@@ -18,28 +18,31 @@
 #
 ################################################################################
 
-# This is the main cmake file of the DebugAgent project
+# cmake configuration file of the "Core" component
 
-project(DebugAgent)
+# Main executable
+set(SRCS
+    src/Main.cpp
+    src/DebugAgent.cpp)
 
-cmake_minimum_required(VERSION 3.0.0)
+set(INCS
+    include/Core/DebugAgent.hpp)
 
-# Provinding poco library
+include_directories(include)
+
+add_executable(Core ${SRCS} ${INCS})
+
+# Setting executable name to DebugAgent
+set_target_properties(Core PROPERTIES OUTPUT_NAME "DebugAgent")
+
+# Binding with Poco
+target_link_libraries(Core ${Poco_LIBRARIES})
+set_property( TARGET Core PROPERTY COMPILE_DEFINITIONS POCO_STATIC=1 POCO_NO_AUTOMATIC_LIBS=1 )
 
 if (WIN32)
-    set(platform_name "Win64")
-elseif (UNIX)
-    set(platform_name "Linux")
-else (WIN32)
-    message( FATAL_ERROR "Unsupported platform." )
+  # cmake handles incorrectly static library symbol database, so disabling the involved warning.
+  set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099" )
 endif (WIN32)
 
-set(Poco_DIR "external/poco/install/${platform_name}/lib/cmake/Poco")
-find_package(Poco REQUIRED COMPONENTS Foundation Net Util )
-
-if (NOT ${Poco_FOUND})
-    message( FATAL_ERROR "Poco not found : ${Poco_NOT_FOUND_MESSAGE}" )
-endif(NOT ${Poco_FOUND})
-
-# Adding components
-add_subdirectory("components/Core")
+# Installation step
+install(TARGETS Core RUNTIME DESTINATION bin)
