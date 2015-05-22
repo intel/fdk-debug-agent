@@ -47,6 +47,12 @@ function(link_poco target)
     set_property( TARGET ${target} PROPERTY COMPILE_DEFINITIONS POCO_STATIC=1 POCO_NO_AUTOMATIC_LIBS=1)
 endfunction()
 
+# providing "catch" test framework library
+# usage: link_catch(<target_name>) where target_name is the target that links with catch.
+function(link_catch target)
+    target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}/external/catch/include")
+endfunction()
+
 # this function applies common settings to all debug agent projects
 function (set_common_settings projectname)
     #enabling c++11
