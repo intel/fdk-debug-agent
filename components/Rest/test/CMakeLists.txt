@@ -18,34 +18,26 @@
 #
 ################################################################################
 
-# cmake configuration file of the "Rest" component
+# cmake configuration file of the "Rest" component unit test
 
-# library
-set(LIB_SRCS
-    src/Server.cpp
-    src/Dispatcher.cpp
-    src/ServerRequestHandling.cpp)
+# test
+set(TEST_SRCS
+    DispatcherUnitTest.cpp
+    ServerUnitTest.cpp)
 
-set(LIB_INCS
-    include/Rest/Server.hpp
-    include/Rest/Request.hpp
-    include/Rest/Response.hpp
-    include/Rest/Dispatcher.hpp
-    include/Rest/Resource.hpp
-    src/ServerRequestHandling.hpp) # private header
+set(TEST_INCS)
 
-add_library(Rest STATIC ${LIB_SRCS} ${LIB_INCS})
-set_common_settings(Rest)
-
-# including private headers in src directory
-target_include_directories(Rest PRIVATE "src")
-
-# exporting "include" directory
-target_include_directories(Rest PUBLIC "include")
+add_executable(RestUnitTest ${TEST_SRCS} ${TEST_INCS})
+set_common_settings(RestUnitTest)
 
 # external libraries
-link_poco(Rest)
+link_poco(RestUnitTest)
+link_catch(RestUnitTest)
 
-# adding test
-add_subdirectory("test")
+# Binding with rest library
+target_link_libraries(RestUnitTest Rest)
 
+# Binding with test common in order to use the HttpClientSimulator
+target_link_libraries(RestUnitTest TestCommon)
+
+install(TARGETS RestUnitTest RUNTIME DESTINATION bin/tests)
