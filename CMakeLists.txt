@@ -55,5 +55,5 @@ function (set_common_settings projectname)
 endfunction()
 
 # Adding components in the right order (less dependent first)
+add_subdirectory("components/Rest")
 add_subdirectory("components/Core")
-
