@@ -36,13 +36,7 @@ add_executable(Core ${SRCS} ${INCS})
 set_target_properties(Core PROPERTIES OUTPUT_NAME "DebugAgent")
 
 # Binding with Poco
-target_link_libraries(Core ${Poco_LIBRARIES})
-set_property( TARGET Core PROPERTY COMPILE_DEFINITIONS POCO_STATIC=1 POCO_NO_AUTOMATIC_LIBS=1 )
-
-if (WIN32)
-  # cmake handles incorrectly static library symbol database, so disabling the involved warning.
-  set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099" )
-endif (WIN32)
+link_poco(Core)
 
 # Installation step
 install(TARGETS Core RUNTIME DESTINATION bin)

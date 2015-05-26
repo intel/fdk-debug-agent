@@ -25,21 +25,28 @@ project(DebugAgent)
 cmake_minimum_required(VERSION 3.0.0)
 
 # Provinding poco library
-
-if (WIN32)
-    set(platform_name "Win64")
-elseif (UNIX)
-    set(platform_name "Linux")
-else (WIN32)
-    message( FATAL_ERROR "Unsupported platform." )
-endif (WIN32)
-
-set(Poco_DIR "external/poco/install/${platform_name}/lib/cmake/Poco")
 find_package(Poco REQUIRED COMPONENTS Foundation Net Util )
 
 if (NOT ${Poco_FOUND})
     message( FATAL_ERROR "Poco not found : ${Poco_NOT_FOUND_MESSAGE}" )
 endif(NOT ${Poco_FOUND})
 
-# Adding components
+if (WIN32)
+    # cmake handles incorrectly static library symbol database, so disabling the involved warning.
+    set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099" )
+endif (WIN32)
+
+# usage: link_poco(<target_name>) where target_name is the target that links with poco.
+function(link_poco target)
+    target_link_libraries(${target} ${Poco_LIBRARIES})
+
+    # POCO_STATIC -> using poco as static libraries
+    # POCO_NO_AUTOMATIC_LIBS -> disable an ugly feature of visual studio c++ : the ability to
+    #                           link with static libraries through the code using #pragma.
+    #                           In this way the behavior is the same between Linux and Windows
+    set_property( TARGET ${target} PROPERTY COMPILE_DEFINITIONS POCO_STATIC=1 POCO_NO_AUTOMATIC_LIBS=1)
+endfunction()
+
+# Adding components in the right order (less dependent first)
 add_subdirectory("components/Core")
+

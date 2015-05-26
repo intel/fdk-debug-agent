@@ -76,11 +76,13 @@ fi
 root_dir=$(cd "$(dirname "$0")" && pwd)
 build_dir=$root_dir/build/$platform
 install_dir=$root_dir/install/$platform
+poco_dir=$root_dir/external/poco/install/$platform/lib/cmake/Poco
 
 echo Directories:
 echo   root_dir=$root_dir
 echo   build_dir=$build_dir
 echo   install_dir=$install_dir
+echo   poco_dir=$poco_dir
 echo
 
 # Cleaning build directory if required
@@ -99,7 +101,7 @@ fi
 # Running cmake
 cd $build_dir
 echo Running cmake for platform $platform...
-cmake $root_dir -G "$cmake_generator" -DCMAKE_INSTALL_PREFIX=$install_dir
+cmake $root_dir -G "$cmake_generator" -DCMAKE_INSTALL_PREFIX=$install_dir -DPoco_DIR=$poco_dir
 
 # Coming back to initial directory
 cd $root_dir
