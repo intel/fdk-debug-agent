@@ -24,6 +24,13 @@ project(DebugAgent)
 
 cmake_minimum_required(VERSION 3.0.0)
 
+# checking gcc version
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.1")
+    message(FATAL_ERROR "Insufficient gcc version")
+  endif()
+endif()
+
 # Provinding poco library
 find_package(Poco REQUIRED COMPONENTS Foundation Net Util )
 
