@@ -47,6 +47,13 @@ function(link_poco target)
     set_property( TARGET ${target} PROPERTY COMPILE_DEFINITIONS POCO_STATIC=1 POCO_NO_AUTOMATIC_LIBS=1)
 endfunction()
 
+# this function applies common settings to all debug agent projects
+function (set_common_settings projectname)
+    #enabling c++11
+    set_property(TARGET ${projectname} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${projectname} PROPERTY CXX_STANDARD_REQUIRED ON)
+endfunction()
+
 # Adding components in the right order (less dependent first)
 add_subdirectory("components/Core")
 

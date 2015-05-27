@@ -31,6 +31,7 @@ set(INCS
 include_directories(include)
 
 add_executable(Core ${SRCS} ${INCS})
+set_common_settings(Core)
 
 # Setting executable name to DebugAgent
 set_target_properties(Core PROPERTIES OUTPUT_NAME "DebugAgent")
