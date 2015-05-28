@@ -40,4 +40,4 @@ target_link_libraries(RestUnitTest Rest)
 # Binding with test common in order to use the HttpClientSimulator
 target_link_libraries(RestUnitTest TestCommon)
 
-install(TARGETS RestUnitTest RUNTIME DESTINATION bin/tests)
+install(TARGETS RestUnitTest RUNTIME DESTINATION tests)
