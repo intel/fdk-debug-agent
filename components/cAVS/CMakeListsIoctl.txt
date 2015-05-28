@@ -18,30 +18,11 @@
 #
 ################################################################################
 
-# cmake configuration file of the "cAVS" component
-
-
-# Common source files
 set(LIB_SRCS
-    src/Logger.cpp)
+    ${LIB_SRCS}
+    src/Ioctl/IoctlLogger.cpp)
 
-# Common include files
 set(LIB_INCS
-    include/cAVS/Logger.hpp)
+    ${LIB_INCS}
+    include/cAVS/Ioctl/IoctlLogger.hpp)
 
-# Target specific source and header files
-if (WIN32)
-    # Windows IOCTL SST Driver
-    include("CMakeListsIoctl.txt")
-elseif (UNIX)
-    # Linux Debug FS SST Driver
-    include("CMakeListsDebugFs.txt")
-else ()
-    error("No cAVS implementation for this platform")
-endif (WIN32)
-
-add_library(cAVS STATIC ${LIB_SRCS} ${LIB_INCS})
-set_common_settings(cAVS)
-
-# exporting "include" directory
-target_include_directories(cAVS PUBLIC "include")
