@@ -23,13 +23,15 @@
 
 # Common source files
 set(LIB_SRCS
-    src/Logger.cpp)
+    src/Logger.cpp
+    src/System.cpp)
 
 # Common include files
 set(LIB_INCS
     include/cAVS/Logger.hpp
     include/cAVS/Driver.hpp
-    include/cAVS/DriverFactory.hpp)
+    include/cAVS/DriverFactory.hpp
+    include/cAVS/System.hpp)
 
 # Target specific source and header files
 if (WIN32)
