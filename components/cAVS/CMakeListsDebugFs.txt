@@ -20,6 +20,7 @@
 
 set(LIB_SRCS
     ${LIB_SRCS}
+    src/DebugFs/DebugFsDriverFactory.cpp
     src/DebugFs/DebugFsLogger.cpp)
 
 set(LIB_INCS

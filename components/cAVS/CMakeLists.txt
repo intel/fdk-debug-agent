@@ -28,7 +28,8 @@ set(LIB_SRCS
 # Common include files
 set(LIB_INCS
     include/cAVS/Logger.hpp
-    include/cAVS/Driver.hpp)
+    include/cAVS/Driver.hpp
+    include/cAVS/DriverFactory.hpp)
 
 # Target specific source and header files
 if (WIN32)

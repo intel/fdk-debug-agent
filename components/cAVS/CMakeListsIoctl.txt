@@ -20,6 +20,7 @@
 
 set(LIB_SRCS
     ${LIB_SRCS}
+    src/Ioctl/IoctlDriverFactory.cpp
     src/Ioctl/IoctlLogger.cpp)
 
 set(LIB_INCS
