@@ -24,4 +24,5 @@ set(LIB_SRCS
 
 set(LIB_INCS
     ${LIB_INCS}
+    include/cAVS/DebugFs/DebugFsDriver.hpp
     include/cAVS/DebugFs/DebugFsLogger.hpp)

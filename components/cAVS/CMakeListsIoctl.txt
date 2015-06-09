@@ -24,5 +24,5 @@ set(LIB_SRCS
 
 set(LIB_INCS
     ${LIB_INCS}
+    include/cAVS/Ioctl/IoctlDriver.hpp
     include/cAVS/Ioctl/IoctlLogger.hpp)
-
