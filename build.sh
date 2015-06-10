@@ -37,7 +37,7 @@
 
 # This script takes one parameter: the platform name.
 # These platforms are currently supported:
-# - Linux
+# - Linux64
 # - Win64
 
 # Produce install binaries on windows
@@ -60,11 +60,11 @@ actions=$@
 if [ "$platform" = "" ] || [ "$actions" = "" ]
 then
     echo "build.sh <platform> [<action>]"
-    echo "  <platform> : Win64, Linux"
+    echo "  <platform> : Win64, Linux64"
     echo "  <action>   : clean, cmake, install, test, all"
     echo
     echo "Example:"
-    echo "  build.sh Linux clean cmake"
+    echo "  build.sh Linux64 clean cmake"
     exit 1
 fi
 
@@ -102,10 +102,16 @@ if [ "$platform" = "Win64" ]
 then
     cmake_generator="Visual Studio 12 2013 Win64"
     build_function="build_win64"
-elif [ "$platform" = "Linux" ]
+elif [ "$platform" = "Linux64" ]
 then
     cmake_generator="Unix Makefiles"
     build_function="build_linux"
+    gcc_64=$(gcc -v |& grep "Target: x86_64")
+    if [ "$gcc_64" = "" ]
+    then
+        echo Current gcc target does not support 64bits.
+        exit 1
+    fi
 else
     echo Unknown platform: "$platform"
     exit 1
