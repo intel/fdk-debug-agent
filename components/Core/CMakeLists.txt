@@ -39,5 +39,8 @@ set_target_properties(Core PROPERTIES OUTPUT_NAME "DebugAgent")
 # Binding with Poco
 link_poco(Core)
 
+# Needed components
+target_link_libraries(Core cAVS Rest)
+
 # Installation step
 install(TARGETS Core RUNTIME DESTINATION bin)

@@ -19,22 +19,48 @@
 *
 ********************************************************************************
 */
-#include <Poco/Util/ServerApplication.h>
-#include <stdint.h>
+
+#pragma once
+
+#include "cAVS/System.hpp"
+#include "Rest/Resource.hpp"
 
 namespace debug_agent
 {
-namespace core
+namespace cavs
 {
 
-/** The debug agent application class */
-class DebugAgent : public Poco::Util::ServerApplication
+class RootResource : public rest::Resource
 {
+public:
+    explicit RootResource(System &system) : mSystem(system) {}
 protected:
-    virtual int main(const std::vector<std::string>&);
+    System &mSystem;
+};
 
+
+class LogStreamResource : public RootResource
+{
+public:
+    LogStreamResource(System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
+
+class LogParametersResource : public RootResource
+{
+public:
+    LogParametersResource(System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+    virtual void handlePut(const rest::Request &request, rest::Response &response) override;
 private:
-    static const uint32_t port;
+    static const std::string delimiters;
+    static const std::size_t numberOfParameters;
+    static const std::size_t isStartedParameterIndex;
+    static const std::size_t levelParameterIndex;
+    static const std::size_t outputParameterIndex;
 };
 
 }

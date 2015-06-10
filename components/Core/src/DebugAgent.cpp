@@ -21,67 +21,45 @@
 */
 
 #include "Core/DebugAgent.hpp"
-#include <Poco/Util/Application.h>
-#include <Poco/Net/HTTPServer.h>
-#include <Poco/Net/HTTPRequestHandler.h>
-#include <Poco/Net/HTTPRequestHandlerFactory.h>
-#include <Poco/Net/HTTPResponse.h>
-#include <Poco/Net/HTTPServerRequest.h>
-#include <Poco/Net/HTTPServerResponse.h>
-#include <Poco/Net/NetException.h>
-#include <iostream>
+#include "Rest/Server.hpp"
+#include "cAVS/Resources.hpp"
+#include "cAVS/System.hpp"
+#include <memory>
 
 using namespace Poco::Util;
-using namespace Poco::Net;
+using namespace debug_agent::rest;
 
 namespace debug_agent
 {
 namespace core
 {
 
-/** Handle resource not found case */
-class UnknownResourceRequestHandler : public HTTPRequestHandler
-{
-public:
-    virtual void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp)
-    {
-        resp.setStatus(HTTPResponse::HTTP_NOT_FOUND);
-        resp.setContentType("text/plain");
-
-        try
-        {
-            std::ostream& out = resp.send();
-            out << "Resource not found." << std::endl;
-        }
-        catch (ConnectionAbortedException &)
-        {
-            std::cout << "Connection aborted." << std::endl;
-        }
-    }
-};
-
-class RequestHandlerFactory : public HTTPRequestHandlerFactory
-{
-public:
-    virtual HTTPRequestHandler* createRequestHandler(const HTTPServerRequest &req)
-    {
-        /* For now just returning 404 http result code (page not found) */
-        return new UnknownResourceRequestHandler;
-    }
-};
+/**
+ * @fixme This is a temporary port value
+ */
+const uint32_t DebugAgent::port = 9090;
 
 int DebugAgent::main(const std::vector<std::string>&)
 {
-    HTTPServerParams::Ptr params = new HTTPServerParams();
+    // System is currently limited to cAVS
+    cavs::System system;
 
-    HTTPServer s(new RequestHandlerFactory, ServerSocket(9090), params);
-    s.start();
-    std::cout << "DebugAgent started" << std::endl;
+    std::shared_ptr<rest::Dispatcher> dispatcher(new rest::Dispatcher());
 
-    waitForTerminationRequest();  /* wait for CTRL-C or kill */
+    dispatcher->addResource("/cAVS/logging/stream",
+        std::shared_ptr<Resource>(new cavs::LogStreamResource(system)));
+    dispatcher->addResource("/cAVS/logging/parameters",
+        std::shared_ptr<Resource>(new cavs::LogParametersResource(system)));
 
-    std::cout << std::endl << "Shutting down DebugAgent..." << std::endl;
-    s.stop();
+    {
+        rest::Server restServer(dispatcher, port);
+
+        std::cout << "DebugAgent started" << std::endl;
+
+        waitForTerminationRequest();  /* wait for CTRL-C or kill */
+
+        std::cout << std::endl << "Shutting down DebugAgent..." << std::endl;
+    }
 
     return Application::EXIT_OK;
 }

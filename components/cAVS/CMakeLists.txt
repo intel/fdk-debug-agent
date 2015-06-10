@@ -24,14 +24,16 @@
 # Common source files
 set(LIB_SRCS
     src/Logger.cpp
-    src/System.cpp)
+    src/System.cpp
+    src/Resources.cpp)
 
 # Common include files
 set(LIB_INCS
     include/cAVS/Logger.hpp
     include/cAVS/Driver.hpp
     include/cAVS/DriverFactory.hpp
-    include/cAVS/System.hpp)
+    include/cAVS/System.hpp
+    include/cAVS/Resources.hpp)
 
 # Target specific source and header files
 if (WIN32)
@@ -49,3 +51,9 @@ set_common_settings(cAVS)
 
 # exporting "include" directory
 target_include_directories(cAVS PUBLIC "include")
+
+# Binding with Poco
+link_poco(cAVS)
+
+# cAVS needs Rest library
+target_link_libraries(cAVS Rest)
