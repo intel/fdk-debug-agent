@@ -88,10 +88,54 @@ public:
     Resource() {}
     virtual ~Resource() {}
 
-    /* Handle a REST request and returns a REST response.
+    /* The default request handler which dispatches requests to the default request handlers.
+     * This method calls the default handler according to the request verb.
+     * @param[in] request The request to be handled
+     * @param[in] response The response to be forwarded
+     * @throw RequestException
+     * @see handleGet
+     * @see handlePut
+     * @see handlePost
+     * @see handleDelete
+     */
+    virtual void handleRequest(const Request &request, Response &response);
+
+protected:
+    /**
+     * Default GET handler: raises RequestException (ErrorStatus::VerbNotAllowed)
+     * This method is intended to be overridden if the Resource subclass handles GET
+     * @param[in] request The GET request to be handled
+     * @param[in] response The response to be forwarded
      * @throw RequestException
      */
-    virtual void handleRequest(const Request &request, Response &response) = 0;
+    virtual void handleGet(const Request &request, Response &response);
+
+    /**
+     * Default PUT handler: raises RequestException (ErrorStatus::VerbNotAllowed)
+     * This method is intended to be overridden if the Resource subclass handles PUT
+     * @param[in] request The PUT request to be handled
+     * @param[in] response The response to be forwarded
+     * @throw RequestException
+     */
+    virtual void handlePut(const Request &request, Response &response);
+
+    /**
+     * Default POST handler: raises RequestException (ErrorStatus::VerbNotAllowed)
+     * This method is intended to be overridden if the Resource subclasses handles POST
+     * @param[in] request The POST request to be handled
+     * @param[in] response The response to be forwarded
+     * @throw RequestException
+     */
+    virtual void handlePost(const Request &request, Response &response);
+
+    /**
+     * Default DELETE handler: raises RequestException (ErrorStatus::VerbNotAllowed)
+     * This method is intended to be overridden if the Resource subclass handles DELETE
+     * @param[in] request The DELETE request to be handled
+     * @param[in] response The response to be forwarded
+     * @throw RequestException
+     */
+    virtual void handleDelete(const Request &request, Response &response);
 
 private:
     Resource(const Resource&) = delete;

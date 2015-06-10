@@ -24,7 +24,8 @@
 set(LIB_SRCS
     src/Server.cpp
     src/Dispatcher.cpp
-    src/ServerRequestHandling.cpp)
+    src/ServerRequestHandling.cpp
+    src/Resource.cpp)
 
 set(LIB_INCS
     include/Rest/Server.hpp
