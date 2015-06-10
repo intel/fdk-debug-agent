@@ -26,6 +26,7 @@
 #include "Response.hpp"
 #include <exception>
 #include <sstream>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -58,20 +59,15 @@ public:
         abort();
     }
 
-    class RequestException : public std::exception
+    class RequestException : public std::logic_error
     {
     public:
         RequestException(ErrorStatus status, const std::string &userMessage = "") :
-            mMessage(getErrorMessage(status, userMessage).c_str()), mStatus(status) {}
+            std::logic_error(getErrorMessage(status, userMessage).c_str()), mStatus(status) {}
 
         ErrorStatus getStatus() { return mStatus; }
 
-        /* @todo 'throw()' is deprecated with c++11, it should be replaced by 'noexcept'. But
-         * this keyword is not supported by visual studio 2013 yet. So keeping 'throw()' */
-        virtual const char *what() const throw() { return mMessage.c_str(); }
-
     private:
-        std::string mMessage;
         ErrorStatus mStatus;
 
         static std::string getErrorMessage(ErrorStatus status, const std::string &userMessage)

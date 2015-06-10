@@ -26,6 +26,7 @@
 #include <inttypes.h>
 #include <exception>
 #include <assert.h>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -60,17 +61,10 @@ public:
     static std::string toString(Status s);
 
     /* This exception is thrown when the server response is not the expected one. */
-    class RequestFailureException : public std::exception
+    class RequestFailureException : public std::logic_error
     {
     public:
-        RequestFailureException(const std::string &msg) : mMessage(msg.c_str()) {}
-
-        /* @todo 'throw()' is deprecated with c++11, it should be replaced by 'noexcept'. But
-         * this keyword is not supported by visual studio 2013 yet. So keeping 'throw()' */
-        virtual const char *what() const throw() {  return mMessage.c_str(); }
-
-    private:
-        std::string mMessage;
+        RequestFailureException(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
     HttpClientSimulator(const std::string &server, uint32_t port) : mServer(server), mPort(port) {}

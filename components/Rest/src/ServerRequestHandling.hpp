@@ -31,6 +31,7 @@
 #include "Poco/Net/HTTPServerRequest.h"
 #include "Poco/Net/HTTPServerResponse.h"
 #include "Poco/Net/NetException.h"
+#include <stdexcept>
 
 using namespace Poco::Net;
 
@@ -58,17 +59,10 @@ public:
     static rest::Request::Verb translateVerb(const std::string &verbLiteral);
 
 private:
-    class UnknownVerbException : public std::exception
+    class UnknownVerbException : public std::logic_error
     {
     public:
-        UnknownVerbException(const std::string &msg) : mMessage(msg.c_str()) {}
-
-        /* @todo 'throw()' is deprecated with c++11, it should be replaced by 'noexcept'. But
-         * this keyword is not supported by visual studio 2013 yet. So keeping 'throw()' */
-        virtual const char *what() const throw() { return mMessage.c_str(); }
-
-    private:
-        std::string mMessage;
+        UnknownVerbException(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
     std::shared_ptr<const Dispatcher> mDispatcher;

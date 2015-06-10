@@ -29,6 +29,7 @@
 #include <string>
 #include <exception>
 #include <map>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -54,17 +55,10 @@ namespace rest
 class Dispatcher final
 {
 public:
-    class InvalidUriException : public std::exception
+    class InvalidUriException : public std::logic_error
     {
     public:
-        InvalidUriException(const std::string &msg) : mMessage(msg.c_str()) {}
-
-        /* @todo 'throw()' is deprecated with c++11, it should be replaced by 'noexcept'. But
-         * this keyword is not supported by visual studio 2013 yet. So keeping 'throw()' */
-        virtual const char *what() const throw() { return mMessage.c_str(); }
-
-    private:
-        std::string mMessage;
+        InvalidUriException(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
     using Identifiers = std::map<std::string, std::string>;
