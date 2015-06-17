@@ -18,45 +18,24 @@
 #
 ################################################################################
 
-# cmake configuration file of the "cAVS" component
+# cmake configuration file of the "cAVS" component unit test
 
+# test
+set(TEST_SRCS
+    LoggerUnitTest.cpp)
 
-# Common source files
-set(LIB_SRCS
-    src/Logger.cpp
-    src/System.cpp
-    src/Resources.cpp)
+set(TEST_INCS)
 
-# Common include files
-set(LIB_INCS
-    include/cAVS/Logger.hpp
-    include/cAVS/Driver.hpp
-    include/cAVS/DriverFactory.hpp
-    include/cAVS/System.hpp
-    include/cAVS/Resources.hpp)
+add_executable(CavsUnitTest ${TEST_SRCS} ${TEST_INCS})
+set_common_settings(CavsUnitTest)
 
-# Target specific source and header files
-if (WIN32)
-    # Windows IOCTL SST Driver
-    include("CMakeListsIoctl.txt")
-elseif (UNIX)
-    # Linux Debug FS SST Driver
-    include("CMakeListsDebugFs.txt")
-else ()
-    error("No cAVS implementation for this platform")
-endif (WIN32)
+# external libraries
+link_catch(CavsUnitTest)
 
-add_library(cAVS STATIC ${LIB_SRCS} ${LIB_INCS})
-set_common_settings(cAVS)
+# Binding with cAVS library
+target_link_libraries(CavsUnitTest cAVS)
 
-# exporting "include" directory
-target_include_directories(cAVS PUBLIC "include")
+# Binding with test common in order to use the HttpClientSimulator
+target_link_libraries(CavsUnitTest TestCommon)
 
-# Binding with Poco
-link_poco(cAVS)
-
-# cAVS needs Rest library
-target_link_libraries(cAVS Rest)
-
-# Adding test
-add_subdirectory("test")
+install(TARGETS CavsUnitTest RUNTIME DESTINATION tests)
