@@ -71,13 +71,15 @@ TEST_CASE("Request test", "[Server]")
         Server server(dispatcher, port);
 
         /* Performing the http request */
-        client.request(
-            "/unknown", // uri
-            HttpClientSimulator::Verb::Get,  //verb
-            "",  // request content
-            HttpClientSimulator::Status::NotFound, //expected status
-            "text/plain", //expected content type
-            "Resource not found: /unknown"); //expected response content
+        CHECK_NOTHROW(
+            client.request(
+                "/unknown", // uri
+                HttpClientSimulator::Verb::Get,  //verb
+                "",  // request content
+                HttpClientSimulator::Status::NotFound, //expected status
+                "text/plain", //expected content type
+                "Resource not found: /unknown") //expected response content
+            );
     }
 
     SECTION("Resource without identifier") {
@@ -96,13 +98,15 @@ TEST_CASE("Request test", "[Server]")
             "Request content: Hello world!";
 
         /* Performing the http request */
-        client.request(
-            "/test/test2", // uri
-            HttpClientSimulator::Verb::Delete,  //verb
-            "Hello world!",  // request content
-            HttpClientSimulator::Status::Ok, //expected status
-            "text/html", //expected content type
-            expectedResponseContent); //expected response content
+        CHECK_NOTHROW(
+            client.request(
+                "/test/test2", // uri
+                HttpClientSimulator::Verb::Delete,  //verb
+                "Hello world!",  // request content
+                HttpClientSimulator::Status::Ok, //expected status
+                "text/html", //expected content type
+                expectedResponseContent) //expected response content
+            );
     }
 
     SECTION("Resource with 2 identifiers") {
@@ -121,12 +125,14 @@ TEST_CASE("Request test", "[Server]")
             "Request content: Two identifiers";
 
         /* Performing the http request */
-        client.request(
-            "/test/val1/titi/val2/lulu", // uri
-            HttpClientSimulator::Verb::Put,  //verb
-            "Two identifiers",  // request content
-            HttpClientSimulator::Status::Ok, //expected status
-            "text/html", //expected content type
-            expectedResponseContent); //expected response content
+        CHECK_NOTHROW(
+            client.request(
+                "/test/val1/titi/val2/lulu", // uri
+                HttpClientSimulator::Verb::Put,  //verb
+                "Two identifiers",  // request content
+                HttpClientSimulator::Status::Ok, //expected status
+                "text/html", //expected content type
+                expectedResponseContent) //expected response content
+            );
     }
 }
