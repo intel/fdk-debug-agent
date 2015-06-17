@@ -19,7 +19,7 @@
 *
 ********************************************************************************
 */
-#include <cAVS/Ioctl/IoctlLogger.hpp>
+#include <cAVS/Windows/Logger.hpp>
 #include <string>
 #include <cstring>
 #include <algorithm>
@@ -28,28 +28,30 @@ namespace debug_agent
 {
 namespace cavs
 {
-
-
-void IoctlLogger::setParameters(Parameters &parameters)
+namespace windows
 {
-    /** @todo set parameters in driver through the IOCTL interface */
+
+void Logger::setParameters(Parameters &parameters)
+{
+    /** @todo set parameters in driver through the windows driver interface */
     mDriverEmulationParameter = parameters;
 }
 
-Logger::Parameters IoctlLogger::getParameters()
+Logger::Parameters Logger::getParameters()
 {
-    /** @todo set parameters using the driver IOCTL interface */
+    /** @todo set parameters using the windows driver interface */
     return mDriverEmulationParameter;
 }
 
-std::size_t IoctlLogger::read(void *buf, std::size_t count)
+std::size_t Logger::read(void *buf, std::size_t count)
 {
-    /** @todo read FW log using driver IOCTL interface once available */
-    static const std::string msg("Log from IOCTL\n");
+    /** @todo read FW log using windows driver interface once available */
+    static const std::string msg("Log from Windows driver\n");
     std::size_t len = std::min(count, msg.length());
     std::memcpy(buf, msg.c_str(), len);
     return len;
 }
 
+}
 }
 }

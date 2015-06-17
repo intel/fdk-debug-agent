@@ -27,10 +27,13 @@ namespace debug_agent
 {
 namespace cavs
 {
+namespace linuxx /* using 'linuxx' instead of 'linux' because 'linux' is an existing symbol */
+{
+
 /**
- * Implements the cavs::Logger interface for IOCTL cAVS driver API.
+ * Implements the cavs::Logger interface for Linux cAVS driver API.
  */
-class IoctlLogger final: public cavs::Logger
+class Logger final : public cavs::Logger
 {
 public:
     virtual void setParameters(Parameters &parameters) override;
@@ -41,12 +44,13 @@ public:
 
 private:
     /**
-     * While driver IOCTL interface is not available, parameters storage
+     * While driver Debug FS interface is not available, parameters storage
      * is emulated using this internal member.
      * @todo remove it!
      */
     Parameters mDriverEmulationParameter;
 };
 
+}
 }
 }

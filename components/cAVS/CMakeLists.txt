@@ -38,10 +38,10 @@ set(LIB_INCS
 # Target specific source and header files
 if (WIN32)
     # Windows IOCTL SST Driver
-    include("CMakeListsIoctl.txt")
+    include("CMakeListsWindows.txt")
 elseif (UNIX)
     # Linux Debug FS SST Driver
-    include("CMakeListsDebugFs.txt")
+    include("CMakeListsLinux.txt")
 else ()
     error("No cAVS implementation for this platform")
 endif (WIN32)

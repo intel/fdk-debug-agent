@@ -20,10 +20,10 @@
 
 set(LIB_SRCS
     ${LIB_SRCS}
-    src/Ioctl/IoctlDriverFactory.cpp
-    src/Ioctl/IoctlLogger.cpp)
+    src/Linux/DriverFactory.cpp
+    src/Linux/Logger.cpp)
 
 set(LIB_INCS
     ${LIB_INCS}
-    include/cAVS/Ioctl/IoctlDriver.hpp
-    include/cAVS/Ioctl/IoctlLogger.hpp)
+    include/cAVS/Linux/Driver.hpp
+    include/cAVS/Linux/Logger.hpp)

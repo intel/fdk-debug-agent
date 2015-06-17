@@ -19,27 +19,39 @@
 *
 ********************************************************************************
 */
-#pragma once
-
-#include "cAVS/Driver.hpp"
-#include "cAVS/DebugFs/DebugFsLogger.hpp"
+#include <cAVS/Linux/Logger.hpp>
+#include <string>
+#include <cstring>
+#include <algorithm>
 
 namespace debug_agent
 {
 namespace cavs
 {
-
-/**
- * Defines the cavs::Driver for Debug FS Driver interface.
- */
-class DebugFsDriver final: public Driver
+namespace linuxx
 {
-public:
-    virtual Logger &getLogger() override { return mLogger; }
 
-private:
-    DebugFsLogger mLogger;
-};
-};
+void Logger::setParameters(Parameters &parameters)
+{
+    /** @todo set parameters in driver through the Debug FS interface */
+    mDriverEmulationParameter = parameters;
+}
 
-};
+Logger::Parameters Logger::getParameters()
+{
+    /** @todo set parameters using the driver Debug FS interface */
+    return mDriverEmulationParameter;
+}
+
+std::size_t Logger::read(void *buf, std::size_t count)
+{
+    /** @todo read FW log using driver Debug FS interface once available */
+    static const std::string msg("Log from Linux driver\n");
+    std::size_t len = std::min(count, msg.length());
+    std::memcpy(buf, msg.c_str(), len);
+    return len;
+}
+
+}
+}
+}

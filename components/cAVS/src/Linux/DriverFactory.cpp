@@ -19,27 +19,18 @@
 *
 ********************************************************************************
 */
-#pragma once
-
-#include "cAVS/Driver.hpp"
-#include "cAVS/Ioctl/IoctlLogger.hpp"
+#include <cAVS/DriverFactory.hpp>
+#include <cAVS/Linux/Driver.hpp>
 
 namespace debug_agent
 {
 namespace cavs
 {
 
-/**
- * Defines the cavs::Driver for IOCTL Driver interface.
- */
-class IoctlDriver final : public Driver
+std::unique_ptr<Driver> DriverFactory::newDriver()
 {
-public:
-    virtual Logger &getLogger() override { return mLogger; }
+    return std::unique_ptr<Driver>(new linuxx::Driver);
+}
 
-private:
-    IoctlLogger mLogger;
-};
-};
-
-};
+}
+}

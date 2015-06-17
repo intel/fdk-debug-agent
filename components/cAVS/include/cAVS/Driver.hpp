@@ -29,7 +29,7 @@ namespace cavs
 {
 
 /**
- * Defines the cavs::Driver interface abstracting the Driver API (DebugFS or IOCTL).
+ * Defines the cavs::Driver interface abstracting the Driver API (Linux/DebugFS or Windows/IOCTL).
  */
 class Driver
 {

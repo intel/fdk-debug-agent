@@ -20,16 +20,16 @@
 ********************************************************************************
 */
 #include <cAVS/DriverFactory.hpp>
-#include <cAVS/DebugFs/DebugFsDriver.hpp>
+#include <cAVS/Windows/Driver.hpp>
 
 namespace debug_agent
 {
 namespace cavs
 {
 
-std::unique_ptr<Driver> DriverFactory::newDriver()
+std::unique_ptr<Driver> cavs::DriverFactory::newDriver()
 {
-    return std::unique_ptr<Driver>(new DebugFsDriver);
+    return std::unique_ptr<Driver>(new windows::Driver);
 }
 
 }

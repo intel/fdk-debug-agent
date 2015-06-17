@@ -21,32 +21,28 @@
 */
 #pragma once
 
-#include <cAVS/Logger.hpp>
+#include "cAVS/Driver.hpp"
+#include "cAVS/Windows/Logger.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
+namespace windows
+{
+
 /**
- * Implements the cavs::Logger interface for Debug FS cAVS driver API.
+ * Defines the cavs::Driver for Windows driver interface.
  */
-class DebugFsLogger final : public cavs::Logger
+class Driver final : public cavs::Driver
 {
 public:
-    virtual void setParameters(Parameters &parameters) override;
-
-    virtual Parameters getParameters() override;
-
-    virtual std::size_t read(void *buf, std::size_t count) override;
+    virtual cavs::Logger &getLogger() override { return mLogger; }
 
 private:
-    /**
-     * While driver Debug FS interface is not available, parameters storage
-     * is emulated using this internal member.
-     * @todo remove it!
-     */
-    Parameters mDriverEmulationParameter;
+    Logger mLogger;
 };
 
+}
 }
 }
