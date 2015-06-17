@@ -23,7 +23,8 @@
 # test
 set(TEST_SRCS
     DispatcherUnitTest.cpp
-    ServerUnitTest.cpp)
+    ServerUnitTest.cpp
+    DefaultResourceUnitTest.cpp)
 
 set(TEST_INCS)
 
