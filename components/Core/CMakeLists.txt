@@ -23,10 +23,12 @@
 # Main executable
 set(SRCS
     src/Main.cpp
-    src/DebugAgent.cpp)
+    src/DebugAgent.cpp
+    src/Resources.cpp)
 
 set(INCS
-    include/Core/DebugAgent.hpp)
+    include/Core/DebugAgent.hpp
+    include/Core/Resources.hpp)
 
 include_directories(include)
 

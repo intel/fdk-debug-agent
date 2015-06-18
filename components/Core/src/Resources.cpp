@@ -19,7 +19,7 @@
 *
 ********************************************************************************
 */
-#include "cAVS/Resources.hpp"
+#include "Core/Resources.hpp"
 #include <Poco/NumberParser.h>
 #include <Poco/StringTokenizer.h>
 #include <string>
@@ -27,10 +27,11 @@
 #include <thread>
 
 using namespace debug_agent::rest;
+using namespace debug_agent::cavs;
 
 namespace debug_agent
 {
-namespace cavs
+namespace core
 {
 
 static const std::string ContentType("text/html");

@@ -21,9 +21,8 @@
 */
 
 #include "Core/DebugAgent.hpp"
+#include "Core/Resources.hpp"
 #include "Rest/Server.hpp"
-#include "cAVS/Resources.hpp"
-#include "cAVS/System.hpp"
 #include <memory>
 
 using namespace Poco::Util;
@@ -47,9 +46,9 @@ int DebugAgent::main(const std::vector<std::string>&)
     std::shared_ptr<rest::Dispatcher> dispatcher(new rest::Dispatcher());
 
     dispatcher->addResource("/cAVS/logging/stream",
-        std::shared_ptr<Resource>(new cavs::LogStreamResource(system)));
+        std::shared_ptr<Resource>(new LogStreamResource(system)));
     dispatcher->addResource("/cAVS/logging/parameters",
-        std::shared_ptr<Resource>(new cavs::LogParametersResource(system)));
+        std::shared_ptr<Resource>(new LogParametersResource(system)));
 
     {
         rest::Server restServer(dispatcher, port);

@@ -22,27 +22,27 @@
 
 #pragma once
 
-#include "cAVS/System.hpp"
 #include "Rest/Resource.hpp"
+#include "cAVS/System.hpp"
 
 namespace debug_agent
 {
-namespace cavs
+namespace core
 {
 
 class RootResource : public rest::Resource
 {
 public:
-    explicit RootResource(System &system) : mSystem(system) {}
+    explicit RootResource(cavs::System &system) : mSystem(system) {}
 protected:
-    System &mSystem;
+    cavs::System &mSystem;
 };
 
 
 class LogStreamResource : public RootResource
 {
 public:
-    LogStreamResource(System &system) : RootResource(system) {}
+    LogStreamResource(cavs::System &system) : RootResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 };
@@ -51,7 +51,7 @@ protected:
 class LogParametersResource : public RootResource
 {
 public:
-    LogParametersResource(System &system) : RootResource(system) {}
+    LogParametersResource(cavs::System &system) : RootResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
     virtual void handlePut(const rest::Request &request, rest::Response &response) override;
