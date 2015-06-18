@@ -28,7 +28,9 @@ source_group("Source Files\\Windows" FILES ${WINDOWS_LIB_SRCS})
 
 set(WINDOWS_LIB_INCS
     include/cAVS/Windows/Driver.hpp
-    include/cAVS/Windows/Logger.hpp)
+    include/cAVS/Windows/Logger.hpp
+    include/cAVS/Windows/Device.hpp
+    include/cAVS/Windows/Buffer.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
