@@ -20,7 +20,9 @@
 
 set(WINDOWS_LIB_SRCS
     src/Windows/DriverFactory.cpp
-    src/Windows/Logger.cpp)
+    src/Windows/Logger.cpp
+    src/Windows/SystemDevice.cpp
+    src/Windows/LastError.cpp)
 
 set(LIB_SRCS ${LIB_SRCS} ${WINDOWS_LIB_SRCS})
 
@@ -30,7 +32,9 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/Driver.hpp
     include/cAVS/Windows/Logger.hpp
     include/cAVS/Windows/Device.hpp
-    include/cAVS/Windows/Buffer.hpp)
+    include/cAVS/Windows/Buffer.hpp
+    include/cAVS/Windows/SystemDevice.hpp
+    include/cAVS/Windows/LastError.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
