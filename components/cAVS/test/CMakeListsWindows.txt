@@ -19,7 +19,8 @@
 ################################################################################
 
 set(WINDOWS_TEST_SRCS
-    Windows/DeviceIdFinderUnitTest.cpp)
+    Windows/DeviceIdFinderUnitTest.cpp
+    Windows/SystemDeviceUnitTest.cpp)
 
 set(TEST_SRCS ${TEST_SRCS} ${WINDOWS_TEST_SRCS})
 
