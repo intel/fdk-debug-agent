@@ -38,9 +38,20 @@ class Driver final : public cavs::Driver
 {
 public:
     virtual cavs::Logger &getLogger() override { return mLogger; }
+    virtual ModuleHandler &getModuleHandler() override { return mModuleHandler;  }
 
 private:
+    /* Will be replaced by the true implementation*/
+    class DummyModuleHandler : public ModuleHandler
+    {
+    public:
+        virtual void getAdspProperties(dsp_fw::AdspProperties &properties) override {}
+        virtual void getModulesEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries)
+            override {}
+    };
+
     Logger mLogger;
+    DummyModuleHandler mModuleHandler;
 };
 
 }

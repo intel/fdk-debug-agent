@@ -22,6 +22,7 @@
 #pragma once
 
 #include "cAVS/Logger.hpp"
+#include "cAVS/ModuleHandler.hpp"
 
 namespace debug_agent
 {
@@ -37,6 +38,8 @@ public:
     Driver() = default;
 
     virtual Logger &getLogger() = 0;
+
+    virtual ModuleHandler &getModuleHandler() = 0;
 
     virtual ~Driver() {};
 
