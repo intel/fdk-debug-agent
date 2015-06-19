@@ -41,3 +41,7 @@ set(WINDOWS_LIB_INCS
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
 source_group("Header Files\\Windows" FILES ${WINDOWS_LIB_INCS})
+
+set(LIBRAIRIES
+    ${LIBRAIRIES}
+    Setupapi)

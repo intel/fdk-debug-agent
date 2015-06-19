@@ -26,6 +26,15 @@ set(TEST_SRCS
 
 set(TEST_INCS)
 
+# Target specific source and header files
+if (WIN32)
+    include("CMakeListsWindows.txt")
+elseif (UNIX)
+    #currently there are no linux specific test
+else ()
+    error("No cAVS implementation for this platform")
+endif ()
+
 add_executable(CavsUnitTest ${TEST_SRCS} ${TEST_INCS})
 set_common_settings(CavsUnitTest)
 

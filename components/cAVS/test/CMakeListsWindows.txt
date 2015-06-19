@@ -18,41 +18,9 @@
 #
 ################################################################################
 
-# cmake configuration file of the "cAVS" component
+set(WINDOWS_TEST_SRCS
+    Windows/DeviceIdFinderUnitTest.cpp)
 
+set(TEST_SRCS ${TEST_SRCS} ${WINDOWS_TEST_SRCS})
 
-# Common source files
-set(LIB_SRCS
-    src/Logger.cpp
-    src/System.cpp)
-
-# Common include files
-set(LIB_INCS
-    include/cAVS/Logger.hpp
-    include/cAVS/Driver.hpp
-    include/cAVS/DriverFactory.hpp
-    include/cAVS/System.hpp)
-
-set(LIBRAIRIES)
-
-# Target specific source and header files
-if (WIN32)
-    # Windows IOCTL SST Driver
-    include("CMakeListsWindows.txt")
-elseif (UNIX)
-    # Linux Debug FS SST Driver
-    include("CMakeListsLinux.txt")
-else ()
-    error("No cAVS implementation for this platform")
-endif (WIN32)
-
-add_library(cAVS STATIC ${LIB_SRCS} ${LIB_INCS})
-set_common_settings(cAVS)
-
-target_link_libraries(cAVS ${LIBRAIRIES})
-
-# exporting "include" directory
-target_include_directories(cAVS PUBLIC "include")
-
-# Adding test
-add_subdirectory("test")
+source_group("Source Files\\Windows" FILES ${WINDOWS_TEST_SRCS})
