@@ -22,6 +22,7 @@ set(WINDOWS_LIB_SRCS
     src/Windows/DriverFactory.cpp
     src/Windows/Logger.cpp
     src/Windows/SystemDevice.cpp
+    src/Windows/MockedDevice.cpp
     src/Windows/LastError.cpp
     src/Windows/DeviceIdFinder.cpp)
 
@@ -35,6 +36,7 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/Device.hpp
     include/cAVS/Windows/Buffer.hpp
     include/cAVS/Windows/SystemDevice.hpp
+    include/cAVS/Windows/MockedDevice.hpp
     include/cAVS/Windows/LastError.hpp
     include/cAVS/Windows/DeviceIdFinder.hpp)
 
