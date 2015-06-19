@@ -21,7 +21,8 @@
 set(WINDOWS_TEST_SRCS
     Windows/DeviceIdFinderUnitTest.cpp
     Windows/SystemDeviceUnitTest.cpp
-    Windows/MockedDeviceUnitTest.cpp)
+    Windows/MockedDeviceUnitTest.cpp
+    Windows/LastErrorUnitTest.cpp)
 
 set(TEST_SRCS ${TEST_SRCS} ${WINDOWS_TEST_SRCS})
 
