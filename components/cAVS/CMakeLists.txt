@@ -31,7 +31,8 @@ set(LIB_INCS
     include/cAVS/Logger.hpp
     include/cAVS/Driver.hpp
     include/cAVS/DriverFactory.hpp
-    include/cAVS/System.hpp)
+    include/cAVS/System.hpp
+    include/cAVS/FirmwareTypes.hpp)
 
 set(LIBRAIRIES)
 
@@ -53,6 +54,9 @@ target_link_libraries(cAVS ${LIBRAIRIES})
 
 # exporting "include" directory
 target_include_directories(cAVS PUBLIC "include")
+
+# Adding firmware cAVS headers as public because they will be used by client components
+target_include_directories(cAVS PUBLIC "${PROJECT_SOURCE_DIR}/external/cAVS/firmware/include")
 
 # Adding test
 add_subdirectory("test")
