@@ -43,9 +43,6 @@ const std::string &Logger::toString(Level level)
 {
     switch (level)
     {
-    case Level::Quiet:
-        return quiet;
-        break;
     case Level::Critical:
         return critical;
         break;
@@ -78,9 +75,7 @@ Logger::Output Logger::outputFromString(const std::string &output)
 
 Logger::Level Logger::levelFromString(const std::string &level)
 {
-    if (level == quiet) {
-        return Level::Quiet;
-    } else if (level == critical) {
+    if (level == critical) {
         return Level::Critical;
     } else if (level == high) {
         return Level::High;
@@ -94,7 +89,6 @@ Logger::Level Logger::levelFromString(const std::string &level)
     throw Exception(Exception::Cause::InvalidArgument);
 }
 
-const std::string Logger::quiet("Quiet");
 const std::string Logger::critical("Critical");
 const std::string Logger::high("High");
 const std::string Logger::medium("Medium");

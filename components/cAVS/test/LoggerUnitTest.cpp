@@ -28,7 +28,6 @@ using namespace debug_agent::cavs;
 /* Checking that all Logger::Level are correctly converted to string */
 TEST_CASE("Logger::Level to string", "[tostring]")
 {
-    REQUIRE(Logger::toString(Logger::Level::Quiet) == "Quiet");
     REQUIRE(Logger::toString(Logger::Level::Critical) == "Critical");
     REQUIRE(Logger::toString(Logger::Level::High) == "High");
     REQUIRE(Logger::toString(Logger::Level::Medium) == "Medium");
@@ -46,7 +45,6 @@ TEST_CASE("Logger::Output to string", "[tostring]")
 /* Checking that all Logger::Level are correctly created from string */
 TEST_CASE("Logger::Level from string", "[fromstring]")
 {
-    REQUIRE(Logger::levelFromString("Quiet") == Logger::Level::Quiet);
     REQUIRE(Logger::levelFromString("Critical") == Logger::Level::Critical);
     REQUIRE(Logger::levelFromString("High") == Logger::Level::High);
     REQUIRE(Logger::levelFromString("Medium") == Logger::Level::Medium);

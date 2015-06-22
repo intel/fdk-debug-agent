@@ -74,14 +74,14 @@ public:
     /**
      * Log level
      */
-    enum class Level {Quiet, Critical, High, Medium, Low, Verbose};
+    enum class Level {Critical, High, Medium, Low, Verbose};
 
     /**
      * The parameters of a log
      */
     struct Parameters
     {
-        Parameters() : mIsStarted(false), mLevel(Level::Quiet), mOutput(Output::Sram) {};
+        Parameters() : mIsStarted(false), mLevel(Level::Verbose), mOutput(Output::Sram) {};
 
         /**
          * Log state: started if true, stopped if false
@@ -162,7 +162,6 @@ private:
     Logger & operator=(const Logger&) = delete;
 
     /** Level enum class string representation */
-    static const std::string quiet;
     static const std::string critical;
     static const std::string high;
     static const std::string medium;
