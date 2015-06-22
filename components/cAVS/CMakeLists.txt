@@ -36,6 +36,7 @@ set(LIB_INCS
     include/cAVS/ModuleHandler.hpp)
 
 set(LIBRAIRIES)
+SET(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/external/cAVS/firmware/include")
 
 # Target specific source and header files
 if (WIN32)
@@ -56,8 +57,8 @@ target_link_libraries(cAVS ${LIBRAIRIES})
 # exporting "include" directory
 target_include_directories(cAVS PUBLIC "include")
 
-# Adding firmware cAVS headers as public because they will be used by client components
-target_include_directories(cAVS PUBLIC "${PROJECT_SOURCE_DIR}/external/cAVS/firmware/include")
+# Adding include directories
+target_include_directories(cAVS PUBLIC ${INCLUDE_DIRS})
 
 # Adding test
 add_subdirectory("test")

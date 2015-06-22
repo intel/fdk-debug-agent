@@ -38,7 +38,8 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/SystemDevice.hpp
     include/cAVS/Windows/MockedDevice.hpp
     include/cAVS/Windows/LastError.hpp
-    include/cAVS/Windows/DeviceIdFinder.hpp)
+    include/cAVS/Windows/DeviceIdFinder.hpp
+    include/cAVS/Windows/DriverTypes.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
@@ -47,3 +48,7 @@ source_group("Header Files\\Windows" FILES ${WINDOWS_LIB_INCS})
 set(LIBRAIRIES
     ${LIBRAIRIES}
     Setupapi)
+
+set(INCLUDE_DIRS
+    ${INCLUDE_DIRS}
+    "${PROJECT_SOURCE_DIR}/external/cAVS/driver/include")
