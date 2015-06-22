@@ -23,6 +23,9 @@
 
 #include "cAVS/Driver.hpp"
 #include "cAVS/Windows/Logger.hpp"
+#include "cAVS/Windows/ModuleHandler.hpp"
+#include "cAVS/Windows/Device.hpp"
+#include <memory>
 
 namespace debug_agent
 {
@@ -37,21 +40,16 @@ namespace windows
 class Driver final : public cavs::Driver
 {
 public:
+    Driver(std::unique_ptr<Device> device) : mDevice(std::move(device)),
+        mModuleHandler(*mDevice) {}
+
     virtual cavs::Logger &getLogger() override { return mLogger; }
     virtual ModuleHandler &getModuleHandler() override { return mModuleHandler;  }
 
 private:
-    /* Will be replaced by the true implementation*/
-    class DummyModuleHandler : public ModuleHandler
-    {
-    public:
-        virtual void getAdspProperties(dsp_fw::AdspProperties &properties) override {}
-        virtual void getModulesEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries)
-            override {}
-    };
-
+    std::unique_ptr<Device> mDevice;
     Logger mLogger;
-    DummyModuleHandler mModuleHandler;
+    ModuleHandler mModuleHandler;
 };
 
 }
