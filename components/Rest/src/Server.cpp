@@ -40,16 +40,32 @@ namespace rest
 Server::Server(std::shared_ptr<const Dispatcher> dispatcher, uint32_t port)  :
     mHttpServer(new RequestHandlerFactory(dispatcher), port)
 {
-    mHttpServer.start();
+    try
+    {
+        mHttpServer.start();
+    }
+    catch (Poco::Net::NetException &e)
+    {
+        throw Exception("Unable to start http server: " + std::string(e.what()));
+    }
 }
 
 Server::~Server()
 {
-    /* Stopping the http server immediately, leading to close current http connections.
-     * The http server cannot wait that all client disconnect. If one client is doing
-     * streaming (log retrieval...) the server would never be able to close.
-     */
-    mHttpServer.stopAll(true);
+    try
+    {
+        /* Stopping the http server immediately, leading to close current http connections.
+        * The http server cannot wait that all client disconnect. If one client is doing
+        * streaming (log retrieval...) the server would never be able to close.
+        */
+        mHttpServer.stopAll(true);
+    }
+    catch (Poco::Net::NetException &e)
+    {
+        /* Exception is swallowed because there is no way to handle the issue */
+        /* @todo: use logging */
+        std::cout << "Unable to stop http server: " << e.what() << std::endl;
+    }
 }
 
 }

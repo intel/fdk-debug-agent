@@ -23,6 +23,7 @@
 
 #include <cAVS/Driver.hpp>
 #include <memory>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -32,6 +33,13 @@ namespace cavs
 class DriverFactory final
 {
 public:
+    class Exception : public std::logic_error
+    {
+    public:
+        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
+    };
+
+    /** @throw DriverFactory::Exception */
     static std::unique_ptr<Driver> newDriver();
 
 private:

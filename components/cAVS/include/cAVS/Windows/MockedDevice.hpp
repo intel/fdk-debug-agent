@@ -75,7 +75,7 @@ public:
      *                           also as input buffer)
      * @param[in] returnedOutput the returned buffer
      * @param[in] success the returned IO control status
-     * @throw Exception
+     * @throw Device::Exception
      *
      * Note: Supplied buffers are cloned, ownership is not transferred.
      */

@@ -66,6 +66,8 @@ private:
     System(const System &) = delete;
     System & operator=(const System &) = delete;
 
+    static std::unique_ptr<Driver> createDriver();
+
     std::unique_ptr<Driver> mDriver;
 };
 

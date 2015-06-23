@@ -24,6 +24,7 @@
 #include "Core/Resources.hpp"
 #include "Rest/Server.hpp"
 #include <memory>
+#include <exception>
 
 using namespace Poco::Util;
 using namespace debug_agent::rest;
@@ -41,23 +42,48 @@ const uint32_t DebugAgent::port = 9090;
 int DebugAgent::main(const std::vector<std::string>&)
 {
     // System is currently limited to cAVS
-    cavs::System system;
-
-    std::shared_ptr<rest::Dispatcher> dispatcher(new rest::Dispatcher());
-
-    dispatcher->addResource("/cAVS/logging/stream",
-        std::shared_ptr<Resource>(new LogStreamResource(system)));
-    dispatcher->addResource("/cAVS/logging/parameters",
-        std::shared_ptr<Resource>(new LogParametersResource(system)));
-
+    try
     {
-        rest::Server restServer(dispatcher, port);
+        cavs::System system;
 
-        std::cout << "DebugAgent started" << std::endl;
+        std::shared_ptr<rest::Dispatcher> dispatcher(new rest::Dispatcher());
 
-        waitForTerminationRequest();  /* wait for CTRL-C or kill */
+        dispatcher->addResource("/cAVS/logging/stream",
+            std::shared_ptr<Resource>(new LogStreamResource(system)));
+        dispatcher->addResource("/cAVS/logging/parameters",
+            std::shared_ptr<Resource>(new LogParametersResource(system)));
 
-        std::cout << std::endl << "Shutting down DebugAgent..." << std::endl;
+        {
+            rest::Server restServer(dispatcher, port);
+
+            std::cout << "DebugAgent started" << std::endl;
+
+            waitForTerminationRequest();  /* wait for CTRL-C or kill */
+
+            std::cout << std::endl << "Shutting down DebugAgent..." << std::endl;
+        }
+    }
+    catch (rest::Dispatcher::InvalidUriException &e)
+    {
+        std::cout << "Invalid resource URI: " << e.what() << std::endl;
+        return Application::EXIT_SOFTWARE;
+    }
+    catch (rest::Server::Exception &e)
+    {
+        std::cout << "Rest server error : " << e.what() << std::endl;
+        return Application::EXIT_SOFTWARE;
+    }
+    catch (cavs::System::Exception &e)
+    {
+        std::cout << "System error: " << e.what() << std::endl;
+        return Application::EXIT_SOFTWARE;
+    }
+    catch (std::exception &e)
+    {
+        /* This block should not be reached */
+        std::cout << "Unexpected exception of type '" << typeid(e).name() << "': " << e.what()
+            << std::endl;
+        return Application::EXIT_SOFTWARE;
     }
 
     return Application::EXIT_OK;

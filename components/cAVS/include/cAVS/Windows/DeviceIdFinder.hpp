@@ -52,7 +52,7 @@ public:
      * @param[in] guid the GUID class to match
      * @param[out] deviceIds the found device identifiers
      * @param[in] substring the found devices identifiers have to contain this substring (optional)
-     * @throw Exception
+     * @throw DeviceIdFinder::Exception
      */
     static void findAll(const GUID &guid, std::set<std::string> &deviceIds,
         const std::string &substring = "");
@@ -65,7 +65,7 @@ public:
      * @param[in] guid the GUID class to match
      * @param[in] substring the found devices identifiers have to contain this substring (optional)
      * @return the found device identifier
-     * @throw Exception
+     * @throw DeviceIdFinder::Exception
      */
     static std::string findOne(const GUID &guid, const std::string &substring = "");
 

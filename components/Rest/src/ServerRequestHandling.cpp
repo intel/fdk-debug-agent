@@ -22,6 +22,7 @@
 
 #include "ServerRequestHandling.hpp"
 #include "Rest/HttpMessageProperties.hpp"
+#include <sstream>
 
 using namespace Poco::Net;
 
@@ -71,14 +72,31 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
     }
     catch (ConnectionAbortedException &)
     {
-        /* @todo Use logging instead */
+        /* This exception is swallowed
+         * @todo Use logging instead */
         std::cout << "Connection aborted." << std::endl;
+    }
+    catch (std::exception &e)
+    {
+        /* This block should not be reached */
+        std::stringstream stream;
+        stream << "Unexpected exception of type '" << typeid(e).name() << "': " << e.what();
+        fail(HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR, stream.str(), resp);
+    }
+    catch (...)
+    {
+        /* This block should not be reached also */
+        std::string msg("An exception with an unknown type has been caugth.");
+        fail(HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR, msg, resp);
     }
 }
 
 void RestResourceRequestHandler::fail(HTTPResponse::HTTPStatus status, const std::string message,
     HTTPServerResponse &resp)
 {
+    /* @todo Use logging instead */
+    std::cout << "Request failure: " << message << std::endl;
+
     HttpMessageProperties::setCommonProperties(resp);
     resp.setStatus(status);
     resp.setContentType("text/plain");

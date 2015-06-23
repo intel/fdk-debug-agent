@@ -48,7 +48,7 @@ public:
         Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
-    /** @throw Exception if the device initialization has failed */
+    /** @throw Device::Exception if the device initialization has failed */
     Device() {}
     virtual ~Device() {}
 
@@ -59,7 +59,7 @@ public:
     * @param[in,out] outputBuffer the output buffer (basically this buffer can be used as input
     *                             buffer too). This parameter is optional, use nullptr if the
                                   output buffer is not required.
-    * @throw Exception if the io control has failed
+    * @throw Device::Exception if the io control has failed
     */
     virtual void ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output) = 0;
 

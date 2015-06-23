@@ -29,7 +29,7 @@ namespace cavs
 {
 
 System::System()
-: mDriver(std::move(DriverFactory::newDriver()))
+: mDriver(std::move(createDriver()))
 {
     if (mDriver == nullptr) {
 
@@ -37,14 +37,40 @@ System::System()
     }
 }
 
+std::unique_ptr<Driver> System::createDriver()
+{
+    try
+    {
+        return DriverFactory::newDriver();
+    }
+    catch (DriverFactory::Exception e)
+    {
+        throw Exception("Unable to create driver: " + std::string(e.what()));
+    }
+}
+
 void System::setLogParameters(Logger::Parameters &parameters)
 {
-    mDriver->getLogger().setParameters(parameters);
+    try
+    {
+        mDriver->getLogger().setParameters(parameters);
+    }
+    catch (Logger::Exception &e)
+    {
+        throw Exception("Unable to set log parameter: " + std::string(e.what()));
+    }
 }
 
 Logger::Parameters System::getLogParameters()
 {
-    return mDriver->getLogger().getParameters();
+    try
+    {
+        return mDriver->getLogger().getParameters();
+    }
+    catch (Logger::Exception &e)
+    {
+        throw Exception("Unable to get log parameter: " + std::string(e.what()));
+    }
 }
 
 }

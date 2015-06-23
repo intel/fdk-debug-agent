@@ -41,8 +41,18 @@ namespace rest
 class Server
 {
 public:
-    /* @param[in] dispatcher The dispatcher that will be used by the server to resolve the
-     * resources */
+    class Exception : public std::logic_error
+    {
+    public:
+        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
+    };
+
+
+    /** @param[in] dispatcher The dispatcher that will be used by the server to resolve the
+     * resources
+     *
+     * @throw Server::Exception
+     */
     Server(std::shared_ptr<const Dispatcher> dispatcher, uint32_t port);
     ~Server();
 

@@ -39,11 +39,26 @@ const GUID DriverInterfaceGuid =
 std::unique_ptr<Driver> cavs::DriverFactory::newDriver()
 {
     /* Finding device id */
-    std::string deviceId = windows::DeviceIdFinder::findOne(DriverInterfaceGuid,
-        DriverInterfaceSubstr);
+    std::string deviceId;
+    try
+    {
+        deviceId = windows::DeviceIdFinder::findOne(DriverInterfaceGuid,
+            DriverInterfaceSubstr);
+    }
+    catch (windows::DeviceIdFinder::Exception &e)
+    {
+        throw Exception("Cannot get device identifier: " + std::string(e.what()));
+    }
 
-    /* Creating system device, may throw an exception */
-    std::unique_ptr<windows::Device> device(new windows::SystemDevice(deviceId));
+    std::unique_ptr<windows::Device> device;
+    try
+    {
+        device = std::move(std::unique_ptr<windows::Device>(new windows::SystemDevice(deviceId)));
+    }
+    catch (windows::Device::Exception &e)
+    {
+        throw Exception("Cannot create device: " + std::string(e.what()));
+    }
 
     /* Creating Driver interface */
     return std::unique_ptr<Driver>(new windows::Driver(std::move(device)));
