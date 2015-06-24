@@ -28,8 +28,8 @@ namespace debug_agent
 namespace cavs
 {
 
-System::System()
-: mDriver(std::move(createDriver()))
+System::System(const DriverFactory &driverFactory)
+: mDriver(std::move(createDriver(driverFactory)))
 {
     if (mDriver == nullptr) {
 
@@ -37,11 +37,11 @@ System::System()
     }
 }
 
-std::unique_ptr<Driver> System::createDriver()
+std::unique_ptr<Driver> System::createDriver(const DriverFactory &driverFactory)
 {
     try
     {
-        return DriverFactory::newDriver();
+        return driverFactory.newDriver();
     }
     catch (DriverFactory::Exception e)
     {

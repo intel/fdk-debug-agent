@@ -31,6 +31,7 @@ set(LIB_INCS
     include/cAVS/Logger.hpp
     include/cAVS/Driver.hpp
     include/cAVS/DriverFactory.hpp
+    include/cAVS/SystemDriverFactory.hpp
     include/cAVS/System.hpp
     include/cAVS/FirmwareTypes.hpp
     include/cAVS/ModuleHandler.hpp)

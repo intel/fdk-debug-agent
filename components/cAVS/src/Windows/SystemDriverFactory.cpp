@@ -19,66 +19,50 @@
 *
 ********************************************************************************
 */
-#pragma once
-
-#include "cAVS/Driver.hpp"
-#include "cAVS/DriverFactory.hpp"
-#include <memory>
-#include <stdexcept>
-#include <vector>
+#include "cAVS/SystemDriverFactory.hpp"
+#include "cAVS/Windows/Driver.hpp"
+#include "cAVS/Windows/SystemDevice.hpp"
+#include "cAVS/Windows/DeviceIdFinder.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
 
-/**
- * The cAVS System
- */
-class System final
+/** OED driver interface substring */
+static const std::string DriverInterfaceSubstr = "intelapp2audiodspiface";
+
+/** OED driver class */
+const GUID DriverInterfaceGuid =
+{ 0xd562b888, 0xcf36, 0x4c54, { 0x84, 0x1d, 0x10, 0xff, 0x7b, 0xff, 0x4f, 0x60 } };
+
+std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
 {
-public:
-    class Exception : public std::logic_error
+    /* Finding device id */
+    std::string deviceId;
+    try
     {
-    public:
-        explicit Exception(const std::string& what)
-        : std::logic_error(what)
-        {}
-    };
+        deviceId = windows::DeviceIdFinder::findOne(DriverInterfaceGuid,
+            DriverInterfaceSubstr);
+    }
+    catch (windows::DeviceIdFinder::Exception &e)
+    {
+        throw Exception("Cannot get device identifier: " + std::string(e.what()));
+    }
 
-    /**
-     * @throw System::Exception
-     */
-    System(const DriverFactory &driverFactory);
+    std::unique_ptr<windows::Device> device;
+    try
+    {
+        device = std::move(std::unique_ptr<windows::Device>(new windows::SystemDevice(deviceId)));
+    }
+    catch (windows::Device::Exception &e)
+    {
+        throw Exception("Cannot create device: " + std::string(e.what()));
+    }
 
-    /**
-     * Set log parameters
-     * @param[in] parameters Log parameters to be set
-     */
-    void setLogParameters(Logger::Parameters &parameters);
-
-    /**
-     * Get log parameters
-     * @return current log parameters
-     */
-    Logger::Parameters getLogParameters();
-
-    /**
-     * Get module entries
-     */
-    void getModuleEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries);
-
-private:
-    /* Make this class non copyable */
-    System(const System &) = delete;
-    System & operator=(const System &) = delete;
-
-    static std::unique_ptr<Driver> createDriver(const DriverFactory &driverFactory);
-
-    std::unique_ptr<Driver> mDriver;
-};
+    /* Creating Driver interface */
+    return std::unique_ptr<Driver>(new windows::Driver(std::move(device)));
+}
 
 }
 }
-
-

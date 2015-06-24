@@ -39,12 +39,14 @@ namespace core
  */
 const uint32_t DebugAgent::port = 9090;
 
+DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory) : mDriverFactory(driverFactory) {}
+
 int DebugAgent::main(const std::vector<std::string>&)
 {
     // System is currently limited to cAVS
     try
     {
-        cavs::System system;
+        cavs::System system(mDriverFactory);
 
         std::shared_ptr<rest::Dispatcher> dispatcher(new rest::Dispatcher());
 

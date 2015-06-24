@@ -30,7 +30,7 @@ namespace debug_agent
 namespace cavs
 {
 
-class DriverFactory final
+class DriverFactory
 {
 public:
     class Exception : public std::logic_error
@@ -39,12 +39,13 @@ public:
         Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
+    DriverFactory() = default;
+
     /** @throw DriverFactory::Exception */
-    static std::unique_ptr<Driver> newDriver();
+    virtual std::unique_ptr<Driver> newDriver() const = 0;
 
 private:
-    /* Make this class non instantiable & non copyable */
-    DriverFactory() = delete;
+    /* Make this class non copyable */
     DriverFactory(const DriverFactory&) = delete;
     DriverFactory & operator=(const DriverFactory&) = delete;
 };

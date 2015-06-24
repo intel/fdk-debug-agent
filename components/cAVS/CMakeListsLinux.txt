@@ -20,7 +20,7 @@
 
 set(LIB_SRCS
     ${LIB_SRCS}
-    src/Linux/DriverFactory.cpp
+    src/Linux/SystemDriverFactory.cpp
     src/Linux/Logger.cpp)
 
 set(LIB_INCS

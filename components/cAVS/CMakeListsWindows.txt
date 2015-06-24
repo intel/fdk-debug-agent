@@ -19,7 +19,7 @@
 ################################################################################
 
 set(WINDOWS_LIB_SRCS
-    src/Windows/DriverFactory.cpp
+    src/Windows/SystemDriverFactory.cpp
     src/Windows/Logger.cpp
     src/Windows/SystemDevice.cpp
     src/Windows/MockedDevice.cpp

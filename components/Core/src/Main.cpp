@@ -20,6 +20,7 @@
 ********************************************************************************
 */
 
+#include "cAVS/SystemDriverFactory.hpp"
 #include "Core/DebugAgent.hpp"
 #include "Rest/ErrorHandler.hpp"
 
@@ -28,7 +29,8 @@ int main(int argc, char* argv[])
     /* Installing the rest error handler in order to hide ConnectionAbortedException */
     debug_agent::rest::ErrorHandler handler;
 
-    debug_agent::core::DebugAgent debugAgent;
+    debug_agent::cavs::SystemDriverFactory driverFactory;
+    debug_agent::core::DebugAgent debugAgent(driverFactory);
     return debugAgent.run(argc, argv);
 }
 

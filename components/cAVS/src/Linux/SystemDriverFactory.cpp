@@ -19,7 +19,7 @@
 *
 ********************************************************************************
 */
-#include <cAVS/DriverFactory.hpp>
+#include <cAVS/SystemDriverFactory.hpp>
 #include <cAVS/Linux/Driver.hpp>
 
 namespace debug_agent
@@ -27,7 +27,7 @@ namespace debug_agent
 namespace cavs
 {
 
-std::unique_ptr<Driver> DriverFactory::newDriver()
+std::unique_ptr<Driver> SystemDriverFactory::newDriver() const
 {
     return std::unique_ptr<Driver>(new linuxx::Driver);
 }

@@ -19,6 +19,7 @@
 *
 ********************************************************************************
 */
+#include "cAVS/DriverFactory.hpp"
 #include <Poco/Util/ServerApplication.h>
 #include <stdint.h>
 
@@ -30,11 +31,15 @@ namespace core
 /** The debug agent application class */
 class DebugAgent : public Poco::Util::ServerApplication
 {
+public:
+    DebugAgent(const cavs::DriverFactory &driverFactory);
+
 protected:
     virtual int main(const std::vector<std::string>&);
 
 private:
     static const uint32_t port;
+    const cavs::DriverFactory &mDriverFactory;
 };
 
 }
