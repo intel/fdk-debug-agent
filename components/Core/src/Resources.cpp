@@ -25,6 +25,8 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <iomanip>
+#include <sstream>
 
 using namespace debug_agent::rest;
 using namespace debug_agent::cavs;
@@ -35,6 +37,23 @@ namespace core
 {
 
 static const std::string ContentType("text/html");
+
+/** This method returns a std::string from a byte buffer
+ *
+ * @tparam ArrayElementType the array element type, its size must be one byte.
+ *                          For instance: int8_t, uint8_t, char, unsigned char ...
+ */
+template<typename ArrayElementType>
+static std::string getStringFromFixedSizeArray(ArrayElementType *buffer, std::size_t size)
+{
+    static_assert(sizeof(ArrayElementType) == 1, "Size of ArrayElementType must be one");
+
+    std::stringstream stream;
+    for (std::size_t i = 0; i < size && buffer[i] != 0; i++) {
+        stream << static_cast<char>(buffer[i]);
+    }
+    return stream.str();
+}
 
 void LogStreamResource::handleGet(const Request &request, Response &response)
 {
@@ -98,6 +117,52 @@ void LogParametersResource::handlePut(const Request &request, Response &response
     }
     std::ostream &out = response.send(ContentType);
     out << "<p>Done</p>";
+}
+
+void ModuleEntryResource::handleGet(const Request &request, Response &response)
+{
+    /* Retrieving module entries */
+    std::vector<dsp_fw::ModuleEntry> entries;
+    try
+    {
+        mSystem.getModuleEntries(entries);
+    }
+    catch (System::Exception &e)
+    {
+        throw RequestException(ErrorStatus::BadRequest, "Can not get module entries: " +
+            std::string(e.what()));
+    }
+
+    std::ostream &out = response.send(ContentType);
+    out << "<p>Module type count: " << entries.size() << "</p>";
+
+    /* Writing the result as an html table */
+    out << "<table border='1'><tr><td>name</td><td>uuid</td><td>module id</td></tr>";
+
+    std::size_t moduleId = 0;
+    for (auto &entry : entries)
+    {
+        out << "<tr>";
+
+        /* Module Name */
+        std::string name(getStringFromFixedSizeArray(entry.name, sizeof(entry.name)));
+        out << "<td>" << name << "</td>";
+
+        /* Module uuid */
+        out << "<td>";
+        static const std::size_t uuidIntergerCount = 4;
+        for (std::size_t j = 0; j < uuidIntergerCount; j++) {
+            out << std::hex << std::setw(8) << std::setfill('0') << entry.uuid[j];
+        }
+        out << "</td>";
+
+        /* The module id is the array index */
+        out << "<td>" << moduleId << "</td>";
+        out << "</tr>";
+
+        moduleId++;
+    }
+    out << "</table>";
 }
 
 /**

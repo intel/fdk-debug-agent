@@ -73,6 +73,18 @@ Logger::Parameters System::getLogParameters()
     }
 }
 
+void System::getModuleEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries)
+{
+    try
+    {
+        mDriver->getModuleHandler().getModulesEntries(modulesEntries);
+    }
+    catch (ModuleHandler::Exception &e)
+    {
+        throw Exception("Unable to get module entries: " + std::string(e.what()));
+    }
+}
+
 }
 }
 

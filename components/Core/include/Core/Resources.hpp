@@ -63,6 +63,15 @@ private:
     static const std::size_t outputParameterIndex;
 };
 
+/** This resource returns the uuid<->module_id mapping table */
+class ModuleEntryResource : public RootResource
+{
+public:
+    ModuleEntryResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
 }
 }
 

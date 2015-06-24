@@ -52,6 +52,8 @@ int DebugAgent::main(const std::vector<std::string>&)
             std::shared_ptr<Resource>(new LogStreamResource(system)));
         dispatcher->addResource("/cAVS/logging/parameters",
             std::shared_ptr<Resource>(new LogParametersResource(system)));
+        dispatcher->addResource("/cAVS/module/entries",
+            std::shared_ptr<Resource>(new ModuleEntryResource(system)));
 
         {
             rest::Server restServer(dispatcher, port);

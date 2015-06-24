@@ -24,6 +24,7 @@
 #include "cAVS/Driver.hpp"
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 namespace debug_agent
 {
@@ -60,6 +61,11 @@ public:
      * @return current log parameters
      */
     Logger::Parameters getLogParameters();
+
+    /**
+     * Get module entries
+     */
+    void getModuleEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries);
 
 private:
     /* Make this class non copyable */
