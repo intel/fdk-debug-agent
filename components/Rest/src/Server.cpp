@@ -45,7 +45,11 @@ Server::Server(std::shared_ptr<const Dispatcher> dispatcher, uint32_t port)  :
 
 Server::~Server()
 {
-    mHttpServer.stop();
+    /* Stopping the http server immediately, leading to close current http connections.
+     * The http server cannot wait that all client disconnect. If one client is doing
+     * streaming (log retrieval...) the server would never be able to close.
+     */
+    mHttpServer.stopAll(true);
 }
 
 }
