@@ -22,48 +22,26 @@
 
 #pragma once
 
-#include "Rest/HttpMessageProperties.hpp"
-#include <Poco/Net/HTTPServerResponse.h>
-#include <iostream>
-
+#include <Poco/Net/HTTPMessage.h>
 namespace debug_agent
 {
 namespace rest
 {
 
-/** Describe a REST response
- *
- * The status and the content type is sent to the client using the send() method.
- * The send() method returns an output stream that can be used to send the response
- * content.
- */
-class Response final
+/** This helper class intends to set common properties to all http messages */
+class HttpMessageProperties final
 {
 public:
-    /* Send the response to the client
-     * @param[in] contentType the response content type
-     * @return an output stream that can be used to send the response content
-     */
-    std::ostream &send(const std::string& contentType) {
-        HttpMessageProperties::setCommonProperties(mResponse);
-        mResponse.setContentType(contentType);
-        mResponse.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_OK);
-        return mResponse.send();
+    static void setCommonProperties(Poco::Net::HTTPMessage &httpMessage)
+    {
+        httpMessage.setChunkedTransferEncoding(true);
+        httpMessage.setKeepAlive(true);
     }
 
 private:
-    friend class RestResourceRequestHandler;
-
-    /* Constructor is called by the RestResourceRequestHandler class */
-    Response(Poco::Net::HTTPServerResponse &response) : mResponse(response) {}
-
-    Response(const Response&) = delete;
-    Response &operator=(const Response &) = delete;
-
-    Poco::Net::HTTPServerResponse &mResponse;
+    HttpMessageProperties();
 };
 
 }
 }
-
 

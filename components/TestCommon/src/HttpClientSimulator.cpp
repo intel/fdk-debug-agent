@@ -98,6 +98,7 @@ void HttpClientSimulator::request(
     try
     {
         request.setChunkedTransferEncoding(true);
+        request.setKeepAlive(true);
 
         /* Sending the request header */
         std::ostream& requestStream = session.sendRequest(request);

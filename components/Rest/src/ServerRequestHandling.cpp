@@ -21,6 +21,7 @@
 */
 
 #include "ServerRequestHandling.hpp"
+#include "Rest/HttpMessageProperties.hpp"
 
 using namespace Poco::Net;
 
@@ -78,8 +79,10 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
 void RestResourceRequestHandler::fail(HTTPResponse::HTTPStatus status, const std::string message,
     HTTPServerResponse &resp)
 {
+    HttpMessageProperties::setCommonProperties(resp);
     resp.setStatus(status);
     resp.setContentType("text/plain");
+
     try
     {
         std::ostream &out = resp.send();
