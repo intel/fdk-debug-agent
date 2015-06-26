@@ -20,15 +20,14 @@
 ********************************************************************************
 */
 
-#include "Core/DebugAgent.hpp"
+#define CATCH_CONFIG_RUNNER
 #include "Rest/ErrorHandler.hpp"
+#include "catch.hpp"
 
-int main(int argc, char* argv[])
+int main(int argc, char* const argv[])
 {
     /* Installing the rest error handler in order to hide ConnectionAbortedException */
     debug_agent::rest::ErrorHandler handler;
 
-    debug_agent::core::DebugAgent debugAgent;
-    return debugAgent.run(argc, argv);
+    return Catch::Session().run(argc, argv);
 }
-

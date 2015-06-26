@@ -20,7 +20,6 @@
 ********************************************************************************
 */
 
-#define CATCH_CONFIG_MAIN
 #include "Rest/Server.hpp"
 #include "TestCommon/HttpClientSimulator.hpp"
 #include "Poco/StreamCopier.h"

@@ -24,7 +24,8 @@
 set(TEST_SRCS
     DispatcherUnitTest.cpp
     ServerUnitTest.cpp
-    DefaultResourceUnitTest.cpp)
+    DefaultResourceUnitTest.cpp
+    Main.cpp)
 
 set(TEST_INCS)
 

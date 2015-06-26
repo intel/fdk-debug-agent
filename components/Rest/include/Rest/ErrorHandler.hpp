@@ -20,15 +20,61 @@
 ********************************************************************************
 */
 
-#include "Core/DebugAgent.hpp"
-#include "Rest/ErrorHandler.hpp"
+#pragma once
 
-int main(int argc, char* argv[])
+#include <Poco/ErrorHandler.h>
+#include <Poco/Net/NetException.h>
+#include <iostream>
+#include <typeinfo>
+
+namespace debug_agent
 {
-    /* Installing the rest error handler in order to hide ConnectionAbortedException */
-    debug_agent::rest::ErrorHandler handler;
+namespace rest
+{
 
-    debug_agent::core::DebugAgent debugAgent;
-    return debugAgent.run(argc, argv);
+/**
+ * Implements a Poco ErrorHandler that hides ConnectionAbortedException, because
+ * this exception is thrown when a client disconnects from the http server using a
+ * keep-alive connection, which is a nominal case. */
+class ErrorHandler final : public Poco::ErrorHandler
+{
+public:
+    ErrorHandler() : mBaseErrorHandler(nullptr)
+    {
+        /* Getting base handler */
+        mBaseErrorHandler = Poco::ErrorHandler::get();
+        poco_check_ptr(mBaseErrorHandler);
+
+        /* Setting this as current handler*/
+        Poco::ErrorHandler::set(this);
+    }
+
+    ~ErrorHandler()
+    {
+        /* Restoring base handler */
+        Poco::ErrorHandler::set(mBaseErrorHandler);
+    }
+
+    virtual void exception(const Poco::Exception& e) override
+    {
+        const std::type_info &exceptionType = typeid(e);
+
+        /* comparing the exception type */
+        if (exceptionType == typeid(Poco::Net::ConnectionAbortedException)) {
+
+            /* ConnectionAbortedException is a nominal case: ignoring it */
+            return;
+        }
+
+        /* Calling base handler */
+        mBaseErrorHandler->exception(e);
+    }
+
+private:
+    Poco::ErrorHandler *mBaseErrorHandler;
+};
+
 }
+}
+
 

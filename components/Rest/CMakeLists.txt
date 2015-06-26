@@ -34,6 +34,7 @@ set(LIB_INCS
     include/Rest/Dispatcher.hpp
     include/Rest/Resource.hpp
     include/Rest/HttpMessageProperties.hpp
+    include/Rest/ErrorHandler.hpp
     src/ServerRequestHandling.hpp) # private header
 
 add_library(Rest STATIC ${LIB_SRCS} ${LIB_INCS})
