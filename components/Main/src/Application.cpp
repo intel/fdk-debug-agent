@@ -20,17 +20,45 @@
 ********************************************************************************
 */
 
+#include "Main/Application.hpp"
 #include "cAVS/SystemDriverFactory.hpp"
 #include "Core/DebugAgent.hpp"
-#include "Rest/ErrorHandler.hpp"
 
-int main(int argc, char* argv[])
+using namespace debug_agent::core;
+using namespace debug_agent::cavs;
+
+namespace debug_agent
 {
-    /* Installing the rest error handler in order to hide ConnectionAbortedException */
-    debug_agent::rest::ErrorHandler handler;
+namespace main
+{
 
-    debug_agent::cavs::SystemDriverFactory driverFactory;
-    debug_agent::core::DebugAgent debugAgent(driverFactory);
-    return debugAgent.run(argc, argv);
+int Application::main(const std::vector<std::string>&)
+{
+    try
+    {
+        SystemDriverFactory driverFactory;
+        DebugAgent debugAgent(driverFactory, ServerPort);
+
+        std::cout << "DebugAgent started" << std::endl;
+
+        waitForTerminationRequest();  /* wait for CTRL-C or kill */
+
+        std::cout << std::endl << "Shutting down DebugAgent..." << std::endl;
+        return Application::EXIT_OK;
+    }
+    catch (DebugAgent::Exception &e)
+    {
+        std::cout << "DebugAgent exception: " << e.what() << std::endl;
+        return Application::EXIT_SOFTWARE;
+    }
+    catch (std::exception &e)
+    {
+        /* This block should not be reached */
+        std::cout << "Unexpected std::exception of type '" << typeid(e).name() << "': " << e.what()
+            << std::endl;
+        return Application::EXIT_SOFTWARE;
+    }
 }
 
+}
+}

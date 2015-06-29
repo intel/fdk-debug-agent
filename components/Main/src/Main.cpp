@@ -20,49 +20,15 @@
 ********************************************************************************
 */
 
-#include "Core/DebugAgent.hpp"
-#include "Core/Resources.hpp"
-#include <memory>
-#include <exception>
+#include "Main/Application.hpp"
+#include "Rest/ErrorHandler.hpp"
 
-using namespace debug_agent::rest;
-
-namespace debug_agent
+int main(int argc, char* argv[])
 {
-namespace core
-{
+    /* Installing the rest error handler in order to hide ConnectionAbortedException */
+    debug_agent::rest::ErrorHandler handler;
 
-std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
-{
-    Dispatcher *dispatcher = new rest::Dispatcher();
-
-    dispatcher->addResource("/cAVS/logging/stream",
-        std::shared_ptr<Resource>(new LogStreamResource(mSystem)));
-    dispatcher->addResource("/cAVS/logging/parameters",
-        std::shared_ptr<Resource>(new LogParametersResource(mSystem)));
-    dispatcher->addResource("/cAVS/module/entries",
-        std::shared_ptr<Resource>(new ModuleEntryResource(mSystem)));
-
-    return std::shared_ptr<rest::Dispatcher>(dispatcher);
+    debug_agent::main::Application application;
+    return application.run(argc, argv);
 }
 
-DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port)
-try : mSystem(driverFactory), mRestServer(createDispatcher(), port)
-{
-}
-catch (rest::Dispatcher::InvalidUriException &e)
-{
-    throw Exception("Invalid resource URI: " + std::string(e.what()));
-}
-catch (rest::Server::Exception &e)
-{
-    throw Exception("Rest server error : " + std::string(e.what()));
-}
-catch (cavs::System::Exception &e)
-{
-    throw Exception("System error: " + std::string(e.what()));
-}
-
-
-}
-}

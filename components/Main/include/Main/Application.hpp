@@ -20,49 +20,26 @@
 ********************************************************************************
 */
 
-#include "Core/DebugAgent.hpp"
-#include "Core/Resources.hpp"
-#include <memory>
-#include <exception>
+#pragma once
 
-using namespace debug_agent::rest;
+#include <Poco/Util/ServerApplication.h>
+#include <inttypes.h>
 
 namespace debug_agent
 {
-namespace core
+namespace main
 {
 
-std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
+class Application : public Poco::Util::ServerApplication
 {
-    Dispatcher *dispatcher = new rest::Dispatcher();
-
-    dispatcher->addResource("/cAVS/logging/stream",
-        std::shared_ptr<Resource>(new LogStreamResource(mSystem)));
-    dispatcher->addResource("/cAVS/logging/parameters",
-        std::shared_ptr<Resource>(new LogParametersResource(mSystem)));
-    dispatcher->addResource("/cAVS/module/entries",
-        std::shared_ptr<Resource>(new ModuleEntryResource(mSystem)));
-
-    return std::shared_ptr<rest::Dispatcher>(dispatcher);
-}
-
-DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port)
-try : mSystem(driverFactory), mRestServer(createDispatcher(), port)
-{
-}
-catch (rest::Dispatcher::InvalidUriException &e)
-{
-    throw Exception("Invalid resource URI: " + std::string(e.what()));
-}
-catch (rest::Server::Exception &e)
-{
-    throw Exception("Rest server error : " + std::string(e.what()));
-}
-catch (cavs::System::Exception &e)
-{
-    throw Exception("System error: " + std::string(e.what()));
-}
-
+protected:
+    virtual int main(const std::vector<std::string>&) override;
+private:
+    /**
+    * @fixme This is a temporary port value
+    */
+    static const uint32_t ServerPort = 9090;
+};
 
 }
 }

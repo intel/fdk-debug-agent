@@ -19,9 +19,10 @@
 *
 ********************************************************************************
 */
-#include "cAVS/DriverFactory.hpp"
-#include <Poco/Util/ServerApplication.h>
-#include <stdint.h>
+
+#include "cAVS/System.hpp"
+#include "Rest/Server.hpp"
+#include <inttypes.h>
 
 namespace debug_agent
 {
@@ -29,17 +30,26 @@ namespace core
 {
 
 /** The debug agent application class */
-class DebugAgent : public Poco::Util::ServerApplication
+class DebugAgent final
 {
 public:
-    DebugAgent(const cavs::DriverFactory &driverFactory);
+    /** @throw DebugAgent::Exception */
+    DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port);
 
-protected:
-    virtual int main(const std::vector<std::string>&);
+    class Exception : public std::logic_error
+    {
+    public:
+        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
+    };
 
 private:
-    static const uint32_t port;
-    const cavs::DriverFactory &mDriverFactory;
+    DebugAgent(const DebugAgent&) = delete;
+    DebugAgent& operator=(const DebugAgent&) = delete;
+
+    std::shared_ptr<rest::Dispatcher> createDispatcher();
+
+    cavs::System mSystem;
+    rest::Server mRestServer;
 };
 
 }

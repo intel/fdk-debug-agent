@@ -18,25 +18,29 @@
 #
 ################################################################################
 
-# cmake configuration file of the "Core" component
+# cmake configuration file of the "Main" component
 
 # Main executable
 set(SRCS
-    src/DebugAgent.cpp
-    src/Resources.cpp)
+    src/Application.cpp
+    src/Main.cpp)
 
 set(INCS
-    include/Core/DebugAgent.hpp
-    include/Core/Resources.hpp)
+    include/Main/Application.hpp)
 
-add_library(Core STATIC ${SRCS} ${INCS})
-set_common_settings(Core)
+add_executable(Main ${SRCS} ${INCS})
+set_common_settings(Main)
 
-#exporting include directory
-target_include_directories(Core PUBLIC "include")
+target_include_directories(Main PRIVATE "include")
+
+# Setting executable name to DebugAgent
+set_target_properties(Main PROPERTIES OUTPUT_NAME "DebugAgent")
 
 # Binding with Poco
-link_poco(Core)
+link_poco(Main)
 
 # Needed components
-target_link_libraries(Core cAVS Rest)
+target_link_libraries(Main Core)
+
+# Installation step
+install(TARGETS Main RUNTIME DESTINATION bin)
