@@ -210,7 +210,7 @@ then
     test_count=0
     if [ -d $test_dir ]
     then
-        for test_file in $test_dir/*UnitTest*
+        for test_file in $test_dir/*Test*
         do
             echo "Running $test_file"
             eval $test_file
