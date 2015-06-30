@@ -20,6 +20,7 @@
 
 set(WINDOWS_LIB_SRCS
     src/Windows/SystemDriverFactory.cpp
+    src/Windows/DeviceInjectionDriverFactory.cpp
     src/Windows/Logger.cpp
     src/Windows/SystemDevice.cpp
     src/Windows/MockedDevice.cpp
@@ -42,7 +43,8 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/DeviceIdFinder.hpp
     include/cAVS/Windows/DriverTypes.hpp
     include/cAVS/Windows/ModuleHandler.hpp
-    include/cAVS/Windows/IoCtlStructureHelpers.hpp)
+    include/cAVS/Windows/IoCtlStructureHelpers.hpp
+    include/cAVS/Windows/DeviceInjectionDriverFactory.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
