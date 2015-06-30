@@ -64,8 +64,14 @@ endfunction()
 # this function applies common settings to all debug agent projects
 function (set_common_settings projectname)
     #enabling c++11
-    set_property(TARGET ${projectname} PROPERTY CXX_STANDARD 11)
-    set_property(TARGET ${projectname} PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD_REQUIRED ON)
+if (WIN32)
+    # Windows does not support noexcept: fall back to throw()
+    set_property(TARGET ${projectname} APPEND PROPERTY COMPILE_DEFINITIONS "NOEXCEPT=throw()")
+else ()
+    set_property(TARGET ${projectname} APPEND PROPERTY COMPILE_DEFINITIONS NOEXCEPT=noexcept)
+endif (WIN32)
 endfunction()
 
 # Adding components in the right order (less dependent first)
