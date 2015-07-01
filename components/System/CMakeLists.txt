@@ -23,11 +23,13 @@
 # Common source files
 set(LIB_SRCS
     src/Streamer.cpp
+    src/IfdkStreamer.cpp
     src/IfdkStreamHeader.cpp)
 
 # Common include files
 set(LIB_INCS
     include/System/Streamer.hpp
+    include/System/IfdkStreamer.hpp
     include/System/IfdkStreamHeader.hpp)
 
 add_library(System STATIC ${LIB_SRCS} ${LIB_INCS})

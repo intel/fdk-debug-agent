@@ -23,7 +23,8 @@
 # test
 set(TEST_SRCS
     IfdkStreamHeaderTest.cpp
-    StreamerTest.cpp)
+    StreamerTest.cpp
+    IfdkStreamerTest.cpp)
 
 set(TEST_INCS)
 
