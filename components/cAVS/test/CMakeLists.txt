@@ -23,7 +23,8 @@
 # test
 set(TEST_SRCS
     LogBlockTest.cpp
-    LoggerUnitTest.cpp)
+    LoggerUnitTest.cpp
+    LogStreamerTest.cpp)
 
 set(TEST_INCS)
 

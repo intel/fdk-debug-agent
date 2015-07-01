@@ -24,12 +24,14 @@
 # Common source files
 set(LIB_SRCS
     src/Logger.cpp
+    src/LogStreamer.cpp
     src/System.cpp)
 
 # Common include files
 set(LIB_INCS
     include/cAVS/LogBlock.hpp
     include/cAVS/Logger.hpp
+    include/cAVS/LogStreamer.hpp
     include/cAVS/Driver.hpp
     include/cAVS/DriverFactory.hpp
     include/cAVS/SystemDriverFactory.hpp
@@ -66,3 +68,6 @@ link_poco(cAVS)
 
 # Adding test
 add_subdirectory("test")
+
+# Needed components
+target_link_libraries(cAVS System)
