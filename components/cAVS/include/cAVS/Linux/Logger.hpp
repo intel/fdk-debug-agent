@@ -40,7 +40,7 @@ public:
 
     virtual Parameters getParameters() override;
 
-    virtual std::size_t read(void *buf, std::size_t count) override;
+    virtual std::unique_ptr<LogBlock> readLogBlock() override;
 
 private:
     /**

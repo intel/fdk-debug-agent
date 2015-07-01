@@ -23,6 +23,9 @@
 #include <string>
 #include <cstring>
 #include <algorithm>
+/** @todo remove these header inclusion only needed for fake/demo log */
+#include <thread>
+#include <chrono>
 
 namespace debug_agent
 {
@@ -43,13 +46,21 @@ Logger::Parameters Logger::getParameters()
     return mDriverEmulationParameter;
 }
 
-std::size_t Logger::read(void *buf, std::size_t count)
+std::unique_ptr<LogBlock> Logger::readLogBlock()
 {
-    /** @todo read FW log using driver Debug FS interface once available */
-    static const std::string msg("Log from Linux driver\n");
-    std::size_t len = std::min(count, msg.length());
-    std::memcpy(buf, msg.c_str(), len);
-    return len;
+    /** @todo read FW log using linux driver interface once available */
+    static const std::string msg("Fake log from Linux driver");
+    static const int fakeCoreID = 0x0F; // a 0x0F is a valid core ID and easy to see in hex editor
+
+    std::unique_ptr<LogBlock> block(new LogBlock(fakeCoreID, msg.size()));
+    std::copy(msg.begin(), msg.end(), block->getLogData().begin());
+
+    /* Bandwidth limiter !
+     * We must add a tempo for fake log since it would produce an infinite log stream bandwidth,
+     * only limited by machine capacity. */
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    return block;
 }
 
 }

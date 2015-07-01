@@ -21,8 +21,10 @@
 */
 #pragma once
 
+#include <cAVS/LogBlock.hpp>
 #include <stdexcept>
 #include <string>
+#include <memory>
 
 namespace debug_agent
 {
@@ -102,18 +104,11 @@ public:
 
     /**
      * Read the FW log stream.
-     * The method blocks until FW log data are available.
-     * Then, it writes the FW log data into buffer 'buf'.
-     * If more than 'count' bytes of log data are available, only 'count' bytes are
-     * written into 'buf'.
-     * If less than 'count' bytes of log data are available, only available amount of
-     * bytes are written into 'bug'.
-     * The method returns the number of bytes written into 'buf'.
-     * @param[in] buf the address of the buffer where the read log data have to be written into
-     * @param[in] count the size of the buffer 'buf' in bytes
-     * @return the number of bytes written into 'buf'
+     * Each time the method is called, each time it returns the next log block of the log stream.
+     * @remarks The method waits until FW log data are available.
+     * @return a block of log
      */
-    virtual std::size_t read(void *buf, std::size_t count) = 0;
+    virtual std::unique_ptr<LogBlock> readLogBlock() = 0;
 
     /**
      * Return a human representation of an Output enum class value.
