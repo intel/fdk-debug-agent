@@ -22,6 +22,7 @@
 
 # test
 set(TEST_SRCS
+    LogBlockTest.cpp
     LoggerUnitTest.cpp)
 
 set(TEST_INCS)

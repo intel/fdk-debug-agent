@@ -28,6 +28,7 @@ set(LIB_SRCS
 
 # Common include files
 set(LIB_INCS
+    include/cAVS/LogBlock.hpp
     include/cAVS/Logger.hpp
     include/cAVS/Driver.hpp
     include/cAVS/DriverFactory.hpp
