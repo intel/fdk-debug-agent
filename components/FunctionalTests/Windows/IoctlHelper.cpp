@@ -61,11 +61,11 @@ void IoctlHelper::addModuleEntryCommand(MockedDevice &device)
     std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize();
 
     /* Expected output buffer*/
-    BigCmdIoctlOutput<dsp_fw::ModulesInfo>
+    BigCmdModuleAccessIoctlOutput<dsp_fw::ModulesInfo>
         expectedOutput(dsp_fw::MODULES_INFO_GET, moduleInfoSize);
 
     /* Returned output buffer*/
-    BigCmdIoctlOutput<dsp_fw::ModulesInfo>
+    BigCmdModuleAccessIoctlOutput<dsp_fw::ModulesInfo>
         returnedOutput(dsp_fw::MODULES_INFO_GET, moduleInfoSize);
 
     /* Result codes */

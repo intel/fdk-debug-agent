@@ -32,7 +32,8 @@ namespace windows
 {
 
 template <typename FirmwareParameterType>
-void ModuleHandler::bigCmdIoctl(BigCmdIoctlOutput<FirmwareParameterType> &output)
+void ModuleHandler::bigGetModuleAccessIoctl(
+    BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output)
 {
     /* Creating ioctl input structure */
     TypedBuffer<driver::Intc_App_Cmd_Header> ioctlInput;
@@ -67,11 +68,11 @@ void ModuleHandler::bigCmdIoctl(BigCmdIoctlOutput<FirmwareParameterType> &output
 void ModuleHandler::getAdspProperties(dsp_fw::AdspProperties &properties)
 {
     /* Constructing ioctl output structure*/
-    BigCmdIoctlOutput<dsp_fw::AdspProperties> ioctlOutput(
+    BigCmdModuleAccessIoctlOutput<dsp_fw::AdspProperties> ioctlOutput(
         dsp_fw::ADSP_PROPERTIES, sizeof(dsp_fw::AdspProperties));
 
     /* Performing ioctl */
-    bigCmdIoctl<dsp_fw::AdspProperties>(ioctlOutput);
+    bigGetModuleAccessIoctl<dsp_fw::AdspProperties>(ioctlOutput);
 
     /* Retrieving properties */
     properties = ioctlOutput.getFirmwareParameter();
@@ -82,10 +83,11 @@ void ModuleHandler::getModulesEntries(std::vector<dsp_fw::ModuleEntry> &modulesE
     std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize();
 
     /* Constructing ioctl output structure */
-    BigCmdIoctlOutput<dsp_fw::ModulesInfo> ioctlOutput(dsp_fw::MODULES_INFO_GET, moduleInfoSize);
+    BigCmdModuleAccessIoctlOutput<dsp_fw::ModulesInfo>
+        ioctlOutput(dsp_fw::MODULES_INFO_GET, moduleInfoSize);
 
     /* Performing ioctl */
-    bigCmdIoctl<dsp_fw::ModulesInfo>(ioctlOutput);
+    bigGetModuleAccessIoctl<dsp_fw::ModulesInfo>(ioctlOutput);
 
     /* Checking returned module count */
     const dsp_fw::ModulesInfo &modulesInfo = ioctlOutput.getFirmwareParameter();

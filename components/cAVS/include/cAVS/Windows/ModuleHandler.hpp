@@ -61,7 +61,7 @@ private:
      * @param[in, out] output A structure that will receive ioctl result.
      */
     template<typename FirmwareParameterType>
-    void bigCmdIoctl(BigCmdIoctlOutput<FirmwareParameterType> &output);
+    void bigGetModuleAccessIoctl(BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output);
 };
 
 }

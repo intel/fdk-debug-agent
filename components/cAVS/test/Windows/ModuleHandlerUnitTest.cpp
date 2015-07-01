@@ -58,11 +58,11 @@ void addAdspPropertiesCommand(MockedDevice &device, NTSTATUS driverStatus,
     dsp_fw::Message::IxcStatus firmwareStatus)
 {
     /* Expected output buffer*/
-    BigCmdIoctlOutput<dsp_fw::AdspProperties> expectedOutput(
+    BigCmdModuleAccessIoctlOutput<dsp_fw::AdspProperties> expectedOutput(
         dsp_fw::BaseFwParams::ADSP_PROPERTIES, sizeof(dsp_fw::AdspProperties));
 
     /* Returned output buffer*/
-    BigCmdIoctlOutput<dsp_fw::AdspProperties> returnedOutput(
+    BigCmdModuleAccessIoctlOutput<dsp_fw::AdspProperties> returnedOutput(
         dsp_fw::BaseFwParams::ADSP_PROPERTIES, sizeof(dsp_fw::AdspProperties));
 
     /* Result codes */
@@ -90,11 +90,11 @@ void addModuleInfoCommand(MockedDevice &device, std::size_t moduleCount)
     std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize();
 
     /* Expected output buffer*/
-    BigCmdIoctlOutput<dsp_fw::ModulesInfo>
+    BigCmdModuleAccessIoctlOutput<dsp_fw::ModulesInfo>
         expectedOutput(dsp_fw::MODULES_INFO_GET, moduleInfoSize);
 
     /* Returned output buffer*/
-    BigCmdIoctlOutput<dsp_fw::ModulesInfo>
+    BigCmdModuleAccessIoctlOutput<dsp_fw::ModulesInfo>
         returnedOutput(dsp_fw::MODULES_INFO_GET, moduleInfoSize);
 
     /* Result codes */

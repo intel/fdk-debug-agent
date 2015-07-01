@@ -49,7 +49,7 @@ namespace windows
  * See Intel SST Driver Private IOCTL Specification (FDK Support).docx
  */
 template <typename FirmwareParameterType>
-class BigCmdIoctlOutput
+class BigCmdModuleAccessIoctlOutput
 {
 public:
     /**
@@ -57,7 +57,8 @@ public:
      * @param[in] firmwareParameterSize the size of the firmware parameter.
      *                                   Must be >= sizeof(FirmwareParameterType)
      */
-    BigCmdIoctlOutput(dsp_fw::BaseFwParams fwParam, std::size_t firmwareParameterSize) :
+    BigCmdModuleAccessIoctlOutput(dsp_fw::BaseFwParams fwParam,
+        std::size_t firmwareParameterSize) :
         mBuffer(calculateSize(firmwareParameterSize)),
         mModuleParameterAccess(nullptr), mFirmwareParameter(nullptr)
     {
