@@ -31,7 +31,7 @@ namespace cavs
 namespace linuxx
 {
 
-void Logger::setParameters(Parameters &parameters)
+void Logger::setParameters(const Parameters &parameters)
 {
     /** @todo set parameters in driver through the Debug FS interface */
     mDriverEmulationParameter = parameters;

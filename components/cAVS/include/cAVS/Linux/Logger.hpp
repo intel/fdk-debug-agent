@@ -36,7 +36,7 @@ namespace linuxx /* using 'linuxx' instead of 'linux' because 'linux' is an exis
 class Logger final : public cavs::Logger
 {
 public:
-    virtual void setParameters(Parameters &parameters) override;
+    virtual void setParameters(const Parameters &parameters) override;
 
     virtual Parameters getParameters() override;
 

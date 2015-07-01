@@ -20,9 +20,14 @@
 ********************************************************************************
 */
 #include <cAVS/Windows/Logger.hpp>
+#include <cAVS/Windows/DriverTypes.hpp>
 #include <string>
 #include <cstring>
 #include <algorithm>
+
+/** Unfortunetely windows.h define "min" as macro, making fail the call std::min()
+ * So undefining it */
+#undef min
 
 namespace debug_agent
 {
@@ -31,16 +36,172 @@ namespace cavs
 namespace windows
 {
 
-void Logger::setParameters(Parameters &parameters)
+uint32_t Logger::getIoControlCodeFromType(IoCtlType type)
 {
-    /** @todo set parameters in driver through the windows driver interface */
-    mDriverEmulationParameter = parameters;
+    switch (type)
+    {
+    case IoCtlType::Get:
+        return IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET;
+    case IoCtlType::Set:
+        return IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
+    }
+    throw Exception("Wrong ioctl type value: " + std::to_string(static_cast<uint32_t>(type)));
+}
+
+std::string Logger::getIoControlTypeName(IoCtlType type)
+{
+    switch (type)
+    {
+    case IoCtlType::Get:
+        return "TinyGet";
+    case IoCtlType::Set:
+        return "TinySet";
+    }
+    throw Exception("Wrong ioctl type value: " + std::to_string(static_cast<uint32_t>(type)));
+}
+
+driver::LOG_STATE Logger::translateToDriver(bool isStarted)
+{
+    return isStarted ? driver::LOG_STATE::STARTED : driver::LOG_STATE::STOPPED;
+}
+
+driver::LOG_LEVEL Logger::translateToDriver(Level level)
+{
+    switch (level)
+    {
+    case Level::Verbose:
+        return driver::LOG_LEVEL::VERBOSE;
+    case Level::Low:
+        return driver::LOG_LEVEL::LOW;
+    case Level::Medium:
+        return driver::LOG_LEVEL::MEDIUM;
+    case Level::High:
+        return driver::LOG_LEVEL::HIGH;
+    case Level::Critical:
+        return driver::LOG_LEVEL::CRITICAL;
+    }
+    throw Exception("Wrong log level value: " + std::to_string(static_cast<uint32_t>(level)));
+}
+
+driver::LOG_OUTPUT Logger::translateToDriver(Output output)
+{
+    switch (output)
+    {
+    case Output::Pti:
+        return driver::LOG_OUTPUT::OUTPUT_PTI;
+    case Output::Sram:
+        return driver::LOG_OUTPUT::OUTPUT_SRAM;
+    }
+    throw Exception("Wrong log output value: " + std::to_string(static_cast<uint32_t>(output)));
+}
+
+bool Logger::translateFromDriver(driver::LOG_STATE state)
+{
+    switch (state)
+    {
+    case driver::LOG_STATE::STARTED:
+        return true;
+    case driver::LOG_STATE::STOPPED:
+        return false;
+    }
+    throw Exception("Wrong driver log state value: " +
+        std::to_string(static_cast<uint32_t>(state)));
+}
+
+Logger::Level Logger::translateFromDriver(driver::LOG_LEVEL level)
+{
+    switch (level)
+    {
+    case driver::LOG_LEVEL::VERBOSE:
+        return Level::Verbose;
+    case driver::LOG_LEVEL::LOW:
+        return Level::Low;
+    case driver::LOG_LEVEL::MEDIUM:
+        return Level::Medium;
+    case driver::LOG_LEVEL::HIGH:
+        return Level::High;
+    case driver::LOG_LEVEL::CRITICAL:
+        return Level::Critical;
+    }
+    throw Exception("Wrong driver log level value: " +
+        std::to_string(static_cast<uint32_t>(level)));
+}
+
+Logger::Output Logger::translateFromDriver(driver::LOG_OUTPUT output)
+{
+    switch (output)
+    {
+    case driver::LOG_OUTPUT::OUTPUT_PTI:
+        return Output::Pti;
+    case driver::LOG_OUTPUT::OUTPUT_SRAM:
+        return Output::Sram;
+    }
+    throw Exception("Wrong driver log output value: " +
+        std::to_string(static_cast<uint32_t>(output)));
+}
+
+driver::FwLogsState Logger::translateToDriver(const Parameters& params)
+{
+    driver::FwLogsState fwParams = {
+        translateToDriver(params.mIsStarted),
+        translateToDriver(params.mLevel),
+        translateToDriver(params.mOutput)
+    };
+    return fwParams;
+}
+
+Logger::Parameters Logger::translateFromDriver(const driver::FwLogsState &fwParams)
+{
+    Parameters params = {
+        translateFromDriver(static_cast<driver::LOG_STATE>(fwParams.started)),
+        translateFromDriver(static_cast<driver::LOG_LEVEL>(fwParams.level)),
+        translateFromDriver(static_cast<driver::LOG_OUTPUT>(fwParams.output))
+    };
+    return params;
+}
+
+void Logger::setParameters(const Parameters &parameters)
+{
+    TinyCmdLogParameterIoctl content;
+
+    /* Seting supplied parameters.
+     * May throws Logger::Exception */
+    content.getFwLogsState() = translateToDriver(parameters);
+
+    /* Performing the ioctl */
+    logParameterIoctl(IoCtlType::Set, content);
 }
 
 Logger::Parameters Logger::getParameters()
 {
-    /** @todo set parameters using the windows driver interface */
-    return mDriverEmulationParameter;
+    TinyCmdLogParameterIoctl content;
+
+    /* Performing the ioctl */
+    logParameterIoctl(IoCtlType::Get, content);
+
+    /* Returning the parameters
+     * May throws Logger::Exception */
+    return translateFromDriver(content.getFwLogsState());
+}
+
+void Logger::logParameterIoctl(IoCtlType type, TinyCmdLogParameterIoctl &content)
+{
+    uint32_t ioControlCode = getIoControlCodeFromType(type);
+
+    try
+    {
+        mDevice.ioControl(ioControlCode, &content.getBuffer(), &content.getBuffer());
+    }
+    catch (Device::Exception &e)
+    {
+        throw Exception(getIoControlTypeName(type) + " error: " + e.what());
+    }
+
+    NTSTATUS status = content.getTinyCmd().Body.Status;
+    if (status != STATUS_SUCCESS) {
+        throw Exception("Driver returns invalid status: " +
+            std::to_string(static_cast<uint32_t>(status)));
+    }
 }
 
 std::size_t Logger::read(void *buf, std::size_t count)

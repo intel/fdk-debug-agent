@@ -21,7 +21,9 @@
 */
 #pragma once
 
-#include <cAVS/Logger.hpp>
+#include "cAVS/Windows/Device.hpp"
+#include "cAVS/Windows/IoCtlStructureHelpers.hpp"
+#include "cAVS/Logger.hpp"
 
 namespace debug_agent
 {
@@ -36,19 +38,52 @@ namespace windows
 class Logger final: public cavs::Logger
 {
 public:
-    virtual void setParameters(Parameters &parameters) override;
+    Logger(Device &device) : mDevice(device) {}
+
+    virtual void setParameters(const Parameters &parameters) override;
 
     virtual Parameters getParameters() override;
 
     virtual std::size_t read(void *buf, std::size_t count) override;
 
 private:
-    /**
-     * While windows driver interface is not available, parameters storage
-     * is emulated using this internal member.
-     * @todo remove it!
-     */
-    Parameters mDriverEmulationParameter;
+    enum class IoCtlType
+    {
+        Get,
+        Set
+    };
+
+    static uint32_t getIoControlCodeFromType(IoCtlType type);
+    static std::string getIoControlTypeName(IoCtlType type);
+
+    /** Translate log state to driver type */
+    static driver::LOG_STATE translateToDriver(bool isStarted);
+
+    /** Translate log level to driver type */
+    static driver::LOG_LEVEL translateToDriver(Level level);
+
+    /** Translate log output to driver type */
+    static driver::LOG_OUTPUT translateToDriver(Output output);
+
+    /** Translate log state from driver type */
+    static bool translateFromDriver(driver::LOG_STATE state);
+
+    /** Translate log level from driver type */
+    static Level translateFromDriver(driver::LOG_LEVEL level);
+
+    /** Translate log output from driver type */
+    static Output translateFromDriver(driver::LOG_OUTPUT output);
+
+    /** Translate log parameters to driver type */
+    static driver::FwLogsState translateToDriver(const Parameters& params);
+
+    /** Translate log parameters from driver type */
+    static Parameters translateFromDriver(const driver::FwLogsState &params);
+
+    /** Set/Get log parameters using a Tiny(Get|Set) ioctl */
+    void logParameterIoctl(IoCtlType type, TinyCmdLogParameterIoctl &content);
+
+    Device &mDevice;
 };
 
 }

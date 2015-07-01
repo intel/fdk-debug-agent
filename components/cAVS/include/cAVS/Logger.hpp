@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 namespace debug_agent
@@ -36,33 +36,10 @@ namespace cavs
 class Logger
 {
 public:
-    class Exception : public std::exception
+    class Exception : public std::logic_error
     {
-        public:
-            enum class Cause {AlreadySet, InvalidArgument, DspFailure};
-
-            Exception(Cause cause) : mCause(cause) {}
-
-            virtual const char* what() const throw()
-            {
-                static const char* alreadySet = "Parameter already set";
-                static const char* invalidArguments = "Invalid argument";
-                static const char* dspFailure = "DSP failure (time out)";
-
-                switch (mCause) {
-                case Cause::AlreadySet:
-                    return alreadySet;
-                case Cause::InvalidArgument:
-                    return invalidArguments;
-                case Cause::DspFailure:
-                    return dspFailure;
-                }
-                // Unreachable
-                std::abort();
-            }
-
-        private:
-            Cause mCause;
+    public:
+        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
     /**
@@ -81,6 +58,10 @@ public:
      */
     struct Parameters
     {
+
+        Parameters(bool isStarted, Level level, Output output) :
+            mIsStarted(isStarted), mLevel(level), mOutput(output) {}
+
         Parameters() : mIsStarted(false), mLevel(Level::Verbose), mOutput(Output::Sram) {};
 
         /**
@@ -109,7 +90,7 @@ public:
      * @param[in] parameters the log parameters to be set
      * @throw Logger::Exception
      */
-    virtual void setParameters(Parameters &parameters) = 0;
+    virtual void setParameters(const Parameters &parameters) = 0;
 
     /**
      * Read the FW log stream.

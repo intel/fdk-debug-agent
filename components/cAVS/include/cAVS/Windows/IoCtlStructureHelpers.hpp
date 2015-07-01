@@ -39,6 +39,12 @@ namespace cavs
 namespace windows
 {
 
+/** By convention the base firmware module id is 0 */
+static const uint32_t baseFirwareModuleId = 0;
+
+/** By convention the base firmware instance id is 0 */
+static const uint32_t baseFirwareInstanceId = 0;
+
 /** This class helps to construct IOCTL_CMD_APP_TO_AUDIODSP_BIG_(GET|SET) output structure.
  * This structure has 3 imbrication levels:
  * Intc_Get_Parameter (driver structure) which contains
@@ -62,19 +68,21 @@ public:
         mBuffer(calculateSize(firmwareParameterSize)),
         mModuleParameterAccess(nullptr), mFirmwareParameter(nullptr)
     {
-        /* Initializing member that points to the ModuleParameterAccess structure */
-        mModuleParameterAccess =
-            reinterpret_cast<driver::ModuleParameterAccess*>(mBuffer->Data.Parameter);
+        /* Initializing pointer members */
+        initPointers();
 
         /* Setting ModuleParameterAccess input properties */
         mModuleParameterAccess->ModuleId = baseFirwareModuleId;
         mModuleParameterAccess->InstanceId = baseFirwareInstanceId;
         mModuleParameterAccess->ModuleParameterId = static_cast<uint32_t>(fwParam);
         mModuleParameterAccess->ModuleParameterSize = static_cast<uint32_t>(firmwareParameterSize);
+    }
 
-        /* Initializing member that points to the firmware parameter */
-        mFirmwareParameter =
-            reinterpret_cast<FirmwareParameterType*>(mModuleParameterAccess->Parameter);
+    /** Copy constructor */
+    BigCmdModuleAccessIoctlOutput(const BigCmdModuleAccessIoctlOutput& other) :
+        mBuffer(other.mBuffer)
+    {
+        initPointers();
     }
 
     /** @return Intc_App_Cmd_Body reference */
@@ -101,8 +109,19 @@ public:
     }
 
 private:
-    static const uint32_t baseFirwareModuleId = 0;
-    static const uint32_t baseFirwareInstanceId = 0;
+    BigCmdModuleAccessIoctlOutput & operator=(const BigCmdModuleAccessIoctlOutput&) = delete;
+
+    /* Initialize pmointers to sub-structures */
+    void initPointers()
+    {
+        /* Initializing member that points to the ModuleParameterAccess structure */
+        mModuleParameterAccess =
+            reinterpret_cast<driver::ModuleParameterAccess*>(mBuffer->Data.Parameter);
+
+        /* Initializing member that points to the firmware parameter */
+        mFirmwareParameter =
+            reinterpret_cast<FirmwareParameterType*>(mModuleParameterAccess->Parameter);
+    }
 
     /** Calculate the overall size of the structure *
     * @param[in] firmwareParameterSize the size of the firmware parameter
@@ -137,6 +156,88 @@ public:
 
 private:
     ModulesInfoHelper();
+};
+
+/** This class helps to construct an IOCTL_CMD_APP_TO_AUDIODSP_TINY_(GET|SET) structure
+  * in order to set/get log parameters.
+  *
+  * The underlying driver type is Intc_App_TinyCmd, here is its structure:
+  *
+  * Intc_App_TinyCmd has 2 sub-structures:
+  * -> Intc_App_Cmd_Header
+  * -> Intc_App_Cmd_Body, this structure contains the payload, which is of type:
+  *    -> FwLogState
+  *
+  * Note: the Intc_App_TinyCmd type has to be used as both input and output buffer of the
+  * ioctl TinyGet and TinySet.
+  */
+class TinyCmdLogParameterIoctl
+{
+public:
+    TinyCmdLogParameterIoctl() :
+        mBuffer(calculateSize()), mFwLogState(nullptr)
+    {
+        /* Filling the header */
+        driver::Intc_App_Cmd_Header &header = mBuffer.getContent().Header;
+        header.FeatureID = static_cast<ULONG>(driver::FEATURE_LOG_PARAMETERS);
+        header.ParameterID = parameterId;
+
+        /* By contract, the DataSize has to be set with body size, i.e. the whole size minus
+         * the header size. We cannot use directly use the body size
+         * (i.e. sizeof(Intc_App_Cmd_Body)) because it depends on the parameter type. */
+        header.DataSize = static_cast<ULONG>(calculateSize()
+            - sizeof(driver::Intc_App_Cmd_Header));
+
+        initPointers();
+    }
+
+    /** Copy constructor */
+    TinyCmdLogParameterIoctl(const TinyCmdLogParameterIoctl &other) :
+        mBuffer(other.mBuffer)
+    {
+        initPointers();
+    }
+
+    driver::Intc_App_TinyCmd &getTinyCmd()
+    {
+        return mBuffer.getContent();
+    }
+
+    driver::FwLogsState &getFwLogsState()
+    {
+        return *mFwLogState;
+    }
+
+    Buffer &getBuffer()
+    {
+        return mBuffer;
+    }
+
+private:
+
+    /** By convention the parameter id of the "FEATURE_LOG_PARAMETERS" feature is 0 */
+    static const uint32_t parameterId = 0;
+
+    TinyCmdLogParameterIoctl & operator=(const TinyCmdLogParameterIoctl&) = delete;
+
+    /** Init pointers to the sub-structures */
+    void initPointers()
+    {
+        mFwLogState =
+            reinterpret_cast<driver::FwLogsState*>(mBuffer.getContent().Body.Data.Parameter);
+    }
+
+    /** Calculate the overall size of the structure */
+    static std::size_t calculateSize()
+    {
+        return sizeof(driver::Intc_App_TinyCmd) /* size of the whole structure */
+            - MEMBER_SIZE(driver::Intc_App_Cmd_Body, Data) /* minus the parameter that points
+                                                            * to the payload */
+            + sizeof(driver::FwLogsState);   /* plus the payload size */
+    }
+
+    TypedBuffer<driver::Intc_App_TinyCmd> mBuffer;
+    driver::FwLogsState *mFwLogState;
 };
 
 }

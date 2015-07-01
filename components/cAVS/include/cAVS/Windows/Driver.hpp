@@ -41,7 +41,7 @@ class Driver final : public cavs::Driver
 {
 public:
     Driver(std::unique_ptr<Device> device) : mDevice(std::move(device)),
-        mModuleHandler(*mDevice) {}
+        mLogger(*mDevice), mModuleHandler(*mDevice) {}
 
     virtual cavs::Logger &getLogger() override { return mLogger; }
     virtual ModuleHandler &getModuleHandler() override { return mModuleHandler;  }

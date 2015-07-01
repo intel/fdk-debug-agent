@@ -70,7 +70,7 @@ Logger::Output Logger::outputFromString(const std::string &output)
     } else if (output == pti) {
         return Output::Pti;
     }
-    throw Exception(Exception::Cause::InvalidArgument);
+    throw Exception("Wrong log output value: " + output);
 }
 
 Logger::Level Logger::levelFromString(const std::string &level)
@@ -86,7 +86,7 @@ Logger::Level Logger::levelFromString(const std::string &level)
     } else if (level == verbose) {
         return Level::Verbose;
     }
-    throw Exception(Exception::Cause::InvalidArgument);
+    throw Exception("Wrong log level value: " + level);
 }
 
 const std::string Logger::critical("Critical");

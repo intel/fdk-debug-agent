@@ -53,8 +53,31 @@ namespace driver
 /** Including the driver structures into the debug_agent::cavs::driver namespace */
 #include <IIntcPrivateIOCTL.h>
 
-/** Providing the missing ModuleParameterAccess structure */
+/** Providing the missing driver structures (keeping driver coding style)*/
+
+enum LOG_STATE
+{
+    STOPPED = 0,
+    STARTED = 1
+};
+
+enum LOG_LEVEL
+{
+    CRITICAL = 2,
+    HIGH = 3,
+    MEDIUM = 4,
+    LOW = 5,
+    VERBOSE = 6
+};
+
+enum LOG_OUTPUT
+{
+    OUTPUT_SRAM = 0,
+    OUTPUT_PTI = 1
+};
+
 #include <pshpack1.h>
+
 struct ModuleParameterAccess
 {
     uint32_t FwStatus; /* out, uint32_t */
@@ -64,9 +87,18 @@ struct ModuleParameterAccess
     uint32_t ModuleParameterSize; /* in */
     char Parameter[1]; /* in/out */
 };
+
+struct FwLogsState
+{
+    uint32_t started;
+    uint32_t level;
+    uint32_t output;
+};
+
 #include <poppack.h>
 
-/** Providing the missing value FEATURE_MODULE_PARAMETER_ACCESS of the enum IOCTL_FEATURE */
+/** Providing the missing values of the enum IOCTL_FEATURE */
+static const IOCTL_FEATURE FEATURE_LOG_PARAMETERS = static_cast<IOCTL_FEATURE>(0x200000);
 static const IOCTL_FEATURE FEATURE_MODULE_PARAMETER_ACCESS = static_cast<IOCTL_FEATURE>(0x240000);
 }
 
