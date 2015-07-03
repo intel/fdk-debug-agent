@@ -21,6 +21,7 @@
 */
 #include "cAVS/System.hpp"
 #include "cAVS/DriverFactory.hpp"
+#include "cAVS/LogStreamer.hpp"
 #include <utility>
 
 namespace debug_agent
@@ -82,6 +83,21 @@ void System::getModuleEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries)
     catch (ModuleHandler::Exception &e)
     {
         throw Exception("Unable to get module entries: " + std::string(e.what()));
+    }
+}
+
+void System::doLogStream(std::ostream &os)
+{
+    LogStreamer logStreamer(mDriver->getLogger());
+
+    try
+    {
+        os << logStreamer;
+    }
+    catch (system::Streamer::Exception &e)
+    {
+        /* @todo Use logging instead */
+        std::cout << "End of cAVS log stream: " << e.what() << std::endl;
     }
 }
 

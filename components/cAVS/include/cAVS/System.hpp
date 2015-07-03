@@ -68,6 +68,12 @@ public:
      */
     void getModuleEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries);
 
+    /**
+     * Streams out log in IFDK:cavs:fwlog format
+     * @param[in] os the std::ostream where the log has to be written to
+     */
+    void doLogStream(std::ostream &os);
+
 private:
     /* Make this class non copyable */
     System(const System &) = delete;

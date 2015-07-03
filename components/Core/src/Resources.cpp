@@ -57,11 +57,20 @@ static std::string getStringFromFixedSizeArray(ArrayElementType *buffer, std::si
 
 void LogStreamResource::handleGet(const Request &request, Response &response)
 {
-    std::ostream &out = response.send(ContentType);
     /**
-     * @todo replace this "demo" code by real implementation.
+     * @fixme use the content type specified by SwAS. Currently, the SwAS does not specify
+     * which content type shall be used. A request has been sent to get SwAS updated. Until that,
+     * the rational is:
+     *  - the content is application specific: usage of 'application/'
+     *  - the content type is vendor specific: usage of standard 'vnd.'
+     *  - knowing the resource is an IFDK file, the client can read the streamed IFDK header to
+     *    know which <subsystem>:<file format> the resource is.
+     * @remarks http://www.iana.org/assignments/media-types/media-types.xhtml
      */
-    out << "<p>Not yet implemented</p>";
+    static const std::string ContentType("application/vnd.ifdk-file");
+    std::ostream &out = response.send(ContentType);
+
+    mSystem.doLogStream(out);
 }
 
 void LogParametersResource::handleGet(const Request &request, Response &response)
