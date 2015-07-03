@@ -18,59 +18,26 @@
 #
 ################################################################################
 
-# cmake configuration file of the "cAVS" component
+# cmake configuration file of the cAVS test framework component
 
+set(LIB_SRCS)
 
-# Common source files
-set(LIB_SRCS
-    src/Logger.cpp
-    src/LogStreamer.cpp
-    src/System.cpp)
-
-# Common include files
-set(LIB_INCS
-    include/cAVS/LogBlock.hpp
-    include/cAVS/Logger.hpp
-    include/cAVS/LogStreamer.hpp
-    include/cAVS/Driver.hpp
-    include/cAVS/DriverFactory.hpp
-    include/cAVS/SystemDriverFactory.hpp
-    include/cAVS/System.hpp
-    include/cAVS/FirmwareTypes.hpp
-    include/cAVS/ModuleHandler.hpp)
-
-set(LIBRAIRIES)
-SET(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/external/cAVS/firmware/include")
+set(LIB_INCS)
 
 # Target specific source and header files
 if (WIN32)
-    # Windows IOCTL SST Driver
     include("CMakeListsWindows.txt")
 elseif (UNIX)
-    # Linux Debug FS SST Driver
     include("CMakeListsLinux.txt")
 else ()
-    error("No cAVS implementation for this platform")
-endif (WIN32)
+    error("No cAVS test framework implementation for this platform")
+endif ()
 
-add_library(cAVS STATIC ${LIB_SRCS} ${LIB_INCS})
-set_common_settings(cAVS)
+add_library(cAVSTestFramework STATIC ${LIB_SRCS} ${LIB_INCS})
+set_common_settings(cAVSTestFramework)
 
-target_link_libraries(cAVS ${LIBRAIRIES})
+target_link_libraries(cAVSTestFramework cAVS)
 
 # exporting "include" directory
-target_include_directories(cAVS PUBLIC "include")
+target_include_directories(cAVSTestFramework PUBLIC "include")
 
-# Adding include directories
-target_include_directories(cAVS PUBLIC ${INCLUDE_DIRS})
-
-link_poco(cAVS)
-
-#Adding test framework library, currently windows only
-add_subdirectory("TestFramework")
-
-# Adding test
-add_subdirectory("test")
-
-# Needed components
-target_link_libraries(cAVS System)
