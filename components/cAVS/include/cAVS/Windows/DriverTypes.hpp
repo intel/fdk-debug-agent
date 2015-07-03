@@ -24,22 +24,7 @@
 
 #include <inttypes.h>
 
-/** OED Driver structure uses the NTSTATUS type, which is almost a kernel type. In user mode some
- * NTSTATUS values are missing, for instance STATUS_SUCCESS. But we need this value to test driver
- * result, that's why the header ntstatus.h is included.
- *
- * But including both ntstatus.h (which is basically a driver header) and windows.h makes warnings
- * (macro redefinition)
- *
- * That's why we are using a macro trick to avoid these warnings
- * @see http://kirkshoop.blogspot.com/2011/09/ntstatus.html
- *
- * Defining the macro WIN32_NO_STATUS avoids to define twice NTSTATUS values.
- */
-#define WIN32_NO_STATUS
-#include <Windows.h>
-#undef WIN32_NO_STATUS
-#include <ntstatus.h>
+#include "cAVS/Windows/WindowsTypes.hpp"
 
 namespace debug_agent
 {

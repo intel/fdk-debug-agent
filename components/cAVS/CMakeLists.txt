@@ -61,5 +61,7 @@ target_include_directories(cAVS PUBLIC "include")
 # Adding include directories
 target_include_directories(cAVS PUBLIC ${INCLUDE_DIRS})
 
+link_poco(cAVS)
+
 # Adding test
 add_subdirectory("test")

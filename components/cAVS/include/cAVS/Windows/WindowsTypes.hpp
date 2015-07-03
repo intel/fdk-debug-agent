@@ -22,31 +22,29 @@
 
 #pragma once
 
-#include "cAVS/Windows/Device.hpp"
-#include "cAVS/Windows/WindowsTypes.hpp"
+/**
+ * Include this header when a Windows type is needed, instead of Windows.h
+ *
+ * Indeed including both windows.h and Poco/Foundation.h leads to conflict, because
+ * Poco/Foundation.h already includes windows.h in a specfic way.
+ *
+ * Therefore when windows types are needed (for instance when using a windows device),
+ * it's better to include Poco/Foundation.h than windows.h. This header hides this detail.
+ */
+#include <Poco/Foundation.h>
 
-namespace debug_agent
-{
-namespace cavs
-{
-namespace windows
-{
+/** Included for NTSTATUS type */
+#include <bcrypt.h>
 
-/** This device implementation uses the real DeviceIoControl WIN32 function*/
-class SystemDevice final : public Device
-{
-public:
-    /** @throw Exeption if the device initialization has failed */
-    SystemDevice(const std::string &deviceId);
+/** Included for ioctl type definition */
+#include <winioctl.h>
 
-    virtual ~SystemDevice();
+/** Defining manually the "STATUS_SUCCESS" value of NTSTATUS type because this value is
+ * defined in ntstatus.h, which is a driver space header. Therefore including both
+ * windows.h (or Poco/Foundation.h) and ntstatus.h leads to conflict (macro redefinition).
+ */
+#define STATUS_SUCCESS static_cast<NTSTATUS>(0)
 
-    virtual void ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output) override;
-
-private:
-    HANDLE mDeviceHandle;
-};
-
-}
-}
-}
+/** Undefining these windows macros that conflict with standard symbols (std::min ...)*/
+#undef min
+#undef max

@@ -33,8 +33,11 @@ namespace windows
 SystemDevice::SystemDevice(const std::string &deviceId) :
     mDeviceHandle(INVALID_HANDLE_VALUE)
 {
+    /** CreateFileA is the ansi version of the Windows CreateFile method. It has to be called
+     * explicitly because "CreateFile" is a macro defined by windows.h,
+     * which is then undefined by the POCO library. */
     HANDLE handle =
-        CreateFile(deviceId.c_str(),
+        CreateFileA(deviceId.c_str(),
                    GENERIC_READ | GENERIC_WRITE,
                    FILE_SHARE_READ | FILE_SHARE_WRITE,
                    NULL,

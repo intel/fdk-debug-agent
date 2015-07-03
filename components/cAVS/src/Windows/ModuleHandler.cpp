@@ -21,7 +21,7 @@
  */
 
 #include "cAVS/Windows/ModuleHandler.hpp"
-#include <windows.h>
+#include "cAVS/Windows/WindowsTypes.hpp"
 #include <vector>
 
 namespace debug_agent

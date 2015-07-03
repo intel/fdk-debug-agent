@@ -21,15 +21,20 @@
 */
 
 #include "cAVS/Windows/LastError.hpp"
+#include "cAVS/Windows/WindowsTypes.hpp"
 #include <catch.hpp>
-#include <Windows.h>
+
 
 using namespace debug_agent::cavs::windows;
 
 TEST_CASE("LastError")
 {
+    /** CreateFileA is the ansi version of the Windows CreateFile method. It has to be called
+    * explicitly because "CreateFile" is a macro defined by windows.h,
+    * which is then undefined by the POCO library. */
+
     /* Calling a Win32 function that will fail */
-    HANDLE file = CreateFile("c:\\Unexisting_file",
+    HANDLE file = CreateFileA("c:\\Unexisting_file",
         GENERIC_READ,
         0,
         NULL,

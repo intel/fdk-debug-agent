@@ -22,11 +22,11 @@
 
 #pragma once
 
+#include "cAVS/Windows/WindowsTypes.hpp"
 #include <stdexcept>
 #include <string>
 #include <set>
 #include <vector>
-#include <windows.h>
 #include <setupapi.h>
 
 namespace debug_agent

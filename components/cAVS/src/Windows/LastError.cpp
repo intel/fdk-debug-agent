@@ -21,7 +21,7 @@
  */
 
 #include "cAVS/Windows/LastError.hpp"
-#include <Windows.h>
+#include "cAVS/Windows/WindowsTypes.hpp"
 
 namespace debug_agent
 {
@@ -39,8 +39,13 @@ std::string LastError::get()
     LPVOID msgBuf;
 
     /* Getting system error message. This function allocates a string, which shall be released
-     * with LocalFree function. */
-    DWORD bufLen = FormatMessage(
+     * with LocalFree function.
+     *
+     * FormatMessageA is the ansi version of the Windows FormatMessage method. It has to be called
+     * explicitly because "FormatMessage" is a macro defined by
+     * windows.h, which is then undefined by the POCO library. */
+
+    DWORD bufLen = FormatMessageA(
         FORMAT_MESSAGE_ALLOCATE_BUFFER |
         FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
