@@ -19,16 +19,8 @@
 ################################################################################
 
 set(WINDOWS_TEST_SRCS
-    Windows/CavsTest.cpp
-    Windows/IoctlHelper.cpp)
+    Windows/CavsTest.cpp)
 
 set(TEST_SRCS ${TEST_SRCS} ${WINDOWS_TEST_SRCS})
 
 source_group("Source Files\\Windows" FILES ${WINDOWS_TEST_SRCS})
-
-set(WINDOWS_TEST_INCS
-    Windows/IoctlHelper.hpp)
-
-set(TEST_INCS ${TEST_INCS} ${WINDOWS_TEST_INCS})
-
-source_group("Header Files\\Windows" FILES ${WINDOWS_TEST_INCS})
