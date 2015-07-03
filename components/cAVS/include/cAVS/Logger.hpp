@@ -64,6 +64,14 @@ public:
 
         Parameters() : mIsStarted(false), mLevel(Level::Verbose), mOutput(Output::Sram) {};
 
+        bool operator == (const Parameters& other) const
+        {
+            return
+                mIsStarted == other.mIsStarted &&
+                mLevel == other.mLevel &&
+                mOutput == other.mOutput;
+        }
+
         /**
          * Log state: started if true, stopped if false
          */
