@@ -51,7 +51,8 @@ function(link_poco target)
     # POCO_NO_AUTOMATIC_LIBS -> disable an ugly feature of visual studio c++ : the ability to
     #                           link with static libraries through the code using #pragma.
     #                           In this way the behavior is the same between Linux and Windows
-    set_property( TARGET ${target} PROPERTY COMPILE_DEFINITIONS POCO_STATIC=1 POCO_NO_AUTOMATIC_LIBS=1)
+    set_property( TARGET ${target} APPEND PROPERTY COMPILE_DEFINITIONS
+        POCO_STATIC=1 POCO_NO_AUTOMATIC_LIBS=1)
 endfunction()
 
 # providing "catch" test framework library
