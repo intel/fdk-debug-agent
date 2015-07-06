@@ -43,7 +43,7 @@ target_include_directories(FunctionalTests PRIVATE ".")
 link_catch(FunctionalTests)
 
 # dependent libraries
-target_link_libraries(FunctionalTests Core TestCommon)
+target_link_libraries(FunctionalTests Core TestCommon cAVSTestFramework)
 link_poco(FunctionalTests)
 
 install(TARGETS FunctionalTests RUNTIME DESTINATION tests)

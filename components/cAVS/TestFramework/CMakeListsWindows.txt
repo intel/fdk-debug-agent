@@ -19,6 +19,8 @@
 ################################################################################
 
 set(WINDOWS_LIB_SRCS
+    src/Windows/DeviceInjectionDriverFactory.cpp
+    src/Windows/MockedDevice.cpp
     src/Windows/MockedDeviceCommands.cpp)
 
 set(LIB_SRCS ${LIB_SRCS} ${WINDOWS_LIB_SRCS})
@@ -26,6 +28,8 @@ set(LIB_SRCS ${LIB_SRCS} ${WINDOWS_LIB_SRCS})
 source_group("Source Files\\Windows" FILES ${WINDOWS_LIB_SRCS})
 
 set(WINDOWS_LIB_INCS
+    include/cAVS/Windows/DeviceInjectionDriverFactory.hpp
+    include/cAVS/Windows/MockedDevice.hpp
     include/cAVS/Windows/MockedDeviceCommands.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})

@@ -44,7 +44,7 @@ set_common_settings(CavsUnitTest)
 link_catch(CavsUnitTest)
 
 # Binding with cAVS library
-target_link_libraries(CavsUnitTest cAVS)
+target_link_libraries(CavsUnitTest cAVS cAVSTestFramework)
 
 # Binding with test common in order to use the HttpClientSimulator
 target_link_libraries(CavsUnitTest TestCommon)
