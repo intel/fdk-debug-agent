@@ -88,7 +88,7 @@ void SystemDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
         NULL);
 
     if (result == FALSE) {
-        throw new Exception("IOControl failure: " + LastError::get());
+        throw Exception("IOControl failure: " + LastError::get());
     }
 }
 
