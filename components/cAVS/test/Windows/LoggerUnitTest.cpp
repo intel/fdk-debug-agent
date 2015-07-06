@@ -22,56 +22,13 @@
 
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
+#include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/Logger.hpp"
 #include <catch.hpp>
 #include <memory>
 
 using namespace debug_agent::cavs;
 using namespace debug_agent::cavs::windows;
-
-/** Add a "set logger parameters" command into the mocked device test vector */
-void addLoggerSetParameterCommand(MockedDevice &device)
-{
-    /* Expected buffer, used as both expected input AND output buffer */
-    TinyCmdLogParameterIoctl expected;
-
-    driver::FwLogsState &logState = expected.getFwLogsState();
-    logState.started = driver::LOG_STATE::STARTED;
-    logState.output = driver::LOG_OUTPUT::OUTPUT_SRAM;
-    logState.level = driver::LOG_LEVEL::HIGH;
-
-    /* Returned output buffer*/
-    TinyCmdLogParameterIoctl returned(expected);
-
-    /* Result codes */
-    returned.getTinyCmd().Body.Status = STATUS_SUCCESS;
-
-    /* Adding entry */
-    device.addIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET, &expected.getBuffer(),
-        &expected.getBuffer(), &returned.getBuffer(), true);
-}
-
-/** Add a "get logger parameters" command into the mocked device test vector */
-void addLoggerGetParameterCommand(MockedDevice &device)
-{
-    /* Expected buffer, used as both expected input AND output buffer */
-    TinyCmdLogParameterIoctl expected;
-
-    /* Returned output buffer*/
-    TinyCmdLogParameterIoctl returned(expected);
-
-    driver::FwLogsState &logState = returned.getFwLogsState();
-    logState.started = driver::LOG_STATE::STARTED;
-    logState.output = driver::LOG_OUTPUT::OUTPUT_SRAM;
-    logState.level = driver::LOG_LEVEL::HIGH;
-
-    /* Result codes */
-    returned.getTinyCmd().Body.Status = STATUS_SUCCESS;
-
-    /* Adding entry */
-    device.addIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET, &expected.getBuffer(),
-        &expected.getBuffer(), &returned.getBuffer(), true);
-}
 
 TEST_CASE("Logging: setting and getting parameters")
 {
@@ -80,8 +37,33 @@ TEST_CASE("Logging: setting and getting parameters")
     /* Setting the test vector
      * ----------------------- */
 
-    addLoggerSetParameterCommand(device);
-    addLoggerGetParameterCommand(device);
+    MockedDeviceCommands commands(device);
+
+    driver::FwLogsState expectedFwLogState = {
+        driver::LOG_STATE::STARTED,
+        driver::LOG_LEVEL::HIGH,
+        driver::LOG_OUTPUT::OUTPUT_SRAM
+    };
+
+    /** Adding a failed set log parameters command */
+    commands.addSetLogParametersCommand(
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        expectedFwLogState);
+
+    /** Adding a successful set log parameters command */
+    commands.addSetLogParametersCommand(
+        STATUS_SUCCESS,
+        expectedFwLogState);
+
+    /** Adding a failed get log parameters command */
+    commands.addGetLogParametersCommand(
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        driver::FwLogsState()); /* Unused parameter */
+
+    /** Adding a successful get log parameters command */
+    commands.addGetLogParametersCommand(
+        STATUS_SUCCESS,
+        expectedFwLogState);
 
     /* Now using the mocked device
      * --------------------------- */
@@ -93,10 +75,20 @@ TEST_CASE("Logging: setting and getting parameters")
     windows::Logger::Parameters inputParameters(true, windows::Logger::Level::High,
         windows::Logger::Output::Sram);
 
-    /* Setting the parameters */
+    /* Checking that set log parameters command produces driver error */
+    CHECK_THROWS_MSG(logger.setParameters(inputParameters),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+
+    /* Checking successful set log parameters command */
     CHECK_NOTHROW(logger.setParameters(inputParameters));
 
-    /* Getting the parameters */
+    /* Checking that get log parameters command produces driver error */
+    CHECK_THROWS_MSG(logger.getParameters(),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+
+    /* Checking successful get log parameters command */
     windows::Logger::Parameters outputParameters;
     CHECK_NOTHROW(outputParameters = logger.getParameters());
 

@@ -22,6 +22,7 @@
 
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
+#include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/ModuleHandler.hpp"
 #include <catch.hpp>
 #include <memory>
@@ -53,71 +54,19 @@ void setArbitraryContent(T &value)
     }
 }
 
-/** Add a get Adsp properties command into the mocked device test vector */
-void addAdspPropertiesCommand(MockedDevice &device, NTSTATUS driverStatus,
-    dsp_fw::Message::IxcStatus firmwareStatus)
+/** Produce a module entry vector of the supplied size.
+ * Each entry is filled with an arbitrary content. */
+std::vector<dsp_fw::ModuleEntry> produceModuleEntries(std::size_t expectedModuleCount)
 {
-    /* Expected output buffer*/
-    BigCmdModuleAccessIoctlOutput<dsp_fw::AdspProperties> expectedOutput(
-        dsp_fw::BaseFwParams::ADSP_PROPERTIES, sizeof(dsp_fw::AdspProperties));
+    dsp_fw::ModuleEntry moduleEntry;
+    setArbitraryContent(moduleEntry);
 
-    /* Returned output buffer*/
-    BigCmdModuleAccessIoctlOutput<dsp_fw::AdspProperties> returnedOutput(
-        dsp_fw::BaseFwParams::ADSP_PROPERTIES, sizeof(dsp_fw::AdspProperties));
-
-    /* Result codes */
-    returnedOutput.getCmdBody().Status = driverStatus;
-    returnedOutput.getModuleParameterAccess().FwStatus = firmwareStatus;
-
-    /* Adsp properties content */
-    setArbitraryContent(returnedOutput.getFirmwareParameter());
-
-    /* Filling expected input buffer */
-    TypedBuffer<driver::Intc_App_Cmd_Header> expectedInput;
-    expectedInput->FeatureID =
-        static_cast<ULONG>(driver::FEATURE_MODULE_PARAMETER_ACCESS);
-    expectedInput->ParameterID = 0; /* only one parameter id for this feature */
-    expectedInput->DataSize = static_cast<ULONG>(expectedOutput.getBuffer().getSize());
-
-    /* Adding entry */
-    device.addIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
-        &expectedOutput.getBuffer(), &returnedOutput.getBuffer(), true);
-}
-
-/** Add a get module info command into the mocked device test vector */
-void addModuleInfoCommand(MockedDevice &device, std::size_t moduleCount)
-{
-    std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize();
-
-    /* Expected output buffer*/
-    BigCmdModuleAccessIoctlOutput<dsp_fw::ModulesInfo>
-        expectedOutput(dsp_fw::MODULES_INFO_GET, moduleInfoSize);
-
-    /* Returned output buffer*/
-    BigCmdModuleAccessIoctlOutput<dsp_fw::ModulesInfo>
-        returnedOutput(dsp_fw::MODULES_INFO_GET, moduleInfoSize);
-
-    /* Result codes */
-    returnedOutput.getCmdBody().Status = STATUS_SUCCESS;
-    returnedOutput.getModuleParameterAccess().FwStatus =
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS;
-
-    /* Settings module entry content*/
-    dsp_fw::ModulesInfo &modulesInfo = returnedOutput.getFirmwareParameter();
-    modulesInfo.module_count = static_cast<uint32_t>(moduleCount);
-    for (std::size_t i = 0; i < moduleCount; i++) {
-        setArbitraryContent(modulesInfo.module_info[i]);
+    std::vector<dsp_fw::ModuleEntry> entries;
+    for (std::size_t i = 0; i < expectedModuleCount; ++i) {
+        entries.push_back(moduleEntry);
     }
 
-    /* Filling expected input buffer */
-    TypedBuffer<driver::Intc_App_Cmd_Header> expectedInput;
-    expectedInput->FeatureID = static_cast<ULONG>(driver::FEATURE_MODULE_PARAMETER_ACCESS);
-    expectedInput->ParameterID = 0; /* only one parameter id for this feature */
-    expectedInput->DataSize = static_cast<ULONG>(expectedOutput.getBuffer().getSize());
-
-    /* Adding entry */
-    device.addIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
-        &expectedOutput.getBuffer(), &returnedOutput.getBuffer(), true);
+    return entries;
 }
 
 /** Perform a module entry ioctl and check the result using the supplied expected module count */
@@ -143,45 +92,92 @@ TEST_CASE("Module handling: getting module entries")
     /* Setting the test vector
      * ----------------------- */
 
-    /* Simulating a driver error */
-    addAdspPropertiesCommand(device, STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS);
+    /* Simulating a driver error during getting adsp properties */
+    MockedDeviceCommands commands(device);
+    commands.addGetAdspPropertiesCommand(
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::AdspProperties()); /* unused parameter */
 
-    /* Simulating a firmware error */
-    addAdspPropertiesCommand(device, STATUS_SUCCESS, dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE);
+    /* Simulating a firmware error during getting adsp properties */
+    commands.addGetAdspPropertiesCommand(
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::AdspProperties()); /* unused parameter */
 
     /* Successful get adsp properties command */
-    addAdspPropertiesCommand(device, STATUS_SUCCESS, dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS);
+    dsp_fw::AdspProperties expectedAdspProperties;
+    setArbitraryContent(expectedAdspProperties);
+    commands.addGetAdspPropertiesCommand(
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        expectedAdspProperties);
+
+    /* Simulating a driver error during getting module entries */
+    commands.addGetModuleEntriesCommand(
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
+
+    /* Simulating a firmware error during getting module entries */
+    commands.addGetModuleEntriesCommand(
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
     /* Successful get module info command with 2 modules */
-    addModuleInfoCommand(device, 2);
+    commands.addGetModuleEntriesCommand(
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        produceModuleEntries(2));
 
     /* Successful get module info command with 'MaxModuleCount' modules */
-    addModuleInfoCommand(device, dsp_fw::MaxModuleCount);
+    commands.addGetModuleEntriesCommand(
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        produceModuleEntries(dsp_fw::MaxModuleCount));
 
     /* Now using the mocked device
      * --------------------------- */
 
+    dsp_fw::AdspProperties emptyAdspProperties;
+    memset(&emptyAdspProperties, 0, sizeof(dsp_fw::AdspProperties));
+
+    dsp_fw::AdspProperties properties = emptyAdspProperties;
+
     /* Creating the module handler, that will use the mocked device*/
     windows::ModuleHandler moduleHandler(device);
 
-    dsp_fw::AdspProperties properties;
-
-    /* Simulating a driver error */
+    /* Simulating a driver error during getting adsp properties */
     CHECK_THROWS_MSG(moduleHandler.getAdspProperties(properties),
-        "Driver returns invalid status: 3221225614"); /* value of STATUS_FLOAT_DIVIDE_BY_ZERO */
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(memoryEquals(properties, emptyAdspProperties));
 
-    /* Simulating a firmware error */
+    /* Simulating a firmware error during getting adsp properties */
     CHECK_THROWS_MSG(moduleHandler.getAdspProperties(properties),
-        "Firmware returns invalid status: 6"); /* value of ADSP_IPC_FAILURE */
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(memoryEquals(properties, emptyAdspProperties));
 
     /* Successful get adsp properties command */
     CHECK_NOTHROW(moduleHandler.getAdspProperties(properties));
+    CHECK(memoryEquals(properties, expectedAdspProperties));
 
-    /* Checking result */
-    dsp_fw::AdspProperties expectedProperties;
-    setArbitraryContent(expectedProperties);
-    CHECK(memoryEquals(properties, expectedProperties));
+
+    /* Simulating a driver error during getting module entries */
+    std::vector<dsp_fw::ModuleEntry> entries;
+    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(entries.empty());
+
+    /* Simulating a firmware error during getting module entries */
+    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+
+    CHECK(entries.empty());
 
     /*Successful get module info command with 2 modules*/
     checkModuleEntryIoctl(moduleHandler, 2);
