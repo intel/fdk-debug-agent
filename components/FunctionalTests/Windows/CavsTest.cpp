@@ -60,17 +60,8 @@ void setModuleEntry(dsp_fw::ModuleEntry &entry, const std::string &name,
     }
 }
 
-
-TEST_CASE("DebugAgent: module entries")
+void addModuleEntryCommand(windows::MockedDeviceCommands &commands)
 {
-    /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
-
-    /* Setting the test vector
-     * ----------------------- */
-
-    windows::MockedDeviceCommands commands(*device);
-
     /* Creating 2 module entries */
     std::vector<dsp_fw::ModuleEntry> returnedEntries(2);
     setModuleEntry(returnedEntries[0], "module_0", Module0UID);
@@ -81,6 +72,20 @@ TEST_CASE("DebugAgent: module entries")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         returnedEntries);
+}
+
+TEST_CASE("DebugAgent/cAVS: module entries")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+     * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial module entry command */
+    addModuleEntryCommand(commands);
 
     /* Now using the mocked device
     * --------------------------- */
@@ -110,5 +115,99 @@ TEST_CASE("DebugAgent: module entries")
         HttpClientSimulator::Status::Ok,
         "text/html",
         expectedContent
+        );
+}
+
+TEST_CASE("DebugAgent/cAVS: log parameters")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* 0: Initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* 1: Get log parameter, will return
+     * - isStarted : false
+     * - level: critical
+     * - output: pti
+     */
+
+    windows::driver::FwLogsState initialLogParams = {
+        false,
+        windows::driver::LOG_LEVEL::CRITICAL,
+        windows::driver::LOG_OUTPUT::OUTPUT_PTI
+    };
+    commands.addGetLogParametersCommand(
+        STATUS_SUCCESS,
+        initialLogParams);
+
+    /* 2: Set log parameter to
+    * - isStarted : true
+    * - level: verbose
+    * - output: sram
+    */
+    windows::driver::FwLogsState setLogParams = {
+        true,
+        windows::driver::LOG_LEVEL::VERBOSE,
+        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+    };
+    commands.addSetLogParametersCommand(
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /* 3: Get log parameter , will return
+    * - isStarted : true
+    * - level: verbose
+    * - output: sram
+    */
+    commands.addGetLogParametersCommand(
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting log parameters*/
+    client.request(
+        "/cAVS/logging/parameters",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/html",
+        "<p>0;Critical;PTI</p>" /*isStarted : false, level: critical, output:pti */
+        );
+
+    /* 2: Setting log parameters */
+    client.request(
+        "/cAVS/logging/parameters",
+        HttpClientSimulator::Verb::Put,
+        "1;Verbose;SRAM", /*isStarted : true, level: verbose, output:sram */
+        HttpClientSimulator::Status::Ok,
+        "text/html",
+        "<p>Done</p>"
+        );
+
+    /* 3: Getting log parameters again */
+    client.request(
+        "/cAVS/logging/parameters",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/html",
+        "<p>1;Verbose;SRAM</p>" /*isStarted : true, level: verbose, output:sram */
         );
 }
