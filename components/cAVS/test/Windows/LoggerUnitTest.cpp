@@ -94,8 +94,5 @@ TEST_CASE("Logging: setting and getting parameters")
 
     /* Checking that returned parameters are correct */
     CHECK(outputParameters == inputParameters);
-
-    /* Checking that test vector is fully consumed */
-    CHECK_NOTHROW(device.checkMockingSuccess());
 }
 

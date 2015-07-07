@@ -107,8 +107,6 @@ TEST_CASE("MockedDevice: expected inputs")
     /* The iotcl should return failure */
     CHECK_THROWS_MSG(device.ioControl(IoCtl5, nullptr, nullptr),
         "Mock specifies failure.");
-
-    CHECK_NOTHROW(device.checkMockingSuccess());
 }
 
 /* This test case uses the mocked device with unexpected inputs, i.e. the mocking has failed */
@@ -138,8 +136,6 @@ TEST_CASE("MockedDevice: unexpected inputs")
 
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, nullptr, nullptr),
             "Mock failed: IOCtl entry #0: IoCtrl code: 2 expected : 1");
-
-        CHECK_THROWS(device.checkMockingSuccess());
     }
 
     SECTION("Wrong input buffer content") {
@@ -199,16 +195,24 @@ TEST_CASE("MockedDevice: unexpected inputs")
             "Mock failed: IOCtl entry #0: Candidate output buffer size 4 differs "
             "from required size: 8");
     }
+}
 
-    SECTION("Test vector not fully consumed") {
+TEST_CASE("MockedDevice: Test vector not fully consumed")
+{
+    try
+    {
+        MockedDevice device;
         device.addIoctlEntry(IoCtl2, nullptr, nullptr, nullptr, true);
         device.addIoctlEntry(IoCtl1, nullptr, nullptr, nullptr, true);
 
         CHECK_NOTHROW(device.ioControl(IoCtl2, nullptr, nullptr));
-
-        CHECK_THROWS_MSG(device.checkMockingSuccess(),
-            "IoCtl test vector has not been fully consumed.");
     }
+    catch (MockedDevice::Exception &e)
+    {
+        /* Mocked device destructor throws an exception when the test vector is not consumed */
+        CHECK(std::string(e.what()) == "IoCtl test vector has not been fully consumed.");
+        return;
+    }
+    INFO("MockedDevice::Exception should have been thrown.");
+    CHECK(false);
 }
-
-

@@ -52,7 +52,15 @@ class MockedDevice final : public Device
 {
 public:
     MockedDevice() : mCurrentEntry(0), mFailed(false) {}
-    virtual ~MockedDevice() {}
+
+    /** @throw MockedDevice::Exception if the mocking has failed.
+     *
+     * Indeed throwing in destructor ensures that the client code is notified of a mock failure.
+     *
+     * Another solution would consist in supplying a method "checkMockingSuccess()", but if the
+     * client forgets to call it, the failure will not be reported.
+     */
+    virtual ~MockedDevice();
 
     /** Thrown when the mock fails, for instance when an input value is not the expected one. */
     class Exception : public std::logic_error
@@ -81,22 +89,6 @@ public:
      */
     void addIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
         const Buffer *expectedOutput, const Buffer *returnedOutput, bool success);
-
-    /** Check that the mocking sequence is successful, i.e.:
-     * - no error has occured
-     * - the test vector is fully consumed
-     *
-     * This method should be called when the test session is finished.
-     */
-    void checkMockingSuccess()
-    {
-        if (mFailed) {
-            throw Exception("Mocked failed: " + mFailureMessage);
-        }
-        if (mCurrentEntry != mEntries.size()) {
-            throw Exception("IoCtl test vector has not been fully consumed.");
-        }
-    }
 
     virtual void ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output) override;
 

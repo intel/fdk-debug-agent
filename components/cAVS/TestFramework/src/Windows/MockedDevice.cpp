@@ -58,6 +58,13 @@ MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expec
     }
 }
 
+MockedDevice::~MockedDevice()
+{
+    if (!mFailed && mCurrentEntry != mEntries.size()) {
+        throw Exception("IoCtl test vector has not been fully consumed.");
+    }
+}
+
 void MockedDevice::addIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
     const Buffer *expectedOutput, const Buffer *returnedOutput, bool success)
 {

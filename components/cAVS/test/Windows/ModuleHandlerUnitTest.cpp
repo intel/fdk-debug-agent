@@ -184,8 +184,5 @@ TEST_CASE("Module handling: getting module entries")
 
     /*Successful get module info command with 'MaxModuleCount' modules*/
     checkModuleEntryIoctl(moduleHandler, dsp_fw::MaxModuleCount);
-
-    /* Checking that test vector is fully consumed */
-    CHECK_NOTHROW(device.checkMockingSuccess());
 }
 
