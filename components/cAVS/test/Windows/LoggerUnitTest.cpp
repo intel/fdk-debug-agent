@@ -45,23 +45,39 @@ TEST_CASE("Logging: setting and getting parameters")
         driver::LOG_OUTPUT::OUTPUT_SRAM
     };
 
-    /** Adding a failed set log parameters command */
+    /** Adding a failed set log parameters command due to OS error */
     commands.addSetLogParametersCommand(
+        false,
+        STATUS_SUCCESS,
+        expectedFwLogState);
+
+    /** Adding a failed set log parameters command due to driver error */
+    commands.addSetLogParametersCommand(
+        true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         expectedFwLogState);
 
     /** Adding a successful set log parameters command */
     commands.addSetLogParametersCommand(
+        true,
         STATUS_SUCCESS,
         expectedFwLogState);
 
-    /** Adding a failed get log parameters command */
+    /** Adding a failed get log parameters command due to OS error */
     commands.addGetLogParametersCommand(
+        false,
+        STATUS_SUCCESS,
+        driver::FwLogsState()); /* Unused parameter */
+
+    /** Adding a failed get log parameters command due to driver error */
+    commands.addGetLogParametersCommand(
+        true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         driver::FwLogsState()); /* Unused parameter */
 
     /** Adding a successful get log parameters command */
     commands.addGetLogParametersCommand(
+        true,
         STATUS_SUCCESS,
         expectedFwLogState);
 
@@ -75,6 +91,10 @@ TEST_CASE("Logging: setting and getting parameters")
     windows::Logger::Parameters inputParameters(true, windows::Logger::Level::High,
         windows::Logger::Output::Sram);
 
+    /* Checking that set log parameters command produces OS error */
+    CHECK_THROWS_MSG(logger.setParameters(inputParameters),
+        "OS says that io control has failed.");
+
     /* Checking that set log parameters command produces driver error */
     CHECK_THROWS_MSG(logger.setParameters(inputParameters),
         "Driver returns invalid status: " +
@@ -82,6 +102,10 @@ TEST_CASE("Logging: setting and getting parameters")
 
     /* Checking successful set log parameters command */
     CHECK_NOTHROW(logger.setParameters(inputParameters));
+
+    /* Checking that get log parameters command produces OS error */
+    CHECK_THROWS_MSG(logger.getParameters(),
+        "OS says that io control has failed.");
 
     /* Checking that get log parameters command produces driver error */
     CHECK_THROWS_MSG(logger.getParameters(),

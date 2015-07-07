@@ -32,12 +32,25 @@ namespace windows
 
 template <typename FirmwareParameterType>
 void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams parameterTypeId,
-    const Buffer &returnedParameterContent, NTSTATUS returnedDriverStatus,
+    const Buffer &returnedParameterContent, bool ioctlSuccess, NTSTATUS returnedDriverStatus,
     dsp_fw::Message::IxcStatus returnedFirmwareStatus)
 {
     /* Expected output buffer*/
     BigCmdModuleAccessIoctlOutput<FirmwareParameterType> expectedOutput(
         parameterTypeId, returnedParameterContent.getSize());
+
+    /* Filling expected input buffer */
+    TypedBuffer<driver::Intc_App_Cmd_Header> expectedInput;
+    expectedInput->FeatureID =
+        static_cast<ULONG>(driver::FEATURE_MODULE_PARAMETER_ACCESS);
+    expectedInput->ParameterID = 0; /* only one parameter id for this feature */
+    expectedInput->DataSize = static_cast<ULONG>(expectedOutput.getBuffer().getSize());
+
+    if (!ioctlSuccess) {
+        mDevice.addFailedIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
+            &expectedOutput.getBuffer());
+        return;
+    }
 
     /* Returned output buffer*/
     BigCmdModuleAccessIoctlOutput<FirmwareParameterType> returnedOutput(expectedOutput);
@@ -56,30 +69,24 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams par
         }
     }
 
-    /* Filling expected input buffer */
-    TypedBuffer<driver::Intc_App_Cmd_Header> expectedInput;
-    expectedInput->FeatureID =
-        static_cast<ULONG>(driver::FEATURE_MODULE_PARAMETER_ACCESS);
-    expectedInput->ParameterID = 0; /* only one parameter id for this feature */
-    expectedInput->DataSize = static_cast<ULONG>(expectedOutput.getBuffer().getSize());
-
     /* Adding entry */
     mDevice.addSuccessfulIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
         &expectedOutput.getBuffer(), &returnedOutput.getBuffer());
 }
 
-void MockedDeviceCommands::addGetAdspPropertiesCommand(NTSTATUS returnedDriverStatus,
+void MockedDeviceCommands::addGetAdspPropertiesCommand(bool ioctlSuccess,
+    NTSTATUS returnedDriverStatus,
     dsp_fw::Message::IxcStatus returnedFirmwareStatus,
     const dsp_fw::AdspProperties &returnedProperties)
 {
     TypedBuffer<dsp_fw::AdspProperties> buffer(returnedProperties);
 
     addGetModuleParameterCommand<dsp_fw::AdspProperties>(dsp_fw::BaseFwParams::ADSP_PROPERTIES,
-        buffer, returnedDriverStatus, returnedFirmwareStatus);
+        buffer, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 
 }
 
-void MockedDeviceCommands::addGetModuleEntriesCommand(
+void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
     NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
     const std::vector<dsp_fw::ModuleEntry> &returnedEntries)
 {
@@ -93,12 +100,12 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(
     }
 
     addGetModuleParameterCommand<dsp_fw::ModulesInfo>(dsp_fw::MODULES_INFO_GET,
-        buffer, returnedDriverStatus, returnedFirmwareStatus);
+        buffer, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 
 /* log parameters methods */
 
-void MockedDeviceCommands::addGetLogParametersCommand(NTSTATUS returnedStatus,
+void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::FwLogsState &returnedState)
 {
     /* Expected buffer, used as both expected input AND output buffer */
@@ -106,6 +113,12 @@ void MockedDeviceCommands::addGetLogParametersCommand(NTSTATUS returnedStatus,
 
     /* Returned output buffer*/
     TinyCmdLogParameterIoctl returned(expected);
+
+    if (!ioctlSuccess) {
+        mDevice.addFailedIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET, &expected.getBuffer(),
+            &expected.getBuffer());
+        return;
+    }
 
     /* Result code */
     returned.getTinyCmd().Body.Status = returnedStatus;
@@ -120,7 +133,7 @@ void MockedDeviceCommands::addGetLogParametersCommand(NTSTATUS returnedStatus,
         &expected.getBuffer(), &returned.getBuffer());
 }
 
-void MockedDeviceCommands::addSetLogParametersCommand(NTSTATUS returnedStatus,
+void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::FwLogsState &expectedState)
 {
     /* Expected buffer, used as both expected input AND output buffer */
@@ -128,6 +141,12 @@ void MockedDeviceCommands::addSetLogParametersCommand(NTSTATUS returnedStatus,
 
     /* Setting expected log state content */
     expected.getFwLogsState() = expectedState;
+
+    if (!ioctlSuccess) {
+        mDevice.addFailedIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET, &expected.getBuffer(),
+            &expected.getBuffer());
+        return;
+    }
 
     /* Returned output buffer*/
     TinyCmdLogParameterIoctl returned(expected);

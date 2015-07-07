@@ -92,15 +92,24 @@ TEST_CASE("Module handling: getting module entries")
     /* Setting the test vector
      * ----------------------- */
 
-    /* Simulating a driver error during getting adsp properties */
+    /* Simulating an os error during getting adsp properties */
     MockedDeviceCommands commands(device);
     commands.addGetAdspPropertiesCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::AdspProperties()); /* unused parameter */
+
+    /* Simulating a driver error during getting adsp properties */
+    commands.addGetAdspPropertiesCommand(
+        true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         dsp_fw::AdspProperties()); /* unused parameter */
 
     /* Simulating a firmware error during getting adsp properties */
     commands.addGetAdspPropertiesCommand(
+        true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
         dsp_fw::AdspProperties()); /* unused parameter */
@@ -109,30 +118,42 @@ TEST_CASE("Module handling: getting module entries")
     dsp_fw::AdspProperties expectedAdspProperties;
     setArbitraryContent(expectedAdspProperties);
     commands.addGetAdspPropertiesCommand(
+        true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         expectedAdspProperties);
 
+    /* Simulating an os error during getting module entries */
+    commands.addGetModuleEntriesCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
+
     /* Simulating a driver error during getting module entries */
     commands.addGetModuleEntriesCommand(
+        true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
     /* Simulating a firmware error during getting module entries */
     commands.addGetModuleEntriesCommand(
+        true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
         std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
     /* Successful get module info command with 2 modules */
     commands.addGetModuleEntriesCommand(
+        true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         produceModuleEntries(2));
 
     /* Successful get module info command with 'MaxModuleCount' modules */
     commands.addGetModuleEntriesCommand(
+        true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         produceModuleEntries(dsp_fw::MaxModuleCount));
@@ -147,6 +168,11 @@ TEST_CASE("Module handling: getting module entries")
 
     /* Creating the module handler, that will use the mocked device*/
     windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error during getting adsp properties */
+    CHECK_THROWS_MSG(moduleHandler.getAdspProperties(properties),
+        "OS says that io control has failed.");
+    CHECK(memoryEquals(properties, emptyAdspProperties));
 
     /* Simulating a driver error during getting adsp properties */
     CHECK_THROWS_MSG(moduleHandler.getAdspProperties(properties),
@@ -164,9 +190,13 @@ TEST_CASE("Module handling: getting module entries")
     CHECK_NOTHROW(moduleHandler.getAdspProperties(properties));
     CHECK(memoryEquals(properties, expectedAdspProperties));
 
+    /* Simulating an os error during getting module entries */
+    std::vector<dsp_fw::ModuleEntry> entries;
+    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
+        "OS says that io control has failed.");
+    CHECK(entries.empty());
 
     /* Simulating a driver error during getting module entries */
-    std::vector<dsp_fw::ModuleEntry> entries;
     CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
         "Driver returns invalid status: " +
         std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));

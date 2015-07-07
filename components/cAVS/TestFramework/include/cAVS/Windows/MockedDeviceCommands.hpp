@@ -42,59 +42,67 @@ public:
 
     /** Add a get adsp properties command
      *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
      * @param[in] returnedDriverStatus the returned driver status
      * @param[in] returnedFirmwareStatus the returned firmware status
      * @param[in] returnedProperties the properties returned by the ioctl.
      *
      * Note: the returnedProperties parameter is unused if :
-     * - NT_SUCCESS(returnedDriverStatus) returns false
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedDriverStatus) returns false or
      * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
      *
      * @throw MockedDevice::Exception
      */
-    void addGetAdspPropertiesCommand(NTSTATUS returnedDriverStatus,
+    void addGetAdspPropertiesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
         const dsp_fw::AdspProperties &returnedProperties);
 
     /** Add a get module entries command.
      *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
      * @param[in] returnedDriverStatus the returned driver status
      * @param[in] returnedFirmwareStatus the returned firmware status
      * @param[in] returnedEntries the module entries returned by the ioctl.
      *
      * Note: the returnedEntries parameter is unused if :
-     * - NT_SUCCESS(returnedDriverStatus) returns false
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedDriverStatus) returns false or
      * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
      *
      * @throw MockedDevice::Exception
      */
-    void addGetModuleEntriesCommand(NTSTATUS returnedDriverStatus,
+    void addGetModuleEntriesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
         const std::vector<dsp_fw::ModuleEntry> &returnedEntries);
 
     /** Add a get log parameters command
     *
+    * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
     * @param[in] returnedStatus the returned driver status
     * @param[in] returnedState the log parameters returned by the ioctl
     *
-    * Note: returnedState is unused if NT_SUCCESS(returnedStatus) returns false
+    * Note: returnedState is unused if
+    * - ioctlSuccess is false or
+    * - NT_SUCCESS(returnedStatus) returns false
     *
     * @throw MockedDevice::Exception
     */
-    void addGetLogParametersCommand(NTSTATUS returnedStatus,
+    void addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
         const driver::FwLogsState &returnedState);
 
     /** Add a set log parameters command.
      *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
      * @param[in] returnedStatus the returned driver status
      * @param[in] expectedState the expected log parameters passed as input buffer to the ioctl
      *
      * Note: the expectedState parameter is alwayse used,
-     * even if NT_SUCCESS(returnedStatus) returns false
+     * even if NT_SUCCESS(returnedStatus) returns false or if ioctlSuccess is false
      *
      * @throw MockedDevice::Exception
      */
-    void addSetLogParametersCommand(NTSTATUS returnedStatus,
+    void addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
         const driver::FwLogsState &expectedState);
 
 private:
@@ -107,8 +115,8 @@ private:
      * AdspProperties or ModulesInfo */
     template <typename FirmwareParameterType>
     void addGetModuleParameterCommand(dsp_fw::BaseFwParams parameterTypeId,
-        const Buffer &returnedParameterContent, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus);
+        const Buffer &returnedParameterContent, bool ioctlSuccess,
+        NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus);
 
     MockedDevice &mDevice;
 };

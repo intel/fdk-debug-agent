@@ -135,7 +135,7 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
 
     /* Simulate failure if the entry specifies it. */
     if (!entry.isSuccessful()) {
-        throw Exception("Mock specifies failure.");
+        throw Exception("OS says that io control has failed.");
     }
 
     /* Setting the returned output buffer if it exists */

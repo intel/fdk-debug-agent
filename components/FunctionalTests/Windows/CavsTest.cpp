@@ -69,6 +69,7 @@ void addModuleEntryCommand(windows::MockedDeviceCommands &commands)
 
     /* Adding the "get module entries" command to the test vector */
     commands.addGetModuleEntriesCommand(
+        true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         returnedEntries);
@@ -143,6 +144,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
         windows::driver::LOG_OUTPUT::OUTPUT_PTI
     };
     commands.addGetLogParametersCommand(
+        true,
         STATUS_SUCCESS,
         initialLogParams);
 
@@ -157,6 +159,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
         windows::driver::LOG_OUTPUT::OUTPUT_SRAM
     };
     commands.addSetLogParametersCommand(
+        true,
         STATUS_SUCCESS,
         setLogParams);
 
@@ -166,6 +169,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
     * - output: sram
     */
     commands.addGetLogParametersCommand(
+        true,
         STATUS_SUCCESS,
         setLogParams);
 

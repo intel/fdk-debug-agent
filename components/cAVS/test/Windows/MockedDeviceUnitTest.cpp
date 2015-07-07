@@ -106,7 +106,7 @@ TEST_CASE("MockedDevice: expected inputs")
 
     /* The iotcl should return failure */
     CHECK_THROWS_MSG(device.ioControl(IoCtl5, nullptr, nullptr),
-        "Mock specifies failure.");
+        "OS says that io control has failed.");
 }
 
 /* This test case uses the mocked device with unexpected inputs, i.e. the mocking has failed */
