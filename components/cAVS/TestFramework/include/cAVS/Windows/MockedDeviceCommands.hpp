@@ -47,7 +47,7 @@ public:
      * @param[in] returnedProperties the properties returned by the ioctl.
      *
      * Note: the returnedProperties parameter is unused if :
-     * - returnedDriverStatus != STATUS_SUCCESS or
+     * - NT_SUCCESS(returnedDriverStatus) returns false
      * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
      *
      * @throw MockedDevice::Exception
@@ -63,7 +63,7 @@ public:
      * @param[in] returnedEntries the module entries returned by the ioctl.
      *
      * Note: the returnedEntries parameter is unused if :
-     * - returnedDriverStatus != STATUS_SUCCESS or
+     * - NT_SUCCESS(returnedDriverStatus) returns false
      * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
      *
      * @throw MockedDevice::Exception
@@ -74,10 +74,10 @@ public:
 
     /** Add a get log parameters command
     *
-    * @param[in] returnedDriverStatus the returned driver status
+    * @param[in] returnedStatus the returned driver status
     * @param[in] returnedState the log parameters returned by the ioctl
     *
-    * Note: returnedState is unused if returnedDriverStatus != STATUS_SUCCESS
+    * Note: returnedState is unused if NT_SUCCESS(returnedStatus) returns false
     *
     * @throw MockedDevice::Exception
     */
@@ -86,11 +86,11 @@ public:
 
     /** Add a set log parameters command.
      *
-     * @param[in] returnedDriverStatus the returned driver status
+     * @param[in] returnedStatus the returned driver status
      * @param[in] expectedState the expected log parameters passed as input buffer to the ioctl
      *
      * Note: the expectedState parameter is alwayse used,
-     * even if returnedDriverStatus != STATUS_SUCCESS
+     * even if NT_SUCCESS(returnedStatus) returns false
      *
      * @throw MockedDevice::Exception
      */

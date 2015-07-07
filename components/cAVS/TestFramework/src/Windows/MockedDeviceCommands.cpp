@@ -43,7 +43,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams par
     BigCmdModuleAccessIoctlOutput<FirmwareParameterType> returnedOutput(expectedOutput);
 
     returnedOutput.getCmdBody().Status = returnedDriverStatus;
-    if (returnedDriverStatus == STATUS_SUCCESS) {
+    if (NT_SUCCESS(returnedDriverStatus)) {
 
         /* If the driver returns success, set the firmware status*/
         returnedOutput.getModuleParameterAccess().FwStatus = returnedFirmwareStatus;
@@ -109,7 +109,7 @@ void MockedDeviceCommands::addGetLogParametersCommand(NTSTATUS returnedStatus,
 
     /* Result code */
     returned.getTinyCmd().Body.Status = returnedStatus;
-    if (returnedStatus == STATUS_SUCCESS) {
+    if (NT_SUCCESS(returnedStatus)) {
 
         /* Setting returned log state content if the driver returns success */
         returned.getFwLogsState() = returnedState;

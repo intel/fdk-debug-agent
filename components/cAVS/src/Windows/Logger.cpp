@@ -201,7 +201,7 @@ void Logger::logParameterIoctl(IoCtlType type, TinyCmdLogParameterIoctl &content
     }
 
     NTSTATUS status = content.getTinyCmd().Body.Status;
-    if (status != STATUS_SUCCESS) {
+    if (!NT_SUCCESS(status)) {
         throw Exception("Driver returns invalid status: " +
             std::to_string(static_cast<uint32_t>(status)));
     }

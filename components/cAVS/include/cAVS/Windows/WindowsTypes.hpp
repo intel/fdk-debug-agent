@@ -45,6 +45,10 @@
  */
 #define STATUS_SUCCESS static_cast<NTSTATUS>(0)
 
+/** For the same reasons, defining also manually the NT_SUCCESS macro that checks if a NTSTATUS
+ * is successful (by convention successful values are >= 0 ) */
+#define NT_SUCCESS(Status) (static_cast<NTSTATUS>(Status) >= 0)
+
 /** Undefining these windows macros that conflict with standard symbols (std::min ...)*/
 #undef min
 #undef max

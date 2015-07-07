@@ -52,14 +52,15 @@ void ModuleHandler::bigGetModuleAccessIoctl(
     }
 
     /* Checking driver status */
-    if (output.getCmdBody().Status != STATUS_SUCCESS)
+    if (!NT_SUCCESS(output.getCmdBody().Status))
     {
         throw Exception("Driver returns invalid status: " +
             std::to_string(static_cast<uint32_t>(output.getCmdBody().Status)));
     }
 
     /* Checking firwmare status */
-    if (output.getModuleParameterAccess().FwStatus != dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS) {
+    if (output.getModuleParameterAccess().FwStatus !=
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS) {
         throw Exception("Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(output.getModuleParameterAccess().FwStatus)));
     }
