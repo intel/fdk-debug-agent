@@ -22,6 +22,7 @@
 #pragma once
 
 #include <cAVS/Logger.hpp>
+#include "cAVS/Driver.hpp"
 #include <System/IfdkStreamer.hpp>
 #include <ostream>
 #include <string>
@@ -38,11 +39,12 @@ public:
     /**
      * A LogStreamer writes the cAVS log to an ostream in real time, using a cavs::Logger interface.
      * @param[in] logger The Logger interface to be used to get the cAVS log
+     * @param[in] moduleEntries The FW module entries table
      * @throw LogStreamer::Exception
      * @todo The LogStreamer will need a way to retrieve the "Module Entries" table in a subsequent
      * patch.
      */
-    LogStreamer(Logger &logger);
+    LogStreamer(Logger &logger, const std::vector<dsp_fw::ModuleEntry> &moduleEntries);
 
 private:
     virtual void streamFormatHeader(std::ostream &os) override;
@@ -52,6 +54,11 @@ private:
      * The Logger interface to be used to get the cAVS log
      */
     Logger &mLogger;
+
+    /**
+     * The module entries table retrieved from FW once, at initialization
+     */
+    const std::vector<dsp_fw::ModuleEntry> &mModuleEntries;
 
     /**
      * The stream is produced in the IFDK stream format which requires a system type (cavs)

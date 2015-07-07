@@ -24,11 +24,17 @@
 #include <TestCommon/TestHelpers.hpp>
 #include "catch.hpp"
 #include <ostream>
+#include <sstream>
 #include <string>
-#include <stdexcept>
 
 using namespace debug_agent::cavs;
 using namespace debug_agent::system;
+
+/* Current IFDK:cavs:log generic IFDK header content */
+static const std::string systemType = "cavs";
+static const std::string formatType = "fwlogs";
+static const int majorVersion = 1;
+static const int minorVersion = 0;
 
 class TestLoggerMock: public Logger
 {
@@ -91,31 +97,119 @@ public:
     Parameters mMockedParameter;
 };
 
+void initFakeModuleEntries(std::vector<dsp_fw::ModuleEntry> &moduleEntries, size_t nbEntries)
+{
+    for (size_t i = 0; i < nbEntries; ++i) {
+
+        dsp_fw::ModuleEntry entry;
+        /* Fill UUID with current entry value shifted by uuid word index to get a pattern like:
+         * uuid[0] = 0x000000<i>
+         * uuid[1] = 0x0000<i>00
+         * uuid[2] = 0x00<i>0000
+         * uuid[3] = 0x<i>000000
+         * Which will be binary streamed out:
+         * uuid[0] = 0x<i>000000
+         * uuid[1] = 0x00<i>0000
+         * uuid[2] = 0x0000<i>00
+         * uuid[3] = 0x000000<i>
+         */
+        entry.uuid[0] = static_cast<uint32_t>(i);
+        entry.uuid[1] = static_cast<uint32_t>(i) << 8;
+        entry.uuid[2] = static_cast<uint32_t>(i) << 16;
+        entry.uuid[3] = static_cast<uint32_t>(i) << 24;
+        moduleEntries.push_back(entry);
+    }
+}
+
 TEST_CASE("Test IFDK cAVS Log stream", "[stream]")
 {
-    /* Current IFDK:cavs:log generic IFDK header content */
-    const std::string systemType = "cavs";
-    const std::string formatType = "fwlogs";
-    const int majorVersion = 1;
-    const int minorVersion = 0;
-    IfdkStreamHeader logIfdkHeader(systemType,
-                                   formatType,
-                                   majorVersion,
-                                   minorVersion);
+    // Create a fake module entries table with no entries
+    std::vector<dsp_fw::ModuleEntry> moduleEntries;
 
     // Create a LogStreamer to be tested, using a fake TestLoggerMock as Logger
     TestLoggerMock fakeLogger(50);
-    LogStreamer logStreamer(fakeLogger);
+    LogStreamer logStreamer(fakeLogger, moduleEntries);
 
     std::stringstream outStream;
     std::stringstream expectedOutStream;
 
     // Compute expected stream
+    const IfdkStreamHeader logIfdkHeader(systemType, formatType, majorVersion, minorVersion);
     expectedOutStream << logIfdkHeader;
     expectedOutStream << fakeLogger.getExpectedBlocksStream().str();
 
     CHECK_THROWS_MSG(outStream << logStreamer,
         "Fail to read log: No more log");
+
+    CHECK(outStream.str() == expectedOutStream.str());
+}
+
+TEST_CASE("Test module entries to stream", "[streaming]")
+{
+    // Create a fake module entries table
+    std::vector<dsp_fw::ModuleEntry> moduleEntries;
+    initFakeModuleEntries(moduleEntries, 3);
+
+    // Create a LogStreamer to be tested, using a fake TestLoggerMock as Logger which will not
+    // generate any log block
+    TestLoggerMock fakeLogger(0);
+    LogStreamer logStreamer(fakeLogger, moduleEntries);
+
+    std::stringstream outStream;
+    CHECK_THROWS_MSG(outStream << logStreamer,
+        "Fail to read log: No more log");
+
+    /* Expected stream size:
+     * - 4 bytes for Module ID per entry
+     * - 16 bytes for UUID per entry
+     * - 8 bytes for versions per entry
+     * - 3 entries in test table
+     */
+    static const size_t expectedOutModuleEntriesStreamLength = (4 + 16 + 8) * 3;
+    /* Expected stream: versions are currently all 0 and UUID is filled by initFakeModuleEntries().
+     */
+    char expectedOutModuleEntriesStreamBytes[expectedOutModuleEntriesStreamLength] = {
+        // Entry 1
+            // Module ID (little endian)
+            0x00, 0x00, 0x00, 0x00,
+            // UUID
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            // Versions (little endian)
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+        // Entry 2
+            // Module ID (little endian)
+            0x01, 0x00, 0x00, 0x00,
+            // UUID
+            0x01, 0x00, 0x00, 0x00,
+            0x00, 0x01, 0x00, 0x00,
+            0x00, 0x00, 0x01, 0x00,
+            0x00, 0x00, 0x00, 0x01,
+            // Versions (little endian)
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+        // Entry 3
+            // Module ID (little endian)
+            0x02, 0x00, 0x00, 0x00,
+            // UUID
+            0x02, 0x00, 0x00, 0x00,
+            0x00, 0x02, 0x00, 0x00,
+            0x00, 0x00, 0x02, 0x00,
+            0x00, 0x00, 0x00, 0x02,
+            // Versions (little endian)
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+    };
+
+    // Expected stream: IFDK header + expectedOutModuleEntriesStreamBytes
+    const IfdkStreamHeader logIfdkHeader(systemType, formatType, majorVersion, minorVersion);
+    std::stringstream expectedOutStream;
+    expectedOutStream << logIfdkHeader;
+    expectedOutStream.write(expectedOutModuleEntriesStreamBytes,
+                            expectedOutModuleEntriesStreamLength);
 
     CHECK(outStream.str() == expectedOutStream.str());
 }
