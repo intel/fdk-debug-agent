@@ -71,19 +71,19 @@ TEST_CASE("MockedDevice: expected inputs")
      * ----------------------- */
 
     /* All buffers are null */
-    device.addIoctlEntry(IoCtl1, nullptr, nullptr, nullptr, true);
+    device.addSuccessfulIoctlEntry(IoCtl1, nullptr, nullptr, nullptr);
 
     /* Only input buffer */
-    device.addIoctlEntry(IoCtl2, &expectedInput, nullptr, nullptr, true);
+    device.addSuccessfulIoctlEntry(IoCtl2, &expectedInput, nullptr, nullptr);
 
     /* Only output buffer */
-    device.addIoctlEntry(IoCtl3, nullptr, &expectedOutput, &returnedOutput, true);
+    device.addSuccessfulIoctlEntry(IoCtl3, nullptr, &expectedOutput, &returnedOutput);
 
     /* Both input and output buffers */
-    device.addIoctlEntry(IoCtl4, &expectedInput, &expectedOutput, &returnedOutput, true);
+    device.addSuccessfulIoctlEntry(IoCtl4, &expectedInput, &expectedOutput, &returnedOutput);
 
     /* The iotcl should return failure (success parameter is set to false) */
-    device.addIoctlEntry(IoCtl5, nullptr, nullptr, nullptr, false);
+    device.addFailedIoctlEntry(IoCtl5, nullptr, nullptr);
 
     /* Now using the mocked device
      * --------------------------- */
@@ -121,7 +121,7 @@ TEST_CASE("MockedDevice: unexpected inputs")
 
     MockedDevice device;
     SECTION("Test vector consumed") {
-        device.addIoctlEntry(IoCtl1, nullptr, nullptr, nullptr, true);
+        device.addSuccessfulIoctlEntry(IoCtl1, nullptr, nullptr, nullptr);
 
         /* First ioctl: ok */
         CHECK_NOTHROW(device.ioControl(IoCtl1, nullptr, nullptr));
@@ -132,35 +132,35 @@ TEST_CASE("MockedDevice: unexpected inputs")
     }
 
     SECTION("Wrong ioctl") {
-        device.addIoctlEntry(IoCtl1, nullptr, nullptr, nullptr, true);
+        device.addSuccessfulIoctlEntry(IoCtl1, nullptr, nullptr, nullptr);
 
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, nullptr, nullptr),
             "Mock failed: IOCtl entry #0: IoCtrl code: 2 expected : 1");
     }
 
     SECTION("Wrong input buffer content") {
-        device.addIoctlEntry(IoCtl2, &expectedInput, nullptr, nullptr, true);
+        device.addSuccessfulIoctlEntry(IoCtl2, &expectedInput, nullptr, nullptr);
 
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, &unexpectedInput, nullptr),
             "Mock failed: IOCtl entry #0: Input buffer content is not the expected one.");
     }
 
     SECTION("Wrong input buffer: input buffer should be null") {
-        device.addIoctlEntry(IoCtl2, nullptr, nullptr, nullptr, true);
+        device.addSuccessfulIoctlEntry(IoCtl2, nullptr, nullptr, nullptr);
 
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, &unexpectedInput, nullptr),
             "Mock failed: IOCtl entry #0: Input buffer should be null.");
     }
 
     SECTION("Wrong input buffer: input buffer should not be null") {
-        device.addIoctlEntry(IoCtl2, &expectedInput, nullptr, nullptr, true);
+        device.addSuccessfulIoctlEntry(IoCtl2, &expectedInput, nullptr, nullptr);
 
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, nullptr, nullptr),
             "Mock failed: IOCtl entry #0: Input buffer should not be null.");
     }
 
     SECTION("Wrong output buffer: output buffer should be null") {
-        device.addIoctlEntry(IoCtl2, nullptr, nullptr, nullptr, true);
+        device.addSuccessfulIoctlEntry(IoCtl2, nullptr, nullptr, nullptr);
 
         TypedBuffer<IoCtl_Output> output(unexpectedOutput);
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, nullptr, &output),
@@ -168,14 +168,14 @@ TEST_CASE("MockedDevice: unexpected inputs")
     }
 
     SECTION("Wrong output buffer: output buffer should not be null") {
-        device.addIoctlEntry(IoCtl2, nullptr, &expectedOutput, &returnedOutput, true);
+        device.addSuccessfulIoctlEntry(IoCtl2, nullptr, &expectedOutput, &returnedOutput);
 
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, nullptr, nullptr),
             "Mock failed: IOCtl entry #0: Output buffer should not be null.");
     }
 
     SECTION("Wrong output buffer: output buffer content is not the expected one.") {
-        device.addIoctlEntry(IoCtl2, nullptr, &expectedOutput, &returnedOutput, true);
+        device.addSuccessfulIoctlEntry(IoCtl2, nullptr, &expectedOutput, &returnedOutput);
 
         TypedBuffer<IoCtl_Output> output(unexpectedOutput);
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, nullptr, &output),
@@ -183,7 +183,7 @@ TEST_CASE("MockedDevice: unexpected inputs")
     }
 
     SECTION("Wrong output buffer: output buffer too small") {
-        device.addIoctlEntry(IoCtl2, nullptr, &expectedOutput, &returnedOutput, true);
+        device.addSuccessfulIoctlEntry(IoCtl2, nullptr, &expectedOutput, &returnedOutput);
 
         struct TooSmallOutput {
             uint32_t a;
@@ -192,7 +192,7 @@ TEST_CASE("MockedDevice: unexpected inputs")
         TypedBuffer<TooSmallOutput> tooSmallOutput;
 
         CHECK_THROWS_MSG(device.ioControl(IoCtl2, nullptr, &tooSmallOutput),
-            "Mock failed: IOCtl entry #0: Candidate output buffer size 4 differs "
+            "Mock failed: IOCtl entry #0: Output buffer candidate with size 4 differs "
             "from required size: 8");
     }
 }
@@ -202,8 +202,8 @@ TEST_CASE("MockedDevice: Test vector not fully consumed")
     try
     {
         MockedDevice device;
-        device.addIoctlEntry(IoCtl2, nullptr, nullptr, nullptr, true);
-        device.addIoctlEntry(IoCtl1, nullptr, nullptr, nullptr, true);
+        device.addSuccessfulIoctlEntry(IoCtl2, nullptr, nullptr, nullptr);
+        device.addSuccessfulIoctlEntry(IoCtl1, nullptr, nullptr, nullptr);
 
         CHECK_NOTHROW(device.ioControl(IoCtl2, nullptr, nullptr));
     }

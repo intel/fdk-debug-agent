@@ -39,22 +39,41 @@ MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expec
         mExpectedInputBuffer = std::make_shared<Buffer>(*expectedInputBuffer);
     }
 
-    if ((expectedOutputBuffer != nullptr) != (returnedOutputBuffer != nullptr)) {
-        throw Exception("Expected buffer and returned buffer have to be both null or "
-            "both not null");
-    }
+    if (successsful) {
 
-    if (expectedOutputBuffer != nullptr)
-    {
-        /* Because of previous check it's sure that returnedOutputBuffer != nullptr */
-        assert(returnedOutputBuffer != nullptr);
+        /* If the ioctl is successful:
+         * - expectedOutputBuffer and returnedOutputBuffer have to be both null or both not null
+         * - if they are not null, expectedOutputBuffer should have the same size than
+         *   returnedOutputBuffer.
+         */
 
-        if (expectedOutputBuffer->getSize() != returnedOutputBuffer->getSize()) {
-            throw Exception("Expected buffer and returned buffer shall have the same size");
+        if ((expectedOutputBuffer != nullptr) != (returnedOutputBuffer != nullptr)) {
+            throw Exception("Expected buffer and returned buffer have to be both null or "
+                "both not null");
         }
 
-        mExpectedOutputBuffer = std::make_shared<Buffer>(*expectedOutputBuffer);
-        mReturnedOutputBuffer = std::make_shared<Buffer>(*returnedOutputBuffer);
+        if (expectedOutputBuffer != nullptr)
+        {
+            /* Because of previous check it's sure that returnedOutputBuffer != nullptr */
+            assert(returnedOutputBuffer != nullptr);
+
+            if (expectedOutputBuffer->getSize() != returnedOutputBuffer->getSize()) {
+                throw Exception("Expected buffer and returned buffer shall have the same size");
+            }
+
+            mExpectedOutputBuffer = std::make_shared<Buffer>(*expectedOutputBuffer);
+            mReturnedOutputBuffer = std::make_shared<Buffer>(*returnedOutputBuffer);
+        }
+    }
+    else {
+        /* If the ioctl will fail, returnedOutputBuffer is not used because nothing is returned. */
+
+        /** Guaranteed by the addFailedIoctlEntry method */
+        assert(returnedOutputBuffer == nullptr);
+
+        if (expectedOutputBuffer != nullptr) {
+            mExpectedOutputBuffer = std::make_shared<Buffer>(*expectedOutputBuffer);
+        }
     }
 }
 
@@ -65,15 +84,26 @@ MockedDevice::~MockedDevice()
     }
 }
 
-void MockedDevice::addIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
-    const Buffer *expectedOutput, const Buffer *returnedOutput, bool success)
+void MockedDevice::addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
+    const Buffer *expectedOutput, const Buffer *returnedOutput)
 {
     mEntries.push_back(IoCtlEntry(
         ioControlCode,
         expectedInput,
         expectedOutput,
         returnedOutput,
-        success));
+        true));
+}
+
+void MockedDevice::addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
+    const Buffer *expectedOutput)
+{
+    mEntries.push_back(IoCtlEntry(
+        ioControlCode,
+        expectedInput,
+        expectedOutput,
+        nullptr,
+        false));
 }
 
 void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output)
@@ -94,13 +124,11 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
             std::to_string(entry.getIOControlCode()));
     }
 
-    /* Checking input buffer */
-    checkInputBuffer(input, entry.getExpectedInputBuffer());
+    /* Checking input buffer content */
+    compareBuffers("Input buffer", input, entry.getExpectedInputBuffer());
 
-    /* Checking and setting output buffer */
-    checkAndSetOutputBuffer(output, entry.getExpectedOutputBuffer(),
-        entry.getReturnedOutputBuffer());
-
+    /* Checking output buffer content */
+    compareBuffers("Output buffer", output, entry.getExpectedOutputBuffer());
 
     /* Incrementing entry index */
     mCurrentEntry++;
@@ -109,75 +137,66 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
     if (!entry.isSuccessful()) {
         throw Exception("Mock specifies failure.");
     }
+
+    /* Setting the returned output buffer if it exists */
+    if (entry.getReturnedOutputBuffer() != nullptr)
+    {
+        /* Guaranteed because entry.getReturnedOutputBuffer() != null
+         * => implies that entry.getExpectedOutputBuffer() != null
+         * => implies that output == entry.getExpectedOutputBuffer()
+         * => implies that output != null
+         */
+        assert(output != nullptr);
+
+        /* Guaranteed because candidateOutputBuffer == expectedOutputBuffer and
+         * expectedOutputBuffer.size() == returnedOutputBuffer.size()
+         * therefore output.size() == returnedOutputBuffer.size()
+         */
+        assert(output->getSize() == entry.getReturnedOutputBuffer()->getSize());
+
+        /*Now copying the returned buffer into the candidate output buffer * /
+        /* @todo: find a cross-OS memcpy replacement to avoid klockwork error */
+        std::memcpy(output->getPtr(), entry.getReturnedOutputBuffer()->getPtr(),
+            entry.getReturnedOutputBuffer()->getSize());
+    }
 }
 
-void MockedDevice::checkInputBuffer(const Buffer *candidateInputBuffer,
-    const Buffer *expectedInputBuffer)
+void MockedDevice::compareBuffers(
+    const std::string &bufferName,
+    const Buffer *candidateBuffer,
+    const Buffer *expectedBuffer)
 {
-    if (candidateInputBuffer != nullptr) {
-        if (expectedInputBuffer != nullptr) {
+    if (candidateBuffer != nullptr) {
+        if (expectedBuffer != nullptr) {
+
+            /* Checking size */
+            if (candidateBuffer->getSize() != expectedBuffer->getSize()) {
+                entryFailure(bufferName+" candidate with size " +
+                    std::to_string(candidateBuffer->getSize()) +
+                    " differs from required size: " +
+                    std::to_string(expectedBuffer->getSize()));
+            }
+
+
             /* Checking buffer content */
-            if (*candidateInputBuffer != *expectedInputBuffer) {
-                entryFailure("Input buffer content is not the expected one.");
+            if (*candidateBuffer != *expectedBuffer) {
+                entryFailure(bufferName + " content is not the expected one.");
             }
         }
         else
         {
             /* Input buffer is not null and expected input buffer is null*/
-            entryFailure("Input buffer should be null.");
+            entryFailure(bufferName + " should be null.");
         }
     }
     else
     {
-        if (expectedInputBuffer != nullptr) {
+        if (expectedBuffer != nullptr) {
             /* Input buffer is null and expected input buffer is not null*/
-            entryFailure("Input buffer should not be null.");
+            entryFailure(bufferName + " should not be null.");
         }
     }
 }
-
-void MockedDevice::checkAndSetOutputBuffer(Buffer *candidateOutputBuffer,
-    const Buffer *expectedOutputBuffer, const Buffer *returnedOutputBuffer)
-{
-    /* Checking output buffer, which can be used as input buffer */
-    if (candidateOutputBuffer != nullptr) {
-        if (expectedOutputBuffer != nullptr) {
-
-            /* This has already been checked when adding the ioctl entry */
-            assert(returnedOutputBuffer != nullptr);
-            assert(expectedOutputBuffer->getSize() == returnedOutputBuffer->getSize());
-
-            /* Checking the size*/
-            if (candidateOutputBuffer->getSize() != expectedOutputBuffer->getSize()) {
-                entryFailure("Candidate output buffer size " +
-                    std::to_string(candidateOutputBuffer->getSize()) +
-                    " differs from required size: " +
-                    std::to_string(expectedOutputBuffer->getSize()));
-            }
-
-            /* Checking the content*/
-            if (*candidateOutputBuffer != *expectedOutputBuffer) {
-                entryFailure("Output buffer content is not the expected one.");
-            }
-
-            /* Now copying the returned buffer into the candidate output buffer */
-            /* @todo: find a cross-OS memcpy replacement to avoid klockwork error */
-            std::memcpy(candidateOutputBuffer->getPtr(), returnedOutputBuffer->getPtr(),
-                returnedOutputBuffer->getSize());
-        }
-        else {
-            /* Output buffer is not null and expected output buffer is null*/
-            entryFailure("Output buffer should be null.");
-        }
-    }
-    else {
-        if (expectedOutputBuffer != nullptr) {
-            /* Output buffer is null and expected output buffer is not null*/
-            entryFailure("Output buffer should not be null.");
-        }
-    }
-}
-
 
 }
 }

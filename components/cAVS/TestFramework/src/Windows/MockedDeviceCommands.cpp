@@ -64,8 +64,8 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams par
     expectedInput->DataSize = static_cast<ULONG>(expectedOutput.getBuffer().getSize());
 
     /* Adding entry */
-    mDevice.addIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
-        &expectedOutput.getBuffer(), &returnedOutput.getBuffer(), true);
+    mDevice.addSuccessfulIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
+        &expectedOutput.getBuffer(), &returnedOutput.getBuffer());
 }
 
 void MockedDeviceCommands::addGetAdspPropertiesCommand(NTSTATUS returnedDriverStatus,
@@ -116,8 +116,8 @@ void MockedDeviceCommands::addGetLogParametersCommand(NTSTATUS returnedStatus,
     }
 
     /* Adding entry */
-    mDevice.addIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET, &expected.getBuffer(),
-        &expected.getBuffer(), &returned.getBuffer(), true);
+    mDevice.addSuccessfulIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET, &expected.getBuffer(),
+        &expected.getBuffer(), &returned.getBuffer());
 }
 
 void MockedDeviceCommands::addSetLogParametersCommand(NTSTATUS returnedStatus,
@@ -136,8 +136,8 @@ void MockedDeviceCommands::addSetLogParametersCommand(NTSTATUS returnedStatus,
     returned.getTinyCmd().Body.Status = returnedStatus;
 
     /* Adding entry */
-    mDevice.addIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET, &expected.getBuffer(),
-        &expected.getBuffer(), &returned.getBuffer(), true);
+    mDevice.addSuccessfulIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET, &expected.getBuffer(),
+        &expected.getBuffer(), &returned.getBuffer());
 }
 
 }

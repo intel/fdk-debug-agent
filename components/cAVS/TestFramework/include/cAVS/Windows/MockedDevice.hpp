@@ -69,7 +69,7 @@ public:
         Exception(const std::string &msg) : logic_error(msg.c_str()) {}
     };
 
-    /** Add an ioctl entry into the test vector.
+    /** Add a successful ioctl entry into the test vector.
      *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
      *  - if an output buffer is required, the 'expectedOutput' AND 'returnedOutput' arguments
      *    shall be specified. They must have the same size.
@@ -82,13 +82,30 @@ public:
      * @param[in] expectedOutput the expected output buffer (because output buffer can be used
      *                           also as input buffer)
      * @param[in] returnedOutput the returned buffer
-     * @param[in] success the returned IO control status
      * @throw Device::Exception
      *
      * Note: Supplied buffers are cloned, ownership is not transferred.
      */
-    void addIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
-        const Buffer *expectedOutput, const Buffer *returnedOutput, bool success);
+    void addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
+        const Buffer *expectedOutput, const Buffer *returnedOutput);
+
+    /** Add a failed ioctl entry into the test vector.
+    *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
+    *  - if an output buffer is required, the 'expectedOutput' argument shall be specified.
+    *
+    * All entries are added in an ordered way, and will be consumed in the same order
+    * when using the ioControl() method.
+    *
+    * @param[in] ioControlCode the expected io control code
+    * @param[in] expectedInput the expected input buffer
+    * @param[in] expectedOutput the expected output buffer (because output buffer can be used
+    *                           also as input buffer)
+    * @throw Device::Exception
+    *
+    * Note: Supplied buffers are cloned, ownership is not transferred.
+    */
+    void addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
+        const Buffer *expectedOutput);
 
     virtual void ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output) override;
 
@@ -158,9 +175,11 @@ private:
         }
     }
 
-    void checkInputBuffer(const Buffer *candidateInputBuffer, const Buffer *expectedInputBuffer);
-    void checkAndSetOutputBuffer(Buffer *candidateOutputBuffer, const Buffer *expectedOutputBuffer,
-        const Buffer *returnedOutputBuffer);
+    /** Compare two buffers, each buffer can be null */
+    void compareBuffers(
+        const std::string &bufferName,
+        const Buffer *candidateBuffer,
+        const Buffer *expectedBuffer);
 
     using EntryCollection = std::vector<IoCtlEntry>;
 
