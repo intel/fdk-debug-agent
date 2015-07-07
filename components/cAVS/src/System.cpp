@@ -29,12 +29,21 @@ namespace debug_agent
 namespace cavs
 {
 
-System::System(const DriverFactory &driverFactory)
-: mDriver(std::move(createDriver(driverFactory)))
+System::System(const DriverFactory &driverFactory):
+    mDriver(std::move(createDriver(driverFactory))),
+    mModuleEntries()
 {
     if (mDriver == nullptr) {
 
         throw Exception("Driver factory has failed");
+    }
+    try
+    {
+        mDriver->getModuleHandler().getModulesEntries(mModuleEntries);
+    }
+    catch (ModuleHandler::Exception &e)
+    {
+        throw Exception("Unable to get module entries: " + std::string(e.what()));
     }
 }
 
@@ -74,21 +83,14 @@ Logger::Parameters System::getLogParameters()
     }
 }
 
-void System::getModuleEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries)
+const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const NOEXCEPT
 {
-    try
-    {
-        mDriver->getModuleHandler().getModulesEntries(modulesEntries);
-    }
-    catch (ModuleHandler::Exception &e)
-    {
-        throw Exception("Unable to get module entries: " + std::string(e.what()));
-    }
+    return mModuleEntries;
 }
 
 void System::doLogStream(std::ostream &os)
 {
-    LogStreamer logStreamer(mDriver->getLogger());
+    LogStreamer logStreamer(mDriver->getLogger(), mModuleEntries);
 
     try
     {

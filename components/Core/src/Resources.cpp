@@ -131,16 +131,7 @@ void LogParametersResource::handlePut(const Request &request, Response &response
 void ModuleEntryResource::handleGet(const Request &request, Response &response)
 {
     /* Retrieving module entries */
-    std::vector<dsp_fw::ModuleEntry> entries;
-    try
-    {
-        mSystem.getModuleEntries(entries);
-    }
-    catch (System::Exception &e)
-    {
-        throw RequestException(ErrorStatus::BadRequest, "Can not get module entries: " +
-            std::string(e.what()));
-    }
+    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
 
     std::ostream &out = response.send(ContentType);
     out << "<p>Module type count: " << entries.size() << "</p>";

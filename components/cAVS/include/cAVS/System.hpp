@@ -66,7 +66,7 @@ public:
     /**
      * Get module entries
      */
-    void getModuleEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries);
+    const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const NOEXCEPT;
 
     /**
      * Streams out log in IFDK:cavs:fwlog format
@@ -82,6 +82,11 @@ private:
     static std::unique_ptr<Driver> createDriver(const DriverFactory &driverFactory);
 
     std::unique_ptr<Driver> mDriver;
+
+    /**
+     * The module entries table retrieved from FW once, at initialization
+     */
+    std::vector<dsp_fw::ModuleEntry> mModuleEntries;
 };
 
 }
