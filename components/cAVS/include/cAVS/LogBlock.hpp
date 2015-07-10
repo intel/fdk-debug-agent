@@ -142,7 +142,7 @@ private:
 /**
  * Define the cavs::LogBlock using maximum size defined by SwAS.
  */
-static const size_t cavsLogBlockMaxSize = 0x0FFFFFFF;
+static const size_t cavsLogBlockMaxSize = 0x0000FFFF;
 using LogBlock = LogBlockBase<cavsLogBlockMaxSize>;
 
 template <const size_t maxSize>

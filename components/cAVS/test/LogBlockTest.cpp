@@ -55,6 +55,18 @@ TEST_CASE("Size validity", "[streaming]")
         "Log block size exceeds maximum value");
 }
 
+TEST_CASE("cAVS block size validity", "[streaming]")
+{
+    static const int coreId = 15;
+    static const unsigned int overmaxBlocSize = cavsLogBlockMaxSize + 1;
+
+    LogBlock block(coreId, overmaxBlocSize);
+
+    std::stringstream blockStream;
+    CHECK_THROWS_MSG(blockStream << block,
+        "Log block size exceeds maximum value");
+}
+
 TEST_CASE("Stream empty LogBlock", "[streaming]")
 {
     static const int coreId = 15;
