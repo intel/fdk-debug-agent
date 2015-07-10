@@ -39,6 +39,8 @@ namespace test_common
 class HttpClientSimulator final
 {
 public:
+    static const uint32_t DefaultPort = 9096;
+
     /* Http verb */
     enum class Verb
     {
@@ -67,7 +69,8 @@ public:
         RequestFailureException(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
-    HttpClientSimulator(const std::string &server, uint32_t port) : mServer(server), mPort(port) {}
+    HttpClientSimulator(const std::string &server, uint32_t port = DefaultPort) :
+        mServer(server), mPort(port) {}
 
     /* Perform an http request and checks the result. If the result is not the expected one,
      * the exception RequestFailureException is thrown

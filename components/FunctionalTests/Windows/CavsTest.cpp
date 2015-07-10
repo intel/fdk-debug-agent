@@ -44,10 +44,10 @@ TEST_CASE("DebugAgent: module entries")
     windows::DeviceInjectionDriverFactory driverFactory(std::move(device));
 
     /* Creating and starting the debug agent */
-    DebugAgent debugAgent(driverFactory, 9090);
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
 
     /* Creating the http client */
-    HttpClientSimulator client("localhost", 9090);
+    HttpClientSimulator client("localhost");
 
     std::string expectedContent(
         "<p>Module type count: 2</p>"
