@@ -81,11 +81,13 @@ void LogParametersResource::handleGet(const Request &request, Response &response
     /**
      * @fixme This output is temporary. Final implementation will be done in a subsequent patch
      */
-    out << "<p>"
-        << logParameters.mIsStarted << ";"
-        << Logger::toString(logParameters.mLevel) << ";"
-        << Logger::toString(logParameters.mOutput)
-        << "</p>";
+    out << "<table border='1'><tr><th>Log Parameter</th><th>Value</th></tr>"
+        << "<tr><td>State</td><td>" << logParameters.mIsStarted << "</td></tr>"
+        << "<tr><td>Level</td><td>" << Logger::toString(logParameters.mLevel) << "</td></tr>"
+        << "<tr><td>Output</td><td>" << Logger::toString(logParameters.mOutput)
+        << "</td></tr></table>"
+        << "<p>To change log parameters: "
+        << "PUT [log status];[log level];[log output] at /cAVS/logging/parameters</p>";
 }
 
 void LogParametersResource::handlePut(const Request &request, Response &response)

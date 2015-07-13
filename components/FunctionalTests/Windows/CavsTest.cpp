@@ -109,14 +109,14 @@ TEST_CASE("DebugAgent/cAVS: module entries")
         "</table>");
 
     /* Doing the request on the "/cAVS/module/entries" URI */
-    client.request(
+    CHECK_NOTHROW(client.request(
         "/cAVS/module/entries",
         HttpClientSimulator::Verb::Get,
         "",
         HttpClientSimulator::Status::Ok,
         "text/html",
         expectedContent
-        );
+        ));
 }
 
 TEST_CASE("DebugAgent/cAVS: log parameters")
@@ -186,32 +186,44 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
     HttpClientSimulator client("localhost");
 
     /* 1: Getting log parameters*/
-    client.request(
+    CHECK_NOTHROW(client.request(
         "/cAVS/logging/parameters",
         HttpClientSimulator::Verb::Get,
         "",
         HttpClientSimulator::Status::Ok,
         "text/html",
-        "<p>0;Critical;PTI</p>" /*isStarted : false, level: critical, output:pti */
-        );
+        "<table border='1'>"
+        "<tr><th>Log Parameter</th><th>Value</th></tr>"
+        "<tr><td>State</td><td>0</td></tr>"
+        "<tr><td>Level</td><td>Critical</td></tr>"
+        "<tr><td>Output</td><td>PTI</td></tr>"
+        "</table><p>To change log parameters: PUT [log status];[log level];[log output] at "
+        "/cAVS/logging/parameters</p>"
+        ));
 
     /* 2: Setting log parameters */
-    client.request(
+    CHECK_NOTHROW(client.request(
         "/cAVS/logging/parameters",
         HttpClientSimulator::Verb::Put,
-        "1;Verbose;SRAM", /*isStarted : true, level: verbose, output:sram */
+        "1;Verbose;SRAM",
         HttpClientSimulator::Status::Ok,
         "text/html",
         "<p>Done</p>"
-        );
+        ));
 
     /* 3: Getting log parameters again */
-    client.request(
+    CHECK_NOTHROW(client.request(
         "/cAVS/logging/parameters",
         HttpClientSimulator::Verb::Get,
         "",
         HttpClientSimulator::Status::Ok,
         "text/html",
-        "<p>1;Verbose;SRAM</p>" /*isStarted : true, level: verbose, output:sram */
-        );
+        "<table border='1'>"
+        "<tr><th>Log Parameter</th><th>Value</th></tr>"
+        "<tr><td>State</td><td>1</td></tr>"
+        "<tr><td>Level</td><td>Verbose</td></tr>"
+        "<tr><td>Output</td><td>SRAM</td></tr>"
+        "</table><p>To change log parameters: PUT [log status];[log level];[log output] at "
+        "/cAVS/logging/parameters</p>"
+        ));
 }
