@@ -53,7 +53,7 @@ public:
 
     /** Returns a failure to the client, using the supplied status code and error
      * message */
-    void fail(HTTPResponse::HTTPStatus status, const std::string message,
+    void fail(HTTPResponse::HTTPStatus status, const std::string &message,
         HTTPServerResponse &resp);
 
     static rest::Request::Verb translateVerb(const std::string &verbLiteral);

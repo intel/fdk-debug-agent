@@ -91,7 +91,7 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
     }
 }
 
-void RestResourceRequestHandler::fail(HTTPResponse::HTTPStatus status, const std::string message,
+void RestResourceRequestHandler::fail(HTTPResponse::HTTPStatus status, const std::string &message,
     HTTPServerResponse &resp)
 {
     /* @todo Use logging instead */
