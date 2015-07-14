@@ -95,7 +95,7 @@ TEST_CASE("Test stream", "[stream]")
     StreamerTest streamer(50);
     std::stringstream outStream;
 
-    CHECK_THROWS_MSG(outStream << streamer, "End of stream");
+    CHECK_NOTHROW(outStream << streamer);
 
     CHECK(outStream.str() == streamer.getExpectedStream().str());
 }

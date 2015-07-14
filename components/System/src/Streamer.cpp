@@ -20,6 +20,7 @@
 ********************************************************************************
 */
 #include <System/Streamer.hpp>
+#include <string>
 
 namespace debug_agent
 {
@@ -30,13 +31,24 @@ void Streamer::doStream(std::ostream &os)
 {
     streamFirst(os);
 
-    while(os.good() && streamNext(os)) {
+    while(os.good()) {
+
+        if (!streamNext(os)) {
+            /* No more entries to proceed, returning */
+            return;
+        }
 
         // Flush out stream at each iteration
         os.flush();
     }
 
-    throw Exception("End of stream");
+    /* os.good() returns false */
+    throw Exception(
+        "Output stream error "
+        "(eof: " + std::to_string(os.eof()) +
+        " fail: " + std::to_string(os.fail()) +
+        " bad: " + std::to_string(os.bad()) +
+        ")");
 }
 
 void Streamer::streamFirst(std::ostream &)

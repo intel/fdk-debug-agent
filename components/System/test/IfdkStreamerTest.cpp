@@ -105,7 +105,7 @@ TEST_CASE("Test IFDK stream", "[stream]")
     IfdkStreamerTest ifdkStreamer(50);
     std::stringstream outStream;
 
-    CHECK_THROWS_MSG(outStream << ifdkStreamer, "End of stream");
+    CHECK_NOTHROW(outStream << ifdkStreamer);
 
     CHECK(outStream.str() == ifdkStreamer.getExpectedStream().str());
 }
