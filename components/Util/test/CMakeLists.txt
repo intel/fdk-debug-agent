@@ -22,7 +22,8 @@
 
 # test
 set(TEST_SRCS
-    UuidTest.cpp)
+    UuidTest.cpp
+    BlockingQueueTest.cpp)
 
 set(TEST_INCS)
 
@@ -33,6 +34,6 @@ set_common_settings(UtilTest)
 link_catch(UtilTest)
 
 # Binding with Util library
-target_link_libraries(UtilTest Util)
+target_link_libraries(UtilTest Util TestCommon)
 
 install(TARGETS UtilTest RUNTIME DESTINATION tests)

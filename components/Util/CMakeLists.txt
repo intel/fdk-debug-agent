@@ -24,7 +24,8 @@ set(SRCS
     src/Uuid.cpp)
 
 set(INCS
-    include/Util/Uuid.hpp)
+    include/Util/Uuid.hpp
+    include/Util/BlockingQueue.hpp)
 
 add_library(Util STATIC ${SRCS} ${INCS})
 set_common_settings(Util)
