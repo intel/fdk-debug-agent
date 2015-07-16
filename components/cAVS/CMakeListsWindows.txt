@@ -24,7 +24,8 @@ set(WINDOWS_LIB_SRCS
     src/Windows/SystemDevice.cpp
     src/Windows/LastError.cpp
     src/Windows/DeviceIdFinder.cpp
-    src/Windows/ModuleHandler.cpp)
+    src/Windows/ModuleHandler.cpp
+    src/Windows/WppConsumer.cpp)
 
 set(LIB_SRCS ${LIB_SRCS} ${WINDOWS_LIB_SRCS})
 
@@ -41,7 +42,10 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/DriverTypes.hpp
     include/cAVS/Windows/ModuleHandler.hpp
     include/cAVS/Windows/IoCtlStructureHelpers.hpp
-    include/cAVS/Windows/WindowsTypes.hpp)
+    include/cAVS/Windows/WindowsTypes.hpp
+    include/cAVS/Windows/WppConsumer.hpp
+    include/cAVS/Windows/WppCommon.hpp
+    include/cAVS/Windows/WppLogEntryListener.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
