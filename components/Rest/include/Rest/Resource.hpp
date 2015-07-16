@@ -62,10 +62,32 @@ public:
         abort();
     }
 
-    class RequestException : public std::logic_error
+    /**
+    * HttpAbort exception
+    * This exception is intended to be raised
+    * where it is not possible to send an HTTP error since part of the response
+    * has already been sent after response.send(ContentType) has been called.
+    * @param[in] what The message to be carried on by the exception object
+    */
+    class HttpAbort : public std::logic_error
     {
     public:
-        RequestException(ErrorStatus status, const std::string &userMessage = "") :
+        explicit HttpAbort(const std::string &what)
+        : std::logic_error(what)
+        {}
+    };
+
+    /**
+    * HttpError exception
+    * This exception is intended to be raised basically any HTTP session errors,
+    * where response has not already been sent.
+    * @param[in] status The error status of the HTTP response to be sent
+    * @param[in] what The message to be carried on by the exception object
+    */
+    class HttpError : public std::logic_error
+    {
+    public:
+        HttpError(ErrorStatus status, const std::string &userMessage = "") :
             std::logic_error(getErrorMessage(status, userMessage).c_str()), mStatus(status) {}
 
         ErrorStatus getStatus() { return mStatus; }
@@ -91,7 +113,7 @@ public:
      * This method calls the default handler according to the request verb.
      * @param[in] request The request to be handled
      * @param[in] response The response to be forwarded
-     * @throw RequestException
+     * @throw HttpError or HttpAbort
      * @see handleGet
      * @see handlePut
      * @see handlePost
@@ -101,38 +123,38 @@ public:
 
 protected:
     /**
-     * Default GET handler: raises RequestException (ErrorStatus::VerbNotAllowed)
+     * Default GET handler: raises HttpError (ErrorStatus::VerbNotAllowed)
      * This method is intended to be overridden if the Resource subclass handles GET
      * @param[in] request The GET request to be handled
      * @param[in] response The response to be forwarded
-     * @throw RequestException
+     * @throw HttpError or HttpAbort
      */
     virtual void handleGet(const Request &request, Response &response);
 
     /**
-     * Default PUT handler: raises RequestException (ErrorStatus::VerbNotAllowed)
+     * Default PUT handler: raises HttpError (ErrorStatus::VerbNotAllowed)
      * This method is intended to be overridden if the Resource subclass handles PUT
      * @param[in] request The PUT request to be handled
      * @param[in] response The response to be forwarded
-     * @throw RequestException
+     * @throw HttpError or HttpAbort
      */
     virtual void handlePut(const Request &request, Response &response);
 
     /**
-     * Default POST handler: raises RequestException (ErrorStatus::VerbNotAllowed)
+     * Default POST handler: raises HttpError (ErrorStatus::VerbNotAllowed)
      * This method is intended to be overridden if the Resource subclasses handles POST
      * @param[in] request The POST request to be handled
      * @param[in] response The response to be forwarded
-     * @throw RequestException
+     * @throw HttpError or HttpAbort
      */
     virtual void handlePost(const Request &request, Response &response);
 
     /**
-     * Default DELETE handler: raises RequestException (ErrorStatus::VerbNotAllowed)
+     * Default DELETE handler: raises HttpError (ErrorStatus::VerbNotAllowed)
      * This method is intended to be overridden if the Resource subclass handles DELETE
      * @param[in] request The DELETE request to be handled
      * @param[in] response The response to be forwarded
-     * @throw RequestException
+     * @throw HttpError or HttpAbort
      */
     virtual void handleDelete(const Request &request, Response &response);
 

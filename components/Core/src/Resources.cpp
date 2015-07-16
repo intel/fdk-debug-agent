@@ -61,7 +61,7 @@ void LogStreamResource::handleGet(const Request &request, Response &response)
     /** Acquiring the log stream resource */
     auto resource = std::move(mSystem.tryToAcquireLogStreamResource());
     if (resource == nullptr) {
-        throw RequestException(ErrorStatus::Locked, "Logging stream resource is already used.");
+        throw HttpError(ErrorStatus::Locked, "Logging stream resource is already used.");
     }
 
     /**
@@ -82,11 +82,12 @@ void LogStreamResource::handleGet(const Request &request, Response &response)
     }
     catch (System::Exception &e)
     {
-        /* Here a successful http response has already be sent to the server. So
-         * it is not possible to throw the exception */
-
-        /** @todo use logging */
-        std::cout << "Exception while getting logs from system: " << e.what();
+        /* Here a successful http response has already be sent to the server.
+         * So, it is not possible to send an HTTP error.
+         * For this reason, we convert any system exception as HttpAbort exception that
+         * will be silently handled at upper level
+         */
+     throw HttpAbort(e.what());
     }
 }
 
@@ -100,7 +101,7 @@ void LogParametersResource::handleGet(const Request &request, Response &response
     }
     catch (System::Exception &e)
     {
-        throw RequestException(ErrorStatus::BadRequest, "Cannot get log parameters : " +
+        throw HttpError(ErrorStatus::BadRequest, "Cannot get log parameters : " +
             std::string(e.what()));
     }
 
@@ -128,7 +129,7 @@ void LogParametersResource::handlePut(const Request &request, Response &response
      * patch
      */
     if (parametersList.count() != numberOfParameters) {
-        throw RequestException(ErrorStatus::BadRequest, "Invalid parameters format");
+        throw HttpError(ErrorStatus::BadRequest, "Invalid parameters format");
     }
 
     Logger::Parameters logParameters;
@@ -141,10 +142,10 @@ void LogParametersResource::handlePut(const Request &request, Response &response
             Logger::outputFromString(parametersList[outputParameterIndex]);
     }
     catch (Logger::Exception &e) {
-        throw RequestException(ErrorStatus::BadRequest, std::string("Invalid value: ") + e.what());
+        throw HttpError(ErrorStatus::BadRequest, std::string("Invalid value: ") + e.what());
     }
     catch (Poco::SyntaxException &e) {
-        throw RequestException(ErrorStatus::BadRequest,
+        throw HttpError(ErrorStatus::BadRequest,
             std::string("Invalid Start/Stop request: ") + e.what());
     }
 
@@ -152,7 +153,7 @@ void LogParametersResource::handlePut(const Request &request, Response &response
         mSystem.setLogParameters(logParameters);
     }
     catch (System::Exception &e) {
-        throw RequestException(ErrorStatus::BadRequest, std::string("Fail to apply: ") + e.what());
+        throw HttpError(ErrorStatus::BadRequest, std::string("Fail to apply: ") + e.what());
     }
 
     std::ostream &out = response.send(ContentType);

@@ -103,15 +103,7 @@ void System::doLogStreamInternal(std::ostream &os)
 {
     LogStreamer logStreamer(mDriver->getLogger(), mModuleEntries);
 
-    try
-    {
-        os << logStreamer;
-    }
-    catch (system::Streamer::Exception &e)
-    {
-        /* @todo Use logging instead */
-        std::cout << "End of cAVS log stream: " << e.what() << std::endl;
-    }
+    os << logStreamer;
 }
 
 }

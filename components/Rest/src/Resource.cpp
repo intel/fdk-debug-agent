@@ -43,27 +43,27 @@ void Resource::handleRequest(const Request &request, Response &response)
         handleDelete(request, response);
         return;
     }
-    throw RequestException(ErrorStatus::VerbNotAllowed);
+    throw HttpError(ErrorStatus::VerbNotAllowed);
 }
 
 void Resource::handleGet(const Request &request, Response &response)
 {
-    throw RequestException(ErrorStatus::VerbNotAllowed);
+    throw HttpError(ErrorStatus::VerbNotAllowed);
 }
 
 void Resource::handlePut(const Request &request, Response &response)
 {
-    throw RequestException(ErrorStatus::VerbNotAllowed);
+    throw HttpError(ErrorStatus::VerbNotAllowed);
 }
 
 void Resource::handlePost(const Request &request, Response &response)
 {
-    throw RequestException(ErrorStatus::VerbNotAllowed);
+    throw HttpError(ErrorStatus::VerbNotAllowed);
 }
 
 void Resource::handleDelete(const Request &request, Response &response)
 {
-    throw RequestException(ErrorStatus::VerbNotAllowed);
+    throw HttpError(ErrorStatus::VerbNotAllowed);
 }
 
 }

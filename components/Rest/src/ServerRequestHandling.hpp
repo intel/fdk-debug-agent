@@ -51,19 +51,18 @@ public:
 
     virtual void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp);
 
-    /** Returns a failure to the client, using the supplied status code and error
-     * message */
-    void fail(HTTPResponse::HTTPStatus status, const std::string &message,
-        HTTPServerResponse &resp);
-
-    static rest::Request::Verb translateVerb(const std::string &verbLiteral);
-
 private:
     class UnknownVerbException : public std::logic_error
     {
     public:
         UnknownVerbException(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
+
+    /** Returns an error to the client, using the supplied status code and error message */
+    void sendHttpError(HTTPResponse::HTTPStatus status, const std::string &message,
+        HTTPServerResponse &resp);
+
+    static rest::Request::Verb translateVerb(const std::string &verbLiteral);
 
     std::shared_ptr<const Dispatcher> mDispatcher;
 };

@@ -41,7 +41,7 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
     }
     catch (UnknownVerbException &e)
     {
-        fail(HTTPResponse::HTTPStatus::HTTP_METHOD_NOT_ALLOWED, e.what(), resp);
+        sendHttpError(HTTPResponse::HTTPStatus::HTTP_METHOD_NOT_ALLOWED, e.what(), resp);
         return;
     }
 
@@ -52,8 +52,7 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
 
     if (resource == nullptr)
     {
-        fail(HTTPResponse::HTTP_NOT_FOUND, "Resource not found: " + req.getURI(),
-            resp);
+        sendHttpError(HTTPResponse::HTTP_NOT_FOUND, "Resource not found: " + req.getURI(), resp);
         return;
     }
 
@@ -65,36 +64,60 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
     {
         resource->handleRequest(request, response);
     }
-    catch (Resource::RequestException &e)
+    catch (Resource::HttpError &e)
     {
         HTTPResponse::HTTPStatus pocoStatus =
             static_cast<HTTPResponse::HTTPStatus>(e.getStatus());
 
-        fail(pocoStatus, e.what(), resp);
+        if (!resp.sent()) {
+            // HTTP error has to be sent to the client
+            sendHttpError(pocoStatus, e.what(), resp);
+        }
+        else {
+            // we cannot do anything else that log the issue
+            // This should not happen
+            /** @todo Use logging instead */
+            std::cout << "Internal error: "
+                << "HttpError exception while response has already been sent: "
+                << req.getURI() << ": " << e.what() << std::endl;
+        }
     }
-    catch (IOException &)
+    catch (Resource::HttpAbort &e)
     {
-        /* This exception is swallowed
-         * @todo Use logging instead */
-        std::cout << "Connection broken." << std::endl;
+        /** @todo Use logging instead */
+        if (!resp.sent()) {
+            // Should not happen
+            /** @todo Use logging instead */
+            std::cout << "Internal error: HttpAbort exception while response has not been sent: "
+                << req.getURI() << ": " << e.what() << std::endl;
+            // HTTP error has to be sent to the client
+            sendHttpError(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, e.what(), resp);
+        }
+        else {
+            // we cannot do anything else that log the issue and abandon the client
+            /** @todo Use logging instead */
+            std::cout << "Abort request on " << req.getURI() << ": " << e.what() << std::endl;
+        }
     }
     catch (std::exception &e)
     {
-        /* This block should not be reached */
-        std::stringstream stream;
-        stream << "Unexpected exception of type '" << typeid(e).name() << "': " << e.what();
-        fail(HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR, stream.str(), resp);
+        /** @todo Use logging instead */
+        std::cout << "Abort request on " << req.getURI() << " due to unexpected exception: "
+            << typeid(e).name() << ": " << e.what() << std::endl;
     }
-    catch (...)
-    {
-        /* This block should not be reached also */
-        std::string msg("An exception with an unknown type has been caugth.");
-        fail(HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR, msg, resp);
+
+    // Ensure we send at least an HTTP error response to the client
+    if (!resp.sent()) {
+        std::string msg("Internal error: no response sent out for: " + req.getURI());
+        /** @todo Use logging instead */
+        std::cout << msg;
+        sendHttpError(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, msg, resp);
     }
 }
 
-void RestResourceRequestHandler::fail(HTTPResponse::HTTPStatus status, const std::string &message,
-    HTTPServerResponse &resp)
+void RestResourceRequestHandler::sendHttpError(HTTPResponse::HTTPStatus status,
+                                               const std::string &message,
+                                               HTTPServerResponse &resp)
 {
     /* @todo Use logging instead */
     std::cout << "Request failure: " << message << std::endl;
