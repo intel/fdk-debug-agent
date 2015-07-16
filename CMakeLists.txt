@@ -82,3 +82,8 @@ add_subdirectory("components/cAVS")
 add_subdirectory("components/Core")
 add_subdirectory("components/Main")
 add_subdirectory("components/FunctionalTests")
+
+# Windows only components
+if (WIN32)
+    add_subdirectory("components/LogGrabber")
+endif()
