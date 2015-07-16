@@ -26,7 +26,7 @@ set(WINDOWS_LIB_SRCS
     src/Windows/DeviceIdFinder.cpp
     src/Windows/ModuleHandler.cpp
     src/Windows/WppConsumer.cpp
-    src/Windows/WppController.cpp)
+    src/Windows/RealTimeWppClient.cpp)
 
 set(LIB_SRCS ${LIB_SRCS} ${WINDOWS_LIB_SRCS})
 
@@ -49,6 +49,7 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/WppController.hpp
     include/cAVS/Windows/WppLogEntryListener.hpp
     include/cAVS/Windows/WppClient.hpp)
+    include/cAVS/Windows/RealTimeWppClient.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
