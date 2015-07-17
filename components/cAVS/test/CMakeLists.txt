@@ -28,6 +28,8 @@ set(TEST_SRCS
 
 set(TEST_INCS)
 
+set(DATA_DIRECTORIES)
+
 # Target specific source and header files
 if (WIN32)
     include("CMakeListsWindows.txt")
@@ -49,4 +51,10 @@ target_link_libraries(CavsUnitTest cAVS cAVSTestFramework)
 # Binding with test common in order to use the HttpClientSimulator
 target_link_libraries(CavsUnitTest TestCommon)
 
+#installing executable
 install(TARGETS CavsUnitTest RUNTIME DESTINATION tests)
+
+# installing data files (if at least one exists)
+if (DATA_DIRECTORIES)
+    install(DIRECTORY ${DATA_DIRECTORIES} DESTINATION tests)
+endif()

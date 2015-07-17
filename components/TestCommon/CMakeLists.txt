@@ -28,7 +28,8 @@ set(LIB_SRCS
 
 set(LIB_INCS
     include/TestCommon/HttpClientSimulator.hpp
-    include/TestCommon/TestHelpers.hpp)
+    include/TestCommon/TestHelpers.hpp
+    include/TestCommon/ThreadHelpers.hpp)
 
 add_library(TestCommon STATIC ${LIB_SRCS} ${LIB_INCS})
 set_common_settings(TestCommon)

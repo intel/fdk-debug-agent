@@ -18,14 +18,23 @@
 #
 ################################################################################
 
+# Source files
+
 set(WINDOWS_TEST_SRCS
     Windows/DeviceIdFinderUnitTest.cpp
     Windows/SystemDeviceUnitTest.cpp
     Windows/MockedDeviceUnitTest.cpp
     Windows/LastErrorUnitTest.cpp
     Windows/ModuleHandlerUnitTest.cpp
-    Windows/LoggerUnitTest.cpp)
+    Windows/LoggerUnitTest.cpp
+    Windows/WppUnitTest.cpp)
 
 set(TEST_SRCS ${TEST_SRCS} ${WINDOWS_TEST_SRCS})
 
 source_group("Source Files\\Windows" FILES ${WINDOWS_TEST_SRCS})
+
+# Data files
+
+set(DATA_DIRECTORIES
+    ${DATA_DIRECTORIES}
+    Windows/data)

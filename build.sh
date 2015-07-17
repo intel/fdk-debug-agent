@@ -210,17 +210,22 @@ then
     test_count=0
     if [ -d $test_dir ]
     then
-        for test_file in $test_dir/*Test*
+        # going into test directory and launching tests from it
+        # in this way relative data files will be found
+        cd $test_dir
+        for test_file in ./*Test*
         do
             echo "Running $test_file"
             eval $test_file
             if [ $? != 0 ]
             then
                 echo "Unit test failed: $test_file"
+                cd $root_dir
                 exit 1;
             fi
             test_count=$((test_count+1))
         done
+        cd $root_dir
     fi
 
     if [ $test_count == 0 ]
