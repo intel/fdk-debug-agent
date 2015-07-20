@@ -94,6 +94,16 @@ private:
     HttpClientSimulator(const HttpClientSimulator&) = delete;
     HttpClientSimulator &operator=(const HttpClientSimulator &) = delete;
 
+    /** Returns a substring. If the substring exceeds the string length (i.e.
+     * index + length > str.length()) then the returned substring is truncated (i.e. returning
+     * chars from [index..str.length()] )
+     */
+    static std::string getSubStringSafe(const std::string &str, std::size_t index,
+        std::size_t length);
+
+    /** Returns the index of the first different char */
+    std::size_t getStringDiffOffset(const std::string &str1, const std::string &str2);
+
     const std::string mServer;
     const uint32_t mPort;
 };

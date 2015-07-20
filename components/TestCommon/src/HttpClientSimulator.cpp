@@ -27,6 +27,17 @@
 #include <Poco/Net/NetException.h>
 #include <Poco/StreamCopier.h>
 #include <assert.h>
+#include <algorithm>
+
+/** Unfortunately <Poco/Net/HTTPRequest.h> defines the "min" macro, which makes fail the
+ * std::min function
+ * So undefining it.
+ */
+#ifdef min
+#undef min
+#endif
+
+
 
 using namespace Poco::Net;
 
@@ -81,6 +92,34 @@ std::string HttpClientSimulator::toString(Status s)
     throw RequestFailureException(std::string("Invalid http status"));
 }
 
+std::string HttpClientSimulator::getSubStringSafe(const std::string &str, std::size_t index,
+    std::size_t length)
+{
+    /* Changing the substring length if it exceeds the input string size */
+    std::size_t safeLength;
+    if (index + length <= str.length()) {
+        safeLength = length;
+    }
+    else {
+        safeLength = str.length() - index;
+    }
+
+    return str.substr(index, safeLength);
+}
+
+std::size_t HttpClientSimulator::getStringDiffOffset(const std::string &str1,
+    const std::string &str2)
+{
+    std::size_t minSize = std::min(str1.length(), str2.length());
+
+    for (std::size_t i = 0; i < minSize; i++)
+    {
+        if (str1[i] != str2[i])
+            return i;
+    }
+    return minSize;
+}
+
 void HttpClientSimulator::request(
     const std::string &uri,
     Verb verb,
@@ -132,9 +171,25 @@ void HttpClientSimulator::request(
     }
     /* Checking response content*/
     if (responseContent != expectedResponseContent) {
+
+        /* The substring that contains difference will not exceed 15 chars */
+        static const std::size_t diffLength = 15;
+
+        /* Getting the index of the first different char */
+        std::size_t diffIndex = getStringDiffOffset(responseContent, expectedResponseContent);
+
+        /* "Got" content substring that contains the difference */
+        std::string substringContent = getSubStringSafe(responseContent, diffIndex, diffLength);
+
+        /* "Expected" content substring that contains the difference */
+        std::string substringExpectedContent = getSubStringSafe(expectedResponseContent, diffIndex,
+            diffLength);
+
         throw RequestFailureException(
             "Wrong response content, got:\n" + responseContent +
-            "\nexpected: '" + expectedResponseContent + "'");
+            "\nexpected: '" + expectedResponseContent + "' at index " + std::to_string(diffIndex)
+            + ": got substring: '" + substringContent + "' expected substring: '" +
+            substringExpectedContent + "'");
     }
 }
 
