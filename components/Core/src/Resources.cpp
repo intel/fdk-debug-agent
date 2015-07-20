@@ -70,13 +70,34 @@ void LogStreamResource::handleGet(const Request &request, Response &response)
     static const std::string ContentType("application/vnd.ifdk-file");
     std::ostream &out = response.send(ContentType);
 
-    mSystem.doLogStream(out);
+    try {
+        mSystem.doLogStream(out);
+    }
+    catch (System::Exception &e)
+    {
+        /* Here a successful http response has already be sent to the server. So
+         * it is not possible to throw the exception */
+
+        /** @todo use logging */
+        std::cout << "Exception while getting logs from system: " << e.what();
+    }
 }
 
 void LogParametersResource::handleGet(const Request &request, Response &response)
 {
+    Logger::Parameters logParameters;
+
+    try
+    {
+        logParameters = mSystem.getLogParameters();
+    }
+    catch (System::Exception &e)
+    {
+        throw RequestException(ErrorStatus::BadRequest, "Cannot get log parameters : " +
+            std::string(e.what()));
+    }
+
     std::ostream &out = response.send(ContentType);
-    const Logger::Parameters logParameters = mSystem.getLogParameters();
 
     /**
      * @fixme This output is temporary. Final implementation will be done in a subsequent patch
@@ -123,16 +144,17 @@ void LogParametersResource::handlePut(const Request &request, Response &response
     try {
         mSystem.setLogParameters(logParameters);
     }
-    catch (Logger::Exception &e) {
+    catch (System::Exception &e) {
         throw RequestException(ErrorStatus::BadRequest, std::string("Fail to apply: ") + e.what());
     }
+
     std::ostream &out = response.send(ContentType);
     out << "<p>Done</p>";
 }
 
 void ModuleEntryResource::handleGet(const Request &request, Response &response)
 {
-    /* Retrieving module entries */
+    /* Retrieving module entries, doesn't throw exception */
     const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
 
     std::ostream &out = response.send(ContentType);
