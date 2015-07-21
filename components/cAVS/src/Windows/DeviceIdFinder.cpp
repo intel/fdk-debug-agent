@@ -22,6 +22,7 @@
 
 #include "cAVS/Windows/DeviceIdFinder.hpp"
 #include "cAVS/Windows/LastError.hpp"
+#include "Util/Uuid.hpp"
 #include <inttypes.h>
 #include <memory>
 #include <sstream>
@@ -43,15 +44,9 @@ namespace windows
 /** GUID to string, used for error reporting */
 static std::string to_string(const GUID &guid)
 {
-    std::stringstream strBuf;
-    strBuf << std::hex << std::setw(8) << std::setfill('0') << guid.Data1 << "-" << guid.Data2 <<
-        "-" << guid.Data3 << "-";
-    for (int i = 0; i < 2; ++i)
-        strBuf << std::hex << std::setw(2) << std::setfill('0') << short(guid.Data4[i]);
-    strBuf << "-";
-    for (int i = 2; i < 8; ++i)
-        strBuf << std::hex << std::setw(2) << std::setfill('0') << short(guid.Data4[i]);
-    return strBuf.str();
+    util::Uuid uuid;
+    uuid.fromOtherUuidType(guid);
+    return uuid.toString();
 }
 
 /** Create and handle the life cycle of a HDEVINFO handle

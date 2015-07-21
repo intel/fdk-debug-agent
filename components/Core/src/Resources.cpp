@@ -20,6 +20,7 @@
 ********************************************************************************
 */
 #include "Core/Resources.hpp"
+#include "Util/Uuid.hpp"
 #include <Poco/NumberParser.h>
 #include <Poco/StringTokenizer.h>
 #include <string>
@@ -174,10 +175,11 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
 
         /* Module uuid */
         out << "<td>";
-        static const std::size_t uuidIntergerCount = 4;
-        for (std::size_t j = 0; j < uuidIntergerCount; j++) {
-            out << std::hex << std::setw(8) << std::setfill('0') << entry.uuid[j];
-        }
+
+        util::Uuid uuid;
+        uuid.fromOtherUuidType(entry.uuid);
+        out << uuid.toString();
+
         out << "</td>";
 
         /* The module id is the array index */

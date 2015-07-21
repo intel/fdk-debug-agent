@@ -21,6 +21,7 @@
 */
 
 #include "Core/DebugAgent.hpp"
+#include "Util/Uuid.hpp"
 #include "TestCommon/HttpClientSimulator.hpp"
 #include "cAVS/Windows/DeviceInjectionDriverFactory.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
@@ -30,17 +31,21 @@
 using namespace debug_agent::core;
 using namespace debug_agent::cavs;
 using namespace debug_agent::test_common;
+using namespace debug_agent::util;
 
 static const std::size_t ModuleUIDSize = 4;
 using ModuleUID = uint32_t[ModuleUIDSize];
 
 /** Defining some module uuids... */
-const ModuleUID Module0UID = { 1, 2, 3, 4 };
-const ModuleUID Module1UID = { 11, 12, 13, 14 };
+const Uuid Module0UID = { 0x01020304, 0x0506, 0x0708,
+    { 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}};
+
+const Uuid Module1UID = { 0x11121314, 0x1516, 0x1718,
+    { 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20 } };
 
 /** Helper function to set a module entry */
 void setModuleEntry(dsp_fw::ModuleEntry &entry, const std::string &name,
-    const ModuleUID &uuid)
+    const Uuid &uuid)
 {
     /* Setting name */
     assert(name.size() <= sizeof(entry.name));
@@ -55,9 +60,7 @@ void setModuleEntry(dsp_fw::ModuleEntry &entry, const std::string &name,
     }
 
     /* Setting GUID*/
-    for (std::size_t i = 0; i < ModuleUIDSize; i++) {
-        entry.uuid[i] = uuid[i];
-    }
+    uuid.toOtherUuidType(entry.uuid);
 }
 
 void addModuleEntryCommand(windows::MockedDeviceCommands &commands)
@@ -104,8 +107,8 @@ TEST_CASE("DebugAgent/cAVS: module entries")
     std::string expectedContent(
         "<p>Module type count: 2</p>"
         "<table border='1'><tr><td>name</td><td>uuid</td><td>module id</td></tr>"
-        "<tr><td>module_0</td><td>00000001000000020000000300000004</td><td>0</td></tr>"
-        "<tr><td>module_1</td><td>0000000b0000000c0000000d0000000e</td><td>1</td></tr>"
+        "<tr><td>module_0</td><td>01020304-0506-0708-090A-0B0C0D0E0F10</td><td>0</td></tr>"
+        "<tr><td>module_1</td><td>11121314-1516-1718-191A-1B1C1D1E1F20</td><td>1</td></tr>"
         "</table>");
 
     /* Doing the request on the "/cAVS/module/entries" URI */

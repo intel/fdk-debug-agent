@@ -39,4 +39,4 @@ target_include_directories(Core PUBLIC "include")
 link_poco(Core)
 
 # Needed components
-target_link_libraries(Core cAVS Rest)
+target_link_libraries(Core cAVS Rest Util)
