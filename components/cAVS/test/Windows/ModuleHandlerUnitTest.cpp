@@ -171,7 +171,7 @@ TEST_CASE("Module handling: getting module entries")
 
     /* Simulating an os error during getting adsp properties */
     CHECK_THROWS_MSG(moduleHandler.getAdspProperties(properties),
-        "OS says that io control has failed.");
+        "Device returns an exception: OS says that io control has failed.");
     CHECK(memoryEquals(properties, emptyAdspProperties));
 
     /* Simulating a driver error during getting adsp properties */
@@ -193,7 +193,7 @@ TEST_CASE("Module handling: getting module entries")
     /* Simulating an os error during getting module entries */
     std::vector<dsp_fw::ModuleEntry> entries;
     CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
-        "OS says that io control has failed.");
+        "Device returns an exception: OS says that io control has failed.");
     CHECK(entries.empty());
 
     /* Simulating a driver error during getting module entries */

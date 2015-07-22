@@ -93,7 +93,7 @@ TEST_CASE("Logging: setting and getting parameters")
 
     /* Checking that set log parameters command produces OS error */
     CHECK_THROWS_MSG(logger.setParameters(inputParameters),
-        "OS says that io control has failed.");
+        "TinySet error: OS says that io control has failed.");
 
     /* Checking that set log parameters command produces driver error */
     CHECK_THROWS_MSG(logger.setParameters(inputParameters),
@@ -105,7 +105,7 @@ TEST_CASE("Logging: setting and getting parameters")
 
     /* Checking that get log parameters command produces OS error */
     CHECK_THROWS_MSG(logger.getParameters(),
-        "OS says that io control has failed.");
+        "TinyGet error: OS says that io control has failed.");
 
     /* Checking that get log parameters command produces driver error */
     CHECK_THROWS_MSG(logger.getParameters(),

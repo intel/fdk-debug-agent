@@ -52,7 +52,7 @@ public:
      * - NT_SUCCESS(returnedDriverStatus) returns false or
      * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
      *
-     * @throw MockedDevice::Exception
+     * @throw Device::Exception
      */
     void addGetAdspPropertiesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
@@ -70,7 +70,7 @@ public:
      * - NT_SUCCESS(returnedDriverStatus) returns false or
      * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
      *
-     * @throw MockedDevice::Exception
+     * @throw Device::Exception
      */
     void addGetModuleEntriesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
@@ -86,7 +86,7 @@ public:
     * - ioctlSuccess is false or
     * - NT_SUCCESS(returnedStatus) returns false
     *
-    * @throw MockedDevice::Exception
+    * @throw Device::Exception
     */
     void addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
         const driver::FwLogsState &returnedState);
@@ -100,7 +100,7 @@ public:
      * Note: the expectedState parameter is alwayse used,
      * even if NT_SUCCESS(returnedStatus) returns false or if ioctlSuccess is false
      *
-     * @throw MockedDevice::Exception
+     * @throw Device::Exception
      */
     void addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
         const driver::FwLogsState &expectedState);

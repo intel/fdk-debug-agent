@@ -207,12 +207,12 @@ TEST_CASE("MockedDevice: Test vector not fully consumed")
 
         CHECK_NOTHROW(device.ioControl(IoCtl2, nullptr, nullptr));
     }
-    catch (MockedDevice::Exception &e)
+    catch (Device::Exception &e)
     {
         /* Mocked device destructor throws an exception when the test vector is not consumed */
         CHECK(std::string(e.what()) == "IoCtl test vector has not been fully consumed.");
         return;
     }
-    INFO("MockedDevice::Exception should have been thrown.");
+    INFO("Device::Exception should have been thrown.");
     CHECK(false);
 }

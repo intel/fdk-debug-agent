@@ -53,7 +53,7 @@ class MockedDevice final : public Device
 public:
     MockedDevice() : mCurrentEntry(0), mFailed(false) {}
 
-    /** @throw MockedDevice::Exception if the mocking has failed.
+    /** @throw Device::Exception if the mocking has failed.
      *
      * Indeed throwing in destructor ensures that the client code is notified of a mock failure.
      *
@@ -61,13 +61,6 @@ public:
      * client forgets to call it, the failure will not be reported.
      */
     virtual ~MockedDevice();
-
-    /** Thrown when the mock fails, for instance when an input value is not the expected one. */
-    class Exception : public std::logic_error
-    {
-    public:
-        Exception(const std::string &msg) : logic_error(msg.c_str()) {}
-    };
 
     /** Add a successful ioctl entry into the test vector.
      *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
