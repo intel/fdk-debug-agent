@@ -105,6 +105,10 @@ bool LogStreamer::streamNextFormatData(std::ostream &os)
     /* Blocking read to get a log block */
     try {
         std::unique_ptr<LogBlock> block(std::move(mLogger.readLogBlock()));
+        if (block == nullptr) {
+            /* Logger is closed, no more entries */
+            return false;
+        }
         os << *block;
     }
     catch (Logger::Exception &e) {

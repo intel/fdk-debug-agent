@@ -23,7 +23,11 @@
 
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/IoCtlStructureHelpers.hpp"
+#include "cAVS/Windows/RealTimeWppClient.hpp"
+#include "Util/BlockingQueue.hpp"
 #include "cAVS/Logger.hpp"
+#include <mutex>
+#include <thread>
 
 namespace debug_agent
 {
@@ -38,7 +42,7 @@ namespace windows
 class Logger final: public cavs::Logger
 {
 public:
-    Logger(Device &device) : mDevice(device) {}
+    Logger(Device &device) : mDevice(device), mLogEntryQueue(queueMaxMemoryBytes, logBlockSize) {}
 
     virtual void setParameters(const Parameters &parameters) override;
 
@@ -47,10 +51,40 @@ public:
     virtual std::unique_ptr<LogBlock> readLogBlock() override;
 
 private:
+    /** Maximum size of the log entry queue */
+    static const std::size_t queueMaxMemoryBytes = 10 * 1024 * 1024; /* 10 meg */
+
     enum class IoCtlType
     {
         Get,
         Set
+    };
+
+    using BlockingQueue = util::BlockingQueue<LogBlock>;
+
+    /** This class handles the log producer thread */
+    class LogProducer final : public windows::WppLogEntryListener
+    {
+    public:
+        /** The constructor starts the log producer thread */
+        LogProducer(BlockingQueue &queue);
+
+        /** The destructor stops (and joins) the log producer thread */
+        ~LogProducer();
+
+    private:
+        LogProducer(const LogProducer&) = delete;
+        LogProducer& operator=(const LogProducer&) = delete;
+
+        /** Method called by the log producer thread */
+        void produceEntries();
+
+        /** Implements WppLogEntryListener interface */
+        virtual void onLogEntry(uint32_t coreId, uint8_t *buffer, uint32_t bufferSize) override;
+
+        BlockingQueue &mQueue;
+        RealTimeWppClient mWppClient;
+        std::thread mProducerThread;
     };
 
     static uint32_t getIoControlCodeFromType(IoCtlType type);
@@ -80,10 +114,27 @@ private:
     /** Translate log parameters from driver type */
     static Parameters translateFromDriver(const driver::FwLogsState &params);
 
+    /* Returns the size of a log block.
+     * This method is used by the blocking queue in order to estimate the
+     * memory size of all contained log blocks.
+     */
+    static std::size_t logBlockSize(const LogBlock &block)
+    {
+        return block.getLogSize();
+    }
+
     /** Set/Get log parameters using a Tiny(Get|Set) ioctl */
     void logParameterIoctl(IoCtlType type, TinyCmdLogParameterIoctl &content);
 
+    void setLogParameterIoctl(const Parameters &parameters);
+    void startLogLocked(const Parameters &parameters);
+    void stopLogLocked(const Parameters &parameters);
+    void updateLogLocked(const Parameters &parameters);
+
     Device &mDevice;
+    BlockingQueue mLogEntryQueue;
+    std::unique_ptr<LogProducer> mLogProducer;
+    std::mutex mLogActivationContextMutex;
 };
 
 }

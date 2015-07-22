@@ -19,14 +19,13 @@
 *
 ********************************************************************************
 */
-#include <cAVS/Windows/Logger.hpp>
-#include <cAVS/Windows/DriverTypes.hpp>
+#include "cAVS/Windows/Logger.hpp"
+#include "cAVS/Windows/DriverTypes.hpp"
+#include "Util/PointerHelper.hpp"
 #include <string>
 #include <cstring>
 #include <algorithm>
-/** @todo remove these header inclusion only needed for fake/demo log */
-#include <thread>
-#include <chrono>
+#include <assert.h>
 
 /** Unfortunetely windows.h define "min" as macro, making fail the call std::min()
  * So undefining it */
@@ -38,6 +37,49 @@ namespace cavs
 {
 namespace windows
 {
+
+Logger::LogProducer::LogProducer(BlockingQueue &queue) :
+    mQueue(queue),
+    mWppClient(),
+
+    /* Note: mProducerThread should be the last initialized member because it starts a thread
+     * that uses the previous members.
+     */
+     mProducerThread(&Logger::LogProducer::produceEntries, this)
+{
+}
+
+Logger::LogProducer::~LogProducer()
+{
+    mWppClient.stop();
+    mProducerThread.join();
+}
+
+void Logger::LogProducer::produceEntries()
+{
+    try {
+        mWppClient.collectLogEntries(*this);
+    }
+    catch (WppClient::Exception &e)
+    {
+        /* Swallowing the exception because currently the SwAS doesn't propose any way
+         * to forward the error to the client (here the client may be disconnected)
+         */
+        std::cout << "Error: can not collect log entries: " << e.what() << std::endl;
+    }
+}
+
+void Logger::LogProducer::onLogEntry(uint32_t coreId, uint8_t *buffer,
+    uint32_t bufferSize)
+{
+    std::unique_ptr<LogBlock> logBlock(new LogBlock(coreId, bufferSize));
+    std::copy(buffer, buffer + bufferSize, logBlock->getLogData().begin());
+
+    if (!mQueue.add(std::move(logBlock))) {
+        std::cout << "Warning: dropping log entry: the queue is full or closed"
+                  << std::endl;
+    }
+}
 
 uint32_t Logger::getIoControlCodeFromType(IoCtlType type)
 {
@@ -165,10 +207,76 @@ Logger::Parameters Logger::translateFromDriver(const driver::FwLogsState &fwPara
 
 void Logger::setParameters(const Parameters &parameters)
 {
+    std::lock_guard<std::mutex> locker(mLogActivationContextMutex);
+
+    bool isLogProductionRunning = mLogProducer != nullptr;
+    if (isLogProductionRunning != parameters.mIsStarted) {
+        /* Start/Stop state has changed */
+
+        if (parameters.mIsStarted) {
+            startLogLocked(parameters);
+        }
+        else {
+            stopLogLocked(parameters);
+        }
+    }
+    else {
+        /* Start/Stop state has not changed */
+
+        if (isLogProductionRunning) {
+            throw Exception("Can not change log parameters while logging is activated.");
+        }
+        else {
+            updateLogLocked(parameters);
+        }
+    }
+}
+
+void Logger::startLogLocked(const Parameters &parameters)
+{
+    assert(mLogProducer == nullptr);
+
+    /* Starting the producer thread before enabling logs into the fw */
+    mLogProducer = std::move(std::make_unique<LogProducer>(mLogEntryQueue));
+
+    try
+    {
+        setLogParameterIoctl(parameters);
+    }
+    catch (Exception &)
+    {
+        /* Stopping the log producer thread in exception case */
+        mLogProducer.reset();
+        throw;
+    }
+}
+
+void Logger::stopLogLocked(const Parameters &parameters)
+{
+    assert(mLogProducer != nullptr);
+
+    /* This ensures that mLogProducer will be deleted, even if an exception is thrown */
+    util::EnsureUniquePtrDeletion<LogProducer> ptrDeleter(mLogProducer);
+
+    /* May throw Logger::Exception */
+    setLogParameterIoctl(parameters);
+}
+
+void Logger::updateLogLocked(const Parameters &parameters)
+{
+    /* Cannot change log parameters during running session */
+    assert(mLogProducer == nullptr);
+
+    setLogParameterIoctl(parameters);
+}
+
+
+void Logger::setLogParameterIoctl(const Parameters &parameters)
+{
     TinyCmdLogParameterIoctl content;
 
     /* Seting supplied parameters.
-     * May throws Logger::Exception */
+    * May throw Logger::Exception */
     content.getFwLogsState() = translateToDriver(parameters);
 
     /* Performing the ioctl */
@@ -209,19 +317,7 @@ void Logger::logParameterIoctl(IoCtlType type, TinyCmdLogParameterIoctl &content
 
 std::unique_ptr<LogBlock> Logger::readLogBlock()
 {
-    /** @todo read FW log using windows driver interface once available */
-    static const std::string msg("Fake log from Windows driver");
-    static const int fakeCoreID = 0x0F; // a 0x0F is a valid core ID and easy to see in hex editor
-
-    std::unique_ptr<LogBlock> block(new LogBlock(fakeCoreID, msg.size()));
-    std::copy(msg.begin(), msg.end(), block->getLogData().begin());
-
-    /* Bandwidth limiter !
-     * We must add a tempo for fake log since it would produce an infinite log stream bandwidth,
-     * only limited by machine capacity. */
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    return block;
+    return mLogEntryQueue.remove();
 }
 
 }
