@@ -19,52 +19,51 @@
 *
 ********************************************************************************
 */
-#include "cAVS/SystemDriverFactory.hpp"
-#include "cAVS/Windows/Driver.hpp"
-#include "cAVS/Windows/SystemDevice.hpp"
-#include "cAVS/Windows/DeviceIdFinder.hpp"
-#include "cAVS/Windows/RealTimeWppClientFactory.hpp"
+#pragma once
+
+#include "cAVS/Windows/WppClient.hpp"
+#include <mutex>
+#include <condition_variable>
 
 namespace debug_agent
 {
 namespace cavs
 {
-
-/** OED driver interface substring */
-static const std::string DriverInterfaceSubstr = "intelapp2audiodspiface";
-
-/** OED driver class */
-const GUID DriverInterfaceGuid =
-{ 0xd562b888, 0xcf36, 0x4c54, { 0x84, 0x1d, 0x10, 0xff, 0x7b, 0xff, 0x4f, 0x60 } };
-
-std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
+namespace windows
 {
-    /* Finding device id */
-    std::string deviceId;
-    try
+
+/** This wpp client produces no logs */
+class StubbedWppClient final : public WppClient
+{
+public:
+    StubbedWppClient() : mStopped(false) {}
+
+    virtual void collectLogEntries(WppLogEntryListener &listener) override
     {
-        deviceId = windows::DeviceIdFinder::findOne(DriverInterfaceGuid,
-            DriverInterfaceSubstr);
-    }
-    catch (windows::DeviceIdFinder::Exception &e)
-    {
-        throw Exception("Cannot get device identifier: " + std::string(e.what()));
+        std::unique_lock<std::mutex> locker(mMutex);
+        if (mStopped) {
+            return;
+        }
+
+        /* Blocking until stop() is called */
+        mCondVar.wait(locker);
     }
 
-    std::unique_ptr<windows::Device> device;
-    try
+    virtual void stop() NOEXCEPT override
     {
-        device = std::move(std::unique_ptr<windows::Device>(new windows::SystemDevice(deviceId)));
-    }
-    catch (windows::Device::Exception &e)
-    {
-        throw Exception("Cannot create device: " + std::string(e.what()));
+        std::unique_lock<std::mutex> locker(mMutex);
+        if (!mStopped) {
+            mStopped = true;
+            mCondVar.notify_all();
+        }
     }
 
-    /* Creating Driver interface */
-    return std::unique_ptr<Driver>(new windows::Driver(std::move(device),
-        std::make_unique<windows::RealTimeWppClientFactory>()));
+private:
+    bool mStopped;
+    std::mutex mMutex;
+    std::condition_variable mCondVar;
+};
+
 }
-
 }
 }

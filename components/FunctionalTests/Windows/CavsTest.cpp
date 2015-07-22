@@ -26,6 +26,7 @@
 #include "cAVS/Windows/DeviceInjectionDriverFactory.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
+#include "cAVS/Windows/StubbedWppClientFactory.hpp"
 #include "catch.hpp"
 
 using namespace debug_agent::core;
@@ -95,7 +96,8 @@ TEST_CASE("DebugAgent/cAVS: module entries")
     * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
-    windows::DeviceInjectionDriverFactory driverFactory(std::move(device));
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
@@ -192,7 +194,8 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
     * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
-    windows::DeviceInjectionDriverFactory driverFactory(std::move(device));
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);

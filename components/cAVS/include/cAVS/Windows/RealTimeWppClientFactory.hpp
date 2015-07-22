@@ -19,52 +19,29 @@
 *
 ********************************************************************************
 */
-#include "cAVS/SystemDriverFactory.hpp"
-#include "cAVS/Windows/Driver.hpp"
-#include "cAVS/Windows/SystemDevice.hpp"
-#include "cAVS/Windows/DeviceIdFinder.hpp"
-#include "cAVS/Windows/RealTimeWppClientFactory.hpp"
+#pragma once
+
+#include "cAVS/Windows/WppClientFactory.hpp"
+#include "cAVS/Windows/RealTimeWppClient.hpp"
+#include <string>
 
 namespace debug_agent
 {
 namespace cavs
 {
-
-/** OED driver interface substring */
-static const std::string DriverInterfaceSubstr = "intelapp2audiodspiface";
-
-/** OED driver class */
-const GUID DriverInterfaceGuid =
-{ 0xd562b888, 0xcf36, 0x4c54, { 0x84, 0x1d, 0x10, 0xff, 0x7b, 0xff, 0x4f, 0x60 } };
-
-std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
+namespace windows
 {
-    /* Finding device id */
-    std::string deviceId;
-    try
-    {
-        deviceId = windows::DeviceIdFinder::findOne(DriverInterfaceGuid,
-            DriverInterfaceSubstr);
-    }
-    catch (windows::DeviceIdFinder::Exception &e)
-    {
-        throw Exception("Cannot get device identifier: " + std::string(e.what()));
-    }
 
-    std::unique_ptr<windows::Device> device;
-    try
+/* This factory creates real time wpp client */
+class RealTimeWppClientFactory : public WppClientFactory
+{
+public:
+    virtual std::unique_ptr<WppClient> createInstance() const override
     {
-        device = std::move(std::unique_ptr<windows::Device>(new windows::SystemDevice(deviceId)));
+        return std::make_unique<RealTimeWppClient>();
     }
-    catch (windows::Device::Exception &e)
-    {
-        throw Exception("Cannot create device: " + std::string(e.what()));
-    }
+};
 
-    /* Creating Driver interface */
-    return std::unique_ptr<Driver>(new windows::Driver(std::move(device),
-        std::make_unique<windows::RealTimeWppClientFactory>()));
 }
-
 }
 }

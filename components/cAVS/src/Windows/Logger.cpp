@@ -38,27 +38,28 @@ namespace cavs
 namespace windows
 {
 
-Logger::LogProducer::LogProducer(BlockingQueue &queue) :
+Logger::LogProducer::LogProducer(BlockingQueue &queue, std::unique_ptr<WppClient> wppClient) :
     mQueue(queue),
-    mWppClient(),
+    mWppClient(std::move(wppClient)),
 
     /* Note: mProducerThread should be the last initialized member because it starts a thread
      * that uses the previous members.
      */
      mProducerThread(&Logger::LogProducer::produceEntries, this)
 {
+    assert(mWppClient != nullptr);
 }
 
 Logger::LogProducer::~LogProducer()
 {
-    mWppClient.stop();
+    mWppClient->stop();
     mProducerThread.join();
 }
 
 void Logger::LogProducer::produceEntries()
 {
     try {
-        mWppClient.collectLogEntries(*this);
+        mWppClient->collectLogEntries(*this);
     }
     catch (WppClient::Exception &e)
     {
@@ -237,7 +238,8 @@ void Logger::startLogLocked(const Parameters &parameters)
     assert(mLogProducer == nullptr);
 
     /* Starting the producer thread before enabling logs into the fw */
-    mLogProducer = std::move(std::make_unique<LogProducer>(mLogEntryQueue));
+    mLogProducer = std::move(std::make_unique<LogProducer>(mLogEntryQueue,
+        mWppClientFactory.createInstance()));
 
     try
     {

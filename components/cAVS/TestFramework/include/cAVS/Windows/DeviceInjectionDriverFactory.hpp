@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/Windows/Device.hpp"
+#include "cAVS/Windows/WppClientFactory.hpp"
 #include "cAVS/DriverFactory.hpp"
 #include <memory>
 
@@ -33,12 +34,15 @@ namespace cavs
 namespace windows
 {
 
-/** This driver factory injects a device into the created driver instance */
+/** This driver factory injects a device and a wpp client factory into the created
+ * driver instance */
 class DeviceInjectionDriverFactory : public DriverFactory
 {
 public:
-    DeviceInjectionDriverFactory(std::unique_ptr<Device> injectedDevice) :
-        mInjectedDevice(std::move(injectedDevice)) {}
+    DeviceInjectionDriverFactory(std::unique_ptr<Device> injectedDevice,
+        std::unique_ptr<WppClientFactory> injectedWppClientFactory) :
+        mInjectedDevice(std::move(injectedDevice)),
+        mInjectedWppClientFactory(std::move(injectedWppClientFactory)) {}
 
     virtual std::unique_ptr<cavs::Driver> newDriver() const override;
 
@@ -48,6 +52,9 @@ private:
      * But in the DeviceInjectionDriverFactory case, the following unique pointer will loose its
      * content when newDriver() is called, so declaring it mutable */
     mutable std::unique_ptr<Device> mInjectedDevice;
+
+    /* Same point for this member */
+    mutable std::unique_ptr<WppClientFactory> mInjectedWppClientFactory;
 };
 
 }

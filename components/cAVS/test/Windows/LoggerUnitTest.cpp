@@ -23,6 +23,7 @@
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
+#include "cAVS/Windows/StubbedWppClientFactory.hpp"
 #include "cAVS/Windows/Logger.hpp"
 #include <catch.hpp>
 #include <memory>
@@ -32,6 +33,7 @@ using namespace debug_agent::cavs::windows;
 
 TEST_CASE("Logging: setting and getting parameters")
 {
+    StubbedWppClientFactory wppClientFactory;
     MockedDevice device;
 
     /* Setting the test vector
@@ -97,7 +99,7 @@ TEST_CASE("Logging: setting and getting parameters")
      * --------------------------- */
 
     /* Creating the windows logger, that will use the mocked device*/
-    windows::Logger logger(device);
+    windows::Logger logger(device, wppClientFactory);
 
     /* Defining parameters that will be used for set then get*/
     windows::Logger::Parameters inputParameters(true, windows::Logger::Level::High,

@@ -23,7 +23,7 @@
 
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/IoCtlStructureHelpers.hpp"
-#include "cAVS/Windows/RealTimeWppClient.hpp"
+#include "cAVS/Windows/WppClientFactory.hpp"
 #include "Util/BlockingQueue.hpp"
 #include "cAVS/Logger.hpp"
 #include <mutex>
@@ -42,7 +42,10 @@ namespace windows
 class Logger final: public cavs::Logger
 {
 public:
-    Logger(Device &device) : mDevice(device), mLogEntryQueue(queueMaxMemoryBytes, logBlockSize) {}
+    Logger(Device &device, WppClientFactory &wppClientFactory) : mDevice(device),
+        mWppClientFactory(wppClientFactory),
+        mLogEntryQueue(queueMaxMemoryBytes, logBlockSize) {}
+
     ~Logger()
     {
         /* Ensure that internal threads are stopped and all consumer threads are unblocked */
@@ -73,8 +76,8 @@ private:
     class LogProducer final : public windows::WppLogEntryListener
     {
     public:
-        /** The constructor starts the log producer thread */
-        LogProducer(BlockingQueue &queue);
+        /* The constructor starts the log producer thread */
+        LogProducer(BlockingQueue &queue, std::unique_ptr<WppClient> wppClient);
 
         /** The destructor stops (and joins) the log producer thread */
         ~LogProducer();
@@ -90,7 +93,7 @@ private:
         virtual void onLogEntry(uint32_t coreId, uint8_t *buffer, uint32_t bufferSize) override;
 
         BlockingQueue &mQueue;
-        RealTimeWppClient mWppClient;
+        std::unique_ptr<WppClient> mWppClient;
         std::thread mProducerThread;
     };
 
@@ -139,6 +142,7 @@ private:
     void updateLogLocked(const Parameters &parameters);
 
     Device &mDevice;
+    WppClientFactory &mWppClientFactory;
     BlockingQueue mLogEntryQueue;
     std::unique_ptr<LogProducer> mLogProducer;
     std::mutex mLogActivationContextMutex;

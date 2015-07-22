@@ -39,8 +39,11 @@ std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
             "Please call newDriver() once.");
     }
 
+    assert(mInjectedWppClientFactory != nullptr);
+
     /* After this call mInjectedDevice will be null */
-    return std::unique_ptr<cavs::Driver>(new windows::Driver(std::move(mInjectedDevice)));
+    return std::unique_ptr<cavs::Driver>(new windows::Driver(std::move(mInjectedDevice),
+        std::move(mInjectedWppClientFactory)));
 }
 
 }

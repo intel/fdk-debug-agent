@@ -25,6 +25,7 @@
 #include "cAVS/Windows/Logger.hpp"
 #include "cAVS/Windows/ModuleHandler.hpp"
 #include "cAVS/Windows/Device.hpp"
+#include "cAVS/Windows/WppClientFactory.hpp"
 #include <memory>
 
 namespace debug_agent
@@ -40,14 +41,17 @@ namespace windows
 class Driver final : public cavs::Driver
 {
 public:
-    Driver(std::unique_ptr<Device> device) : mDevice(std::move(device)),
-        mLogger(*mDevice), mModuleHandler(*mDevice) {}
+    Driver(std::unique_ptr<Device> device,
+        std::unique_ptr<WppClientFactory> wppClientFactory) : mDevice(std::move(device)),
+        mWppClientFactory(std::move(wppClientFactory)),
+        mLogger(*mDevice, *mWppClientFactory), mModuleHandler(*mDevice) {}
 
     virtual cavs::Logger &getLogger() override { return mLogger; }
     virtual ModuleHandler &getModuleHandler() override { return mModuleHandler;  }
 
 private:
     std::unique_ptr<Device> mDevice;
+    std::unique_ptr<WppClientFactory> mWppClientFactory;
     Logger mLogger;
     ModuleHandler mModuleHandler;
 };

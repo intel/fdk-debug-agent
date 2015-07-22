@@ -52,7 +52,11 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/WppLogEntryListener.hpp
     include/cAVS/Windows/WppClient.hpp
     include/cAVS/Windows/RealTimeWppClient.hpp
-    include/cAVS/Windows/FileWppClient.hpp)
+    include/cAVS/Windows/FileWppClient.hpp
+    include/cAVS/Windows/StubbedWppClient.hpp
+    include/cAVS/Windows/WppClientFactory.hpp
+    include/cAVS/Windows/RealTimeWppClientFactory.hpp
+    include/cAVS/Windows/StubbedWppClientFactory.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
