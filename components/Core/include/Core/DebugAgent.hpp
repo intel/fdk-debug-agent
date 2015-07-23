@@ -35,6 +35,7 @@ class DebugAgent final
 public:
     /** @throw DebugAgent::Exception */
     DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port);
+    ~DebugAgent();
 
     class Exception : public std::logic_error
     {

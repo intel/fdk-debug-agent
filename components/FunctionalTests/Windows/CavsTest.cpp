@@ -176,6 +176,18 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
         STATUS_SUCCESS,
         setLogParams);
 
+    /** Adding a successful set log parameters command, this is called by the System class
+     * destructor to stop log */
+    setLogParams = {
+        windows::driver::LOG_STATE::STOPPED,
+        windows::driver::LOG_LEVEL::VERBOSE,
+        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+    };
+    commands.addSetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        setLogParams);
+
     /* Now using the mocked device
     * --------------------------- */
 

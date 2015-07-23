@@ -63,6 +63,14 @@ catch (cavs::System::Exception &e)
     throw Exception("System error: " + std::string(e.what()));
 }
 
+DebugAgent::~DebugAgent()
+{
+    /* This call will unblock all threads that consume system events (log...) */
+    mSystem.stop();
+
+   /* Then rest server destructor can terminate the http request threads gracefully */
+}
+
 
 }
 }

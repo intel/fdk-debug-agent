@@ -80,6 +80,10 @@ public:
         }
     }
 
+    virtual void stop() NOEXCEPT override
+    {
+    }
+
     static std::unique_ptr<LogBlock> generateLogBlock(size_t blockNumber)
     {
         const unsigned int coreId = 0;

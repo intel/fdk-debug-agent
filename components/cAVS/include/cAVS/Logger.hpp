@@ -111,6 +111,11 @@ public:
     virtual std::unique_ptr<LogBlock> readLogBlock() = 0;
 
     /**
+    * Stop internal threads and unblock consumer threads
+    */
+    virtual void stop() NOEXCEPT = 0;
+
+    /**
      * Return a human representation of an Output enum class value.
      * @param[in] output The Output enum class value
      * @return a string representing the value

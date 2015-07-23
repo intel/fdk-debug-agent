@@ -81,6 +81,18 @@ TEST_CASE("Logging: setting and getting parameters")
         STATUS_SUCCESS,
         expectedFwLogState);
 
+    /** Adding a successful set log parameters command, this is called by the logger destructor
+     * to stop log */
+    expectedFwLogState = {
+        driver::LOG_STATE::STOPPED,
+        driver::LOG_LEVEL::VERBOSE,
+        driver::LOG_OUTPUT::OUTPUT_SRAM
+    };
+    commands.addSetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        expectedFwLogState);
+
     /* Now using the mocked device
      * --------------------------- */
 

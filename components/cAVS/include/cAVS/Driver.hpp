@@ -36,12 +36,17 @@ class Driver
 {
 public:
     Driver() = default;
+    virtual ~Driver() = default;
 
     virtual Logger &getLogger() = 0;
 
     virtual ModuleHandler &getModuleHandler() = 0;
 
-    virtual ~Driver() {};
+    /** Stop threads and unblock consumer threads, currently only logging is concerned. */
+    void stop() NOEXCEPT
+    {
+        getLogger().stop();
+    }
 
 private:
     /* Make this class non copyable */

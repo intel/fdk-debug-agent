@@ -320,6 +320,28 @@ std::unique_ptr<LogBlock> Logger::readLogBlock()
     return mLogEntryQueue.remove();
 }
 
+void Logger::stop()
+{
+    /* Stopping log session if one is running */
+    std::lock_guard<std::mutex> locker(mLogActivationContextMutex);
+    if (mLogProducer != nullptr) {
+
+        /* Using arbitrary level and output values, they are not relevant when stopping log... */
+        Parameters parameter(false, Logger::Level::Verbose, Logger::Output::Sram);
+        try
+        {
+            stopLogLocked(parameter);
+        }
+        catch (Exception &e)
+        {
+            std::cout << "Cannot stop log producer : " << e.what() << std::endl;
+        }
+    }
+
+    /* Unblocking log consumer threads */
+    mLogEntryQueue.close();
+}
+
 }
 }
 }

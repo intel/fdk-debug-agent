@@ -74,6 +74,12 @@ public:
      */
     void doLogStream(std::ostream &os);
 
+    /** Stop internal threads and unblock consumer threads */
+    void stop() NOEXCEPT
+    {
+        mDriver->stop();
+    }
+
 private:
     /* Make this class non copyable */
     System(const System &) = delete;

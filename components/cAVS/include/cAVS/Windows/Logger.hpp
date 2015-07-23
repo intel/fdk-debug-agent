@@ -43,12 +43,19 @@ class Logger final: public cavs::Logger
 {
 public:
     Logger(Device &device) : mDevice(device), mLogEntryQueue(queueMaxMemoryBytes, logBlockSize) {}
+    ~Logger()
+    {
+        /* Ensure that internal threads are stopped and all consumer threads are unblocked */
+        stop();
+    }
 
     virtual void setParameters(const Parameters &parameters) override;
 
     virtual Parameters getParameters() override;
 
     virtual std::unique_ptr<LogBlock> readLogBlock() override;
+
+    virtual void stop() NOEXCEPT override;
 
 private:
     /** Maximum size of the log entry queue */

@@ -63,6 +63,11 @@ std::unique_ptr<LogBlock> Logger::readLogBlock()
     return block;
 }
 
+void Logger::stop() NOEXCEPT
+{
+    /* To do */
+}
+
 }
 }
 }
