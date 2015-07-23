@@ -28,6 +28,10 @@
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/StubbedWppClientFactory.hpp"
 #include "catch.hpp"
+#include <chrono>
+#include <thread>
+#include <future>
+#include <condition_variable>
 
 using namespace debug_agent::core;
 using namespace debug_agent::cavs;
@@ -244,4 +248,99 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
         "</table><p>To change log parameters: PUT [log status];[log level];[log output] at "
         "/cAVS/logging/parameters</p>"
         ));
+}
+
+TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* 0: Initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* 1: start log command */
+    windows::driver::FwLogsState setLogParams = {
+        true,
+        windows::driver::LOG_LEVEL::VERBOSE,
+        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+    };
+    commands.addSetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /* 2: Stop log command, will be called by the debug agent termination */
+    setLogParams.started = false;
+    setLogParams.level = windows::driver::LOG_LEVEL::VERBOSE;
+    setLogParams.output = windows::driver::LOG_OUTPUT::OUTPUT_SRAM;
+    commands.addSetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent in another thread. It can be stopped using
+     * a condition variable*/
+    std::mutex debugAgentMutex;
+    std::condition_variable stopDebugAgentCondVar;
+    std::future<void> debugAgentFuture(std::async(std::launch::async, [&]() {
+
+        DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+        /* Waiting for stop order */
+        std::unique_lock<std::mutex> locker(debugAgentMutex);
+        stopDebugAgentCondVar.wait(locker);
+    }));
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* Starting log */
+    CHECK_NOTHROW(client.request(
+        "/cAVS/logging/parameters",
+        HttpClientSimulator::Verb::Put,
+        "1;Verbose;SRAM",
+        HttpClientSimulator::Status::Ok,
+        "text/html",
+        "<p>Done</p>"
+        ));
+
+    /* Terminating the debug agent after 500ms in another thread, the client should be consuming
+     * log at this date */
+    std::future<void> debugAgentTerminationResult(std::async(std::launch::async, [&]() {
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
+        std::unique_lock<std::mutex> locker(debugAgentMutex);
+
+        /* Terminating debug agent */
+        stopDebugAgentCondVar.notify_one();
+    }));
+
+    /* Consuming log */
+    try
+    {
+        client.request(
+            "/cAVS/logging/stream",
+            HttpClientSimulator::Verb::Get,
+            "",
+            HttpClientSimulator::Status::Ok,
+            "application/vnd.ifdk-file",
+            HttpClientSimulator::AnyContent);
+    }
+    catch (HttpClientSimulator::NetworkException &)
+    {
+        /* A network exception can occur here because the debug agent closes its sockets.
+         * This is a normal case.
+         */
+    }
 }

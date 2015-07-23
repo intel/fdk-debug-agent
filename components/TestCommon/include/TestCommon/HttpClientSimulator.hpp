@@ -40,6 +40,7 @@ class HttpClientSimulator final
 {
 public:
     static const uint32_t DefaultPort = 9096;
+    static const std::string AnyContent;
 
     /* Http verb */
     enum class Verb
@@ -69,6 +70,13 @@ public:
         RequestFailureException(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
+    /* This specialized exception is thrown when a network error occurs */
+    class NetworkException : public RequestFailureException
+    {
+    public:
+        NetworkException(const std::string &msg) : RequestFailureException(msg.c_str()) {}
+    };
+
     HttpClientSimulator(const std::string &server, uint32_t port = DefaultPort) :
         mServer(server), mPort(port) {}
 
@@ -80,7 +88,8 @@ public:
      * @param[in] requestContent the content of the request
      * @param[in] expectedStatus the expected http status returned by the server
      * @param[in] expectedContentType the expected response content type returned by the server
-     * @param[in] expectedResponseContent the expected response content returned by the server
+     * @param[in] expectedResponseContent the expected response content returned by the server.
+     *                                    Use the AnyContent constant to accept any content.
      */
     void request(
         const std::string &uri,

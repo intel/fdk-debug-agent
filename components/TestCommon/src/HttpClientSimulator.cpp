@@ -46,6 +46,8 @@ namespace debug_agent
 namespace test_common
 {
 
+const std::string HttpClientSimulator::AnyContent("<any_content>");
+
 /* Translate the Poco status into the HttpClientSimulator::Status enum*/
 static HttpClientSimulator::Status translateStatus(HTTPResponse::HTTPStatus status)
 {
@@ -151,9 +153,9 @@ void HttpClientSimulator::request(
         /* Receiving the response content */
         Poco::StreamCopier::copyToString(responseStream, responseContent);
     }
-    catch (ConnectionAbortedException &e)
+    catch (NetException &e)
     {
-        throw RequestFailureException(std::string("Connection aborted: ") + e.what());
+        throw NetworkException(std::string("Network error: ") + e.what());
     }
 
     /* Checking status */
@@ -170,7 +172,7 @@ void HttpClientSimulator::request(
 
     }
     /* Checking response content*/
-    if (responseContent != expectedResponseContent) {
+    if (expectedResponseContent != AnyContent  && responseContent != expectedResponseContent) {
 
         /* The substring that contains difference will not exceed 15 chars */
         static const std::size_t diffLength = 15;
