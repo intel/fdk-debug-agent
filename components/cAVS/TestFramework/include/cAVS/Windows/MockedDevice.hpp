@@ -26,6 +26,7 @@
 #include <memory>
 #include <vector>
 #include <stdexcept>
+#include <mutex>
 
 namespace debug_agent
 {
@@ -180,6 +181,9 @@ private:
     std::size_t mCurrentEntry;
     bool mFailed;
     std::string mFailureMessage;
+
+    /* A device supports concurent ioctl calls */
+    std::mutex mMemberMutex;
 };
 
 }

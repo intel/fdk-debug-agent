@@ -87,6 +87,9 @@ MockedDevice::~MockedDevice()
 void MockedDevice::addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
     const Buffer *expectedOutput, const Buffer *returnedOutput)
 {
+    /* No need to lock members, this method is called by the main thread of the test,
+     * when it fills the test vector. */
+
     mEntries.push_back(IoCtlEntry(
         ioControlCode,
         expectedInput,
@@ -98,6 +101,9 @@ void MockedDevice::addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer 
 void MockedDevice::addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
     const Buffer *expectedOutput)
 {
+    /* No need to lock members, this method is called by the main thread of the test,
+     * when it fills the test vector. */
+
     mEntries.push_back(IoCtlEntry(
         ioControlCode,
         expectedInput,
@@ -108,6 +114,14 @@ void MockedDevice::addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *exp
 
 void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output)
 {
+    /* Several threads can call this method, so protecting against it.
+     *
+     * Note: although this mutex protects against concurrent calls,
+     *       no concurrent calls should happen because this leads to randomize the call order
+     *       which won't match probably the test vector.
+     */
+    std::lock_guard<std::mutex> locker(mMemberMutex);
+
     checkNonFailure();
 
     /* Checking that the test vector is not already consumed */
