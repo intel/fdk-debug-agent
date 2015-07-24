@@ -24,6 +24,7 @@
 
 #include <Poco/ErrorHandler.h>
 #include <Poco/Net/NetException.h>
+#include <Poco/Exception.h>
 #include <iostream>
 #include <typeinfo>
 
@@ -33,9 +34,10 @@ namespace rest
 {
 
 /**
- * Implements a Poco ErrorHandler that hides ConnectionAbortedException, because
- * this exception is thrown when a client disconnects from the http server using a
- * keep-alive connection, which is a nominal case. */
+* Implements a Poco ErrorHandler that hides IOException (and derived exceptions as
+* NetException) because these exceptions are thrown when a client disconnects, or when
+* the server closes all its sockets.
+*/
 class ErrorHandler final : public Poco::ErrorHandler
 {
 public:
@@ -60,9 +62,11 @@ public:
         const std::type_info &exceptionType = typeid(e);
 
         /* comparing the exception type */
-        if (exceptionType == typeid(Poco::Net::ConnectionAbortedException)) {
+        if (dynamic_cast<const Poco::IOException*>(&e) != nullptr) {
 
-            /* ConnectionAbortedException is a nominal case: ignoring it */
+            /* IOException occurs during client disconnection/server closing
+            * It's a nominal case, so hiding it.
+            */
             return;
         }
 
@@ -76,5 +80,3 @@ private:
 
 }
 }
-
-

@@ -22,8 +22,10 @@
 
 #include "ServerRequestHandling.hpp"
 #include "Rest/HttpMessageProperties.hpp"
+#include <Poco/Exception.h>
 #include <sstream>
 
+using namespace Poco;
 using namespace Poco::Net;
 
 namespace debug_agent
@@ -70,11 +72,11 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
 
         fail(pocoStatus, e.what(), resp);
     }
-    catch (ConnectionAbortedException &)
+    catch (IOException &)
     {
         /* This exception is swallowed
          * @todo Use logging instead */
-        std::cout << "Connection aborted." << std::endl;
+        std::cout << "Connection broken." << std::endl;
     }
     catch (std::exception &e)
     {
