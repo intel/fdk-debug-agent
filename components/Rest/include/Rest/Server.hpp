@@ -24,6 +24,7 @@
 
 #include "Rest/Dispatcher.hpp"
 #include <Poco/Net/HTTPServer.h>
+#include <Poco/ThreadPool.h>
 
 namespace debug_agent
 {
@@ -60,6 +61,8 @@ private:
     Server(const Server&) = delete;
     Server &operator=(const Server &) = delete;
 
+    Poco::Net::ServerSocket mServerSocket;
+    Poco::ThreadPool mThreadPool;
     Poco::Net::HTTPServer mHttpServer;
 };
 

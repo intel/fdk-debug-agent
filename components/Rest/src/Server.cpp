@@ -37,17 +37,16 @@ namespace debug_agent
 namespace rest
 {
 
-Server::Server(std::shared_ptr<const Dispatcher> dispatcher, uint32_t port)  :
-    mHttpServer(new RequestHandlerFactory(dispatcher), port)
+Server::Server(std::shared_ptr<const Dispatcher> dispatcher, uint32_t port)
+try: mServerSocket(port),
+     mHttpServer(new RequestHandlerFactory(dispatcher), mThreadPool, mServerSocket,
+     new HTTPServerParams())
 {
-    try
-    {
-        mHttpServer.start();
-    }
-    catch (Poco::Net::NetException &e)
-    {
-        throw Exception("Unable to start http server: " + std::string(e.what()));
-    }
+    mHttpServer.start();
+}
+catch (Poco::Net::NetException &e)
+{
+    throw Exception("Unable to start http server: " + std::string(e.what()));
 }
 
 Server::~Server()
@@ -66,6 +65,9 @@ Server::~Server()
         /* @todo: use logging */
         std::cout << "Unable to stop http server: " << e.what() << std::endl;
     }
+
+    /* Now all sockets are closed, the http request threads should finish. Joining them */
+    mThreadPool.joinAll();
 }
 
 }
