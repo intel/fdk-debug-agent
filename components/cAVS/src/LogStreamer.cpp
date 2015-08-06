@@ -97,7 +97,15 @@ LogStreamer::LogStreamer(Logger &logger, const std::vector<dsp_fw::ModuleEntry> 
 
 void LogStreamer::streamFormatHeader(std::ostream &os)
 {
+    /* Write the number of module entries */
+    uint32_t moduleEntriesNb = mModuleEntries.size();
+    os.write(reinterpret_cast<const char *>(&moduleEntriesNb), sizeof(moduleEntriesNb));
+
+    /* Write all the module entries */
     os << mModuleEntries;
+
+    /* Flush the header data */
+    os.flush();
 }
 
 bool LogStreamer::streamNextFormatData(std::ostream &os)

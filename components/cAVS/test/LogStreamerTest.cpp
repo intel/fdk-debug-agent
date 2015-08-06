@@ -45,8 +45,15 @@ public:
         mExpectedBlocksStream(),
         mMockedParameter()
     {
-        for (size_t i = 0; i < mNbBlocks; ++i) {
+        /* Write the number of module entries, and the module entry table.
+        *  In this test, there is no module entry table, but we still have to write the
+        *  number of module entries, i.e. 0 */
+        static const int nbModuleEntriesBytesLength = 4;
+        char nbModuleEntriesBytes[nbModuleEntriesBytesLength] = { 0x00, 0x00, 0x00, 0x00 };
+        mExpectedBlocksStream.write(nbModuleEntriesBytes, nbModuleEntriesBytesLength);
 
+        /* Write the log blocks */
+        for (size_t i = 0; i < mNbBlocks; ++i) {
             std::unique_ptr<LogBlock> block(std::move(generateLogBlock(i)));
             mExpectedBlocksStream << *block;
         }
@@ -169,10 +176,12 @@ TEST_CASE("Test module entries to stream", "[streaming]")
      * - 8 bytes for versions per entry
      * - 3 entries in test table
      */
-    static const size_t expectedOutModuleEntriesStreamLength = (4 + 16 + 8) * 3;
+    static const size_t expectedOutModuleEntriesStreamLength = 4 + (4 + 16 + 8) * 3;
     /* Expected stream: versions are currently all 0 and UUID is filled by initFakeModuleEntries().
      */
     char expectedOutModuleEntriesStreamBytes[expectedOutModuleEntriesStreamLength] = {
+        // Number of Module Entries (little endian)
+            0x03, 0x00, 0x00, 0x00,
         // Entry 1
             // Module ID (little endian)
             0x00, 0x00, 0x00, 0x00,
