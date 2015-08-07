@@ -18,35 +18,12 @@
 #
 ################################################################################
 
-# cmake configuration file of the "Main" component
+set(WINDOWS_SRCS
+    src/Windows/Resource.rc)
 
-# Main executable
+set(SRCS ${SRCS} ${WINDOWS_SRCS})
 
-set(SRCS
-    src/Application.cpp
-    src/Main.cpp)
+set(WINDOWS_INCS
+    include/Main/Windows/resource.h)
 
-set(INCS
-    include/Main/Application.hpp)
-
-if (WIN32)
-    # use to handle versioning
-    include("CMakeListsWindows.txt")
-endif (WIN32)
-
-add_executable(Main ${SRCS} ${INCS})
-set_common_settings(Main)
-
-target_include_directories(Main PRIVATE "include")
-
-# Setting executable name to DebugAgent
-set_target_properties(Main PROPERTIES OUTPUT_NAME "DebugAgent")
-
-# Binding with Poco
-link_poco(Main)
-
-# Needed components
-target_link_libraries(Main Core)
-
-# Installation step
-install(TARGETS Main RUNTIME DESTINATION bin)
+set(INCS ${INCS} ${WINDOWS_INCS})
