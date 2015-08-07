@@ -251,11 +251,427 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
         ));
 }
 
+TEST_CASE("DebugAgent/cAVS: system type (URL: /)")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting system information*/
+    CHECK_NOTHROW(client.request(
+        "/",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<system_type Name=\"SKL\">"
+        "    <description>Skylake platform</description>"
+        "    <subsystem_types>"
+        "        <subsystem_type Name=\"cavs\"/>"
+        "    </subsystem_types>"
+        "</system_type>"
+        ));
+}
+
+TEST_CASE("DebugAgent/cAVS: subsystem instances (URL: /instance/cavs)")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting system information*/
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<subsystem_collection>"
+        "    <subsystem Type=\"cavs\" Id=\"0\">"
+        "        <info_parameters>"
+        "            <ParameterBlock Name=\"Free Pages\">"
+        "                <ParameterBlock Name=\"0\">"
+        "                    <EnumParameter Name=\"mem_type\">HP_MEM</EnumParameter>"
+        "                    <IntegerParameter Name=\"pages\">12</IntegerParameter>"
+        "                </ParameterBlock>"
+        "                <ParameterBlock Name=\"1\">"
+        "                    <EnumParameter Name=\"mem_type\">LP_MEM</EnumParameter>"
+        "                    <IntegerParameter Name=\"pages\">13</IntegerParameter>"
+        "                </ParameterBlock>"
+        "            </ParameterBlock>"
+        "        </info_parameters>"
+        "        <parents>"
+        "            <system Type=\"SKL\" Id=\"0\"/>"
+        "        </parents>"
+        "        <children>"
+        "            <collection Name=\"pipes\">"
+        "                <!-- all pipe instances -->"
+        "                <instance Type=\"pipe\" Id=\"0\"/>"
+        "                <instance Type=\"pipe\" Id=\"1\"/>"
+        "            </collection>"
+        "            <collection Name=\"cores\">"
+        "                <!-- all core instances -->"
+        "                <instance Type=\"core\" Id=\"0\"/>"
+        "                <instance Type=\"core\" Id=\"1\"/>"
+        "            </collection>"
+        "            <service_collection Name=\"services\">"
+        "                <service Type=\"fwlogs\" Id=\"0\"/>"
+        "            </service_collection>"
+        "            <component_collection Name=\"modules\">"
+        "                <!-- all module instances -->"
+        "                <component Type=\"module-aec(2)\" Id=\"0\"/>"
+        "                <component Type=\"module-gain(4)\" Id=\"3\"/>"
+        "                <component Type=\"module-copier(1)\" Id=\"2\"/>"
+        "            </component_collection>"
+        "        </children>"
+        "        <!-- links -->"
+        "        <links>"
+        "            <link Id=\"0\">"
+        "                <from Type=\"module-aec(2)\" Id=\"0\" OutputId=\"1\"/>"
+        "                <to Type=\"module-gain(4)\" Id=\"3\" InputId=\"0\"/>"
+        "            </link>"
+        "            <link Id=\"1\">"
+        "                <from Type=\"module-gain(4)\" Id=\"3\" OutputId=\"2\"/>"
+        "                <to Type=\"module-copier(1)\" Id=\"2\" InputId=\"0\"/>"
+        "            </link>"
+        "        </links>"
+        "    </subsystem>"
+        "</subsystem_collection>"
+        ));
+}
+
+TEST_CASE("DebugAgent/cAVS: subsystem instance 1 (URL: /instance/cavs/0)")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting system information*/
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs/0",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<subsystem Type=\"cavs\" Id=\"0\">"
+        "    <info_parameters>"
+        "        <ParameterBlock Name=\"Free Pages\">"
+        "            <ParameterBlock Name=\"0\">"
+        "                <EnumParameter Name=\"mem_type\">HP_MEM</EnumParameter>"
+        "                <IntegerParameter Name=\"pages\">12</IntegerParameter>"
+        "            </ParameterBlock>"
+        "            <ParameterBlock Name=\"1\">"
+        "                <EnumParameter Name=\"mem_type\">LP_MEM</EnumParameter>"
+        "                <IntegerParameter Name=\"pages\">13</IntegerParameter>"
+        "            </ParameterBlock>"
+        "        </ParameterBlock>"
+        "    </info_parameters>"
+        "    <parents>"
+        "        <system Type=\"SKL\" Id=\"0\"/>"
+        "    </parents>"
+        "    <children>"
+        "        <collection Name=\"pipes\">"
+        "            <!-- all pipe instances -->"
+        "            <instance Type=\"pipe\" Id=\"0\"/>"
+        "            <instance Type=\"pipe\" Id=\"1\"/>"
+        "        </collection>"
+        "        <collection Name=\"cores\">"
+        "            <!-- all core instances -->"
+        "            <instance Type=\"core\" Id=\"0\"/>"
+        "            <instance Type=\"core\" Id=\"1\"/>"
+        "        </collection>"
+        "        <service_collection Name=\"services\">"
+        "            <service Type=\"fwlogs\" Id=\"0\"/>"
+        "        </service_collection>"
+        "        <component_collection Name=\"modules\">"
+        "            <!-- all module instances -->"
+        "            <component Type=\"module-aec(2)\" Id=\"0\"/>"
+        "            <component Type=\"module-gain(4)\" Id=\"3\"/>"
+        "            <component Type=\"module-copier(1)\" Id=\"2\"/>"
+        "        </component_collection>"
+        "    </children>"
+        "    <!-- links -->"
+        "    <links>"
+        "        <link Id=\"0\">"
+        "            <from Type=\"module-aec(2)\" Id=\"0\" OutputId=\"1\"/>"
+        "            <to Type=\"module-gain(4)\" Id=\"3\" InputId=\"0\"/>"
+        "        </link>"
+        "        <link Id=\"1\">"
+        "            <from Type=\"module-gain(4)\" Id=\"3\" OutputId=\"2\"/>"
+        "            <to Type=\"module-copier(1)\" Id=\"2\" InputId=\"0\"/>"
+        "        </link>"
+        "    </links>"
+        "</subsystem>"
+        ));
+}
+
+TEST_CASE("DebugAgent/cAVS: log type (URL: /type/cavs.fwlogs)")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting system information*/
+    CHECK_NOTHROW(client.request(
+        "/type/cavs.fwlogs",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<service_type Name=\"fwlogs\">"
+        "    <control_parameters>"
+        "        <!-- service generic -->"
+        "        <BooleanParameter Name=\"Started\"/>"
+        "        <ParameterBlock Name=\"Buffering\">"
+        "            <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>"
+        "            <BooleanParameter Name=\"Circular\"/>"
+        "        </ParameterBlock>"
+        "        <BooleanParameter Name=\"PersistsState\"/>"
+        "        <!-- service specific -->"
+        "        <EnumParameter Size=\"8\" Name=\"Verbosity\">"
+        "            <ValuePair Numerical=\"2\" Literal=\"Critical\"/>"
+        "            <ValuePair Numerical=\"3\" Literal=\"High\"/>"
+        "            <ValuePair Numerical=\"4\" Literal=\"Medium\"/>"
+        "            <ValuePair Numerical=\"5\" Literal=\"Low\"/>"
+        "            <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>"
+        "        </EnumParameter>"
+        "        <BooleanParameter Name=\"ViaPTI\" Description=\"Set to 1 if PTI interface is to be used\"/>"
+        "    </control_parameters>"
+        "</service_type>"
+        ));
+}
+
+TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* 0: Initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* 1: Get log parameter, will return
+    * - isStarted : false
+    * - level: critical
+    * - output: pti
+    */
+
+    windows::driver::FwLogsState initialLogParams = {
+        false,
+        windows::driver::LOG_LEVEL::CRITICAL,
+        windows::driver::LOG_OUTPUT::OUTPUT_PTI
+    };
+    commands.addGetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        initialLogParams);
+
+    /* 2: Set log parameter to
+    * - isStarted : true
+    * - level: verbose
+    * - output: sram
+    */
+    windows::driver::FwLogsState setLogParams = {
+        true,
+        windows::driver::LOG_LEVEL::VERBOSE,
+        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+    };
+    commands.addSetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /* 3: Get log parameter , will return
+    * - isStarted : true
+    * - level: verbose
+    * - output: sram
+    */
+    commands.addGetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /** Adding a successful set log parameters command, this is called by the System class
+    * destructor to stop log */
+    setLogParams = {
+        windows::driver::LOG_STATE::STOPPED,
+        windows::driver::LOG_LEVEL::VERBOSE,
+        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+    };
+    commands.addSetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting log parameters*/
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
+        "    <parents/>"
+        "    <control_parameters>"
+        "        <BooleanParameter Name=\"Started\">0</BooleanParameter>"
+        "        <ParameterBlock Name=\"Buffering\">"
+        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
+        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
+        "        </ParameterBlock>"
+        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
+        "        <EnumParameter Name=\"Verbosity\">Critical</EnumParameter>"
+        "        <BooleanParameter Name=\"ViaPTI\">1</BooleanParameter>"
+        "    </control_parameters>"
+        "</service>"
+        ));
+
+    /* 2: Setting log parameters ("1;Verbose;SRAM") */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0",
+        HttpClientSimulator::Verb::Put,
+        "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
+        "    <parents/>"
+        "    <control_parameters>"
+        "        <BooleanParameter Name=\"Started\">1</BooleanParameter>"
+        "        <ParameterBlock Name=\"Buffering\">"
+        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
+        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
+        "        </ParameterBlock>"
+        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
+        "        <EnumParameter Name=\"Verbosity\">Verbose</EnumParameter>"
+        "        <BooleanParameter Name=\"ViaPTI\">0</BooleanParameter>"
+        "    </control_parameters>"
+        "</service>",
+        HttpClientSimulator::Status::Ok,
+        "text/html",
+        "<p>Done</p>"
+        ));
+
+    /* 3: Getting log parameters again */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
+        "    <parents/>"
+        "    <control_parameters>"
+        "        <BooleanParameter Name=\"Started\">1</BooleanParameter>"
+        "        <ParameterBlock Name=\"Buffering\">"
+        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
+        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
+        "        </ParameterBlock>"
+        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
+        "        <EnumParameter Name=\"Verbosity\">Verbose</EnumParameter>"
+        "        <BooleanParameter Name=\"ViaPTI\">0</BooleanParameter>"
+        "    </control_parameters>"
+        "</service>"
+        ));
+}
+
 /** The following test is based on tempos, so it is not 100% safe. These tempos are
 * used to synchronize DebugAgent (and its HTTP server) and HTTP clients.
 * @todo: to be reworked.
 */
-TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log")
+TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log (html)")
 {
     /* Creating the mocked device */
     std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
@@ -365,6 +781,142 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
         /* A network exception can occur here because the debug agent closes its sockets.
          * This is a normal case.
          */
+    }
+
+    /* Ensuring that the debug agent thread doesn't have thrown an exception*/
+    CHECK_NOTHROW(debugAgentFuture.get());
+
+    /* Checking that the thread that has tried to get log content although another client
+     * was already getting it has obtained the expected server response */
+    CHECK_NOTHROW(delayedGetLogStreamFuture.get());
+}
+
+/** The following test is based on tempos, so it is not 100% safe. These tempos are
+* used to synchronize DebugAgent (and its HTTP server) and HTTP clients.
+* @todo: to be reworked.
+*/
+TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* 0: Initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* 1: start log command */
+    windows::driver::FwLogsState setLogParams = {
+        true,
+        windows::driver::LOG_LEVEL::VERBOSE,
+        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+    };
+    commands.addSetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /* 2: Stop log command, will be called by the debug agent termination */
+    setLogParams.started = false;
+    setLogParams.level = windows::driver::LOG_LEVEL::VERBOSE;
+    setLogParams.output = windows::driver::LOG_OUTPUT::OUTPUT_SRAM;
+    commands.addSetLogParametersCommand(
+        true,
+        STATUS_SUCCESS,
+        setLogParams);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent in another thread. It can be stopped using
+    * a condition variable*/
+    std::mutex debugAgentMutex;
+    std::condition_variable stopDebugAgentCondVar;
+    std::future<void> debugAgentFuture(std::async(std::launch::async, [&]() {
+
+        DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+        /* Waiting for stop order */
+        std::unique_lock<std::mutex> locker(debugAgentMutex);
+        stopDebugAgentCondVar.wait(locker);
+    }));
+
+    /* Give some time to DebugAgent to start its http server */
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* Starting log */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0",
+        HttpClientSimulator::Verb::Put,
+        "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
+        "    <parents/>"
+        "    <control_parameters>"
+        "        <BooleanParameter Name=\"Started\">1</BooleanParameter>"
+        "        <ParameterBlock Name=\"Buffering\">"
+        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
+        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
+        "        </ParameterBlock>"
+        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
+        "        <EnumParameter Name=\"Verbosity\">Verbose</EnumParameter>"
+        "        <BooleanParameter Name=\"ViaPTI\">0</BooleanParameter>"
+        "    </control_parameters>"
+        "</service>",
+        HttpClientSimulator::Status::Ok,
+        "text/html",
+        "<p>Done</p>"
+        ));
+
+    /* Trying to get log data in another thread after 250 ms. This should result on "resource
+    * locked" http status */
+    std::future<void> delayedGetLogStreamFuture(std::async(std::launch::async, [&]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+        HttpClientSimulator client2("localhost");
+        client2.request(
+            "/instance/cavs.fwlogs/0/streaming",
+            HttpClientSimulator::Verb::Get,
+            "",
+            HttpClientSimulator::Status::Locked,
+            "text/plain",
+            "Resource is locked : Logging stream resource is already used.");
+    }));
+
+    /* Terminating the debug agent after 500ms in another thread, the client should be consuming
+    * log at this date */
+    std::future<void> debugAgentTerminationResult(std::async(std::launch::async, [&]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::unique_lock<std::mutex> locker(debugAgentMutex);
+
+        /* Terminating debug agent */
+        stopDebugAgentCondVar.notify_one();
+    }));
+
+    /* Consuming log */
+    try
+    {
+        client.request(
+            "/instance/cavs.fwlogs/0/streaming",
+            HttpClientSimulator::Verb::Get,
+            "",
+            HttpClientSimulator::Status::Ok,
+            "application/vnd.ifdk-file",
+            HttpClientSimulator::AnyContent);
+    }
+    catch (HttpClientSimulator::NetworkException &)
+    {
+        /* A network exception can occur here because the debug agent closes its sockets.
+        * This is a normal case.
+        */
     }
 
     /* Ensuring that the debug agent thread doesn't have thrown an exception*/

@@ -23,6 +23,13 @@
 #include "Util/Uuid.hpp"
 #include <Poco/NumberParser.h>
 #include <Poco/StringTokenizer.h>
+#include <Poco/XML/XML.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Text.h>
 #include <string>
 #include <chrono>
 #include <thread>
@@ -37,7 +44,19 @@ namespace debug_agent
 namespace core
 {
 
-static const std::string ContentType("text/html");
+    static const std::string ContentTypeHtml("text/html");
+    static const std::string ContentTypeXml("text/xml");
+    /**
+    * @fixme use the content type specified by SwAS. Currently, the SwAS does not specify
+    * which content type shall be used. A request has been sent to get SwAS updated. Until that,
+    * the rational is:
+    *  - the content is application specific: usage of 'application/'
+    *  - the content type is vendor specific: usage of standard 'vnd.'
+    *  - knowing the resource is an IFDK file, the client can read the streamed IFDK header to
+    *    know which <subsystem>:<file format> the resource is.
+    * @remarks http://www.iana.org/assignments/media-types/media-types.xhtml
+    */
+    static const std::string ContentTypeBin("application/vnd.ifdk-file");
 
 /** This method returns a std::string from a byte buffer
  *
@@ -54,6 +73,28 @@ static std::string getStringFromFixedSizeArray(ArrayElementType *buffer, std::si
         stream << static_cast<char>(buffer[i]);
     }
     return stream.str();
+}
+
+/** This method returns the value of a node part of an XML document, based on an XPath expression
+ *
+ *  @param const Poco::XML::Document* the XML document to parse
+ *  @param const std::string& a simplified XPath expression describing the location of the node
+ *  in the XML tree
+ *
+ *  @returns a std::string corresponding to the value of an XML node
+ */
+static const std::string& getNodeValueFromXPath(const Poco::XML::Document* document,
+                                                const std::string& url) {
+    Poco::XML::Node* startedNode = document->getNodeByPath(url);
+    if (startedNode) {
+        return Poco::XML::fromXMLString(startedNode->innerText());
+    }
+    else
+    {
+        throw debug_agent::rest::Resource::HttpError (
+            debug_agent::rest::Resource::ErrorStatus::BadRequest,
+            "Invalid parameters format: node for path \"" + url + "\" not found");
+    }
 }
 
 void LogStreamResource::handleGet(const Request &request, Response &response)
@@ -105,7 +146,7 @@ void LogParametersResource::handleGet(const Request &request, Response &response
             std::string(e.what()));
     }
 
-    std::ostream &out = response.send(ContentType);
+    std::ostream &out = response.send(ContentTypeHtml);
 
     /**
      * @fixme This output is temporary. Final implementation will be done in a subsequent patch
@@ -156,7 +197,7 @@ void LogParametersResource::handlePut(const Request &request, Response &response
         throw HttpError(ErrorStatus::BadRequest, std::string("Fail to apply: ") + e.what());
     }
 
-    std::ostream &out = response.send(ContentType);
+    std::ostream &out = response.send(ContentTypeHtml);
     out << "<p>Done</p>";
 }
 
@@ -165,7 +206,7 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
     /* Retrieving module entries, doesn't throw exception */
     const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
 
-    std::ostream &out = response.send(ContentType);
+    std::ostream &out = response.send(ContentTypeHtml);
     out << "<p>Module type count: " << entries.size() << "</p>";
 
     /* Writing the result as an html table */
@@ -197,6 +238,265 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
     }
     out << "</table>";
 }
+
+void SystemTypeResource::handleGet(const Request &request, Response &response)
+{
+    std::ostream &out = response.send(ContentTypeXml);
+
+    out << "<system_type Name=\"SKL\">"
+        "    <description>Skylake platform</description>"
+        "    <subsystem_types>"
+        "        <subsystem_type Name=\"cavs\"/>"
+        "    </subsystem_types>"
+        "</system_type>";
+}
+
+void SubsystemsInstancesListResource::handleGet(const Request &request, Response &response)
+{
+    std::ostream &out = response.send(ContentTypeXml);
+
+    out << "<subsystem_collection>"
+        "    <subsystem Type=\"cavs\" Id=\"0\">"
+        "        <info_parameters>"
+        "            <ParameterBlock Name=\"Free Pages\">"
+        "                <ParameterBlock Name=\"0\">"
+        "                    <EnumParameter Name=\"mem_type\">HP_MEM</EnumParameter>"
+        "                    <IntegerParameter Name=\"pages\">12</IntegerParameter>"
+        "                </ParameterBlock>"
+        "                <ParameterBlock Name=\"1\">"
+        "                    <EnumParameter Name=\"mem_type\">LP_MEM</EnumParameter>"
+        "                    <IntegerParameter Name=\"pages\">13</IntegerParameter>"
+        "                </ParameterBlock>"
+        "            </ParameterBlock>"
+        "        </info_parameters>"
+        "        <parents>"
+        "            <system Type=\"SKL\" Id=\"0\"/>"
+        "        </parents>"
+        "        <children>"
+        "            <collection Name=\"pipes\">"
+        "                <!-- all pipe instances -->"
+        "                <instance Type=\"pipe\" Id=\"0\"/>"
+        "                <instance Type=\"pipe\" Id=\"1\"/>"
+        "            </collection>"
+        "            <collection Name=\"cores\">"
+        "                <!-- all core instances -->"
+        "                <instance Type=\"core\" Id=\"0\"/>"
+        "                <instance Type=\"core\" Id=\"1\"/>"
+        "            </collection>"
+        "            <service_collection Name=\"services\">"
+        "                <service Type=\"fwlogs\" Id=\"0\"/>"
+        "            </service_collection>"
+        "            <component_collection Name=\"modules\">"
+        "                <!-- all module instances -->"
+        "                <component Type=\"module-aec(2)\" Id=\"0\"/>"
+        "                <component Type=\"module-gain(4)\" Id=\"3\"/>"
+        "                <component Type=\"module-copier(1)\" Id=\"2\"/>"
+        "            </component_collection>"
+        "        </children>"
+        "        <!-- links -->"
+        "        <links>"
+        "            <link Id=\"0\">"
+        "                <from Type=\"module-aec(2)\" Id=\"0\" OutputId=\"1\"/>"
+        "                <to Type=\"module-gain(4)\" Id=\"3\" InputId=\"0\"/>"
+        "            </link>"
+        "            <link Id=\"1\">"
+        "                <from Type=\"module-gain(4)\" Id=\"3\" OutputId=\"2\"/>"
+        "                <to Type=\"module-copier(1)\" Id=\"2\" InputId=\"0\"/>"
+        "            </link>"
+        "        </links>"
+        "    </subsystem>"
+        "</subsystem_collection>";
+}
+
+void SubsystemInstanceResource::handleGet(const Request &request, Response &response)
+{
+    std::ostream &out = response.send(ContentTypeXml);
+    out << "<subsystem Type=\"cavs\" Id=\"0\">"
+        "    <info_parameters>"
+        "        <ParameterBlock Name=\"Free Pages\">"
+        "            <ParameterBlock Name=\"0\">"
+        "                <EnumParameter Name=\"mem_type\">HP_MEM</EnumParameter>"
+        "                <IntegerParameter Name=\"pages\">12</IntegerParameter>"
+        "            </ParameterBlock>"
+        "            <ParameterBlock Name=\"1\">"
+        "                <EnumParameter Name=\"mem_type\">LP_MEM</EnumParameter>"
+        "                <IntegerParameter Name=\"pages\">13</IntegerParameter>"
+        "            </ParameterBlock>"
+        "        </ParameterBlock>"
+        "    </info_parameters>"
+        "    <parents>"
+        "        <system Type=\"SKL\" Id=\"0\"/>"
+        "    </parents>"
+        "    <children>"
+        "        <collection Name=\"pipes\">"
+        "            <!-- all pipe instances -->"
+        "            <instance Type=\"pipe\" Id=\"0\"/>"
+        "            <instance Type=\"pipe\" Id=\"1\"/>"
+        "        </collection>"
+        "        <collection Name=\"cores\">"
+        "            <!-- all core instances -->"
+        "            <instance Type=\"core\" Id=\"0\"/>"
+        "            <instance Type=\"core\" Id=\"1\"/>"
+        "        </collection>"
+        "        <service_collection Name=\"services\">"
+        "            <service Type=\"fwlogs\" Id=\"0\"/>"
+        "        </service_collection>"
+        "        <component_collection Name=\"modules\">"
+        "            <!-- all module instances -->"
+        "            <component Type=\"module-aec(2)\" Id=\"0\"/>"
+        "            <component Type=\"module-gain(4)\" Id=\"3\"/>"
+        "            <component Type=\"module-copier(1)\" Id=\"2\"/>"
+        "        </component_collection>"
+        "    </children>"
+        "    <!-- links -->"
+        "    <links>"
+        "        <link Id=\"0\">"
+        "            <from Type=\"module-aec(2)\" Id=\"0\" OutputId=\"1\"/>"
+        "            <to Type=\"module-gain(4)\" Id=\"3\" InputId=\"0\"/>"
+        "        </link>"
+        "        <link Id=\"1\">"
+        "            <from Type=\"module-gain(4)\" Id=\"3\" OutputId=\"2\"/>"
+        "            <to Type=\"module-copier(1)\" Id=\"2\" InputId=\"0\"/>"
+        "        </link>"
+        "    </links>"
+        "</subsystem>";
+}
+
+void SubsystemInstanceLogParametersResource::handleGet(const Request &request, Response &response)
+{
+    Logger::Parameters logParameters;
+
+    try
+    {
+        logParameters = mSystem.getLogParameters();
+    }
+    catch (System::Exception &e)
+    {
+        throw HttpError(ErrorStatus::BadRequest, "Cannot get log parameters : " +
+            std::string(e.what()));
+    }
+
+    std::ostream &out = response.send(ContentTypeXml);
+    out << "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
+        "    <parents/>"
+        "    <control_parameters>"
+        "        <BooleanParameter Name=\"Started\">" <<
+                    logParameters.mIsStarted << "</BooleanParameter>"
+        "        <ParameterBlock Name=\"Buffering\">"
+        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
+        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
+        "        </ParameterBlock>"
+        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
+        "        <EnumParameter Name=\"Verbosity\">" <<
+                    Logger::toString(logParameters.mLevel) << "</EnumParameter>"
+        "        <BooleanParameter Name=\"ViaPTI\">" <<
+                    (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>"
+        "    </control_parameters>"
+        "</service>";
+}
+
+void SubsystemInstanceLogParametersResource::handlePut(const Request &request, Response &response)
+{
+    Poco::XML::DOMParser parser;
+    Poco::XML::Document* document = parser.parseString(request.getRequestContentAsString());
+
+    if (!document) {
+        throw HttpError(ErrorStatus::BadRequest, "Invalid document");
+    }
+
+    static const std::string controlParametersUrl = "/service[@Type='fwlogs']/control_parameters/";
+
+    // Retrieve the Started BooleanParameter and its value
+    std::string startedNodeValue = getNodeValueFromXPath(document,
+        controlParametersUrl + "BooleanParameter[@Name='Started']");
+
+    // Retrieve the Verbosity EnumParameter and its value
+    std::string verbosityNodeValue = getNodeValueFromXPath(document,
+        controlParametersUrl + "EnumParameter[@Name='Verbosity']");
+
+    // Retrieve the ViaPTI BooleanParameter and its value
+    std::string viaPtiNodeValue = getNodeValueFromXPath(document,
+        controlParametersUrl + "BooleanParameter[@Name='ViaPTI']");
+
+    // Parse each of the parameters found into their correct type
+    Logger::Parameters logParameters;
+    try {
+        logParameters.mIsStarted =
+            Poco::NumberParser::parseBool(startedNodeValue);
+        logParameters.mLevel =
+            Logger::levelFromString(verbosityNodeValue);
+        logParameters.mOutput =
+            Poco::NumberParser::parseBool(viaPtiNodeValue) ? Logger::Output::Pti :
+                                                             Logger::Output::Sram;
+    }
+    catch (Logger::Exception &e) {
+        throw HttpError(ErrorStatus::BadRequest, std::string("Invalid value: ") + e.what());
+    }
+    catch (Poco::SyntaxException &e) {
+        throw HttpError(ErrorStatus::BadRequest,
+            std::string("Invalid Start/Stop request: ") + e.what());
+    }
+
+    try {
+        mSystem.setLogParameters(logParameters);
+    }
+    catch (System::Exception &e) {
+        throw HttpError(ErrorStatus::BadRequest, std::string("Fail to apply: ") + e.what());
+    }
+
+    std::ostream &out = response.send(ContentTypeHtml);
+    out << "<p>Done</p>";
+}
+
+void SubsystemTypeLogParametersResource::handleGet(const Request &request, Response &response)
+{
+    std::ostream &out = response.send(ContentTypeXml);
+    out << "<service_type Name=\"fwlogs\">"
+        "    <control_parameters>"
+        "        <!-- service generic -->"
+        "        <BooleanParameter Name=\"Started\"/>"
+        "        <ParameterBlock Name=\"Buffering\">"
+        "            <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>"
+        "            <BooleanParameter Name=\"Circular\"/>"
+        "        </ParameterBlock>"
+        "        <BooleanParameter Name=\"PersistsState\"/>"
+        "        <!-- service specific -->"
+        "        <EnumParameter Size=\"8\" Name=\"Verbosity\">"
+        "            <ValuePair Numerical=\"2\" Literal=\"Critical\"/>"
+        "            <ValuePair Numerical=\"3\" Literal=\"High\"/>"
+        "            <ValuePair Numerical=\"4\" Literal=\"Medium\"/>"
+        "            <ValuePair Numerical=\"5\" Literal=\"Low\"/>"
+        "            <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>"
+        "        </EnumParameter>"
+        "        <BooleanParameter Name=\"ViaPTI\" " <<
+                                  "Description=\"Set to 1 if PTI interface is to be used\"/>"
+        "    </control_parameters>"
+        "</service_type>";
+}
+
+void SubsystemInstanceLogStreamResource::handleGet(const Request &request, Response &response)
+{
+    /** Acquiring the log stream resource */
+    auto resource = std::move(mSystem.tryToAcquireLogStreamResource());
+    if (resource == nullptr) {
+        throw HttpError(ErrorStatus::Locked, "Logging stream resource is already used.");
+    }
+
+    std::ostream &out = response.send(ContentTypeBin);
+
+    try {
+        resource->doLogStream(out);
+    }
+    catch (System::Exception &e)
+    {
+        /* Here a successful http response has already be sent to the server. So
+        * it is not possible to throw the exception */
+
+        /** @todo use logging */
+        std::cout << "Exception while getting logs from system: " << e.what();
+    }
+}
+
 
 /**
  * @fixme These constants are temporary, final implementation will not use them and they will be

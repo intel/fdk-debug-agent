@@ -72,6 +72,61 @@ protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 };
 
+/** This resource returns the System Type, containing Subsystems Types (XML) */
+class SystemTypeResource : public RootResource
+{
+public:
+    SystemTypeResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
+/** This resource returns a list of all the Instances of a Subsystem (XML) */
+class SubsystemsInstancesListResource : public RootResource
+{
+public:
+    SubsystemsInstancesListResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
+/** This resource returns one Instance of a Subsystem (XML) */
+class SubsystemInstanceResource : public RootResource
+{
+public:
+    SubsystemInstanceResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
+/** This resource returns the Log Parameters for an Instance of a Subsystem (XML) */
+class SubsystemInstanceLogParametersResource : public RootResource
+{
+public:
+    SubsystemInstanceLogParametersResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+    virtual void handlePut(const rest::Request &request, rest::Response &response) override;
+};
+
+/** This resource returns the Log Parameters for a Subsystem Type (XML) */
+class SubsystemTypeLogParametersResource : public RootResource
+{
+public:
+    SubsystemTypeLogParametersResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
+/** This resource returns the Log Stream for a Subsystem Instance (XML) */
+class SubsystemInstanceLogStreamResource : public RootResource
+{
+public:
+    SubsystemInstanceLogStreamResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
 }
 }
 
