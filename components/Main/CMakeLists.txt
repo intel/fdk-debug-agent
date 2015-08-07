@@ -19,8 +19,13 @@
 ################################################################################
 
 # cmake configuration file of the "Main" component
-
 # Main executable
+
+# Version
+set(MAJOR 0)
+set(MINOR 2)
+set(FIX 0)
+set(BUILD 0)
 
 set(SRCS
     src/Application.cpp

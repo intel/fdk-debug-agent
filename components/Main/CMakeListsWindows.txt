@@ -18,8 +18,13 @@
 #
 ################################################################################
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Windows/Resource.rc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/src/Windows/Resource.rc
+    @ONLY)
+
 set(WINDOWS_SRCS
-    src/Windows/Resource.rc)
+    ${CMAKE_CURRENT_BINARY_DIR}/src/Windows/Resource.rc)
 
 set(SRCS ${SRCS} ${WINDOWS_SRCS})
 
