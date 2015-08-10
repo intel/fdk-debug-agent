@@ -41,7 +41,7 @@ public:
     virtual Parameters getParameters() override;
 
     virtual std::unique_ptr<LogBlock> readLogBlock() override;
-    virtual void releaseConsumers() NOEXCEPT override;
+    virtual void stop() NOEXCEPT override;
 
 private:
     /**
