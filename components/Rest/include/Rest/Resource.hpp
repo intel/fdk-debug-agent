@@ -42,7 +42,8 @@ public:
     {
         NotFound = 404,
         BadRequest = 400,
-        VerbNotAllowed = 405
+        VerbNotAllowed = 405,
+        Locked = 423
     };
 
     static std::string toString(ErrorStatus status)
@@ -55,6 +56,8 @@ public:
             return "Bad request";
         case ErrorStatus::VerbNotAllowed:
             return "Verb not allowed";
+        case ErrorStatus::Locked:
+            return "Resource is locked";
         }
         abort();
     }

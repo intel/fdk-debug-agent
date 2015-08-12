@@ -23,6 +23,7 @@
 #include "Core/DebugAgent.hpp"
 #include "Util/Uuid.hpp"
 #include "TestCommon/HttpClientSimulator.hpp"
+#include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Windows/DeviceInjectionDriverFactory.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
@@ -316,10 +317,25 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
         "<p>Done</p>"
         ));
 
+    /* Trying to get log data in another thread after 250 ms. This should result on "resource
+     * locked" http status */
+    std::future<void> delayedGetLogStreamFuture(std::async(std::launch::async, [&]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+        HttpClientSimulator client2("localhost");
+        client2.request(
+            "/cAVS/logging/stream",
+            HttpClientSimulator::Verb::Get,
+            "",
+            HttpClientSimulator::Status::Locked,
+            "text/plain",
+            "Resource is locked : Logging stream resource is already used.");
+    }));
+
     /* Terminating the debug agent after 500ms in another thread, the client should be consuming
      * log at this date */
-    std::future<void> debugAgentTerminationResult(std::async(std::launch::async, [&]() {
-        std::this_thread::sleep_for(std::chrono::microseconds(500));
+    std::future<void> debugAgentTerminationFuture(std::async(std::launch::async, [&]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         std::unique_lock<std::mutex> locker(debugAgentMutex);
 
         /* Terminating debug agent */
@@ -343,4 +359,11 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
          * This is a normal case.
          */
     }
+
+    /* Ensuring that the debug agent thread doesn't have thrown an exception*/
+    CHECK_NOTHROW(debugAgentFuture.get());
+
+    /* Checking that the thread that has tried to get log content although another client
+     * was already getting it has obtained the expected server response */
+    CHECK_NOTHROW(delayedGetLogStreamFuture.get());
 }

@@ -26,6 +26,7 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include <mutex>
 
 namespace debug_agent
 {
@@ -46,6 +47,39 @@ public:
         {}
     };
 
+    /** Exclusive resource used to retrieve log data */
+    class LogStreamResource
+    {
+    public:
+        /**
+         * Streams out log in IFDK:cavs:fwlog format
+         *
+         * @param[in] os the std::ostream where the log has to be written to
+         *
+         * @throw System::Exception
+         */
+        void doLogStream(std::ostream &os)
+        {
+            mSystem.doLogStreamInternal(os);
+        }
+
+    private:
+        friend class System;
+
+        /* Called by the System class only */
+        LogStreamResource(System &system) : mLocker(system.mLogStreamMutex, std::defer_lock),
+            mSystem(system) {}
+
+        /* Called by the System class only */
+        bool tryLock()
+        {
+            return mLocker.try_lock();
+        }
+
+        std::unique_lock<std::mutex> mLocker;
+        System &mSystem;
+    };
+
     /**
      * @throw System::Exception
      */
@@ -54,12 +88,14 @@ public:
     /**
      * Set log parameters
      * @param[in] parameters Log parameters to be set
+     * @throw System::Exception
      */
     void setLogParameters(Logger::Parameters &parameters);
 
     /**
      * Get log parameters
      * @return current log parameters
+     * @throw System::Exception
      */
     Logger::Parameters getLogParameters();
 
@@ -69,10 +105,13 @@ public:
     const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const NOEXCEPT;
 
     /**
-     * Streams out log in IFDK:cavs:fwlog format
-     * @param[in] os the std::ostream where the log has to be written to
+     * Try to acquire the log stream resource
+     *
+     * The resource will be locked until the returned LogStreamResource instance is released.
+     *
+     * @return a LogStreamResource instance if the locking is successful, otherwise nullptr.
      */
-    void doLogStream(std::ostream &os);
+    std::unique_ptr<LogStreamResource> tryToAcquireLogStreamResource();
 
     /** Stop internal threads and unblock consumer threads */
     void stop() NOEXCEPT
@@ -86,6 +125,7 @@ private:
     System & operator=(const System &) = delete;
 
     static std::unique_ptr<Driver> createDriver(const DriverFactory &driverFactory);
+    void doLogStreamInternal(std::ostream &os);
 
     std::unique_ptr<Driver> mDriver;
 
@@ -93,6 +133,9 @@ private:
      * The module entries table retrieved from FW once, at initialization
      */
     std::vector<dsp_fw::ModuleEntry> mModuleEntries;
+
+    /** Mutex that guarantees log stream exclusive usage */
+    std::mutex mLogStreamMutex;
 };
 
 }

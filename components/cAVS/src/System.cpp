@@ -88,7 +88,18 @@ const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const NOEXCEP
     return mModuleEntries;
 }
 
-void System::doLogStream(std::ostream &os)
+std::unique_ptr<System::LogStreamResource> System::tryToAcquireLogStreamResource()
+{
+    std::unique_ptr<System::LogStreamResource> resource(new System::LogStreamResource(*this));
+    if (resource->tryLock()) {
+        return resource;
+    }
+    else {
+        return nullptr;
+    }
+}
+
+void System::doLogStreamInternal(std::ostream &os)
 {
     LogStreamer logStreamer(mDriver->getLogger(), mModuleEntries);
 

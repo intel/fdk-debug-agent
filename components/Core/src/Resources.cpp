@@ -58,6 +58,12 @@ static std::string getStringFromFixedSizeArray(ArrayElementType *buffer, std::si
 
 void LogStreamResource::handleGet(const Request &request, Response &response)
 {
+    /** Acquiring the log stream resource */
+    auto resource = std::move(mSystem.tryToAcquireLogStreamResource());
+    if (resource == nullptr) {
+        throw RequestException(ErrorStatus::Locked, "Logging stream resource is already used.");
+    }
+
     /**
      * @fixme use the content type specified by SwAS. Currently, the SwAS does not specify
      * which content type shall be used. A request has been sent to get SwAS updated. Until that,
@@ -72,7 +78,7 @@ void LogStreamResource::handleGet(const Request &request, Response &response)
     std::ostream &out = response.send(ContentType);
 
     try {
-        mSystem.doLogStream(out);
+        resource->doLogStream(out);
     }
     catch (System::Exception &e)
     {

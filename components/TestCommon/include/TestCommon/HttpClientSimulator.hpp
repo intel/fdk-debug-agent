@@ -58,7 +58,8 @@ public:
     {
         Ok,
         NotFound,
-        VerbNotAllowed
+        VerbNotAllowed,
+        Locked
     };
 
     static std::string toString(Status s);
