@@ -154,6 +154,12 @@ HTTPRequestHandler* RequestHandlerFactory::createRequestHandler(const HTTPServer
     std::shared_ptr<Resource> resource =
         mDispatcher->resolveResource(req.getURI(), *identifiers);
 
+    /** @todo use log interface instead */
+    if (mVerbose){
+        std::cout << "RequestHandlerFactory::createRequestHandler "
+                  << req.getMethod() << " " << req.getURI() << std::endl;
+    }
+
     /* Poco forces us to use operator new here: the HttpServer will take the ownership of this new
      * RestResourceRequestHandler. */
     return new RestResourceRequestHandler(resource, std::move(identifiers));

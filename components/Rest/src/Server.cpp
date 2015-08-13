@@ -39,10 +39,10 @@ namespace rest
 /* Poco forces us to use operator new here: the HttpServer takes the ownership of the
  * RequestHandlerFactory and the HTTPServerParams.
  */
-Server::Server(std::unique_ptr<const Dispatcher> dispatcher, uint32_t port)
+Server::Server(std::unique_ptr<const Dispatcher> dispatcher, uint32_t port, bool isVerbose)
 try: mServerSocket(port),
-     mHttpServer(new RequestHandlerFactory(std::move(dispatcher)), mThreadPool, mServerSocket,
-     new HTTPServerParams())
+     mHttpServer(new RequestHandlerFactory(std::move(dispatcher), isVerbose),
+                 mThreadPool, mServerSocket, new HTTPServerParams())
 {
     mHttpServer.start();
 }

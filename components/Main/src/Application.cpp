@@ -75,6 +75,10 @@ void Application::handleLogControlOnly(const std::string& name, const std::strin
     mConfig.logControlOnly = true;
 }
 
+void Application::handleVerbose(const std::string& name, const std::string& value){
+    mConfig.serverIsVerbose = true;
+}
+
 void Application::defineOptions(OptionSet& options)
 {
     options.addOption(Option("help", "h", "Display DebugAgent help.")
@@ -86,6 +90,7 @@ void Application::defineOptions(OptionSet& options)
     .required(false)
     .repeatable(false)
     .argument("value")
+
     /* Poco forces us to use operator new here: the Option takes the ownership of the IntValidator.
      */
     .validator(new IntValidator(22, 65535))
@@ -99,10 +104,15 @@ void Application::defineOptions(OptionSet& options)
     .callback(OptionCallback<Application>(this, &Application::handlePfwConfig)));
 
     options.addOption(Option("control", "c",
-        "Disable log data path, and keep log control capabilities of DebugAgent")
+        "Disable CAVS FW log data path, and keep CAVS FW log control capabilities of DebugAgent")
     .required(false)
     .repeatable(false)
     .callback(OptionCallback<Application>(this, &Application::handleLogControlOnly)));
+
+    options.addOption(Option("verbose", "v", "Enable verbose logging")
+    .required(false)
+    .repeatable(false)
+    .callback(OptionCallback<Application>(this, &Application::handleVerbose)));
 }
 
 int Application::main(const std::vector<std::string>&)
@@ -114,7 +124,8 @@ int Application::main(const std::vector<std::string>&)
     try
     {
         SystemDriverFactory driverFactory(mConfig.logControlOnly);
-        DebugAgent debugAgent(driverFactory, mConfig.serverPort, mConfig.pfwConfig);
+        DebugAgent debugAgent(driverFactory, mConfig.serverPort, mConfig.pfwConfig,
+                              mConfig.serverIsVerbose);
 
         std::cout << "DebugAgent started" << std::endl;
 

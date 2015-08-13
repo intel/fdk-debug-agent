@@ -137,7 +137,8 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 DebugAgent::DebugAgent(
     const cavs::DriverFactory &driverFactory,
     uint32_t port,
-    const std::string &pfwConfig)
+    const std::string &pfwConfig,
+    bool isVerbose)
 try :
     /* Order is important! */
     mSystem(driverFactory),
@@ -145,7 +146,7 @@ try :
     mSystemInstance(createSystemInstance()),
     mInstanceModel(nullptr),
     mParameterMgrPlatformConnector(pfwConfig),
-    mRestServer(createDispatcher(), port)
+    mRestServer(createDispatcher(), port, isVerbose)
 {
     assert(mTypeModel != nullptr);
     assert(mSystemInstance != nullptr);

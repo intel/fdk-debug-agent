@@ -50,13 +50,16 @@ private:
     void handlePort(const std::string& name, const std::string& value);
     void handlePfwConfig(const std::string& name, const std::string& value);
     void handleLogControlOnly(const std::string& name, const std::string& value);
+    void handleVerbose(const std::string& name, const std::string& value);
 
     struct Config {
         bool helpRequested;
         uint32_t serverPort;
         std::string pfwConfig;
         bool logControlOnly;
-        Config() :helpRequested(false), serverPort(9090), logControlOnly(false) {};
+        bool serverIsVerbose;
+        Config() : helpRequested(false), serverPort(9090), logControlOnly(false),
+                   serverIsVerbose(false) {};
     };
 
     Config mConfig;

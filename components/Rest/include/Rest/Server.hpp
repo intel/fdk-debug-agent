@@ -54,7 +54,7 @@ public:
      *
      * @throw Server::Exception
      */
-    Server(std::unique_ptr<const Dispatcher> dispatcher, uint32_t port);
+    Server(std::unique_ptr<const Dispatcher> dispatcher, uint32_t port, bool isVerbose = false);
     ~Server();
 
 private:

@@ -76,13 +76,14 @@ private:
 class RequestHandlerFactory : public HTTPRequestHandlerFactory
 {
 public:
-    RequestHandlerFactory(std::unique_ptr<const Dispatcher> dispatcher) :
-        mDispatcher(std::move(dispatcher)) {}
+    RequestHandlerFactory(std::unique_ptr<const Dispatcher> dispatcher, bool isVerbose) :
+        mDispatcher(std::move(dispatcher)), mVerbose(isVerbose) {}
 
     virtual HTTPRequestHandler* createRequestHandler(const HTTPServerRequest &req);
 
 private:
     std::unique_ptr<const Dispatcher> mDispatcher;
+    bool mVerbose;
 };
 
 }
