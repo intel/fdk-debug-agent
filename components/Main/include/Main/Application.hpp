@@ -23,6 +23,7 @@
 #pragma once
 
 #include <Poco/Util/ServerApplication.h>
+#include <Poco/Util/OptionSet.h>
 #include <inttypes.h>
 
 namespace debug_agent
@@ -32,13 +33,27 @@ namespace main
 
 class Application : public Poco::Util::ServerApplication
 {
+public:
+    Application();
+    virtual ~Application() {};
+
 protected:
+    virtual void defineOptions(Poco::Util::OptionSet& options) override;
+
     virtual int main(const std::vector<std::string>&) override;
+
+private:
+    void usage();
+
+    /* Option handlers */
+    void handleHelp(const std::string& name, const std::string& value);
+
 private:
     /**
     * @fixme This is a temporary port value
     */
     static const uint32_t ServerPort = 9090;
+    bool mHelpRequested = false;
 };
 
 }

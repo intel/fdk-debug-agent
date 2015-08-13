@@ -23,17 +23,51 @@
 #include "Main/Application.hpp"
 #include "cAVS/SystemDriverFactory.hpp"
 #include "Core/DebugAgent.hpp"
+#include <Poco/Util/HelpFormatter.h>
 
 using namespace debug_agent::core;
 using namespace debug_agent::cavs;
+using namespace Poco::Util;
 
 namespace debug_agent
 {
 namespace main
 {
 
+Application::Application()
+{
+    setUnixOptions(true);
+}
+
+void Application::usage(){
+    HelpFormatter helpFormatter(options());
+    helpFormatter.setCommand(commandName());
+    helpFormatter.setUsage("OPTIONS");
+    helpFormatter.setHeader("Provides the ability to debug firmwares.");
+    helpFormatter.setUnixStyle(true);
+    helpFormatter.format(std::cout);
+}
+
+void Application::handleHelp(const std::string& name, const std::string& value){
+    mHelpRequested = true;
+    usage();
+    stopOptionsProcessing();
+}
+
+void Application::defineOptions(OptionSet& options)
+{
+    options.addOption(Option("help", "h", "Display DebugAgent help.")
+    .required(false)
+    .repeatable(false)
+    .callback(OptionCallback<Application>(this, &Application::handleHelp)));
+}
+
 int Application::main(const std::vector<std::string>&)
 {
+    if (mHelpRequested){
+        return Application::EXIT_OK;
+    }
+
     try
     {
         SystemDriverFactory driverFactory;
@@ -44,7 +78,6 @@ int Application::main(const std::vector<std::string>&)
         waitForTerminationRequest();  /* wait for CTRL-C or kill */
 
         std::cout << std::endl << "Shutting down DebugAgent..." << std::endl;
-        return Application::EXIT_OK;
     }
     catch (DebugAgent::Exception &e)
     {
@@ -58,6 +91,7 @@ int Application::main(const std::vector<std::string>&)
             << std::endl;
         return Application::EXIT_SOFTWARE;
     }
+    return Application::EXIT_OK;
 }
 
 }
