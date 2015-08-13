@@ -47,13 +47,15 @@ private:
 
     /* Option handlers */
     void handleHelp(const std::string& name, const std::string& value);
+    void handlePort(const std::string& name, const std::string& value);
 
-private:
-    /**
-    * @fixme This is a temporary port value
-    */
-    static const uint32_t ServerPort = 9090;
-    bool mHelpRequested = false;
+    struct Config {
+        bool helpRequested;
+        uint32_t serverPort;
+        Config() :helpRequested(false), serverPort(9090){};
+    };
+
+    Config mConfig;
 };
 
 }

@@ -24,6 +24,8 @@
 #include "cAVS/SystemDriverFactory.hpp"
 #include "Core/DebugAgent.hpp"
 #include <Poco/Util/HelpFormatter.h>
+#include <Poco/Util/IntValidator.h>
+#include <assert.h>
 
 using namespace debug_agent::core;
 using namespace debug_agent::cavs;
@@ -49,9 +51,15 @@ void Application::usage(){
 }
 
 void Application::handleHelp(const std::string& name, const std::string& value){
-    mHelpRequested = true;
+    mConfig.helpRequested = true;
     usage();
     stopOptionsProcessing();
+}
+
+void Application::handlePort(const std::string& name, const std::string& value){
+    std::stringstream ss(value);
+    ss >> mConfig.serverPort;
+    assert(ss.good());
 }
 
 void Application::defineOptions(OptionSet& options)
@@ -60,18 +68,25 @@ void Application::defineOptions(OptionSet& options)
     .required(false)
     .repeatable(false)
     .callback(OptionCallback<Application>(this, &Application::handleHelp)));
+
+    options.addOption(Option("port", "p", "Set HTTP server port")
+    .required(false)
+    .repeatable(false)
+    .argument("value")
+    .validator(new IntValidator(1024, 65535))
+    .callback(OptionCallback<Application>(this, &Application::handlePort)));
 }
 
 int Application::main(const std::vector<std::string>&)
 {
-    if (mHelpRequested){
+    if (mConfig.helpRequested){
         return Application::EXIT_OK;
     }
 
     try
     {
         SystemDriverFactory driverFactory;
-        DebugAgent debugAgent(driverFactory, ServerPort);
+        DebugAgent debugAgent(driverFactory, mConfig.serverPort);
 
         std::cout << "DebugAgent started" << std::endl;
 
