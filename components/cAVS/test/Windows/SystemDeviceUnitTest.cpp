@@ -56,11 +56,11 @@ TEST_CASE("SystemDevice: getting device baud rate")
     {
         try {
             /* Creating a system device using the current device identifier */
-            SystemDevice device(device);
+            SystemDevice systemDevice(device);
 
             /* Performing the io control. Input buffer is not used. */
             TypedBuffer<SERIAL_BAUD_RATE> output;
-            device.ioControl(IOCTL_SERIAL_GET_BAUD_RATE, nullptr, &output);
+            systemDevice.ioControl(IOCTL_SERIAL_GET_BAUD_RATE, nullptr, &output);
 
             /* Printing the baud rate */
             std::cout << "  Baud rate: " << output->BaudRate << std::endl;
