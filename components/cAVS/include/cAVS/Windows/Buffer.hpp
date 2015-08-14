@@ -25,6 +25,7 @@
 #include <vector>
 #include <memory>
 #include <assert.h>
+#include <algorithm>
 
 namespace debug_agent
 {
@@ -142,7 +143,7 @@ public:
     explicit TypedBuffer(const T &value, std::size_t size = sizeof(T)) : Buffer(size)
     {
         assert(size >= sizeof(T));
-        memcpy(getPtr(), &value, sizeof(T));
+        std::copy(&value, &value + 1, &getContent());
     }
 
     T &getContent()
