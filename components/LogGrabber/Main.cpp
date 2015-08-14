@@ -106,7 +106,6 @@ private:
 
         virtual void onLogEntry(uint32_t coreId, uint8_t *buffer, uint32_t size) override
         {
-            static int i = 0;
             std::cout << "Entry: coreId=" << coreId << " size=" << size
                 << " buffer=" << toHex(buffer, size, maxPrintedBufferSize) << std::endl;
         }
