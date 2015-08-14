@@ -23,7 +23,7 @@
 
 # Version
 set(MAJOR 0)
-set(MINOR 2)
+set(MINOR 0)
 set(FIX 0)
 set(BUILD 0)
 
