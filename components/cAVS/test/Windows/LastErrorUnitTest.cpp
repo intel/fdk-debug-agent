@@ -23,18 +23,42 @@
 #include "cAVS/Windows/LastError.hpp"
 #include "cAVS/Windows/WindowsTypes.hpp"
 #include <catch.hpp>
-
+#include <string>
 
 using namespace debug_agent::cavs::windows;
+
+class SafeHandle final
+{
+public:
+    SafeHandle(HANDLE handle): mHandle(handle)
+    {
+    }
+
+    ~SafeHandle()
+    {
+        if (isValid())
+        {
+            CloseHandle(mHandle);
+        }
+    }
+
+    bool isValid()
+    {
+        return mHandle != INVALID_HANDLE_VALUE;
+    }
+
+private:
+    SafeHandle(const SafeHandle&) = delete;
+    SafeHandle& operator=(const SafeHandle&) = delete;
+    HANDLE mHandle;
+};
 
 TEST_CASE("LastError")
 {
     /** CreateFileA is the ansi version of the Windows CreateFile method. It has to be called
-    * explicitly because "CreateFile" is a macro defined by windows.h,
-    * which is then undefined by the POCO library. */
-
-    /* Calling a Win32 function that will fail */
-    HANDLE file = CreateFileA("c:\\Unexisting_file",
+      * explicitly because "CreateFile" is a macro defined by windows.h,
+      * which is then undefined by the POCO library. */
+    HANDLE handle = CreateFileA("c:\\Unexisting_file",
         GENERIC_READ,
         0,
         NULL,
@@ -42,7 +66,10 @@ TEST_CASE("LastError")
         FILE_ATTRIBUTE_NORMAL,
         NULL);
 
-    CHECK(file == INVALID_HANDLE_VALUE);
+    SafeHandle safeHandle(handle);
+
+    /* File handle shall be invalid */
+    REQUIRE(!safeHandle.isValid());
 
     /* Checking last error string */
     CHECK(LastError::get() == "ERR 2: The system cannot find the file specified.");
