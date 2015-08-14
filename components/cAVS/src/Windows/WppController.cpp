@@ -90,7 +90,6 @@ void WppController::start()
      * within the TraceProperties constructor. */
 
     EVENT_TRACE_PROPERTIES &properties = mTraceProperties.properties;
-    WNODE_HEADER &header = properties.Wnode;
 
     /* Note: There is no need to set the header.guid field:
      * from https://msdn.microsoft.com/en-us/library/windows/desktop/aa364160(v=vs.85).aspx:
