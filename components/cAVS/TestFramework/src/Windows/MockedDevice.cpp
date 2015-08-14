@@ -162,16 +162,12 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
          */
         assert(output != nullptr);
 
-        /* Guaranteed because candidateOutputBuffer == expectedOutputBuffer and
+        /* candidateOutputBuffer == expectedOutputBuffer and
          * expectedOutputBuffer.size() == returnedOutputBuffer.size()
          * therefore output.size() == returnedOutputBuffer.size()
-         */
-        assert(output->getSize() == entry.getReturnedOutputBuffer()->getSize());
-
-        /*Now copying the returned buffer into the candidate output buffer * /
-        /* @todo: find a cross-OS memcpy replacement to avoid klockwork error */
-        std::memcpy(output->getPtr(), entry.getReturnedOutputBuffer()->getPtr(),
-            entry.getReturnedOutputBuffer()->getSize());
+         *
+         * We can copy the returned buffer into the candidate output buffer */
+        output->copyFrom(*entry.getReturnedOutputBuffer());
     }
 }
 

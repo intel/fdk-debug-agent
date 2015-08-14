@@ -83,6 +83,14 @@ public:
         return !(*this == other);
     }
 
+    void copyFrom(const Buffer &other)
+    {
+        /* Copying a buffer with a different size is forbidden */
+        assert(getSize() == other.getSize());
+
+        mBuffer = other.mBuffer;
+    }
+
 private:
 
     Buffer &operator=(const Buffer &other) = delete;
