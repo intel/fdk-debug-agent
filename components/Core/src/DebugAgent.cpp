@@ -36,10 +36,6 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 {
     Dispatcher *dispatcher = new rest::Dispatcher();
 
-    dispatcher->addResource("/cAVS/logging/stream",
-        std::shared_ptr<Resource>(new LogStreamResource(mSystem)));
-    dispatcher->addResource("/cAVS/logging/parameters",
-        std::shared_ptr<Resource>(new LogParametersResource(mSystem)));
     dispatcher->addResource("/cAVS/module/entries",
         std::shared_ptr<Resource>(new ModuleEntryResource(mSystem)));
 

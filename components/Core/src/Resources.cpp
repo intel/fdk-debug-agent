@@ -97,110 +97,6 @@ static const std::string& getNodeValueFromXPath(const Poco::XML::Document* docum
     }
 }
 
-void LogStreamResource::handleGet(const Request &request, Response &response)
-{
-    /** Acquiring the log stream resource */
-    auto resource = std::move(mSystem.tryToAcquireLogStreamResource());
-    if (resource == nullptr) {
-        throw HttpError(ErrorStatus::Locked, "Logging stream resource is already used.");
-    }
-
-    /**
-     * @fixme use the content type specified by SwAS. Currently, the SwAS does not specify
-     * which content type shall be used. A request has been sent to get SwAS updated. Until that,
-     * the rational is:
-     *  - the content is application specific: usage of 'application/'
-     *  - the content type is vendor specific: usage of standard 'vnd.'
-     *  - knowing the resource is an IFDK file, the client can read the streamed IFDK header to
-     *    know which <subsystem>:<file format> the resource is.
-     * @remarks http://www.iana.org/assignments/media-types/media-types.xhtml
-     */
-    static const std::string ContentType("application/vnd.ifdk-file");
-    std::ostream &out = response.send(ContentType);
-
-    try {
-        resource->doLogStream(out);
-    }
-    catch (System::Exception &e)
-    {
-        /* Here a successful http response has already be sent to the server.
-         * So, it is not possible to send an HTTP error.
-         * For this reason, we convert any system exception as HttpAbort exception that
-         * will be silently handled at upper level
-         */
-     throw HttpAbort(e.what());
-    }
-}
-
-void LogParametersResource::handleGet(const Request &request, Response &response)
-{
-    Logger::Parameters logParameters;
-
-    try
-    {
-        logParameters = mSystem.getLogParameters();
-    }
-    catch (System::Exception &e)
-    {
-        throw HttpError(ErrorStatus::BadRequest, "Cannot get log parameters : " +
-            std::string(e.what()));
-    }
-
-    std::ostream &out = response.send(ContentTypeHtml);
-
-    /**
-     * @fixme This output is temporary. Final implementation will be done in a subsequent patch
-     */
-    out << "<table border='1'><tr><th>Log Parameter</th><th>Value</th></tr>"
-        << "<tr><td>State</td><td>" << logParameters.mIsStarted << "</td></tr>"
-        << "<tr><td>Level</td><td>" << Logger::toString(logParameters.mLevel) << "</td></tr>"
-        << "<tr><td>Output</td><td>" << Logger::toString(logParameters.mOutput)
-        << "</td></tr></table>"
-        << "<p>To change log parameters: "
-        << "PUT [log status];[log level];[log output] at /cAVS/logging/parameters</p>";
-}
-
-void LogParametersResource::handlePut(const Request &request, Response &response)
-{
-    std::string parameters = request.getRequestContentAsString();
-    Poco::StringTokenizer parametersList(parameters, delimiters, Poco::StringTokenizer::TOK_TRIM);
-
-    /**
-     * @fixme This request format is temporary. Final implementation will be done in a subsequent
-     * patch
-     */
-    if (parametersList.count() != numberOfParameters) {
-        throw HttpError(ErrorStatus::BadRequest, "Invalid parameters format");
-    }
-
-    Logger::Parameters logParameters;
-    try {
-        logParameters.mIsStarted =
-            Poco::NumberParser::parseBool(parametersList[isStartedParameterIndex]);
-        logParameters.mLevel =
-            Logger::levelFromString(parametersList[levelParameterIndex]);
-        logParameters.mOutput =
-            Logger::outputFromString(parametersList[outputParameterIndex]);
-    }
-    catch (Logger::Exception &e) {
-        throw HttpError(ErrorStatus::BadRequest, std::string("Invalid value: ") + e.what());
-    }
-    catch (Poco::SyntaxException &e) {
-        throw HttpError(ErrorStatus::BadRequest,
-            std::string("Invalid Start/Stop request: ") + e.what());
-    }
-
-    try {
-        mSystem.setLogParameters(logParameters);
-    }
-    catch (System::Exception &e) {
-        throw HttpError(ErrorStatus::BadRequest, std::string("Fail to apply: ") + e.what());
-    }
-
-    std::ostream &out = response.send(ContentTypeHtml);
-    out << "<p>Done</p>";
-}
-
 void ModuleEntryResource::handleGet(const Request &request, Response &response)
 {
     /* Retrieving module entries, doesn't throw exception */
@@ -497,15 +393,5 @@ void SubsystemInstanceLogStreamResource::handleGet(const Request &request, Respo
     }
 }
 
-
-/**
- * @fixme These constants are temporary, final implementation will not use them and they will be
- * removed.
- */
-const std::string LogParametersResource::delimiters(";");
-const std::size_t LogParametersResource::numberOfParameters = 3;
-const std::size_t LogParametersResource::isStartedParameterIndex = 0;
-const std::size_t LogParametersResource::levelParameterIndex = 1;
-const std::size_t LogParametersResource::outputParameterIndex = 2;
 }
 }

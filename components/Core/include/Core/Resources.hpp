@@ -38,31 +38,6 @@ protected:
     cavs::System &mSystem;
 };
 
-
-class LogStreamResource : public RootResource
-{
-public:
-    LogStreamResource(cavs::System &system) : RootResource(system) {}
-protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
-};
-
-
-class LogParametersResource : public RootResource
-{
-public:
-    LogParametersResource(cavs::System &system) : RootResource(system) {}
-protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
-    virtual void handlePut(const rest::Request &request, rest::Response &response) override;
-private:
-    static const std::string delimiters;
-    static const std::size_t numberOfParameters;
-    static const std::size_t isStartedParameterIndex;
-    static const std::size_t levelParameterIndex;
-    static const std::size_t outputParameterIndex;
-};
-
 /** This resource returns the uuid<->module_id mapping table */
 class ModuleEntryResource : public RootResource
 {
