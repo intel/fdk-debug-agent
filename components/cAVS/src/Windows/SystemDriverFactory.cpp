@@ -24,6 +24,7 @@
 #include "cAVS/Windows/SystemDevice.hpp"
 #include "cAVS/Windows/DeviceIdFinder.hpp"
 #include "cAVS/Windows/RealTimeWppClientFactory.hpp"
+#include "cAVS/Windows/StubbedWppClientFactory.hpp"
 
 namespace debug_agent
 {
@@ -61,9 +62,18 @@ std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
         throw Exception("Cannot create device: " + std::string(e.what()));
     }
 
+    /* Creating the WppClientFactory */
+    std::unique_ptr<windows::WppClientFactory> wppClientFactory;
+    if (mLogControlOnly){
+        wppClientFactory = std::make_unique<windows::StubbedWppClientFactory>();
+    }
+    else {
+        wppClientFactory = std::make_unique<windows::RealTimeWppClientFactory>();
+    }
+
     /* Creating Driver interface */
     return std::unique_ptr<Driver>(new windows::Driver(std::move(device),
-        std::make_unique<windows::RealTimeWppClientFactory>()));
+        std::move(wppClientFactory)));
 }
 
 }

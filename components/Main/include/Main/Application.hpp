@@ -48,11 +48,13 @@ private:
     /* Option handlers */
     void handleHelp(const std::string& name, const std::string& value);
     void handlePort(const std::string& name, const std::string& value);
+    void handleLogControlOnly(const std::string& name, const std::string& value);
 
     struct Config {
         bool helpRequested;
         uint32_t serverPort;
-        Config() :helpRequested(false), serverPort(9090){};
+        bool logControlOnly;
+        Config() :helpRequested(false), serverPort(9090), logControlOnly(false) {};
     };
 
     Config mConfig;

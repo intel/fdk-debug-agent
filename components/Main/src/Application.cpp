@@ -62,6 +62,10 @@ void Application::handlePort(const std::string& name, const std::string& value){
     assert(ss.good());
 }
 
+void Application::handleLogControlOnly(const std::string& name, const std::string& value){
+    mConfig.logControlOnly = true;
+}
+
 void Application::defineOptions(OptionSet& options)
 {
     options.addOption(Option("help", "h", "Display DebugAgent help.")
@@ -75,6 +79,12 @@ void Application::defineOptions(OptionSet& options)
     .argument("value")
     .validator(new IntValidator(1024, 65535))
     .callback(OptionCallback<Application>(this, &Application::handlePort)));
+
+    options.addOption(Option("control", "c",
+        "Disable log data path, and keep log control capabilities of DebugAgent")
+    .required(false)
+    .repeatable(false)
+    .callback(OptionCallback<Application>(this, &Application::handleLogControlOnly)));
 }
 
 int Application::main(const std::vector<std::string>&)
@@ -85,7 +95,7 @@ int Application::main(const std::vector<std::string>&)
 
     try
     {
-        SystemDriverFactory driverFactory;
+        SystemDriverFactory driverFactory(mConfig.logControlOnly);
         DebugAgent debugAgent(driverFactory, mConfig.serverPort);
 
         std::cout << "DebugAgent started" << std::endl;

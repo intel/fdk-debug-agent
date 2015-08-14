@@ -31,7 +31,12 @@ namespace cavs
 class SystemDriverFactory : public DriverFactory
 {
 public:
+    SystemDriverFactory(bool logControlOnly): mLogControlOnly(logControlOnly){};
+
     virtual std::unique_ptr<Driver> newDriver() const override;
+
+private:
+    bool mLogControlOnly = false;
 };
 
 }
