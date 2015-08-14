@@ -42,7 +42,14 @@ WppController::TraceProperties::TraceProperties()
 
 void WppController::TraceProperties::init()
 {
-    memset(this, 0, sizeof(TraceProperties));
+
+    /* When memset'ing to 0 the whole structure, KW complains of a potential
+     * issue because it is not POD. To fix it, only the relevant fields of
+     * this structure are initialized.
+     */
+    memset(&properties, 0, sizeof(properties));
+    memset(sessionName, 0, sizeof(sessionName));
+    memset(logFileName, 0, sizeof(logFileName));
 
     WNODE_HEADER &header = properties.Wnode;
 
