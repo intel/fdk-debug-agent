@@ -251,6 +251,10 @@ TEST_CASE("DebugAgent/cAVS: log parameters")
         ));
 }
 
+/** The following test is based on tempos, so it is not 100% safe. These tempos are
+* used to synchronize DebugAgent (and its HTTP server) and HTTP clients.
+* @todo: to be reworked.
+*/
 TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log")
 {
     /* Creating the mocked device */
@@ -303,6 +307,9 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
         std::unique_lock<std::mutex> locker(debugAgentMutex);
         stopDebugAgentCondVar.wait(locker);
     }));
+
+    /* Give some time to DebugAgent to start its http server */
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     /* Creating the http client */
     HttpClientSimulator client("localhost");
