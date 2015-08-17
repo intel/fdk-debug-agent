@@ -64,8 +64,12 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams par
         if (returnedFirmwareStatus == dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS) {
 
             /* Setting returned parameter content if the firmware returns success */
-            memcpy(&returnedOutput.getFirmwareParameter(), returnedParameterContent.getPtr(),
-                returnedParameterContent.getSize());
+            const uint8_t *src =
+                reinterpret_cast<const uint8_t *>(returnedParameterContent.getPtr());
+            const size_t size = returnedParameterContent.getSize();
+            uint8_t *dest = reinterpret_cast<uint8_t *>(&returnedOutput.getFirmwareParameter());
+
+            std::copy(src, src + size, dest);
         }
     }
 
