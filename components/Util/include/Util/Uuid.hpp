@@ -70,7 +70,12 @@ struct Uuid
     void fromOtherUuidType(const UuidType &other)
     {
         static_assert(sizeof(UuidType) == sizeof(Uuid), "Wrong uuid type size");
-        std::memcpy(this, &other, sizeof(Uuid));
+
+        const uint8_t *src = reinterpret_cast<const uint8_t *>(&other);
+        const size_t size = sizeof(UuidType);
+        uint8_t *dest = reinterpret_cast<uint8_t *>(this);
+
+        std::copy(src, src + size, dest);
     }
 
     /** Convert to an other uuid type. It must have the same size. */
@@ -78,7 +83,12 @@ struct Uuid
     void toOtherUuidType(UuidType &other) const NOEXCEPT
     {
         static_assert(sizeof(UuidType) == sizeof(Uuid), "Wrong uuid type size");
-        std::memcpy(&other, this, sizeof(Uuid));
+
+        const uint8_t *src = reinterpret_cast<const uint8_t *>(this);
+        const size_t size = sizeof(Uuid);
+        uint8_t *dest = reinterpret_cast<uint8_t *>(&other);
+
+        std::copy(src, src + size, dest);
     }
 };
 
