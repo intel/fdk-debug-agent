@@ -26,7 +26,6 @@
 #include <Poco/Net/NetException.h>
 #include <Poco/Exception.h>
 #include <iostream>
-#include <typeinfo>
 
 namespace debug_agent
 {
@@ -59,8 +58,6 @@ public:
 
     virtual void exception(const Poco::Exception& e) override
     {
-        const std::type_info &exceptionType = typeid(e);
-
         /* comparing the exception type */
         if (dynamic_cast<const Poco::IOException*>(&e) != nullptr) {
 
