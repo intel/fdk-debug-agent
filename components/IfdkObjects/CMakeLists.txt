@@ -83,3 +83,7 @@ target_include_directories(IfdkObjects PUBLIC "include")
 
 # external libraries
 link_poco(IfdkObjects)
+
+# adding test
+add_subdirectory("test")
+
