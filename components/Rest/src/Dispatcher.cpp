@@ -30,7 +30,7 @@ namespace rest
 {
 
 /* Reg exp that identifies a symbol, for instance 'aa_b2' */
-static const std::string SymbolExp("([a-zA-Z0-9_\\-]+)");
+static const std::string SymbolExp("([a-zA-Z0-9_\\.\\-]+)");
 
 static const std::string ResourceIdentifierPrefix("\\$\\{");
 static const size_t ResourceIdentifierPrefixLength = 2;
@@ -68,7 +68,7 @@ Dispatcher::ResourceEntry::ResourceEntry(const std::string &uri,
     /* Checking uri syntax */
     if (!std::regex_match(uri, UriRegExp))
     {
-        throw InvalidUriException("Wrong URI: " + uri);
+        throw InvalidUriException("Wrong URI: " + uri + " Regexp used: " + UriExp);
     }
 
     /* Finding resource identifiers, for instance '${account_id}' */

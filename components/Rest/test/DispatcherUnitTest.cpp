@@ -146,5 +146,17 @@ TEST_CASE("Valid URIs", "[Dispatcher]")
         identifiers["id3"] = "uu";
         checkFindResourceSuccess(dispatcher, "/ab/toto/cb/titi8/uu", identifiers);
     }
+
+    SECTION("simple path with a point") {
+        /* Adding the resource */
+        checkAddResourceWithValidURI(dispatcher, "/b/c.d/e.f");
+
+        /* Finding the resource with the same url*/
+        checkFindResourceSuccess(dispatcher, "/b/c.d/e.f");
+
+        /* Trying a shorter or a longer URI: should fail */
+        checkFindResourceFailure(dispatcher, "/b/c.d/e.f/a");
+        checkFindResourceFailure(dispatcher, "/b/c.d");
+    }
 }
 
