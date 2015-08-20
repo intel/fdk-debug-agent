@@ -76,6 +76,7 @@ endfunction()
 
 # Adding components in the right order (less dependent first)
 add_subdirectory("components/Util")
+add_subdirectory("components/IfdkObjects")
 add_subdirectory("components/TestCommon")
 add_subdirectory("components/Rest")
 add_subdirectory("components/System")
