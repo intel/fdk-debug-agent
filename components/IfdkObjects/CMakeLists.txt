@@ -48,14 +48,21 @@ SET(TYPE_INCS
     include/IfdkObjects/Type/InfoParameters.hpp
     include/IfdkObjects/Type/Visitor.hpp)
 
+SET(XML_INCS
+    include/IfdkObjects/Xml/Serializer.hpp
+    include/IfdkObjects/Xml/Deserializer.hpp
+    include/IfdkObjects/Xml/DynamicFactory.hpp)
+
 source_group("Header Files\\Type" FILES ${TYPE_INCS})
+source_group("Header Files\\Xml" FILES ${XML_INCS})
 
 set(LIB_SRCS)
 
 set(LIB_INCS
     include/IfdkObjects/VisitableVector.hpp
     include/IfdkObjects/VisitablePtrVector.hpp
-    ${TYPE_INCS})
+    ${TYPE_INCS}
+    ${XML_INCS})
 
 add_library(IfdkObjects STATIC ${LIB_SRCS} ${LIB_INCS})
 set_common_settings(IfdkObjects)
