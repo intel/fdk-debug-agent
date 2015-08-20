@@ -20,11 +20,42 @@
 
 # cmake configuration file of the "IfdkObjects" component
 
+SET(TYPE_INCS
+    include/IfdkObjects/Type/Type.hpp
+    include/IfdkObjects/Type/Component.hpp
+    include/IfdkObjects/Type/Subsystem.hpp
+    include/IfdkObjects/Type/Ref.hpp
+    include/IfdkObjects/Type/TypeRef.hpp
+    include/IfdkObjects/Type/ComponentRef.hpp
+    include/IfdkObjects/Type/ServiceRef.hpp
+    include/IfdkObjects/Type/RefCollection.hpp
+    include/IfdkObjects/Type/GenericRefCollection.hpp
+    include/IfdkObjects/Type/Categories.hpp
+    include/IfdkObjects/Type/Children.hpp
+    include/IfdkObjects/Type/TypeRefCollection.hpp
+    include/IfdkObjects/Type/ComponentRefCollection.hpp
+    include/IfdkObjects/Type/ServiceRefCollection.hpp
+    include/IfdkObjects/Type/Characteristics.hpp
+    include/IfdkObjects/Type/Characteristic.hpp
+    include/IfdkObjects/Type/Description.hpp
+    include/IfdkObjects/Type/Connector.hpp
+    include/IfdkObjects/Type/Input.hpp
+    include/IfdkObjects/Type/Output.hpp
+    include/IfdkObjects/Type/Inputs.hpp
+    include/IfdkObjects/Type/Outputs.hpp
+    include/IfdkObjects/Type/Parameters.hpp
+    include/IfdkObjects/Type/ControlParameters.hpp
+    include/IfdkObjects/Type/InfoParameters.hpp
+    include/IfdkObjects/Type/Visitor.hpp)
+
+source_group("Header Files\\Type" FILES ${TYPE_INCS})
+
 set(LIB_SRCS)
 
 set(LIB_INCS
     include/IfdkObjects/VisitableVector.hpp
-    include/IfdkObjects/VisitablePtrVector.hpp)
+    include/IfdkObjects/VisitablePtrVector.hpp
+    ${TYPE_INCS})
 
 add_library(IfdkObjects STATIC ${LIB_SRCS} ${LIB_INCS})
 set_common_settings(IfdkObjects)
