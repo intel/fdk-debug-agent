@@ -20,6 +20,13 @@
 
 # cmake configuration file of the "IfdkObjects" component
 
+SET(XML_SRCS
+    src/Xml/TypeSerializer.cpp
+    src/Xml/TypeDeserializer.cpp
+    src/Xml/TypeTraits.cpp)
+
+source_group("Source Files\\Xml" FILES ${XML_SRCS})
+
 SET(TYPE_INCS
     include/IfdkObjects/Type/Type.hpp
     include/IfdkObjects/Type/Component.hpp
@@ -51,12 +58,16 @@ SET(TYPE_INCS
 SET(XML_INCS
     include/IfdkObjects/Xml/Serializer.hpp
     include/IfdkObjects/Xml/Deserializer.hpp
-    include/IfdkObjects/Xml/DynamicFactory.hpp)
+    include/IfdkObjects/Xml/DynamicFactory.hpp
+    include/IfdkObjects/Xml/TypeSerializer.hpp
+    include/IfdkObjects/Xml/TypeDeserializer.hpp
+    include/IfdkObjects/Xml/TypeTraits.hpp)
 
 source_group("Header Files\\Type" FILES ${TYPE_INCS})
 source_group("Header Files\\Xml" FILES ${XML_INCS})
 
-set(LIB_SRCS)
+set(LIB_SRCS
+    ${XML_SRCS})
 
 set(LIB_INCS
     include/IfdkObjects/VisitableVector.hpp
