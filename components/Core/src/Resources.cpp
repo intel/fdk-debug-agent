@@ -83,11 +83,11 @@ static std::string getStringFromFixedSizeArray(ArrayElementType *buffer, std::si
  *
  *  @returns a std::string corresponding to the value of an XML node
  */
-static const std::string& getNodeValueFromXPath(const Poco::XML::Document* document,
+static const std::string getNodeValueFromXPath(const Poco::XML::Document* document,
                                                 const std::string& url) {
-    Poco::XML::Node* startedNode = document->getNodeByPath(url);
-    if (startedNode) {
-        return Poco::XML::fromXMLString(startedNode->innerText());
+    Poco::XML::Node* node = document->getNodeByPath(url);
+    if (node) {
+        return Poco::XML::fromXMLString(node->innerText());
     }
     else
     {
