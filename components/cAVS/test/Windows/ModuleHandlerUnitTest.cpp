@@ -56,12 +56,12 @@ void setArbitraryContent(T &value)
 
 /** Produce a module entry vector of the supplied size.
  * Each entry is filled with an arbitrary content. */
-std::vector<dsp_fw::ModuleEntry> produceModuleEntries(std::size_t expectedModuleCount)
+std::vector<ModuleEntry> produceModuleEntries(std::size_t expectedModuleCount)
 {
-    dsp_fw::ModuleEntry moduleEntry;
+    ModuleEntry moduleEntry;
     setArbitraryContent(moduleEntry);
 
-    std::vector<dsp_fw::ModuleEntry> entries;
+    std::vector<ModuleEntry> entries;
     for (std::size_t i = 0; i < expectedModuleCount; ++i) {
         entries.push_back(moduleEntry);
     }
@@ -73,11 +73,11 @@ std::vector<dsp_fw::ModuleEntry> produceModuleEntries(std::size_t expectedModule
 void checkModuleEntryIoctl(windows::ModuleHandler& moduleHandler, std::size_t expectedModuleCount)
 {
     /*Successful get module info command */
-    std::vector<dsp_fw::ModuleEntry> entries;
+    std::vector<ModuleEntry> entries;
     CHECK_NOTHROW(moduleHandler.getModulesEntries(entries));
 
     /* Checking result */
-    dsp_fw::ModuleEntry expectedModuleEntry;
+    ModuleEntry expectedModuleEntry;
     setArbitraryContent(expectedModuleEntry);
     CHECK(entries.size() == expectedModuleCount);
     for (auto &candidateModuleEntry : entries) {
@@ -128,21 +128,21 @@ TEST_CASE("Module handling: getting module entries")
         false,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
+        std::vector<ModuleEntry>()); /* unused parameter */
 
     /* Simulating a driver error during getting module entries */
     commands.addGetModuleEntriesCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
+        std::vector<ModuleEntry>()); /* unused parameter */
 
     /* Simulating a firmware error during getting module entries */
     commands.addGetModuleEntriesCommand(
         true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
-        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
+        std::vector<ModuleEntry>()); /* unused parameter */
 
     /* Successful get module info command with 2 modules */
     commands.addGetModuleEntriesCommand(
@@ -191,7 +191,7 @@ TEST_CASE("Module handling: getting module entries")
     CHECK(memoryEquals(properties, expectedAdspProperties));
 
     /* Simulating an os error during getting module entries */
-    std::vector<dsp_fw::ModuleEntry> entries;
+    std::vector<ModuleEntry> entries;
     CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
         "Device returns an exception: OS says that io control has failed.");
     CHECK(entries.empty());

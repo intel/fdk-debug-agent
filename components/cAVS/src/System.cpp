@@ -83,7 +83,7 @@ Logger::Parameters System::getLogParameters()
     }
 }
 
-const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const NOEXCEPT
+const std::vector<ModuleEntry> &System::getModuleEntries() const NOEXCEPT
 {
     return mModuleEntries;
 }

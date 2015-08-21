@@ -24,12 +24,6 @@
 
 #include <inttypes.h>
 
-/** C_ASSERT is a windows specific macro for static assertion. Defining a linux equivalent in order
- *  to make the firmware header cross-toolchain. */
-#ifdef __GNUC__
-#define C_ASSERT(expr) static_assert(expr, "Static assertion failed")
-#endif
-
 namespace debug_agent
 {
 namespace cavs
@@ -41,22 +35,12 @@ namespace cavs
 /** Including the firmware types into the debug_agent::cavs::dsp_fw namespace */
 namespace dsp_fw
 {
-#include "fw_manifest_common.h"
 #include "adsp_ixc_status.h"
 
-/** Defining this missing structure (not yet implemented in firmware headers) */
-struct ModulesInfo
-{
-    uint32_t module_count;
-    ModuleEntry module_info[1];
-};
-C_ASSERT(sizeof(ModulesInfo) == 120);
 
 /** Max module count, used to retrieve module entries. */
 static const uint32_t MaxModuleCount = 128;
 
-/** Defining the missing MODULES_INFO_GET value of the enum BaseFwParams */
-static const BaseFwParams MODULES_INFO_GET = static_cast<BaseFwParams>(9);
 }
 
 

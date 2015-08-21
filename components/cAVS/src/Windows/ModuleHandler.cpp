@@ -79,7 +79,7 @@ void ModuleHandler::getAdspProperties(dsp_fw::AdspProperties &properties)
     properties = ioctlOutput.getFirmwareParameter();
 }
 
-void ModuleHandler::getModulesEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries)
+void ModuleHandler::getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
 {
     std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize();
 

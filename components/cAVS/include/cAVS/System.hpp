@@ -102,7 +102,7 @@ public:
     /**
      * Get module entries
      */
-    const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const NOEXCEPT;
+    const std::vector<ModuleEntry> &getModuleEntries() const NOEXCEPT;
 
     /**
      * Try to acquire the log stream resource
@@ -132,7 +132,7 @@ private:
     /**
      * The module entries table retrieved from FW once, at initialization
      */
-    std::vector<dsp_fw::ModuleEntry> mModuleEntries;
+    std::vector<ModuleEntry> mModuleEntries;
 
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;

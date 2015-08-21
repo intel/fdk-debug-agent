@@ -49,7 +49,7 @@ public:
     virtual void getAdspProperties(dsp_fw::AdspProperties &properties) = 0;
 
     /** @return the firmware module entries */
-    virtual void getModulesEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries) = 0;
+    virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) = 0;
 
 private:
     ModuleHandler(const ModuleHandler &) = delete;

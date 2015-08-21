@@ -151,7 +151,7 @@ public:
         /* "dsp_fw::MaxModuleCount - 1" because the ModulesInfo structure contains one module
          * entry */
         return sizeof(dsp_fw::ModulesInfo)
-            + (dsp_fw::MaxModuleCount - 1) * sizeof(dsp_fw::ModuleEntry);
+            + (dsp_fw::MaxModuleCount - 1) * sizeof(ModuleEntry);
     }
 
 private:

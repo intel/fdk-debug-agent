@@ -40,10 +40,10 @@ public:
     ModuleHandler(Device &device) : mDevice(device) {}
 
     virtual void getAdspProperties(dsp_fw::AdspProperties &properties) override;
-    virtual void getModulesEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries) override;
+    virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) override;
 
 private:
-    /** The module parameter access feature has only one parameter, therefor its index is 0 */
+    /** The module parameter access feature has only one parameter, therefore its index is 0 */
     static const uint32_t moduleParameterAccessParameterId = 0;
 
     Device &mDevice;

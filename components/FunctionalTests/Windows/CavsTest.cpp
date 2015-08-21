@@ -50,7 +50,7 @@ const Uuid Module1UID = { 0x11121314, 0x1516, 0x1718,
     { 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20 } };
 
 /** Helper function to set a module entry */
-void setModuleEntry(dsp_fw::ModuleEntry &entry, const std::string &name,
+void setModuleEntry(ModuleEntry &entry, const std::string &name,
     const Uuid &uuid)
 {
     /* Setting name */
@@ -72,7 +72,7 @@ void setModuleEntry(dsp_fw::ModuleEntry &entry, const std::string &name,
 void addModuleEntryCommand(windows::MockedDeviceCommands &commands)
 {
     /* Creating 2 module entries */
-    std::vector<dsp_fw::ModuleEntry> returnedEntries(2);
+    std::vector<ModuleEntry> returnedEntries(2);
     setModuleEntry(returnedEntries[0], "module_0", Module0UID);
     setModuleEntry(returnedEntries[1], "module_1", Module1UID);
 

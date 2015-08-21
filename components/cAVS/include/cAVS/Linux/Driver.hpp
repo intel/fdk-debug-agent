@@ -46,7 +46,7 @@ private:
     {
     public:
         virtual void getAdspProperties(dsp_fw::AdspProperties &properties) override {}
-        virtual void getModulesEntries(std::vector<dsp_fw::ModuleEntry> &modulesEntries)
+        virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
             override {}
     };
 

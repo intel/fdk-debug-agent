@@ -74,7 +74,7 @@ public:
      */
     void addGetModuleEntriesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-        const std::vector<dsp_fw::ModuleEntry> &returnedEntries);
+        const std::vector<ModuleEntry> &returnedEntries);
 
     /** Add a get log parameters command
     *

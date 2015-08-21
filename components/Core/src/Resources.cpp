@@ -103,7 +103,7 @@ static const std::string getNodeValueFromXPath(const Poco::XML::Document* docume
 void ModuleEntryResource::handleGet(const Request &request, Response &response)
 {
     /* Retrieving module entries, doesn't throw exception */
-    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
+    const std::vector<ModuleEntry> &entries = mSystem.getModuleEntries();
 
     std::ostream &out = response.send(ContentTypeHtml);
     out << "<p>Module type count: " << entries.size() << "</p>";
@@ -222,7 +222,7 @@ void SubsystemTypeResource::handleGet(const Request &request, Response &response
     /* Modules*/
     auto compColl = new type::ComponentRefCollection("modules");
 
-    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
+    const std::vector<ModuleEntry> &entries = mSystem.getModuleEntries();
     for (auto &module : entries) {
         std::string moduleName = getStringFromFixedSizeArray(module.name, sizeof(module.name));
         compColl->add(type::ComponentRef(moduleName));
