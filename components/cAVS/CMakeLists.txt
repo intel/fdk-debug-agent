@@ -37,7 +37,8 @@ set(LIB_INCS
     include/cAVS/SystemDriverFactory.hpp
     include/cAVS/System.hpp
     include/cAVS/FirmwareTypes.hpp
-    include/cAVS/ModuleHandler.hpp)
+    include/cAVS/ModuleHandler.hpp
+    include/cAVS/FwConfig.hpp)
 
 set(LIBRAIRIES)
 SET(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/external/cAVS/firmware/include")
@@ -73,4 +74,4 @@ add_subdirectory("TestFramework")
 add_subdirectory("test")
 
 # Needed components
-target_link_libraries(cAVS System Util)
+target_link_libraries(cAVS System Util Tlv)
