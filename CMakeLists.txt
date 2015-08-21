@@ -38,10 +38,19 @@ if (NOT ${Poco_FOUND})
     message( FATAL_ERROR "Poco not found : ${Poco_NOT_FOUND_MESSAGE}" )
 endif(NOT ${Poco_FOUND})
 
+# Toolchain-specific settings
 if (WIN32)
+    # warning as error. todo: activate all warnings.
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
+
     # cmake handles incorrectly static library symbol database, so disabling the involved warning.
     set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099" )
-endif (WIN32)
+elseif (CMAKE_COMPILER_IS_GNUCXX)
+    # warning as error. todo: activate all warnings.
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+else ()
+    message( FATAL_ERROR "Unsupported toolchain." )
+endif()
 
 # usage: link_poco(<target_name>) where target_name is the target that links with poco.
 function(link_poco target)
@@ -58,7 +67,7 @@ endfunction()
 # providing "catch" test framework library
 # usage: link_catch(<target_name>) where target_name is the target that links with catch.
 function(link_catch target)
-    target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}/external/catch/include")
+    target_include_directories(${target} SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/external/catch/include")
 endfunction()
 
 # this function applies common settings to all debug agent projects
@@ -71,7 +80,7 @@ if (WIN32)
     set_property(TARGET ${projectname} APPEND PROPERTY COMPILE_DEFINITIONS "NOEXCEPT=throw()")
 else ()
     set_property(TARGET ${projectname} APPEND PROPERTY COMPILE_DEFINITIONS NOEXCEPT=noexcept)
-endif (WIN32)
+endif ()
 endfunction()
 
 # Adding components in the right order (less dependent first)
