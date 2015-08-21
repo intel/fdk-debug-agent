@@ -151,7 +151,7 @@ public:
     explicit TypedBuffer(const T &value, std::size_t size = sizeof(T)) : Buffer(size)
     {
         assert(size >= sizeof(T));
-        std::copy(&value, &value + 1, &getContent());
+        getContent() = value;
     }
 
     T &getContent()

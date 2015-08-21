@@ -71,11 +71,8 @@ struct Uuid
     {
         static_assert(sizeof(UuidType) == sizeof(Uuid), "Wrong uuid type size");
 
-        const uint8_t *src = reinterpret_cast<const uint8_t *>(&other);
-        const size_t size = sizeof(UuidType);
-        uint8_t *dest = reinterpret_cast<uint8_t *>(this);
-
-        std::copy(src, src + size, dest);
+        const Uuid *otherAsUuid = reinterpret_cast<const Uuid*>(&other);
+        *this = *otherAsUuid;
     }
 
     /** Convert to an other uuid type. It must have the same size. */
@@ -84,11 +81,8 @@ struct Uuid
     {
         static_assert(sizeof(UuidType) == sizeof(Uuid), "Wrong uuid type size");
 
-        const uint8_t *src = reinterpret_cast<const uint8_t *>(this);
-        const size_t size = sizeof(Uuid);
-        uint8_t *dest = reinterpret_cast<uint8_t *>(&other);
-
-        std::copy(src, src + size, dest);
+        Uuid *otherAsUuid = reinterpret_cast<Uuid*>(&other);
+        *otherAsUuid = *this;
     }
 };
 
