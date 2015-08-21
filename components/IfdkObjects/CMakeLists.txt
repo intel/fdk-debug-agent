@@ -31,15 +31,18 @@ SET(TYPE_INCS
     include/IfdkObjects/Type/Type.hpp
     include/IfdkObjects/Type/Component.hpp
     include/IfdkObjects/Type/Subsystem.hpp
+    include/IfdkObjects/Type/System.hpp
     include/IfdkObjects/Type/Ref.hpp
     include/IfdkObjects/Type/TypeRef.hpp
     include/IfdkObjects/Type/ComponentRef.hpp
     include/IfdkObjects/Type/ServiceRef.hpp
+    include/IfdkObjects/Type/SubsystemRef.hpp
     include/IfdkObjects/Type/RefCollection.hpp
     include/IfdkObjects/Type/GenericRefCollection.hpp
     include/IfdkObjects/Type/Categories.hpp
     include/IfdkObjects/Type/Children.hpp
     include/IfdkObjects/Type/TypeRefCollection.hpp
+    include/IfdkObjects/Type/SubsystemRefCollection.hpp
     include/IfdkObjects/Type/ComponentRefCollection.hpp
     include/IfdkObjects/Type/ServiceRefCollection.hpp
     include/IfdkObjects/Type/Characteristics.hpp

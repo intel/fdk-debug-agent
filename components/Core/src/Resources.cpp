@@ -21,10 +21,6 @@
 */
 #include "Core/Resources.hpp"
 #include "Util/Uuid.hpp"
-#include "IfdkObjects/Type/Subsystem.hpp"
-#include "IfdkObjects/Type/TypeRefCollection.hpp"
-#include "IfdkObjects/Type/ComponentRefCollection.hpp"
-#include "IfdkObjects/Type/ServiceRefCollection.hpp"
 #include "IfdkObjects/Xml/TypeDeserializer.hpp"
 #include "IfdkObjects/Xml/TypeSerializer.hpp"
 #include <Poco/NumberParser.h>
@@ -142,6 +138,23 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
     out << "</table>";
 }
 
+void SystemTypeResource::handleGet(const Request &request, Response &response)
+{
+    type::System system("bxtn");
+    system.getDescription().setValue("Broxton platform");
+
+    auto coll = new type::SubsystemRefCollection("subsystems");
+    coll->add(type::SubsystemRef("cavs"));
+    system.getChildren().add(coll);
+
+    xml::TypeSerializer serializer;
+    system.accept(serializer);
+    std::string xml = serializer.getXml();
+
+    std::ostream &out = response.send(ContentTypeXml);
+    out << xml;
+}
+
 void SubsystemTypeResource::handleGet(const Request &request, Response &response)
 {
     static const std::vector<std::string> staticTypeCollections = {
@@ -225,18 +238,6 @@ void SubsystemTypeResource::handleGet(const Request &request, Response &response
 
     std::ostream &out = response.send(ContentTypeXml);
     out << xml;
-}
-
-void SystemTypeResource::handleGet(const Request &request, Response &response)
-{
-    std::ostream &out = response.send(ContentTypeXml);
-
-    out << "<system_type Name=\"SKL\">"
-        "    <description>Skylake platform</description>"
-        "    <subsystem_types>"
-        "        <subsystem_type Name=\"cavs\"/>"
-        "    </subsystem_types>"
-        "</system_type>";
 }
 
 void SubsystemsInstancesListResource::handleGet(const Request &request, Response &response)

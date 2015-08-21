@@ -53,6 +53,11 @@ void TypeSerializer::enter(const Subsystem &subsystem)
     pushElement(subsystem);
 }
 
+void TypeSerializer::enter(const System &instance)
+{
+    pushElement(instance);
+}
+
 void TypeSerializer::enter(const Categories &instance)
 {
     pushElement(instance);
@@ -79,6 +84,11 @@ void TypeSerializer::enter(const ServiceRef &serviceRef)
     pushElement(serviceRef);
 }
 
+void TypeSerializer::enter(const SubsystemRef &instance)
+{
+    pushElement(instance);
+}
+
 void TypeSerializer::enter(const RefCollection &collection, bool isConcrete)
 {
     assert(!isConcrete);
@@ -96,6 +106,11 @@ void TypeSerializer::enter(const ComponentRefCollection &instance)
 }
 
 void TypeSerializer::enter(const ServiceRefCollection &instance)
+{
+    pushElement(instance);
+}
+
+void TypeSerializer::enter(const SubsystemRefCollection &instance)
 {
     pushElement(instance);
 }

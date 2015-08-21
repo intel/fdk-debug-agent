@@ -133,6 +133,25 @@ TEST_CASE("Type serializer: ServiceRef")
     CHECK(deserializedInstance == serviceRef);
 }
 
+TEST_CASE("Type serializer: SubsystemRef")
+{
+    /* Serialize */
+    SubsystemRef subsystemRef("my_subsystem_ref");
+
+    TypeSerializer serializer;
+    subsystemRef.accept(serializer);
+
+    std::string xml = serializer.getXml();
+    CHECK(xml == "<subsystem_type Name=\"my_subsystem_ref\"/>\n");
+
+    /* Deserialize */
+    TypeDeserializer deserializer(xml);
+    SubsystemRef deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == subsystemRef);
+}
+
 TEST_CASE("Type serializer: Categories")
 {
     /* Serialize */
@@ -239,6 +258,33 @@ TEST_CASE("Type serializer: service ref collection")
 
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == serviceRef);
+}
+
+TEST_CASE("Type serializer: subsystem ref collection")
+{
+    /* Serialize */
+    SubsystemRefCollection subsystemRef("my_subsystem_ref_coll");
+    subsystemRef.add(SubsystemRef("subsystem1"));
+    subsystemRef.add(SubsystemRef("subsystem2"));
+
+    TypeSerializer serializer;
+    subsystemRef.accept(serializer);
+
+    std::string xml = serializer.getXml();
+
+    CHECK(xml ==
+        "<subsystem_collection Name=\"my_subsystem_ref_coll\">\n"
+        "    <subsystem_type Name=\"subsystem1\"/>\n"
+        "    <subsystem_type Name=\"subsystem2\"/>\n"
+        "</subsystem_collection>\n"
+        );
+
+    /* Deserialize */
+    TypeDeserializer deserializer(xml);
+    SubsystemRefCollection deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == subsystemRef);
 }
 
 TEST_CASE("Type serializer: Description")
@@ -628,6 +674,51 @@ TEST_CASE("Type serializer: Subsystem")
 
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == subsystem);
+}
+
+TEST_CASE("Type serializer: System")
+{
+    /* Serialize */
+    System system("my_system");
+    populateDescription(system.getDescription());
+    populateCharacteristics(system.getCharacteristics());
+
+    SubsystemRefCollection *coll = new SubsystemRefCollection("subsystems");
+    coll->add(SubsystemRef("subsystem1"));
+    coll->add(SubsystemRef("subsystem2"));
+    system.getChildren().add(coll);
+
+    TypeSerializer serializer;
+    system.accept(serializer);
+
+    std::string xml = serializer.getXml();
+    CHECK(xml ==
+        "<system_type Name=\"my_system\">\n"
+        "    <description>my desc</description>\n"
+        "    <characteristics>\n"
+        "        <characteristic Name=\"c1\">v1</characteristic>\n"
+        "        <characteristic Name=\"c2\">v2</characteristic>\n"
+        "        <characteristic Name=\"c3\">v3</characteristic>\n"
+        "    </characteristics>\n"
+        "    <info_parameters/>\n"
+        "    <control_parameters/>\n"
+        "    <children>\n"
+        "        <subsystem_collection Name=\"subsystems\">\n"
+        "            <subsystem_type Name=\"subsystem1\"/>\n"
+        "            <subsystem_type Name=\"subsystem2\"/>\n"
+        "        </subsystem_collection>\n"
+        "    </children>\n"
+        "    <inputs/>\n"
+        "    <outputs/>\n"
+        "</system_type>\n"
+        );
+
+    /* Deserialize */
+    TypeDeserializer deserializer(xml);
+    System deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == system);
 }
 
 

@@ -41,9 +41,11 @@ class Ref;
 class TypeRef;
 class ComponentRef;
 class ServiceRef;
+class SubsystemRef;
 class Type;
 class Component;
 class Subsystem;
+class System;
 class RefCollection;
 class Characteristic;
 class Description;
@@ -66,6 +68,7 @@ class GenericRefCollection;
 using TypeRefCollection = GenericRefCollection<TypeRef>;
 using ComponentRefCollection = GenericRefCollection<ComponentRef>;
 using ServiceRefCollection = GenericRefCollection<ServiceRef>;
+using SubsystemRefCollection = GenericRefCollection<SubsystemRef>;
 
 /** Visitor that allows to walk into the "type" data model
  *
@@ -134,12 +137,14 @@ public:
     virtual void enter(TypeRef &instance) = 0;
     virtual void enter(ComponentRef &instance) = 0;
     virtual void enter(ServiceRef &instance) = 0;
+    virtual void enter(SubsystemRef &instance) = 0;
 
     /* Named reference collections */
     virtual void enter(RefCollection &instance, bool isConcrete) = 0;
     virtual void enter(TypeRefCollection &instance) = 0;
     virtual void enter(ComponentRefCollection &instance) = 0;
     virtual void enter(ServiceRefCollection &instance) = 0;
+    virtual void enter(SubsystemRefCollection &instance) = 0;
 
     /* Characteristics */
     virtual void enter(Characteristic &instance) = 0;
@@ -168,6 +173,7 @@ public:
     virtual void enter(Type &instance, bool isConcrete) = 0;
     virtual void enter(Component &instance, bool isConcrete) = 0;
     virtual void enter(Subsystem &instance) = 0;
+    virtual void enter(System &instance) = 0;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;
@@ -184,12 +190,14 @@ public:
     virtual void enter(const TypeRef &instance) = 0;
     virtual void enter(const ComponentRef &instance) = 0;
     virtual void enter(const ServiceRef &instance) = 0;
+    virtual void enter(const SubsystemRef &instance) = 0;
 
     /* Named reference collections */
     virtual void enter(const RefCollection &instance, bool isConcrete) = 0;
     virtual void enter(const TypeRefCollection &instance) = 0;
     virtual void enter(const ComponentRefCollection &instance) = 0;
     virtual void enter(const ServiceRefCollection &instance) = 0;
+    virtual void enter(const SubsystemRefCollection &instance) = 0;
 
     /* Characteristics */
     virtual void enter(const Characteristic &instance) = 0;
@@ -218,6 +226,7 @@ public:
     virtual void enter(const Type &instance, bool isConcrete) = 0;
     virtual void enter(const Component &instance, bool isConcrete) = 0;
     virtual void enter(const Subsystem &instance) = 0;
+    virtual void enter(const System &instance) = 0;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;

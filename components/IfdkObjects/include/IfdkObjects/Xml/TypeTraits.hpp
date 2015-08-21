@@ -25,14 +25,17 @@
 #include "IfdkObjects/Type/Type.hpp"
 #include "IfdkObjects/Type/Component.hpp"
 #include "IfdkObjects/Type/Subsystem.hpp"
+#include "IfdkObjects/Type/System.hpp"
 #include "IfdkObjects/Type/Categories.hpp"
 #include "IfdkObjects/Type/TypeRef.hpp"
 #include "IfdkObjects/Type/ComponentRef.hpp"
 #include "IfdkObjects/Type/ServiceRef.hpp"
+#include "IfdkObjects/Type/SubsystemRef.hpp"
 #include "IfdkObjects/Type/Children.hpp"
 #include "IfdkObjects/Type/TypeRefCollection.hpp"
 #include "IfdkObjects/Type/ComponentRefCollection.hpp"
 #include "IfdkObjects/Type/ServiceRefCollection.hpp"
+#include "IfdkObjects/Type/SubsystemRefCollection.hpp"
 #include "IfdkObjects/Type/Characteristic.hpp"
 #include "IfdkObjects/Type/Characteristics.hpp"
 #include "IfdkObjects/Type/Description.hpp"
@@ -89,6 +92,13 @@ struct TypeTraits<type::ServiceRef>
     static const std::string tag;
 };
 
+template<>
+struct TypeTraits<type::SubsystemRef>
+{
+    static const std::string tag;
+};
+
+
 /* Named reference collections */
 
 template<>
@@ -112,6 +122,12 @@ struct TypeTraits<type::ComponentRefCollection>
 
 template<>
 struct TypeTraits<type::ServiceRefCollection>
+{
+    static const std::string tag;
+};
+
+template<>
+struct TypeTraits<type::SubsystemRefCollection>
 {
     static const std::string tag;
 };
@@ -224,6 +240,12 @@ struct TypeTraits<type::Component>
 
 template<>
 struct TypeTraits<type::Subsystem>
+{
+    static const std::string tag;
+};
+
+template<>
+struct TypeTraits<type::System>
 {
     static const std::string tag;
 };

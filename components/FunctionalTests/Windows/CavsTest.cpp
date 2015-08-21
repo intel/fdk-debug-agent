@@ -162,12 +162,19 @@ TEST_CASE("DebugAgent/cAVS: system type (URL: /type)")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<system_type Name=\"SKL\">"
-        "    <description>Skylake platform</description>"
-        "    <subsystem_types>"
-        "        <subsystem_type Name=\"cavs\"/>"
-        "    </subsystem_types>"
-        "</system_type>"
+        "<system_type Name=\"bxtn\">\n"
+        "    <description>Broxton platform</description>\n"
+        "    <characteristics/>\n"
+        "    <info_parameters/>\n"
+        "    <control_parameters/>\n"
+        "    <children>\n"
+        "        <subsystem_collection Name=\"subsystems\">\n"
+        "            <subsystem_type Name=\"cavs\"/>\n"
+        "        </subsystem_collection>\n"
+        "    </children>\n"
+        "    <inputs/>\n"
+        "    <outputs/>\n"
+        "</system_type>\n"
         ));
 }
 

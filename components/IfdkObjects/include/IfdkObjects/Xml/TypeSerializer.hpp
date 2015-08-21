@@ -47,14 +47,17 @@ private:
     virtual void enter(const type::Type &instance, bool isConcrete) override;
     virtual void enter(const type::Component &instance, bool isConcrete) override;
     virtual void enter(const type::Subsystem &instance) override;
+    virtual void enter(const type::System &instance) override;
     virtual void enter(const type::Categories &instance) override;
     virtual void enter(const type::Ref &instance, bool isConcrete);
     virtual void enter(const type::TypeRef &instance) override;
     virtual void enter(const type::ComponentRef &instance) override;
     virtual void enter(const type::ServiceRef &instance) override;
+    virtual void enter(const type::SubsystemRef &instance) override;
     virtual void enter(const type::TypeRefCollection &instance) override;
     virtual void enter(const type::ComponentRefCollection &instance) override;
     virtual void enter(const type::ServiceRefCollection &instance) override;
+    virtual void enter(const type::SubsystemRefCollection &instance) override;
     virtual void enter(const type::Children &instance) override;
     virtual void enter(const type::RefCollection &instance, bool isConcrete) override;
     virtual void enter(const type::Characteristic &instance) override;

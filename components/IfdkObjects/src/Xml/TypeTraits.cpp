@@ -39,12 +39,16 @@ const std::string TypeTraits<ComponentRef>::tag("component_type");
 
 const std::string TypeTraits<ServiceRef>::tag("service_type");
 
+const std::string TypeTraits<SubsystemRef>::tag("subsystem_type");
+
 const std::string TypeTraits<Type>::tag("type");
 const std::string TypeTraits<Type>::attributeName("Name");
 
 const std::string TypeTraits<Component>::tag("component_type");
 
 const std::string TypeTraits<Subsystem>::tag("subsystem_type");
+
+const std::string TypeTraits<System>::tag("system_type");
 
 const std::string TypeTraits<Categories>::tag("categories");
 
@@ -57,6 +61,8 @@ const std::string TypeTraits<TypeRefCollection>::tag("collection");
 const std::string TypeTraits<ComponentRefCollection>::tag("component_collection");
 
 const std::string TypeTraits<ServiceRefCollection>::tag("service_collection");
+
+const std::string TypeTraits<SubsystemRefCollection>::tag("subsystem_collection");
 
 const std::string TypeTraits<Characteristic>::tag("characteristic");
 const std::string TypeTraits<Characteristic>::attributeName("Name");
