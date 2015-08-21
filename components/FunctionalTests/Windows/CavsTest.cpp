@@ -129,7 +129,7 @@ TEST_CASE("DebugAgent/cAVS: module entries")
         ));
 }
 
-TEST_CASE("DebugAgent/cAVS: system type (URL: /)")
+TEST_CASE("DebugAgent/cAVS: system type (URL: /type)")
 {
     /* Creating the mocked device */
     std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
@@ -157,7 +157,7 @@ TEST_CASE("DebugAgent/cAVS: system type (URL: /)")
 
     /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
-        "/",
+        "/type",
         HttpClientSimulator::Verb::Get,
         "",
         HttpClientSimulator::Status::Ok,
@@ -168,6 +168,92 @@ TEST_CASE("DebugAgent/cAVS: system type (URL: /)")
         "        <subsystem_type Name=\"cavs\"/>"
         "    </subsystem_types>"
         "</system_type>"
+        ));
+}
+
+TEST_CASE("DebugAgent/cAVS: subsystem type (URL: /type/cavs)")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting subsystem information*/
+    CHECK_NOTHROW(client.request(
+        "/type/cavs",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<subsystem_type Name=\"cavs\">\n"
+        "    <description>cAVS subsystem</description>\n"
+        "    <characteristics>\n"
+        "        <characteristic Name=\"Fw Version\">1.0.0.2</characteristic>\n"
+        "        <characteristic Name=\"Nb Cores\">1</characteristic>\n"
+        "        <characteristic Name=\"Memory page size\">4096</characteristic>\n"
+        "    </characteristics>\n"
+        "    <info_parameters/>\n"
+        "    <control_parameters/>\n"
+        "    <children>\n"
+        "        <collection Name=\"pipes\">\n"
+        "            <type Name=\"pipe\"/>\n"
+        "        </collection>\n"
+        "        <collection Name=\"cores\">\n"
+        "            <type Name=\"core\"/>\n"
+        "        </collection>\n"
+        "        <collection Name=\"tasks\">\n"
+        "            <type Name=\"task\"/>\n"
+        "        </collection>\n"
+        "        <service_collection Name=\"services\">\n"
+        "            <service_type Name=\"fwlogs\"/>\n"
+        "        </service_collection>\n"
+        "        <component_collection Name=\"gateways\">\n"
+        "            <component_type Name=\"hda-host-out-gateway\"/>\n"
+        "            <component_type Name=\"hda-host-in-gateway\"/>\n"
+        "            <component_type Name=\"hda-link-out-gateway\"/>\n"
+        "            <component_type Name=\"hda-link-in-gateway\"/>\n"
+        "            <component_type Name=\"dmic-link-in-gateway\"/>\n"
+        "        </component_collection>\n"
+        "        <component_collection Name=\"modules\">\n"
+        "            <component_type Name=\"module_0\"/>\n"
+        "            <component_type Name=\"module_1\"/>\n"
+        "        </component_collection>\n"
+        "    </children>\n"
+        "    <inputs/>\n"
+        "    <outputs/>\n"
+        "    <categories>\n"
+        "        <type Name=\"pipe\"/>\n"
+        "        <type Name=\"core\"/>\n"
+        "        <type Name=\"task\"/>\n"
+        "        <service_type Name=\"fwlogs\"/>\n"
+        "        <component_type Name=\"hda-host-out-gateway\"/>\n"
+        "        <component_type Name=\"hda-host-in-gateway\"/>\n"
+        "        <component_type Name=\"hda-link-out-gateway\"/>\n"
+        "        <component_type Name=\"hda-link-in-gateway\"/>\n"
+        "        <component_type Name=\"dmic-link-in-gateway\"/>\n"
+        "        <component_type Name=\"module_0\"/>\n"
+        "        <component_type Name=\"module_1\"/>\n"
+        "    </categories>\n"
+        "</subsystem_type>\n"
         ));
 }
 

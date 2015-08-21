@@ -21,6 +21,12 @@
 */
 #include "Core/Resources.hpp"
 #include "Util/Uuid.hpp"
+#include "IfdkObjects/Type/Subsystem.hpp"
+#include "IfdkObjects/Type/TypeRefCollection.hpp"
+#include "IfdkObjects/Type/ComponentRefCollection.hpp"
+#include "IfdkObjects/Type/ServiceRefCollection.hpp"
+#include "IfdkObjects/Xml/TypeDeserializer.hpp"
+#include "IfdkObjects/Xml/TypeSerializer.hpp"
 #include <Poco/NumberParser.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/XML/XML.h>
@@ -38,6 +44,7 @@
 
 using namespace debug_agent::rest;
 using namespace debug_agent::cavs;
+using namespace debug_agent::ifdk_objects;
 
 namespace debug_agent
 {
@@ -133,6 +140,91 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
         moduleId++;
     }
     out << "</table>";
+}
+
+void SubsystemTypeResource::handleGet(const Request &request, Response &response)
+{
+    static const std::vector<std::string> staticTypeCollections = {
+        "pipes", "cores", "tasks"
+    };
+
+    static const std::vector<std::string> staticTypes = {
+        "pipe", "core", "task"
+    };
+
+    static const std::vector<std::string> staticServiceTypes = {
+        "fwlogs"
+    };
+
+    static const std::vector<std::string> gateways = {
+        "hda-host-out-gateway",
+        "hda-host-in-gateway",
+        "hda-link-out-gateway",
+        "hda-link-in-gateway",
+        "dmic-link-in-gateway"
+    };
+
+    /* Creating meta model */
+    type::Subsystem subsystem("cavs");
+    subsystem.getDescription().setValue("cAVS subsystem");
+
+    /* Hardcoded characteristics (temporary) */
+    type::Characteristics &ch = subsystem.getCharacteristics();
+    ch.add(type::Characteristic("Fw Version", "1.0.0.2"));
+    ch.add(type::Characteristic("Nb Cores", "1"));
+    ch.add(type::Characteristic("Memory page size", "4096"));
+
+    /* Children and categories */
+    type::Children &children = subsystem.getChildren();
+    type::Categories &categories = subsystem.getCategories();
+
+    /* Static types */
+    assert(staticTypeCollections.size() == staticTypes.size());
+    for (std::size_t i = 0; i < staticTypeCollections.size(); ++i) {
+        auto coll = new type::TypeRefCollection(staticTypeCollections[i]);
+        coll->add(type::TypeRef(staticTypes[i]));
+        children.add(coll);
+
+        categories.add(new type::TypeRef(staticTypes[i]));
+    }
+
+    /* Service */
+    auto serviceColl = new type::ServiceRefCollection("services");
+    for (auto &serviceName : staticServiceTypes) {
+        serviceColl->add(type::ServiceRef(serviceName));
+
+        categories.add(new type::ServiceRef(serviceName));
+    }
+    children.add(serviceColl);
+
+    /* Gateways */
+    auto gatewayColl = new type::ComponentRefCollection("gateways");
+    for (auto &gatewayName : gateways) {
+        gatewayColl->add(type::ComponentRef(gatewayName));
+
+        categories.add(new type::ComponentRef(gatewayName));
+    }
+    children.add(gatewayColl);
+
+    /* Modules*/
+    auto compColl = new type::ComponentRefCollection("modules");
+
+    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
+    for (auto &module : entries) {
+        std::string moduleName = getStringFromFixedSizeArray(module.name, sizeof(module.name));
+        compColl->add(type::ComponentRef(moduleName));
+
+        categories.add(new type::ComponentRef(moduleName));
+    }
+    children.add(compColl);
+
+    xml::TypeSerializer serializer;
+    subsystem.accept(serializer);
+
+    std::string xml = serializer.getXml();
+
+    std::ostream &out = response.send(ContentTypeXml);
+    out << xml;
 }
 
 void SystemTypeResource::handleGet(const Request &request, Response &response)

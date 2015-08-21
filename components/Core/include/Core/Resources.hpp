@@ -56,6 +56,15 @@ protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 };
 
+/** This resource returns a subsystem type (XML) */
+class SubsystemTypeResource : public RootResource
+{
+public:
+    SubsystemTypeResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
 /** This resource returns a list of all the Instances of a Subsystem (XML) */
 class SubsystemsInstancesListResource : public RootResource
 {

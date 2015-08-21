@@ -39,12 +39,21 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     dispatcher->addResource("/cAVS/module/entries",
         std::shared_ptr<Resource>(new ModuleEntryResource(mSystem)));
 
-    dispatcher->addResource("/",
+    /* System */
+    dispatcher->addResource("/type",
         std::shared_ptr<Resource>(new SystemTypeResource(mSystem)));
+
+    /*@todo: url /instance */
+
+    /* Subsystem*/
+    dispatcher->addResource("/type/cavs",
+        std::shared_ptr<Resource>(new SubsystemTypeResource(mSystem)));
     dispatcher->addResource("/instance/cavs",
         std::shared_ptr<Resource>(new SubsystemsInstancesListResource(mSystem)));
     dispatcher->addResource("/instance/cavs/0",
         std::shared_ptr<Resource>(new SubsystemInstanceResource(mSystem)));
+
+    /* Log service */
     dispatcher->addResource("/instance/cavs.fwlogs/0",
         std::shared_ptr<Resource>(new SubsystemInstanceLogParametersResource(mSystem)));
     dispatcher->addResource("/type/cavs.fwlogs",
