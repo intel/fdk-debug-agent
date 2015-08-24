@@ -62,7 +62,7 @@ SystemDevice::~SystemDevice()
 void SystemDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output)
 {
     /* Generally the return size is not used. */
-    DWORD returnedSizeUnused;
+    DWORD returnedSize;
 
     LPVOID inputBufferPtr = nullptr;
     DWORD inputBufferSize = 0;
@@ -87,12 +87,22 @@ void SystemDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
         inputBufferSize,
         outputBufferPtr,
         outputBufferSize,
-        &returnedSizeUnused,
+        &returnedSize,
         NULL);
 
     if (result == FALSE) {
         throw Exception("IOControl failure: " + LastError::get());
     }
+
+    if (returnedSize > output->getSize()) {
+        throw Exception("IOControl response larger than buffer ("
+            + std::to_string(returnedSize)
+            + " while output buffer is "
+            + std::to_string(output->getSize())
+            + ")");
+    }
+
+    output->resize(returnedSize);
 }
 
 }

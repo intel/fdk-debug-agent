@@ -52,15 +52,17 @@ public:
     Device() {}
     virtual ~Device() {}
 
-    /** Perform an IO control
-    * @param[in] ioControlCode the IO control code
-    * @param[in] inputBuffer the input buffer. This parameter is optional, use nullptr if the
-                             input buffer is not required.
-    * @param[in,out] outputBuffer the output buffer (basically this buffer can be used as input
-    *                             buffer too). This parameter is optional, use nullptr if the
-                                  output buffer is not required.
-    * @throw Device::Exception if the io control has failed
-    */
+    /**
+     * Perform an IO control
+     * @param[in] ioControlCode the IO control code
+     * @param[in] inputBuffer the input buffer. This parameter is optional, use nullptr if the
+     *                        input buffer is not required.
+     * @param[in,out] outputBuffer the output buffer (basically this buffer can be used as input
+     *                             buffer too). This parameter is optional, use nullptr if the
+     *                             output buffer is not required. The output Buffer is resized
+     *                             according to the IO control response.
+     * @throw Device::Exception if the io control has failed
+     */
     virtual void ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output) = 0;
 
 private:

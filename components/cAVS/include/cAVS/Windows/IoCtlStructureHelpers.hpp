@@ -45,10 +45,18 @@ static const uint32_t baseFirwareModuleId = 0;
 /** By convention the base firmware instance id is 0 */
 static const uint32_t baseFirwareInstanceId = 0;
 
+/**
+ * In a FW response, the parameter is not at the beginning of the buffer, but after a header
+ * including driver status followed by FW status.
+ */
+static const size_t parameterOffset = INTC_APP_MIN_BODY_SIZE
+                                      + sizeof(driver::ModuleParameterAccess)
+                                      - MEMBER_SIZE(driver::ModuleParameterAccess,Parameter);
+
 /** This class helps to construct IOCTL_CMD_APP_TO_AUDIODSP_BIG_(GET|SET) output structure.
  * This structure has 3 imbrication levels:
  * Intc_Get_Parameter (driver structure) which contains
- *   -> ModuleParameterAccess (driver structrue) which contains
+ *   -> ModuleParameterAccess (driver structure) which contains
  *        -> FirmwareParameterType (firmware structure), for instance AdspProperties,
  *           ModulesInfo...
  *
@@ -97,6 +105,17 @@ public:
         return *mModuleParameterAccess;
     }
 
+    /** 
+     * In case the parameter size is not static, the effective parameter size is required.
+     * @param[out] parameterSize the effective size of the parameter
+     * @return FirmwareParameterType reference
+     */
+    FirmwareParameterType &getFirmwareParameter(size_t &parameterSize)
+    {
+        parameterSize = mBuffer.getSize() - parameterOffset;
+        return getFirmwareParameter();
+    }
+
     /** @return FirmwareParameterType reference */
     FirmwareParameterType &getFirmwareParameter()
     {
@@ -128,10 +147,7 @@ private:
     */
     static std::size_t calculateSize(std::size_t firmwareParameterSize)
     {
-        return INTC_APP_MIN_BODY_SIZE  /* sizeof Intc_App_Cmd_Body minus payload pointer */
-            + sizeof(driver::ModuleParameterAccess)
-            - MEMBER_SIZE(driver::ModuleParameterAccess,Parameter)
-            + firmwareParameterSize;
+        return parameterOffset + firmwareParameterSize;
     }
 
     TypedBuffer<driver::Intc_App_Cmd_Body> mBuffer;

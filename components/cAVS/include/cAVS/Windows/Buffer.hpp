@@ -34,7 +34,7 @@ namespace cavs
 namespace windows
 {
 
-/** Simple buffer class that cannot be resized, used for windows ioctl calls */
+/** Simple buffer class, used for windows ioctl calls */
 class Buffer
 {
 public:
@@ -57,6 +57,14 @@ public:
     }
 
     virtual ~Buffer() {}
+
+    /**
+     * @param[in] size the new size of the buffer in bytes.
+     */
+    void resize(size_t size)
+    {
+        mBuffer.resize(size);
+    }
 
     void *getPtr()
     {
