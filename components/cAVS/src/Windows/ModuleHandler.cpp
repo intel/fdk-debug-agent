@@ -19,10 +19,11 @@
  *
  ********************************************************************************
  */
-
 #include "cAVS/Windows/ModuleHandler.hpp"
 #include "cAVS/Windows/WindowsTypes.hpp"
+#include "Tlv/TlvUnpack.hpp"
 #include <vector>
+#include <iostream>
 
 namespace debug_agent
 {
@@ -88,6 +89,37 @@ void ModuleHandler::getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
     for (std::size_t i = 0; i < modulesInfo.module_count; i++) {
         modulesEntries.push_back(modulesInfo.module_info[i]);
     }
+}
+
+void ModuleHandler::getFwConfig(FwConfig &fwConfig)
+{
+    /* Constructing ioctl output structure*/
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
+        dsp_fw::FW_CONFIG, cavsTlvBufferSize);
+
+    /* Performing ioctl */
+    bigGetModuleAccessIoctl<char>(ioctlOutput);
+
+    /* Retrieving properties */
+    size_t tlvBufferSize;
+    const char * tlvBuffer = &ioctlOutput.getFirmwareParameter(tlvBufferSize);
+
+    /* Now parse the TLV answer */
+    tlv::TlvUnpack unpack(fwConfig, tlvBuffer, tlvBufferSize);
+
+    bool end = false;
+    do {
+
+        try
+        {
+            end = !unpack.readNext();
+        }
+        catch (tlv::TlvUnpack::Exception &e)
+        {
+            /* @todo use log instead ! */
+            std::cout << "Error while parsing FW Config TLV: " << e.what() << std::endl;
+        }
+    } while (!end);
 }
 
 }

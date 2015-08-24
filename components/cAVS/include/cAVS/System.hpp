@@ -134,6 +134,11 @@ private:
      */
     std::vector<ModuleEntry> mModuleEntries;
 
+    /**
+     * The FW config structure retrieved from FW once, at initialization
+     */
+    FwConfig mFwConfig;
+
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;
 };

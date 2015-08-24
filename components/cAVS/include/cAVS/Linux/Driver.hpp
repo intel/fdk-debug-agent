@@ -22,6 +22,7 @@
 #pragma once
 
 #include "cAVS/Driver.hpp"
+#include "cAVS/FwConfig.hpp"
 #include "cAVS/Linux/Logger.hpp"
 
 namespace debug_agent
@@ -45,6 +46,7 @@ private:
     class DummyModuleHandler : public ModuleHandler
     {
     public:
+        virtual void getFwConfig(FwConfig &fwConfig) override {}
         virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
             override {}
     };

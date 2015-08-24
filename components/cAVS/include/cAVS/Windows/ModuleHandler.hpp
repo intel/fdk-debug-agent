@@ -40,6 +40,13 @@ public:
     ModuleHandler(Device &device) : mDevice(device) {}
 
     virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) override;
+    virtual void getFwConfig(FwConfig &fwConfig) override;
+
+    /**
+     * The size in bytes of the response buffer needed by the FW in order to reply a TLV.
+     * The SwAS specifies the output buffer size for TLV shall be 2KB.
+     */
+    static const size_t cavsTlvBufferSize = 2048;
 
 private:
     /** The module parameter access feature has only one parameter, therefore its index is 0 */

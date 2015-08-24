@@ -22,6 +22,7 @@
 
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/IoCtlStructureHelpers.hpp"
+#include "cAVS/Windows/ModuleHandler.hpp"
 
 namespace debug_agent
 {
@@ -31,13 +32,34 @@ namespace windows
 {
 
 template <typename FirmwareParameterType>
-void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams parameterTypeId,
-    const Buffer &returnedParameterContent, bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+void MockedDeviceCommands::addGetModuleParameterCommand(
+    dsp_fw::BaseFwParams parameterTypeId,
+    const Buffer &returnedParameterContent,
+    bool ioctlSuccess,
+    NTSTATUS returnedDriverStatus,
+    dsp_fw::Message::IxcStatus returnedFirmwareStatus)
+{
+    addGetModuleParameterCommand<FirmwareParameterType>(
+        parameterTypeId,
+        Buffer(returnedParameterContent.getSize()),
+        returnedParameterContent,
+        ioctlSuccess,
+        returnedDriverStatus,
+        returnedFirmwareStatus);
+}
+
+template <typename FirmwareParameterType>
+void MockedDeviceCommands::addGetModuleParameterCommand(
+    dsp_fw::BaseFwParams parameterTypeId,
+    const Buffer &expectedParameterContent,
+    const Buffer &returnedParameterContent,
+    bool ioctlSuccess,
+    NTSTATUS returnedDriverStatus,
     dsp_fw::Message::IxcStatus returnedFirmwareStatus)
 {
     /* Expected output buffer*/
     BigCmdModuleAccessIoctlOutput<FirmwareParameterType> expectedOutput(
-        parameterTypeId, returnedParameterContent.getSize());
+        parameterTypeId, expectedParameterContent.getSize());
 
     /* Filling expected input buffer */
     TypedBuffer<driver::Intc_App_Cmd_Header> expectedInput;
@@ -53,7 +75,8 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams par
     }
 
     /* Returned output buffer*/
-    BigCmdModuleAccessIoctlOutput<FirmwareParameterType> returnedOutput(expectedOutput);
+    BigCmdModuleAccessIoctlOutput<FirmwareParameterType> returnedOutput(
+        parameterTypeId, returnedParameterContent.getSize());
 
     returnedOutput.getCmdBody().Status = returnedDriverStatus;
     if (NT_SUCCESS(returnedDriverStatus)) {
@@ -76,6 +99,22 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams par
     /* Adding entry */
     mDevice.addSuccessfulIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
         &expectedOutput.getBuffer(), &returnedOutput.getBuffer());
+}
+
+void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        const std::vector<char> &fwConfigTlvList)
+{
+    Buffer expectedOutput(ModuleHandler::cavsTlvBufferSize);
+    Buffer returnedOutput(fwConfigTlvList);
+
+    addGetModuleParameterCommand<char>(
+        dsp_fw::FW_CONFIG,
+        expectedOutput,
+        returnedOutput,
+        ioctlSuccess,
+        returnedDriverStatus,
+        returnedFirmwareStatus);
 }
 
 void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,

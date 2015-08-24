@@ -54,6 +54,19 @@ void setArbitraryContent(T &value)
     }
 }
 
+static const std::vector<char> fwConfigTlvList {
+    /* Tag for FW_VERSION: 0x00000000 */
+    0x00, 0x00, 0x00, 0x00,
+    /* Length = 8 bytes */
+    0x08, 0x00, 0x00, 0x00,
+    /* Value: dsp_fw::FwVersion */
+        /* major and minor */
+        0x01, 0x02, 0x03, 0x04,
+        /* hot fix and build */
+        0x05, 0x06, 0x07, 0x08
+};
+static const size_t fwVersionValueOffsetInTlv = 8;
+
 /** Produce a module entry vector of the supplied size.
  * Each entry is filled with an arbitrary content. */
 std::vector<ModuleEntry> produceModuleEntries(std::size_t expectedModuleCount)
@@ -93,6 +106,34 @@ TEST_CASE("Module handling: getting module entries")
      * ----------------------- */
     MockedDeviceCommands commands(device);
 
+    /* Simulating an os error during getting fw config */
+    commands.addGetFwConfigCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwConfigTlvList); /* unused parameter */
+
+    /* Simulating a driver error during getting fw config */
+    commands.addGetFwConfigCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwConfigTlvList); /* unused parameter */
+
+    /* Simulating a firmware error during getting fw config */
+    commands.addGetFwConfigCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        fwConfigTlvList); /* unused parameter */
+
+    /* Successful get fw config command */
+    commands.addGetFwConfigCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwConfigTlvList);
+
     /* Simulating an os error during getting module entries */
     commands.addGetModuleEntriesCommand(
         false,
@@ -131,13 +172,38 @@ TEST_CASE("Module handling: getting module entries")
     /* Now using the mocked device
      * --------------------------- */
 
-    dsp_fw::AdspProperties emptyAdspProperties;
-    memset(&emptyAdspProperties, 0, sizeof(dsp_fw::AdspProperties));
-
-    dsp_fw::AdspProperties properties = emptyAdspProperties;
-
     /* Creating the module handler, that will use the mocked device*/
     windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error during getting fw config */
+    FwConfig fwConfig;
+    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
+        "Device returns an exception: OS says that io control has failed.");
+    CHECK(fwConfig.isFwVersionValid == false);
+
+    /* Simulating a driver error during getting fw config */
+    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(fwConfig.isFwVersionValid == false);
+
+    /* Simulating a firmware error during getting fw config */
+    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(fwConfig.isFwVersionValid == false);
+
+    /* Successful get fw config command */
+    CHECK_NOTHROW(moduleHandler.getFwConfig(fwConfig));
+    CHECK(fwConfig.isFwVersionValid == true);
+    const dsp_fw::FwVersion *injectedVersion =
+        reinterpret_cast<const dsp_fw::FwVersion *>
+            (fwConfigTlvList.data() + fwVersionValueOffsetInTlv);
+    // No operator== in FW type: compare each field individually:
+    CHECK(fwConfig.fwVersion.major == injectedVersion->major);
+    CHECK(fwConfig.fwVersion.minor == injectedVersion->minor);
+    CHECK(fwConfig.fwVersion.hotfix == injectedVersion->hotfix);
+    CHECK(fwConfig.fwVersion.build == injectedVersion->build);
 
     /* Simulating an os error during getting module entries */
     std::vector<ModuleEntry> entries;

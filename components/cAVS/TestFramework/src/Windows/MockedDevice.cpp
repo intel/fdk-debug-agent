@@ -57,8 +57,9 @@ MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expec
             /* Because of previous check it's sure that returnedOutputBuffer != nullptr */
             assert(returnedOutputBuffer != nullptr);
 
-            if (expectedOutputBuffer->getSize() != returnedOutputBuffer->getSize()) {
-                throw Exception("Expected buffer and returned buffer shall have the same size");
+            if (expectedOutputBuffer->getSize() < returnedOutputBuffer->getSize()) {
+                throw Exception(
+                    "Expected buffer size shall be greater or equal than the returned buffer size");
             }
 
             mExpectedOutputBuffer = std::make_shared<Buffer>(*expectedOutputBuffer);
@@ -162,11 +163,9 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
          */
         assert(output != nullptr);
 
-        /* candidateOutputBuffer == expectedOutputBuffer and
-         * expectedOutputBuffer.size() == returnedOutputBuffer.size()
-         * therefore output.size() == returnedOutputBuffer.size()
-         *
-         * We can copy the returned buffer into the candidate output buffer */
+        /* The returned output buffer size may be lesser or equal than the output one's size:
+         * resize the output buffer accordingly before the copy */
+        output->resize(entry.getReturnedOutputBuffer()->getSize());
         output->copyFrom(*entry.getReturnedOutputBuffer());
     }
 }

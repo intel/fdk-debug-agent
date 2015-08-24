@@ -58,6 +58,25 @@ public:
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
         const std::vector<ModuleEntry> &returnedEntries);
 
+    /**
+     * Add a get fw config command.
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedDriverStatus the returned driver status
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] fwConfigTlvList the fw config returned by the ioctl, which is a TLV list.
+     *
+     * Note: the fwConfigTlvList parameter is unused if :
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedDriverStatus) returns false or
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     *
+     * @throw Device::Exception
+     */
+    void addGetFwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        const std::vector<char> &fwConfigTlvList);
+
     /** Add a get log parameters command
     *
     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
@@ -97,6 +116,16 @@ private:
      * AdspProperties or ModulesInfo */
     template <typename FirmwareParameterType>
     void addGetModuleParameterCommand(dsp_fw::BaseFwParams parameterTypeId,
+        const Buffer &returnedParameterContent, bool ioctlSuccess,
+        NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus);
+
+    /** Template method that adds a module access ioctl
+     *
+     * @tparam FirmwareParameterType the firmware paramerter type, for instance
+     * AdspProperties or ModulesInfo */
+    template <typename FirmwareParameterType>
+    void addGetModuleParameterCommand(dsp_fw::BaseFwParams parameterTypeId,
+        const Buffer &expectedParameterContent,
         const Buffer &returnedParameterContent, bool ioctlSuccess,
         NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus);
 

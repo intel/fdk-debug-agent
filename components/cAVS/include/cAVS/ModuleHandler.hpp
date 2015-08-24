@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/FirmwareTypes.hpp"
+#include "cAVS/FwConfig.hpp"
 #include <stdexcept>
 #include <vector>
 
@@ -47,6 +48,9 @@ public:
 
     /** @return the firmware module entries */
     virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) = 0;
+
+    /** @return the firmware configuration */
+    virtual void getFwConfig(FwConfig &fwConfig) = 0;
 
 private:
     ModuleHandler(const ModuleHandler &) = delete;

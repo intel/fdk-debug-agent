@@ -56,6 +56,16 @@ public:
         mBuffer = other.mBuffer;
     }
 
+    explicit Buffer(const std::vector<char> &source):
+        Buffer(source.size())
+    {
+        static_assert(sizeof(char) == sizeof(uint8_t),
+            "Code designed for sizeof(char) == sizeof(uint8_t)");
+
+        const uint8_t * sourceData = reinterpret_cast<const uint8_t *>(source.data());
+        std::copy(sourceData, sourceData + source.size(), mBuffer.data());
+    }
+
     virtual ~Buffer() {}
 
     /**

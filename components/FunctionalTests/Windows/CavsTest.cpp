@@ -84,6 +84,28 @@ void addModuleEntryCommand(windows::MockedDeviceCommands &commands)
         returnedEntries);
 }
 
+void addFwConfigCommand(windows::MockedDeviceCommands &commands)
+{
+    std::vector<char> fwConfigTlvList {
+        /* Tag for FW_VERSION: 0x00000000 */
+        0x00, 0x00, 0x00, 0x00,
+        /* Length = 8 bytes */
+        0x08, 0x00, 0x00, 0x00,
+        /* Value */
+            /* major and minor */
+            0x01, 0x02, 0x03, 0x04,
+            /* hot fix and build */
+            0x05, 0x06, 0x07, 0x08
+    };
+
+    /* Adding the "get FW Config" command to the test vector */
+    commands.addGetFwConfigCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwConfigTlvList);
+}
+
 TEST_CASE("DebugAgent/cAVS: module entries")
 {
     /* Creating the mocked device */
@@ -94,8 +116,11 @@ TEST_CASE("DebugAgent/cAVS: module entries")
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* Adding initial module entry command */
+    /* Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding module entry command */
     addModuleEntryCommand(commands);
+
 
     /* Now using the mocked device
     * --------------------------- */
@@ -139,7 +164,9 @@ TEST_CASE("DebugAgent/cAVS: system type (URL: /type)")
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* Adding initial module entry command */
+    /* Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding module entry command */
     addModuleEntryCommand(commands);
 
     /* Now using the mocked device
@@ -188,7 +215,9 @@ TEST_CASE("DebugAgent/cAVS: subsystem type (URL: /type/cavs)")
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* Adding initial module entry command */
+    /* Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding module entry command */
     addModuleEntryCommand(commands);
 
     /* Now using the mocked device
@@ -274,7 +303,9 @@ TEST_CASE("DebugAgent/cAVS: subsystem instances (URL: /instance/cavs)")
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* Adding initial module entry command */
+    /* Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding module entry command */
     addModuleEntryCommand(commands);
 
     /* Now using the mocked device
@@ -361,7 +392,9 @@ TEST_CASE("DebugAgent/cAVS: subsystem instance 1 (URL: /instance/cavs/0)")
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* Adding initial module entry command */
+    /* Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding module entry command */
     addModuleEntryCommand(commands);
 
     /* Now using the mocked device
@@ -446,7 +479,9 @@ TEST_CASE("DebugAgent/cAVS: log type (URL: /type/cavs.fwlogs)")
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* Adding initial module entry command */
+    /* Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding module entry command */
     addModuleEntryCommand(commands);
 
     /* Now using the mocked device
@@ -502,7 +537,9 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* 0: Initial module entry command */
+    /* 0: Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding module entry command */
     addModuleEntryCommand(commands);
 
     /* 1: Get log parameter, will return
@@ -652,7 +689,9 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* 0: Initial module entry command */
+    /* 0: Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding module entry command */
     addModuleEntryCommand(commands);
 
     /* 1: start log command */
