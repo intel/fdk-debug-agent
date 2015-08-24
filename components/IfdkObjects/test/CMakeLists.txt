@@ -22,7 +22,8 @@
 
 # test
 set(TEST_SRCS
-    TypeTest.cpp)
+    TypeTest.cpp
+    InstanceTest.cpp)
 
 set(TEST_INCS)
 
