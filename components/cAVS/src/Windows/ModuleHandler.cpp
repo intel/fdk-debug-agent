@@ -66,19 +66,6 @@ void ModuleHandler::bigGetModuleAccessIoctl(
     }
 }
 
-void ModuleHandler::getAdspProperties(dsp_fw::AdspProperties &properties)
-{
-    /* Constructing ioctl output structure*/
-    BigCmdModuleAccessIoctlOutput<dsp_fw::AdspProperties> ioctlOutput(
-        dsp_fw::ADSP_PROPERTIES, sizeof(dsp_fw::AdspProperties));
-
-    /* Performing ioctl */
-    bigGetModuleAccessIoctl<dsp_fw::AdspProperties>(ioctlOutput);
-
-    /* Retrieving properties */
-    properties = ioctlOutput.getFirmwareParameter();
-}
-
 void ModuleHandler::getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
 {
     std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize();

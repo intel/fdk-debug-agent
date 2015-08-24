@@ -78,18 +78,6 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::BaseFwParams par
         &expectedOutput.getBuffer(), &returnedOutput.getBuffer());
 }
 
-void MockedDeviceCommands::addGetAdspPropertiesCommand(bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus,
-    dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-    const dsp_fw::AdspProperties &returnedProperties)
-{
-    TypedBuffer<dsp_fw::AdspProperties> buffer(returnedProperties);
-
-    addGetModuleParameterCommand<dsp_fw::AdspProperties>(dsp_fw::BaseFwParams::ADSP_PROPERTIES,
-        buffer, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
-
-}
-
 void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
     NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
     const std::vector<ModuleEntry> &returnedEntries)

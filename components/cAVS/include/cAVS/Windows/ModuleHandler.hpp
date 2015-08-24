@@ -39,7 +39,6 @@ class ModuleHandler : public cavs::ModuleHandler
 public:
     ModuleHandler(Device &device) : mDevice(device) {}
 
-    virtual void getAdspProperties(dsp_fw::AdspProperties &properties) override;
     virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) override;
 
 private:

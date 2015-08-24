@@ -45,7 +45,6 @@ private:
     class DummyModuleHandler : public ModuleHandler
     {
     public:
-        virtual void getAdspProperties(dsp_fw::AdspProperties &properties) override {}
         virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
             override {}
     };

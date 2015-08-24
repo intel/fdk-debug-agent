@@ -40,24 +40,6 @@ class MockedDeviceCommands final
 public:
     MockedDeviceCommands(MockedDevice &device) : mDevice(device) {}
 
-    /** Add a get adsp properties command
-     *
-     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
-     * @param[in] returnedDriverStatus the returned driver status
-     * @param[in] returnedFirmwareStatus the returned firmware status
-     * @param[in] returnedProperties the properties returned by the ioctl.
-     *
-     * Note: the returnedProperties parameter is unused if :
-     * - ioctlSuccess is false or
-     * - NT_SUCCESS(returnedDriverStatus) returns false or
-     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
-     *
-     * @throw Device::Exception
-     */
-    void addGetAdspPropertiesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-        const dsp_fw::AdspProperties &returnedProperties);
-
     /** Add a get module entries command.
      *
      * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)

@@ -45,9 +45,6 @@ public:
     ModuleHandler() = default;
     virtual ~ModuleHandler() {}
 
-    /** @return the firmware properties */
-    virtual void getAdspProperties(dsp_fw::AdspProperties &properties) = 0;
-
     /** @return the firmware module entries */
     virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) = 0;
 
