@@ -90,6 +90,11 @@ const std::vector<ModuleEntry> &System::getModuleEntries() const NOEXCEPT
     return mModuleEntries;
 }
 
+const FwConfig &System::getFwConfig() const NOEXCEPT
+{
+    return mFwConfig;
+}
+
 std::unique_ptr<System::LogStreamResource> System::tryToAcquireLogStreamResource()
 {
     std::unique_ptr<System::LogStreamResource> resource(new System::LogStreamResource(*this));

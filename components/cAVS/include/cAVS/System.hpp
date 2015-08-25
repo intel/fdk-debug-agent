@@ -105,6 +105,11 @@ public:
     const std::vector<ModuleEntry> &getModuleEntries() const NOEXCEPT;
 
     /**
+     * Get firmware configuration
+     */
+    const FwConfig &getFwConfig() const NOEXCEPT;
+
+    /**
      * Try to acquire the log stream resource
      *
      * The resource will be locked until the returned LogStreamResource instance is released.
