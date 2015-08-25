@@ -206,6 +206,57 @@ TEST_CASE("DebugAgent/cAVS: system type (URL: /type)")
         ));
 }
 
+TEST_CASE("DebugAgent/cAVS: system instance (URL: /instance)")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* 0: Adding initial FW config command*/
+    addFwConfigCommand(commands);
+    /* Adding initial module entry command */
+    addModuleEntryCommand(commands);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting system information*/
+    CHECK_NOTHROW(client.request(
+        "/instance",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<system Id=\"0\" Type=\"bxtn\">\n"
+        "    <info_parameters/>\n"
+        "    <control_parameters/>\n"
+        "    <parents/>\n"
+        "    <children>\n"
+        "        <subsystem_collection Name=\"subsystems\">\n"
+        "            <subsystem Id=\"0\" Type=\"cavs\"/>\n"
+        "        </subsystem_collection>\n"
+        "    </children>\n"
+        "    <inputs/>\n"
+        "    <outputs/>\n"
+        "    <links/>\n"
+        "</system>\n"
+        ));
+}
+
 TEST_CASE("DebugAgent/cAVS: subsystem type (URL: /type/cavs)")
 {
     /* Creating the mocked device */

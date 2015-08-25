@@ -23,6 +23,8 @@
 #include "Util/Uuid.hpp"
 #include "IfdkObjects/Xml/TypeDeserializer.hpp"
 #include "IfdkObjects/Xml/TypeSerializer.hpp"
+#include "IfdkObjects/Xml/InstanceDeserializer.hpp"
+#include "IfdkObjects/Xml/InstanceSerializer.hpp"
 #include <Poco/NumberParser.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/XML/XML.h>
@@ -148,6 +150,22 @@ void SystemTypeResource::handleGet(const Request &request, Response &response)
     system.getChildren().add(coll);
 
     xml::TypeSerializer serializer;
+    system.accept(serializer);
+    std::string xml = serializer.getXml();
+
+    std::ostream &out = response.send(ContentTypeXml);
+    out << xml;
+}
+
+void SystemInstanceResource::handleGet(const Request &request, Response &response)
+{
+    instance::System system("bxtn", "0");
+
+    auto coll = new instance::SubsystemRefCollection("subsystems");
+    coll->add(instance::SubsystemRef("cavs", "0"));
+    system.getChildren().add(coll);
+
+    xml::InstanceSerializer serializer;
     system.accept(serializer);
     std::string xml = serializer.getXml();
 

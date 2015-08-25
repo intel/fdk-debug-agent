@@ -42,6 +42,8 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     /* System */
     dispatcher->addResource("/type",
         std::shared_ptr<Resource>(new SystemTypeResource(mSystem)));
+    dispatcher->addResource("/instance",
+        std::shared_ptr<Resource>(new SystemInstanceResource(mSystem)));
 
     /*@todo: url /instance */
 
