@@ -249,10 +249,13 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
         CHECK(unpacker.readNext() == true);
-        CHECK_THROWS_MSG(unpacker.readNext(), "Invalid length for tag "
-            + std::to_string(tTag) + " (" + std::to_string(tLength) +" bytes)");
-        CHECK_THROWS_MSG(unpacker.readNext(), "Invalid length for tag "
-            + std::to_string(wTag) + " (" + std::to_string(wLength) + " bytes)");
+        CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
+            + std::to_string(tTag) + " (size " + std::to_string(tLength)
+            + " bytes): Invalid binary size for TLV value read");
+        CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
+            + std::to_string(wTag) + " (size " + std::to_string(wLength)
+            + " bytes): Invalid binary size for TLV value read");
+
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
@@ -261,7 +264,7 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         CHECK(testTlvLanguage.isWorldValid == false);
     }
 
-    SECTION("Read from buffer including bad size") {
+    SECTION("Read from buffer including bad size as last element") {
 
         // Construct a test TLV list buffer
         HelloValueType helloValue {0xDEAD, 0xBEEF};
@@ -296,12 +299,58 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
         CHECK(unpacker.readNext() == true);
-        CHECK_THROWS_MSG(unpacker.readNext(), "Invalid length for tag "
-            + std::to_string(wTag) + " (" + std::to_string(wLength) + " bytes)");
+        CHECK_THROWS_MSG(unpacker.readNext(), "Incomplete value for tag " + std::to_string(wTag));
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
         CHECK(testTlvLanguage.hello == helloValue);
+        CHECK(testTlvLanguage.the.size() == 0);
+        CHECK(testTlvLanguage.isWorldValid == false);
+    }
+
+    SECTION("Read from buffer including bad size as middle element") {
+
+        // Construct a test TLV list buffer
+        HelloValueType helloValue {0xDEAD, 0xBEEF};
+        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
+        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
+        WorldValueType worldValue {0, 42, 1268469841515, 687684186186};
+        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
+        uint32_t wLength = static_cast<uint32_t>(sizeof(WorldValueType));
+
+        // Let's change the HELLO tag length value for fun!
+        hLength += 3;
+
+        const size_t tlvListBufferSize =
+            sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
+            sizeof(wTag) + sizeof(wLength) + sizeof(WorldValueType);
+        char tlvListBuffer[tlvListBufferSize];
+
+        size_t index = 0;
+        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
+        index += sizeof(hTag);
+        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
+        index += sizeof(hLength);
+        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
+        index += sizeof(helloValue);
+        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
+        index += sizeof(wTag);
+        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wLength;
+        index += sizeof(wLength);
+        *reinterpret_cast<WorldValueType *>(&tlvListBuffer[index]) = worldValue;
+
+        // Now test the unpacker
+        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+
+        CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
+            + std::to_string(hTag) + " (size " + std::to_string(hLength)
+            + " bytes): Invalid binary size for TLV value read");
+        // Obviously because of the invalid length, the next read will fail because of the random
+        // tag value:
+        CHECK_THROWS(unpacker.readNext());
+        CHECK(unpacker.readNext() == false);
+
+        CHECK(testTlvLanguage.isHelloValid == false);
         CHECK(testTlvLanguage.the.size() == 0);
         CHECK(testTlvLanguage.isWorldValid == false);
     }

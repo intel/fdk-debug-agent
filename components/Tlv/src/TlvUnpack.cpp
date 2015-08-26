@@ -71,18 +71,20 @@ bool TlvUnpack::readNext()
         mReadIndex += length;
         throw Exception("Cannot parse unknown tag " + std::to_string(tag));
     }
-    // Is the length as expected ?
-    if (!tlvWrapper->isValidSize(length)) {
-
-        // Length is not as expected: ignore this value from buffer
-        mReadIndex += length;
-        throw Exception("Invalid length for tag " + std::to_string(tag)
-            + " (" + std::to_string(length) + " bytes)");
-    }
     // Read value
     if (mTlvBufferSize - mReadIndex >= length) {
 
-        tlvWrapper->readFrom(mTlvBuffer + mReadIndex, length);
+        try
+        {
+            tlvWrapper->readFrom(mTlvBuffer + mReadIndex, length);
+        }
+        catch (TlvWrapperInterface::Exception &e)
+        {
+            throw Exception("Error reading value for tag "
+                + std::to_string(tag)
+                + " (size " + std::to_string(length) + " bytes)"
+                + ": " + e.what());
+        }
         mReadIndex += length;
     } else {
 
