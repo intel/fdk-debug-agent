@@ -26,7 +26,9 @@ set(SRCS
 set(INCS
     include/Util/Uuid.hpp
     include/Util/BlockingQueue.hpp
-    include/Util/PointerHelper.hpp)
+    include/Util/PointerHelper.hpp
+    include/Util/ByteStreamReader.hpp
+    include/Util/ByteStreamWriter.hpp)
 
 add_library(Util STATIC ${SRCS} ${INCS})
 set_common_settings(Util)

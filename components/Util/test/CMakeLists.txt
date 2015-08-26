@@ -23,7 +23,8 @@
 # test
 set(TEST_SRCS
     UuidTest.cpp
-    BlockingQueueTest.cpp)
+    BlockingQueueTest.cpp
+    ByteStreamTest.cpp)
 
 set(TEST_INCS)
 
