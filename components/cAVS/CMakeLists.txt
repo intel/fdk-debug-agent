@@ -38,7 +38,8 @@ set(LIB_INCS
     include/cAVS/System.hpp
     include/cAVS/FirmwareTypes.hpp
     include/cAVS/ModuleHandler.hpp
-    include/cAVS/FwConfig.hpp)
+    include/cAVS/FwConfig.hpp
+    include/cAVS/HwConfig.hpp)
 
 set(LIBRAIRIES)
 SET(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/external/cAVS/firmware/include")

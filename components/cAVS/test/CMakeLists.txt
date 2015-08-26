@@ -24,7 +24,8 @@
 set(TEST_SRCS
     LogBlockTest.cpp
     LoggerUnitTest.cpp
-    LogStreamerTest.cpp)
+    LogStreamerTest.cpp
+    I2sCapsTlvWrapperUnitTest.cpp)
 
 set(TEST_INCS)
 
