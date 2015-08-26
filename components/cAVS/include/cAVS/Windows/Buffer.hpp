@@ -63,7 +63,7 @@ public:
             "Code designed for sizeof(char) == sizeof(uint8_t)");
 
         const uint8_t * sourceData = reinterpret_cast<const uint8_t *>(source.data());
-        std::copy(sourceData, sourceData + source.size(), mBuffer.data());
+        std::copy(sourceData, sourceData + source.size(), mBuffer.begin());
     }
 
     virtual ~Buffer() {}
