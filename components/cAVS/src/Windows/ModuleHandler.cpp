@@ -21,6 +21,7 @@
  */
 #include "cAVS/Windows/ModuleHandler.hpp"
 #include "cAVS/Windows/WindowsTypes.hpp"
+#include "Util/ByteStreamReader.hpp"
 #include "Tlv/TlvUnpack.hpp"
 #include <vector>
 #include <iostream>
@@ -138,6 +139,125 @@ void ModuleHandler::getFwConfig(FwConfig &fwConfig)
 void ModuleHandler::getHwConfig(HwConfig &hwConfig)
 {
     readTlvParameters<HwConfig>(hwConfig, dsp_fw::HW_CONFIG_GET);
+}
+
+void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t> &pipelinesIds)
+{
+    /* Calculating the memory space required */
+    std::size_t parameterSize =
+        MEMBER_SIZE(dsp_fw::PipelinesListInfo, ppl_count) +
+        maxPplCount * MEMBER_SIZE(dsp_fw::PipelinesListInfo, ppl_id);
+
+    /* Constructing ioctl output structure*/
+    BigCmdModuleAccessIoctlOutput<dsp_fw::PipelinesListInfo> ioctlOutput(
+        dsp_fw::PIPELINE_LIST_INFO_GET, parameterSize);
+
+    /* Performing ioctl */
+    bigGetModuleAccessIoctl<dsp_fw::PipelinesListInfo>(ioctlOutput);
+
+    /* Checking returned pipeline count */
+    const dsp_fw::PipelinesListInfo &pipelineListInfo = ioctlOutput.getFirmwareParameter();
+    if (pipelineListInfo.ppl_count > maxPplCount) {
+        throw Exception("Firmware has returned an invalid pipeline count: " +
+            std::to_string(pipelineListInfo.ppl_count) +  " max is: " +
+            std::to_string(maxPplCount));
+    }
+
+    /* Retrieving pipeline entries */
+    for (std::size_t i = 0; i < pipelineListInfo.ppl_count; i++) {
+        pipelinesIds.push_back(pipelineListInfo.ppl_id[i]);
+    }
+}
+
+void ModuleHandler::getPipelineProps(uint32_t pipelineId, DSPplProps &props)
+{
+    /* Constructing ioctl output structure
+     * According to the SwAS allocate a single page, i.e. 4096 bytes
+     */
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
+        dsp_fw::PIPELINE_PROPS_GET, maxParameterPayloadSize);
+
+    /* Filling input argument*/
+    dsp_fw::PplPropsIn &pplPropsIn =
+        reinterpret_cast<dsp_fw::PplPropsIn &>(ioctlOutput.getFirmwareParameter());
+    pplPropsIn.ppl_id = pipelineId;
+
+    /* Performing ioctl */
+    bigGetModuleAccessIoctl<char>(ioctlOutput);
+
+    /* Getting result as byte array*/
+    std::vector<uint8_t> content;
+    ioctlOutput.getFirmwareParameterContent(content);
+
+    /* Parsing result into DSPplProps */
+    try {
+        util::ByteStreamReader reader(content);
+        props.fromStream(reader);
+    }
+    catch (util::ByteStreamReader::Exception &e)
+    {
+        throw Exception("Cannot parse PplProps content: " + std::string(e.what()));
+    }
+}
+
+void ModuleHandler::getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers)
+{
+    /* Constructing ioctl output structure
+    * According to the SwAS allocate a single page, i.e. 4096 bytes
+    */
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
+        dsp_fw::SCHEDULERS_INFO_GET, maxParameterPayloadSize);
+
+    /* Filling input argument*/
+    dsp_fw::SchedulersInfoIn &schedInfoIn =
+        reinterpret_cast<dsp_fw::SchedulersInfoIn &>(ioctlOutput.getFirmwareParameter());
+    schedInfoIn.core_id = coreId;
+
+    /* Performing ioctl */
+    bigGetModuleAccessIoctl<char>(ioctlOutput);
+
+    /* Getting result as byte array*/
+    std::vector<uint8_t> content;
+    ioctlOutput.getFirmwareParameterContent(content);
+
+    /* Parsing result into DSSchedulersInfo */
+    try {
+        util::ByteStreamReader reader(content);
+        schedulers.fromStream(reader);
+    }
+    catch (util::ByteStreamReader::Exception &e)
+    {
+        throw Exception("Cannot parse SchedulersInfo content: " + std::string(e.what()));
+    }
+}
+
+void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
+    std::vector<dsp_fw::GatewayProps> &gateways)
+{
+    /* Calculating the memory space required */
+    std::size_t parameterSize =
+        MEMBER_SIZE(dsp_fw::GatewaysInfo, gateway_count) +
+        gatewayCount * MEMBER_SIZE(dsp_fw::GatewaysInfo, gateways);
+
+    /* Constructing ioctl output structure*/
+    BigCmdModuleAccessIoctlOutput<dsp_fw::GatewaysInfo> ioctlOutput(
+        dsp_fw::GATEWAYS_INFO_GET, parameterSize);
+
+    /* Performing ioctl */
+    bigGetModuleAccessIoctl<dsp_fw::GatewaysInfo>(ioctlOutput);
+
+    /* Checking returned gateway count */
+    const dsp_fw::GatewaysInfo &gatewaysInfo = ioctlOutput.getFirmwareParameter();
+    if (gatewaysInfo.gateway_count > gatewayCount) {
+        throw Exception("Firmware has returned an invalid gateway count: " +
+            std::to_string(gatewaysInfo.gateway_count) + " max is: " +
+            std::to_string(gatewayCount));
+    }
+
+    /* Retrieving gateways entries */
+    for (std::size_t i = 0; i < gatewaysInfo.gateway_count; i++) {
+        gateways.push_back(gatewaysInfo.gateways[i]);
+    }
 }
 
 }

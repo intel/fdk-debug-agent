@@ -37,6 +37,11 @@ namespace dsp_fw
 {
 #include "adsp_ixc_status.h"
 
+/** Missing type */
+struct SchedulersInfoIn
+{
+    uint32_t  core_id;
+};
 
 /** Max module count, used to retrieve module entries. */
 static const uint32_t MaxModuleCount = 128;

@@ -54,19 +54,6 @@ void setArbitraryContent(T &value)
     }
 }
 
-static const std::vector<char> fwConfigTlvList {
-    /* Tag for FW_VERSION: 0x00000000 */
-    0x00, 0x00, 0x00, 0x00,
-    /* Length = 8 bytes */
-    0x08, 0x00, 0x00, 0x00,
-    /* Value: dsp_fw::FwVersion */
-        /* major and minor */
-        0x01, 0x02, 0x03, 0x04,
-        /* hot fix and build */
-        0x05, 0x06, 0x07, 0x08
-};
-static const size_t fwVersionValueOffsetInTlv = 8;
-
 /** Produce a module entry vector of the supplied size.
  * Each entry is filled with an arbitrary content. */
 std::vector<ModuleEntry> produceModuleEntries(std::size_t expectedModuleCount)
@@ -80,6 +67,11 @@ std::vector<ModuleEntry> produceModuleEntries(std::size_t expectedModuleCount)
     }
 
     return entries;
+}
+
+bool isSameGateway(const dsp_fw::GatewayProps &a, const dsp_fw::GatewayProps &b)
+{
+    return a.attribs == b.attribs && a.id == b.id;
 }
 
 /** Perform a module entry ioctl and check the result using the supplied expected module count */
@@ -105,34 +97,6 @@ TEST_CASE("Module handling: getting module entries")
     /* Setting the test vector
      * ----------------------- */
     MockedDeviceCommands commands(device);
-
-    /* Simulating an os error during getting fw config */
-    commands.addGetFwConfigCommand(
-        false,
-        STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-        fwConfigTlvList); /* unused parameter */
-
-    /* Simulating a driver error during getting fw config */
-    commands.addGetFwConfigCommand(
-        true,
-        STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-        fwConfigTlvList); /* unused parameter */
-
-    /* Simulating a firmware error during getting fw config */
-    commands.addGetFwConfigCommand(
-        true,
-        STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
-        fwConfigTlvList); /* unused parameter */
-
-    /* Successful get fw config command */
-    commands.addGetFwConfigCommand(
-        true,
-        STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-        fwConfigTlvList);
 
     /* Simulating an os error during getting module entries */
     commands.addGetModuleEntriesCommand(
@@ -175,36 +139,6 @@ TEST_CASE("Module handling: getting module entries")
     /* Creating the module handler, that will use the mocked device*/
     windows::ModuleHandler moduleHandler(device);
 
-    /* Simulating an os error during getting fw config */
-    FwConfig fwConfig;
-    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
-        "Device returns an exception: OS says that io control has failed.");
-    CHECK(fwConfig.isFwVersionValid == false);
-
-    /* Simulating a driver error during getting fw config */
-    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
-        "Driver returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
-    CHECK(fwConfig.isFwVersionValid == false);
-
-    /* Simulating a firmware error during getting fw config */
-    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
-        "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
-    CHECK(fwConfig.isFwVersionValid == false);
-
-    /* Successful get fw config command */
-    CHECK_NOTHROW(moduleHandler.getFwConfig(fwConfig));
-    CHECK(fwConfig.isFwVersionValid == true);
-    const dsp_fw::FwVersion *injectedVersion =
-        reinterpret_cast<const dsp_fw::FwVersion *>
-            (fwConfigTlvList.data() + fwVersionValueOffsetInTlv);
-    // No operator== in FW type: compare each field individually:
-    CHECK(fwConfig.fwVersion.major == injectedVersion->major);
-    CHECK(fwConfig.fwVersion.minor == injectedVersion->minor);
-    CHECK(fwConfig.fwVersion.hotfix == injectedVersion->hotfix);
-    CHECK(fwConfig.fwVersion.build == injectedVersion->build);
-
     /* Simulating an os error during getting module entries */
     std::vector<ModuleEntry> entries;
     CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
@@ -230,4 +164,397 @@ TEST_CASE("Module handling: getting module entries")
     /*Successful get module info command with 'MaxModuleCount' modules*/
     checkModuleEntryIoctl(moduleHandler, dsp_fw::MaxModuleCount);
 }
+
+TEST_CASE("Module handling: getting FW configs")
+{
+    static const size_t fwVersionValueOffsetInTlv = 8;
+
+    static const std::vector<char> fwConfigTlvList{
+        /* Tag for FW_VERSION: 0x00000000 */
+        0x00, 0x00, 0x00, 0x00,
+        /* Length = 8 bytes */
+        0x08, 0x00, 0x00, 0x00,
+        /* Value: dsp_fw::FwVersion */
+        /* major and minor */
+        0x01, 0x02, 0x03, 0x04,
+        /* hot fix and build */
+        0x05, 0x06, 0x07, 0x08
+    };
+
+    MockedDevice device;
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    /* Simulating an os error during getting fw config */
+    commands.addGetFwConfigCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwConfigTlvList); /* unused parameter */
+
+    /* Simulating a driver error during getting fw config */
+    commands.addGetFwConfigCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwConfigTlvList); /* unused parameter */
+
+    /* Simulating a firmware error during getting fw config */
+    commands.addGetFwConfigCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        fwConfigTlvList); /* unused parameter */
+
+    /* Successful get fw config command */
+    commands.addGetFwConfigCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwConfigTlvList);
+
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error during getting fw config */
+    FwConfig fwConfig;
+    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
+        "Device returns an exception: OS says that io control has failed.");
+    CHECK(fwConfig.isFwVersionValid == false);
+
+    /* Simulating a driver error during getting fw config */
+    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(fwConfig.isFwVersionValid == false);
+
+    /* Simulating a firmware error during getting fw config */
+    CHECK_THROWS_MSG(moduleHandler.getFwConfig(fwConfig),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(fwConfig.isFwVersionValid == false);
+
+    /* Successful get fw config command */
+    CHECK_NOTHROW(moduleHandler.getFwConfig(fwConfig));
+    CHECK(fwConfig.isFwVersionValid == true);
+    const dsp_fw::FwVersion *injectedVersion =
+        reinterpret_cast<const dsp_fw::FwVersion *>
+        (fwConfigTlvList.data() + fwVersionValueOffsetInTlv);
+    // No operator== in FW type: compare each field individually:
+    CHECK(fwConfig.fwVersion.major == injectedVersion->major);
+    CHECK(fwConfig.fwVersion.minor == injectedVersion->minor);
+    CHECK(fwConfig.fwVersion.hotfix == injectedVersion->hotfix);
+    CHECK(fwConfig.fwVersion.build == injectedVersion->build);
+}
+
+TEST_CASE("Module handling: getting pipeline list")
+{
+    static const uint32_t fwMaxPplCount = 10;
+    static const std::vector<uint32_t> fwPipelineIdList = { 1, 2, 3 };
+
+    MockedDevice device;
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    /* Simulating an os error during getting pipeline list */
+    commands.addGetPipelineListCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwMaxPplCount,
+        std::vector<uint32_t>()); /* unused parameter */
+
+    /* Simulating a driver error during getting pipeline list  */
+    commands.addGetPipelineListCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwMaxPplCount,
+        std::vector<uint32_t>()); /* unused parameter */
+
+    /* Simulating a firmware error during getting pipeline list  */
+    commands.addGetPipelineListCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        fwMaxPplCount,
+        std::vector<uint32_t>()); /* unused parameter */
+
+    /* Successful get pipeline list command */
+    commands.addGetPipelineListCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwMaxPplCount,
+        fwPipelineIdList);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error during getting pipeline list */
+    std::vector<uint32_t> pipelineIds;
+    static const uint32_t maxPipeline = 10;
+    CHECK_THROWS_MSG(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds),
+        "Device returns an exception: OS says that io control has failed.");
+    CHECK(pipelineIds.empty());
+
+    /* Simulating a driver error during getting pipeline list */
+    CHECK_THROWS_MSG(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(pipelineIds.empty());
+
+    /* Simulating a firmware error during getting pipeline list */
+    CHECK_THROWS_MSG(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(pipelineIds.empty());
+
+    /*Successful get pipeline list command */
+    CHECK_NOTHROW(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds));
+    CHECK(fwPipelineIdList == pipelineIds);
+}
+
+TEST_CASE("Module handling: getting pipeline props")
+{
+    static const uint32_t pipelineId = 1;
+    static const DSPplProps fwProps = { 1, 2, 3, 4, 5, 6, { 1, 2, 3 }, { 4, 5 }, {} };
+
+    MockedDevice device;
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    /* Simulating an os error */
+    commands.addGetPipelinePropsCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        pipelineId,
+        DSPplProps()); /* unused parameter */
+
+    /* Simulating a driver error */
+    commands.addGetPipelinePropsCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        pipelineId,
+        DSPplProps()); /* unused parameter */
+
+    /* Simulating a firmware error */
+    commands.addGetPipelinePropsCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        pipelineId,
+        DSPplProps()); /* unused parameter */
+
+    /* Successful command */
+    commands.addGetPipelinePropsCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        pipelineId,
+        fwProps);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error */
+
+    static const DSPplProps emptyProps = { 0, 0, 0, 0, 0, 0, {}, {}, {} };
+    DSPplProps props = emptyProps;
+
+    CHECK_THROWS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
+        "Device returns an exception: OS says that io control has failed.");
+    CHECK(emptyProps == props);
+
+    /* Simulating a driver error */
+    CHECK_THROWS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(emptyProps == props);
+
+    /* Simulating a firmware error */
+    CHECK_THROWS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(emptyProps == props);
+
+    /*Successful command */
+    CHECK_NOTHROW(moduleHandler.getPipelineProps(pipelineId, props));
+    CHECK(props == fwProps);
+}
+
+TEST_CASE("Module handling: getting schedulers info")
+{
+    static const uint32_t coreId = 1;
+
+    static const DSTaskProps task1 = { 3, { 1, 2 } };
+    static const DSTaskProps task2 = { 4, { 8 } };
+    static const DSTaskProps task3 = { 6, {} };
+
+    static const DSSchedulerProps props1 = { 1, 2, { task1, task2 } };
+    static const DSSchedulerProps props2 = { 4, 2, { task3 } };
+
+    static const DSSchedulersInfo fwSchedulersInfo = { { props1, props2 } };
+
+    MockedDevice device;
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    /* Simulating an os error */
+    commands.addGetSchedulersInfoCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        coreId,
+        DSSchedulersInfo()); /* unused parameter */
+
+    /* Simulating a driver error */
+    commands.addGetSchedulersInfoCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        coreId,
+        DSSchedulersInfo()); /* unused parameter */
+
+    /* Simulating a firmware error */
+    commands.addGetSchedulersInfoCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        coreId,
+        DSSchedulersInfo()); /* unused parameter */
+
+    /* Successful command */
+    commands.addGetSchedulersInfoCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        coreId,
+        fwSchedulersInfo);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error */
+
+    static const DSSchedulersInfo emptyInfo = {};
+    DSSchedulersInfo info = emptyInfo;
+
+    CHECK_THROWS_MSG(moduleHandler.getSchedulersInfo(coreId, info),
+        "Device returns an exception: OS says that io control has failed.");
+    CHECK(emptyInfo == info);
+
+    /* Simulating a driver error */
+    CHECK_THROWS_MSG(moduleHandler.getSchedulersInfo(coreId, info),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(emptyInfo == info);
+
+    /* Simulating a firmware error */
+    CHECK_THROWS_MSG(moduleHandler.getSchedulersInfo(coreId, info),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(emptyInfo == info);
+
+    /*Successful command */
+    CHECK_NOTHROW(moduleHandler.getSchedulersInfo(coreId, info));
+    CHECK(fwSchedulersInfo == info);
+}
+
+TEST_CASE("Module handling: getting gateways")
+{
+    static const uint32_t fwGatewayCount = 10;
+    static const std::vector<dsp_fw::GatewayProps> fwGateways = { { 1, 2 }, { 3, 4 } };
+
+    MockedDevice device;
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    /* Simulating an os error */
+    commands.addGetGatewaysCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwGatewayCount,
+        std::vector<dsp_fw::GatewayProps>()); /* unused parameter */
+
+    /* Simulating a driver error during */
+    commands.addGetGatewaysCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwGatewayCount,
+        std::vector<dsp_fw::GatewayProps>()); /* unused parameter */
+
+    /* Simulating a firmware error during */
+    commands.addGetGatewaysCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        fwGatewayCount,
+        std::vector<dsp_fw::GatewayProps>()); /* unused parameter */
+
+    /* Successful command */
+    commands.addGetGatewaysCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwGatewayCount,
+        fwGateways);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error during getting pipeline list */
+    std::vector<dsp_fw::GatewayProps> gateways;
+    CHECK_THROWS_MSG(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways),
+        "Device returns an exception: OS says that io control has failed.");
+    CHECK(gateways.empty());
+
+    /* Simulating a driver error during getting pipeline list */
+    CHECK_THROWS_MSG(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(gateways.empty());
+
+    /* Simulating a firmware error during getting pipeline list */
+    CHECK_THROWS_MSG(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(gateways.empty());
+
+    /*Successful get pipeline list command */
+    CHECK_NOTHROW(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways));
+    CHECK(fwGateways.size() == gateways.size());
+    CHECK(std::equal(fwGateways.begin(), fwGateways.end(), gateways.begin(), isSameGateway));
+}
+
 

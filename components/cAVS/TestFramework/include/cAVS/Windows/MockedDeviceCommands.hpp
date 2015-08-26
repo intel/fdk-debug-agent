@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/FirmwareTypes.hpp"
+#include "cAVS/DynamicSizedFirmwareTypes.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
 #include <vector>
@@ -124,6 +125,86 @@ public:
      */
     void addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
         const driver::IoctlFwLogsState &expectedState);
+
+    /** Add a get pipeline list command.
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedDriverStatus the returned driver status
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] maxPplCount the maximum pipeline count
+     * @param[in] pipelineIds the pipeline id list returned by the ioctl.
+     *
+     * Note: the pipelineIds parameter is unused if :
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedDriverStatus) returns false or
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     *
+     * @throw Device::Exception
+     */
+    void addGetPipelineListCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint32_t maxPplCount,
+        const std::vector<uint32_t> &pipelineIds);
+
+    /** Add a get pipeline props command.
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedDriverStatus the returned driver status
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] pipelineId the id of the requested pipeline
+     * @param[in] pipelineProps the returned pipeline properties
+     *
+     * Note: the pipelineProps parameter is unused if :
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedDriverStatus) returns false or
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     *
+     * @throw Device::Exception
+     */
+    void addGetPipelinePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint32_t pipelineId,
+        const DSPplProps &pipelineProps);
+
+    /** Add a get schedulers info command.
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedDriverStatus the returned driver status
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] coreId the id of the requested core
+     * @param[in] info the returned schedulers info
+     *
+     * Note: the info parameter is unused if :
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedDriverStatus) returns false or
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     *
+     * @throw Device::Exception
+     */
+    void addGetSchedulersInfoCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint32_t coreId,
+        const DSSchedulersInfo &info);
+
+    /** Add a get gateways command.
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedDriverStatus the returned driver status
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] gatewayCount the gateway count
+     * @param[in] gateways the gateway list returned by the ioctl.
+     *
+     * Note: the gateways parameter is unused if :
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedDriverStatus) returns false or
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     *
+     * @throw Device::Exception
+     */
+    void addGetGatewaysCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint32_t gatewayCount,
+        const std::vector<dsp_fw::GatewayProps> &gateways);
 
 private:
     MockedDeviceCommands(const MockedDeviceCommands&) = delete;

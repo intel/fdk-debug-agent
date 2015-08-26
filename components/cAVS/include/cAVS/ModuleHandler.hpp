@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/FirmwareTypes.hpp"
+#include "cAVS/DynamicSizedFirmwareTypes.hpp"
 #include "cAVS/FwConfig.hpp"
 #include "cAVS/HwConfig.hpp"
 #include <stdexcept>
@@ -37,12 +38,22 @@ namespace cavs
 class ModuleHandler
 {
 public:
+    /**
+     * The size in bytes of the response buffer needed by the FW in order to reply a TLV.
+     * The SwAS specifies the output buffer size for TLV shall be 2KB.
+     */
+    static const size_t cavsTlvBufferSize = 2048;
+
+    /**
+     * Max parameter payload size set to one memory page (4096 bytes)
+     */
+    static const size_t maxParameterPayloadSize = 4 * 1024;
+
     class Exception : public std::logic_error
     {
     public:
         Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
-
 
     ModuleHandler() = default;
     virtual ~ModuleHandler() {}
@@ -55,6 +66,19 @@ public:
 
     /** @return the hardware configuration */
     virtual void getHwConfig(HwConfig &hwConfig) = 0;
+
+    /** @return the pipeline identifier list */
+    virtual void getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t> &pipelinesIds) = 0;
+
+    /** @return the properties of one pipeline */
+    virtual void getPipelineProps(uint32_t pipelineId, DSPplProps &props) = 0;
+
+    /** @return the schedulers of one core */
+    virtual void getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers) = 0;
+
+    /** @return the gateways */
+    virtual void getGatewaysInfo(uint32_t gatewayCount,
+        std::vector<dsp_fw::GatewayProps> &gateways) = 0;
 
 private:
     ModuleHandler(const ModuleHandler &) = delete;

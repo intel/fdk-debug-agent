@@ -43,6 +43,12 @@ public:
     virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) override;
     virtual void getFwConfig(FwConfig &fwConfig) override;
     virtual void getHwConfig(HwConfig &hwConfig) override;
+    virtual void getPipelineIdList(uint32_t maxPplCount,
+        std::vector<uint32_t> &pipelinesIds) override;
+    virtual void getPipelineProps(uint32_t pipelineId, DSPplProps &props) override;
+    virtual void getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers) override;
+    virtual void getGatewaysInfo(uint32_t gatewayCount,
+        std::vector<dsp_fw::GatewayProps> &gateways) override;
 
     /**
      * The size in bytes of the response buffer needed by the FW in order to reply a TLV.

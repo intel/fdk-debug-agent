@@ -56,11 +56,12 @@ public:
         mBuffer = other.mBuffer;
     }
 
-    explicit Buffer(const std::vector<char> &source):
+    template <typename T>
+    explicit Buffer(const std::vector<T> &source):
         Buffer(source.size())
     {
-        static_assert(sizeof(char) == sizeof(uint8_t),
-            "Code designed for sizeof(char) == sizeof(uint8_t)");
+        static_assert(sizeof(T) == sizeof(uint8_t),
+            "Code designed for sizeof(T) == sizeof(uint8_t)");
 
         const uint8_t * sourceData = reinterpret_cast<const uint8_t *>(source.data());
         std::copy(sourceData, sourceData + source.size(), mBuffer.begin());
@@ -89,6 +90,16 @@ public:
     std::size_t getSize() const
     {
         return mBuffer.size();
+    }
+
+    std::vector<uint8_t> &getElements()
+    {
+        return mBuffer;
+    }
+
+    const std::vector<uint8_t> &getElements() const
+    {
+        return mBuffer;
     }
 
     bool operator == (const Buffer& other) const

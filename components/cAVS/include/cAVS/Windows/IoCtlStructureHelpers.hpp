@@ -45,15 +45,6 @@ static const uint32_t baseFirwareModuleId = 0;
 /** By convention the base firmware instance id is 0 */
 static const uint32_t baseFirwareInstanceId = 0;
 
-/**
- * In a FW response, the parameter is not at the beginning of the buffer, but after a header
- * including driver status followed by FW status.
- */
-static const size_t parameterOffset = INTC_APP_MIN_BODY_SIZE
-                                      + sizeof(driver::IoctlFwModuleParam)
-                                      - MEMBER_SIZE(driver::IoctlFwModuleParam,
-                                                    module_parameter_data);
-
 /** This class helps to construct IOCTL_CMD_APP_TO_AUDIODSP_BIG_(GET|SET) output structure.
  * This structure has 3 imbrication levels:
  * Intc_Get_Parameter (driver structure) which contains
@@ -107,7 +98,7 @@ public:
         return *mModuleParameterAccess;
     }
 
-    /** 
+    /**
      * In case the parameter size is not static, the effective parameter size is required.
      * @param[out] parameterSize the effective size of the parameter
      * @return FirmwareParameterType reference
@@ -129,8 +120,33 @@ public:
         return mBuffer;
     }
 
+    /** Copy the firmware parameter part to the supplied vector */
+    void getFirmwareParameterContent(std::vector<uint8_t> &content) const
+    {
+        content.resize(mBuffer.getSize() - parameterOffset);
+        auto startIterator = mBuffer.getElements().begin();
+        std::copy(startIterator + parameterOffset, startIterator + mBuffer.getSize(),
+            content.begin());
+    }
+
+    /** Copy the firmware parameter part from the supplied vector */
+    void setFirmwareParameterContent(const std::vector<uint8_t> &content)
+    {
+        assert(content.size() == mBuffer.getSize() - parameterOffset);
+        std::copy(content.begin(), content.end(),
+            mBuffer.getElements().begin() + parameterOffset);
+    }
+
 private:
     BigCmdModuleAccessIoctlOutput & operator=(const BigCmdModuleAccessIoctlOutput&) = delete;
+
+    /**
+    * In a FW response, the parameter is not at the beginning of the buffer, but after a header
+    * including driver status followed by FW status.
+    */
+    static const size_t parameterOffset = INTC_APP_MIN_BODY_SIZE
+        + sizeof(driver::IoctlFwModuleParam)
+        - MEMBER_SIZE(driver::IoctlFwModuleParam, module_parameter_data);
 
     /* Initialize pmointers to sub-structures */
     void initPointers()
