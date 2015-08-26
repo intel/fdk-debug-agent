@@ -101,15 +101,17 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
         &expectedOutput.getBuffer(), &returnedOutput.getBuffer());
 }
 
-void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-        const std::vector<char> &fwConfigTlvList)
+void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess,
+                                                  NTSTATUS returnedDriverStatus,
+                                                  dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+                                                  const std::vector<char> &tlvList,
+                                                  dsp_fw::BaseFwParams parameterId)
 {
     Buffer expectedOutput(ModuleHandler::cavsTlvBufferSize);
-    Buffer returnedOutput(fwConfigTlvList);
+    Buffer returnedOutput(tlvList);
 
     addGetModuleParameterCommand<char>(
-        dsp_fw::FW_CONFIG,
+        parameterId,
         expectedOutput,
         returnedOutput,
         ioctlSuccess,
@@ -117,20 +119,28 @@ void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess, NTSTATUS ret
         returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addGetHwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-        const std::vector<char> &hwConfigTlvList)
+void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess,
+                                                 NTSTATUS returnedDriverStatus,
+                                                 dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+                                                 const std::vector<char> &fwConfigTlvList)
 {
-    Buffer expectedOutput(ModuleHandler::cavsTlvBufferSize);
-    Buffer returnedOutput(hwConfigTlvList);
+    addTlvParameterCommand(ioctlSuccess,
+                           returnedDriverStatus,
+                           returnedFirmwareStatus,
+                           fwConfigTlvList,
+                           dsp_fw::FW_CONFIG);
+}
 
-    addGetModuleParameterCommand<char>(
-        dsp_fw::HW_CONFIG_GET,
-        expectedOutput,
-        returnedOutput,
-        ioctlSuccess,
-        returnedDriverStatus,
-        returnedFirmwareStatus);
+void MockedDeviceCommands::addGetHwConfigCommand(bool ioctlSuccess,
+                                                 NTSTATUS returnedDriverStatus,
+                                                 dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+                                                 const std::vector<char> &hwConfigTlvList)
+{
+    addTlvParameterCommand(ioctlSuccess,
+                           returnedDriverStatus,
+                           returnedFirmwareStatus,
+                           hwConfigTlvList,
+                           dsp_fw::HW_CONFIG_GET);
 }
 
 void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,

@@ -129,6 +129,10 @@ private:
     MockedDeviceCommands(const MockedDeviceCommands&) = delete;
     MockedDeviceCommands &operator=(const MockedDeviceCommands&) = delete;
 
+    void addTlvParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        const std::vector<char> &tlvList, dsp_fw::BaseFwParams parameterId);
+
     /** Template method that adds a module access ioctl
      *
      * @tparam FirmwareParameterType the firmware paramerter type, for instance
