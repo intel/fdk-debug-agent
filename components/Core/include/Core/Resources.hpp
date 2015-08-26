@@ -22,6 +22,11 @@
 
 #pragma once
 
+/**
+ * @fixme we should include IfdkObjects/type/Characteristics.hpp but because of a temporary issue
+ *        we must include IfdkObjects/Xml/TypeTraits.hpp.
+ */
+#include "IfdkObjects/Xml/TypeTraits.hpp"
 #include "Rest/Resource.hpp"
 #include "cAVS/System.hpp"
 
@@ -63,6 +68,8 @@ public:
     SubsystemTypeResource(cavs::System &system) : RootResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+private:
+    void addSystemCharacteristics(ifdk_objects::type::Characteristics &ch);
 };
 
 /** This resource returns a list of all the Instances of a Subsystem (XML) */

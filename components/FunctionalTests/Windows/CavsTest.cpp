@@ -49,6 +49,19 @@ const Uuid Module0UID = { 0x01020304, 0x0506, 0x0708,
 const Uuid Module1UID = { 0x11121314, 0x1516, 0x1718,
     { 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20 } };
 
+static const std::vector<char> fwConfigTlvList {
+    /* Tag for FW_VERSION: 0x00000000 */
+    0x00, 0x00, 0x00, 0x00,
+    /* Length = 8 bytes */
+    0x08, 0x00, 0x00, 0x00,
+    /* Value */
+        /* major and minor */
+        0x01, 0x02, 0x03, 0x04,
+        /* hot fix and build */
+        0x05, 0x06, 0x07, 0x08
+};
+static const size_t fwVersionValueOffsetInTlvList = 8;
+
 /** Helper function to set a module entry */
 void setModuleEntry(ModuleEntry &entry, const std::string &name,
     const Uuid &uuid)
@@ -86,18 +99,6 @@ void addModuleEntryCommand(windows::MockedDeviceCommands &commands)
 
 void addFwConfigCommand(windows::MockedDeviceCommands &commands)
 {
-    std::vector<char> fwConfigTlvList {
-        /* Tag for FW_VERSION: 0x00000000 */
-        0x00, 0x00, 0x00, 0x00,
-        /* Length = 8 bytes */
-        0x08, 0x00, 0x00, 0x00,
-        /* Value */
-            /* major and minor */
-            0x01, 0x02, 0x03, 0x04,
-            /* hot fix and build */
-            0x05, 0x06, 0x07, 0x08
-    };
-
     /* Adding the "get FW Config" command to the test vector */
     commands.addGetFwConfigCommand(
         true,
@@ -233,6 +234,9 @@ TEST_CASE("DebugAgent/cAVS: subsystem type (URL: /type/cavs)")
     /* Creating the http client */
     HttpClientSimulator client("localhost");
 
+    const dsp_fw::FwVersion *fwVersion = reinterpret_cast<const dsp_fw::FwVersion *>(
+        fwConfigTlvList.data() + fwVersionValueOffsetInTlvList);
+
     /* 1: Getting subsystem information*/
     CHECK_NOTHROW(client.request(
         "/type/cavs",
@@ -243,9 +247,12 @@ TEST_CASE("DebugAgent/cAVS: subsystem type (URL: /type/cavs)")
         "<subsystem_type Name=\"cavs\">\n"
         "    <description>cAVS subsystem</description>\n"
         "    <characteristics>\n"
-        "        <characteristic Name=\"Fw Version\">1.0.0.2</characteristic>\n"
-        "        <characteristic Name=\"Nb Cores\">1</characteristic>\n"
-        "        <characteristic Name=\"Memory page size\">4096</characteristic>\n"
+        "        <characteristic Name=\"Firmware version\">"
+        +           std::to_string(fwVersion->major) + "."
+        +           std::to_string(fwVersion->minor) + "."
+        +           std::to_string(fwVersion->hotfix) + "."
+        +           std::to_string(fwVersion->build)
+        +        "</characteristic>\n"
         "    </characteristics>\n"
         "    <info_parameters/>\n"
         "    <control_parameters/>\n"

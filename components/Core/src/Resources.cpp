@@ -155,6 +155,106 @@ void SystemTypeResource::handleGet(const Request &request, Response &response)
     out << xml;
 }
 
+void SubsystemTypeResource::addSystemCharacteristics(type::Characteristics &ch)
+{
+    const FwConfig &fwConfig = mSystem.getFwConfig();
+    if (fwConfig.isFwVersionValid) {
+        ch.add(type::Characteristic(
+            "Firmware version",
+            std::to_string(fwConfig.fwVersion.major) + "." +
+            std::to_string(fwConfig.fwVersion.minor) + "." +
+            std::to_string(fwConfig.fwVersion.hotfix) + "." +
+            std::to_string(fwConfig.fwVersion.build)));
+    }
+    if (fwConfig.isMemoryReclaimedValid) {
+        ch.add(type::Characteristic(
+            "Memory reclaimed",
+            std::to_string(fwConfig.memoryReclaimed)));
+    }
+    if (fwConfig.isSlowClockFreqHzValid) {
+        ch.add(type::Characteristic(
+            "Slow clock frequency (Hz)",
+            std::to_string(fwConfig.slowClockFreqHz)));
+    }
+    if (fwConfig.isFastClockFreqHzValid) {
+        ch.add(type::Characteristic(
+            "Fast clock frequency (Hz)",
+            std::to_string(fwConfig.fastClockFreqHz)));
+    }
+    if (fwConfig.dmaBufferConfig.size() > 0) {
+        size_t i = 0;
+        for (auto dmaBufferConfig : fwConfig.dmaBufferConfig) {
+            ch.add(type::Characteristic(
+                "DMA buffer config #" + std::to_string(i) + " min size (bytes)",
+                std::to_string(dmaBufferConfig.min_size_bytes)));
+            ch.add(type::Characteristic(
+                "DMA buffer config #" + std::to_string(i) + " max size (bytes)",
+                std::to_string(dmaBufferConfig.max_size_bytes)));
+            ++i;
+        }
+    }
+    if (fwConfig.isAlhSupportLevelValid) {
+        ch.add(type::Characteristic(
+            "Audio Hub Link support level",
+            std::to_string(fwConfig.alhSupportLevel)));
+    }
+    if (fwConfig.isIpcDlMailboxBytesValid) {
+        ch.add(type::Characteristic(
+            "IPC down link (host to FW) mailbox size (bytes)",
+            std::to_string(fwConfig.ipcDlMailboxBytes)));
+    }
+    if (fwConfig.isIpcUlMailboxBytesValid) {
+        ch.add(type::Characteristic(
+            "IPC up link (FW to host) mailbox size (bytes)",
+            std::to_string(fwConfig.ipcUlMailboxBytes)));
+    }
+    if (fwConfig.isTraceLogBytesValid) {
+        ch.add(type::Characteristic(
+            "Size of trace log buffer per single core (bytes)",
+            std::to_string(fwConfig.traceLogBytes)));
+    }
+    if (fwConfig.isMaxPplCountValid) {
+        ch.add(type::Characteristic(
+            "Maximum number of pipelines instances",
+            std::to_string(fwConfig.maxPplCount)));
+    }
+    if (fwConfig.isMaxAstateCountValid) {
+        ch.add(type::Characteristic(
+            "Maximum number of A-state table entries",
+            std::to_string(fwConfig.maxAstateCount)));
+    }
+    if (fwConfig.isMaxModulePinCountValid) {
+        ch.add(type::Characteristic(
+            "Maximum number of input or output pins per module",
+            std::to_string(fwConfig.maxModulePinCount)));
+    }
+    if (fwConfig.isModulesCountValid) {
+        ch.add(type::Characteristic(
+            "Current total number of module entries loaded into the DSP",
+            std::to_string(fwConfig.modulesCount)));
+    }
+    if (fwConfig.isMaxModInstCountValid) {
+        ch.add(type::Characteristic(
+            "Maximum module instance count",
+            std::to_string(fwConfig.maxModInstCount)));
+    }
+    if (fwConfig.isMaxLlTasksPerPriCountValid) {
+        ch.add(type::Characteristic(
+            "Maximum number of LL tasks per priority",
+            std::to_string(fwConfig.maxLlTasksPerPriCount)));
+    }
+    if (fwConfig.isLlPriCountValid) {
+        ch.add(type::Characteristic(
+            "Number of LL priorities",
+            std::to_string(fwConfig.llPriCount)));
+    }
+    if (fwConfig.isMaxDpTasksCountValid) {
+        ch.add(type::Characteristic(
+            "Maximum number of DP tasks per core",
+            std::to_string(fwConfig.maxDpTasksCount)));
+    }
+}
+
 void SubsystemTypeResource::handleGet(const Request &request, Response &response)
 {
     static const std::vector<std::string> staticTypeCollections = {
@@ -183,9 +283,7 @@ void SubsystemTypeResource::handleGet(const Request &request, Response &response
 
     /* Hardcoded characteristics (temporary) */
     type::Characteristics &ch = subsystem.getCharacteristics();
-    ch.add(type::Characteristic("Fw Version", "1.0.0.2"));
-    ch.add(type::Characteristic("Nb Cores", "1"));
-    ch.add(type::Characteristic("Memory page size", "4096"));
+    addSystemCharacteristics(ch);
 
     /* Children and categories */
     type::Children &children = subsystem.getChildren();
