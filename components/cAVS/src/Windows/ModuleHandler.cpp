@@ -122,6 +122,37 @@ void ModuleHandler::getFwConfig(FwConfig &fwConfig)
     } while (!end);
 }
 
+void ModuleHandler::getHwConfig(HwConfig &hwConfig)
+{
+    /* Constructing ioctl output structure*/
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
+        dsp_fw::HW_CONFIG_GET, cavsTlvBufferSize);
+
+    /* Performing ioctl */
+    bigGetModuleAccessIoctl<char>(ioctlOutput);
+
+    /* Retrieving properties */
+    size_t tlvBufferSize;
+    const char * tlvBuffer = &ioctlOutput.getFirmwareParameter(tlvBufferSize);
+
+    /* Now parse the TLV answer */
+    tlv::TlvUnpack unpack(hwConfig, tlvBuffer, tlvBufferSize);
+
+    bool end = false;
+    do {
+
+        try
+        {
+            end = !unpack.readNext();
+        }
+        catch (tlv::TlvUnpack::Exception &e)
+        {
+            /* @todo use log instead ! */
+            std::cout << "Error while parsing HW Config TLV: " << e.what() << std::endl;
+        }
+    } while (!end);
+}
+
 }
 }
 }

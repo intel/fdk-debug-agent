@@ -24,6 +24,7 @@
 
 #include "cAVS/FirmwareTypes.hpp"
 #include "cAVS/FwConfig.hpp"
+#include "cAVS/HwConfig.hpp"
 #include <stdexcept>
 #include <vector>
 
@@ -51,6 +52,9 @@ public:
 
     /** @return the firmware configuration */
     virtual void getFwConfig(FwConfig &fwConfig) = 0;
+
+    /** @return the hardware configuration */
+    virtual void getHwConfig(HwConfig &hwConfig) = 0;
 
 private:
     ModuleHandler(const ModuleHandler &) = delete;

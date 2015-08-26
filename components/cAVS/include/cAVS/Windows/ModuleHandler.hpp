@@ -41,6 +41,7 @@ public:
 
     virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) override;
     virtual void getFwConfig(FwConfig &fwConfig) override;
+    virtual void getHwConfig(HwConfig &hwConfig) override;
 
     /**
      * The size in bytes of the response buffer needed by the FW in order to reply a TLV.

@@ -117,6 +117,22 @@ void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess, NTSTATUS ret
         returnedFirmwareStatus);
 }
 
+void MockedDeviceCommands::addGetHwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        const std::vector<char> &hwConfigTlvList)
+{
+    Buffer expectedOutput(ModuleHandler::cavsTlvBufferSize);
+    Buffer returnedOutput(hwConfigTlvList);
+
+    addGetModuleParameterCommand<char>(
+        dsp_fw::HW_CONFIG_GET,
+        expectedOutput,
+        returnedOutput,
+        ioctlSuccess,
+        returnedDriverStatus,
+        returnedFirmwareStatus);
+}
+
 void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
     NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
     const std::vector<ModuleEntry> &returnedEntries)

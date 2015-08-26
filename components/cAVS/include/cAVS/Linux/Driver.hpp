@@ -23,6 +23,7 @@
 
 #include "cAVS/Driver.hpp"
 #include "cAVS/FwConfig.hpp"
+#include "cAVS/HwConfig.hpp"
 #include "cAVS/Linux/Logger.hpp"
 
 namespace debug_agent
@@ -47,6 +48,7 @@ private:
     {
     public:
         virtual void getFwConfig(FwConfig &fwConfig) override {}
+        virtual void getHwConfig(HwConfig &hwConfig) override {}
         virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
             override {}
     };

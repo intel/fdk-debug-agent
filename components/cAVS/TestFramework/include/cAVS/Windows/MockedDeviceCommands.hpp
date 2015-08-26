@@ -77,6 +77,25 @@ public:
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
         const std::vector<char> &fwConfigTlvList);
 
+    /**
+     * Add a get hw config command.
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedDriverStatus the returned driver status
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] hwConfigTlvList the hw config returned by the ioctl, which is a TLV list.
+     *
+     * Note: the hwConfigTlvList parameter is unused if :
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedDriverStatus) returns false or
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     *
+     * @throw Device::Exception
+     */
+    void addGetHwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        const std::vector<char> &hwConfigTlvList);
+
     /** Add a get log parameters command
     *
     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)

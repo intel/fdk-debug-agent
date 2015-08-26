@@ -32,7 +32,8 @@ namespace cavs
 System::System(const DriverFactory &driverFactory):
     mDriver(std::move(createDriver(driverFactory))),
     mModuleEntries(),
-    mFwConfig()
+    mFwConfig(),
+    mHwConfig()
 {
     if (mDriver == nullptr) {
 
@@ -41,6 +42,7 @@ System::System(const DriverFactory &driverFactory):
     try
     {
         mDriver->getModuleHandler().getFwConfig(mFwConfig);
+        mDriver->getModuleHandler().getHwConfig(mHwConfig);
         mDriver->getModuleHandler().getModulesEntries(mModuleEntries);
     }
     catch (ModuleHandler::Exception &e)

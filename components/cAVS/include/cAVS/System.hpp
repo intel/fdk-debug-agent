@@ -144,6 +144,11 @@ private:
      */
     FwConfig mFwConfig;
 
+    /**
+     * The HW config structure retrieved from FW once, at initialization
+     */
+    HwConfig mHwConfig;
+
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;
 };
