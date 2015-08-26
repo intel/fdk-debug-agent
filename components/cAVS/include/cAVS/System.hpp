@@ -110,6 +110,11 @@ public:
     const FwConfig &getFwConfig() const NOEXCEPT;
 
     /**
+     * Get hardware configuration
+     */
+    const HwConfig &getHwConfig() const NOEXCEPT;
+
+    /**
      * Try to acquire the log stream resource
      *
      * The resource will be locked until the returned LogStreamResource instance is released.

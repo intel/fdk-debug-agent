@@ -97,6 +97,11 @@ const FwConfig &System::getFwConfig() const NOEXCEPT
     return mFwConfig;
 }
 
+const HwConfig &System::getHwConfig() const NOEXCEPT
+{
+    return mHwConfig;
+}
+
 std::unique_ptr<System::LogStreamResource> System::tryToAcquireLogStreamResource()
 {
     std::unique_ptr<System::LogStreamResource> resource(new System::LogStreamResource(*this));
