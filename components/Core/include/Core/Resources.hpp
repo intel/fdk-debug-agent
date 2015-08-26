@@ -122,6 +122,16 @@ protected:
     virtual void handlePut(const rest::Request &request, rest::Response &response) override;
 };
 
+/** This resource returns the Log Control Parameters for an Instance of a Subsystem (XML) */
+class SubsystemInstanceLogControlParametersResource : public RootResource
+{
+public:
+    SubsystemInstanceLogControlParametersResource(cavs::System &system) : RootResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+    virtual void handlePut(const rest::Request &request, rest::Response &response) override;
+};
+
 /** This resource returns the Log Parameters for a Subsystem Type (XML) */
 class SubsystemTypeLogParametersResource : public RootResource
 {

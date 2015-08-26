@@ -615,6 +615,89 @@ void SubsystemInstanceLogParametersResource::handlePut(const Request &request, R
     out << "<p>Done</p>";
 }
 
+void SubsystemInstanceLogControlParametersResource::handleGet(const Request &request, Response &response)
+{
+    Logger::Parameters logParameters;
+
+    try
+    {
+        logParameters = mSystem.getLogParameters();
+    }
+    catch (System::Exception &e)
+    {
+        throw HttpError(ErrorStatus::BadRequest, "Cannot get log parameters : " +
+            std::string(e.what()));
+    }
+
+    std::ostream &out = response.send(ContentTypeXml);
+    out << "<control_parameters>"
+        "    <BooleanParameter Name=\"Started\">" <<
+        logParameters.mIsStarted << "</BooleanParameter>"
+        "    <ParameterBlock Name=\"Buffering\">"
+        "        <IntegerParameter Name=\"Size\">0</IntegerParameter>"
+        "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
+        "    </ParameterBlock>"
+        "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
+        "    <EnumParameter Name=\"Verbosity\">" <<
+        Logger::toString(logParameters.mLevel) << "</EnumParameter>"
+        "    <BooleanParameter Name=\"ViaPTI\">" <<
+        (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>"
+        "</control_parameters>";
+}
+
+void SubsystemInstanceLogControlParametersResource::handlePut(const Request &request, Response &response)
+{
+    Poco::XML::DOMParser parser;
+    Poco::XML::Document* document = parser.parseString(request.getRequestContentAsString());
+
+    if (!document) {
+        throw HttpError(ErrorStatus::BadRequest, "Invalid document");
+    }
+
+    static const std::string controlParametersUrl = "/control_parameters/";
+
+    // Retrieve the Started BooleanParameter and its value
+    std::string startedNodeValue = getNodeValueFromXPath(document,
+        controlParametersUrl + "BooleanParameter[@Name='Started']");
+
+    // Retrieve the Verbosity EnumParameter and its value
+    std::string verbosityNodeValue = getNodeValueFromXPath(document,
+        controlParametersUrl + "EnumParameter[@Name='Verbosity']");
+
+    // Retrieve the ViaPTI BooleanParameter and its value
+    std::string viaPtiNodeValue = getNodeValueFromXPath(document,
+        controlParametersUrl + "BooleanParameter[@Name='ViaPTI']");
+
+    // Parse each of the parameters found into their correct type
+    Logger::Parameters logParameters;
+    try {
+        logParameters.mIsStarted =
+            Poco::NumberParser::parseBool(startedNodeValue);
+        logParameters.mLevel =
+            Logger::levelFromString(verbosityNodeValue);
+        logParameters.mOutput =
+            Poco::NumberParser::parseBool(viaPtiNodeValue) ? Logger::Output::Pti :
+            Logger::Output::Sram;
+    }
+    catch (Logger::Exception &e) {
+        throw HttpError(ErrorStatus::BadRequest, std::string("Invalid value: ") + e.what());
+    }
+    catch (Poco::SyntaxException &e) {
+        throw HttpError(ErrorStatus::BadRequest,
+            std::string("Invalid Start/Stop request: ") + e.what());
+    }
+
+    try {
+        mSystem.setLogParameters(logParameters);
+    }
+    catch (System::Exception &e) {
+        throw HttpError(ErrorStatus::InternalError, std::string("Fail to apply: ") + e.what());
+    }
+
+    std::ostream &out = response.send(ContentTypeHtml);
+    out << "<p>Done</p>";
+}
+
 void SubsystemTypeLogParametersResource::handleGet(const Request &request, Response &response)
 {
     std::ostream &out = response.send(ContentTypeXml);

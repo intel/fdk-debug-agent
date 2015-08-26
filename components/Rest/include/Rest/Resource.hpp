@@ -43,7 +43,8 @@ public:
         NotFound = 404,
         BadRequest = 400,
         VerbNotAllowed = 405,
-        Locked = 423
+        Locked = 423,
+        InternalError = 500
     };
 
     static std::string toString(ErrorStatus status)

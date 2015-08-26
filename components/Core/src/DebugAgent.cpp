@@ -62,6 +62,8 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     /* Log service */
     dispatcher->addResource("/instance/cavs.fwlogs/0",
         std::shared_ptr<Resource>(new SubsystemInstanceLogParametersResource(mSystem)));
+    dispatcher->addResource("/instance/cavs.fwlogs/0/control_parameters",
+        std::shared_ptr<Resource>(new SubsystemInstanceLogControlParametersResource(mSystem)));
     dispatcher->addResource("/type/cavs.fwlogs",
         std::shared_ptr<Resource>(new SubsystemTypeLogParametersResource(mSystem)));
     dispatcher->addResource("/instance/cavs.fwlogs/0/streaming",
