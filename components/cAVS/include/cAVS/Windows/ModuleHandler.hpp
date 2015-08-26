@@ -25,6 +25,7 @@
 #include "cAVS/ModuleHandler.hpp"
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/IoCtlStructureHelpers.hpp"
+#include "tlv/TlvResponseHandlerInterface.hpp"
 
 namespace debug_agent
 {
@@ -52,6 +53,10 @@ public:
 private:
     /** The module parameter access feature has only one parameter, therefore its index is 0 */
     static const uint32_t moduleParameterAccessParameterId = 0;
+
+    template<typename TlvResponseHandlerInterface>
+    void readTlvParameters(TlvResponseHandlerInterface &responseHandler,
+                           dsp_fw::BaseFwParams parameterId);
 
     Device &mDevice;
 

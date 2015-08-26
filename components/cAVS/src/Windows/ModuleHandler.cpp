@@ -91,11 +91,13 @@ void ModuleHandler::getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
     }
 }
 
-void ModuleHandler::getFwConfig(FwConfig &fwConfig)
+template<typename TlvResponseHandlerInterface>
+void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandler,
+                                      dsp_fw::BaseFwParams parameterId)
 {
     /* Constructing ioctl output structure*/
     BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
-        dsp_fw::FW_CONFIG, cavsTlvBufferSize);
+        parameterId, cavsTlvBufferSize);
 
     /* Performing ioctl */
     bigGetModuleAccessIoctl<char>(ioctlOutput);
@@ -105,7 +107,7 @@ void ModuleHandler::getFwConfig(FwConfig &fwConfig)
     const char * tlvBuffer = &ioctlOutput.getFirmwareParameter(tlvBufferSize);
 
     /* Now parse the TLV answer */
-    tlv::TlvUnpack unpack(fwConfig, tlvBuffer, tlvBufferSize);
+    tlv::TlvUnpack unpack(responseHandler, tlvBuffer, tlvBufferSize);
 
     bool end = false;
     do {
@@ -117,40 +119,21 @@ void ModuleHandler::getFwConfig(FwConfig &fwConfig)
         catch (tlv::TlvUnpack::Exception &e)
         {
             /* @todo use log instead ! */
-            std::cout << "Error while parsing FW Config TLV: " << e.what() << std::endl;
+            std::cout << "Error while parsing TLV for base FW parameter "
+                << parameterId << ": " << e.what() << std::endl;
         }
     } while (!end);
+
+}
+
+void ModuleHandler::getFwConfig(FwConfig &fwConfig)
+{
+    readTlvParameters<FwConfig>(fwConfig, dsp_fw::FW_CONFIG);
 }
 
 void ModuleHandler::getHwConfig(HwConfig &hwConfig)
 {
-    /* Constructing ioctl output structure*/
-    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
-        dsp_fw::HW_CONFIG_GET, cavsTlvBufferSize);
-
-    /* Performing ioctl */
-    bigGetModuleAccessIoctl<char>(ioctlOutput);
-
-    /* Retrieving properties */
-    size_t tlvBufferSize;
-    const char * tlvBuffer = &ioctlOutput.getFirmwareParameter(tlvBufferSize);
-
-    /* Now parse the TLV answer */
-    tlv::TlvUnpack unpack(hwConfig, tlvBuffer, tlvBufferSize);
-
-    bool end = false;
-    do {
-
-        try
-        {
-            end = !unpack.readNext();
-        }
-        catch (tlv::TlvUnpack::Exception &e)
-        {
-            /* @todo use log instead ! */
-            std::cout << "Error while parsing HW Config TLV: " << e.what() << std::endl;
-        }
-    } while (!end);
+    readTlvParameters<HwConfig>(hwConfig, dsp_fw::HW_CONFIG_GET);
 }
 
 }
