@@ -175,6 +175,7 @@ void SystemInstanceResource::handleGet(const Request &request, Response &respons
 
 void SubsystemTypeResource::addSystemCharacteristics(type::Characteristics &ch)
 {
+    // Add FW config
     const FwConfig &fwConfig = mSystem.getFwConfig();
     if (fwConfig.isFwVersionValid) {
         ch.add(type::Characteristic(
@@ -270,6 +271,51 @@ void SubsystemTypeResource::addSystemCharacteristics(type::Characteristics &ch)
         ch.add(type::Characteristic(
             "Maximum number of DP tasks per core",
             std::to_string(fwConfig.maxDpTasksCount)));
+    }
+
+    // Add HW config
+    const HwConfig &hwConfig = mSystem.getHwConfig();
+    if (hwConfig.isCavsVersionValid) {
+        ch.add(type::Characteristic(
+            "cAVS Version",
+            std::to_string(hwConfig.cavsVersion)));
+    }
+    if (hwConfig.isDspCoreCountValid) {
+        ch.add(type::Characteristic(
+            "Number of cores",
+            std::to_string(hwConfig.dspCoreCount)));
+    }
+    if (hwConfig.isMemPageSizeValid) {
+        ch.add(type::Characteristic(
+            "Memory page size (bytes)",
+            std::to_string(hwConfig.memPageSize)));
+    }
+    if (hwConfig.isTotalPhysicalMemoryPageValid) {
+        ch.add(type::Characteristic(
+            "Total number of physical pages",
+            std::to_string(hwConfig.totalPhysicalMemoryPage)));
+    }
+    if (hwConfig.isI2sCapsValid) {
+        ch.add(type::Characteristic(
+            "I2S version",
+            std::to_string(hwConfig.i2sCaps.version)));
+        size_t i = 0;
+        for (auto controllerBaseAddr : hwConfig.i2sCaps.controllerBaseAddr) {
+
+            ch.add(type::Characteristic(
+                "I2S controller #" + std::to_string(i++) + " base address",
+                std::to_string(controllerBaseAddr)));
+        }
+    }
+    if (hwConfig.gatewayCount) {
+        ch.add(type::Characteristic(
+            "Total number of DMA gateways",
+            std::to_string(hwConfig.gatewayCount)));
+    }
+    if (hwConfig.isEbbCountValid) {
+        ch.add(type::Characteristic(
+            "Number of SRAM memory banks",
+            std::to_string(hwConfig.ebbCount)));
     }
 }
 

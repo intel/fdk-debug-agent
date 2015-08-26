@@ -307,6 +307,8 @@ TEST_CASE("DebugAgent/cAVS: subsystem type (URL: /type/cavs)")
 
     const dsp_fw::FwVersion *fwVersion = reinterpret_cast<const dsp_fw::FwVersion *>(
         fwConfigTlvList.data() + fwVersionValueOffsetInTlvList);
+    const uint32_t *nbCores = reinterpret_cast<const uint32_t *>(
+        hwConfigTlvList.data() + nbCoreValueOffsetInTlvList);
 
     /* 1: Getting subsystem information*/
     CHECK_NOTHROW(client.request(
@@ -323,6 +325,9 @@ TEST_CASE("DebugAgent/cAVS: subsystem type (URL: /type/cavs)")
         +           std::to_string(fwVersion->minor) + "."
         +           std::to_string(fwVersion->hotfix) + "."
         +           std::to_string(fwVersion->build)
+        +        "</characteristic>\n"
+        "        <characteristic Name=\"Number of cores\">"
+        +           std::to_string(*nbCores)
         +        "</characteristic>\n"
         "    </characteristics>\n"
         "    <info_parameters/>\n"
