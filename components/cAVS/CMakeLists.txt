@@ -37,6 +37,7 @@ set(LIB_INCS
     include/cAVS/SystemDriverFactory.hpp
     include/cAVS/System.hpp
     include/cAVS/FirmwareTypes.hpp
+    include/cAVS/DynamicSizedFirmwareTypes.hpp
     include/cAVS/ModuleHandler.hpp
     include/cAVS/FwConfig.hpp
     include/cAVS/HwConfig.hpp)
