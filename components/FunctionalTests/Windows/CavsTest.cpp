@@ -238,10 +238,8 @@ TEST_CASE("DebugAgent/cAVS: system instance (URL: /instance)")
 
     windows::MockedDeviceCommands commands(*device);
 
-    /* 0: Adding initial FW config command*/
-    addFwConfigCommand(commands);
-    /* Adding initial module entry command */
-    addModuleEntryCommand(commands);
+    /* Adding initial commands */
+    addInitialCommand(commands);
 
     /* Now using the mocked device
     * --------------------------- */
