@@ -46,5 +46,8 @@ target_include_directories(Core PUBLIC "include")
 # Binding with Poco
 link_poco(Core)
 
+# Binding with pfw
+link_pfw(Core)
+
 # Needed components
 target_link_libraries(Core cAVS Rest Util IfdkObjects)

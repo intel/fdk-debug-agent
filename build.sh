@@ -124,6 +124,8 @@ build_dir=$root_dir/build/$platform
 install_dir=$root_dir/install/$platform
 test_dir=$install_dir/tests
 poco_dir=$root_dir/external/poco/install/$platform/lib/cmake/Poco
+pfw_dir=$root_dir/external/parameter-framework
+pfw_build_dir=$build_dir/parameter-framework
 
 echo Directories:
 echo   root_dir=$root_dir
@@ -138,6 +140,7 @@ then
     echo "-----------"
     echo "Cleaning..."
     echo "-----------"
+
     # Cleaning build directory
     if [ -d $build_dir ]
     then
@@ -161,6 +164,25 @@ then
     echo "Running cmake..."
     echo "----------------"
 
+    # Building PFW
+    echo "---------------"
+    echo "Building PFW..."
+    echo "---------------"
+    # Creating the build directory if it does not exist
+    if [ ! -d $pfw_build_dir ]
+    then
+        mkdir -p $pfw_build_dir
+    fi
+
+    cd $pfw_build_dir
+    cmake $pfw_dir  -G "$cmake_generator" -DCMAKE_INSTALL_PREFIX=$install_dir
+
+    cmake --build . --config release --target install
+
+    # Building Debug Agent
+    echo "---------------"
+    echo "Building Debug Agent..."
+    echo "---------------"
     # Creating the build directory if it does not exist
     if [ ! -d $build_dir ]
     then
@@ -168,7 +190,8 @@ then
     fi
 
     cd $build_dir
-    cmake $root_dir -G "$cmake_generator" -DCMAKE_INSTALL_PREFIX=$install_dir -DPoco_DIR=$poco_dir
+    # parameter_DIR is used to tell cmake where to find libparameter
+    cmake $root_dir -G "$cmake_generator" -DCMAKE_INSTALL_PREFIX=$install_dir -DPoco_DIR=$poco_dir -Dparameter_DIR=$root_dir/install/$platform
     cmake_result=$?
 
     # Coming back to initial directory

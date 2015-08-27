@@ -70,6 +70,13 @@ function(link_catch target)
     target_include_directories(${target} SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/external/catch/include")
 endfunction()
 
+#link with parameter-framework
+function(link_pfw target)
+    find_package(parameter)
+    target_include_directories(${target} PUBLIC "${parameter_CLIENT_INCLUDE_DIR}")
+    target_link_libraries(${target} ${parameter_LIBRARIES})
+endfunction()
+
 # this function applies common settings to all debug agent projects
 function (set_common_settings projectname)
     #enabling c++11
