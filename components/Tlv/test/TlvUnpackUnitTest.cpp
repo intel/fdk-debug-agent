@@ -401,14 +401,12 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         HelloValueType helloValue {0xDEAD, 0xBEEF};
         uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
         uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-        WorldValueType worldValue {0, 42, 1268469841515, 687684186186};
         uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-        uint32_t wLength = static_cast<uint32_t>(sizeof(WorldValueType));
 
         // Let's remove the WORLD tag value and length for fun!
         const size_t tlvListBufferSize =
             sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-            sizeof(wTag) /*+ sizeof(wLength) + sizeof(WorldValueType)*/;
+            sizeof(wTag);
         char tlvListBuffer[tlvListBufferSize];
 
         size_t index = 0;
@@ -439,14 +437,12 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         HelloValueType helloValue {0xDEAD, 0xBEEF};
         uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
         uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-        WorldValueType worldValue {0, 42, 1268469841515, 687684186186};
         uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-        uint32_t wLength = static_cast<uint32_t>(sizeof(WorldValueType));
 
         // Let's remove the WORLD tag value and length for fun!
         const size_t tlvListBufferSize =
             sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-            sizeof(wTag) /* + sizeof(wLength) + sizeof(WorldValueType)*/;
+            sizeof(wTag);
         char tlvListBuffer[tlvListBufferSize];
 
         size_t index = 0;
