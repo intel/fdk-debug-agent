@@ -41,10 +41,10 @@ TEST_CASE("Logging: setting and getting parameters")
 
     MockedDeviceCommands commands(device);
 
-    driver::FwLogsState expectedFwLogState = {
-        driver::LOG_STATE::STARTED,
-        driver::LOG_LEVEL::HIGH,
-        driver::LOG_OUTPUT::OUTPUT_SRAM
+    driver::IoctlFwLogsState expectedFwLogState = {
+        driver::IOCTL_LOG_STATE::STARTED,
+        driver::FW_LOG_LEVEL::LOG_HIGH,
+        driver::FW_LOG_OUTPUT::OUTPUT_SRAM
     };
 
     /** Adding a failed set log parameters command due to OS error */
@@ -69,13 +69,13 @@ TEST_CASE("Logging: setting and getting parameters")
     commands.addGetLogParametersCommand(
         false,
         STATUS_SUCCESS,
-        driver::FwLogsState()); /* Unused parameter */
+        driver::IoctlFwLogsState()); /* Unused parameter */
 
     /** Adding a failed get log parameters command due to driver error */
     commands.addGetLogParametersCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        driver::FwLogsState()); /* Unused parameter */
+        driver::IoctlFwLogsState()); /* Unused parameter */
 
     /** Adding a successful get log parameters command */
     commands.addGetLogParametersCommand(
@@ -86,9 +86,9 @@ TEST_CASE("Logging: setting and getting parameters")
     /** Adding a successful set log parameters command, this is called by the logger destructor
      * to stop log */
     expectedFwLogState = {
-        driver::LOG_STATE::STOPPED,
-        driver::LOG_LEVEL::VERBOSE,
-        driver::LOG_OUTPUT::OUTPUT_SRAM
+        driver::IOCTL_LOG_STATE::STOPPED,
+        driver::FW_LOG_LEVEL::LOG_VERBOSE,
+        driver::FW_LOG_OUTPUT::OUTPUT_SRAM
     };
     commands.addSetLogParametersCommand(
         true,

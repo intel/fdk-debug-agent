@@ -38,7 +38,7 @@ void ModuleHandler::bigGetModuleAccessIoctl(
 {
     /* Creating ioctl input structure */
     TypedBuffer<driver::Intc_App_Cmd_Header> ioctlInput;
-    ioctlInput->FeatureID = static_cast<ULONG>(driver::FEATURE_MODULE_PARAMETER_ACCESS);
+    ioctlInput->FeatureID = static_cast<ULONG>(driver::FEATURE_FW_MODULE_PARAM);
     ioctlInput->ParameterID = moduleParameterAccessParameterId;
     ioctlInput->DataSize = static_cast<ULONG>(output.getBuffer().getSize());
 
@@ -60,10 +60,10 @@ void ModuleHandler::bigGetModuleAccessIoctl(
     }
 
     /* Checking firwmare status */
-    if (output.getModuleParameterAccess().FwStatus !=
+    if (output.getModuleParameterAccess().fw_status !=
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS) {
         throw Exception("Firmware returns invalid status: " +
-            std::to_string(static_cast<uint32_t>(output.getModuleParameterAccess().FwStatus)));
+            std::to_string(static_cast<uint32_t>(output.getModuleParameterAccess().fw_status)));
     }
 }
 

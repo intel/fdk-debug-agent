@@ -109,7 +109,7 @@ public:
     * @throw Device::Exception
     */
     void addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
-        const driver::FwLogsState &returnedState);
+        const driver::IoctlFwLogsState &returnedState);
 
     /** Add a set log parameters command.
      *
@@ -123,7 +123,7 @@ public:
      * @throw Device::Exception
      */
     void addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
-        const driver::FwLogsState &expectedState);
+        const driver::IoctlFwLogsState &expectedState);
 
 private:
     MockedDeviceCommands(const MockedDeviceCommands&) = delete;

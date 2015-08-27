@@ -50,13 +50,14 @@ static const uint32_t baseFirwareInstanceId = 0;
  * including driver status followed by FW status.
  */
 static const size_t parameterOffset = INTC_APP_MIN_BODY_SIZE
-                                      + sizeof(driver::ModuleParameterAccess)
-                                      - MEMBER_SIZE(driver::ModuleParameterAccess,Parameter);
+                                      + sizeof(driver::IoctlFwModuleParam)
+                                      - MEMBER_SIZE(driver::IoctlFwModuleParam,
+                                                    module_parameter_data);
 
 /** This class helps to construct IOCTL_CMD_APP_TO_AUDIODSP_BIG_(GET|SET) output structure.
  * This structure has 3 imbrication levels:
  * Intc_Get_Parameter (driver structure) which contains
- *   -> ModuleParameterAccess (driver structure) which contains
+ *   -> IoctlFwModuleParam (driver structure) which contains
  *        -> FirmwareParameterType (firmware structure), for instance AdspProperties,
  *           ModulesInfo...
  *
@@ -79,11 +80,12 @@ public:
         /* Initializing pointer members */
         initPointers();
 
-        /* Setting ModuleParameterAccess input properties */
-        mModuleParameterAccess->ModuleId = baseFirwareModuleId;
-        mModuleParameterAccess->InstanceId = baseFirwareInstanceId;
-        mModuleParameterAccess->ModuleParameterId = static_cast<uint32_t>(fwParam);
-        mModuleParameterAccess->ModuleParameterSize = static_cast<uint32_t>(firmwareParameterSize);
+        /* Setting IoctlFwModuleParam input properties */
+        mModuleParameterAccess->module_id = baseFirwareModuleId;
+        mModuleParameterAccess->instance_id = baseFirwareInstanceId;
+        mModuleParameterAccess->module_parameter_id = static_cast<uint32_t>(fwParam);
+        mModuleParameterAccess->module_parameter_data_size =
+            static_cast<uint32_t>(firmwareParameterSize);
     }
 
     /** Copy constructor */
@@ -99,8 +101,8 @@ public:
         return mBuffer.getContent();
     }
 
-    /** @return ModuleParameterAccess reference */
-    driver::ModuleParameterAccess &getModuleParameterAccess()
+    /** @return IoctlFwModuleParam reference */
+    driver::IoctlFwModuleParam &getModuleParameterAccess()
     {
         return *mModuleParameterAccess;
     }
@@ -133,13 +135,13 @@ private:
     /* Initialize pmointers to sub-structures */
     void initPointers()
     {
-        /* Initializing member that points to the ModuleParameterAccess structure */
+        /* Initializing member that points to the IoctlFwModuleParam structure */
         mModuleParameterAccess =
-            reinterpret_cast<driver::ModuleParameterAccess*>(mBuffer->Data.Parameter);
+            reinterpret_cast<driver::IoctlFwModuleParam*>(mBuffer->Data.Parameter);
 
         /* Initializing member that points to the firmware parameter */
         mFirmwareParameter =
-            reinterpret_cast<FirmwareParameterType*>(mModuleParameterAccess->Parameter);
+            reinterpret_cast<FirmwareParameterType*>(mModuleParameterAccess->module_parameter_data);
     }
 
     /** Calculate the overall size of the structure *
@@ -151,7 +153,7 @@ private:
     }
 
     TypedBuffer<driver::Intc_App_Cmd_Body> mBuffer;
-    driver::ModuleParameterAccess *mModuleParameterAccess;
+    driver::IoctlFwModuleParam *mModuleParameterAccess;
     FirmwareParameterType *mFirmwareParameter;
 };
 
@@ -195,7 +197,7 @@ public:
     {
         /* Filling the header */
         driver::Intc_App_Cmd_Header &header = mBuffer.getContent().Header;
-        header.FeatureID = static_cast<ULONG>(driver::FEATURE_LOG_PARAMETERS);
+        header.FeatureID = static_cast<ULONG>(driver::FEATURE_FW_LOGS);
         header.ParameterID = parameterId;
 
         /* By contract, the DataSize has to be set with body size, i.e. the whole size minus
@@ -219,7 +221,7 @@ public:
         return mBuffer.getContent();
     }
 
-    driver::FwLogsState &getFwLogsState()
+    driver::IoctlFwLogsState &getFwLogsState()
     {
         return *mFwLogState;
     }
@@ -240,7 +242,7 @@ private:
     void initPointers()
     {
         mFwLogState =
-            reinterpret_cast<driver::FwLogsState*>(mBuffer.getContent().Body.Data.Parameter);
+            reinterpret_cast<driver::IoctlFwLogsState*>(mBuffer.getContent().Body.Data.Parameter);
     }
 
     /** Calculate the overall size of the structure */
@@ -249,11 +251,11 @@ private:
         return sizeof(driver::Intc_App_TinyCmd) /* size of the whole structure */
             - MEMBER_SIZE(driver::Intc_App_Cmd_Body, Data) /* minus the parameter that points
                                                             * to the payload */
-            + sizeof(driver::FwLogsState);   /* plus the payload size */
+            + sizeof(driver::IoctlFwLogsState);   /* plus the payload size */
     }
 
     TypedBuffer<driver::Intc_App_TinyCmd> mBuffer;
-    driver::FwLogsState *mFwLogState;
+    driver::IoctlFwLogsState *mFwLogState;
 };
 
 }

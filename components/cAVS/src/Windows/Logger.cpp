@@ -106,89 +106,89 @@ std::string Logger::getIoControlTypeName(IoCtlType type)
     throw Exception("Wrong ioctl type value: " + std::to_string(static_cast<uint32_t>(type)));
 }
 
-driver::LOG_STATE Logger::translateToDriver(bool isStarted)
+driver::IOCTL_LOG_STATE Logger::translateToDriver(bool isStarted)
 {
-    return isStarted ? driver::LOG_STATE::STARTED : driver::LOG_STATE::STOPPED;
+    return isStarted ? driver::IOCTL_LOG_STATE::STARTED : driver::IOCTL_LOG_STATE::STOPPED;
 }
 
-driver::LOG_LEVEL Logger::translateToDriver(Level level)
+driver::FW_LOG_LEVEL Logger::translateToDriver(Level level)
 {
     switch (level)
     {
     case Level::Verbose:
-        return driver::LOG_LEVEL::VERBOSE;
+        return driver::FW_LOG_LEVEL::LOG_VERBOSE;
     case Level::Low:
-        return driver::LOG_LEVEL::LOW;
+        return driver::FW_LOG_LEVEL::LOG_LOW;
     case Level::Medium:
-        return driver::LOG_LEVEL::MEDIUM;
+        return driver::FW_LOG_LEVEL::LOG_MEDIUM;
     case Level::High:
-        return driver::LOG_LEVEL::HIGH;
+        return driver::FW_LOG_LEVEL::LOG_HIGH;
     case Level::Critical:
-        return driver::LOG_LEVEL::CRITICAL;
+        return driver::FW_LOG_LEVEL::LOG_CRITICAL;
     }
     throw Exception("Wrong log level value: " + std::to_string(static_cast<uint32_t>(level)));
 }
 
-driver::LOG_OUTPUT Logger::translateToDriver(Output output)
+driver::FW_LOG_OUTPUT Logger::translateToDriver(Output output)
 {
     switch (output)
     {
     case Output::Pti:
-        return driver::LOG_OUTPUT::OUTPUT_PTI;
+        return driver::FW_LOG_OUTPUT::OUTPUT_PTI;
     case Output::Sram:
-        return driver::LOG_OUTPUT::OUTPUT_SRAM;
+        return driver::FW_LOG_OUTPUT::OUTPUT_SRAM;
     }
     throw Exception("Wrong log output value: " + std::to_string(static_cast<uint32_t>(output)));
 }
 
-bool Logger::translateFromDriver(driver::LOG_STATE state)
+bool Logger::translateFromDriver(driver::IOCTL_LOG_STATE state)
 {
     switch (state)
     {
-    case driver::LOG_STATE::STARTED:
+    case driver::IOCTL_LOG_STATE::STARTED:
         return true;
-    case driver::LOG_STATE::STOPPED:
+    case driver::IOCTL_LOG_STATE::STOPPED:
         return false;
     }
     throw Exception("Wrong driver log state value: " +
         std::to_string(static_cast<uint32_t>(state)));
 }
 
-Logger::Level Logger::translateFromDriver(driver::LOG_LEVEL level)
+Logger::Level Logger::translateFromDriver(driver::FW_LOG_LEVEL level)
 {
     switch (level)
     {
-    case driver::LOG_LEVEL::VERBOSE:
+    case driver::FW_LOG_LEVEL::LOG_VERBOSE:
         return Level::Verbose;
-    case driver::LOG_LEVEL::LOW:
+    case driver::FW_LOG_LEVEL::LOG_LOW:
         return Level::Low;
-    case driver::LOG_LEVEL::MEDIUM:
+    case driver::FW_LOG_LEVEL::LOG_MEDIUM:
         return Level::Medium;
-    case driver::LOG_LEVEL::HIGH:
+    case driver::FW_LOG_LEVEL::LOG_HIGH:
         return Level::High;
-    case driver::LOG_LEVEL::CRITICAL:
+    case driver::FW_LOG_LEVEL::LOG_CRITICAL:
         return Level::Critical;
     }
     throw Exception("Wrong driver log level value: " +
         std::to_string(static_cast<uint32_t>(level)));
 }
 
-Logger::Output Logger::translateFromDriver(driver::LOG_OUTPUT output)
+Logger::Output Logger::translateFromDriver(driver::FW_LOG_OUTPUT output)
 {
     switch (output)
     {
-    case driver::LOG_OUTPUT::OUTPUT_PTI:
+    case driver::FW_LOG_OUTPUT::OUTPUT_PTI:
         return Output::Pti;
-    case driver::LOG_OUTPUT::OUTPUT_SRAM:
+    case driver::FW_LOG_OUTPUT::OUTPUT_SRAM:
         return Output::Sram;
     }
     throw Exception("Wrong driver log output value: " +
         std::to_string(static_cast<uint32_t>(output)));
 }
 
-driver::FwLogsState Logger::translateToDriver(const Parameters& params)
+driver::IoctlFwLogsState Logger::translateToDriver(const Parameters& params)
 {
-    driver::FwLogsState fwParams = {
+    driver::IoctlFwLogsState fwParams = {
         translateToDriver(params.mIsStarted),
         translateToDriver(params.mLevel),
         translateToDriver(params.mOutput)
@@ -196,12 +196,12 @@ driver::FwLogsState Logger::translateToDriver(const Parameters& params)
     return fwParams;
 }
 
-Logger::Parameters Logger::translateFromDriver(const driver::FwLogsState &fwParams)
+Logger::Parameters Logger::translateFromDriver(const driver::IoctlFwLogsState &fwParams)
 {
     Parameters params = {
-        translateFromDriver(static_cast<driver::LOG_STATE>(fwParams.started)),
-        translateFromDriver(static_cast<driver::LOG_LEVEL>(fwParams.level)),
-        translateFromDriver(static_cast<driver::LOG_OUTPUT>(fwParams.output))
+        translateFromDriver(static_cast<driver::IOCTL_LOG_STATE>(fwParams.started)),
+        translateFromDriver(static_cast<driver::FW_LOG_LEVEL>(fwParams.level)),
+        translateFromDriver(static_cast<driver::FW_LOG_OUTPUT>(fwParams.output))
     };
     return params;
 }

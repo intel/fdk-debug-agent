@@ -101,28 +101,28 @@ private:
     static std::string getIoControlTypeName(IoCtlType type);
 
     /** Translate log state to driver type */
-    static driver::LOG_STATE translateToDriver(bool isStarted);
+    static driver::IOCTL_LOG_STATE translateToDriver(bool isStarted);
 
     /** Translate log level to driver type */
-    static driver::LOG_LEVEL translateToDriver(Level level);
+    static driver::FW_LOG_LEVEL translateToDriver(Level level);
 
     /** Translate log output to driver type */
-    static driver::LOG_OUTPUT translateToDriver(Output output);
+    static driver::FW_LOG_OUTPUT translateToDriver(Output output);
 
     /** Translate log state from driver type */
-    static bool translateFromDriver(driver::LOG_STATE state);
+    static bool translateFromDriver(driver::IOCTL_LOG_STATE state);
 
     /** Translate log level from driver type */
-    static Level translateFromDriver(driver::LOG_LEVEL level);
+    static Level translateFromDriver(driver::FW_LOG_LEVEL level);
 
     /** Translate log output from driver type */
-    static Output translateFromDriver(driver::LOG_OUTPUT output);
+    static Output translateFromDriver(driver::FW_LOG_OUTPUT output);
 
     /** Translate log parameters to driver type */
-    static driver::FwLogsState translateToDriver(const Parameters& params);
+    static driver::IoctlFwLogsState translateToDriver(const Parameters& params);
 
     /** Translate log parameters from driver type */
-    static Parameters translateFromDriver(const driver::FwLogsState &params);
+    static Parameters translateFromDriver(const driver::IoctlFwLogsState &params);
 
     /* Returns the size of a log block.
      * This method is used by the blocking queue in order to estimate the

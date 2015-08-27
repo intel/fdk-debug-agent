@@ -64,7 +64,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
     /* Filling expected input buffer */
     TypedBuffer<driver::Intc_App_Cmd_Header> expectedInput;
     expectedInput->FeatureID =
-        static_cast<ULONG>(driver::FEATURE_MODULE_PARAMETER_ACCESS);
+        static_cast<ULONG>(driver::FEATURE_FW_MODULE_PARAM);
     expectedInput->ParameterID = 0; /* only one parameter id for this feature */
     expectedInput->DataSize = static_cast<ULONG>(expectedOutput.getBuffer().getSize());
 
@@ -82,7 +82,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
     if (NT_SUCCESS(returnedDriverStatus)) {
 
         /* If the driver returns success, set the firmware status*/
-        returnedOutput.getModuleParameterAccess().FwStatus = returnedFirmwareStatus;
+        returnedOutput.getModuleParameterAccess().fw_status = returnedFirmwareStatus;
 
         if (returnedFirmwareStatus == dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS) {
 
@@ -163,7 +163,7 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
 /* log parameters methods */
 
 void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
-    const driver::FwLogsState &returnedState)
+    const driver::IoctlFwLogsState &returnedState)
 {
     /* Expected buffer, used as both expected input AND output buffer */
     TinyCmdLogParameterIoctl expected;
@@ -191,7 +191,7 @@ void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATU
 }
 
 void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
-    const driver::FwLogsState &expectedState)
+    const driver::IoctlFwLogsState &expectedState)
 {
     /* Expected buffer, used as both expected input AND output buffer */
     TinyCmdLogParameterIoctl expected;

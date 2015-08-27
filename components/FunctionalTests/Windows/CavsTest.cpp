@@ -621,10 +621,10 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
     * - output: pti
     */
 
-    windows::driver::FwLogsState initialLogParams = {
+    windows::driver::IoctlFwLogsState initialLogParams = {
         false,
-        windows::driver::LOG_LEVEL::CRITICAL,
-        windows::driver::LOG_OUTPUT::OUTPUT_PTI
+        windows::driver::FW_LOG_LEVEL::LOG_CRITICAL,
+        windows::driver::FW_LOG_OUTPUT::OUTPUT_PTI
     };
     commands.addGetLogParametersCommand(
         true,
@@ -636,10 +636,10 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
     * - level: verbose
     * - output: sram
     */
-    windows::driver::FwLogsState setLogParams = {
+    windows::driver::IoctlFwLogsState setLogParams = {
         true,
-        windows::driver::LOG_LEVEL::VERBOSE,
-        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+        windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
+        windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM
     };
     commands.addSetLogParametersCommand(
         true,
@@ -659,9 +659,9 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
     /** Adding a successful set log parameters command, this is called by the System class
     * destructor to stop log */
     setLogParams = {
-        windows::driver::LOG_STATE::STOPPED,
-        windows::driver::LOG_LEVEL::VERBOSE,
-        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+        windows::driver::IOCTL_LOG_STATE::STOPPED,
+        windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
+        windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM
     };
     commands.addSetLogParametersCommand(
         true,
@@ -766,10 +766,10 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
     addInitialCommand(commands);
 
     /* 1: start log command */
-    windows::driver::FwLogsState setLogParams = {
+    windows::driver::IoctlFwLogsState setLogParams = {
         true,
-        windows::driver::LOG_LEVEL::VERBOSE,
-        windows::driver::LOG_OUTPUT::OUTPUT_SRAM
+        windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
+        windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM
     };
     commands.addSetLogParametersCommand(
         true,
@@ -778,8 +778,8 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
 
     /* 2: Stop log command, will be called by the debug agent termination */
     setLogParams.started = false;
-    setLogParams.level = windows::driver::LOG_LEVEL::VERBOSE;
-    setLogParams.output = windows::driver::LOG_OUTPUT::OUTPUT_SRAM;
+    setLogParams.level = windows::driver::FW_LOG_LEVEL::LOG_VERBOSE;
+    setLogParams.output = windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM;
     commands.addSetLogParametersCommand(
         true,
         STATUS_SUCCESS,
