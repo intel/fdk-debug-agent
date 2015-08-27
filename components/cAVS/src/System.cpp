@@ -42,12 +42,29 @@ System::System(const DriverFactory &driverFactory):
     try
     {
         mDriver->getModuleHandler().getFwConfig(mFwConfig);
+    }
+    catch (ModuleHandler::Exception &e)
+    {
+        /** @todo use logging */
+        std::cout << "Unable to get FW config: " + std::string(e.what()) << std::endl;
+    }
+    try
+    {
         mDriver->getModuleHandler().getHwConfig(mHwConfig);
+    }
+    catch (ModuleHandler::Exception &e)
+    {
+        /** @todo use logging */
+        std::cout << "Unable to get HW config: " + std::string(e.what()) << std::endl;
+    }
+    try
+    {
         mDriver->getModuleHandler().getModulesEntries(mModuleEntries);
     }
     catch (ModuleHandler::Exception &e)
     {
-        throw Exception("Unable to get module entries: " + std::string(e.what()));
+        /** @todo use logging */
+        std::cout << "Unable to get module entries: " + std::string(e.what()) << std::endl;
     }
 }
 
