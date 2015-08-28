@@ -80,6 +80,10 @@ void ModuleHandler::getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
 
     /* Checking returned module count */
     const dsp_fw::ModulesInfo &modulesInfo = ioctlOutput.getFirmwareParameter();
+
+    /** @todo use logging */
+    std::cout << "Number of modules found in FW: " << modulesInfo.module_count << std::endl;
+
     if (modulesInfo.module_count > dsp_fw::MaxModuleCount) {
         throw Exception("Firmware has returned an invalid module count: " +
             std::to_string(modulesInfo.module_count));
