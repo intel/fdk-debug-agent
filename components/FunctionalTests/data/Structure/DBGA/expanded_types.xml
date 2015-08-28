@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ParameterBlock Name="Microphone">
+  <ParameterBlock Name="Modules">
+    <ParameterBlock Name="Module1">
+      <BooleanParameter Name="Enabled"/>
+      <ParameterBlock Name="Subeffects">
+        <ParameterBlock Name="MicEqualizer">
+          <ParameterBlock Name="Coeffs">
+            <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" Name="Coeff1"/>
+            <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="Fixed"/>
+          </ParameterBlock>
+        </ParameterBlock>
+        <ParameterBlock Name="Gain">
+          <IntegerParameter Signed="true" Min="-96" Max="0" Size="16" Name="Level"/>
+          <IntegerParameter Signed="false" Min="0" Max="15" Size="16" Name="Ramp"/>
+        </ParameterBlock>
+      </ParameterBlock>
+    </ParameterBlock>
+    <ParameterBlock Name="Module2">
+      <BooleanParameter Name="Enabled"/>
+      <ParameterBlock Name="Subeffects">
+        <ParameterBlock Name="MicEqualizer">
+          <ParameterBlock Name="Coeffs">
+            <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" Name="Coeff1"/>
+            <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="Fixed"/>
+          </ParameterBlock>
+        </ParameterBlock>
+        <ParameterBlock Name="Gain">
+          <IntegerParameter Signed="true" Min="-96" Max="0" Size="16" Name="Level"/>
+          <IntegerParameter Signed="false" Min="0" Max="15" Size="16" Name="Ramp"/>
+        </ParameterBlock>
+      </ParameterBlock>
+    </ParameterBlock>
+  </ParameterBlock>
+  <ParameterBlock Name="Subpaths">
+    <ParameterBlock Name="Speech">
+      <ParameterBlock Name="Modules">
+        <ParameterBlock Name="Module1">
+          <BooleanParameter Name="Enabled"/>
+          <ParameterBlock Name="Subeffects">
+            <ParameterBlock Name="MicEqualizer">
+              <ParameterBlock Name="Coeffs">
+                <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" Name="Coeff1"/>
+                <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="Fixed"/>
+              </ParameterBlock>
+            </ParameterBlock>
+            <ParameterBlock Name="Gain">
+              <IntegerParameter Signed="true" Min="-96" Max="0" Size="16" Name="Level"/>
+              <IntegerParameter Signed="false" Min="0" Max="15" Size="16" Name="Ramp"/>
+            </ParameterBlock>
+          </ParameterBlock>
+        </ParameterBlock>
+        <ParameterBlock Name="Module2">
+          <BooleanParameter Name="Enabled"/>
+          <ParameterBlock Name="Subeffects">
+            <ParameterBlock Name="MicEqualizer">
+              <ParameterBlock Name="Coeffs">
+                <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" Name="Coeff1"/>
+                <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="Fixed"/>
+              </ParameterBlock>
+            </ParameterBlock>
+            <ParameterBlock Name="Gain">
+              <IntegerParameter Signed="true" Min="-96" Max="0" Size="16" Name="Level"/>
+              <IntegerParameter Signed="false" Min="0" Max="15" Size="16" Name="Ramp"/>
+            </ParameterBlock>
+          </ParameterBlock>
+        </ParameterBlock>
+      </ParameterBlock>
+      <ParameterBlock Name="Subpaths">
+        <ParameterBlock Name="Stream">
+          <ParameterBlock Name="Modules">
+            <ParameterBlock Name="Module1">
+              <BooleanParameter Name="Enabled"/>
+              <ParameterBlock Name="Subeffects">
+                <ParameterBlock Name="MicEqualizer">
+                  <ParameterBlock Name="Coeffs">
+                    <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" Name="Coeff1"/>
+                    <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="Fixed"/>
+                  </ParameterBlock>
+                </ParameterBlock>
+                <ParameterBlock Name="Gain">
+                  <IntegerParameter Signed="true" Min="-96" Max="0" Size="16" Name="Level"/>
+                  <IntegerParameter Signed="false" Min="0" Max="15" Size="16" Name="Ramp"/>
+                </ParameterBlock>
+              </ParameterBlock>
+            </ParameterBlock>
+            <ParameterBlock Name="Module2">
+              <BooleanParameter Name="Enabled"/>
+              <ParameterBlock Name="Subeffects">
+                <ParameterBlock Name="MicEqualizer">
+                  <ParameterBlock Name="Coeffs">
+                    <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" Name="Coeff1"/>
+                    <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="Fixed"/>
+                  </ParameterBlock>
+                </ParameterBlock>
+                <ParameterBlock Name="Gain">
+                  <IntegerParameter Signed="true" Min="-96" Max="0" Size="16" Name="Level"/>
+                  <IntegerParameter Signed="false" Min="0" Max="15" Size="16" Name="Ramp"/>
+                </ParameterBlock>
+              </ParameterBlock>
+            </ParameterBlock>
+          </ParameterBlock>
+        </ParameterBlock>
+      </ParameterBlock>
+    </ParameterBlock>
+  </ParameterBlock>
+</ParameterBlock>
+

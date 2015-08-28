@@ -59,8 +59,8 @@ private:
     cavs::System mSystem;
     std::shared_ptr<TypeModel> mTypeModel;
     util::ExclusiveResource<std::shared_ptr<InstanceModel>> mInstanceModel;
-    rest::Server mRestServer;
     CParameterMgrPlatformConnector mParameterMgrPlatformConnector;
+    rest::Server mRestServer;
 };
 
 }

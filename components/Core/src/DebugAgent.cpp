@@ -24,10 +24,14 @@
 #include "Core/Resources.hpp"
 #include "Core/TypeModelConverter.hpp"
 #include "Core/InstanceModelConverter.hpp"
+#include "cAVS/FirmwareTypes.hpp"
+#include "cAVS/System.hpp"
+#include "Util/StringHelper.hpp"
 #include <memory>
 #include <exception>
 
 using namespace debug_agent::rest;
+using namespace debug_agent::util;
 
 namespace debug_agent
 {
@@ -92,6 +96,20 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     dispatcher->addResource("/instance/${type_name}/${instance_id}",
         std::shared_ptr<Resource>(new InstanceResource(mInstanceModel)));
 
+    /* Create one resource instance for each module type*/
+    uint16_t    moduleId = 0;
+    for (const cavs::ModuleEntry &entry : mSystem.getModuleEntries())
+    {
+        std::string moduleName = StringHelper::getStringFromFixedSizeArray(
+            entry.name, sizeof(entry.name));
+
+        dispatcher->addResource(
+            "/instance/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
+            std::shared_ptr<Resource>(new ControlParametersModuleInstanceResource(
+            mSystem, mParameterMgrPlatformConnector, moduleName, moduleId)));
+        moduleId++;
+    }
+
     /* Refresh special case*/
     dispatcher->addResource("/instance/cavs/0/refreshed",
         std::shared_ptr<Resource>(new RefreshSubsystemResource(mSystem, mInstanceModel)));
@@ -108,11 +126,9 @@ try :
     mSystem(driverFactory),
     mTypeModel(createTypeModel()),
     mInstanceModel(createInstanceModel()),
-    mRestServer(createDispatcher(), port),
-    mParameterMgrPlatformConnector(pfwConfig)
+    mParameterMgrPlatformConnector(pfwConfig),
+    mRestServer(createDispatcher(), port)
 {
-    std::string error;
-    mParameterMgrPlatformConnector.start(error);
 }
 catch (rest::Dispatcher::InvalidUriException &e)
 {

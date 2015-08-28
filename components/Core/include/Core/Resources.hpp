@@ -27,6 +27,8 @@
 #include "Rest/Resource.hpp"
 #include "cAVS/System.hpp"
 #include "Util/ExclusiveResource.hpp"
+#include "ParameterMgrPlatformConnector.h"
+#include "ElementHandle.h"
 
 namespace debug_agent
 {
@@ -109,6 +111,27 @@ private:
     ExclusiveInstanceModel &mInstanceModel;
 };
 
+
+/** This resource returns control parameters of a module instance of a Subsystem (XML) */
+class ControlParametersModuleInstanceResource : public SystemResource
+{
+public:
+    ControlParametersModuleInstanceResource(cavs::System &system,
+        CParameterMgrPlatformConnector &parameterMgrPlatformConnector,
+        const std::string &moduleName,
+        const uint16_t moduleId);
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+
+private:
+    CElementHandle* getModuleControlElement() const;
+    CElementHandle *getChildElementHandle(
+        const CElementHandle *moduleElementHandle, uint32_t childId) const;
+    uint32_t getElementMapping(const CElementHandle *elementHandle) const;
+    CParameterMgrPlatformConnector &mParameterMgrPlatformConnector;
+    const std::string mModuleName;
+    const uint16_t mModuleId;
+};
 
 /** This resource returns the Log Parameters for an Instance of a Subsystem (XML) */
 class SubsystemInstanceLogParametersResource : public SystemResource
