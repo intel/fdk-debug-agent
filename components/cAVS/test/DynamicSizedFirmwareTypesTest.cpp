@@ -25,6 +25,26 @@
 using namespace debug_agent::util;
 using namespace debug_agent::cavs;
 
+static const dsp_fw::AudioDataFormatIpc audioFormat = {
+    static_cast<dsp_fw::SamplingFrequency>(1),
+    static_cast<dsp_fw::BitDepth>(2),
+    static_cast<dsp_fw::ChannelMap>(3),
+    static_cast<dsp_fw::ChannelConfig>(4),
+    static_cast<dsp_fw::InterleavingStyle>(5),
+    6,
+    7,
+    static_cast<dsp_fw::SampleType>(8),
+    9
+};
+
+#define AUDIOFORMAT_MEMORY \
+    1, 0, 0, 0, \
+    2, 0, 0, 0, \
+    3, 0, 0, 0, \
+    4, 0, 0, 0, \
+    5, 0, 0, 0, \
+    6, 7, 8, 9
+
 TEST_CASE("DSFirmwareTypes : DSPplProps")
 {
     DSPplProps props = { 1, 2, 3, 4, 5, 6, { 1, 2, 3 }, { 4, 5 }, {} };
@@ -107,3 +127,86 @@ TEST_CASE("DSFirmwareTypes : DSSchedulersInfo")
 
     CHECK(readInfos == infos);
 }
+
+TEST_CASE("DSFirmwareTypes : DSPinListInfo")
+{
+    static const DSPinListInfo list = {{
+        { static_cast<dsp_fw::StreamType>(1), audioFormat, 3 }
+    }};
+
+    const std::vector<uint8_t> expected = {
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        AUDIOFORMAT_MEMORY,
+        3, 0, 0, 0
+    };
+
+    ByteStreamWriter writer;
+    list.toStream(writer);
+
+    CHECK(writer.getBuffer() == expected);
+
+    ByteStreamReader reader(expected);
+    DSPinListInfo readList;
+    readList.fromStream(reader);
+
+    CHECK(readList == list);
+}
+
+TEST_CASE("DSFirmwareTypes : DSModuleInstanceProps")
+{
+    static const DSPinListInfo input_pins = { {
+        { static_cast<dsp_fw::StreamType>(1), audioFormat, 3 }
+    } };
+    static const DSPinListInfo output_pins = { {
+        { static_cast<dsp_fw::StreamType>(4), audioFormat, 5 },
+        { static_cast<dsp_fw::StreamType>(6), audioFormat, 7 }
+    } };
+
+    static const DSModuleInstanceProps instanceProps = {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
+        dsp_fw::ConnectorNodeId(12), dsp_fw::ConnectorNodeId(13)
+    };
+
+    static const std::vector<uint8_t> expected = {
+        1, 0, 0, 0,
+        2, 0, 0, 0,
+        3, 0, 0, 0,
+        4, 0, 0, 0,
+        5, 0, 0, 0,
+        6, 0, 0, 0,
+        7, 0, 0, 0,
+        8, 0, 0, 0,
+        9, 0, 0, 0,
+        10, 0, 0, 0,
+        11, 0, 0, 0,
+
+        1, 0, 0, 0,
+        1, 0, 0, 0,
+        AUDIOFORMAT_MEMORY,
+        3, 0, 0, 0,
+
+        2, 0, 0, 0,
+        4, 0, 0, 0,
+        AUDIOFORMAT_MEMORY,
+        5, 0, 0, 0,
+        6, 0, 0, 0,
+        AUDIOFORMAT_MEMORY,
+        7, 0, 0, 0,
+
+        12, 0, 0, 0,
+        13, 0, 0, 0
+    };
+
+    ByteStreamWriter writer;
+    instanceProps.toStream(writer);
+
+    CHECK(writer.getBuffer() == expected);
+
+    ByteStreamReader reader(expected);
+    DSModuleInstanceProps readInstanceProps;
+    readInstanceProps.fromStream(reader);
+
+    CHECK(readInstanceProps == instanceProps);
+}
+
