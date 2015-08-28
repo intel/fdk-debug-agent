@@ -323,7 +323,7 @@ void SubsystemTypeResource::addSystemCharacteristics(type::Characteristics &ch)
                 std::to_string(controllerBaseAddr)));
         }
     }
-    if (hwConfig.gatewayCount) {
+    if (hwConfig.isGatewayCountValid) {
         ch.add(type::Characteristic(
             "Total number of DMA gateways",
             std::to_string(hwConfig.gatewayCount)));
