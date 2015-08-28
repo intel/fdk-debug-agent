@@ -63,6 +63,8 @@ std::string xmlFile(const std::string &name)
     return StringHelper::trim(content) + "\n"; /* Poco xml library puts a '\n' on the last line. */
 }
 
+const std::string& pfwConfigPath = "data/ParameterFrameworkConfigurationDBGA.xml";
+
 /** Helper function to set a module entry */
 void setModuleEntry(ModuleEntry &entry, const std::string &name,
     const Uuid &uuid)
@@ -190,7 +192,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
         std::move(std::make_unique<windows::StubbedWppClientFactory>()));
 
     /* Creating and starting the debug agent */
-    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
 
     /* Creating the http client */
     HttpClientSimulator client("localhost");
@@ -254,7 +256,7 @@ TEST_CASE("DebugAgent/cAVS: log type (URL: /type/cavs.fwlogs)")
         std::move(std::make_unique<windows::StubbedWppClientFactory>()));
 
     /* Creating and starting the debug agent */
-    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
 
     /* Creating the http client */
     HttpClientSimulator client("localhost");
@@ -343,7 +345,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
         std::move(std::make_unique<windows::StubbedWppClientFactory>()));
 
     /* Creating and starting the debug agent */
-    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
 
     /* Creating the http client */
     HttpClientSimulator client("localhost");
@@ -427,7 +429,7 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
     std::condition_variable stopDebugAgentCondVar;
     std::future<void> debugAgentFuture(std::async(std::launch::async, [&]() {
 
-        DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort);
+        DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
 
         /* Waiting for stop order */
         std::unique_lock<std::mutex> locker(debugAgentMutex);

@@ -99,14 +99,20 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     return std::shared_ptr<rest::Dispatcher>(dispatcher);
 }
 
-DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port)
+DebugAgent::DebugAgent(
+    const cavs::DriverFactory &driverFactory,
+    uint32_t port,
+    const std::string &pfwConfig)
 try :
     /* Order is important! */
     mSystem(driverFactory),
     mTypeModel(createTypeModel()),
     mInstanceModel(createInstanceModel()),
-    mRestServer(createDispatcher(), port)
+    mRestServer(createDispatcher(), port),
+    mParameterMgrPlatformConnector(pfwConfig)
 {
+    std::string error;
+    mParameterMgrPlatformConnector.start(error);
 }
 catch (rest::Dispatcher::InvalidUriException &e)
 {

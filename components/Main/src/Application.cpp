@@ -50,19 +50,29 @@ void Application::usage(){
     helpFormatter.format(std::cout);
 }
 
-void Application::handleHelp(const std::string& name, const std::string& value){
+void Application::handleHelp(const std::string& name, const std::string& value)
+{
     mConfig.helpRequested = true;
     usage();
     stopOptionsProcessing();
 }
 
-void Application::handlePort(const std::string& name, const std::string& value){
+void Application::handlePort(const std::string& name, const std::string& value)
+{
     std::stringstream ss(value);
     ss >> mConfig.serverPort;
     assert(ss.good());
 }
 
-void Application::handleLogControlOnly(const std::string& name, const std::string& value){
+void Application::handlePfwConfig(const std::string& name, const std::string& value)
+{
+    std::stringstream ss(value);
+    ss >> mConfig.pfwConfig;
+    assert(ss.good());
+}
+
+void Application::handleLogControlOnly(const std::string& name, const std::string& value)
+{
     mConfig.logControlOnly = true;
 }
 
@@ -80,6 +90,13 @@ void Application::defineOptions(OptionSet& options)
     .validator(new IntValidator(1024, 65535))
     .callback(OptionCallback<Application>(this, &Application::handlePort)));
 
+    options.addOption(Option("pfwConfig", "pf",
+        "Set configuration file for parameter-framework instance")
+    .required(true)
+    .repeatable(false)
+    .argument("value")
+    .callback(OptionCallback<Application>(this, &Application::handlePfwConfig)));
+
     options.addOption(Option("control", "c",
         "Disable log data path, and keep log control capabilities of DebugAgent")
     .required(false)
@@ -96,7 +113,7 @@ int Application::main(const std::vector<std::string>&)
     try
     {
         SystemDriverFactory driverFactory(mConfig.logControlOnly);
-        DebugAgent debugAgent(driverFactory, mConfig.serverPort);
+        DebugAgent debugAgent(driverFactory, mConfig.serverPort, mConfig.pfwConfig);
 
         std::cout << "DebugAgent started" << std::endl;
 

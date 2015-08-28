@@ -25,6 +25,7 @@
 #include "cAVS/System.hpp"
 #include "Rest/Server.hpp"
 #include "Util/ExclusiveResource.hpp"
+#include "ParameterMgrPlatformConnector.h"
 #include <inttypes.h>
 
 namespace debug_agent
@@ -37,7 +38,7 @@ class DebugAgent final
 {
 public:
     /** @throw DebugAgent::Exception */
-    DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port);
+    DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port, const std::string &pfwConfig);
     ~DebugAgent();
 
     class Exception : public std::logic_error
@@ -59,6 +60,7 @@ private:
     std::shared_ptr<TypeModel> mTypeModel;
     util::ExclusiveResource<std::shared_ptr<InstanceModel>> mInstanceModel;
     rest::Server mRestServer;
+    CParameterMgrPlatformConnector mParameterMgrPlatformConnector;
 };
 
 }
