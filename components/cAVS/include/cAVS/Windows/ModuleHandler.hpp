@@ -56,12 +56,6 @@ public:
     virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
         std::vector<uint8_t> &parameterPayload) override;
 
-    /**
-     * The size in bytes of the response buffer needed by the FW in order to reply a TLV.
-     * The SwAS specifies the output buffer size for TLV shall be 2KB.
-     */
-    static const size_t cavsTlvBufferSize = 2048;
-
 private:
     /** The module parameter access feature has only one parameter, therefore its index is 0 */
     static const uint32_t moduleParameterAccessParameterId = 0;
