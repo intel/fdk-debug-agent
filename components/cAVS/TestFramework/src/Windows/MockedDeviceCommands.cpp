@@ -259,11 +259,6 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(
     /* Constructing expected output structure */
     Buffer expectedOutput(ModuleHandler::maxParameterPayloadSize);
 
-    /* Filling input argument*/
-    dsp_fw::PplPropsIn *pplPropsIn =
-        reinterpret_cast<dsp_fw::PplPropsIn *>(expectedOutput.getPtr());
-    pplPropsIn->ppl_id = pipelineId;
-
     /* Serializing Ppl props*/
     util::ByteStreamWriter writer;
     props.toStream(writer);
@@ -271,7 +266,11 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(
     /* Constructing returned output structure */
     Buffer returnedOutput(writer.getBuffer());
 
-    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, dsp_fw::PIPELINE_PROPS_GET,
+    /* Using extended parameter id to supply the pipeline id*/
+    uint32_t paramId = ModuleHandler::getExtendedParameterId(dsp_fw::PIPELINE_PROPS_GET,
+        pipelineId);
+
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, paramId,
         expectedOutput, returnedOutput, ioctlSuccess,
         returnedDriverStatus, returnedFirmwareStatus);
 }
@@ -286,11 +285,6 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(
     /* Constructing expected output structure */
     Buffer expectedOutput(ModuleHandler::maxParameterPayloadSize);
 
-    /* Filling input argument*/
-    dsp_fw::SchedulersInfoIn *schedIn =
-        reinterpret_cast<dsp_fw::SchedulersInfoIn *>(expectedOutput.getPtr());
-    schedIn->core_id = coreId;
-
     /* Serializing SchedulersInfo*/
     util::ByteStreamWriter writer;
     info.toStream(writer);
@@ -298,7 +292,11 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(
     /* Constructing returned output structure */
     Buffer returnedOutput(writer.getBuffer());
 
-    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, dsp_fw::SCHEDULERS_INFO_GET,
+    /* Using extended parameter id to supply the core id*/
+    uint32_t paramId = ModuleHandler::getExtendedParameterId(dsp_fw::SCHEDULERS_INFO_GET,
+        coreId);
+
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, paramId,
         expectedOutput, returnedOutput, ioctlSuccess,
         returnedDriverStatus, returnedFirmwareStatus);
 }

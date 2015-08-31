@@ -37,12 +37,6 @@ namespace dsp_fw
 {
 #include "adsp_ixc_status.h"
 
-/** Missing type */
-struct SchedulersInfoIn
-{
-    uint32_t  core_id;
-};
-
 /** This type does not exist in the fw yet */
 enum StreamType
 {

@@ -92,6 +92,15 @@ public:
     virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
         std::vector<uint8_t> &parameterPayload) = 0;
 
+    /** @return extended parameter id that contains the targeted module part id */
+    static uint32_t getExtendedParameterId(uint32_t parameterTypeId, uint32_t parameterInstanceId)
+    {
+        assert(parameterTypeId < (1 << 8));
+        assert(parameterInstanceId < (1 << 24));
+
+        return (parameterTypeId & 0xFF) | (parameterInstanceId << 8);
+    }
+
 private:
     ModuleHandler(const ModuleHandler &) = delete;
     ModuleHandler &operator=(const ModuleHandler &) = delete;

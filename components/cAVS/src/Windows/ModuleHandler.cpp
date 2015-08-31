@@ -174,14 +174,11 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t
 
 void ModuleHandler::getPipelineProps(uint32_t pipelineId, DSPplProps &props)
 {
-    /* Constructing ioctl output structure */
-    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
-        dsp_fw::PIPELINE_PROPS_GET, maxParameterPayloadSize);
+    /* Using extended parameter id to supply the pipeline id*/
+    uint32_t paramId = getExtendedParameterId(dsp_fw::PIPELINE_PROPS_GET, pipelineId);
 
-    /* Filling input argument*/
-    dsp_fw::PplPropsIn &pplPropsIn =
-        reinterpret_cast<dsp_fw::PplPropsIn &>(ioctlOutput.getFirmwareParameter());
-    pplPropsIn.ppl_id = pipelineId;
+    /* Constructing ioctl output structure */
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(paramId, maxParameterPayloadSize);
 
     /* Performing ioctl */
     bigGetModuleAccessIoctl<char>(ioctlOutput);
@@ -203,14 +200,11 @@ void ModuleHandler::getPipelineProps(uint32_t pipelineId, DSPplProps &props)
 
 void ModuleHandler::getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers)
 {
-    /* Constructing ioctl output structure */
-    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
-        dsp_fw::SCHEDULERS_INFO_GET, maxParameterPayloadSize);
+    /* Using extended parameter id to supply the core id*/
+    uint32_t paramId = getExtendedParameterId(dsp_fw::SCHEDULERS_INFO_GET, coreId);
 
-    /* Filling input argument*/
-    dsp_fw::SchedulersInfoIn &schedInfoIn =
-        reinterpret_cast<dsp_fw::SchedulersInfoIn &>(ioctlOutput.getFirmwareParameter());
-    schedInfoIn.core_id = coreId;
+    /* Constructing ioctl output structure */
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(paramId, maxParameterPayloadSize);
 
     /* Performing ioctl */
     bigGetModuleAccessIoctl<char>(ioctlOutput);
