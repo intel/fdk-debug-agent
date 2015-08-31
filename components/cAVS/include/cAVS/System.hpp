@@ -123,6 +123,14 @@ public:
      */
     std::unique_ptr<LogStreamResource> tryToAcquireLogStreamResource();
 
+    /** Set module parameter */
+    void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+        const std::vector<uint8_t> &parameterPayload);
+
+    /** Get module parameter */
+    void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+        std::vector<uint8_t> &parameterPayload);
+
     /** Stop internal threads and unblock consumer threads */
     void stop() NOEXCEPT
     {
