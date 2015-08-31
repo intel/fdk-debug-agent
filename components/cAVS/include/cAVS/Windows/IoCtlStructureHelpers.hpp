@@ -62,21 +62,26 @@ public:
      * @param[in] fwParam The firmware parameter type
      * @param[in] firmwareParameterSize the size of the firmware parameter.
      *                                   Must be >= sizeof(FirmwareParameterType)
+     * @param[in] moduleId the id of the requested module type (optional, default is the base
+     *                     firmware one).
+     * @param[in] instanceId the id of the requested module instance (optional, default is the base
+     *                     firmware one).
      */
-    BigCmdModuleAccessIoctlOutput(dsp_fw::BaseFwParams fwParam,
-        std::size_t firmwareParameterSize) :
+    BigCmdModuleAccessIoctlOutput(uint32_t fwParam,
+        std::size_t firmwareParameterSize,
+        uint16_t moduleId = baseFirwareModuleId,
+        uint16_t instanceId = baseFirwareInstanceId) :
         mBuffer(calculateSize(firmwareParameterSize)),
         mModuleParameterAccess(nullptr), mFirmwareParameter(nullptr)
     {
         /* Initializing pointer members */
         initPointers();
 
-        /* Setting IoctlFwModuleParam input properties */
-        mModuleParameterAccess->module_id = baseFirwareModuleId;
-        mModuleParameterAccess->instance_id = baseFirwareInstanceId;
-        mModuleParameterAccess->module_parameter_id = static_cast<uint32_t>(fwParam);
-        mModuleParameterAccess->module_parameter_data_size =
-            static_cast<uint32_t>(firmwareParameterSize);
+        /* Setting ModuleParameterAccess input properties */
+        mModuleParameterAccess->module_id = moduleId;
+        mModuleParameterAccess->instance_id = instanceId;
+        mModuleParameterAccess->module_parameter_id = fwParam;
+        mModuleParameterAccess->module_parameter_data_size = static_cast<uint32_t>(firmwareParameterSize);
     }
 
     /** Copy constructor */

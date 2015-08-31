@@ -49,6 +49,12 @@ public:
     virtual void getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers) override;
     virtual void getGatewaysInfo(uint32_t gatewayCount,
         std::vector<dsp_fw::GatewayProps> &gateways) override;
+    virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
+        DSModuleInstanceProps &props) override;
+    virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+        const std::vector<uint8_t> &parameterPayload) override;
+    virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+        std::vector<uint8_t> &parameterPayload) override;
 
     /**
      * The size in bytes of the response buffer needed by the FW in order to reply a TLV.
@@ -66,11 +72,11 @@ private:
 
     Device &mDevice;
 
-    /** Performs an ioctl "big get" to the base firmware using the feature
+    /** Performs an ioctl "big get/set" to the base firmware using the feature
      * "module access parameter" to retrieve firmware information: adsp properties, module entries,
      * pipelines...
      *
-     * The ioctl "big get" allows to retrieve information from the driver. This ioctl supports
+     * The ioctl "big get/set" allows to retrieve information from the driver. This ioctl supports
      * several kind of information (Wake On voice...), here the "module access parameter" is used
      * to retrieve firmware structures.
      *
@@ -79,7 +85,22 @@ private:
      * @param[in, out] output A structure that will receive ioctl result.
      */
     template<typename FirmwareParameterType>
-    void bigGetModuleAccessIoctl(BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output);
+    void bigModuleAccessIoctl(bool isGet,
+        BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output);
+
+    /** Helper that performs large GET ioctl */
+    template<typename FirmwareParameterType>
+    void bigGetModuleAccessIoctl(BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output)
+    {
+        bigModuleAccessIoctl<FirmwareParameterType>(true, output);
+    }
+
+    /** Helper that performs large SET ioctl */
+    template<typename FirmwareParameterType>
+    void bigSetModuleAccessIoctl(BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output)
+    {
+        bigModuleAccessIoctl<FirmwareParameterType>(false, output);
+    }
 };
 
 }

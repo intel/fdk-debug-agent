@@ -57,6 +57,12 @@ private:
         virtual void getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers) override {}
         virtual void getGatewaysInfo(uint32_t gatewayCount,
             std::vector<dsp_fw::GatewayProps> &gateways) override {}
+        virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
+            DSModuleInstanceProps &props) override {}
+        virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
+            uint32_t parameterId, const std::vector<uint8_t> &parameterPayload) override {}
+        virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId,
+            uint32_t parameterId, std::vector<uint8_t> &parameterPayload) override {}
     };
 
     Logger mLogger;

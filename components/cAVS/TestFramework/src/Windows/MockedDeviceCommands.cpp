@@ -32,34 +32,46 @@ namespace windows
 {
 
 template <typename FirmwareParameterType>
-void MockedDeviceCommands::addGetModuleParameterCommand(
-    dsp_fw::BaseFwParams parameterTypeId,
+void MockedDeviceCommands::addModuleParameterCommand(
+    Command command,
+    uint32_t parameterTypeId,
     const Buffer &returnedParameterContent,
     bool ioctlSuccess,
     NTSTATUS returnedDriverStatus,
-    dsp_fw::Message::IxcStatus returnedFirmwareStatus)
+    dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+    uint16_t moduleId,
+    uint16_t instanceId)
 {
-    addGetModuleParameterCommand<FirmwareParameterType>(
+    addModuleParameterCommand<FirmwareParameterType>(
+        command,
         parameterTypeId,
         Buffer(returnedParameterContent.getSize()),
         returnedParameterContent,
         ioctlSuccess,
         returnedDriverStatus,
-        returnedFirmwareStatus);
+        returnedFirmwareStatus,
+        moduleId,
+        instanceId);
 }
 
 template <typename FirmwareParameterType>
-void MockedDeviceCommands::addGetModuleParameterCommand(
-    dsp_fw::BaseFwParams parameterTypeId,
+void MockedDeviceCommands::addModuleParameterCommand(
+    Command command,
+    uint32_t parameterTypeId,
     const Buffer &expectedParameterContent,
     const Buffer &returnedParameterContent,
     bool ioctlSuccess,
     NTSTATUS returnedDriverStatus,
-    dsp_fw::Message::IxcStatus returnedFirmwareStatus)
+    dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+    uint16_t moduleId,
+    uint16_t instanceId)
 {
+    uint32_t ioctlCode = command == Command::Get ?
+        IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET;
+
     /* Expected output buffer*/
     BigCmdModuleAccessIoctlOutput<FirmwareParameterType> expectedOutput(
-        parameterTypeId, expectedParameterContent.getSize());
+        parameterTypeId, expectedParameterContent.getSize(), moduleId, instanceId);
     expectedOutput.setFirmwareParameterContent(expectedParameterContent.getElements());
 
     /* Filling expected input buffer */
@@ -70,7 +82,9 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
     expectedInput->DataSize = static_cast<ULONG>(expectedOutput.getBuffer().getSize());
 
     if (!ioctlSuccess) {
-        mDevice.addFailedIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
+        mDevice.addFailedIoctlEntry(
+            ioctlCode,
+            &expectedInput,
             &expectedOutput.getBuffer());
         return;
     }
@@ -93,7 +107,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
     }
 
     /* Adding entry */
-    mDevice.addSuccessfulIoctlEntry(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &expectedInput,
+    mDevice.addSuccessfulIoctlEntry(ioctlCode, &expectedInput,
         &expectedOutput.getBuffer(), &returnedOutput.getBuffer());
 }
 
@@ -106,7 +120,8 @@ void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess,
     Buffer expectedOutput(ModuleHandler::cavsTlvBufferSize);
     Buffer returnedOutput(tlvList);
 
-    addGetModuleParameterCommand<char>(
+    addModuleParameterCommand<char>(
+        Command::Get,
         parameterId,
         expectedOutput,
         returnedOutput,
@@ -152,7 +167,7 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
         buffer->module_info[i] = returnedEntries[i];
     }
 
-    addGetModuleParameterCommand<dsp_fw::ModulesInfo>(dsp_fw::MODULES_INFO_GET,
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, dsp_fw::MODULES_INFO_GET,
         buffer, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 
@@ -230,7 +245,7 @@ void MockedDeviceCommands::addGetPipelineListCommand(
         buffer->ppl_id[i] = pipelineIds[i];
     }
 
-    addGetModuleParameterCommand<dsp_fw::ModulesInfo>(dsp_fw::PIPELINE_LIST_INFO_GET,
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, dsp_fw::PIPELINE_LIST_INFO_GET,
         buffer, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 
@@ -256,7 +271,7 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(
     /* Constructing returned output structure */
     Buffer returnedOutput(writer.getBuffer());
 
-    addGetModuleParameterCommand<dsp_fw::ModulesInfo>(dsp_fw::PIPELINE_PROPS_GET,
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, dsp_fw::PIPELINE_PROPS_GET,
         expectedOutput, returnedOutput, ioctlSuccess,
         returnedDriverStatus, returnedFirmwareStatus);
 }
@@ -283,7 +298,7 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(
     /* Constructing returned output structure */
     Buffer returnedOutput(writer.getBuffer());
 
-    addGetModuleParameterCommand<dsp_fw::ModulesInfo>(dsp_fw::SCHEDULERS_INFO_GET,
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, dsp_fw::SCHEDULERS_INFO_GET,
         expectedOutput, returnedOutput, ioctlSuccess,
         returnedDriverStatus, returnedFirmwareStatus);
 }
@@ -307,8 +322,57 @@ void MockedDeviceCommands::addGetGatewaysCommand(
         buffer->gateways[i] = gateways[i];
     }
 
-    addGetModuleParameterCommand<dsp_fw::ModulesInfo>(dsp_fw::GATEWAYS_INFO_GET,
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, dsp_fw::GATEWAYS_INFO_GET,
         buffer, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+}
+
+void MockedDeviceCommands::addGetModuleInstancePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+    dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+    uint16_t moduleId, uint16_t instanceId,
+    const DSModuleInstanceProps &props)
+{
+    /* Constructing expected output structure */
+    Buffer expectedOutput(ModuleHandler::maxParameterPayloadSize);
+
+    /* Serializing SchedulersInfo*/
+    util::ByteStreamWriter writer;
+    props.toStream(writer);
+
+    /* Constructing returned output structure */
+    Buffer returnedOutput(writer.getBuffer());
+
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, dsp_fw::MOD_INST_PROPS,
+        expectedOutput, returnedOutput, ioctlSuccess,
+        returnedDriverStatus, returnedFirmwareStatus, moduleId, instanceId);
+}
+
+void MockedDeviceCommands::addSetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+    dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+    uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    const std::vector<uint8_t> &parameterPayload)
+{
+    /* Constructing output structure */
+    Buffer output(parameterPayload);
+
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Set, parameterId,
+        output, output, ioctlSuccess,
+        returnedDriverStatus, returnedFirmwareStatus, moduleId, instanceId);
+}
+
+void MockedDeviceCommands::addGetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+    dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+    uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    const std::vector<uint8_t> &parameterPayload)
+{
+    /* Constructing expected output structure */
+    Buffer expectedOutput(ModuleHandler::maxParameterPayloadSize);
+
+    /* Constructing returned output structure */
+    Buffer returnedOutput(parameterPayload);
+
+    addModuleParameterCommand<dsp_fw::ModulesInfo>(Command::Get, parameterId,
+        expectedOutput, returnedOutput, ioctlSuccess,
+        returnedDriverStatus, returnedFirmwareStatus, moduleId, instanceId);
 }
 
 }

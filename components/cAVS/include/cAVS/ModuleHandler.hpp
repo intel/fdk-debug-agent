@@ -80,6 +80,18 @@ public:
     virtual void getGatewaysInfo(uint32_t gatewayCount,
         std::vector<dsp_fw::GatewayProps> &gateways) = 0;
 
+    /** @return the properties of one module instance */
+    virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
+        DSModuleInstanceProps &props) = 0;
+
+    /** set module parameter */
+    virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+        const std::vector<uint8_t> &parameterPayload) = 0;
+
+    /** @return module parameter */
+    virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+        std::vector<uint8_t> &parameterPayload) = 0;
+
 private:
     ModuleHandler(const ModuleHandler &) = delete;
     ModuleHandler &operator=(const ModuleHandler &) = delete;

@@ -34,7 +34,8 @@ namespace windows
 {
 
 template <typename FirmwareParameterType>
-void ModuleHandler::bigGetModuleAccessIoctl(
+void ModuleHandler::bigModuleAccessIoctl(
+    bool isGet,
     BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output)
 {
     /* Creating ioctl input structure */
@@ -46,7 +47,9 @@ void ModuleHandler::bigGetModuleAccessIoctl(
     /* Performing the io ctl */
     try
     {
-        mDevice.ioControl(IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET, &ioctlInput, &output.getBuffer());
+        mDevice.ioControl(
+            isGet ? IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET,
+            &ioctlInput, &output.getBuffer());
     }
     catch (Device::Exception &e)
     {
@@ -171,9 +174,7 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t
 
 void ModuleHandler::getPipelineProps(uint32_t pipelineId, DSPplProps &props)
 {
-    /* Constructing ioctl output structure
-     * According to the SwAS allocate a single page, i.e. 4096 bytes
-     */
+    /* Constructing ioctl output structure */
     BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
         dsp_fw::PIPELINE_PROPS_GET, maxParameterPayloadSize);
 
@@ -202,9 +203,7 @@ void ModuleHandler::getPipelineProps(uint32_t pipelineId, DSPplProps &props)
 
 void ModuleHandler::getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers)
 {
-    /* Constructing ioctl output structure
-    * According to the SwAS allocate a single page, i.e. 4096 bytes
-    */
+    /* Constructing ioctl output structure */
     BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
         dsp_fw::SCHEDULERS_INFO_GET, maxParameterPayloadSize);
 
@@ -260,6 +259,60 @@ void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
     }
 }
 
+void ModuleHandler::getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
+    DSModuleInstanceProps &props)
+{
+    /* Constructing ioctl output structure */
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
+        dsp_fw::MOD_INST_PROPS, maxParameterPayloadSize, moduleId, instanceId);
+
+    /* Performing ioctl */
+    bigGetModuleAccessIoctl<char>(ioctlOutput);
+
+    /* Getting result as byte array*/
+    std::vector<uint8_t> content;
+    ioctlOutput.getFirmwareParameterContent(content);
+
+    /* Parsing result into DSModuleInstanceProps */
+    try {
+        util::ByteStreamReader reader(content);
+        props.fromStream(reader);
+    }
+    catch (util::ByteStreamReader::Exception &e)
+    {
+        throw Exception("Cannot parse ModuleInstanceProps content: " + std::string(e.what()));
+    }
+}
+
+void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    const std::vector<uint8_t> &parameterPayload)
+{
+    /* Constructing ioctl output structure
+    */
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
+        parameterId, parameterPayload.size(), moduleId, instanceId);
+
+    /* Setting parameter payload*/
+    ioctlOutput.setFirmwareParameterContent(parameterPayload);
+
+    /* Performing ioctl */
+    bigSetModuleAccessIoctl<char>(ioctlOutput);
+}
+
+void ModuleHandler::getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    std::vector<uint8_t> &parameterPayload)
+{
+    /* Constructing ioctl output structure
+    */
+    BigCmdModuleAccessIoctlOutput<char> ioctlOutput(
+        parameterId, maxParameterPayloadSize, moduleId, instanceId);
+
+    /* Performing ioctl */
+    bigGetModuleAccessIoctl<char>(ioctlOutput);
+
+    /* Getting result */
+    ioctlOutput.getFirmwareParameterContent(parameterPayload);
+}
 }
 }
 }

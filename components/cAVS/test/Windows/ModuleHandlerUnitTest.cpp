@@ -557,4 +557,263 @@ TEST_CASE("Module handling: getting gateways")
     CHECK(std::equal(fwGateways.begin(), fwGateways.end(), gateways.begin(), isSameGateway));
 }
 
+TEST_CASE("Module handling: getting module instance properties")
+{
+    static const dsp_fw::AudioDataFormatIpc audioFormat = {
+        static_cast<dsp_fw::SamplingFrequency>(1),
+        static_cast<dsp_fw::BitDepth>(2),
+        static_cast<dsp_fw::ChannelMap>(3),
+        static_cast<dsp_fw::ChannelConfig>(4),
+        static_cast<dsp_fw::InterleavingStyle>(5),
+        6,
+        7,
+        static_cast<dsp_fw::SampleType>(8),
+        9
+    };
+
+    static const DSPinListInfo input_pins = { {
+        { static_cast<dsp_fw::StreamType>(1), audioFormat, 3 }
+    } };
+    static const DSPinListInfo output_pins = { {
+        { static_cast<dsp_fw::StreamType>(4), audioFormat, 5 },
+        { static_cast<dsp_fw::StreamType>(6), audioFormat, 7 }
+    } };
+
+    static const DSModuleInstanceProps fwInstanceProps = {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
+        dsp_fw::ConnectorNodeId(12), dsp_fw::ConnectorNodeId(13)
+    };
+
+    static const uint16_t moduleId = 1;
+    static const uint16_t instanceId = 2;
+
+    MockedDevice device;
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    /* Simulating an os error */
+    commands.addGetModuleInstancePropsCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId,
+        DSModuleInstanceProps()); /* unused parameter */
+
+    /* Simulating a driver error */
+    commands.addGetModuleInstancePropsCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId,
+        DSModuleInstanceProps()); /* unused parameter */
+
+    /* Simulating a firmware error */
+    commands.addGetModuleInstancePropsCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        moduleId, instanceId,
+        DSModuleInstanceProps()); /* unused parameter */
+
+    /* Successful command */
+    commands.addGetModuleInstancePropsCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId,
+        fwInstanceProps);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error */
+
+    static const DSModuleInstanceProps emptyProps =
+    {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DSPinListInfo(), DSPinListInfo(),
+        dsp_fw::ConnectorNodeId(0), dsp_fw::ConnectorNodeId(0)
+    };
+    DSModuleInstanceProps props = emptyProps;
+
+    CHECK_THROWS_MSG(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
+        "Device returns an exception: OS says that io control has failed.");
+    CHECK(emptyProps == props);
+
+    /* Simulating a driver error */
+    CHECK_THROWS_MSG(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(emptyProps == props);
+
+    /* Simulating a firmware error */
+    CHECK_THROWS_MSG(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(emptyProps == props);
+
+    /*Successful command */
+    CHECK_NOTHROW(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props));
+    CHECK(fwInstanceProps == props);
+
+}
+
+TEST_CASE("Module handling: getting module parameter")
+{
+    static const std::vector<uint8_t> fwParameterPayload = { 1, 2, 3 };
+
+    static const uint16_t moduleId = 1;
+    static const uint16_t instanceId = 2;
+    static const uint32_t parameterId = 2;
+
+    MockedDevice device;
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    /* Simulating an os error */
+    commands.addGetModuleParameterCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId, parameterId,
+        std::vector<uint8_t>()); /* unused parameter */
+
+    /* Simulating a driver error */
+    commands.addGetModuleParameterCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId, parameterId,
+        std::vector<uint8_t>()); /* unused parameter */
+
+    /* Simulating a firmware error */
+    commands.addGetModuleParameterCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        moduleId, instanceId, parameterId,
+        std::vector<uint8_t>()); /* unused parameter */
+
+    /* Successful command */
+    commands.addGetModuleParameterCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId, parameterId,
+        fwParameterPayload);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error */
+    std::vector<uint8_t> parameterPayload;
+
+    CHECK_THROWS_MSG(moduleHandler.getModuleParameter(moduleId, instanceId, parameterId,
+        parameterPayload),
+        "Device returns an exception: OS says that io control has failed.");
+    CHECK(parameterPayload.empty());
+
+    /* Simulating a driver error */
+    CHECK_THROWS_MSG(moduleHandler.getModuleParameter(moduleId, instanceId, parameterId,
+        parameterPayload),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK(parameterPayload.empty());
+
+    /* Simulating a firmware error */
+    CHECK_THROWS_MSG(moduleHandler.getModuleParameter(moduleId, instanceId, parameterId,
+        parameterPayload),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+    CHECK(parameterPayload.empty());
+
+    /*Successful command */
+    CHECK_NOTHROW(moduleHandler.getModuleParameter(moduleId, instanceId, parameterId,
+        parameterPayload));
+    CHECK(fwParameterPayload == parameterPayload);
+}
+
+TEST_CASE("Module handling: setting module parameter")
+{
+    static const std::vector<uint8_t> parameterPayload = { 4, 5, 6 };
+
+    static const uint16_t moduleId = 1;
+    static const uint16_t instanceId = 2;
+    static const uint32_t parameterId = 2;
+
+    MockedDevice device;
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    /* Simulating an os error */
+    commands.addSetModuleParameterCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId, parameterId,
+        parameterPayload);
+
+    /* Simulating a driver error */
+    commands.addSetModuleParameterCommand(
+        true,
+        STATUS_FLOAT_DIVIDE_BY_ZERO,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId, parameterId,
+        parameterPayload);
+
+    /* Simulating a firmware error */
+    commands.addSetModuleParameterCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        moduleId, instanceId, parameterId,
+        parameterPayload);
+
+    /* Successful command */
+    commands.addSetModuleParameterCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, instanceId, parameterId,
+        parameterPayload);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    windows::ModuleHandler moduleHandler(device);
+
+    /* Simulating an os error */
+    CHECK_THROWS_MSG(moduleHandler.setModuleParameter(moduleId, instanceId, parameterId,
+        parameterPayload),
+        "Device returns an exception: OS says that io control has failed.");
+
+    /* Simulating a driver error */
+    CHECK_THROWS_MSG(moduleHandler.setModuleParameter(moduleId, instanceId, parameterId,
+        parameterPayload),
+        "Driver returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+
+    /* Simulating a firmware error */
+    CHECK_THROWS_MSG(moduleHandler.setModuleParameter(moduleId, instanceId, parameterId,
+        parameterPayload),
+        "Firmware returns invalid status: " +
+        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+
+    /*Successful command */
+    CHECK_NOTHROW(moduleHandler.setModuleParameter(moduleId, instanceId, parameterId,
+        parameterPayload));
+}
+
 

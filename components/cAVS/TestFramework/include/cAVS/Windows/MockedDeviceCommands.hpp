@@ -206,9 +206,75 @@ public:
         uint32_t gatewayCount,
         const std::vector<dsp_fw::GatewayProps> &gateways);
 
+    /** Add a get module instance properties command.
+    *
+    * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+    * @param[in] returnedDriverStatus the returned driver status
+    * @param[in] returnedFirmwareStatus the returned firmware status
+    * @param[in] moduleId the id of the requested module type
+    * @param[in] instanceId the id of the requested module instance
+    * @param[in] props the module instance properties returned by the ioctl.
+    *
+    * Note: the props parameter is unused if :
+    * - ioctlSuccess is false or
+    * - NT_SUCCESS(returnedDriverStatus) returns false or
+    * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+    *
+    * @throw Device::Exception
+    */
+    void addGetModuleInstancePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint16_t moduleId, uint16_t instanceId,
+        const DSModuleInstanceProps &props);
+
+    /** Add a set module parameter command.
+    *
+    * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+    * @param[in] returnedDriverStatus the returned driver status
+    * @param[in] returnedFirmwareStatus the returned firmware status
+    * @param[in] moduleId the id of the requested module type
+    * @param[in] instanceId the id of the requested module instance
+    * @param[in] parameterId the id of the requested module parameter
+    * @param[in] parameterPayload the parameter payload provided to the ioctl.
+    *
+    * @throw Device::Exception
+    */
+    void addSetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+        const std::vector<uint8_t> &parameterPayload);
+
+    /** Add a get module parameter command.
+    *
+    * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+    * @param[in] returnedDriverStatus the returned driver status
+    * @param[in] returnedFirmwareStatus the returned firmware status
+    * @param[in] moduleId the id of the requested module type
+    * @param[in] instanceId the id of the requested module instance
+    * @param[in] parameterId the id of the requested module parameter
+    * @param[in] parameterPayload the parameter payload provided to the ioctl.
+    *
+    * Note: the parameterPayload parameter is unused if :
+    * - ioctlSuccess is false or
+    * - NT_SUCCESS(returnedDriverStatus) returns false or
+    * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+    *
+    * @throw Device::Exception
+    */
+    void addGetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+        const std::vector<uint8_t> &parameterPayload);
+
 private:
     MockedDeviceCommands(const MockedDeviceCommands&) = delete;
     MockedDeviceCommands &operator=(const MockedDeviceCommands&) = delete;
+
+    enum class Command
+    {
+        Get,
+        Set
+    };
 
     void addTlvParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
@@ -219,19 +285,21 @@ private:
      * @tparam FirmwareParameterType the firmware paramerter type, for instance
      * AdspProperties or ModulesInfo */
     template <typename FirmwareParameterType>
-    void addGetModuleParameterCommand(dsp_fw::BaseFwParams parameterTypeId,
+    void addModuleParameterCommand(Command command, uint32_t parameterTypeId,
         const Buffer &returnedParameterContent, bool ioctlSuccess,
-        NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus);
+        NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint16_t moduleId = baseFirwareModuleId, uint16_t instanceId = baseFirwareInstanceId);
 
     /** Template method that adds a module access ioctl
      *
      * @tparam FirmwareParameterType the firmware paramerter type, for instance
      * AdspProperties or ModulesInfo */
     template <typename FirmwareParameterType>
-    void addGetModuleParameterCommand(dsp_fw::BaseFwParams parameterTypeId,
+    void addModuleParameterCommand(Command command, uint32_t parameterTypeId,
         const Buffer &expectedParameterContent,
         const Buffer &returnedParameterContent, bool ioctlSuccess,
-        NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus);
+        NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint16_t moduleId = baseFirwareModuleId, uint16_t instanceId = baseFirwareInstanceId);
 
     MockedDevice &mDevice;
 };

@@ -141,6 +141,19 @@ struct AudioDataFormatIpc
     uint32_t reserved : 8;  /*!< padding byte */
 };
 
+/* This type exists in the fw header but is not easily includable, so copying it */
+enum BaseModuleParams
+{
+    /**
+    * Handled inside LargeConfigGet of module instance
+    */
+    MOD_INST_PROPS = 0xFE,
+    /**
+    * Handled inside ConfigSet of module instance
+    */
+    MOD_INST_ENABLE = 0x3000
+};
+
 /** This type does not exist in the fw yet */
 struct PinProps
 {
