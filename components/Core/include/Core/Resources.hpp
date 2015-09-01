@@ -52,19 +52,6 @@ protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 };
 
-/** @fixme remove this class when the switch to SystemTypeResource is effectively complete
-*
-*   This resource returns the Legacy System Type, containing Legacy Subsystems Types (XML).
-*   This resource is temporary and only here because the current version of FDK Tool is
-*   requesting it, instead of the SystemTypeResource below. */
-class LegacySystemTypeResource : public RootResource
-{
-public:
-    LegacySystemTypeResource(cavs::System &system) : RootResource(system) {}
-protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
-};
-
 /** This resource returns the System Type, containing Subsystems Types (XML) */
 class SystemTypeResource : public RootResource
 {

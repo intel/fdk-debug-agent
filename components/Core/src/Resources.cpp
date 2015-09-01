@@ -140,22 +140,6 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
     out << "</table>";
 }
 
-/** @fixme To be removed when the switch to SystemTypeResource is complete
-*
-*   Temporary resource, to provide a Legacy System Type response. To be removed once the FDK Tool
-*   is updated and does not need this message anymore.*/
-void LegacySystemTypeResource::handleGet(const Request &request, Response &response)
-{
-    std::ostream &out = response.send(ContentTypeXml);
-
-    out << "<system_type Name=\"SKL\">"
-        "    <description>Skylake platform</description>"
-        "    <subsystem_types>"
-        "        <subsystem_type Name=\"cavs\"/>"
-        "    </subsystem_types>"
-        "</system_type>";
-}
-
 void SystemTypeResource::handleGet(const Request &request, Response &response)
 {
     type::System system("bxtn");

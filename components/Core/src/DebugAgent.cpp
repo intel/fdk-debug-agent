@@ -39,17 +39,11 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     dispatcher->addResource("/cAVS/module/entries",
         std::shared_ptr<Resource>(new ModuleEntryResource(mSystem)));
 
-    /** @fixme remove LegacySystem URI */
-    dispatcher->addResource("/",
-        std::shared_ptr<Resource>(new LegacySystemTypeResource(mSystem)));
-
     /* System */
     dispatcher->addResource("/type",
         std::shared_ptr<Resource>(new SystemTypeResource(mSystem)));
     dispatcher->addResource("/instance",
         std::shared_ptr<Resource>(new SystemInstanceResource(mSystem)));
-
-    /*@todo: url /instance */
 
     /* Subsystem*/
     dispatcher->addResource("/type/cavs",
