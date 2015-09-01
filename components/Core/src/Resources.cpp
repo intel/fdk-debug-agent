@@ -129,7 +129,15 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
 void SystemTypeResource::handleGet(const Request &request, Response &response)
 {
     type::System system;
-    ModelConverter::getSystemType(system);
+
+    try {
+        ModelConverter::getSystemType(system);
+    }
+    catch (ModelConverter::Exception &e)
+    {
+        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
+            "Cannot create system type data model: " + std::string(e.what()));
+    }
 
     xml::TypeSerializer serializer;
     system.accept(serializer);
@@ -142,7 +150,15 @@ void SystemTypeResource::handleGet(const Request &request, Response &response)
 void SystemInstanceResource::handleGet(const Request &request, Response &response)
 {
     instance::System system;
-    ModelConverter::getSystemInstance(system);
+
+    try {
+        ModelConverter::getSystemInstance(system);
+    }
+    catch (ModelConverter::Exception &e)
+    {
+        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
+            "Cannot create system instance data model: " + std::string(e.what()));
+    }
 
     xml::InstanceSerializer serializer;
     system.accept(serializer);
@@ -156,8 +172,16 @@ void SubsystemTypeResource::handleGet(const Request &request, Response &response
 {
     /* Creating meta model */
     type::Subsystem subsystem;
-    ModelConverter::getSubsystemType(subsystem,
-        mSystem.getFwConfig(), mSystem.getHwConfig(), mSystem.getModuleEntries());
+
+    try {
+        ModelConverter::getSubsystemType(subsystem,
+            mSystem.getFwConfig(), mSystem.getHwConfig(), mSystem.getModuleEntries());
+    }
+    catch (ModelConverter::Exception &e)
+    {
+        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
+            "Cannot create subsystem type data model: " + std::string(e.what()));
+    }
 
     xml::TypeSerializer serializer;
     subsystem.accept(serializer);
@@ -227,56 +251,37 @@ void SubsystemsInstancesListResource::handleGet(const Request &request, Response
 
 void SubsystemInstanceResource::handleGet(const Request &request, Response &response)
 {
+    Topology topology;
+    try
+    {
+        mSystem.getTopology(topology);
+    }
+    catch (System::Exception &e)
+    {
+        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
+            "Cannot get topology from fw: " + std::string(e.what()));
+    }
+
+    instance::Subsystem subsystem;
+    try
+    {
+        ModelConverter::getSubsystemInstance(subsystem,
+            mSystem.getFwConfig(), mSystem.getHwConfig(), mSystem.getModuleEntries(),
+            topology);
+    }
+    catch (ModelConverter::Exception &e)
+    {
+        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
+            "Cannot create subsystem instance data model: " + std::string(e.what()));
+    }
+
+    xml::InstanceSerializer serializer;
+    subsystem.accept(serializer);
+
+    std::string xml = serializer.getXml();
+
     std::ostream &out = response.send(ContentTypeXml);
-    out << "<subsystem Type=\"cavs\" Id=\"0\">"
-        "    <info_parameters>"
-        "        <ParameterBlock Name=\"Free Pages\">"
-        "            <ParameterBlock Name=\"0\">"
-        "                <EnumParameter Name=\"mem_type\">HP_MEM</EnumParameter>"
-        "                <IntegerParameter Name=\"pages\">12</IntegerParameter>"
-        "            </ParameterBlock>"
-        "            <ParameterBlock Name=\"1\">"
-        "                <EnumParameter Name=\"mem_type\">LP_MEM</EnumParameter>"
-        "                <IntegerParameter Name=\"pages\">13</IntegerParameter>"
-        "            </ParameterBlock>"
-        "        </ParameterBlock>"
-        "    </info_parameters>"
-        "    <parents>"
-        "        <system Type=\"SKL\" Id=\"0\"/>"
-        "    </parents>"
-        "    <children>"
-        "        <collection Name=\"pipes\">"
-        "            <!-- all pipe instances -->"
-        "            <instance Type=\"pipe\" Id=\"0\"/>"
-        "            <instance Type=\"pipe\" Id=\"1\"/>"
-        "        </collection>"
-        "        <collection Name=\"cores\">"
-        "            <!-- all core instances -->"
-        "            <instance Type=\"core\" Id=\"0\"/>"
-        "            <instance Type=\"core\" Id=\"1\"/>"
-        "        </collection>"
-        "        <service_collection Name=\"services\">"
-        "            <service Type=\"fwlogs\" Id=\"0\"/>"
-        "        </service_collection>"
-        "        <component_collection Name=\"modules\">"
-        "            <!-- all module instances -->"
-        "            <component Type=\"module-aec(2)\" Id=\"0\"/>"
-        "            <component Type=\"module-gain(4)\" Id=\"3\"/>"
-        "            <component Type=\"module-copier(1)\" Id=\"2\"/>"
-        "        </component_collection>"
-        "    </children>"
-        "    <!-- links -->"
-        "    <links>"
-        "        <link Id=\"0\">"
-        "            <from Type=\"module-aec(2)\" Id=\"0\" OutputId=\"1\"/>"
-        "            <to Type=\"module-gain(4)\" Id=\"3\" InputId=\"0\"/>"
-        "        </link>"
-        "        <link Id=\"1\">"
-        "            <from Type=\"module-gain(4)\" Id=\"3\" OutputId=\"2\"/>"
-        "            <to Type=\"module-copier(1)\" Id=\"2\" InputId=\"0\"/>"
-        "        </link>"
-        "    </links>"
-        "</subsystem>";
+    out << xml;
 }
 
 void SubsystemInstanceLogParametersResource::handleGet(const Request &request, Response &response)

@@ -43,3 +43,21 @@ TEST_CASE("StringHelper: getStringFromFixedSizeArray")
     const char test5[] = { 'e', 'f', 'g' , 'h'};
     CHECK(StringHelper::getStringFromFixedSizeArray(test5, length) == "efg");
 }
+
+TEST_CASE("StringHelper: setStringFromFixedSizeArray")
+{
+    static const std::size_t length = 3;
+    std::vector<char> buf(length);
+
+    StringHelper::setStringToFixedSizeArray(buf.data(), length, std::string(""));
+    CHECK(buf == std::vector<char>({ '\0', '\0', '\0' }));
+
+    StringHelper::setStringToFixedSizeArray(buf.data(), length, std::string("a"));
+    CHECK(buf == std::vector<char>({ 'a', '\0', '\0' }));
+
+    StringHelper::setStringToFixedSizeArray(buf.data(), length, std::string("ab"));
+    CHECK(buf == std::vector<char>({ 'a', 'b', '\0' }));
+
+    StringHelper::setStringToFixedSizeArray(buf.data(), length, std::string("abc"));
+    CHECK(buf == std::vector<char>({ 'a', 'b', 'c' }));
+}

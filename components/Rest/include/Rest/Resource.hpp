@@ -59,6 +59,8 @@ public:
             return "Verb not allowed";
         case ErrorStatus::Locked:
             return "Resource is locked";
+        case ErrorStatus::InternalError:
+            return "Internal error";
         }
         abort();
     }

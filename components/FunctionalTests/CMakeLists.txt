@@ -20,9 +20,12 @@
 
 # cmake configuration file of functional tests
 
-set(TEST_SRCS Main.cpp)
+set(TEST_SRCS
+    Main.cpp
+    CavsTopologySample.cpp)
 
-set(TEST_INCS)
+set(TEST_INCS
+    CavsTopologySample.hpp)
 
 # Target specific source and header files
 if (WIN32)

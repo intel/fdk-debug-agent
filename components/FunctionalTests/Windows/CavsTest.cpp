@@ -20,8 +20,10 @@
 ********************************************************************************
 */
 
+#include "CavsTopologySample.hpp"
 #include "Core/DebugAgent.hpp"
 #include "Util/Uuid.hpp"
+#include "Util/StringHelper.hpp"
 #include "TestCommon/HttpClientSimulator.hpp"
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Windows/DeviceInjectionDriverFactory.hpp"
@@ -34,6 +36,7 @@
 #include <future>
 #include <condition_variable>
 
+using namespace debug_agent;
 using namespace debug_agent::core;
 using namespace debug_agent::cavs;
 using namespace debug_agent::test_common;
@@ -83,16 +86,7 @@ void setModuleEntry(ModuleEntry &entry, const std::string &name,
     const Uuid &uuid)
 {
     /* Setting name */
-    assert(name.size() <= sizeof(entry.name));
-    for (std::size_t i = 0; i < sizeof(entry.name); i++) {
-        if (i < name.size()) {
-            entry.name[i] = name[i];
-        }
-        else {
-            /* Filling buffer with 0 after name end */
-            entry.name[i] = 0;
-        }
-    }
+    StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), name);
 
     /* Setting GUID*/
     uuid.toOtherUuidType(entry.uuid);
@@ -486,10 +480,34 @@ TEST_CASE("DebugAgent/cAVS: subsystem instances (URL: /instance/cavs)")
         ));
 }
 
-TEST_CASE("DebugAgent/cAVS: subsystem instance 1 (URL: /instance/cavs/0)")
+TEST_CASE("DebugAgent/cAVS: subsystem instance 0 (URL: /instance/cavs/0)")
 {
     /* Creating the mocked device */
     std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Constructing cavs model */
+    /* ----------------------- */
+
+    std::vector<DSModuleInstanceProps> moduleInstances;
+    std::vector<dsp_fw::GatewayProps> gateways;
+    uint32_t maxPplCount;
+    std::vector<uint32_t> pipelineIds;
+    std::vector<DSPplProps> pipelines;
+    std::vector<DSSchedulersInfo> schedulers;
+    std::vector<ModuleEntry> modules;
+    std::vector<char> fwConfig;
+    std::vector<char> hwConfig;
+
+    CavsTopologySample::createFirwareObjects(
+        moduleInstances,
+        gateways,
+        maxPplCount,
+        pipelineIds,
+        pipelines,
+        schedulers,
+        modules,
+        fwConfig,
+        hwConfig);
 
     /* Setting the test vector
     * ----------------------- */
@@ -497,7 +515,73 @@ TEST_CASE("DebugAgent/cAVS: subsystem instance 1 (URL: /instance/cavs/0)")
     windows::MockedDeviceCommands commands(*device);
 
     /* Adding initial commands */
-    addInitialCommand(commands);
+    commands.addGetFwConfigCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        fwConfig);
+    commands.addGetHwConfigCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        hwConfig);
+    commands.addGetModuleEntriesCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        static_cast<uint32_t>(modules.size()),
+        modules);
+
+    /* Gateways*/
+    commands.addGetGatewaysCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        static_cast<uint32_t>(gateways.size()),
+        gateways);
+
+    /* Pipelines*/
+    commands.addGetPipelineListCommand(
+        true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        maxPplCount,
+        pipelineIds);
+
+    for (auto &pipeline : pipelines) {
+        commands.addGetPipelinePropsCommand(
+            true,
+            STATUS_SUCCESS,
+            dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+            pipeline.id,
+            pipeline);
+    }
+
+    /* Schedulers */
+    uint32_t coreId = 0;
+    for (auto &scheduler : schedulers) {
+        commands.addGetSchedulersInfoCommand(
+            true,
+            STATUS_SUCCESS,
+            dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+            coreId++,
+            scheduler);
+    }
+
+    /* Module instances */
+    for (auto &module : moduleInstances) {
+        uint16_t moduleId, instanceId;
+        Topology::splitModuleInstanceId(module.id, moduleId, instanceId);
+
+        commands.addGetModuleInstancePropsCommand(
+            true,
+            STATUS_SUCCESS,
+            dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+            moduleId,
+            instanceId,
+            module);
+    }
+
 
     /* Now using the mocked device
     * --------------------------- */
@@ -512,62 +596,84 @@ TEST_CASE("DebugAgent/cAVS: subsystem instance 1 (URL: /instance/cavs/0)")
     /* Creating the http client */
     HttpClientSimulator client("localhost");
 
-    /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
         "/instance/cavs/0",
         HttpClientSimulator::Verb::Get,
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<subsystem Type=\"cavs\" Id=\"0\">"
-        "    <info_parameters>"
-        "        <ParameterBlock Name=\"Free Pages\">"
-        "            <ParameterBlock Name=\"0\">"
-        "                <EnumParameter Name=\"mem_type\">HP_MEM</EnumParameter>"
-        "                <IntegerParameter Name=\"pages\">12</IntegerParameter>"
-        "            </ParameterBlock>"
-        "            <ParameterBlock Name=\"1\">"
-        "                <EnumParameter Name=\"mem_type\">LP_MEM</EnumParameter>"
-        "                <IntegerParameter Name=\"pages\">13</IntegerParameter>"
-        "            </ParameterBlock>"
-        "        </ParameterBlock>"
-        "    </info_parameters>"
-        "    <parents>"
-        "        <system Type=\"SKL\" Id=\"0\"/>"
-        "    </parents>"
-        "    <children>"
-        "        <collection Name=\"pipes\">"
-        "            <!-- all pipe instances -->"
-        "            <instance Type=\"pipe\" Id=\"0\"/>"
-        "            <instance Type=\"pipe\" Id=\"1\"/>"
-        "        </collection>"
-        "        <collection Name=\"cores\">"
-        "            <!-- all core instances -->"
-        "            <instance Type=\"core\" Id=\"0\"/>"
-        "            <instance Type=\"core\" Id=\"1\"/>"
-        "        </collection>"
-        "        <service_collection Name=\"services\">"
-        "            <service Type=\"fwlogs\" Id=\"0\"/>"
-        "        </service_collection>"
-        "        <component_collection Name=\"modules\">"
-        "            <!-- all module instances -->"
-        "            <component Type=\"module-aec(2)\" Id=\"0\"/>"
-        "            <component Type=\"module-gain(4)\" Id=\"3\"/>"
-        "            <component Type=\"module-copier(1)\" Id=\"2\"/>"
-        "        </component_collection>"
-        "    </children>"
-        "    <!-- links -->"
-        "    <links>"
-        "        <link Id=\"0\">"
-        "            <from Type=\"module-aec(2)\" Id=\"0\" OutputId=\"1\"/>"
-        "            <to Type=\"module-gain(4)\" Id=\"3\" InputId=\"0\"/>"
-        "        </link>"
-        "        <link Id=\"1\">"
-        "            <from Type=\"module-gain(4)\" Id=\"3\" OutputId=\"2\"/>"
-        "            <to Type=\"module-copier(1)\" Id=\"2\" InputId=\"0\"/>"
-        "        </link>"
-        "    </links>"
-        "</subsystem>"
+        "<subsystem Id=\"0\" Type=\"cavs\">\n"
+        "    <info_parameters/>\n"
+        "    <control_parameters/>\n"
+        "    <parents>\n"
+        "        <system Id=\"0\" Type=\"bxtn\"/>\n"
+        "    </parents>\n"
+        "    <children>\n"
+        "        <collection Name=\"pipes\">\n"
+        "            <instance Id=\"1\" Type=\"pipe\"/>\n"
+        "            <instance Id=\"2\" Type=\"pipe\"/>\n"
+        "            <instance Id=\"3\" Type=\"pipe\"/>\n"
+        "            <instance Id=\"4\" Type=\"pipe\"/>\n"
+        "        </collection>\n"
+        "        <collection Name=\"cores\">\n"
+        "            <instance Id=\"0\" Type=\"core\"/>\n"
+        "        </collection>\n"
+        "        <collection Name=\"tasks\">\n"
+        "            <instance Id=\"1\" Type=\"task\"/>\n"
+        "            <instance Id=\"2\" Type=\"task\"/>\n"
+        "            <instance Id=\"3\" Type=\"task\"/>\n"
+        "            <instance Id=\"9\" Type=\"task\"/>\n"
+        "            <instance Id=\"4\" Type=\"task\"/>\n"
+        "            <instance Id=\"5\" Type=\"task\"/>\n"
+        "            <instance Id=\"6\" Type=\"task\"/>\n"
+        "        </collection>\n"
+        "        <component_collection Name=\"gateways\">\n"
+        "            <component Id=\"1\" Type=\"hda-host-in-gateway\"/>\n"
+        "            <component Id=\"2\" Type=\"hda-host-in-gateway\"/>\n"
+        "            <component Id=\"1\" Type=\"hda-link-out-gateway\"/>\n"
+        "            <component Id=\"1\" Type=\"dmic-link-in-gateway\"/>\n"
+        "            <component Id=\"1\" Type=\"hda-host-out-gateway\"/>\n"
+        "        </component_collection>\n"
+        "        <component_collection Name=\"modules\">\n"
+        "            <component Id=\"1\" Type=\"module.copier\"/>\n"
+        "            <component Id=\"2\" Type=\"module.aec\"/>\n"
+        "            <component Id=\"5\" Type=\"module.aec\"/>\n"
+        "            <component Id=\"1\" Type=\"module.gain\"/>\n"
+        "            <component Id=\"4\" Type=\"module.gain\"/>\n"
+        "            <component Id=\"5\" Type=\"module.gain\"/>\n"
+        "            <component Id=\"9\" Type=\"module.gain\"/>\n"
+        "            <component Id=\"2\" Type=\"module.ns\"/>\n"
+        "            <component Id=\"6\" Type=\"module.ns\"/>\n"
+        "            <component Id=\"1\" Type=\"module.mixin\"/>\n"
+        "            <component Id=\"0\" Type=\"module.src\"/>\n"
+        "            <component Id=\"3\" Type=\"module.mixout\"/>\n"
+        "        </component_collection>\n"
+        "    </children>\n"
+        "    <inputs/>\n"
+        "    <outputs/>\n"
+        "    <links>\n"
+        "        <link>\n"
+        "            <from Id=\"1\" OutputId=\"0\" Type=\"hda-host-in-gateway\"/>\n"
+        "            <to Id=\"1\" InputId=\"0\" Type=\"module.copier\"/>\n"
+        "        </link>\n"
+        "        <link>\n"
+        "            <from Id=\"1\" OutputId=\"0\" Type=\"dmic-link-in-gateway\"/>\n"
+        "            <to Id=\"1\" InputId=\"0\" Type=\"module.gain\"/>\n"
+        "        </link>\n"
+        "        <link>\n"
+        "            <from Id=\"2\" OutputId=\"0\" Type=\"hda-host-in-gateway\"/>\n"
+        "            <to Id=\"4\" InputId=\"0\" Type=\"module.gain\"/>\n"
+        "        </link>\n"
+        "        <link>\n"
+        "            <from Id=\"9\" OutputId=\"0\" Type=\"module.gain\"/>\n"
+        "            <to Id=\"1\" InputId=\"0\" Type=\"hda-link-out-gateway\"/>\n"
+        "        </link>\n"
+        "        <link>\n"
+        "            <from Id=\"3\" OutputId=\"0\" Type=\"module.mixout\"/>\n"
+        "            <to Id=\"1\" InputId=\"0\" Type=\"hda-host-out-gateway\"/>\n"
+        "        </link>\n"
+        "    </links>\n"
+        "</subsystem>\n"
         ));
 }
 

@@ -23,6 +23,14 @@
 
 #include <sstream>
 #include <string>
+#include <assert.h>
+
+/* The visual studio toolchain define the "min" macro, which makes fail the call to
+* std::min(). So undefining it.
+*/
+#ifdef min
+#undef min
+#endif
 
 namespace debug_agent
 {
@@ -49,6 +57,30 @@ public:
             stream << static_cast<char>(buffer[i]);
         }
         return stream.str();
+    }
+
+    /** This method fills a fixed-size array from a string
+     *
+     * If the supplied string is bigger than the buffer size, an assertion is thrown.
+     *
+     *  @tparam ArrayElementType the array element type, its size must be one byte.
+     *                          For instance : int8_t, uint8_t, char, unsigned char ...
+     */
+    template<typename ArrayElementType>
+    static void setStringToFixedSizeArray(ArrayElementType *buffer, std::size_t size,
+        const std::string &str)
+    {
+        static_assert(sizeof(ArrayElementType) == 1, "Size of ArrayElementType must be one");
+
+        assert(str.size() <= size);
+        std::size_t copySize = std::min(size, str.size());
+
+        for (std::size_t i = 0; i < copySize; i++) {
+            buffer[i] = str[i];
+        }
+        for (std::size_t i = copySize; i < size; i++) {
+            buffer[i] = 0;
+        }
     }
 
 private:
