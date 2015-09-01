@@ -122,6 +122,7 @@ public:
         const uint16_t moduleId);
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+    virtual void handlePut(const rest::Request &request, rest::Response &response) override;
 
 private:
     CElementHandle* getModuleControlElement() const;

@@ -37,6 +37,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
 #include <string>
 #include <chrono>
 #include <thread>
@@ -338,6 +339,52 @@ void ControlParametersModuleInstanceResource::handleGet(const Request &request, 
 
     out << controlParameters;
     out << "</control_parameters>";
+}
+
+void ControlParametersModuleInstanceResource::handlePut(const Request &request, Response &response)
+{
+    std::string error;
+    Poco::XML::DOMParser parser;
+    Poco::XML::Document* document = parser.parseString(request.getRequestContentAsString());
+    static const std::string controlParametersUrl = "/control_parameters/";
+
+    /* Checking that the identifiers has been fetched */
+    uint16_t instanceId;
+    convertTo(request.getIdentifierValue("instanceId"), instanceId);
+
+    CElementHandle *moduleElementHandle = getModuleControlElement();
+
+    /* Loop through children to get Settings */
+    uint32_t childrenCount = moduleElementHandle->getChildrenCount();
+    for (uint32_t child = 0; child < childrenCount; child++)
+    {
+        CElementHandle* childElementHandle = getChildElementHandle(moduleElementHandle, child);
+
+        uint32_t paramId = getElementMapping(childElementHandle);
+
+        /* Create XML document from the XML node of each child */
+        Poco::XML::AutoPtr<Poco::XML::Document> childDocument(new Poco::XML::Document);
+        childDocument->appendChild(childDocument->importNode(document->getNodeByPath(
+            controlParametersUrl + "ParameterBlock[@Name='" + childElementHandle->getName() + "']"), true));
+        /* Serialize the document in a stream*/
+        Poco::XML::DOMWriter writer;
+        std::stringstream output;
+        writer.writeNode(output, childDocument);
+
+        // Send XML string to PFW
+        if (!childElementHandle->setAsXML(output.str(), error))
+        {
+            throw rest::Resource::HttpError(
+                rest::Resource::ErrorStatus::InternalError,
+                "Not able to set XML stream for " + childElementHandle->getName() + " : " + error);
+        }
+        // Read binary back from PFW
+        std::vector<uint8_t> parameterPayload = childElementHandle->getAsBytes();
+        // Send binary to IOCTL
+        mSystem.setModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
+    }
+    std::ostream &out = response.send(ContentTypeHtml);
+    out << "<p>Done</p>";
 }
 
 void SubsystemInstanceLogParametersResource::handleGet(const Request &request, Response &response)
