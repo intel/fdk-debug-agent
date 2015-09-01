@@ -20,11 +20,13 @@
 ********************************************************************************
 */
 #include "Core/Resources.hpp"
+#include "Core/ModelConverter.hpp"
 #include "Util/Uuid.hpp"
 #include "IfdkObjects/Xml/TypeDeserializer.hpp"
 #include "IfdkObjects/Xml/TypeSerializer.hpp"
 #include "IfdkObjects/Xml/InstanceDeserializer.hpp"
 #include "IfdkObjects/Xml/InstanceSerializer.hpp"
+#include "Util/StringHelper.hpp"
 #include <Poco/NumberParser.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/XML/XML.h>
@@ -49,36 +51,19 @@ namespace debug_agent
 namespace core
 {
 
-    static const std::string ContentTypeHtml("text/html");
-    static const std::string ContentTypeXml("text/xml");
-    /**
-    * @fixme use the content type specified by SwAS. Currently, the SwAS does not specify
-    * which content type shall be used. A request has been sent to get SwAS updated. Until that,
-    * the rational is:
-    *  - the content is application specific: usage of 'application/'
-    *  - the content type is vendor specific: usage of standard 'vnd.'
-    *  - knowing the resource is an IFDK file, the client can read the streamed IFDK header to
-    *    know which <subsystem>:<file format> the resource is.
-    * @remarks http://www.iana.org/assignments/media-types/media-types.xhtml
-    */
-    static const std::string ContentTypeBin("application/vnd.ifdk-file");
-
-/** This method returns a std::string from a byte buffer
- *
- * @tparam ArrayElementType the array element type, its size must be one byte.
- *                          For instance: int8_t, uint8_t, char, unsigned char ...
- */
-template<typename ArrayElementType>
-static std::string getStringFromFixedSizeArray(ArrayElementType *buffer, std::size_t size)
-{
-    static_assert(sizeof(ArrayElementType) == 1, "Size of ArrayElementType must be one");
-
-    std::stringstream stream;
-    for (std::size_t i = 0; i < size && buffer[i] != 0; i++) {
-        stream << static_cast<char>(buffer[i]);
-    }
-    return stream.str();
-}
+static const std::string ContentTypeHtml("text/html");
+static const std::string ContentTypeXml("text/xml");
+/**
+* @fixme use the content type specified by SwAS. Currently, the SwAS does not specify
+* which content type shall be used. A request has been sent to get SwAS updated. Until that,
+* the rational is:
+*  - the content is application specific: usage of 'application/'
+*  - the content type is vendor specific: usage of standard 'vnd.'
+*  - knowing the resource is an IFDK file, the client can read the streamed IFDK header to
+*    know which <subsystem>:<file format> the resource is.
+* @remarks http://www.iana.org/assignments/media-types/media-types.xhtml
+*/
+static const std::string ContentTypeBin("application/vnd.ifdk-file");
 
 /** This method returns the value of a node part of an XML document, based on an XPath expression
  *
@@ -119,7 +104,8 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
         out << "<tr>";
 
         /* Module Name */
-        std::string name(getStringFromFixedSizeArray(entry.name, sizeof(entry.name)));
+        std::string name(
+            util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name)));
         out << "<td>" << name << "</td>";
 
         /* Module uuid */
@@ -142,12 +128,8 @@ void ModuleEntryResource::handleGet(const Request &request, Response &response)
 
 void SystemTypeResource::handleGet(const Request &request, Response &response)
 {
-    type::System system("bxtn");
-    system.getDescription().setValue("Broxton platform");
-
-    auto coll = new type::SubsystemRefCollection("subsystems");
-    coll->add(type::SubsystemRef("cavs"));
-    system.getChildren().add(coll);
+    type::System system;
+    ModelConverter::getSystemType(system);
 
     xml::TypeSerializer serializer;
     system.accept(serializer);
@@ -159,11 +141,8 @@ void SystemTypeResource::handleGet(const Request &request, Response &response)
 
 void SystemInstanceResource::handleGet(const Request &request, Response &response)
 {
-    instance::System system("bxtn", "0");
-
-    auto coll = new instance::SubsystemRefCollection("subsystems");
-    coll->add(instance::SubsystemRef("cavs", "0"));
-    system.getChildren().add(coll);
+    instance::System system;
+    ModelConverter::getSystemInstance(system);
 
     xml::InstanceSerializer serializer;
     system.accept(serializer);
@@ -173,225 +152,12 @@ void SystemInstanceResource::handleGet(const Request &request, Response &respons
     out << xml;
 }
 
-void SubsystemTypeResource::addSystemCharacteristics(type::Characteristics &ch)
-{
-    // Add FW config
-    const FwConfig &fwConfig = mSystem.getFwConfig();
-    if (fwConfig.isFwVersionValid) {
-        ch.add(type::Characteristic(
-            "Firmware version",
-            std::to_string(fwConfig.fwVersion.major) + "." +
-            std::to_string(fwConfig.fwVersion.minor) + "." +
-            std::to_string(fwConfig.fwVersion.hotfix) + "." +
-            std::to_string(fwConfig.fwVersion.build)));
-    }
-    if (fwConfig.isMemoryReclaimedValid) {
-        ch.add(type::Characteristic(
-            "Memory reclaimed",
-            std::to_string(fwConfig.memoryReclaimed)));
-    }
-    if (fwConfig.isSlowClockFreqHzValid) {
-        ch.add(type::Characteristic(
-            "Slow clock frequency (Hz)",
-            std::to_string(fwConfig.slowClockFreqHz)));
-    }
-    if (fwConfig.isFastClockFreqHzValid) {
-        ch.add(type::Characteristic(
-            "Fast clock frequency (Hz)",
-            std::to_string(fwConfig.fastClockFreqHz)));
-    }
-    if (fwConfig.dmaBufferConfig.size() > 0) {
-        size_t i = 0;
-        for (auto dmaBufferConfig : fwConfig.dmaBufferConfig) {
-            ch.add(type::Characteristic(
-                "DMA buffer config #" + std::to_string(i) + " min size (bytes)",
-                std::to_string(dmaBufferConfig.min_size_bytes)));
-            ch.add(type::Characteristic(
-                "DMA buffer config #" + std::to_string(i) + " max size (bytes)",
-                std::to_string(dmaBufferConfig.max_size_bytes)));
-            ++i;
-        }
-    }
-    if (fwConfig.isAlhSupportLevelValid) {
-        ch.add(type::Characteristic(
-            "Audio Hub Link support level",
-            std::to_string(fwConfig.alhSupportLevel)));
-    }
-    if (fwConfig.isIpcDlMailboxBytesValid) {
-        ch.add(type::Characteristic(
-            "IPC down link (host to FW) mailbox size (bytes)",
-            std::to_string(fwConfig.ipcDlMailboxBytes)));
-    }
-    if (fwConfig.isIpcUlMailboxBytesValid) {
-        ch.add(type::Characteristic(
-            "IPC up link (FW to host) mailbox size (bytes)",
-            std::to_string(fwConfig.ipcUlMailboxBytes)));
-    }
-    if (fwConfig.isTraceLogBytesValid) {
-        ch.add(type::Characteristic(
-            "Size of trace log buffer per single core (bytes)",
-            std::to_string(fwConfig.traceLogBytes)));
-    }
-    if (fwConfig.isMaxPplCountValid) {
-        ch.add(type::Characteristic(
-            "Maximum number of pipelines instances",
-            std::to_string(fwConfig.maxPplCount)));
-    }
-    if (fwConfig.isMaxAstateCountValid) {
-        ch.add(type::Characteristic(
-            "Maximum number of A-state table entries",
-            std::to_string(fwConfig.maxAstateCount)));
-    }
-    if (fwConfig.isMaxModulePinCountValid) {
-        ch.add(type::Characteristic(
-            "Maximum number of input or output pins per module",
-            std::to_string(fwConfig.maxModulePinCount)));
-    }
-    if (fwConfig.isModulesCountValid) {
-        ch.add(type::Characteristic(
-            "Current total number of module entries loaded into the DSP",
-            std::to_string(fwConfig.modulesCount)));
-    }
-    if (fwConfig.isMaxModInstCountValid) {
-        ch.add(type::Characteristic(
-            "Maximum module instance count",
-            std::to_string(fwConfig.maxModInstCount)));
-    }
-    if (fwConfig.isMaxLlTasksPerPriCountValid) {
-        ch.add(type::Characteristic(
-            "Maximum number of LL tasks per priority",
-            std::to_string(fwConfig.maxLlTasksPerPriCount)));
-    }
-    if (fwConfig.isLlPriCountValid) {
-        ch.add(type::Characteristic(
-            "Number of LL priorities",
-            std::to_string(fwConfig.llPriCount)));
-    }
-    if (fwConfig.isMaxDpTasksCountValid) {
-        ch.add(type::Characteristic(
-            "Maximum number of DP tasks per core",
-            std::to_string(fwConfig.maxDpTasksCount)));
-    }
-
-    // Add HW config
-    const HwConfig &hwConfig = mSystem.getHwConfig();
-    if (hwConfig.isCavsVersionValid) {
-        ch.add(type::Characteristic(
-            "cAVS Version",
-            std::to_string(hwConfig.cavsVersion)));
-    }
-    if (hwConfig.isDspCoreCountValid) {
-        ch.add(type::Characteristic(
-            "Number of cores",
-            std::to_string(hwConfig.dspCoreCount)));
-    }
-    if (hwConfig.isMemPageSizeValid) {
-        ch.add(type::Characteristic(
-            "Memory page size (bytes)",
-            std::to_string(hwConfig.memPageSize)));
-    }
-    if (hwConfig.isTotalPhysicalMemoryPageValid) {
-        ch.add(type::Characteristic(
-            "Total number of physical pages",
-            std::to_string(hwConfig.totalPhysicalMemoryPage)));
-    }
-    if (hwConfig.isI2sCapsValid) {
-        ch.add(type::Characteristic(
-            "I2S version",
-            std::to_string(hwConfig.i2sCaps.version)));
-        size_t i = 0;
-        for (auto controllerBaseAddr : hwConfig.i2sCaps.controllerBaseAddr) {
-
-            ch.add(type::Characteristic(
-                "I2S controller #" + std::to_string(i++) + " base address",
-                std::to_string(controllerBaseAddr)));
-        }
-    }
-    if (hwConfig.isGatewayCountValid) {
-        ch.add(type::Characteristic(
-            "Total number of DMA gateways",
-            std::to_string(hwConfig.gatewayCount)));
-    }
-    if (hwConfig.isEbbCountValid) {
-        ch.add(type::Characteristic(
-            "Number of SRAM memory banks",
-            std::to_string(hwConfig.ebbCount)));
-    }
-}
-
 void SubsystemTypeResource::handleGet(const Request &request, Response &response)
 {
-    static const std::vector<std::string> staticTypeCollections = {
-        "pipes", "cores", "tasks"
-    };
-
-    static const std::vector<std::string> staticTypes = {
-        "pipe", "core", "task"
-    };
-
-    static const std::vector<std::string> staticServiceTypes = {
-        "fwlogs"
-    };
-
-    static const std::vector<std::string> gateways = {
-        "hda-host-out-gateway",
-        "hda-host-in-gateway",
-        "hda-link-out-gateway",
-        "hda-link-in-gateway",
-        "dmic-link-in-gateway"
-    };
-
     /* Creating meta model */
-    type::Subsystem subsystem("cavs");
-    subsystem.getDescription().setValue("cAVS subsystem");
-
-    /* Hardcoded characteristics (temporary) */
-    type::Characteristics &ch = subsystem.getCharacteristics();
-    addSystemCharacteristics(ch);
-
-    /* Children and categories */
-    type::Children &children = subsystem.getChildren();
-    type::Categories &categories = subsystem.getCategories();
-
-    /* Static types */
-    assert(staticTypeCollections.size() == staticTypes.size());
-    for (std::size_t i = 0; i < staticTypeCollections.size(); ++i) {
-        auto coll = new type::TypeRefCollection(staticTypeCollections[i]);
-        coll->add(type::TypeRef(staticTypes[i]));
-        children.add(coll);
-
-        categories.add(new type::TypeRef(staticTypes[i]));
-    }
-
-    /* Service */
-    auto serviceColl = new type::ServiceRefCollection("services");
-    for (auto &serviceName : staticServiceTypes) {
-        serviceColl->add(type::ServiceRef(serviceName));
-
-        categories.add(new type::ServiceRef(serviceName));
-    }
-    children.add(serviceColl);
-
-    /* Gateways */
-    auto gatewayColl = new type::ComponentRefCollection("gateways");
-    for (auto &gatewayName : gateways) {
-        gatewayColl->add(type::ComponentRef(gatewayName));
-
-        categories.add(new type::ComponentRef(gatewayName));
-    }
-    children.add(gatewayColl);
-
-    /* Modules*/
-    auto compColl = new type::ComponentRefCollection("modules");
-
-    const std::vector<ModuleEntry> &entries = mSystem.getModuleEntries();
-    for (auto &module : entries) {
-        std::string moduleName = getStringFromFixedSizeArray(module.name, sizeof(module.name));
-        compColl->add(type::ComponentRef(moduleName));
-
-        categories.add(new type::ComponentRef(moduleName));
-    }
-    children.add(compColl);
+    type::Subsystem subsystem;
+    ModelConverter::getSubsystemType(subsystem,
+        mSystem.getFwConfig(), mSystem.getHwConfig(), mSystem.getModuleEntries());
 
     xml::TypeSerializer serializer;
     subsystem.accept(serializer);

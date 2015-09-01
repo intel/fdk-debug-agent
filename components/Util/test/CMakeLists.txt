@@ -24,7 +24,8 @@
 set(TEST_SRCS
     UuidTest.cpp
     BlockingQueueTest.cpp
-    ByteStreamTest.cpp)
+    ByteStreamTest.cpp
+    StringHelperTest.cpp)
 
 set(TEST_INCS)
 

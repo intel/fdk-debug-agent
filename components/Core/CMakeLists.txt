@@ -23,11 +23,13 @@
 # Main executable
 set(SRCS
     src/DebugAgent.cpp
-    src/Resources.cpp)
+    src/Resources.cpp
+    src/ModelConverter.cpp)
 
 set(INCS
     include/Core/DebugAgent.hpp
-    include/Core/Resources.hpp)
+    include/Core/Resources.hpp
+    include/Core/ModelConverter.hpp)
 
 add_library(Core STATIC ${SRCS} ${INCS})
 set_common_settings(Core)

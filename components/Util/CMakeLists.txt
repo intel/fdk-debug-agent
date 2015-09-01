@@ -28,7 +28,8 @@ set(INCS
     include/Util/BlockingQueue.hpp
     include/Util/PointerHelper.hpp
     include/Util/ByteStreamReader.hpp
-    include/Util/ByteStreamWriter.hpp)
+    include/Util/ByteStreamWriter.hpp
+    include/Util/StringHelper.hpp)
 
 add_library(Util STATIC ${SRCS} ${INCS})
 set_common_settings(Util)
