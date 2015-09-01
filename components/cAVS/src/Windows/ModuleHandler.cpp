@@ -71,9 +71,10 @@ void ModuleHandler::bigModuleAccessIoctl(
     }
 }
 
-void ModuleHandler::getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
+void ModuleHandler::getModulesEntries(uint32_t moduleCount,
+    std::vector<ModuleEntry> &modulesEntries)
 {
-    std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize();
+    std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize(moduleCount);
 
     /* Constructing ioctl output structure */
     BigCmdModuleAccessIoctlOutput<dsp_fw::ModulesInfo>
@@ -88,9 +89,10 @@ void ModuleHandler::getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
     /** @todo use logging */
     std::cout << "Number of modules found in FW: " << modulesInfo.module_count << std::endl;
 
-    if (modulesInfo.module_count > dsp_fw::MaxModuleCount) {
+    if (modulesInfo.module_count != moduleCount) {
         throw Exception("Firmware has returned an invalid module count: " +
-            std::to_string(modulesInfo.module_count));
+            std::to_string(modulesInfo.module_count) + " instead of " +
+            std::to_string(moduleCount));
     }
 
     /* Retrieving module entries */

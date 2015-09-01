@@ -58,7 +58,13 @@ static const std::vector<char> fwConfigTlvList {
         /* major and minor */
         0x01, 0x02, 0x03, 0x04,
         /* hot fix and build */
-        0x05, 0x06, 0x07, 0x08
+        0x05, 0x06, 0x07, 0x08,
+    /* Tag for MODULES_COUNT : 12 */
+    12, 0x00, 0x00, 0x00,
+    /* Length = 4 bytes */
+    0x04, 0x00, 0x00, 0x00,
+        /* Value : 2 */
+        0x02, 0x00, 0x00, 0x00
 };
 static const size_t fwVersionValueOffsetInTlvList = 8;
 
@@ -104,6 +110,7 @@ void addModuleEntryCommand(windows::MockedDeviceCommands &commands)
         true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        2,
         returnedEntries);
 }
 
@@ -323,7 +330,9 @@ TEST_CASE("DebugAgent/cAVS: subsystem type (URL: /type/cavs)")
         +           std::to_string(fwVersion->minor) + "."
         +           std::to_string(fwVersion->hotfix) + "."
         +           std::to_string(fwVersion->build)
-        +        "</characteristic>\n"
+        +        "</characteristic>\n"+
+        "        <characteristic Name=\"Current total number of module entries loaded "
+        +                              "into the DSP\">2</characteristic>\n"
         "        <characteristic Name=\"Number of cores\">"
         +           std::to_string(*nbCores)
         +        "</characteristic>\n"

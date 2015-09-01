@@ -49,8 +49,8 @@ private:
     public:
         virtual void getFwConfig(FwConfig &fwConfig) override {}
         virtual void getHwConfig(HwConfig &hwConfig) override {}
-        virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries)
-            override {}
+        virtual void getModulesEntries(uint32_t moduleCount,
+            std::vector<ModuleEntry> &modulesEntries) override {}
         virtual void getPipelineIdList(uint32_t maxPplCount,
             std::vector<uint32_t> &pipelinesIds) override {}
         virtual void getPipelineProps(uint32_t pipelineId, DSPplProps &props) override {}

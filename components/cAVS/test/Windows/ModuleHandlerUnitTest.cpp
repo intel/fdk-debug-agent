@@ -79,7 +79,8 @@ void checkModuleEntryIoctl(windows::ModuleHandler& moduleHandler, std::size_t ex
 {
     /*Successful get module info command */
     std::vector<ModuleEntry> entries;
-    CHECK_NOTHROW(moduleHandler.getModulesEntries(entries));
+    CHECK_NOTHROW(
+        moduleHandler.getModulesEntries(static_cast<uint32_t>(expectedModuleCount), entries));
 
     /* Checking result */
     ModuleEntry expectedModuleEntry;
@@ -92,6 +93,8 @@ void checkModuleEntryIoctl(windows::ModuleHandler& moduleHandler, std::size_t ex
 
 TEST_CASE("Module handling: getting module entries")
 {
+    const static uint32_t moduleCount = 2;
+
     MockedDevice device;
 
     /* Setting the test vector
@@ -103,6 +106,7 @@ TEST_CASE("Module handling: getting module entries")
         false,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleCount,
         std::vector<ModuleEntry>()); /* unused parameter */
 
     /* Simulating a driver error during getting module entries */
@@ -110,6 +114,7 @@ TEST_CASE("Module handling: getting module entries")
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleCount,
         std::vector<ModuleEntry>()); /* unused parameter */
 
     /* Simulating a firmware error during getting module entries */
@@ -117,6 +122,7 @@ TEST_CASE("Module handling: getting module entries")
         true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        moduleCount,
         std::vector<ModuleEntry>()); /* unused parameter */
 
     /* Successful get module info command with 2 modules */
@@ -124,14 +130,8 @@ TEST_CASE("Module handling: getting module entries")
         true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-        produceModuleEntries(2));
-
-    /* Successful get module info command with 'MaxModuleCount' modules */
-    commands.addGetModuleEntriesCommand(
-        true,
-        STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-        produceModuleEntries(dsp_fw::MaxModuleCount));
+        moduleCount,
+        produceModuleEntries(moduleCount));
 
     /* Now using the mocked device
      * --------------------------- */
@@ -141,18 +141,18 @@ TEST_CASE("Module handling: getting module entries")
 
     /* Simulating an os error during getting module entries */
     std::vector<ModuleEntry> entries;
-    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
+    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(moduleCount, entries),
         "Device returns an exception: OS says that io control has failed.");
     CHECK(entries.empty());
 
     /* Simulating a driver error during getting module entries */
-    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
+    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(moduleCount, entries),
         "Driver returns invalid status: " +
         std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
     CHECK(entries.empty());
 
     /* Simulating a firmware error during getting module entries */
-    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(entries),
+    CHECK_THROWS_MSG(moduleHandler.getModulesEntries(moduleCount, entries),
         "Firmware returns invalid status: " +
         std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
 
@@ -160,9 +160,6 @@ TEST_CASE("Module handling: getting module entries")
 
     /*Successful get module info command with 2 modules*/
     checkModuleEntryIoctl(moduleHandler, 2);
-
-    /*Successful get module info command with 'MaxModuleCount' modules*/
-    checkModuleEntryIoctl(moduleHandler, dsp_fw::MaxModuleCount);
 }
 
 TEST_CASE("Module handling: getting FW configs")

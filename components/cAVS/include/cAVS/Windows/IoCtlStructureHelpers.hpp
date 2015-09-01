@@ -183,14 +183,14 @@ private:
 class ModulesInfoHelper final
 {
 public:
-    static std::size_t getAllocationSize()
+    static std::size_t getAllocationSize(uint32_t moduleCount)
     {
-        static_assert(dsp_fw::MaxModuleCount > 0, "MaxModuleCount should be greater than 0");
+        assert(moduleCount > 0);
 
-        /* "dsp_fw::MaxModuleCount - 1" because the ModulesInfo structure contains one module
+        /* "moduleCount - 1" because the ModulesInfo structure contains one module
          * entry */
         return sizeof(dsp_fw::ModulesInfo)
-            + (dsp_fw::MaxModuleCount - 1) * sizeof(ModuleEntry);
+            + (moduleCount - 1) * sizeof(ModuleEntry);
     }
 
 private:

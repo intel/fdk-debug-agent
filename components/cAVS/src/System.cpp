@@ -58,14 +58,21 @@ System::System(const DriverFactory &driverFactory):
         /** @todo use logging */
         std::cout << "Unable to get HW config: " + std::string(e.what()) << std::endl;
     }
-    try
-    {
-        mDriver->getModuleHandler().getModulesEntries(mModuleEntries);
+
+    if (mFwConfig.isModulesCountValid) {
+        try
+        {
+            mDriver->getModuleHandler().getModulesEntries(mFwConfig.modulesCount, mModuleEntries);
+        }
+        catch (ModuleHandler::Exception &e)
+        {
+            /** @todo use logging */
+            std::cout << "Unable to get module entries: " + std::string(e.what()) << std::endl;
+        }
     }
-    catch (ModuleHandler::Exception &e)
-    {
+    else {
         /** @todo use logging */
-        std::cout << "Unable to get module entries: " + std::string(e.what()) << std::endl;
+        std::cout << "Cannot get module entries: module count is invalid.";
     }
 }
 

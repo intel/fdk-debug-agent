@@ -59,7 +59,8 @@ public:
     virtual ~ModuleHandler() {}
 
     /** @return the firmware module entries */
-    virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) = 0;
+    virtual void getModulesEntries(uint32_t moduleCount,
+        std::vector<ModuleEntry> &modulesEntries) = 0;
 
     /** @return the firmware configuration */
     virtual void getFwConfig(FwConfig &fwConfig) = 0;

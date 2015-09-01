@@ -223,9 +223,6 @@ struct ConnectorNodeId
     inline uint32_t GetBareNodeId() const { return val.dw; }
 };
 
-/** Max module count, used to retrieve module entries. */
-static const uint32_t MaxModuleCount = 128;
-
 }
 
 

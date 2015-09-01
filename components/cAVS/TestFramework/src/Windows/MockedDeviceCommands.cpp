@@ -156,9 +156,9 @@ void MockedDeviceCommands::addGetHwConfigCommand(bool ioctlSuccess,
 
 void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
     NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-    const std::vector<ModuleEntry> &returnedEntries)
+    uint32_t moduleCount, const std::vector<ModuleEntry> &returnedEntries)
 {
-    std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize();
+    std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize(moduleCount);
 
     /** Filling a ModulesInfo structure with the supplied module entries */
     TypedBuffer<dsp_fw::ModulesInfo> buffer(moduleInfoSize);

@@ -46,6 +46,7 @@ public:
      * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
      * @param[in] returnedDriverStatus the returned driver status
      * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] moduleCount the exact module count
      * @param[in] returnedEntries the module entries returned by the ioctl.
      *
      * Note: the returnedEntries parameter is unused if :
@@ -57,6 +58,7 @@ public:
      */
     void addGetModuleEntriesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        uint32_t moduleCount,
         const std::vector<ModuleEntry> &returnedEntries);
 
     /**

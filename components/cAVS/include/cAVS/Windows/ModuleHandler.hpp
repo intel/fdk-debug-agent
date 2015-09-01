@@ -40,7 +40,8 @@ class ModuleHandler : public cavs::ModuleHandler
 public:
     ModuleHandler(Device &device) : mDevice(device) {}
 
-    virtual void getModulesEntries(std::vector<ModuleEntry> &modulesEntries) override;
+    virtual void getModulesEntries(uint32_t moduleCount,
+        std::vector<ModuleEntry> &modulesEntries) override;
     virtual void getFwConfig(FwConfig &fwConfig) override;
     virtual void getHwConfig(HwConfig &hwConfig) override;
     virtual void getPipelineIdList(uint32_t maxPplCount,
