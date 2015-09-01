@@ -23,6 +23,7 @@
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/LogStreamer.hpp"
 #include <utility>
+#include <set>
 
 namespace debug_agent
 {
@@ -149,6 +150,114 @@ void System::getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t
 {
     mDriver->getModuleHandler().getModuleParameter(moduleId, instanceId, parameterId,
         parameterPayload);
+}
+
+void System::getTopology(Topology &topology)
+{
+    topology.clear();
+
+    ModuleHandler &handler = mDriver->getModuleHandler();
+    std::set<uint32_t> moduleInstanceIds;
+
+    /* Retrieving gateways*/
+    if (!mHwConfig.isGatewayCountValid) {
+        throw Exception("Gate count is invalid.");
+    }
+    const uint32_t gatewayCount = mHwConfig.gatewayCount;
+
+    try
+    {
+        handler.getGatewaysInfo(gatewayCount, topology.gateways);
+    }
+    catch (ModuleHandler::Exception &e)
+    {
+        throw Exception("Can not retrieve gateways: " + std::string(e.what()));
+    }
+
+    /* Retrieving pipelines ids*/
+    if (!mFwConfig.isMaxPplCountValid) {
+        throw Exception("Max pipeline count is invalid.");
+    }
+    const uint32_t maxPplCount = mFwConfig.maxPplCount;
+
+    std::vector<uint32_t> pipelineIds;
+    try
+    {
+        handler.getPipelineIdList(mFwConfig.maxPplCount, pipelineIds);
+    }
+    catch (ModuleHandler::Exception &e)
+    {
+        throw Exception("Can not retrieve pipeline ids: " + std::string(e.what()));
+    }
+
+    /* Retrieving pipeline props*/
+    for (auto pplId : pipelineIds) {
+        try {
+            DSPplProps props;
+            handler.getPipelineProps(pplId, props);
+            topology.pipelines.push_back(props);
+
+            /* Collecting module instance ids*/
+            for (auto instanceId : props.module_instances) {
+                moduleInstanceIds.insert(instanceId);
+            }
+        }
+        catch (ModuleHandler::Exception &e)
+        {
+            throw Exception("Can not retrieve pipeline props of id " + std::to_string(pplId) +
+                " : " + std::string(e.what()));
+        }
+    }
+
+    /* Retrieving scheduler props*/
+    if (!mHwConfig.isDspCoreCountValid) {
+        throw Exception("Core count is invalid.");
+    }
+    const uint32_t coreCount = mHwConfig.dspCoreCount;
+    for (uint32_t coreId = 0; coreId < coreCount; coreId++) {
+        try
+        {
+            DSSchedulersInfo info;
+            handler.getSchedulersInfo(coreId, info);
+            topology.schedulers.push_back(info);
+
+            /* Collecting module instance ids*/
+            for (auto &scheduler : info.scheduler_info) {
+                for (auto &task : scheduler.task_info) {
+                    for (auto instanceId : task.module_instance_id) {
+                        moduleInstanceIds.insert(instanceId);
+                    }
+                }
+            }
+        }
+        catch (ModuleHandler::Exception &e)
+        {
+            throw Exception("Can not retrieve scheduler props of core id: " +
+                std::to_string(coreId) + " : " + std::string(e.what()));
+        }
+    }
+
+    /* Retrieving module instances*/
+    for (auto moduleInstanceId : moduleInstanceIds) {
+        try
+        {
+            uint16_t moduleId, instanceId;
+            Topology::splitModuleInstanceId(moduleInstanceId, moduleId, instanceId);
+
+            DSModuleInstanceProps props;
+            handler.getModuleInstanceProps(moduleId, instanceId, props);
+            topology.moduleInstances.push_back(props);
+        }
+        catch (ModuleHandler::Exception &e)
+        {
+            throw Exception("Can not retrieve module instance with id: " +
+                std::to_string(moduleInstanceId) + " : " + std::string(e.what()));
+        }
+    }
+
+    /* Links and gateway peers */
+    LinkCalculator calculator(topology);
+    calculator.computeLinksAndGatewayPeers();
 }
 
 }

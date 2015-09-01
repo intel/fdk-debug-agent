@@ -25,7 +25,8 @@
 set(LIB_SRCS
     src/Logger.cpp
     src/LogStreamer.cpp
-    src/System.cpp)
+    src/System.cpp
+    src/Topology.cpp)
 
 # Common include files
 set(LIB_INCS
@@ -40,7 +41,8 @@ set(LIB_INCS
     include/cAVS/DynamicSizedFirmwareTypes.hpp
     include/cAVS/ModuleHandler.hpp
     include/cAVS/FwConfig.hpp
-    include/cAVS/HwConfig.hpp)
+    include/cAVS/HwConfig.hpp
+    include/cAVS/Topology.hpp)
 
 set(LIBRAIRIES)
 SET(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/external/cAVS/firmware/include")

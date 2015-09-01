@@ -23,6 +23,7 @@
 
 #include "cAVS/Driver.hpp"
 #include "cAVS/DriverFactory.hpp"
+#include "cAVS/Topology.hpp"
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -130,6 +131,9 @@ public:
     /** Get module parameter */
     void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
         std::vector<uint8_t> &parameterPayload);
+
+    /** @return topology */
+    void getTopology(Topology &topology);
 
     /** Stop internal threads and unblock consumer threads */
     void stop() NOEXCEPT
