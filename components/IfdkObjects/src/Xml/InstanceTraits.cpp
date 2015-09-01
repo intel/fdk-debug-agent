@@ -42,6 +42,8 @@ const std::string InstanceTraits<ServiceRef>::tag("service");
 
 const std::string InstanceTraits<SubsystemRef>::tag("subsystem");
 
+const std::string InstanceTraits<SystemRef>::tag("system");
+
 const std::string InstanceTraits<Instance>::tag("instance");
 const std::string InstanceTraits<Instance>::attributeTypeName("Type");
 const std::string InstanceTraits<Instance>::attributeInstanceId("Id");

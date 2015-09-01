@@ -22,9 +22,7 @@
 
 #pragma once
 
-#include "IfdkObjects/Instance/From.hpp"
-#include "IfdkObjects/Instance/To.hpp"
-#include <string>
+#include "IfdkObjects/Instance/Ref.hpp"
 
 namespace debug_agent
 {
@@ -33,44 +31,43 @@ namespace ifdk_objects
 namespace instance
 {
 
-/** Link between two components */
-class Link
+/** Reference to a system instance */
+class SystemRef : public Ref
 {
+private:
+    using base = Ref;
 public:
-    Link() = default;
-    explicit Link(const Link& other) = default;
-    explicit Link(const From &from, const To &to) : mFrom(from), mTo(to) {}
+    SystemRef() = default;
+    explicit SystemRef(const std::string& typeName, const std::string& instanceId) :
+        base(typeName, instanceId) {}
+    explicit SystemRef(const SystemRef& other) = default;
+    SystemRef &operator=(const SystemRef &other) = default;
 
-    Link &operator=(const Link &other) = default;
-
-    bool operator == (const Link &other) const NOEXCEPT
+    virtual void accept(Visitor &visitor, bool isConcrete = true) override
     {
-        return mFrom == other.mFrom && mTo == other.mTo;
-    }
-
-    bool operator != (const Link &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
-
-    virtual void accept(Visitor &visitor)
-    {
+        assert(isConcrete);
         acceptCommon(*this, visitor);
     }
 
-    virtual void accept(ConstVisitor &visitor) const
+    virtual void accept(ConstVisitor &visitor, bool isConcrete = true) const override
     {
+        assert(isConcrete);
         acceptCommon(*this, visitor);
     }
 
-    From &getFrom()
+protected:
+    virtual bool equalsTo(const Ref &other) const NOEXCEPT override
     {
-        return mFrom;
-    }
+        if (!base::equalsTo(other)) {
+            return false;
+        }
 
-    To &getTo()
-    {
-        return mTo;
+        const SystemRef *otherServ = dynamic_cast<const SystemRef*>(&other);
+        if (otherServ == nullptr) {
+            return false;
+        }
+
+        return true;
     }
 
 private:
@@ -78,17 +75,10 @@ private:
     static void acceptCommon(T &me, Visitor &visitor)
     {
         visitor.enter(me);
-
-        me.mFrom.accept(visitor);
-        me.mTo.accept(visitor);
-
-        visitor.leave(true);
+        me.base::accept(visitor, false);
+        visitor.leave();
     }
-
-    From mFrom;
-    To mTo;
 };
-
 }
 }
 }

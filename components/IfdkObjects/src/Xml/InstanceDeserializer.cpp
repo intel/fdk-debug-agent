@@ -86,6 +86,11 @@ void InstanceDeserializer::enter(SubsystemRef &instance)
     pushElement(instance);
 }
 
+void InstanceDeserializer::enter(SystemRef &instance)
+{
+    pushElement(instance);
+}
+
 void InstanceDeserializer::enter(RefCollection &collection, bool isConcrete)
 {
     assert(!isConcrete);

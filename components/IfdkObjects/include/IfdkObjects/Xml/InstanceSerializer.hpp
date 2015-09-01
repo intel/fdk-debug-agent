@@ -51,6 +51,7 @@ private:
     virtual void enter(const instance::ComponentRef &instance) override;
     virtual void enter(const instance::ServiceRef &instance) override;
     virtual void enter(const instance::SubsystemRef &instance) override;
+    virtual void enter(const instance::SystemRef &instance) override;
 
     /* Named reference collections */
     virtual void enter(const instance::RefCollection &instance, bool isConcrete) override;

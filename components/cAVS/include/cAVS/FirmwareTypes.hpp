@@ -182,14 +182,10 @@ struct ConnectorNodeId
         kDmicLinkInputClass = 11,
         kI2sLinkOutputClass = 12,
         kI2sLinkInputClass = 13,
-#if SLIMBUS_PRESENT
         kSlimbusLinkOutputClass = 14,
         kSlimbusLinkInputClass = 15,
-#endif
-#if ALH_PRESENT
         kALHLinkOutputClass = 16,
-        kALHLinkInputClass = 17,
-#endif
+        kALHLinkInputClass = 17
     };
 
     /**
@@ -224,7 +220,5 @@ struct ConnectorNodeId
 };
 
 }
-
-
 }
 }

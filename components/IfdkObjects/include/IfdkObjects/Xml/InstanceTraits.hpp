@@ -31,6 +31,7 @@
 #include "IfdkObjects/Instance/ComponentRef.hpp"
 #include "IfdkObjects/Instance/ServiceRef.hpp"
 #include "IfdkObjects/Instance/SubsystemRef.hpp"
+#include "IfdkObjects/Instance/SystemRef.hpp"
 #include "IfdkObjects/Instance/Children.hpp"
 #include "IfdkObjects/Instance/InstanceRefCollection.hpp"
 #include "IfdkObjects/Instance/ComponentRefCollection.hpp"
@@ -99,6 +100,12 @@ struct InstanceTraits<instance::ServiceRef>
 
 template<>
 struct InstanceTraits<instance::SubsystemRef>
+{
+    static const std::string tag;
+};
+
+template<>
+struct InstanceTraits<instance::SystemRef>
 {
     static const std::string tag;
 };

@@ -88,6 +88,11 @@ void InstanceSerializer::enter(const SubsystemRef &instance)
     pushElement(instance);
 }
 
+void InstanceSerializer::enter(const SystemRef &instance)
+{
+    pushElement(instance);
+}
+
 void InstanceSerializer::enter(const RefCollection &collection, bool isConcrete)
 {
     assert(!isConcrete);

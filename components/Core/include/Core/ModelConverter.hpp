@@ -26,8 +26,10 @@
 #include "cAVS/DynamicSizedFirmwareTypes.hpp"
 #include "cAVS/FwConfig.hpp"
 #include "cAVS/HwConfig.hpp"
+#include "cAVS/Topology.hpp"
 #include "IfdkObjects/Xml/TypeSerializer.hpp"
 #include "IfdkObjects/Xml/InstanceSerializer.hpp"
+#include "Util/StringHelper.hpp"
 
 
 namespace debug_agent
@@ -56,12 +58,32 @@ public:
         const cavs::FwConfig &fwConfig, const cavs::HwConfig &hwConfig,
         const std::vector<cavs::ModuleEntry> &entries);
 
+    /** Create a subsystem instance */
+    static void getSubsystemInstance(ifdk_objects::instance::Subsystem &subsystem,
+        const cavs::FwConfig &fwConfig, const cavs::HwConfig &hwConfig,
+        const std::vector<cavs::ModuleEntry> &entries,
+        const cavs::Topology &topology);
+
     /** Create system characteristics */
     static void getSystemCharacteristics(ifdk_objects::type::Characteristics &characteristics,
         const cavs::FwConfig &fwConfig, const cavs::HwConfig &hwConfig);
 
 private:
     ModelConverter();
+
+    /** Find a module entry using its id */
+    static const cavs::ModuleEntry &findModuleEntry(uint32_t moduleId,
+        const std::vector<cavs::ModuleEntry> &entries);
+
+    /** Find a module entry name using its id */
+    static std::string findModuleEntryName(uint32_t moduleId,
+        const std::vector<cavs::ModuleEntry> &entries);
+
+    /** Find a gateway type name using a connector id */
+    static std::string findGatewayTypeName(const cavs::dsp_fw::ConnectorNodeId &connectorId);
+
+    /** Find a gateway instance id using a connector id */
+    static uint32_t findGatewayInstanceId(const cavs::dsp_fw::ConnectorNodeId &connectorId);
 };
 
 }

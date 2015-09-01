@@ -74,6 +74,7 @@ SET(INSTANCE_INCS
     include/IfdkObjects/Instance/ComponentRef.hpp
     include/IfdkObjects/Instance/ServiceRef.hpp
     include/IfdkObjects/Instance/SubsystemRef.hpp
+    include/IfdkObjects/Instance/SystemRef.hpp
     include/IfdkObjects/Instance/RefCollection.hpp
     include/IfdkObjects/Instance/GenericRefCollection.hpp
     include/IfdkObjects/Instance/Children.hpp

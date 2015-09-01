@@ -42,6 +42,7 @@ class InstanceRef;
 class ComponentRef;
 class ServiceRef;
 class SubsystemRef;
+class SystemRef;
 class Instance;
 class Component;
 class Subsystem;
@@ -92,6 +93,7 @@ public:
     virtual void enter(ComponentRef &instance) = 0;
     virtual void enter(ServiceRef &instance) = 0;
     virtual void enter(SubsystemRef &instance) = 0;
+    virtual void enter(SystemRef &instance) = 0;
 
     /* Named reference collections */
     virtual void enter(RefCollection &instance, bool isConcrete) = 0;
@@ -149,6 +151,7 @@ public:
     virtual void enter(const ComponentRef &instance) = 0;
     virtual void enter(const ServiceRef &instance) = 0;
     virtual void enter(const SubsystemRef &instance) = 0;
+    virtual void enter(const SystemRef &instance) = 0;
 
     /* Named reference collections */
     virtual void enter(const RefCollection &instance, bool isConcrete) = 0;

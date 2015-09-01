@@ -30,6 +30,8 @@ namespace debug_agent
 namespace core
 {
 
+/* Static definitions */
+
 static const std::string systemName = "bxtn";
 static const std::string systemDescription = "Broxton platform";
 static const std::string systemId = "0";
@@ -38,12 +40,91 @@ static const std::string subsystemName = "cavs";
 static const std::string subsystemDescription = "cAVS subsystem";
 static const std::string subsystemId = "0";
 
+static const std::string collectionName_pipe = "pipes";
+static const std::string collectionName_core = "cores";
+static const std::string collectionName_task = "tasks";
+static const std::string collectionName_subsystem = "subsystems";
+static const std::string collectionName_service = "services";
+static const std::string collectionName_gateway = "gateways";
+static const std::string collectionName_module = "modules";
+
+static const std::vector<std::string> staticTypeCollections = {
+    collectionName_pipe, collectionName_core, collectionName_task
+};
+
+static const std::string typeName_pipe = "pipe";
+static const std::string typeName_core = "core";
+static const std::string typeName_task = "task";
+
+static const std::vector<std::string> staticTypes = {
+    typeName_pipe, typeName_core, typeName_task
+};
+
+static const std::string logServiceTypeName = "fwlogs";
+
+static const std::vector<std::string> staticServiceTypes = {
+    logServiceTypeName
+};
+
+static const std::map<dsp_fw::ConnectorNodeId::Type, std::string> gatewayNames = {
+    { dsp_fw::ConnectorNodeId::kHdaHostOutputClass, "hda-host-out-gateway" },
+    { dsp_fw::ConnectorNodeId::kHdaHostInputClass, "hda-host-in-gateway" },
+    { dsp_fw::ConnectorNodeId::kHdaHostInoutClass, "hda-host-inout-gateway" },
+    { dsp_fw::ConnectorNodeId::kHdaLinkOutputClass, "hda-link-out-gateway" },
+    { dsp_fw::ConnectorNodeId::kHdaLinkInputClass, "hda-link-in-gateway" },
+    { dsp_fw::ConnectorNodeId::kHdaLinkInoutClass, "hda-link-inout-gateway" },
+    { dsp_fw::ConnectorNodeId::kDmicLinkInputClass, "dmic-link-in-gateway" },
+    { dsp_fw::ConnectorNodeId::kI2sLinkOutputClass, "i2s-link-out-gateway" },
+    { dsp_fw::ConnectorNodeId::kI2sLinkInputClass, "i2s-link-in-gateway" },
+    { dsp_fw::ConnectorNodeId::kSlimbusLinkOutputClass, "slimbus-link-out-gateway" },
+    { dsp_fw::ConnectorNodeId::kSlimbusLinkInputClass, "slimbus-link-in-gateway" },
+    { dsp_fw::ConnectorNodeId::kALHLinkOutputClass, "alh-link-out-gateway" },
+    { dsp_fw::ConnectorNodeId::kALHLinkInputClass, "alh-link-in-gateway" }
+};
+
+const cavs::ModuleEntry &ModelConverter::findModuleEntry(uint32_t moduleId,
+    const std::vector<cavs::ModuleEntry> &entries)
+{
+    if (moduleId > entries.size()) {
+        throw Exception("Wrong module id: " + std::to_string(moduleId) + " max: " +
+            std::to_string(entries.size() - 1));
+    }
+    return entries[moduleId];
+}
+
+std::string ModelConverter::findModuleEntryName(uint32_t moduleId,
+    const std::vector<cavs::ModuleEntry> &entries)
+{
+    const cavs::ModuleEntry &entry = findModuleEntry(moduleId, entries);
+    return "module." +
+        util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
+}
+
+std::string ModelConverter::findGatewayTypeName(const cavs::dsp_fw::ConnectorNodeId &connectorId)
+{
+    /* Casting the type into the associated enum */
+    auto connectorType = static_cast<dsp_fw::ConnectorNodeId::Type>(connectorId.val.f.dma_type);
+
+    /* Finding the gateway name */
+    auto it = gatewayNames.find(connectorType);
+    if (it == gatewayNames.end()) {
+        throw Exception("Unknown gateway type: " + std::to_string(connectorId.val.f.dma_type));
+    }
+
+    return it->second;
+}
+
+uint32_t ModelConverter::findGatewayInstanceId(const cavs::dsp_fw::ConnectorNodeId &connectorId)
+{
+    return connectorId.val.f.v_index;
+}
+
 void ModelConverter::getSystemType(type::System &system)
 {
     system.setName(systemName);
     system.getDescription().setValue(systemDescription);
 
-    auto coll = new type::SubsystemRefCollection("subsystems");
+    auto coll = new type::SubsystemRefCollection(collectionName_subsystem);
     coll->add(type::SubsystemRef(subsystemName));
     system.getChildren().add(coll);
 }
@@ -53,7 +134,7 @@ void ModelConverter::getSystemInstance(instance::System &system)
     system.setTypeName(systemName);
     system.setInstanceId(systemId);
 
-    auto coll = new instance::SubsystemRefCollection("subsystems");
+    auto coll = new instance::SubsystemRefCollection(collectionName_subsystem);
     coll->add(instance::SubsystemRef(subsystemName, subsystemId));
     system.getChildren().add(coll);
 
@@ -63,26 +144,6 @@ void ModelConverter::getSubsystemType(type::Subsystem &subsystem,
     const FwConfig &fwConfig, const HwConfig &hwConfig,
     const std::vector<ModuleEntry> &entries)
 {
-    static const std::vector<std::string> staticTypeCollections = {
-        "pipes", "cores", "tasks"
-    };
-
-    static const std::vector<std::string> staticTypes = {
-        "pipe", "core", "task"
-    };
-
-    static const std::vector<std::string> staticServiceTypes = {
-        "fwlogs"
-    };
-
-    static const std::vector<std::string> gateways = {
-        "hda-host-out-gateway",
-        "hda-host-in-gateway",
-        "hda-link-out-gateway",
-        "hda-link-in-gateway",
-        "dmic-link-in-gateway"
-    };
-
     /* Creating meta model */
     subsystem.setName(subsystemName);
     subsystem.getDescription().setValue(subsystemDescription);
@@ -106,7 +167,7 @@ void ModelConverter::getSubsystemType(type::Subsystem &subsystem,
     }
 
     /* Service */
-    auto serviceColl = new type::ServiceRefCollection("services");
+    auto serviceColl = new type::ServiceRefCollection(collectionName_service);
     for (auto &serviceName : staticServiceTypes) {
         serviceColl->add(type::ServiceRef(serviceName));
 
@@ -115,8 +176,10 @@ void ModelConverter::getSubsystemType(type::Subsystem &subsystem,
     children.add(serviceColl);
 
     /* Gateways */
-    auto gatewayColl = new type::ComponentRefCollection("gateways");
-    for (auto &gatewayName : gateways) {
+    auto gatewayColl = new type::ComponentRefCollection(collectionName_gateway);
+    for (auto &gatewayPair : gatewayNames) {
+        const std::string &gatewayName = gatewayPair.second;
+
         gatewayColl->add(type::ComponentRef(gatewayName));
 
         categories.add(new type::ComponentRef(gatewayName));
@@ -124,7 +187,7 @@ void ModelConverter::getSubsystemType(type::Subsystem &subsystem,
     children.add(gatewayColl);
 
     /* Modules*/
-    auto compColl = new type::ComponentRefCollection("modules");
+    auto compColl = new type::ComponentRefCollection(collectionName_module);
     for (auto &module : entries) {
         std::string moduleName =
             util::StringHelper::getStringFromFixedSizeArray(module.name, sizeof(module.name));
@@ -133,6 +196,136 @@ void ModelConverter::getSubsystemType(type::Subsystem &subsystem,
         categories.add(new type::ComponentRef(moduleName));
     }
     children.add(compColl);
+}
+
+void ModelConverter::getSubsystemInstance(ifdk_objects::instance::Subsystem &subsystem,
+    const cavs::FwConfig &fwConfig, const cavs::HwConfig &hwConfig,
+    const std::vector<cavs::ModuleEntry> &entries,
+    const cavs::Topology &topology)
+{
+    subsystem.setTypeName(subsystemName);
+    subsystem.setInstanceId(subsystemId);
+
+    instance::Links &links = subsystem.getLinks();
+
+    /* Parents */
+    subsystem.getParents().add(new instance::SystemRef(systemName, systemId));
+
+    /* Children*/
+    instance::Children &children = subsystem.getChildren();
+
+    /* Pipes */
+    auto pipeCollection = new instance::InstanceRefCollection(collectionName_pipe);
+    for (auto &pipeline : topology.pipelines) {
+        pipeCollection->add(instance::InstanceRef(typeName_pipe, std::to_string(pipeline.id)));
+    }
+    children.add(pipeCollection);
+
+    /* Cores */
+    auto coreCollection = new instance::InstanceRefCollection(collectionName_core);
+    if (!hwConfig.isDspCoreCountValid) {
+        throw Exception("Core count is invalid.");
+    }
+    for (uint32_t coreId = 0; coreId < hwConfig.dspCoreCount; coreId++) {
+        coreCollection->add(instance::InstanceRef(typeName_core, std::to_string(coreId)));
+    }
+    children.add(coreCollection);
+
+    /* Tasks */
+    auto taskCollection = new instance::InstanceRefCollection(collectionName_task);
+    for (auto &schedulersInfo : topology.schedulers) {
+        for (auto &scheduler : schedulersInfo.scheduler_info) {
+            for (auto &task : scheduler.task_info) {
+                taskCollection->add(
+                    instance::InstanceRef(typeName_task, std::to_string(task.task_id)));
+            }
+        }
+    }
+    children.add(taskCollection);
+
+    /* Gateways */
+    auto gatewayCollection = new instance::ComponentRefCollection(collectionName_gateway);
+    for (auto &gateway : topology.gateways) {
+        dsp_fw::ConnectorNodeId connector(gateway.id);
+
+        gatewayCollection->add(instance::ComponentRef(findGatewayTypeName(connector),
+            std::to_string(findGatewayInstanceId(connector))));
+    }
+    children.add(gatewayCollection);
+
+    /* Modules and links to gateway*/
+    auto moduleCollection = new instance::ComponentRefCollection(collectionName_module);
+    for (auto &moduleEntry : topology.moduleInstances) {
+
+        auto &module = moduleEntry.second;
+        uint16_t moduleId, instanceId;
+        Topology::splitModuleInstanceId(module.id, moduleId, instanceId);
+
+        /* Finding the module type to get the type name */
+        auto moduleName = findModuleEntryName(moduleId, entries);
+
+        moduleCollection->add(instance::ComponentRef(moduleName, std::to_string(instanceId)));
+
+        if (module.input_gateway.val.dw != dsp_fw::ConnectorNodeId::kInvalidNodeId) {
+            /* Connected to an input gateway */
+
+            instance::Link l(
+                instance::From(
+                    findGatewayTypeName(module.input_gateway),
+                    std::to_string(findGatewayInstanceId(module.input_gateway)),
+                    std::to_string(0) /* 0-index is dedicated to gateway */
+                ),
+                instance::To(
+                    moduleName,
+                    std::to_string(instanceId),
+                    std::to_string(0)));  /* 0-index is dedicated to gateway */
+
+            links.add(l);
+        }
+
+        if (module.output_gateway.val.dw != dsp_fw::ConnectorNodeId::kInvalidNodeId) {
+            /* Connected to an output gateway */
+
+            instance::Link l(
+                instance::From(
+                    moduleName,
+                    std::to_string(instanceId),
+                    std::to_string(0) /* 0-index is dedicated to gateway */
+                ),
+                instance::To(
+                    findGatewayTypeName(module.output_gateway),
+                    std::to_string(findGatewayInstanceId(module.output_gateway)),
+                    std::to_string(0)));  /* 0-index is dedicated to gateway */
+
+            links.add(l);
+        }
+    }
+    children.add(moduleCollection);
+
+    /* Links between modules */
+    for (auto &link : topology.links) {
+        uint16_t fromModuleId, fromInstanceId;
+        uint16_t toModuleId, toInstanceId;
+
+        Topology::splitModuleInstanceId(link.fromModuleInstanceId, fromModuleId, fromInstanceId);
+        Topology::splitModuleInstanceId(link.toModuleInstanceId, toModuleId, toInstanceId);
+
+        auto fromName = findModuleEntryName(fromModuleId, entries);
+        auto toName = findModuleEntryName(toModuleId, entries);
+
+        instance::Link l(
+            instance::From(
+                fromName,
+                std::to_string(fromInstanceId),
+                std::to_string(link.fromOutputId + 1) /* + 1 because 0 is dedicated to gateway */
+            ),
+            instance::To(
+                toName,
+                std::to_string(toInstanceId),
+                std::to_string(link.toInputId + 1))); /* + 1 because 0 is dedicated to gateway */
+
+        links.add(l);
+    }
 }
 
 void ModelConverter::getSystemCharacteristics(ifdk_objects::type::Characteristics &ch,

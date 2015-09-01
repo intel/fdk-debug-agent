@@ -50,6 +50,7 @@ private:
     virtual void enter(instance::ComponentRef &instance) override;
     virtual void enter(instance::ServiceRef &instance) override;
     virtual void enter(instance::SubsystemRef &instance) override;
+    virtual void enter(instance::SystemRef &instance) override;
 
     /* Named reference collections */
     virtual void enter(instance::RefCollection &instance, bool isConcrete) override;
