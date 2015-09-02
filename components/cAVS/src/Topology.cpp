@@ -26,10 +26,9 @@ namespace debug_agent
 namespace cavs
 {
 
-void LinkCalculator::computeLinksAndGatewayPeers()
+void LinkCalculator::computeLinks()
 {
     mTopology.links.clear();
-    mTopology.gatewayPeers.clear();
 }
 
 }

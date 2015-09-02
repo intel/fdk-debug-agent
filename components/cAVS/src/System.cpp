@@ -262,9 +262,9 @@ void System::getTopology(Topology &topology)
         }
     }
 
-    /* Links and gateway peers */
+    /* Compute links */
     LinkCalculator calculator(topology);
-    calculator.computeLinksAndGatewayPeers();
+    calculator.computeLinks();
 }
 
 }

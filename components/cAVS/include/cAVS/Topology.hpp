@@ -84,10 +84,10 @@ struct Topology
         return moduleInstances == other.moduleInstances &&
             pipelines == other.pipelines &&
             schedulers == other.schedulers &&
-            links == other.links &&
-            gatewayPeers == other.gatewayPeers;
+            links == other.links;
     }
 
+    /** Erase topology's collections of pipes, modules, schedulers, links and gateways */
     void clear()
     {
         moduleInstances.clear();
@@ -95,7 +95,6 @@ struct Topology
         pipelines.clear();
         schedulers.clear();
         links.clear();
-        gatewayPeers.clear();
     }
 
     static uint32_t joinModuleInstanceId(uint16_t moduleId, uint16_t instanceId)
@@ -115,18 +114,15 @@ struct Topology
     std::vector<DSPplProps> pipelines;
     std::vector<DSSchedulersInfo> schedulers;
     std::vector<Link> links;
-
-    /* a gateway peer is a module instance id connected to a gateway */
-    std::vector<uint32_t> gatewayPeers;
 };
 
-/* Calculate links and gateway peers of the supplied topology*/
+/* Calculate links of the supplied topology*/
 class LinkCalculator
 {
 public:
     LinkCalculator(Topology &topology) : mTopology(topology) {}
 
-    void computeLinksAndGatewayPeers();
+    void computeLinks();
 
 private:
     Topology &mTopology;
