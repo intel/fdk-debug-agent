@@ -253,7 +253,7 @@ void System::getTopology(Topology &topology)
 
             DSModuleInstanceProps props;
             handler.getModuleInstanceProps(moduleId, instanceId, props);
-            topology.moduleInstances.push_back(props);
+            topology.moduleInstances[props.id] = props;
         }
         catch (ModuleHandler::Exception &e)
         {

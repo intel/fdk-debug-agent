@@ -23,6 +23,7 @@
 
 #include "cAVS/DynamicSizedFirmwareTypes.hpp"
 #include <vector>
+#include <map>
 #include <assert.h>
 
 namespace debug_agent
@@ -33,6 +34,8 @@ namespace cavs
 /* Describe cAVS topology */
 struct Topology
 {
+    using ModuleCompoundId = uint32_t;
+
     Topology() = default;
     Topology(const Topology&) = default;
     Topology& operator=(const Topology&) = default;
@@ -107,7 +110,7 @@ struct Topology
         moduleId = moduleInstanceId >> 16;
     }
 
-    std::vector<DSModuleInstanceProps> moduleInstances;
+    std::map<ModuleCompoundId, DSModuleInstanceProps> moduleInstances;
     std::vector<dsp_fw::GatewayProps> gateways;
     std::vector<DSPplProps> pipelines;
     std::vector<DSSchedulersInfo> schedulers;
