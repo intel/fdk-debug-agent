@@ -22,9 +22,10 @@
 #pragma once
 
 #include "cAVS/DynamicSizedFirmwareTypes.hpp"
+#include <utility>
 #include <vector>
 #include <map>
-#include <assert.h>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -32,8 +33,21 @@ namespace cavs
 {
 
 /* Describe cAVS topology */
-struct Topology
+class Topology
 {
+public:
+    class Exception final : public std::logic_error
+    {
+    public:
+        explicit Exception(const std::string &what)
+        : std::logic_error(what)
+        {}
+    };
+    /**
+     * To identify a module ID, module ID and module instance D are needed. They are both aggregated
+     * into a ModuleCompoundId: high significant 16 bits are module ID, lower significant 16 bits
+     * are instance ID.
+     */
     using ModuleCompoundId = uint32_t;
 
     Topology() = default;
@@ -43,26 +57,28 @@ struct Topology
     /* Describe a link between two modules */
     struct Link
     {
-        Link(uint32_t pFromModuleInstanceId, uint32_t pFromOutputId, uint32_t pToModuleInstanceId,
-            uint32_t pToInputId) :
-            fromModuleInstanceId(pFromModuleInstanceId), fromOutputId(pFromOutputId),
-            toModuleInstanceId(pToModuleInstanceId), toInputId(pToInputId) {}
+        Link(ModuleCompoundId fromModuleInstanceId, uint32_t fromOutputId,
+             ModuleCompoundId toModuleInstanceId, uint32_t toInputId) :
+            mFromModuleInstanceId(fromModuleInstanceId), mFromOutputId(fromOutputId),
+            mToModuleInstanceId(toModuleInstanceId), mToInputId(toInputId)
+        {}
         Link(const Link&) = default;
         Link& operator=(const Link&) = default;
 
         bool operator==(const Link &other) const
         {
-            return fromModuleInstanceId == other.fromModuleInstanceId &&
-                fromOutputId == other.fromOutputId &&
-                toModuleInstanceId == other.toModuleInstanceId &&
-                toInputId == other.toInputId;
+            return
+                mFromModuleInstanceId == other.mFromModuleInstanceId &&
+                mFromOutputId == other.mFromOutputId &&
+                mToModuleInstanceId == other.mToModuleInstanceId &&
+                mToInputId == other.mToInputId;
         }
 
-        uint32_t fromModuleInstanceId;
-        uint32_t fromOutputId;
+        ModuleCompoundId mFromModuleInstanceId;
+        uint32_t mFromOutputId;
 
-        uint32_t toModuleInstanceId;
-        uint32_t toInputId;
+        ModuleCompoundId mToModuleInstanceId;
+        uint32_t mToInputId;
     };
 
     bool operator==(const Topology &other) const
@@ -97,12 +113,18 @@ struct Topology
         links.clear();
     }
 
-    static uint32_t joinModuleInstanceId(uint16_t moduleId, uint16_t instanceId)
+    /**
+     * Compute Links collection from pipes and modules collections
+     * @throw Topology::Exception
+     */
+    void computeLinks();
+
+    static ModuleCompoundId joinModuleInstanceId(uint16_t moduleId, uint16_t instanceId)
     {
-        return (static_cast<uint32_t>(moduleId) << 16) | instanceId;
+        return (static_cast<ModuleCompoundId>(moduleId) << 16) | instanceId;
     }
 
-    static void splitModuleInstanceId(uint32_t moduleInstanceId,
+    static void splitModuleInstanceId(ModuleCompoundId moduleInstanceId,
         uint16_t &moduleId, uint16_t &instanceId)
     {
         instanceId = moduleInstanceId & 0xFFFF;
@@ -114,18 +136,36 @@ struct Topology
     std::vector<DSPplProps> pipelines;
     std::vector<DSSchedulersInfo> schedulers;
     std::vector<Link> links;
-};
-
-/* Calculate links of the supplied topology*/
-class LinkCalculator
-{
-public:
-    LinkCalculator(Topology &topology) : mTopology(topology) {}
-
-    void computeLinks();
 
 private:
-    Topology &mTopology;
+    /**
+     * @param moduleInstanceId the ModuleCompoundId of the wanted module instance
+     * @return a const reference to the DSModuleInstanceProps which correspond to the
+     *         moduleInstanceId.
+     * @see ModuleCompoundId
+     * @throw Topology::Exception
+     */
+    const DSModuleInstanceProps &getModuleInstance(ModuleCompoundId moduleInstanceId) const;
+
+    using InputId = uint32_t;
+    using Input = std::pair<ModuleCompoundId, InputId>;
+    using InputList = std::vector<Input>;
+
+    using OutputId = uint32_t;
+    using Output = std::pair<ModuleCompoundId, OutputId>;
+    using OutputList = std::vector<Output>;
+
+    void computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
+    void computeModulesPairLink(ModuleCompoundId sourceModuleId,
+                                ModuleCompoundId destinationModuleId,
+                                InputList &unresolvedInputs,
+                                OutputList &unresolvedOutputs);
+
+    void computeInterPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
+
+    void addAllModuleOutputs(OutputList &list, ModuleCompoundId module) const;
+    void addAllModuleInputs(InputList &list, ModuleCompoundId module) const;
+
 };
 
 }

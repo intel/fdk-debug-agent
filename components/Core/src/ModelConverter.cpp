@@ -307,8 +307,8 @@ void ModelConverter::getSubsystemInstance(ifdk_objects::instance::Subsystem &sub
         uint16_t fromModuleId, fromInstanceId;
         uint16_t toModuleId, toInstanceId;
 
-        Topology::splitModuleInstanceId(link.fromModuleInstanceId, fromModuleId, fromInstanceId);
-        Topology::splitModuleInstanceId(link.toModuleInstanceId, toModuleId, toInstanceId);
+        Topology::splitModuleInstanceId(link.mFromModuleInstanceId, fromModuleId, fromInstanceId);
+        Topology::splitModuleInstanceId(link.mToModuleInstanceId, toModuleId, toInstanceId);
 
         auto fromName = findModuleEntryName(fromModuleId, entries);
         auto toName = findModuleEntryName(toModuleId, entries);
@@ -317,12 +317,12 @@ void ModelConverter::getSubsystemInstance(ifdk_objects::instance::Subsystem &sub
             instance::From(
                 fromName,
                 std::to_string(fromInstanceId),
-                std::to_string(link.fromOutputId + 1) /* + 1 because 0 is dedicated to gateway */
+                std::to_string(link.mFromOutputId + 1) /* + 1 because 0 is dedicated to gateway */
             ),
             instance::To(
                 toName,
                 std::to_string(toInstanceId),
-                std::to_string(link.toInputId + 1))); /* + 1 because 0 is dedicated to gateway */
+                std::to_string(link.mToInputId + 1))); /* + 1 because 0 is dedicated to gateway */
 
         links.add(l);
     }

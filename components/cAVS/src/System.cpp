@@ -261,8 +261,7 @@ void System::getTopology(Topology &topology)
     }
 
     /* Compute links */
-    LinkCalculator calculator(topology);
-    calculator.computeLinks();
+    topology.computeLinks();
 }
 
 }
