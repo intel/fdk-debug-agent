@@ -170,11 +170,10 @@ void System::getTopology(Topology &topology)
     if (!mHwConfig.isGatewayCountValid) {
         throw Exception("Gate count is invalid.");
     }
-    const uint32_t gatewayCount = mHwConfig.gatewayCount;
 
     try
     {
-        handler.getGatewaysInfo(gatewayCount, topology.gateways);
+        handler.getGatewaysInfo(mHwConfig.gatewayCount, topology.gateways);
     }
     catch (ModuleHandler::Exception &e)
     {
@@ -185,7 +184,6 @@ void System::getTopology(Topology &topology)
     if (!mFwConfig.isMaxPplCountValid) {
         throw Exception("Max pipeline count is invalid.");
     }
-    const uint32_t maxPplCount = mFwConfig.maxPplCount;
 
     std::vector<uint32_t> pipelineIds;
     try
@@ -220,8 +218,8 @@ void System::getTopology(Topology &topology)
     if (!mHwConfig.isDspCoreCountValid) {
         throw Exception("Core count is invalid.");
     }
-    const uint32_t coreCount = mHwConfig.dspCoreCount;
-    for (uint32_t coreId = 0; coreId < coreCount; coreId++) {
+
+    for (uint32_t coreId = 0; coreId < mHwConfig.dspCoreCount; coreId++) {
         try
         {
             DSSchedulersInfo info;
