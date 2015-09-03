@@ -31,7 +31,8 @@ set(INCS
     include/Util/ByteStreamWriter.hpp
     include/Util/StringHelper.hpp
     include/Util/ExclusiveResource.hpp
-    include/Util/AssertAlways.hpp)
+    include/Util/AssertAlways.hpp
+    include/Util/convert.hpp)
 
 add_library(Util STATIC ${SRCS} ${INCS})
 set_common_settings(Util)
