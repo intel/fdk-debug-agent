@@ -109,6 +109,11 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
             std::shared_ptr<Resource>(new ControlParametersModuleInstanceResource(
             mSystem, mParameterMgrPlatformConnector, moduleName, moduleId)));
 
+        dispatcher->addResource(
+            "/type/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
+            std::shared_ptr<Resource>(new ControlParametersModuleTypeResource(
+            mSystem, mParameterMgrPlatformConnector, moduleName, moduleId)));
+
         moduleId++;
     }
 

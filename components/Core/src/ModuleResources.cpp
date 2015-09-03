@@ -62,7 +62,6 @@ PFWResource::PFWResource(cavs::System &system,
     }
 }
 
-
 std::unique_ptr<CElementHandle> ModuleResource::getModuleControlElement()
     const
 {
@@ -100,6 +99,7 @@ std::unique_ptr<CElementHandle> ModuleResource::getChildElementHandle(
     std::unique_ptr<CElementHandle> childElementHandle(
         getParameterMgrPlatformConnector().createElementHandle(
             moduleElementHandle.getPath() + "/" + childName, error));
+
     if (childElementHandle == nullptr) {
         throw Resource::HttpError(
             Resource::ErrorStatus::BadRequest,
@@ -219,6 +219,42 @@ void ControlParametersModuleInstanceResource::handlePut(const Request &request, 
     }
     std::ostream &out = response.send(ContentTypeHtml);
     out << "<p>Done</p>";
+}
+
+void ControlParametersModuleTypeResource::handleGet(const Request &request, Response &response)
+{
+    /* Checking that the identifiers has been fetched */
+    uint16_t instanceId;
+    convertTo(request.getIdentifierValue("instanceId"), instanceId);
+
+    std::unique_ptr<CElementHandle> moduleElementHandle = getModuleControlElement();
+
+    /* Loop through children to get Settings */
+    std::string controlParameters;
+    uint32_t childrenCount = moduleElementHandle->getChildrenCount();
+    for (uint32_t child = 0; child < childrenCount; child++)
+    {
+        std::unique_ptr<CElementHandle>  childElementHandle = getChildElementHandle(
+            *moduleElementHandle, child);
+
+        uint32_t paramId = getElementMapping(*childElementHandle);
+
+        // Get Structure information from PFW
+        std::string result = childElementHandle->getStructureAsXML();
+        // Remove first line which is XML document header
+        std::size_t endLinePos = result.find("\n");
+        assert(endLinePos != std::string::npos);
+        controlParameters += result.erase(0, endLinePos + 1);
+    }
+
+    std::ostream &out = response.send(ContentTypeXml);
+    out << "<control_parameters Type=\"module-";
+    out << mModuleName;
+    out << "\" Id=\"";
+    out << mModuleId;
+    out << "\">\n";
+    out << controlParameters;
+    out << "</control_parameters>";
 }
 
 }

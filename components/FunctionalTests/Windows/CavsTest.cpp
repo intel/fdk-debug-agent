@@ -567,6 +567,144 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
         ));
 }
 
+TEST_CASE("DebugAgent/cAVS: module type control parameters "
+    "(URL: /type/cavs.module-aec/1/control_parameters)")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial commands */
+    addInitialCommands(commands);
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting system information*/
+    CHECK_NOTHROW(client.request(
+        "/type/cavs.module-aec/1/control_parameters",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "<control_parameters Type=\"module-aec\" Id=\"1\">\n"
+        "<ParameterBlock Name=\"AcousticEchoCanceler\">\n"
+        "  <ParameterBlock Name=\"switch\">\n"
+        "    <EnumParameter Size=\"16\" Name=\"value\">\n"
+        "      <ValuePair Literal=\"off\" Numerical=\"0\"/>\n"
+        "      <ValuePair Literal=\"on\" Numerical=\"3\"/>\n"
+        "    </EnumParameter>\n"
+        "  </ParameterBlock>\n"
+        "  <BitParameterBlock Name=\"sw_flag\">\n"
+        "    <BitParameter Pos=\"0\" Size=\"1\" Max=\"1\" Name=\"aec_1_2\"/>\n"
+        "    <BitParameter Pos=\"1\" Size=\"1\" Max=\"1\" Name=\"aec_1_3\"/>\n"
+        "    <BitParameter Pos=\"2\" Size=\"1\" Max=\"1\" Name=\"aec_1_41\"/>\n"
+        "    <BitParameter Pos=\"3\" Size=\"1\" Max=\"1\" Name=\"aec_1_42\"/>\n"
+        "    <BitParameter Pos=\"4\" Size=\"1\" Max=\"1\" Name=\"aec_1_5\"/>\n"
+        "    <BitParameter Pos=\"5\" Size=\"1\" Max=\"1\" Name=\"aec_1_6\"/>\n"
+        "  </BitParameterBlock>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"1\" Max=\"1096\" Size=\"16\" Name=\"nr_coeffs_real\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"1\" Max=\"548\" Size=\"16\" Name=\"nr_coeffs_complex_1\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"1\" Max=\"548\" Size=\"16\" Name=\"nr_coeffs_complex_2\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"1\" Max=\"995\" Size=\"16\" Name=\"nr_coeffs_complex_3\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"1\" Max=\"995\" Size=\"16\" Name=\"nr_coeffs_complex_4\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"1\" Max=\"995\" Size=\"16\" Name=\"nr_coeffs_complex_5\"/>\n"
+        "  <EnumParameter Size=\"16\" Name=\"b_len\">\n"
+        "    <ValuePair Literal=\"LMS_1 LMS block vector length=1\" Numerical=\"1\"/>\n"
+        "    <ValuePair Literal=\"LMS_2 LMS block vector length=2\" Numerical=\"2\"/>\n"
+        "    <ValuePair Literal=\"LMS_4 LMS block vector length=4\" Numerical=\"4\"/>\n"
+        "    <ValuePair Literal=\"LMS_5 LMS block vector length=5\" Numerical=\"5\"/>\n"
+        "    <ValuePair Literal=\"LMS_8 LMS block vector length=8\" Numerical=\"8\"/>\n"
+        "  </EnumParameter>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"nr_shl_norm\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"12\" Size=\"16\" Name=\"x_max_exp\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"h_max_lim\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"x_max_lim\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"corr_thres\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"sb_meas_shl_ri\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"sb_meas_shl_fa\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"nr_steps_shl_ri\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"nr_steps_shl_fa\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"steps_sig_thresh\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"nr_far_near_shl_ri\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"nr_far_near_shl_fa\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"0\" Max=\"4096\" Size=\"16\" Name=\"factor_near_fa_calc\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"nr_far_near_shl\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"far_near_ld_max\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-12\" Max=\"0\" Size=\"16\" Name=\"x_min_exp\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"steps_sig_thresh1\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"steps_sig_thresh2\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-32768\" Max=\"32767\" Size=\"16\" ArrayLength=\"6\" Name=\"data_shift\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"s_sfloor_attack\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"s_sfloor_decay\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"alpha_smooth_attack\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"alpha_smooth_decay\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"beta_smooth_attack\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"beta_smooth_decay\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"st_detector_sensitivity\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"dt_detector_sensitivity\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"st_step_min\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"st_step_max\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"3\" Fractional=\"12\" Name=\"st_step_mult\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"dt_step_mult\"/>\n"
+        "  <BitParameterBlock Name=\"dt_flag_dependency\">\n"
+        "    <BitParameter Pos=\"0\" Size=\"1\" Max=\"1\" Name=\"subband_0\"/>\n"
+        "    <BitParameter Pos=\"1\" Size=\"1\" Max=\"1\" Name=\"subband_1\"/>\n"
+        "    <BitParameter Pos=\"2\" Size=\"1\" Max=\"1\" Name=\"subband_2\"/>\n"
+        "  </BitParameterBlock>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_0_real\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_1_real\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_1_im\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_2_real\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_2_im\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_3_real\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_3_im\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_4_real\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_4_im\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_5_real\"/>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" ArrayLength=\"25\" Name=\"sub_5_im\"/>\n"
+        "</ParameterBlock>\n"
+        "<ParameterBlock Name=\"NoiseReduction\">\n"
+        "  <ParameterBlock Name=\"switch\">\n"
+        "    <EnumParameter Size=\"16\" Name=\"value\">\n"
+        "      <ValuePair Literal=\"off\" Numerical=\"0\"/>\n"
+        "      <ValuePair Literal=\"on\" Numerical=\"3\"/>\n"
+        "    </EnumParameter>\n"
+        "  </ParameterBlock>\n"
+        "  <IntegerParameter Signed=\"false\" Min=\"0\" Max=\"65535\" Size=\"16\" Name=\"sw_flag\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"atten_factor_min_val\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"2\" Fractional=\"13\" Name=\"ov_est_fac_band_zero\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"2\" Fractional=\"13\" Name=\"ov_est_fac_band_no_zero\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"nr_shl_ri\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"-15\" Max=\"0\" Size=\"16\" Name=\"nr_shl_fa\"/>\n"
+        "  <IntegerParameter Signed=\"true\" Min=\"1\" Max=\"32767\" Size=\"16\" Name=\"min_stat_len\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"atte_ratio\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"correction_value\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"thresh_spe_act\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"noise_lev_enhanc_max\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"noise_lev_enhanc_min\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"noise_lev_enhanc_incre_no_sp\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"noise_lev_enhanc_incre_sp\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"agc_thresh_abs\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"5\" Fractional=\"10\" Name=\"agc_thresh_rel\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"0\" Fractional=\"15\" Name=\"gain_factor\"/>\n"
+        "  <FixedPointParameter Size=\"16\" Integral=\"1\" Fractional=\"14\" Name=\"gain_limit\"/>\n"
+        "</ParameterBlock>\n"
+        "</control_parameters>"
+        ));
+}
+
 TEST_CASE("DebugAgent/cAVS: log type (URL: /type/cavs.fwlogs)")
 {
     /* Creating the mocked device */

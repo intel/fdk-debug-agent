@@ -82,5 +82,18 @@ protected:
     virtual void handlePut(const rest::Request &request, rest::Response &response) override;
 };
 
+/** This resource returns control parameters of a module type of a Subsystem (XML) */
+class ControlParametersModuleTypeResource : public ModuleResource
+{
+public:
+    ControlParametersModuleTypeResource(cavs::System &system,
+        CParameterMgrPlatformConnector &parameterMgrPlatformConnector,
+        const std::string moduleName,
+        const uint16_t moduleId) :
+        ModuleResource(system, parameterMgrPlatformConnector, moduleName, moduleId) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
 }
 }
