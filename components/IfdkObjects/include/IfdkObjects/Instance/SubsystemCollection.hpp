@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "IfdkObjects/VisitablePtrVector.hpp"
+#include "IfdkObjects/Instance/GenericCollection.hpp"
 #include "IfdkObjects/Instance/Subsystem.hpp"
 
 namespace debug_agent
@@ -32,7 +32,7 @@ namespace ifdk_objects
 namespace instance
 {
 
-using SubsystemCollection = VisitablePtrVector<Subsystem, Visitor, ConstVisitor>;
+using SubsystemCollection = GenericCollection<Subsystem>;
 
 }
 }

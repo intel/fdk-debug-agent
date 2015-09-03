@@ -66,6 +66,8 @@ SET(INSTANCE_INCS
     include/IfdkObjects/Instance/Component.hpp
     include/IfdkObjects/Instance/Subsystem.hpp
     include/IfdkObjects/Instance/System.hpp
+    include/IfdkObjects/Instance/BaseCollection.hpp
+    include/IfdkObjects/Instance/GenericCollection.hpp
     include/IfdkObjects/Instance/InstanceCollection.hpp
     include/IfdkObjects/Instance/ComponentCollection.hpp
     include/IfdkObjects/Instance/SubsystemCollection.hpp

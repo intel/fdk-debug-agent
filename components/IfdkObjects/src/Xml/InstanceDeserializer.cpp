@@ -213,30 +213,30 @@ void InstanceDeserializer::enter(Links &instance)
 }
 
 template <class T>
-void InstanceDeserializer::collectionCommon(std::vector<std::shared_ptr<T>> &collection)
+void InstanceDeserializer::collectionCommon(GenericCollection<T> &collection)
 {
     std::size_t childCount = getChildElementCount();
     for (std::size_t i = 0; i < childCount; ++i) {
-        collection.push_back(std::shared_ptr<T>(new T()));
+        collection.add(new T());
     }
 }
 
 void InstanceDeserializer::enter(InstanceCollection &instance)
 {
     pushElement(instance);
-    collectionCommon(instance.getElements());
+    collectionCommon(instance);
 }
 
 void InstanceDeserializer::enter(ComponentCollection &instance)
 {
     pushElement(instance);
-    collectionCommon(instance.getElements());
+    collectionCommon(instance);
 }
 
 void InstanceDeserializer::enter(SubsystemCollection &instance)
 {
     pushElement(instance);
-    collectionCommon(instance.getElements());
+    collectionCommon(instance);
 }
 
 void InstanceDeserializer::leave(bool isConcrete)

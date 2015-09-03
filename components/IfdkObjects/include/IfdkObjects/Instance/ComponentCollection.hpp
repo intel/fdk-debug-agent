@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "IfdkObjects/VisitablePtrVector.hpp"
+#include "IfdkObjects/Instance/GenericCollection.hpp"
 #include "IfdkObjects/Instance/Component.hpp"
 
 namespace debug_agent
@@ -32,7 +32,7 @@ namespace ifdk_objects
 namespace instance
 {
 
-using ComponentCollection = VisitablePtrVector<Component, Visitor, ConstVisitor>;
+using ComponentCollection = GenericCollection<Component>;
 
 }
 }

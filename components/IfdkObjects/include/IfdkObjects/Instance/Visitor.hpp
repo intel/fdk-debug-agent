@@ -64,9 +64,6 @@ using Children = VisitablePtrVector<RefCollection, Visitor, ConstVisitor>;
 using Inputs = VisitableVector<Input, Visitor, ConstVisitor>;
 using Outputs = VisitableVector<Output, Visitor, ConstVisitor>;
 using Links = VisitableVector<Link, Visitor, ConstVisitor>;
-using InstanceCollection = VisitablePtrVector<Instance, Visitor, ConstVisitor>;
-using ComponentCollection = VisitablePtrVector<Component, Visitor, ConstVisitor>;
-using SubsystemCollection = VisitablePtrVector<Subsystem, Visitor, ConstVisitor>;
 using Parents = VisitablePtrVector<Ref, Visitor, ConstVisitor>;
 
 template <class T>
@@ -75,6 +72,12 @@ using InstanceRefCollection = GenericRefCollection<InstanceRef>;
 using ComponentRefCollection = GenericRefCollection<ComponentRef>;
 using ServiceRefCollection = GenericRefCollection<ServiceRef>;
 using SubsystemRefCollection = GenericRefCollection<SubsystemRef>;
+
+template <class T>
+class GenericCollection;
+using InstanceCollection = GenericCollection<Instance>;
+using ComponentCollection = GenericCollection<Component>;
+using SubsystemCollection = GenericCollection<Subsystem>;
 
 /** Visitor that allows to walk into the "instance" data model
  *

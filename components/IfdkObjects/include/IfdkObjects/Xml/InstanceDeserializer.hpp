@@ -100,7 +100,7 @@ private:
     void refCollectionCommon(instance::GenericRefCollection<T> &collection);
 
     template <class T>
-    void collectionCommon(std::vector<std::shared_ptr<T>> &collection);
+    void collectionCommon(instance::GenericCollection<T> &collection);
 };
 
 }

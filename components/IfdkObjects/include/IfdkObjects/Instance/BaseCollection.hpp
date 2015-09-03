@@ -22,7 +22,9 @@
 
 #pragma once
 
-#include "IfdkObjects/Instance/GenericCollection.hpp"
+#include "IfdkObjects/Instance/Instance.hpp"
+#include <vector>
+#include <assert.h>
 
 namespace debug_agent
 {
@@ -31,7 +33,46 @@ namespace ifdk_objects
 namespace instance
 {
 
-using InstanceCollection = GenericCollection<Instance>;
+/**
+ * Base class of instance collections
+ *
+ * Instance collections are not polymorphic, they are collections of one instance type only:
+ * Collection<Instance>
+ * Collection<Component>
+ * Collection<Subsystem>
+ *
+ * Although Component and Subsystem classes derive from Instance class, it's not possible to
+ * retrieve easily each element as instance.
+ *
+ * That's why theses collection will inherit from this base class, that allows access to contained
+ * instances.
+ */
+class BaseCollection
+{
+public:
+    virtual ~BaseCollection() = default;
+
+    virtual void accept(Visitor &visitor, bool isConcrete = true) = 0;
+    virtual void accept(ConstVisitor &visitor, bool isConcrete = true) const = 0;
+
+    /** @return the instance that matches the supplied instanceId, or nullptr if no instance is
+     * found.
+     */
+    virtual std::shared_ptr<Instance> getInstance(const std::string &instanceId) = 0;
+
+    bool operator == (const BaseCollection &other) const NOEXCEPT
+    {
+        if (typeid(*this) != typeid(other)) {
+            return false;
+        }
+
+        return equalsTo(other);
+    }
+
+protected:
+    virtual bool equalsTo(const BaseCollection &other) const NOEXCEPT = 0;
+
+};
 
 }
 }
