@@ -108,7 +108,7 @@ private:
     {
         visitor.enter(me);
 
-        for (auto &type : me.mElementPtrs) {
+        for (auto type : me.mElementPtrs) {
             type->accept(visitor);
         }
 

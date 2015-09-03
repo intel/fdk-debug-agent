@@ -69,7 +69,7 @@ public:
 
     void resize(std::size_t size)
     {
-        return mElements.resize(size);
+        mElements.resize(size);
     }
 
 protected:

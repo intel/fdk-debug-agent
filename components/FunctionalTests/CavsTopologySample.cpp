@@ -83,9 +83,9 @@ DSPinListInfo newEmptyPinList()
 /** Helper function to create pin list */
 DSPinListInfo newPinList(const std::vector<uint32_t> queueIds)
 {
-    DSPinListInfo info;
+    DSPinListInfo info {};
     for (auto queueId : queueIds) {
-        dsp_fw::PinProps props;
+        dsp_fw::PinProps props {};
         props.format = audioFormat;
         props.stream_type = dsp_fw::STREAM_TYPE_PCM;
         props.phys_queue_id = queueId;
@@ -103,7 +103,7 @@ DSModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
     const dsp_fw::ConnectorNodeId &outputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId))
 {
-    DSModuleInstanceProps props;
+    DSModuleInstanceProps props {};
     props.id = Topology::joinModuleInstanceId(type, instance);
     props.input_gateway = inputGateway;
     props.output_gateway = outputGateway;
@@ -115,7 +115,7 @@ DSModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
 /** Helper function to create gateway */
 dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 {
-    dsp_fw::GatewayProps p;
+    dsp_fw::GatewayProps p {};
     p.attribs = 0;
     p.id = connectorId.val.dw;
     return p;
@@ -124,7 +124,7 @@ dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 /** Helper function to create task */
 DSTaskProps newTask(uint32_t id, const std::vector<uint32_t> &ids)
 {
-    DSTaskProps props;
+    DSTaskProps props {};
     props.task_id = id;
     props.module_instance_id = ids;
     return props;
@@ -133,7 +133,7 @@ DSTaskProps newTask(uint32_t id, const std::vector<uint32_t> &ids)
 /** Helper function to create scheduler */
 DSSchedulersInfo newScheduler(const std::vector<DSTaskProps> &tasks)
 {
-    DSSchedulerProps props;
+    DSSchedulerProps props {};
     props.core_id = 0;
     props.task_info = tasks;
 
@@ -147,7 +147,7 @@ DSSchedulersInfo newScheduler(const std::vector<DSTaskProps> &tasks)
 DSPplProps newPipeline(uint32_t id, const std::vector<uint32_t> &instanceIds,
     const std::vector<uint32_t> &taskIds)
 {
-    DSPplProps props;
+    DSPplProps props {};
     props.id = id;
     props.module_instances = instanceIds;
     props.ll_tasks = taskIds;

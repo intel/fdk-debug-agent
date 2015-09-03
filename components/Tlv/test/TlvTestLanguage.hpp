@@ -85,17 +85,14 @@ public:
         mTestLanguageTlvMap(),
         mLanguageDictionary(mTestLanguageTlvMap)
     {
-        helloWrapperPointer = new TlvWrapper<HelloValueType>(hello, isHelloValid);
         mTestLanguageTlvMap[Tags::Hello] =
-            std::unique_ptr<TlvWrapperInterface>(helloWrapperPointer);
+            std::unique_ptr<TlvWrapperInterface>(new TlvWrapper<HelloValueType>(hello, isHelloValid));
 
-        theWrapperPointer = new TlvVectorWrapper<TheValueType>(the);
         mTestLanguageTlvMap[Tags::The] =
-            std::unique_ptr<TlvWrapperInterface>(theWrapperPointer);
+            std::unique_ptr<TlvWrapperInterface>(new TlvVectorWrapper<TheValueType>(the));
 
-        worldWrapperPointer = new TlvWrapper<WorldValueType>(world, isWorldValid);
         mTestLanguageTlvMap[Tags::World] =
-            std::unique_ptr<TlvWrapperInterface>(worldWrapperPointer);
+            std::unique_ptr<TlvWrapperInterface>(new TlvWrapper<WorldValueType>(world, isWorldValid));
     }
 
     const TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override
@@ -103,9 +100,10 @@ public:
         return mLanguageDictionary;
     }
 
-    TlvWrapperInterface *helloWrapperPointer;
-    TlvWrapperInterface *theWrapperPointer;
-    TlvWrapperInterface *worldWrapperPointer;
+    TlvWrapperInterface *getReferenceWrapper(Tags tag)
+    {
+        return mTestLanguageTlvMap[tag].get();
+    }
 
 private:
     TlvDictionary<Tags>::TlvMap mTestLanguageTlvMap;

@@ -43,19 +43,19 @@ TEST_CASE("TlvDictionary", "[Dictionary]")
         tlvWrapper = dictionary.getTlvWrapperForTag
             (static_cast<unsigned int>(TlvTestLanguage::Tags::Hello));
         CHECK(tlvWrapper != nullptr);
-        CHECK(tlvWrapper == testTlvLanguage.helloWrapperPointer);
+        CHECK(tlvWrapper == testTlvLanguage.getReferenceWrapper(TlvTestLanguage::Tags::Hello));
 
         // Retrieve the THE TLV wrapper
         tlvWrapper = dictionary.getTlvWrapperForTag
             (static_cast<unsigned int>(TlvTestLanguage::Tags::The));
         CHECK(tlvWrapper != nullptr);
-        CHECK(tlvWrapper == testTlvLanguage.theWrapperPointer);
+        CHECK(tlvWrapper == testTlvLanguage.getReferenceWrapper(TlvTestLanguage::Tags::The));
 
         // Retrieve the WORLD TLV wrapper
         tlvWrapper = dictionary.getTlvWrapperForTag
             (static_cast<unsigned int>(TlvTestLanguage::Tags::World));
         CHECK(tlvWrapper != nullptr);
-        CHECK(tlvWrapper == testTlvLanguage.worldWrapperPointer);
+        CHECK(tlvWrapper == testTlvLanguage.getReferenceWrapper(TlvTestLanguage::Tags::World));
 
         // Check that unknown tag does not retrieve any TLV wrapper
         tlvWrapper = dictionary.getTlvWrapperForTag

@@ -222,8 +222,11 @@ void ModelConverter::getSubsystemInstance(ifdk_objects::instance::Subsystem &sub
     children.add(pipeCollection);
 
     /* Cores */
-    auto coreCollection = new instance::InstanceRefCollection(collectionName_core);
+    std::shared_ptr<instance::InstanceRefCollection> coreCollection(
+        new instance::InstanceRefCollection(collectionName_core));
+        
     if (!hwConfig.isDspCoreCountValid) {
+
         throw Exception("Core count is invalid.");
     }
     for (uint32_t coreId = 0; coreId < hwConfig.dspCoreCount; coreId++) {
