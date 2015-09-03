@@ -20,45 +20,53 @@
 ********************************************************************************
 */
 
-#include "Core/TypeModel.hpp"
-#include "Core/InstanceModel.hpp"
-#include "cAVS/System.hpp"
-#include "Rest/Server.hpp"
-#include "Util/ExclusiveResource.hpp"
-#include <inttypes.h>
+#pragma once
+
+#include "IfdkObjects/Xml/TypeTraits.hpp"
+#include <map>
+#include <string>
+#include <memory>
 
 namespace debug_agent
 {
 namespace core
 {
 
-/** The debug agent application class */
-class DebugAgent final
+/** Main class of instance data model */
+class TypeModel
 {
 public:
-    /** @throw DebugAgent::Exception */
-    DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port);
-    ~DebugAgent();
+    using TypePtr = std::shared_ptr<ifdk_objects::type::Type>;
+    using SystemPtr = std::shared_ptr<ifdk_objects::type::System>;
 
-    class Exception : public std::logic_error
+    using TypeMap = std::map<std::string, TypePtr>;
+
+    TypeModel(const SystemPtr &systemPtr,
+        const TypeMap &typeMap) :
+        mSystemPtr(systemPtr), mTypeMap(typeMap) {}
+
+    /** @return the system type */
+    SystemPtr getSystem()
     {
-    public:
-        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
-    };
+        return mSystemPtr;
+    }
+
+    /** @return a type by its name, or nullptr if not found */
+    TypePtr getType(const std::string &typeName)
+    {
+        auto it = mTypeMap.find(typeName);
+        if (it == mTypeMap.end()) {
+            return nullptr;
+        }
+        return it->second;
+    }
 
 private:
-    DebugAgent(const DebugAgent&) = delete;
-    DebugAgent& operator=(const DebugAgent&) = delete;
+    TypeModel(const TypeModel&) = delete;
+    TypeModel &operator=(const TypeModel&) = delete;
 
-    std::shared_ptr<TypeModel> createTypeModel();
-    std::shared_ptr<InstanceModel> createInstanceModel();
-
-    std::shared_ptr<rest::Dispatcher> createDispatcher();
-
-    cavs::System mSystem;
-    std::shared_ptr<TypeModel> mTypeModel;
-    util::ExclusiveResource<std::shared_ptr<InstanceModel>> mInstanceModel;
-    rest::Server mRestServer;
+    SystemPtr mSystemPtr;
+    TypeMap mTypeMap;
 };
 
 }

@@ -20,45 +20,34 @@
 ********************************************************************************
 */
 
+#pragma once
+
+#include "Core/BaseModelConverter.hpp"
 #include "Core/TypeModel.hpp"
-#include "Core/InstanceModel.hpp"
 #include "cAVS/System.hpp"
-#include "Rest/Server.hpp"
-#include "Util/ExclusiveResource.hpp"
-#include <inttypes.h>
 
 namespace debug_agent
 {
 namespace core
 {
 
-/** The debug agent application class */
-class DebugAgent final
+/** This class converts cAVS data model to generic type data model */
+class TypeModelConverter final : public BaseModelConverter
 {
 public:
-    /** @throw DebugAgent::Exception */
-    DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port);
-    ~DebugAgent();
+    TypeModelConverter(cavs::System &system) : BaseModelConverter(system) {}
 
-    class Exception : public std::logic_error
-    {
-    public:
-        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
-    };
+    std::shared_ptr<TypeModel> createModel();
 
 private:
-    DebugAgent(const DebugAgent&) = delete;
-    DebugAgent& operator=(const DebugAgent&) = delete;
+    /** Create a Type type */
+    static std::shared_ptr<ifdk_objects::type::System> createSystem();
 
-    std::shared_ptr<TypeModel> createTypeModel();
-    std::shared_ptr<InstanceModel> createInstanceModel();
+    /** Create a Subsystem type */
+    std::shared_ptr<ifdk_objects::type::Subsystem> createSubsystem();
 
-    std::shared_ptr<rest::Dispatcher> createDispatcher();
-
-    cavs::System mSystem;
-    std::shared_ptr<TypeModel> mTypeModel;
-    util::ExclusiveResource<std::shared_ptr<InstanceModel>> mInstanceModel;
-    rest::Server mRestServer;
+    /** Get system characteristics */
+    void getSystemCharacteristics(ifdk_objects::type::Characteristics &characteristics);
 };
 
 }

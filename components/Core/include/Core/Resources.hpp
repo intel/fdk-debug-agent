@@ -22,110 +22,128 @@
 
 #pragma once
 
+#include "Core/TypeModel.hpp"
+#include "Core/InstanceModel.hpp"
 #include "Rest/Resource.hpp"
 #include "cAVS/System.hpp"
+#include "Util/ExclusiveResource.hpp"
 
 namespace debug_agent
 {
 namespace core
 {
 
-class RootResource : public rest::Resource
+using ExclusiveInstanceModel = util::ExclusiveResource<std::shared_ptr<InstanceModel>>;
+
+class SystemResource : public rest::Resource
 {
 public:
-    explicit RootResource(cavs::System &system) : mSystem(system) {}
+    explicit SystemResource(cavs::System &system) : mSystem(system) {}
 protected:
     cavs::System &mSystem;
 };
 
-/** This resource returns the uuid<->module_id mapping table */
-class ModuleEntryResource : public RootResource
-{
-public:
-    ModuleEntryResource(cavs::System &system) : RootResource(system) {}
-protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
-};
-
 /** This resource returns the System Type, containing Subsystems Types (XML) */
-class SystemTypeResource : public RootResource
+class SystemTypeResource : public rest::Resource
 {
 public:
-    SystemTypeResource(cavs::System &system) : RootResource(system) {}
+    SystemTypeResource(TypeModel &model) : mTypeModel(model) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+private:
+    TypeModel &mTypeModel;
 };
 
 /** This resource returns the System instance, containing Subsystem instances (XML) */
-class SystemInstanceResource : public RootResource
+class SystemInstanceResource : public rest::Resource
 {
 public:
-    SystemInstanceResource(cavs::System &system) : RootResource(system) {}
+    SystemInstanceResource(ExclusiveInstanceModel &instanceModel) :
+        mInstanceModel(instanceModel) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+private:
+    ExclusiveInstanceModel &mInstanceModel;
 };
 
 /** This resource returns a subsystem type (XML) */
-class SubsystemTypeResource : public RootResource
+class TypeResource : public rest::Resource
 {
 public:
-    SubsystemTypeResource(cavs::System &system) : RootResource(system) {}
+    TypeResource(TypeModel &model) : mTypeModel(model) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+private:
+    TypeModel &mTypeModel;
 };
 
-/** This resource returns a list of all the Instances of a Subsystem (XML) */
-class SubsystemsInstancesListResource : public RootResource
+class InstanceResource : public rest::Resource
 {
 public:
-    SubsystemsInstancesListResource(cavs::System &system) : RootResource(system) {}
+    InstanceResource(ExclusiveInstanceModel &instanceModel) : mInstanceModel(instanceModel) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+private:
+    ExclusiveInstanceModel &mInstanceModel;
 };
 
-/** This resource returns one Instance of a Subsystem (XML) */
-class SubsystemInstanceResource : public RootResource
+class InstanceCollectionResource : public rest::Resource
 {
 public:
-    SubsystemInstanceResource(cavs::System &system) : RootResource(system) {}
+    InstanceCollectionResource(ExclusiveInstanceModel &instanceModel) :
+        mInstanceModel(instanceModel) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+private:
+    ExclusiveInstanceModel &mInstanceModel;
 };
+
+class RefreshSubsystemResource : public SystemResource
+{
+public:
+    RefreshSubsystemResource(cavs::System &system, ExclusiveInstanceModel &instanceModel) :
+        SystemResource(system), mInstanceModel(instanceModel) {}
+protected:
+    virtual void handlePost(const rest::Request &request, rest::Response &response) override;
+private:
+    ExclusiveInstanceModel &mInstanceModel;
+};
+
 
 /** This resource returns the Log Parameters for an Instance of a Subsystem (XML) */
-class SubsystemInstanceLogParametersResource : public RootResource
+class SubsystemInstanceLogParametersResource : public SystemResource
 {
 public:
-    SubsystemInstanceLogParametersResource(cavs::System &system) : RootResource(system) {}
+    SubsystemInstanceLogParametersResource(cavs::System &system) : SystemResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
     virtual void handlePut(const rest::Request &request, rest::Response &response) override;
 };
 
 /** This resource returns the Log Control Parameters for an Instance of a Subsystem (XML) */
-class SubsystemInstanceLogControlParametersResource : public RootResource
+class SubsystemInstanceLogControlParametersResource : public SystemResource
 {
 public:
-    SubsystemInstanceLogControlParametersResource(cavs::System &system) : RootResource(system) {}
+    SubsystemInstanceLogControlParametersResource(cavs::System &system) : SystemResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
     virtual void handlePut(const rest::Request &request, rest::Response &response) override;
 };
 
 /** This resource returns the Log Parameters for a Subsystem Type (XML) */
-class SubsystemTypeLogParametersResource : public RootResource
+class SubsystemTypeLogParametersResource : public SystemResource
 {
 public:
-    SubsystemTypeLogParametersResource(cavs::System &system) : RootResource(system) {}
+    SubsystemTypeLogParametersResource(cavs::System &system) : SystemResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 };
 
 /** This resource returns the Log Stream for a Subsystem Instance (XML) */
-class SubsystemInstanceLogStreamResource : public RootResource
+class SubsystemInstanceLogStreamResource : public SystemResource
 {
 public:
-    SubsystemInstanceLogStreamResource(cavs::System &system) : RootResource(system) {}
+    SubsystemInstanceLogStreamResource(cavs::System &system) : SystemResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 };

@@ -22,6 +22,8 @@
 
 #include "Core/DebugAgent.hpp"
 #include "Core/Resources.hpp"
+#include "Core/TypeModelConverter.hpp"
+#include "Core/InstanceModelConverter.hpp"
 #include <memory>
 #include <exception>
 
@@ -32,28 +34,41 @@ namespace debug_agent
 namespace core
 {
 
+std::shared_ptr<TypeModel> DebugAgent::createTypeModel()
+{
+    try
+    {
+        TypeModelConverter converter(mSystem);
+        return converter.createModel();
+    }
+    catch (BaseModelConverter::Exception &e)
+    {
+        throw Exception("Can not create type model: " + std::string(e.what()));
+    }
+}
+
+std::shared_ptr<InstanceModel> DebugAgent::createInstanceModel()
+{
+    try
+    {
+        InstanceModelConverter converter(mSystem);
+        return converter.createModel();
+    }
+    catch (BaseModelConverter::Exception &e)
+    {
+        throw Exception("Can not create instance model: " + std::string(e.what()));
+    }
+}
+
 std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 {
     Dispatcher *dispatcher = new rest::Dispatcher();
 
-    dispatcher->addResource("/cAVS/module/entries",
-        std::shared_ptr<Resource>(new ModuleEntryResource(mSystem)));
-
-    /* System */
-    dispatcher->addResource("/type",
-        std::shared_ptr<Resource>(new SystemTypeResource(mSystem)));
-    dispatcher->addResource("/instance",
-        std::shared_ptr<Resource>(new SystemInstanceResource(mSystem)));
-
-    /* Subsystem*/
-    dispatcher->addResource("/type/cavs",
-        std::shared_ptr<Resource>(new SubsystemTypeResource(mSystem)));
-    dispatcher->addResource("/instance/cavs",
-        std::shared_ptr<Resource>(new SubsystemsInstancesListResource(mSystem)));
-    dispatcher->addResource("/instance/cavs/0",
-        std::shared_ptr<Resource>(new SubsystemInstanceResource(mSystem)));
-
-    /* Log service */
+    /* Log service (hardcoded urls)
+     *
+     * Note: putting these hardcoded urls before the real ones because otherwise real urls
+     * will be invoked first, and will fail.
+     */
     dispatcher->addResource("/instance/cavs.fwlogs/0",
         std::shared_ptr<Resource>(new SubsystemInstanceLogParametersResource(mSystem)));
     dispatcher->addResource("/instance/cavs.fwlogs/0/control_parameters",
@@ -63,11 +78,34 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     dispatcher->addResource("/instance/cavs.fwlogs/0/streaming",
         std::shared_ptr<Resource>(new SubsystemInstanceLogStreamResource(mSystem)));
 
+    /* System */
+    dispatcher->addResource("/type",
+        std::shared_ptr<Resource>(new SystemTypeResource(*mTypeModel)));
+    dispatcher->addResource("/instance",
+        std::shared_ptr<Resource>(new SystemInstanceResource(mInstanceModel)));
+
+    /* Other types*/
+    dispatcher->addResource("/type/${type_name}",
+        std::shared_ptr<Resource>(new TypeResource(*mTypeModel)));
+    dispatcher->addResource("/instance/${type_name}",
+        std::shared_ptr<Resource>(new InstanceCollectionResource(mInstanceModel)));
+    dispatcher->addResource("/instance/${type_name}/${instance_id}",
+        std::shared_ptr<Resource>(new InstanceResource(mInstanceModel)));
+
+    /* Refresh special case*/
+    dispatcher->addResource("/instance/cavs/0/refreshed",
+        std::shared_ptr<Resource>(new RefreshSubsystemResource(mSystem, mInstanceModel)));
+
     return std::shared_ptr<rest::Dispatcher>(dispatcher);
 }
 
 DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port)
-try : mSystem(driverFactory), mRestServer(createDispatcher(), port)
+try :
+    /* Order is important! */
+    mSystem(driverFactory),
+    mTypeModel(createTypeModel()),
+    mInstanceModel(createInstanceModel()),
+    mRestServer(createDispatcher(), port)
 {
 }
 catch (rest::Dispatcher::InvalidUriException &e)

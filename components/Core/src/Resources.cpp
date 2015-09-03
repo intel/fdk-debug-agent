@@ -20,7 +20,7 @@
 ********************************************************************************
 */
 #include "Core/Resources.hpp"
-#include "Core/ModelConverter.hpp"
+#include "Core/InstanceModelConverter.hpp"
 #include "Util/Uuid.hpp"
 #include "IfdkObjects/Xml/TypeDeserializer.hpp"
 #include "IfdkObjects/Xml/TypeSerializer.hpp"
@@ -87,60 +87,10 @@ static const std::string getNodeValueFromXPath(const Poco::XML::Document* docume
     }
 }
 
-void ModuleEntryResource::handleGet(const Request &request, Response &response)
-{
-    /* Retrieving module entries, doesn't throw exception */
-    const std::vector<ModuleEntry> &entries = mSystem.getModuleEntries();
-
-    std::ostream &out = response.send(ContentTypeHtml);
-    out << "<p>Module type count: " << entries.size() << "</p>";
-
-    /* Writing the result as an html table */
-    out << "<table border='1'><tr><td>name</td><td>uuid</td><td>module id</td></tr>";
-
-    std::size_t moduleId = 0;
-    for (auto &entry : entries)
-    {
-        out << "<tr>";
-
-        /* Module Name */
-        std::string name(
-            util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name)));
-        out << "<td>" << name << "</td>";
-
-        /* Module uuid */
-        out << "<td>";
-
-        util::Uuid uuid;
-        uuid.fromOtherUuidType(entry.uuid);
-        out << uuid.toString();
-
-        out << "</td>";
-
-        /* The module id is the array index */
-        out << "<td>" << moduleId << "</td>";
-        out << "</tr>";
-
-        moduleId++;
-    }
-    out << "</table>";
-}
-
 void SystemTypeResource::handleGet(const Request &request, Response &response)
 {
-    type::System system;
-
-    try {
-        ModelConverter::getSystemType(system);
-    }
-    catch (ModelConverter::Exception &e)
-    {
-        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
-            "Cannot create system type data model: " + std::string(e.what()));
-    }
-
     xml::TypeSerializer serializer;
-    system.accept(serializer);
+    mTypeModel.getSystem()->accept(serializer);
     std::string xml = serializer.getXml();
 
     std::ostream &out = response.send(ContentTypeXml);
@@ -149,42 +99,33 @@ void SystemTypeResource::handleGet(const Request &request, Response &response)
 
 void SystemInstanceResource::handleGet(const Request &request, Response &response)
 {
-    instance::System system;
-
-    try {
-        ModelConverter::getSystemInstance(system);
-    }
-    catch (ModelConverter::Exception &e)
-    {
-        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
-            "Cannot create system instance data model: " + std::string(e.what()));
-    }
-
     xml::InstanceSerializer serializer;
-    system.accept(serializer);
-    std::string xml = serializer.getXml();
+    {
+        ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
+        if (handle->getResource() == nullptr) {
+            throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
+        }
+        assert(handle->getResource()->getSystem() != nullptr);
+        handle->getResource()->getSystem()->accept(serializer);
+    }
 
+    std::string xml = serializer.getXml();
     std::ostream &out = response.send(ContentTypeXml);
     out << xml;
 }
 
-void SubsystemTypeResource::handleGet(const Request &request, Response &response)
+void TypeResource::handleGet(const Request &request, Response &response)
 {
-    /* Creating meta model */
-    type::Subsystem subsystem;
+    std::string typeName = request.getIdentifierValue("type_name");
+    std::shared_ptr<type::Type> typePtr =
+        mTypeModel.getType(typeName);
 
-    try {
-        ModelConverter::getSubsystemType(subsystem,
-            mSystem.getFwConfig(), mSystem.getHwConfig(), mSystem.getModuleEntries());
-    }
-    catch (ModelConverter::Exception &e)
-    {
-        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
-            "Cannot create subsystem type data model: " + std::string(e.what()));
+    if (typePtr == nullptr) {
+        throw HttpError(Resource::ErrorStatus::BadRequest, "Uknown type: " + typeName);
     }
 
     xml::TypeSerializer serializer;
-    subsystem.accept(serializer);
+    typePtr->accept(serializer);
 
     std::string xml = serializer.getXml();
 
@@ -192,96 +133,80 @@ void SubsystemTypeResource::handleGet(const Request &request, Response &response
     out << xml;
 }
 
-void SubsystemsInstancesListResource::handleGet(const Request &request, Response &response)
+void InstanceCollectionResource::handleGet(const Request &request, Response &response)
 {
-    std::ostream &out = response.send(ContentTypeXml);
-
-    out << "<subsystem_collection>"
-        "    <subsystem Type=\"cavs\" Id=\"0\">"
-        "        <info_parameters>"
-        "            <ParameterBlock Name=\"Free Pages\">"
-        "                <ParameterBlock Name=\"0\">"
-        "                    <EnumParameter Name=\"mem_type\">HP_MEM</EnumParameter>"
-        "                    <IntegerParameter Name=\"pages\">12</IntegerParameter>"
-        "                </ParameterBlock>"
-        "                <ParameterBlock Name=\"1\">"
-        "                    <EnumParameter Name=\"mem_type\">LP_MEM</EnumParameter>"
-        "                    <IntegerParameter Name=\"pages\">13</IntegerParameter>"
-        "                </ParameterBlock>"
-        "            </ParameterBlock>"
-        "        </info_parameters>"
-        "        <parents>"
-        "            <system Type=\"SKL\" Id=\"0\"/>"
-        "        </parents>"
-        "        <children>"
-        "            <collection Name=\"pipes\">"
-        "                <!-- all pipe instances -->"
-        "                <instance Type=\"pipe\" Id=\"0\"/>"
-        "                <instance Type=\"pipe\" Id=\"1\"/>"
-        "            </collection>"
-        "            <collection Name=\"cores\">"
-        "                <!-- all core instances -->"
-        "                <instance Type=\"core\" Id=\"0\"/>"
-        "                <instance Type=\"core\" Id=\"1\"/>"
-        "            </collection>"
-        "            <service_collection Name=\"services\">"
-        "                <service Type=\"fwlogs\" Id=\"0\"/>"
-        "            </service_collection>"
-        "            <component_collection Name=\"modules\">"
-        "                <!-- all module instances -->"
-        "                <component Type=\"module-aec(2)\" Id=\"0\"/>"
-        "                <component Type=\"module-gain(4)\" Id=\"3\"/>"
-        "                <component Type=\"module-copier(1)\" Id=\"2\"/>"
-        "            </component_collection>"
-        "        </children>"
-        "        <!-- links -->"
-        "        <links>"
-        "            <link Id=\"0\">"
-        "                <from Type=\"module-aec(2)\" Id=\"0\" OutputId=\"1\"/>"
-        "                <to Type=\"module-gain(4)\" Id=\"3\" InputId=\"0\"/>"
-        "            </link>"
-        "            <link Id=\"1\">"
-        "                <from Type=\"module-gain(4)\" Id=\"3\" OutputId=\"2\"/>"
-        "                <to Type=\"module-copier(1)\" Id=\"2\" InputId=\"0\"/>"
-        "            </link>"
-        "        </links>"
-        "    </subsystem>"
-        "</subsystem_collection>";
-}
-
-void SubsystemInstanceResource::handleGet(const Request &request, Response &response)
-{
-    Topology topology;
-    try
-    {
-        mSystem.getTopology(topology);
-    }
-    catch (System::Exception &e)
-    {
-        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
-            "Cannot get topology from fw: " + std::string(e.what()));
-    }
-
-    instance::Subsystem subsystem;
-    try
-    {
-        ModelConverter::getSubsystemInstance(subsystem,
-            mSystem.getFwConfig(), mSystem.getHwConfig(), mSystem.getModuleEntries(),
-            topology);
-    }
-    catch (ModelConverter::Exception &e)
-    {
-        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
-            "Cannot create subsystem instance data model: " + std::string(e.what()));
-    }
-
     xml::InstanceSerializer serializer;
-    subsystem.accept(serializer);
+    std::string typeName = request.getIdentifierValue("type_name");
+
+    {
+        ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
+        if (handle->getResource() == nullptr) {
+            throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
+        }
+        std::shared_ptr<instance::BaseCollection> collection =
+            handle->getResource()->getCollection(typeName);
+
+        if (collection == nullptr) {
+            throw HttpError(Resource::ErrorStatus::BadRequest, "Uknown type: " + typeName);
+        }
+
+        collection->accept(serializer);
+    }
 
     std::string xml = serializer.getXml();
-
     std::ostream &out = response.send(ContentTypeXml);
     out << xml;
+}
+
+void InstanceResource::handleGet(const Request &request, Response &response)
+{
+    xml::InstanceSerializer serializer;
+    std::string typeName = request.getIdentifierValue("type_name");
+    std::string instanceId = request.getIdentifierValue("instance_id");
+
+    {
+        ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
+        if (handle->getResource() == nullptr) {
+            throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
+        }
+        std::shared_ptr<instance::Instance> instancePtr =
+            handle->getResource()->getInstance(typeName, instanceId);
+
+        if (instancePtr == nullptr) {
+            throw HttpError(Resource::ErrorStatus::BadRequest, "Uknown instance: type=" +
+                typeName + " instance_id=" + instanceId);
+        }
+
+        instancePtr->accept(serializer);
+    }
+
+    std::string xml = serializer.getXml();
+    std::ostream &out = response.send(ContentTypeXml);
+    out << xml;
+}
+
+
+void RefreshSubsystemResource::handlePost(const Request &request, Response &response)
+{
+    std::shared_ptr<InstanceModel> instanceModel;
+    try
+    {
+        InstanceModelConverter converter(mSystem);
+        instanceModel = converter.createModel();
+    }
+    catch (BaseModelConverter::Exception &e)
+    {
+        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
+            "Cannot refresh instance model: " + std::string(e.what()));
+    }
+
+
+    {
+        ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
+        handle->getResource() = instanceModel;
+    }
+
+    response.send(ContentTypeXml);
 }
 
 void SubsystemInstanceLogParametersResource::handleGet(const Request &request, Response &response)
