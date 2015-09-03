@@ -24,6 +24,7 @@
 #include "Core/Resources.hpp"
 #include "Core/TypeModelConverter.hpp"
 #include "Core/InstanceModelConverter.hpp"
+#include "Core/ModuleResources.hpp"
 #include "cAVS/FirmwareTypes.hpp"
 #include "cAVS/System.hpp"
 #include "Util/StringHelper.hpp"
@@ -107,6 +108,7 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
             "/instance/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
             std::shared_ptr<Resource>(new ControlParametersModuleInstanceResource(
             mSystem, mParameterMgrPlatformConnector, moduleName, moduleId)));
+
         moduleId++;
     }
 
