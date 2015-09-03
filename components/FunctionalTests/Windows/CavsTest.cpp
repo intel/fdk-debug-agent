@@ -43,7 +43,7 @@ using namespace debug_agent::cavs;
 using namespace debug_agent::test_common;
 using namespace debug_agent::util;
 
-static const std::vector<uint8_t> controlParameterPayload =
+static const std::vector<uint8_t> aecControlParameterPayload =
 { 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00,
 0x01, 0x00, 0xF1, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF1, 0xFF, 0xF1, 0xFF,
 0xF1, 0xFF, 0xF1, 0xFF, 0x00, 0x00, 0xF1, 0xFF, 0xF1, 0xFF, 0x00, 0x00, 0xF1, 0xFF, 0x00, 0x00,
@@ -85,6 +85,10 @@ static const std::vector<uint8_t> controlParameterPayload =
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0xAA };
+static const std::vector<uint8_t> nsControlParameterPayload =
+{ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF1, 0xFF, 0xF1, 0xFF, 0x01, 0x00,
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 /** @return the xml file content as string */
 std::string xmlFile(const std::string &name)
@@ -299,8 +303,12 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, InstanceId, ParamId,
-        controlParameterPayload);
-
+        aecControlParameterPayload);
+    commands.addGetModuleParameterCommand(true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, InstanceId, 25,
+        nsControlParameterPayload);
     /* Now using the mocked device
     * --------------------------- */
 
@@ -389,6 +397,29 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
         "  <IntegerParameter Name=\"sub_5_real\">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>\n"
         "  <IntegerParameter Name=\"sub_5_im\">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 43520</IntegerParameter>\n"
         "</ParameterBlock>\n"
+        "<ParameterBlock Name=\"NoiseReduction\">\n"
+        "  <ParameterBlock Name=\"switch\">\n"
+        "    <EnumParameter Name=\"value\">on</EnumParameter>\n"
+        "  </ParameterBlock>\n"
+        "  <IntegerParameter Name=\"sw_flag\">0</IntegerParameter>\n"
+        "  <FixedPointParameter Name=\"atten_factor_min_val\">0.000000000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"ov_est_fac_band_zero\">0.0000000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"ov_est_fac_band_no_zero\">0.0000000000000</FixedPointParameter>\n"
+        "  <IntegerParameter Name=\"nr_shl_ri\">-15</IntegerParameter>\n"
+        "  <IntegerParameter Name=\"nr_shl_fa\">-15</IntegerParameter>\n"
+        "  <IntegerParameter Name=\"min_stat_len\">1</IntegerParameter>\n"
+        "  <FixedPointParameter Name=\"atte_ratio\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"correction_value\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"thresh_spe_act\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"noise_lev_enhanc_max\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"noise_lev_enhanc_min\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"noise_lev_enhanc_incre_no_sp\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"noise_lev_enhanc_incre_sp\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"agc_thresh_abs\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"agc_thresh_rel\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"gain_factor\">0.000000000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"gain_limit\">0.00000000000000</FixedPointParameter>\n"
+        "</ParameterBlock>\n"
         "</control_parameters>"
         ));
 }
@@ -414,7 +445,12 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, InstanceId, ParamId,
-        controlParameterPayload);
+        aecControlParameterPayload);
+    commands.addSetModuleParameterCommand(true,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        moduleId, InstanceId, 25,
+        nsControlParameterPayload);
 
     /* Now using the mocked device
     * --------------------------- */
@@ -500,6 +536,29 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
         "  <IntegerParameter Name=\"sub_4_im\">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>\n"
         "  <IntegerParameter Name=\"sub_5_real\">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>\n"
         "  <IntegerParameter Name=\"sub_5_im\">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 43520</IntegerParameter>\n"
+        "</ParameterBlock>\n"
+        "<ParameterBlock Name=\"NoiseReduction\">\n"
+        "  <ParameterBlock Name=\"switch\">\n"
+        "    <EnumParameter Name=\"value\">on</EnumParameter>\n"
+        "  </ParameterBlock>\n"
+        "  <IntegerParameter Name=\"sw_flag\">0</IntegerParameter>\n"
+        "  <FixedPointParameter Name=\"atten_factor_min_val\">0.000000000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"ov_est_fac_band_zero\">0.0000000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"ov_est_fac_band_no_zero\">0.0000000000000</FixedPointParameter>\n"
+        "  <IntegerParameter Name=\"nr_shl_ri\">-15</IntegerParameter>\n"
+        "  <IntegerParameter Name=\"nr_shl_fa\">-15</IntegerParameter>\n"
+        "  <IntegerParameter Name=\"min_stat_len\">1</IntegerParameter>\n"
+        "  <FixedPointParameter Name=\"atte_ratio\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"correction_value\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"thresh_spe_act\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"noise_lev_enhanc_max\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"noise_lev_enhanc_min\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"noise_lev_enhanc_incre_no_sp\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"noise_lev_enhanc_incre_sp\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"agc_thresh_abs\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"agc_thresh_rel\">0.0000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"gain_factor\">0.000000000000000</FixedPointParameter>\n"
+        "  <FixedPointParameter Name=\"gain_limit\">0.00000000000000</FixedPointParameter>\n"
         "</ParameterBlock>\n"
         "</control_parameters>\n",
         HttpClientSimulator::Status::Ok,
