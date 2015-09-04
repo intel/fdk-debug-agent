@@ -58,7 +58,10 @@ public:
     {
         if (!isValidSize(binaryValueSize)) {
 
-            throw Exception("Invalid binary size for TLV value read");
+            throw Exception(std::string("Invalid binary size (")
+                + std::to_string(binaryValueSize)
+                + " instead of " + std::to_string(sizeof(ValueType))
+                + " bytes) for TLV value read");
         }
         mValue = *(reinterpret_cast<const ValueType *>(binarySource));
         mValid = true;

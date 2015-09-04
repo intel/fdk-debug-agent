@@ -54,9 +54,12 @@ TEST_CASE("I2sCapsTlvWrapper", "[WrapperRead]")
     CHECK(i2sCapsTlvWrapper.isValidSize(i2sCapsValueSize(5) + 3) == false);
 
     // Read invalid size
-    char invalidSizeTlv[1];
-    CHECK_THROWS_MSG(i2sCapsTlvWrapper.readFrom(invalidSizeTlv, i2sCapsValueSize(0) + 1),
-                     "Invalid binary size for TLV value read");
+    const size_t invalidSize = i2sCapsValueSize(0) + 1;
+    char invalidSizeTlv[invalidSize];
+    CHECK_THROWS_MSG(i2sCapsTlvWrapper.readFrom(invalidSizeTlv, invalidSize),
+                     "Invalid binary size ("
+                     + std::to_string(invalidSize)
+                     + " bytes) for a TLV I2sCaps value");
     CHECK(testValueIsValid == false);
 
     // Read inconsistent value (controller_count to high)

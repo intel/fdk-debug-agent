@@ -250,11 +250,13 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
 
         CHECK(unpacker.readNext() == true);
         CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
-            + std::to_string(tTag) + " (size " + std::to_string(tLength)
-            + " bytes): Invalid binary size for TLV value read");
+            + std::to_string(tTag) + ": Invalid binary size ("
+            + std::to_string(tLength) + " instead of multiple of "
+            + std::to_string(sizeof(TheValueType)) + " bytes) for TLV value read");
         CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
-            + std::to_string(wTag) + " (size " + std::to_string(wLength)
-            + " bytes): Invalid binary size for TLV value read");
+            + std::to_string(wTag) + ": Invalid binary size ("
+            + std::to_string(wLength) + " instead of "
+            + std::to_string(sizeof(WorldValueType)) + " bytes) for TLV value read");
 
         CHECK(unpacker.readNext() == false);
 
@@ -342,9 +344,12 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         // Now test the unpacker
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
+
         CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
-            + std::to_string(hTag) + " (size " + std::to_string(hLength)
-            + " bytes): Invalid binary size for TLV value read");
+            + std::to_string(hTag) + ": Invalid binary size ("
+            + std::to_string(hLength) + " instead of "
+            + std::to_string(sizeof(HelloValueType)) + " bytes) for TLV value read");
+
         // Obviously because of the invalid length, the next read will fail because of the random
         // tag value:
         CHECK_THROWS(unpacker.readNext());

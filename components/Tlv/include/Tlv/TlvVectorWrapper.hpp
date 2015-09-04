@@ -59,7 +59,10 @@ public:
     {
         if (!isValidSize(binaryValueSize)) {
 
-            throw Exception("Invalid binary size for TLV value read");
+            throw Exception(std::string("Invalid binary size (")
+                + std::to_string(binaryValueSize)
+                + " instead of multiple of " + std::to_string(sizeof(ValueType))
+                + " bytes) for TLV value read");
         }
         size_t nbElements = binaryValueSize / sizeof(ValueType);
         const ValueType *firstElement = reinterpret_cast<const ValueType *>(binarySource);

@@ -82,7 +82,6 @@ bool TlvUnpack::readNext()
         {
             throw Exception("Error reading value for tag "
                 + std::to_string(tag)
-                + " (size " + std::to_string(length) + " bytes)"
                 + ": " + e.what());
         }
         mReadIndex += length;

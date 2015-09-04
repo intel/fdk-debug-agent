@@ -26,6 +26,7 @@
 #include "Tlv/TlvDictionary.hpp"
 #include "Tlv/TlvWrapper.hpp"
 #include <vector>
+#include <string>
 
 namespace debug_agent
 {
@@ -138,7 +139,9 @@ public:
         {
             if (!isValidSize(binaryValueSize)) {
 
-                throw tlv::TlvWrapperInterface::Exception("Invalid binary size for TLV value read");
+                throw Exception(std::string("Invalid binary size (")
+                    + std::to_string(binaryValueSize)
+                    + " bytes) for a TLV I2sCaps value");
             }
             // First uint32_t is version
             mValue.version = *(reinterpret_cast<const uint32_t *>(binarySource));
