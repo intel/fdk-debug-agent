@@ -29,7 +29,8 @@ set(INCS
     include/Util/PointerHelper.hpp
     include/Util/ByteStreamReader.hpp
     include/Util/ByteStreamWriter.hpp
-    include/Util/StringHelper.hpp)
+    include/Util/StringHelper.hpp
+    include/Util/ExclusiveResource.hpp)
 
 add_library(Util STATIC ${SRCS} ${INCS})
 set_common_settings(Util)
