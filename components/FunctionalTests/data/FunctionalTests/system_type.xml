@@ -1,0 +1,13 @@
+<system_type Name="bxtn">
+    <description>Broxton platform</description>
+    <characteristics/>
+    <info_parameters/>
+    <control_parameters/>
+    <children>
+        <subsystem_collection Name="subsystems">
+            <subsystem_type Name="cavs"/>
+        </subsystem_collection>
+    </children>
+    <inputs/>
+    <outputs/>
+</system_type>

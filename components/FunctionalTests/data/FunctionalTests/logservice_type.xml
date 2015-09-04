@@ -1,0 +1,20 @@
+<service_type Name="fwlogs">
+    <control_parameters>
+        <!-- service generic -->
+        <BooleanParameter Name="Started"/>
+        <ParameterBlock Name="Buffering">
+            <IntegerParameter Name="Size" Size="16" Unit="MegaBytes"/>
+            <BooleanParameter Name="Circular"/>
+        </ParameterBlock>
+        <BooleanParameter Name="PersistsState"/>
+        <!-- service specific -->
+        <EnumParameter Size="8" Name="Verbosity">
+            <ValuePair Numerical="2" Literal="Critical"/>
+            <ValuePair Numerical="3" Literal="High"/>
+            <ValuePair Numerical="4" Literal="Medium"/>
+            <ValuePair Numerical="5" Literal="Low"/>
+            <ValuePair Numerical="6" Literal="Verbose"/>
+        </EnumParameter>
+        <BooleanParameter Name="ViaPTI" Description="Set to 1 if PTI interface is to be used"/>
+    </control_parameters>
+</service_type>

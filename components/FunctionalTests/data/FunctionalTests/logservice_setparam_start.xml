@@ -1,0 +1,13 @@
+<service Direction="Outgoing" Type="fwlogs" Id="0">
+    <parents/>
+    <control_parameters>
+        <BooleanParameter Name="Started">1</BooleanParameter>
+        <ParameterBlock Name="Buffering">
+            <IntegerParameter Name="Size">100</IntegerParameter>
+            <BooleanParameter Name="Circular">0</BooleanParameter>
+        </ParameterBlock>
+        <BooleanParameter Name="PersistsState">0</BooleanParameter>
+        <EnumParameter Name="Verbosity">Verbose</EnumParameter>
+        <BooleanParameter Name="ViaPTI">0</BooleanParameter>
+    </control_parameters>
+</service>

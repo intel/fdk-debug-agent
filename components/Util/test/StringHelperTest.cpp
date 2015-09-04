@@ -61,3 +61,12 @@ TEST_CASE("StringHelper: setStringFromFixedSizeArray")
     StringHelper::setStringToFixedSizeArray(buf.data(), length, std::string("abc"));
     CHECK(buf == std::vector<char>({ 'a', 'b', 'c' }));
 }
+
+TEST_CASE("StringHelper: trim")
+{
+    CHECK(StringHelper::trim(" \n ") == "");
+    CHECK(StringHelper::trim(" \n abc") == "abc");
+    CHECK(StringHelper::trim("abc \n ") == "abc");
+    CHECK(StringHelper::trim(" \n abc \n\r ") == "abc");
+    CHECK(StringHelper::trim(" \n a b c \n ") == "a b c");
+}

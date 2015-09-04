@@ -1,0 +1,13 @@
+<system Id="0" Type="bxtn">
+    <info_parameters/>
+    <control_parameters/>
+    <parents/>
+    <children>
+        <subsystem_collection Name="subsystems">
+            <subsystem Id="0" Type="cavs"/>
+        </subsystem_collection>
+    </children>
+    <inputs/>
+    <outputs/>
+    <links/>
+</system>

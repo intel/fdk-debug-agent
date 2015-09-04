@@ -224,22 +224,23 @@ void SubsystemInstanceLogParametersResource::handleGet(const Request &request, R
     }
 
     std::ostream &out = response.send(ContentTypeXml);
-    out << "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
-        "    <parents/>"
-        "    <control_parameters>"
+    out << "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">\n"
+        "    <parents/>\n"
+        "    <control_parameters>\n"
         "        <BooleanParameter Name=\"Started\">" <<
-                    logParameters.mIsStarted << "</BooleanParameter>"
-        "        <ParameterBlock Name=\"Buffering\">"
-        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
-        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
-        "        </ParameterBlock>"
-        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
+                    logParameters.mIsStarted << "</BooleanParameter>\n"
+        "        <ParameterBlock Name=\"Buffering\">\n"
+        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>\n"
+        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
+        "        </ParameterBlock>\n"
+        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
         "        <EnumParameter Name=\"Verbosity\">" <<
-                    Logger::toString(logParameters.mLevel) << "</EnumParameter>"
+                    Logger::toString(logParameters.mLevel) << "</EnumParameter>\n"
         "        <BooleanParameter Name=\"ViaPTI\">" <<
-                    (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>"
-        "    </control_parameters>"
-        "</service>";
+                    (logParameters.mOutput == Logger::Output::Pti ? 1 : 0)
+                    << "</BooleanParameter>\n"
+        "    </control_parameters>\n"
+        "</service>\n";
 }
 
 void SubsystemInstanceLogParametersResource::handlePut(const Request &request, Response &response)
@@ -310,19 +311,19 @@ void SubsystemInstanceLogControlParametersResource::handleGet(const Request &req
     }
 
     std::ostream &out = response.send(ContentTypeXml);
-    out << "<control_parameters>"
+    out << "<control_parameters>\n"
         "    <BooleanParameter Name=\"Started\">" <<
         logParameters.mIsStarted << "</BooleanParameter>"
-        "    <ParameterBlock Name=\"Buffering\">"
-        "        <IntegerParameter Name=\"Size\">0</IntegerParameter>"
-        "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
-        "    </ParameterBlock>"
-        "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
+        "    <ParameterBlock Name=\"Buffering\">\n"
+        "        <IntegerParameter Name=\"Size\">0</IntegerParameter>\n"
+        "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
+        "    </ParameterBlock>\n"
+        "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
         "    <EnumParameter Name=\"Verbosity\">" <<
-        Logger::toString(logParameters.mLevel) << "</EnumParameter>"
+        Logger::toString(logParameters.mLevel) << "</EnumParameter>\n"
         "    <BooleanParameter Name=\"ViaPTI\">" <<
-        (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>"
-        "</control_parameters>";
+        (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>\n"
+        "</control_parameters>\n";
 }
 
 void SubsystemInstanceLogControlParametersResource::handlePut(const Request &request, Response &response)
@@ -381,27 +382,27 @@ void SubsystemInstanceLogControlParametersResource::handlePut(const Request &req
 void SubsystemTypeLogParametersResource::handleGet(const Request &request, Response &response)
 {
     std::ostream &out = response.send(ContentTypeXml);
-    out << "<service_type Name=\"fwlogs\">"
-        "    <control_parameters>"
-        "        <!-- service generic -->"
-        "        <BooleanParameter Name=\"Started\"/>"
-        "        <ParameterBlock Name=\"Buffering\">"
-        "            <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>"
-        "            <BooleanParameter Name=\"Circular\"/>"
-        "        </ParameterBlock>"
-        "        <BooleanParameter Name=\"PersistsState\"/>"
-        "        <!-- service specific -->"
-        "        <EnumParameter Size=\"8\" Name=\"Verbosity\">"
-        "            <ValuePair Numerical=\"2\" Literal=\"Critical\"/>"
-        "            <ValuePair Numerical=\"3\" Literal=\"High\"/>"
-        "            <ValuePair Numerical=\"4\" Literal=\"Medium\"/>"
-        "            <ValuePair Numerical=\"5\" Literal=\"Low\"/>"
-        "            <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>"
-        "        </EnumParameter>"
+    out << "<service_type Name=\"fwlogs\">\n"
+        "    <control_parameters>\n"
+        "        <!-- service generic -->\n"
+        "        <BooleanParameter Name=\"Started\"/>\n"
+        "        <ParameterBlock Name=\"Buffering\">\n"
+        "            <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>\n"
+        "            <BooleanParameter Name=\"Circular\"/>\n"
+        "        </ParameterBlock>\n"
+        "        <BooleanParameter Name=\"PersistsState\"/>\n"
+        "        <!-- service specific -->\n"
+        "        <EnumParameter Size=\"8\" Name=\"Verbosity\">\n"
+        "            <ValuePair Numerical=\"2\" Literal=\"Critical\"/>\n"
+        "            <ValuePair Numerical=\"3\" Literal=\"High\"/>\n"
+        "            <ValuePair Numerical=\"4\" Literal=\"Medium\"/>\n"
+        "            <ValuePair Numerical=\"5\" Literal=\"Low\"/>\n"
+        "            <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>\n"
+        "        </EnumParameter>\n"
         "        <BooleanParameter Name=\"ViaPTI\" " <<
-                                  "Description=\"Set to 1 if PTI interface is to be used\"/>"
-        "    </control_parameters>"
-        "</service_type>";
+                                  "Description=\"Set to 1 if PTI interface is to be used\"/>\n"
+        "    </control_parameters>\n"
+        "</service_type>\n";
 }
 
 void SubsystemInstanceLogStreamResource::handleGet(const Request &request, Response &response)

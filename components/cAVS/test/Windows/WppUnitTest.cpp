@@ -31,7 +31,7 @@ using namespace debug_agent::test_common;
 /** Unfortunately these tests don't collect firmware log entries because it's not possible on host.
  */
 
-static const char* LogFileName = "data/fw_log_38_entries.etl";
+static const char* LogFileName = "data/cAVS/fw_log_38_entries.etl";
 static const std::size_t LogFileEntryCount = 38;
 
 /** This log entry listener counts retrieved entries */

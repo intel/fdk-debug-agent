@@ -50,3 +50,4 @@ target_link_libraries(FunctionalTests Core TestCommon cAVSTestFramework)
 link_poco(FunctionalTests)
 
 install(TARGETS FunctionalTests RUNTIME DESTINATION tests)
+install(DIRECTORY "data" DESTINATION tests)

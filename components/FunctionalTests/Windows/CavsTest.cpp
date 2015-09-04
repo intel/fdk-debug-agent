@@ -35,12 +35,29 @@
 #include <thread>
 #include <future>
 #include <condition_variable>
+#include <fstream>
 
 using namespace debug_agent;
 using namespace debug_agent::core;
 using namespace debug_agent::cavs;
 using namespace debug_agent::test_common;
 using namespace debug_agent::util;
+
+/** @return the xml file content as string */
+std::string xmlFile(const std::string &name)
+{
+    std::string fileName = "data/FunctionalTests/" + name + ".xml";
+
+    std::ifstream file(fileName);
+    std::string content((std::istreambuf_iterator<char>(file)),
+                         std::istreambuf_iterator<char>());
+
+    if (file.bad()) {
+        throw std::logic_error("Unknown xml file: " + fileName);
+    }
+
+    return StringHelper::trim(content) + "\n"; /* Poco xml library puts a '\n' on the last line. */
+}
 
 /** Helper function to set a module entry */
 void setModuleEntry(ModuleEntry &entry, const std::string &name,
@@ -181,21 +198,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<system_type Name=\"bxtn\">\n"
-        "    <description>Broxton platform</description>\n"
-        "    <characteristics/>\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <children>\n"
-        "        <subsystem_collection Name=\"subsystems\">\n"
-        "            <subsystem_type Name=\"cavs\"/>\n"
-        "        </subsystem_collection>\n"
-        "    </children>\n"
-        "    <inputs/>\n"
-        "    <outputs/>\n"
-        "</system_type>\n"
-        ));
-
+        xmlFile("system_type")));
 
     /* 2: Getting system instance */
     CHECK_NOTHROW(client.request(
@@ -204,21 +207,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<system Id=\"0\" Type=\"bxtn\">\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <parents/>\n"
-        "    <children>\n"
-        "        <subsystem_collection Name=\"subsystems\">\n"
-        "            <subsystem Id=\"0\" Type=\"cavs\"/>\n"
-        "        </subsystem_collection>\n"
-        "    </children>\n"
-        "    <inputs/>\n"
-        "    <outputs/>\n"
-        "    <links/>\n"
-        "</system>\n"
-        ));
-
+        xmlFile("system_instance")));
 
     /* 3 Getting subsystem type*/
     CHECK_NOTHROW(client.request(
@@ -227,88 +216,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<subsystem_type Name=\"cavs\">\n"
-        "    <description>cAVS subsystem</description>\n"
-        "    <characteristics>\n"
-        "        <characteristic Name=\"Firmware version\">1.2.3.4</characteristic>\n"
-        "        <characteristic Name=\"Maximum number of pipelines instances\">10"
-        "</characteristic>\n"
-        "        <characteristic Name=\"Current total number of module entries loaded "
-        "into the DSP\">7</characteristic>\n"
-        "        <characteristic Name=\"Number of cores\">1</characteristic>\n"
-        "        <characteristic Name=\"Total number of DMA gateways\">5"
-        "</characteristic>\n"
-        "    </characteristics>\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <children>\n"
-        "        <collection Name=\"pipes\">\n"
-        "            <type Name=\"pipe\"/>\n"
-        "        </collection>\n"
-        "        <collection Name=\"cores\">\n"
-        "            <type Name=\"core\"/>\n"
-        "        </collection>\n"
-        "        <collection Name=\"tasks\">\n"
-        "            <type Name=\"task\"/>\n"
-        "        </collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service_type Name=\"fwlogs\"/>\n"
-        "        </service_collection>\n"
-        "        <component_collection Name=\"gateways\">\n"
-        "            <component_type Name=\"hda-host-out-gateway\"/>\n"
-        "            <component_type Name=\"hda-host-in-gateway\"/>\n"
-        "            <component_type Name=\"hda-host-inout-gateway\"/>\n"
-        "            <component_type Name=\"hda-link-out-gateway\"/>\n"
-        "            <component_type Name=\"hda-link-in-gateway\"/>\n"
-        "            <component_type Name=\"hda-link-inout-gateway\"/>\n"
-        "            <component_type Name=\"dmic-link-in-gateway\"/>\n"
-        "            <component_type Name=\"i2s-link-out-gateway\"/>\n"
-        "            <component_type Name=\"i2s-link-in-gateway\"/>\n"
-        "            <component_type Name=\"slimbus-link-out-gateway\"/>\n"
-        "            <component_type Name=\"slimbus-link-in-gateway\"/>\n"
-        "            <component_type Name=\"alh-link-out-gateway\"/>\n"
-        "            <component_type Name=\"alh-link-in-gateway\"/>\n"
-        "        </component_collection>\n"
-        "        <component_collection Name=\"modules\">\n"
-        "            <component_type Name=\"module.copier\"/>\n"
-        "            <component_type Name=\"module.aec\"/>\n"
-        "            <component_type Name=\"module.gain\"/>\n"
-        "            <component_type Name=\"module.ns\"/>\n"
-        "            <component_type Name=\"module.mixin\"/>\n"
-        "            <component_type Name=\"module.src\"/>\n"
-        "            <component_type Name=\"module.mixout\"/>\n"
-        "        </component_collection>\n"
-        "    </children>\n"
-        "    <inputs/>\n"
-        "    <outputs/>\n"
-        "    <categories>\n"
-        "        <type Name=\"pipe\"/>\n"
-        "        <type Name=\"core\"/>\n"
-        "        <type Name=\"task\"/>\n"
-        "        <service_type Name=\"fwlogs\"/>\n"
-        "        <component_type Name=\"hda-host-out-gateway\"/>\n"
-        "        <component_type Name=\"hda-host-in-gateway\"/>\n"
-        "        <component_type Name=\"hda-host-inout-gateway\"/>\n"
-        "        <component_type Name=\"hda-link-out-gateway\"/>\n"
-        "        <component_type Name=\"hda-link-in-gateway\"/>\n"
-        "        <component_type Name=\"hda-link-inout-gateway\"/>\n"
-        "        <component_type Name=\"dmic-link-in-gateway\"/>\n"
-        "        <component_type Name=\"i2s-link-out-gateway\"/>\n"
-        "        <component_type Name=\"i2s-link-in-gateway\"/>\n"
-        "        <component_type Name=\"slimbus-link-out-gateway\"/>\n"
-        "        <component_type Name=\"slimbus-link-in-gateway\"/>\n"
-        "        <component_type Name=\"alh-link-out-gateway\"/>\n"
-        "        <component_type Name=\"alh-link-in-gateway\"/>\n"
-        "        <component_type Name=\"module.copier\"/>\n"
-        "        <component_type Name=\"module.aec\"/>\n"
-        "        <component_type Name=\"module.gain\"/>\n"
-        "        <component_type Name=\"module.ns\"/>\n"
-        "        <component_type Name=\"module.mixin\"/>\n"
-        "        <component_type Name=\"module.src\"/>\n"
-        "        <component_type Name=\"module.mixout\"/>\n"
-        "    </categories>\n"
-        "</subsystem_type>\n"
-        ));
+        xmlFile("subsystem_type")));
 
     /* 4: Getting subsystem instance collection*/
     CHECK_NOTHROW(client.request(
@@ -317,81 +225,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<subsystem_collection>\n"
-        "    <subsystem Id=\"0\" Type=\"cavs\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents>\n"
-        "            <system Id=\"0\" Type=\"bxtn\"/>\n"
-        "        </parents>\n"
-        "        <children>\n"
-        "            <collection Name=\"pipes\">\n"
-        "                <instance Id=\"1\" Type=\"pipe\"/>\n"
-        "                <instance Id=\"2\" Type=\"pipe\"/>\n"
-        "                <instance Id=\"3\" Type=\"pipe\"/>\n"
-        "                <instance Id=\"4\" Type=\"pipe\"/>\n"
-        "            </collection>\n"
-        "            <collection Name=\"cores\">\n"
-        "                <instance Id=\"0\" Type=\"core\"/>\n"
-        "            </collection>\n"
-        "            <collection Name=\"tasks\">\n"
-        "                <instance Id=\"1\" Type=\"task\"/>\n"
-        "                <instance Id=\"2\" Type=\"task\"/>\n"
-        "                <instance Id=\"3\" Type=\"task\"/>\n"
-        "                <instance Id=\"9\" Type=\"task\"/>\n"
-        "                <instance Id=\"4\" Type=\"task\"/>\n"
-        "                <instance Id=\"5\" Type=\"task\"/>\n"
-        "                <instance Id=\"6\" Type=\"task\"/>\n"
-        "            </collection>\n"
-        "            <component_collection Name=\"gateways\">\n"
-        "                <component Id=\"1\" Type=\"hda-host-in-gateway\"/>\n"
-        "                <component Id=\"2\" Type=\"hda-host-in-gateway\"/>\n"
-        "                <component Id=\"1\" Type=\"hda-link-out-gateway\"/>\n"
-        "                <component Id=\"1\" Type=\"dmic-link-in-gateway\"/>\n"
-        "                <component Id=\"1\" Type=\"hda-host-out-gateway\"/>\n"
-        "            </component_collection>\n"
-        "            <component_collection Name=\"modules\">\n"
-        "                <component Id=\"1\" Type=\"module.copier\"/>\n"
-        "                <component Id=\"2\" Type=\"module.aec\"/>\n"
-        "                <component Id=\"5\" Type=\"module.aec\"/>\n"
-        "                <component Id=\"1\" Type=\"module.gain\"/>\n"
-        "                <component Id=\"4\" Type=\"module.gain\"/>\n"
-        "                <component Id=\"5\" Type=\"module.gain\"/>\n"
-        "                <component Id=\"9\" Type=\"module.gain\"/>\n"
-        "                <component Id=\"2\" Type=\"module.ns\"/>\n"
-        "                <component Id=\"6\" Type=\"module.ns\"/>\n"
-        "                <component Id=\"1\" Type=\"module.mixin\"/>\n"
-        "                <component Id=\"0\" Type=\"module.src\"/>\n"
-        "                <component Id=\"3\" Type=\"module.mixout\"/>\n"
-        "            </component_collection>\n"
-        "        </children>\n"
-        "        <inputs/>\n"
-        "        <outputs/>\n"
-        "        <links>\n"
-        "            <link>\n"
-        "                <from Id=\"1\" OutputId=\"0\" Type=\"hda-host-in-gateway\"/>\n"
-        "                <to Id=\"1\" InputId=\"0\" Type=\"module.copier\"/>\n"
-        "            </link>\n"
-        "            <link>\n"
-        "                <from Id=\"1\" OutputId=\"0\" Type=\"dmic-link-in-gateway\"/>\n"
-        "                <to Id=\"1\" InputId=\"0\" Type=\"module.gain\"/>\n"
-        "            </link>\n"
-        "            <link>\n"
-        "                <from Id=\"2\" OutputId=\"0\" Type=\"hda-host-in-gateway\"/>\n"
-        "                <to Id=\"4\" InputId=\"0\" Type=\"module.gain\"/>\n"
-        "            </link>\n"
-        "            <link>\n"
-        "                <from Id=\"9\" OutputId=\"0\" Type=\"module.gain\"/>\n"
-        "                <to Id=\"1\" InputId=\"0\" Type=\"hda-link-out-gateway\"/>\n"
-        "            </link>\n"
-        "            <link>\n"
-        "                <from Id=\"3\" OutputId=\"0\" Type=\"module.mixout\"/>\n"
-        "                <to Id=\"1\" InputId=\"0\" Type=\"hda-host-out-gateway\"/>\n"
-        "            </link>\n"
-        "        </links>\n"
-        "    </subsystem>\n"
-        "</subsystem_collection>\n"
-        ));
+        xmlFile("subsystem_instance_collection")));
 
     /* 4: Getting one subsystem instance*/
     CHECK_NOTHROW(client.request(
@@ -400,123 +234,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<subsystem Id=\"0\" Type=\"cavs\">\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <parents>\n"
-        "        <system Id=\"0\" Type=\"bxtn\"/>\n"
-        "    </parents>\n"
-        "    <children>\n"
-        "        <collection Name=\"pipes\">\n"
-        "            <instance Id=\"1\" Type=\"pipe\"/>\n"
-        "            <instance Id=\"2\" Type=\"pipe\"/>\n"
-        "            <instance Id=\"3\" Type=\"pipe\"/>\n"
-        "            <instance Id=\"4\" Type=\"pipe\"/>\n"
-        "        </collection>\n"
-        "        <collection Name=\"cores\">\n"
-        "            <instance Id=\"0\" Type=\"core\"/>\n"
-        "        </collection>\n"
-        "        <collection Name=\"tasks\">\n"
-        "            <instance Id=\"1\" Type=\"task\"/>\n"
-        "            <instance Id=\"2\" Type=\"task\"/>\n"
-        "            <instance Id=\"3\" Type=\"task\"/>\n"
-        "            <instance Id=\"9\" Type=\"task\"/>\n"
-        "            <instance Id=\"4\" Type=\"task\"/>\n"
-        "            <instance Id=\"5\" Type=\"task\"/>\n"
-        "            <instance Id=\"6\" Type=\"task\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"gateways\">\n"
-        "            <component Id=\"1\" Type=\"hda-host-in-gateway\"/>\n"
-        "            <component Id=\"2\" Type=\"hda-host-in-gateway\"/>\n"
-        "            <component Id=\"1\" Type=\"hda-link-out-gateway\"/>\n"
-        "            <component Id=\"1\" Type=\"dmic-link-in-gateway\"/>\n"
-        "            <component Id=\"1\" Type=\"hda-host-out-gateway\"/>\n"
-        "        </component_collection>\n"
-        "        <component_collection Name=\"modules\">\n"
-        "            <component Id=\"1\" Type=\"module.copier\"/>\n"
-        "            <component Id=\"2\" Type=\"module.aec\"/>\n"
-        "            <component Id=\"5\" Type=\"module.aec\"/>\n"
-        "            <component Id=\"1\" Type=\"module.gain\"/>\n"
-        "            <component Id=\"4\" Type=\"module.gain\"/>\n"
-        "            <component Id=\"5\" Type=\"module.gain\"/>\n"
-        "            <component Id=\"9\" Type=\"module.gain\"/>\n"
-        "            <component Id=\"2\" Type=\"module.ns\"/>\n"
-        "            <component Id=\"6\" Type=\"module.ns\"/>\n"
-        "            <component Id=\"1\" Type=\"module.mixin\"/>\n"
-        "            <component Id=\"0\" Type=\"module.src\"/>\n"
-        "            <component Id=\"3\" Type=\"module.mixout\"/>\n"
-        "        </component_collection>\n"
-        "    </children>\n"
-        "    <inputs/>\n"
-        "    <outputs/>\n"
-        "    <links>\n"
-        "        <link>\n"
-        "            <from Id=\"1\" OutputId=\"0\" Type=\"hda-host-in-gateway\"/>\n"
-        "            <to Id=\"1\" InputId=\"0\" Type=\"module.copier\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"1\" OutputId=\"0\" Type=\"dmic-link-in-gateway\"/>\n"
-        "            <to Id=\"1\" InputId=\"0\" Type=\"module.gain\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"2\" OutputId=\"0\" Type=\"hda-host-in-gateway\"/>\n"
-        "            <to Id=\"4\" InputId=\"0\" Type=\"module.gain\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"9\" OutputId=\"0\" Type=\"module.gain\"/>\n"
-        "            <to Id=\"1\" InputId=\"0\" Type=\"hda-link-out-gateway\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"3\" OutputId=\"0\" Type=\"module.mixout\"/>\n"
-        "            <to Id=\"1\" InputId=\"0\" Type=\"hda-host-out-gateway\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"1\" OutputId=\"1\" Type=\"module.copier\"/>\n"
-        "            <to Id=\"2\" InputId=\"1\" Type=\"module.aec\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"2\" OutputId=\"1\" Type=\"module.aec\"/>\n"
-        "            <to Id=\"5\" InputId=\"1\" Type=\"module.gain\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"4\" OutputId=\"1\" Type=\"module.gain\"/>\n"
-        "            <to Id=\"5\" InputId=\"1\" Type=\"module.aec\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"5\" OutputId=\"1\" Type=\"module.aec\"/>\n"
-        "            <to Id=\"6\" InputId=\"1\" Type=\"module.ns\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"1\" OutputId=\"1\" Type=\"module.mixin\"/>\n"
-        "            <to Id=\"0\" InputId=\"1\" Type=\"module.src\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"0\" OutputId=\"1\" Type=\"module.src\"/>\n"
-        "            <to Id=\"9\" InputId=\"1\" Type=\"module.gain\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"1\" OutputId=\"1\" Type=\"module.gain\"/>\n"
-        "            <to Id=\"2\" InputId=\"1\" Type=\"module.ns\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"2\" OutputId=\"1\" Type=\"module.ns\"/>\n"
-        "            <to Id=\"3\" InputId=\"1\" Type=\"module.mixout\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"5\" OutputId=\"1\" Type=\"module.gain\"/>\n"
-        "            <to Id=\"1\" InputId=\"1\" Type=\"module.mixin\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"6\" OutputId=\"1\" Type=\"module.ns\"/>\n"
-        "            <to Id=\"1\" InputId=\"2\" Type=\"module.mixin\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"1\" OutputId=\"2\" Type=\"module.gain\"/>\n"
-        "            <to Id=\"9\" InputId=\"2\" Type=\"module.gain\"/>\n"
-        "        </link>\n"
-        "    </links>\n"
-        "</subsystem>\n"
-        ));
+        xmlFile("subsystem_instance")));
 }
 
 TEST_CASE("DebugAgent/cAVS: log type (URL: /type/cavs.fwlogs)")
@@ -552,28 +270,7 @@ TEST_CASE("DebugAgent/cAVS: log type (URL: /type/cavs.fwlogs)")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<service_type Name=\"fwlogs\">"
-        "    <control_parameters>"
-        "        <!-- service generic -->"
-        "        <BooleanParameter Name=\"Started\"/>"
-        "        <ParameterBlock Name=\"Buffering\">"
-        "            <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>"
-        "            <BooleanParameter Name=\"Circular\"/>"
-        "        </ParameterBlock>"
-        "        <BooleanParameter Name=\"PersistsState\"/>"
-        "        <!-- service specific -->"
-        "        <EnumParameter Size=\"8\" Name=\"Verbosity\">"
-        "            <ValuePair Numerical=\"2\" Literal=\"Critical\"/>"
-        "            <ValuePair Numerical=\"3\" Literal=\"High\"/>"
-        "            <ValuePair Numerical=\"4\" Literal=\"Medium\"/>"
-        "            <ValuePair Numerical=\"5\" Literal=\"Low\"/>"
-        "            <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>"
-        "        </EnumParameter>"
-        "        <BooleanParameter Name=\"ViaPTI\" Description=\"Set to 1 if PTI interface is to "
-        "be used\"/>"
-        "    </control_parameters>"
-        "</service_type>"
-        ));
+        xmlFile("logservice_type")));
 }
 
 TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
@@ -662,38 +359,13 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
-        "    <parents/>"
-        "    <control_parameters>"
-        "        <BooleanParameter Name=\"Started\">0</BooleanParameter>"
-        "        <ParameterBlock Name=\"Buffering\">"
-        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
-        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
-        "        </ParameterBlock>"
-        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
-        "        <EnumParameter Name=\"Verbosity\">Critical</EnumParameter>"
-        "        <BooleanParameter Name=\"ViaPTI\">1</BooleanParameter>"
-        "    </control_parameters>"
-        "</service>"
-        ));
+        xmlFile("logservice_getparam_stopped")));
 
     /* 2: Setting log parameters ("1;Verbose;SRAM") */
     CHECK_NOTHROW(client.request(
         "/instance/cavs.fwlogs/0",
         HttpClientSimulator::Verb::Put,
-        "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
-        "    <parents/>"
-        "    <control_parameters>"
-        "        <BooleanParameter Name=\"Started\">1</BooleanParameter>"
-        "        <ParameterBlock Name=\"Buffering\">"
-        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
-        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
-        "        </ParameterBlock>"
-        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
-        "        <EnumParameter Name=\"Verbosity\">Verbose</EnumParameter>"
-        "        <BooleanParameter Name=\"ViaPTI\">0</BooleanParameter>"
-        "    </control_parameters>"
-        "</service>",
+        xmlFile("logservice_setparam_start"),
         HttpClientSimulator::Status::Ok,
         "text/html",
         "<p>Done</p>"
@@ -706,20 +378,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
-        "    <parents/>"
-        "    <control_parameters>"
-        "        <BooleanParameter Name=\"Started\">1</BooleanParameter>"
-        "        <ParameterBlock Name=\"Buffering\">"
-        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
-        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
-        "        </ParameterBlock>"
-        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
-        "        <EnumParameter Name=\"Verbosity\">Verbose</EnumParameter>"
-        "        <BooleanParameter Name=\"ViaPTI\">0</BooleanParameter>"
-        "    </control_parameters>"
-        "</service>"
-        ));
+        xmlFile("logservice_getparam_started")));
 }
 
 /** The following test is based on tempos, so it is not 100% safe. These tempos are
@@ -789,19 +448,7 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
     CHECK_NOTHROW(client.request(
         "/instance/cavs.fwlogs/0",
         HttpClientSimulator::Verb::Put,
-        "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">"
-        "    <parents/>"
-        "    <control_parameters>"
-        "        <BooleanParameter Name=\"Started\">1</BooleanParameter>"
-        "        <ParameterBlock Name=\"Buffering\">"
-        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>"
-        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>"
-        "        </ParameterBlock>"
-        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>"
-        "        <EnumParameter Name=\"Verbosity\">Verbose</EnumParameter>"
-        "        <BooleanParameter Name=\"ViaPTI\">0</BooleanParameter>"
-        "    </control_parameters>"
-        "</service>",
+        xmlFile("logservice_setparam_start"),
         HttpClientSimulator::Status::Ok,
         "text/html",
         "<p>Done</p>"

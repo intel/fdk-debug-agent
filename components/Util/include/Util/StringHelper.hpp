@@ -24,6 +24,7 @@
 #include <sstream>
 #include <string>
 #include <assert.h>
+#include <cctype>
 
 /* The visual studio toolchain define the "min" macro, which makes fail the call to
 * std::min(). So undefining it.
@@ -81,6 +82,29 @@ public:
         for (std::size_t i = copySize; i < size; i++) {
             buffer[i] = 0;
         }
+    }
+
+    /* Trim string whitespaces */
+    static std::string trim(const std::string &str)
+    {
+        auto beginIt = str.begin();
+        while (beginIt != str.end() && std::isspace(*beginIt)) {
+            beginIt++;
+        }
+
+        auto endIt = str.rbegin();
+        while (endIt != str.rend() && std::isspace(*endIt)) {
+            endIt++;
+        }
+
+        std::size_t offset = beginIt - str.begin();
+        std::size_t endOffset = str.length() - ( endIt - str.rbegin());
+        std::size_t length = 0;
+        if (endOffset > offset) {
+            length = endOffset - offset;
+        }
+
+        return str.substr(offset, length);
     }
 
 private:

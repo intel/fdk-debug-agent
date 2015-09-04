@@ -1,0 +1,78 @@
+<subsystem_type Name="cavs">
+    <description>cAVS subsystem</description>
+    <characteristics>
+        <characteristic Name="Firmware version">1.2.3.4</characteristic>
+        <characteristic Name="Maximum number of pipelines instances">10</characteristic>
+        <characteristic Name="Current total number of module entries loaded into the DSP">7</characteristic>
+        <characteristic Name="Number of cores">1</characteristic>
+        <characteristic Name="Total number of DMA gateways">5</characteristic>
+    </characteristics>
+    <info_parameters/>
+    <control_parameters/>
+    <children>
+        <collection Name="pipes">
+            <type Name="pipe"/>
+        </collection>
+        <collection Name="cores">
+            <type Name="core"/>
+        </collection>
+        <collection Name="tasks">
+            <type Name="task"/>
+        </collection>
+        <service_collection Name="services">
+            <service_type Name="fwlogs"/>
+        </service_collection>
+        <component_collection Name="gateways">
+            <component_type Name="hda-host-out-gateway"/>
+            <component_type Name="hda-host-in-gateway"/>
+            <component_type Name="hda-host-inout-gateway"/>
+            <component_type Name="hda-link-out-gateway"/>
+            <component_type Name="hda-link-in-gateway"/>
+            <component_type Name="hda-link-inout-gateway"/>
+            <component_type Name="dmic-link-in-gateway"/>
+            <component_type Name="i2s-link-out-gateway"/>
+            <component_type Name="i2s-link-in-gateway"/>
+            <component_type Name="slimbus-link-out-gateway"/>
+            <component_type Name="slimbus-link-in-gateway"/>
+            <component_type Name="alh-link-out-gateway"/>
+            <component_type Name="alh-link-in-gateway"/>
+        </component_collection>
+        <component_collection Name="modules">
+            <component_type Name="module.copier"/>
+            <component_type Name="module.aec"/>
+            <component_type Name="module.gain"/>
+            <component_type Name="module.ns"/>
+            <component_type Name="module.mixin"/>
+            <component_type Name="module.src"/>
+            <component_type Name="module.mixout"/>
+        </component_collection>
+    </children>
+    <inputs/>
+    <outputs/>
+    <categories>
+        <type Name="pipe"/>
+        <type Name="core"/>
+        <type Name="task"/>
+        <service_type Name="fwlogs"/>
+        <component_type Name="hda-host-out-gateway"/>
+        <component_type Name="hda-host-in-gateway"/>
+        <component_type Name="hda-host-inout-gateway"/>
+        <component_type Name="hda-link-out-gateway"/>
+        <component_type Name="hda-link-in-gateway"/>
+        <component_type Name="hda-link-inout-gateway"/>
+        <component_type Name="dmic-link-in-gateway"/>
+        <component_type Name="i2s-link-out-gateway"/>
+        <component_type Name="i2s-link-in-gateway"/>
+        <component_type Name="slimbus-link-out-gateway"/>
+        <component_type Name="slimbus-link-in-gateway"/>
+        <component_type Name="alh-link-out-gateway"/>
+        <component_type Name="alh-link-in-gateway"/>
+        <component_type Name="module.copier"/>
+        <component_type Name="module.aec"/>
+        <component_type Name="module.gain"/>
+        <component_type Name="module.ns"/>
+        <component_type Name="module.mixin"/>
+        <component_type Name="module.src"/>
+        <component_type Name="module.mixout"/>
+    </categories>
+</subsystem_type>
