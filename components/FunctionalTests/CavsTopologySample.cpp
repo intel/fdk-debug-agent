@@ -166,11 +166,18 @@ void CavsTopologySample::createFirwareObjects(
     std::vector<char> &hwConfig)
 {
     /* Filling module entries */
+    uint32_t i = 0;
     for (auto &moduleName: moduleNames)
     {
         ModuleEntry entry;
         StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleName);
+        for (uint32_t &intValue : entry.uuid) {
+            /* filling four bytes with i value */
+            intValue = (i << 24) | (i << 16) | (i << 8) | i;
+        }
+
         modules.push_back(entry);
+        ++i;
     }
 
     /* Filling module instances */

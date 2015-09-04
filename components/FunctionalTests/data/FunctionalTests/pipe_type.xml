@@ -1,0 +1,20 @@
+<type Name="pipe">
+    <description>cAVS pipe type</description>
+    <characteristics/>
+    <info_parameters/>
+    <control_parameters/>
+    <children>
+        <component_collection Name="modules">
+            <component_type Name="module.copier"/>
+            <component_type Name="module.aec"/>
+            <component_type Name="module.gain"/>
+            <component_type Name="module.ns"/>
+            <component_type Name="module.mixin"/>
+            <component_type Name="module.src"/>
+            <component_type Name="module.mixout"/>
+        </component_collection>
+        <collection Name="tasks">
+            <type Name="task"/>
+        </collection>
+    </children>
+</type>

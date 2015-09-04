@@ -53,6 +53,9 @@ const std::vector<std::string> BaseModelConverter::staticTypeCollections = {
 const std::string BaseModelConverter::typeName_pipe = "pipe";
 const std::string BaseModelConverter::typeName_core = "core";
 const std::string BaseModelConverter::typeName_task = "task";
+const std::string BaseModelConverter::typeDescription_pipe = "cAVS pipe type";
+const std::string BaseModelConverter::typeDescription_core = "cAVS core type";
+const std::string BaseModelConverter::typeDescription_task = "cAVS task type";
 
 const std::vector<std::string> BaseModelConverter::staticTypes = {
     typeName_pipe, typeName_core, typeName_task

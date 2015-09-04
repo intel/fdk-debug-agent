@@ -49,11 +49,15 @@ std::string xmlFile(const std::string &name)
     std::string fileName = "data/FunctionalTests/" + name + ".xml";
 
     std::ifstream file(fileName);
+    if (!file.is_open()) {
+        throw std::logic_error("Unknown xml file: " + fileName);
+    }
+
     std::string content((std::istreambuf_iterator<char>(file)),
                          std::istreambuf_iterator<char>());
 
     if (file.bad()) {
-        throw std::logic_error("Unknown xml file: " + fileName);
+        throw std::logic_error("Error while reading xml file: " + fileName);
     }
 
     return StringHelper::trim(content) + "\n"; /* Poco xml library puts a '\n' on the last line. */
@@ -191,50 +195,42 @@ TEST_CASE("DebugAgent/cAVS: topology")
     /* Creating the http client */
     HttpClientSimulator client("localhost");
 
-    /* 1: Getting system type*/
-    CHECK_NOTHROW(client.request(
-        "/type",
-        HttpClientSimulator::Verb::Get,
-        "",
-        HttpClientSimulator::Status::Ok,
-        "text/xml",
-        xmlFile("system_type")));
+    /* Key: the url
+     * Value: a file that contains the expected xml
+     */
+    std::map<std::string, std::string> urlMap = {
+        { "/type",                          "system_type" },
+        { "/instance",                      "system_instance" },
+        { "/type/cavs",                     "subsystem_type" },
+        { "/instance/cavs",                 "subsystem_instance_collection" },
+        { "/instance/cavs/0",               "subsystem_instance" },
+        { "/type/pipe",                     "pipe_type" },
+        { "/type/task",                     "task_type" },
+        { "/type/core",                     "core_type" },
+        { "/type/module.aec",               "module_type" },
+        { "/type/hda-host-out-gateway",     "gateway_type" }
+    };
 
-    /* 2: Getting system instance */
-    CHECK_NOTHROW(client.request(
-        "/instance",
-        HttpClientSimulator::Verb::Get,
-        "",
-        HttpClientSimulator::Status::Ok,
-        "text/xml",
-        xmlFile("system_instance")));
-
-    /* 3 Getting subsystem type*/
-    CHECK_NOTHROW(client.request(
-        "/type/cavs",
-        HttpClientSimulator::Verb::Get,
-        "",
-        HttpClientSimulator::Status::Ok,
-        "text/xml",
-        xmlFile("subsystem_type")));
-
-    /* 4: Getting subsystem instance collection*/
-    CHECK_NOTHROW(client.request(
-        "/instance/cavs",
-        HttpClientSimulator::Verb::Get,
-        "",
-        HttpClientSimulator::Status::Ok,
-        "text/xml",
-        xmlFile("subsystem_instance_collection")));
-
-    /* 4: Getting one subsystem instance*/
-    CHECK_NOTHROW(client.request(
-        "/instance/cavs/0",
-        HttpClientSimulator::Verb::Get,
-        "",
-        HttpClientSimulator::Status::Ok,
-        "text/xml",
-        xmlFile("subsystem_instance")));
+    for (auto it : urlMap) {
+        try{
+            client.request(
+                it.first,
+                HttpClientSimulator::Verb::Get,
+                "",
+                HttpClientSimulator::Status::Ok,
+                "text/xml",
+                xmlFile(it.second));
+        }
+        catch (...)
+        {
+            /* Proving some error information because catch doesn't display them. */
+            std::cout
+                << "------------------------------------------------------------" << std::endl
+                << "Error on url=" << it.first << " file=" << it.second << std::endl
+                << "------------------------------------------------------------" << std::endl;
+            CHECK_NOTHROW(throw);
+        }
+    }
 }
 
 TEST_CASE("DebugAgent/cAVS: log type (URL: /type/cavs.fwlogs)")

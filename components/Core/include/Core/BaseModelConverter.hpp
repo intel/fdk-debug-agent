@@ -75,6 +75,9 @@ protected:
     static const std::string typeName_pipe;
     static const std::string typeName_core;
     static const std::string typeName_task;
+    static const std::string typeDescription_pipe;
+    static const std::string typeDescription_core;
+    static const std::string typeDescription_task;
 
     /* List of static type names, i.e type names that are not retrieved dynamically  */
     static const std::vector<std::string> staticTypes;

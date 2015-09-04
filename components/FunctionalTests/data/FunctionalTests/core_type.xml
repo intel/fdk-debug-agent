@@ -1,0 +1,11 @@
+<type Name="core">
+    <description>cAVS core type</description>
+    <characteristics/>
+    <info_parameters/>
+    <control_parameters/>
+    <children>
+        <collection Name="tasks">
+            <type Name="task"/>
+        </collection>
+    </children>
+</type>

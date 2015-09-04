@@ -40,11 +40,13 @@ public:
     std::shared_ptr<TypeModel> createModel();
 
 private:
-    /** Create a Type type */
-    static std::shared_ptr<ifdk_objects::type::System> createSystem();
-
-    /** Create a Subsystem type */
-    std::shared_ptr<ifdk_objects::type::Subsystem> createSubsystem();
+    std::shared_ptr<ifdk_objects::type::System> createSystem();
+    std::shared_ptr<ifdk_objects::type::Type> createSubsystem();
+    std::shared_ptr<ifdk_objects::type::Type> createPipe();
+    std::shared_ptr<ifdk_objects::type::Type> createTask();
+    std::shared_ptr<ifdk_objects::type::Type> createCore();
+    std::shared_ptr<ifdk_objects::type::Type> createGateway(const std::string &name);
+    std::shared_ptr<ifdk_objects::type::Type> createModule(uint32_t id);
 
     /** Get system characteristics */
     void getSystemCharacteristics(ifdk_objects::type::Characteristics &characteristics);

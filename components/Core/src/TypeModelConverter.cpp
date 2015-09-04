@@ -21,6 +21,7 @@
 */
 #include "Core/TypeModelConverter.hpp"
 #include "Util/StringHelper.hpp"
+#include "Util/Uuid.hpp"
 #include <map>
 
 using namespace debug_agent::cavs;
@@ -35,6 +36,19 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
 {
     TypeModel::TypeMap typeMap;
     typeMap[subsystemName] = createSubsystem();
+    typeMap[typeName_pipe] = createPipe();
+    typeMap[typeName_task] = createTask();
+    typeMap[typeName_core] = createCore();
+
+    /* modules */
+    for (uint32_t moduleId = 0; moduleId < mSystem.getModuleEntries().size(); ++moduleId) {
+        typeMap[findModuleEntryName(moduleId)] = createModule(moduleId);
+    }
+
+    /* gateways */
+    for (auto &it : gatewayNames) {
+        typeMap[it.second] = createGateway(it.second);
+    }
 
     return std::shared_ptr<TypeModel>(
         new TypeModel(createSystem(), typeMap));
@@ -53,7 +67,7 @@ std::shared_ptr<ifdk_objects::type::System> TypeModelConverter::createSystem()
     return system;
 }
 
-std::shared_ptr<Subsystem> TypeModelConverter::createSubsystem()
+std::shared_ptr<Type> TypeModelConverter::createSubsystem()
 {
     auto subsystem = std::shared_ptr<Subsystem>(new Subsystem());
     subsystem->setName(subsystemName);
@@ -109,6 +123,99 @@ std::shared_ptr<Subsystem> TypeModelConverter::createSubsystem()
     children.add(compColl);
 
     return subsystem;
+}
+
+
+std::shared_ptr<Type> TypeModelConverter::createPipe()
+{
+    auto pipe =
+        std::shared_ptr<Type>(new Type());
+
+    pipe->setName(typeName_pipe);
+    pipe->getDescription().setValue(typeDescription_pipe);
+
+    /* Modules*/
+    auto compColl = new ComponentRefCollection(collectionName_module);
+    for (uint32_t i = 0; i < mSystem.getModuleEntries().size(); ++i) {
+        std::string moduleName = findModuleEntryName(i);
+
+        compColl->add(ComponentRef(moduleName));
+    }
+    pipe->getChildren().add(compColl);
+
+    /* Task */
+    auto coll = new TypeRefCollection(collectionName_task);
+    coll->add(TypeRef(typeName_task));
+    pipe->getChildren().add(coll);
+
+    return pipe;
+}
+
+std::shared_ptr<Type> TypeModelConverter::createTask()
+{
+    auto task = std::shared_ptr<Type>(new Type());
+
+    task->setName(typeName_task);
+    task->getDescription().setValue(typeDescription_task);
+
+    /* Modules*/
+    auto compColl = new ComponentRefCollection(collectionName_module);
+    for (uint32_t i = 0; i < mSystem.getModuleEntries().size(); ++i) {
+        std::string moduleName = findModuleEntryName(i);
+
+        compColl->add(ComponentRef(moduleName));
+    }
+    task->getChildren().add(compColl);
+
+    return task;
+}
+
+std::shared_ptr<Type> TypeModelConverter::createCore()
+{
+    auto core = std::shared_ptr<Type>(new Type());
+
+    core->setName(typeName_core);
+    core->getDescription().setValue(typeDescription_core);
+
+    /* Task */
+    auto coll = new TypeRefCollection(collectionName_task);
+    coll->add(TypeRef(typeName_task));
+    core->getChildren().add(coll);
+
+    return core;
+}
+
+std::shared_ptr<Type> TypeModelConverter::createGateway(const std::string &name)
+{
+    auto gateway = std::shared_ptr<Component>(new Component());
+
+    gateway->setName(name);
+    gateway->getDescription().setValue(subsystemDescription + " " + name);
+
+    return gateway;
+}
+
+std::shared_ptr<Type> TypeModelConverter::createModule(uint32_t id)
+{
+    assert(id < mSystem.getModuleEntries().size());
+
+    auto module = std::shared_ptr<Component>(new Component());
+    auto name = findModuleEntryName(id);
+
+    module->setName(name);
+    module->getDescription().setValue(subsystemDescription + " " + name);
+
+    /* Characteristics */
+    Characteristics &ch = module->getCharacteristics();
+    ch.add(Characteristic("ModuleId", std::to_string(id)));
+
+    const ModuleEntry &entry = mSystem.getModuleEntries()[id];
+    util::Uuid uuid;
+    uuid.fromOtherUuidType(entry.uuid);
+
+    ch.add(Characteristic("UUID", uuid.toString()));
+
+    return module;
 }
 
 void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)

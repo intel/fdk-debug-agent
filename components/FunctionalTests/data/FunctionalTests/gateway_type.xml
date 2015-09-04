@@ -1,0 +1,9 @@
+<component_type Name="hda-host-out-gateway">
+    <description>cAVS subsystem hda-host-out-gateway</description>
+    <characteristics/>
+    <info_parameters/>
+    <control_parameters/>
+    <children/>
+    <inputs/>
+    <outputs/>
+</component_type>
