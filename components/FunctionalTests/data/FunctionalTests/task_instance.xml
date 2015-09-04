@@ -1,0 +1,13 @@
+<instance Id="1" Type="task">
+    <info_parameters/>
+    <control_parameters/>
+    <parents>
+        <instance Id="0" Type="core"/>
+        <instance Id="1" Type="pipe"/>
+    </parents>
+    <children>
+        <component_collection Name="modules">
+            <component Id="1" Type="module-copier"/>
+        </component_collection>
+    </children>
+</instance>

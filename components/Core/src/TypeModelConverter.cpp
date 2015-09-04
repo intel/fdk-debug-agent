@@ -70,7 +70,9 @@ std::shared_ptr<ifdk_objects::type::System> TypeModelConverter::createSystem()
     system->setName(systemName);
     system->getDescription().setValue(systemDescription);
 
-    auto coll = new SubsystemRefCollection(collectionName_subsystem);
+    auto coll = std::shared_ptr<SubsystemRefCollection>(
+        new SubsystemRefCollection(collectionName_subsystem));
+
     coll->add(SubsystemRef(subsystemName));
     system->getChildren().add(coll);
 
@@ -94,7 +96,9 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     /* Static types */
     assert(staticTypeCollections.size() == staticTypes.size());
     for (std::size_t i = 0; i < staticTypeCollections.size(); ++i) {
-        auto coll = new TypeRefCollection(staticTypeCollections[i]);
+        auto coll = std::shared_ptr<TypeRefCollection>(
+            new TypeRefCollection(staticTypeCollections[i]));
+
         coll->add(TypeRef(staticTypes[i]));
         children.add(coll);
 
@@ -102,7 +106,9 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     }
 
     /* Service */
-    auto serviceColl = new ServiceRefCollection(collectionName_service);
+    auto serviceColl = std::shared_ptr<ServiceRefCollection>(
+        new ServiceRefCollection(collectionName_service));
+
     for (auto &serviceName : staticServiceTypes) {
         serviceColl->add(ServiceRef(serviceName));
 
@@ -111,7 +117,9 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     children.add(serviceColl);
 
     /* Gateways */
-    auto gatewayColl = new ComponentRefCollection(collectionName_gateway);
+    auto gatewayColl = std::shared_ptr<ComponentRefCollection>(
+        new ComponentRefCollection(collectionName_gateway));
+
     for (auto &gatewayPair : gatewayNames) {
         const std::string &gatewayName = gatewayPair.second;
 
@@ -122,7 +130,9 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     children.add(gatewayColl);
 
     /* Modules*/
-    auto compColl = new ComponentRefCollection(collectionName_module);
+    auto compColl = std::shared_ptr<ComponentRefCollection>(
+        new ComponentRefCollection(collectionName_module));
+
     for (uint32_t i = 0; i < mSystem.getModuleEntries().size(); ++i) {
         std::string moduleName = findModuleEntryName(i);
 
@@ -145,7 +155,9 @@ std::shared_ptr<Type> TypeModelConverter::createPipe()
     pipe->getDescription().setValue(typeDescription_pipe);
 
     /* Modules*/
-    auto compColl = new ComponentRefCollection(collectionName_module);
+    auto compColl = std::shared_ptr<ComponentRefCollection>(
+        new ComponentRefCollection(collectionName_module));
+
     for (uint32_t i = 0; i < mSystem.getModuleEntries().size(); ++i) {
         std::string moduleName = findModuleEntryName(i);
 
@@ -154,7 +166,7 @@ std::shared_ptr<Type> TypeModelConverter::createPipe()
     pipe->getChildren().add(compColl);
 
     /* Task */
-    auto coll = new TypeRefCollection(collectionName_task);
+    auto coll = std::shared_ptr<TypeRefCollection>(new TypeRefCollection(collectionName_task));
     coll->add(TypeRef(typeName_task));
     pipe->getChildren().add(coll);
 
@@ -169,7 +181,9 @@ std::shared_ptr<Type> TypeModelConverter::createTask()
     task->getDescription().setValue(typeDescription_task);
 
     /* Modules*/
-    auto compColl = new ComponentRefCollection(collectionName_module);
+    auto compColl = std::shared_ptr<ComponentRefCollection>(
+        new ComponentRefCollection(collectionName_module));
+
     for (uint32_t i = 0; i < mSystem.getModuleEntries().size(); ++i) {
         std::string moduleName = findModuleEntryName(i);
 
@@ -188,7 +202,7 @@ std::shared_ptr<Type> TypeModelConverter::createCore()
     core->getDescription().setValue(typeDescription_core);
 
     /* Task */
-    auto coll = new TypeRefCollection(collectionName_task);
+    auto coll = std::shared_ptr<TypeRefCollection>(new TypeRefCollection(collectionName_task));
     coll->add(TypeRef(typeName_task));
     core->getChildren().add(coll);
 

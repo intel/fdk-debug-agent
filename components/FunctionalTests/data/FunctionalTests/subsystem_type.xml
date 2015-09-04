@@ -38,13 +38,13 @@
             <component_type Name="alh-link-in-gateway"/>
         </component_collection>
         <component_collection Name="modules">
-            <component_type Name="module.copier"/>
-            <component_type Name="module.aec"/>
-            <component_type Name="module.gain"/>
-            <component_type Name="module.ns"/>
-            <component_type Name="module.mixin"/>
-            <component_type Name="module.src"/>
-            <component_type Name="module.mixout"/>
+            <component_type Name="module-copier"/>
+            <component_type Name="module-aec"/>
+            <component_type Name="module-gain"/>
+            <component_type Name="module-ns"/>
+            <component_type Name="module-mixin"/>
+            <component_type Name="module-src"/>
+            <component_type Name="module-mixout"/>
         </component_collection>
     </children>
     <inputs/>
@@ -67,12 +67,12 @@
         <component_type Name="slimbus-link-in-gateway"/>
         <component_type Name="alh-link-out-gateway"/>
         <component_type Name="alh-link-in-gateway"/>
-        <component_type Name="module.copier"/>
-        <component_type Name="module.aec"/>
-        <component_type Name="module.gain"/>
-        <component_type Name="module.ns"/>
-        <component_type Name="module.mixin"/>
-        <component_type Name="module.src"/>
-        <component_type Name="module.mixout"/>
+        <component_type Name="module-copier"/>
+        <component_type Name="module-aec"/>
+        <component_type Name="module-gain"/>
+        <component_type Name="module-ns"/>
+        <component_type Name="module-mixin"/>
+        <component_type Name="module-src"/>
+        <component_type Name="module-mixout"/>
     </categories>
 </subsystem_type>

@@ -248,16 +248,32 @@ TEST_CASE("DebugAgent/cAVS: topology")
      * Value: a file that contains the expected xml
      */
     std::map<std::string, std::string> urlMap = {
-        { "/type",                              "system_type" },
-        { "/instance",                          "system_instance" },
-        { "/type/cavs",                         "subsystem_type" },
-        { "/instance/cavs",                     "subsystem_instance_collection" },
-        { "/instance/cavs/0",                   "subsystem_instance" },
-        { "/type/cavs.pipe",                    "pipe_type" },
-        { "/type/cavs.task",                    "task_type" },
-        { "/type/cavs.core",                    "core_type" },
-        { "/type/cavs.module.aec",              "module_type" },
-        { "/type/cavs.hda-host-out-gateway",    "gateway_type" }
+        { "/type",                                  "system_type" },
+        { "/instance",                              "system_instance" },
+
+        { "/type/cavs",                             "subsystem_type" },
+        { "/instance/cavs",                         "subsystem_instance_collection" },
+        { "/instance/cavs/0",                       "subsystem_instance" },
+
+        { "/type/cavs.pipe",                        "pipe_type" },
+        { "/instance/cavs.pipe",                    "pipe_instance_collection" },
+        { "/instance/cavs.pipe/1",                  "pipe_instance" },
+
+        { "/type/cavs.task",                        "task_type" },
+        { "/instance/cavs.task",                    "task_instance_collection" },
+        { "/instance/cavs.task/1",                  "task_instance" },
+
+        { "/type/cavs.core",                        "core_type" },
+        { "/instance/cavs.core",                    "core_instance_collection" },
+        { "/instance/cavs.core/0",                  "core_instance" },
+
+        { "/type/cavs.module-aec",                  "module_type" },
+        { "/instance/cavs.module-aec",              "module_instance_collection" },
+        { "/instance/cavs.module-aec/2",            "module_instance" },
+
+        { "/type/cavs.hda-host-out-gateway",        "gateway_type" },
+        { "/instance/cavs.hda-host-out-gateway",    "gateway_instance_collection" },
+        { "/instance/cavs.hda-host-out-gateway/1",  "gateway_instance" },
     };
 
     for (auto it : urlMap) {

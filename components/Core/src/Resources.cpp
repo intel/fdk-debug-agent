@@ -122,7 +122,7 @@ void TypeResource::handleGet(const Request &request, Response &response)
         mTypeModel.getType(typeName);
 
     if (typePtr == nullptr) {
-        throw HttpError(Resource::ErrorStatus::BadRequest, "Uknown type: " + typeName);
+        throw HttpError(Resource::ErrorStatus::BadRequest, "Unknown type: " + typeName);
     }
 
     xml::TypeSerializer serializer;

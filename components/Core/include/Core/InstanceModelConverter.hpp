@@ -25,6 +25,8 @@
 #include "Core/BaseModelConverter.hpp"
 #include "Core/InstanceModel.hpp"
 #include "cAVS/System.hpp"
+#include <set>
+#include <map>
 
 namespace debug_agent
 {
@@ -41,9 +43,61 @@ public:
 
 private:
     std::shared_ptr<ifdk_objects::instance::System> createSystem();
-    std::shared_ptr<ifdk_objects::instance::Subsystem> createSubsystem();
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createSubsystem();
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createPipe();
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createTask();
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createCore();
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createGateway(
+        const cavs::dsp_fw::ConnectorNodeId::Type &gatewayType);
+
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createModule(
+        uint32_t moduleId);
+
+    std::shared_ptr<ifdk_objects::instance::RefCollection> createModuleRef(
+        const std::vector<uint32_t> &compoundIdList);
+
+    /* This method calculates intermediate structures required to compute instance model:
+     * - parents of modules and tasks
+     * - peers connected to a gateway
+     */
+    void initializeIntermediateStructures();
+
+    /* Parents of tasks */
+    struct TaskParents
+    {
+        std::set<uint32_t> pipeIds;
+    };
+
+    /* Parents of modules */
+    struct ModuleParents
+    {
+        std::set<uint32_t> pipeIds;
+        std::set<uint32_t> taskIds;
+    };
+
+    /* Gateway direction */
+    enum class GatewayDirection {
+        Input,
+        Output
+    };
+
+    using TaskParentMap = std::map<uint32_t, TaskParents>;
+    using ModuleParentMap = std::map<uint32_t, ModuleParents>;
+    using GatewayDirectionMap = std::map<uint32_t, GatewayDirection>;
 
     cavs::Topology mTopology;
+
+    /* Intermediate structures */
+    TaskParentMap mTaskParents;
+    ModuleParentMap mModuleParents;
+    GatewayDirectionMap mGatewayDirections;
+
+    /** Add one instance collection in the supplied map. The key of the map is :
+     *  <subsystem name>.<type name>
+     */
+    static void addInstanceCollection(InstanceModel::CollectionMap &map,
+        const std::string &typeName,
+        std::shared_ptr<ifdk_objects::instance::BaseCollection> collection);
 };
 
 }

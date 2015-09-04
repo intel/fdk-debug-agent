@@ -1,0 +1,20 @@
+<collection>
+    <instance Id="0" Type="core">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <subsystem Id="0" Type="cavs"/>
+        </parents>
+        <children>
+            <collection Name="tasks">
+                <instance Id="1" Type="task"/>
+                <instance Id="2" Type="task"/>
+                <instance Id="3" Type="task"/>
+                <instance Id="9" Type="task"/>
+                <instance Id="4" Type="task"/>
+                <instance Id="5" Type="task"/>
+                <instance Id="6" Type="task"/>
+            </collection>
+        </children>
+    </instance>
+</collection>

@@ -1,0 +1,18 @@
+<instance Id="1" Type="pipe">
+    <info_parameters/>
+    <control_parameters/>
+    <parents>
+        <subsystem Id="0" Type="cavs"/>
+    </parents>
+    <children>
+        <collection Name="tasks">
+            <instance Id="1" Type="task"/>
+            <instance Id="2" Type="task"/>
+        </collection>
+        <component_collection Name="modules">
+            <component Id="1" Type="module-copier"/>
+            <component Id="2" Type="module-aec"/>
+            <component Id="5" Type="module-gain"/>
+        </component_collection>
+    </children>
+</instance>

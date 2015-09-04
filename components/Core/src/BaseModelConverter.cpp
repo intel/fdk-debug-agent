@@ -97,7 +97,11 @@ const cavs::ModuleEntry &BaseModelConverter::findModuleEntry(uint32_t moduleId)
 std::string BaseModelConverter::findModuleEntryName(uint32_t moduleId)
 {
     const cavs::ModuleEntry &entry = findModuleEntry(moduleId);
-    return "module." +
+
+    /** According to the SwAS, module type name is "module-<module name>", for instance
+     * "module-aec".
+     */
+    return "module-" +
         util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
 }
 

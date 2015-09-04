@@ -1,5 +1,5 @@
-<component_type Name="module.aec">
-    <description>cAVS subsystem module.aec</description>
+<component_type Name="module-aec">
+    <description>cAVS subsystem module-aec</description>
     <characteristics>
         <characteristic Name="ModuleId">1</characteristic>
         <characteristic Name="UUID">01010101-0101-0101-0101-010101010101</characteristic>

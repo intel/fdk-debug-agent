@@ -1,0 +1,98 @@
+<collection>
+    <instance Id="1" Type="task">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <instance Id="0" Type="core"/>
+            <instance Id="1" Type="pipe"/>
+        </parents>
+        <children>
+            <component_collection Name="modules">
+                <component Id="1" Type="module-copier"/>
+            </component_collection>
+        </children>
+    </instance>
+    <instance Id="2" Type="task">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <instance Id="0" Type="core"/>
+            <instance Id="1" Type="pipe"/>
+        </parents>
+        <children>
+            <component_collection Name="modules">
+                <component Id="2" Type="module-aec"/>
+                <component Id="5" Type="module-gain"/>
+            </component_collection>
+        </children>
+    </instance>
+    <instance Id="3" Type="task">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <instance Id="0" Type="core"/>
+            <instance Id="2" Type="pipe"/>
+        </parents>
+        <children>
+            <component_collection Name="modules">
+                <component Id="4" Type="module-gain"/>
+            </component_collection>
+        </children>
+    </instance>
+    <instance Id="9" Type="task">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <instance Id="0" Type="core"/>
+            <instance Id="2" Type="pipe"/>
+        </parents>
+        <children>
+            <component_collection Name="modules">
+                <component Id="5" Type="module-aec"/>
+                <component Id="6" Type="module-ns"/>
+            </component_collection>
+        </children>
+    </instance>
+    <instance Id="4" Type="task">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <instance Id="0" Type="core"/>
+            <instance Id="3" Type="pipe"/>
+        </parents>
+        <children>
+            <component_collection Name="modules">
+                <component Id="1" Type="module-mixin"/>
+                <component Id="0" Type="module-src"/>
+                <component Id="9" Type="module-gain"/>
+            </component_collection>
+        </children>
+    </instance>
+    <instance Id="5" Type="task">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <instance Id="0" Type="core"/>
+            <instance Id="4" Type="pipe"/>
+        </parents>
+        <children>
+            <component_collection Name="modules">
+                <component Id="1" Type="module-gain"/>
+            </component_collection>
+        </children>
+    </instance>
+    <instance Id="6" Type="task">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <instance Id="0" Type="core"/>
+            <instance Id="4" Type="pipe"/>
+        </parents>
+        <children>
+            <component_collection Name="modules">
+                <component Id="2" Type="module-ns"/>
+                <component Id="3" Type="module-mixout"/>
+            </component_collection>
+        </children>
+    </instance>
+</collection>
