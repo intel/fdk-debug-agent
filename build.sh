@@ -43,13 +43,14 @@
 # Produce install binaries on windows
 function build_win64
 {
-    cmake --build . --config release --target install
+    # '--' means "pass option to the native compiler"
+    cmake --build . --config release --target install -- -m:8
 }
 
 # Produce install binaries on linux
 function build_linux
 {
-    make && make install
+    make -j8 && make install
 }
 
 # Checking parameters
