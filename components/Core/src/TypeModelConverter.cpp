@@ -32,22 +32,32 @@ namespace debug_agent
 namespace core
 {
 
+void TypeModelConverter::addSubsystemSubType(TypeModel::TypeMap &map,
+    std::shared_ptr<ifdk_objects::type::Type> type)
+{
+    map[subsystemName + "." + type->getName()] = type;
+}
+
 std::shared_ptr<TypeModel> TypeModelConverter::createModel()
 {
     TypeModel::TypeMap typeMap;
+
+    /* Subsystem type : key is the subsystem name*/
     typeMap[subsystemName] = createSubsystem();
-    typeMap[typeName_pipe] = createPipe();
-    typeMap[typeName_task] = createTask();
-    typeMap[typeName_core] = createCore();
+
+    /* Subsystem subtypes : key is <subsystem name>.<type name> */
+    addSubsystemSubType(typeMap, createPipe());
+    addSubsystemSubType(typeMap, createTask());
+    addSubsystemSubType(typeMap, createCore());
 
     /* modules */
     for (uint32_t moduleId = 0; moduleId < mSystem.getModuleEntries().size(); ++moduleId) {
-        typeMap[findModuleEntryName(moduleId)] = createModule(moduleId);
+        addSubsystemSubType(typeMap, createModule(moduleId));
     }
 
     /* gateways */
     for (auto &it : gatewayNames) {
-        typeMap[it.second] = createGateway(it.second);
+        addSubsystemSubType(typeMap, createGateway(it.second));
     }
 
     return std::shared_ptr<TypeModel>(

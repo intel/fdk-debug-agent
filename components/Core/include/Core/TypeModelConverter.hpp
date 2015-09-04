@@ -50,6 +50,12 @@ private:
 
     /** Get system characteristics */
     void getSystemCharacteristics(ifdk_objects::type::Characteristics &characteristics);
+
+    /** Add one type owned by a subsystem in the supplied map. The key of the map is :
+     *  <subsystem name>.<type name>
+     */
+    static void addSubsystemSubType(TypeModel::TypeMap &map,
+        std::shared_ptr<ifdk_objects::type::Type> type);
 };
 
 }

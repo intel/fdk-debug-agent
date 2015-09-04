@@ -248,16 +248,16 @@ TEST_CASE("DebugAgent/cAVS: topology")
      * Value: a file that contains the expected xml
      */
     std::map<std::string, std::string> urlMap = {
-        { "/type",                          "system_type" },
-        { "/instance",                      "system_instance" },
-        { "/type/cavs",                     "subsystem_type" },
-        { "/instance/cavs",                 "subsystem_instance_collection" },
-        { "/instance/cavs/0",               "subsystem_instance" },
-        { "/type/pipe",                     "pipe_type" },
-        { "/type/task",                     "task_type" },
-        { "/type/core",                     "core_type" },
-        { "/type/module.aec",               "module_type" },
-        { "/type/hda-host-out-gateway",     "gateway_type" }
+        { "/type",                              "system_type" },
+        { "/instance",                          "system_instance" },
+        { "/type/cavs",                         "subsystem_type" },
+        { "/instance/cavs",                     "subsystem_instance_collection" },
+        { "/instance/cavs/0",                   "subsystem_instance" },
+        { "/type/cavs.pipe",                    "pipe_type" },
+        { "/type/cavs.task",                    "task_type" },
+        { "/type/cavs.core",                    "core_type" },
+        { "/type/cavs.module.aec",              "module_type" },
+        { "/type/cavs.hda-host-out-gateway",    "gateway_type" }
     };
 
     for (auto it : urlMap) {
