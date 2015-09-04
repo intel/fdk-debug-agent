@@ -72,7 +72,7 @@ System::System(const DriverFactory &driverFactory):
     }
     else {
         /** @todo use logging */
-        std::cout << "Cannot get module entries: module count is invalid.";
+        std::cout << "Cannot get module entries: module count is invalid." << std::endl;
     }
 }
 
