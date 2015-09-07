@@ -45,6 +45,17 @@ namespace cavs
 class HwConfig final: public tlv::TlvResponseHandlerInterface
 {
 public:
+    /**
+     * @fixme this type definition should be removed and replaced by the one from FW in
+     * basefw_config.h.
+     */
+    struct GpdmaCapabilities
+    {
+        uint32_t lp_gpdma0_count;
+        uint32_t lp_gpdma1_count;
+        uint32_t hp_gpdma_count;
+    };
+
     struct I2sCaps final
     {
         uint32_t version;
@@ -67,6 +78,9 @@ public:
 
     I2sCaps i2sCaps;
     bool isI2sCapsValid;
+
+    GpdmaCapabilities gpdmaCaps;
+    bool isGpdmaCapsValid;
 
     uint32_t gatewayCount;
     bool isGatewayCountValid;
@@ -91,6 +105,8 @@ public:
             new TlvWrapper<uint32_t>(totalPhysicalMemoryPage, isTotalPhysicalMemoryPageValid));
         mHwConfigTlvMap[Tags::I2S_CAPS_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
             new I2sCapsTlvWrapper(i2sCaps, isI2sCapsValid));
+        mHwConfigTlvMap[Tags::GPDMA_CAPS_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
+            new TlvWrapper<GpdmaCapabilities>(gpdmaCaps, isGpdmaCapsValid));
         mHwConfigTlvMap[Tags::GATEWAY_COUNT_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
             new TlvWrapper<uint32_t>(gatewayCount, isGatewayCountValid));
         mHwConfigTlvMap[Tags::EBB_COUNT_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
