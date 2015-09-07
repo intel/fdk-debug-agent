@@ -49,7 +49,7 @@ TEST_CASE("TlvWrapper", "[WrapperRead]")
     CHECK(tlvWrapper.isValidSize(sizeof(ATestValueType) + 1) == false);
     CHECK(tlvWrapper.isValidSize(sizeof(ATestValueType) - 1) == false);
 
-    ATestValueType valueToBeRead { 1234, 56, 789};
+    ATestValueType valueToBeRead = { 1234, 56, 789};
     const char *rawValue = reinterpret_cast<const char *>(&valueToBeRead);
 
     tlvWrapper.readFrom(rawValue, sizeof(ATestValueType));

@@ -88,7 +88,9 @@ std::shared_ptr<Subsystem> InstanceModelConverter::createSubsystem()
     children.add(pipeCollection);
 
     /* Cores */
-    auto coreCollection = new InstanceRefCollection(collectionName_core);
+    std::shared_ptr<InstanceRefCollection> coreCollection(
+        new InstanceRefCollection(collectionName_core));
+
     if (!mSystem.getHwConfig().isDspCoreCountValid) {
         throw Exception("Core count is invalid.");
     }

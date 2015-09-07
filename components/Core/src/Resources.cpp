@@ -146,7 +146,8 @@ void InstanceCollectionResource::handleGet(const Request &request, Response &res
         std::shared_ptr<instance::BaseCollection> collection =
             handle->getResource()->getCollection(typeName);
 
-        if (collection == nullptr) {
+        /* check nullptr using get() to avoid any KW error */
+        if (collection.get() == nullptr) {
             throw HttpError(Resource::ErrorStatus::BadRequest, "Uknown type: " + typeName);
         }
 
@@ -172,7 +173,8 @@ void InstanceResource::handleGet(const Request &request, Response &response)
         std::shared_ptr<instance::Instance> instancePtr =
             handle->getResource()->getInstance(typeName, instanceId);
 
-        if (instancePtr == nullptr) {
+        /* check nullptr using get() to avoid any KW error */
+        if (instancePtr.get() == nullptr) {
             throw HttpError(Resource::ErrorStatus::BadRequest, "Uknown instance: type=" +
                 typeName + " instance_id=" + instanceId);
         }

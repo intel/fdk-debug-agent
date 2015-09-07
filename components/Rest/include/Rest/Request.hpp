@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <Util/AssertAlways.hpp>
 #include <Poco/StreamCopier.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <iostream>
@@ -82,7 +83,7 @@ public:
     std::string getIdentifierValue(const std::string &identifier) const
     {
         Identifiers::const_iterator it = mIdentifiers.find(identifier);
-        assert(it != mIdentifiers.end());
+        ASSERT_ALWAYS(it != mIdentifiers.end());
 
         return it->second;
     }

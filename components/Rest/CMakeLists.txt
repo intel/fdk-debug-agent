@@ -52,3 +52,6 @@ link_poco(Rest)
 # adding test
 add_subdirectory("test")
 
+# Needed components
+target_link_libraries(Rest Util)
+
