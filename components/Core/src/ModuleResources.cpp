@@ -169,7 +169,7 @@ void ControlParametersModuleInstanceResource::handleGet(const Request &request, 
     out << mModuleId;
     out << "\">\n";
     out << controlParameters;
-    out << "</control_parameters>";
+    out << "</control_parameters>\n";
 }
 
 void ControlParametersModuleInstanceResource::handlePut(const Request &request, Response &response)
@@ -254,7 +254,7 @@ void ControlParametersModuleTypeResource::handleGet(const Request &request, Resp
     out << mModuleId;
     out << "\">\n";
     out << controlParameters;
-    out << "</control_parameters>";
+    out << "</control_parameters>\n";
 }
 
 }

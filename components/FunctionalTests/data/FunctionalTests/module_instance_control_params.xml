@@ -1,0 +1,92 @@
+<control_parameters Type="module-aec" Id="1">
+<ParameterBlock Name="AcousticEchoCanceler">
+  <ParameterBlock Name="switch">
+    <EnumParameter Name="value">on</EnumParameter>
+  </ParameterBlock>
+  <BitParameterBlock Name="sw_flag">
+    <BitParameter Name="aec_1_2">0</BitParameter>
+    <BitParameter Name="aec_1_3">0</BitParameter>
+    <BitParameter Name="aec_1_41">0</BitParameter>
+    <BitParameter Name="aec_1_42">0</BitParameter>
+    <BitParameter Name="aec_1_5">0</BitParameter>
+    <BitParameter Name="aec_1_6">0</BitParameter>
+  </BitParameterBlock>
+  <IntegerParameter Name="nr_coeffs_real">1</IntegerParameter>
+  <IntegerParameter Name="nr_coeffs_complex_1">1</IntegerParameter>
+  <IntegerParameter Name="nr_coeffs_complex_2">1</IntegerParameter>
+  <IntegerParameter Name="nr_coeffs_complex_3">1</IntegerParameter>
+  <IntegerParameter Name="nr_coeffs_complex_4">1</IntegerParameter>
+  <IntegerParameter Name="nr_coeffs_complex_5">1</IntegerParameter>
+  <EnumParameter Name="b_len">LMS_1 LMS block vector length=1</EnumParameter>
+  <IntegerParameter Name="nr_shl_norm">-15</IntegerParameter>
+  <IntegerParameter Name="x_max_exp">0</IntegerParameter>
+  <FixedPointParameter Name="h_max_lim">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="x_max_lim">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="corr_thres">0.000000000000000</FixedPointParameter>
+  <IntegerParameter Name="sb_meas_shl_ri">-15</IntegerParameter>
+  <IntegerParameter Name="sb_meas_shl_fa">-15</IntegerParameter>
+  <IntegerParameter Name="nr_steps_shl_ri">-15</IntegerParameter>
+  <IntegerParameter Name="nr_steps_shl_fa">-15</IntegerParameter>
+  <FixedPointParameter Name="steps_sig_thresh">0.000000000000000</FixedPointParameter>
+  <IntegerParameter Name="nr_far_near_shl_ri">-15</IntegerParameter>
+  <IntegerParameter Name="nr_far_near_shl_fa">-15</IntegerParameter>
+  <IntegerParameter Name="factor_near_fa_calc">0</IntegerParameter>
+  <IntegerParameter Name="nr_far_near_shl">-15</IntegerParameter>
+  <FixedPointParameter Name="far_near_ld_max">0.0000000000</FixedPointParameter>
+  <IntegerParameter Name="x_min_exp">-12</IntegerParameter>
+  <FixedPointParameter Name="steps_sig_thresh1">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="steps_sig_thresh2">0.000000000000000</FixedPointParameter>
+  <IntegerParameter Name="data_shift">-32768 -32768 -32768 -32768 -32768 -32768</IntegerParameter>
+  <IntegerParameter Name="s_sfloor_attack">-15</IntegerParameter>
+  <IntegerParameter Name="s_sfloor_decay">-15</IntegerParameter>
+  <IntegerParameter Name="alpha_smooth_attack">-15</IntegerParameter>
+  <IntegerParameter Name="alpha_smooth_decay">-15</IntegerParameter>
+  <IntegerParameter Name="beta_smooth_attack">-15</IntegerParameter>
+  <IntegerParameter Name="beta_smooth_decay">-15</IntegerParameter>
+  <FixedPointParameter Name="st_detector_sensitivity">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="dt_detector_sensitivity">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="st_step_min">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="st_step_max">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="st_step_mult">0.000000000000</FixedPointParameter>
+  <FixedPointParameter Name="dt_step_mult">0.000000000000000</FixedPointParameter>
+  <BitParameterBlock Name="dt_flag_dependency">
+    <BitParameter Name="subband_0">0</BitParameter>
+    <BitParameter Name="subband_1">0</BitParameter>
+    <BitParameter Name="subband_2">0</BitParameter>
+  </BitParameterBlock>
+  <IntegerParameter Name="sub_0_real">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_1_real">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_1_im">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_2_real">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_2_im">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_3_real">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_3_im">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_4_real">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_4_im">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_5_real">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
+  <IntegerParameter Name="sub_5_im">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 43520</IntegerParameter>
+</ParameterBlock>
+<ParameterBlock Name="NoiseReduction">
+  <ParameterBlock Name="switch">
+    <EnumParameter Name="value">on</EnumParameter>
+  </ParameterBlock>
+  <IntegerParameter Name="sw_flag">0</IntegerParameter>
+  <FixedPointParameter Name="atten_factor_min_val">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="ov_est_fac_band_zero">0.0000000000000</FixedPointParameter>
+  <FixedPointParameter Name="ov_est_fac_band_no_zero">0.0000000000000</FixedPointParameter>
+  <IntegerParameter Name="nr_shl_ri">-15</IntegerParameter>
+  <IntegerParameter Name="nr_shl_fa">-15</IntegerParameter>
+  <IntegerParameter Name="min_stat_len">1</IntegerParameter>
+  <FixedPointParameter Name="atte_ratio">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="correction_value">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="thresh_spe_act">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="noise_lev_enhanc_max">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="noise_lev_enhanc_min">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="noise_lev_enhanc_incre_no_sp">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="noise_lev_enhanc_incre_sp">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="agc_thresh_abs">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="agc_thresh_rel">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="gain_factor">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="gain_limit">0.00000000000000</FixedPointParameter>
+</ParameterBlock>
+</control_parameters>

@@ -1,0 +1,104 @@
+<control_parameters Type="module-aec" Id="1">
+<ParameterBlock Name="AcousticEchoCanceler">
+  <ParameterBlock Name="switch">
+    <EnumParameter Size="16" Name="value">
+      <ValuePair Literal="off" Numerical="0"/>
+      <ValuePair Literal="on" Numerical="3"/>
+    </EnumParameter>
+  </ParameterBlock>
+  <BitParameterBlock Name="sw_flag">
+    <BitParameter Pos="0" Size="1" Max="1" Name="aec_1_2"/>
+    <BitParameter Pos="1" Size="1" Max="1" Name="aec_1_3"/>
+    <BitParameter Pos="2" Size="1" Max="1" Name="aec_1_41"/>
+    <BitParameter Pos="3" Size="1" Max="1" Name="aec_1_42"/>
+    <BitParameter Pos="4" Size="1" Max="1" Name="aec_1_5"/>
+    <BitParameter Pos="5" Size="1" Max="1" Name="aec_1_6"/>
+  </BitParameterBlock>
+  <IntegerParameter Signed="false" Min="1" Max="1096" Size="16" Name="nr_coeffs_real"/>
+  <IntegerParameter Signed="false" Min="1" Max="548" Size="16" Name="nr_coeffs_complex_1"/>
+  <IntegerParameter Signed="false" Min="1" Max="548" Size="16" Name="nr_coeffs_complex_2"/>
+  <IntegerParameter Signed="false" Min="1" Max="995" Size="16" Name="nr_coeffs_complex_3"/>
+  <IntegerParameter Signed="false" Min="1" Max="995" Size="16" Name="nr_coeffs_complex_4"/>
+  <IntegerParameter Signed="false" Min="1" Max="995" Size="16" Name="nr_coeffs_complex_5"/>
+  <EnumParameter Size="16" Name="b_len">
+    <ValuePair Literal="LMS_1 LMS block vector length=1" Numerical="1"/>
+    <ValuePair Literal="LMS_2 LMS block vector length=2" Numerical="2"/>
+    <ValuePair Literal="LMS_4 LMS block vector length=4" Numerical="4"/>
+    <ValuePair Literal="LMS_5 LMS block vector length=5" Numerical="5"/>
+    <ValuePair Literal="LMS_8 LMS block vector length=8" Numerical="8"/>
+  </EnumParameter>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="nr_shl_norm"/>
+  <IntegerParameter Signed="false" Min="0" Max="12" Size="16" Name="x_max_exp"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="h_max_lim"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="x_max_lim"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="corr_thres"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="sb_meas_shl_ri"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="sb_meas_shl_fa"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="nr_steps_shl_ri"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="nr_steps_shl_fa"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="steps_sig_thresh"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="nr_far_near_shl_ri"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="nr_far_near_shl_fa"/>
+  <IntegerParameter Signed="true" Min="0" Max="4096" Size="16" Name="factor_near_fa_calc"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="nr_far_near_shl"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="far_near_ld_max"/>
+  <IntegerParameter Signed="true" Min="-12" Max="0" Size="16" Name="x_min_exp"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="steps_sig_thresh1"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="steps_sig_thresh2"/>
+  <IntegerParameter Signed="true" Min="-32768" Max="32767" Size="16" ArrayLength="6" Name="data_shift"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="s_sfloor_attack"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="s_sfloor_decay"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="alpha_smooth_attack"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="alpha_smooth_decay"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="beta_smooth_attack"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="beta_smooth_decay"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="st_detector_sensitivity"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="dt_detector_sensitivity"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="st_step_min"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="st_step_max"/>
+  <FixedPointParameter Size="16" Integral="3" Fractional="12" Name="st_step_mult"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="dt_step_mult"/>
+  <BitParameterBlock Name="dt_flag_dependency">
+    <BitParameter Pos="0" Size="1" Max="1" Name="subband_0"/>
+    <BitParameter Pos="1" Size="1" Max="1" Name="subband_1"/>
+    <BitParameter Pos="2" Size="1" Max="1" Name="subband_2"/>
+  </BitParameterBlock>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_0_real"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_1_real"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_1_im"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_2_real"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_2_im"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_3_real"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_3_im"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_4_real"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_4_im"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_5_real"/>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_5_im"/>
+</ParameterBlock>
+<ParameterBlock Name="NoiseReduction">
+  <ParameterBlock Name="switch">
+    <EnumParameter Size="16" Name="value">
+      <ValuePair Literal="off" Numerical="0"/>
+      <ValuePair Literal="on" Numerical="3"/>
+    </EnumParameter>
+  </ParameterBlock>
+  <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" Name="sw_flag"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="atten_factor_min_val"/>
+  <FixedPointParameter Size="16" Integral="2" Fractional="13" Name="ov_est_fac_band_zero"/>
+  <FixedPointParameter Size="16" Integral="2" Fractional="13" Name="ov_est_fac_band_no_zero"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="nr_shl_ri"/>
+  <IntegerParameter Signed="true" Min="-15" Max="0" Size="16" Name="nr_shl_fa"/>
+  <IntegerParameter Signed="true" Min="1" Max="32767" Size="16" Name="min_stat_len"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="atte_ratio"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="correction_value"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="thresh_spe_act"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="noise_lev_enhanc_max"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="noise_lev_enhanc_min"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="noise_lev_enhanc_incre_no_sp"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="noise_lev_enhanc_incre_sp"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="agc_thresh_abs"/>
+  <FixedPointParameter Size="16" Integral="5" Fractional="10" Name="agc_thresh_rel"/>
+  <FixedPointParameter Size="16" Integral="0" Fractional="15" Name="gain_factor"/>
+  <FixedPointParameter Size="16" Integral="1" Fractional="14" Name="gain_limit"/>
+</ParameterBlock>
+</control_parameters>
