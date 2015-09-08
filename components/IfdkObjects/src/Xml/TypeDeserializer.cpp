@@ -58,6 +58,11 @@ void TypeDeserializer::enter(System &instance)
     pushElement(instance);
 }
 
+void TypeDeserializer::enter(Service &instance)
+{
+    pushElement(instance);
+}
+
 void TypeDeserializer::enter(Categories &categories)
 {
     pushElement(categories);

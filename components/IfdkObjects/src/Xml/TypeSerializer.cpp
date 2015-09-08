@@ -58,6 +58,12 @@ void TypeSerializer::enter(const System &instance)
     pushElement(instance);
 }
 
+void TypeSerializer::enter(const Service &instance)
+{
+    pushElement(instance);
+}
+
+
 void TypeSerializer::enter(const Categories &instance)
 {
     pushElement(instance);

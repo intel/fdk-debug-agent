@@ -59,6 +59,20 @@ void InstanceDeserializer::enter(System &instance)
     pushElement(instance);
 }
 
+void InstanceDeserializer::enter(Service &instance)
+{
+    pushElement(instance);
+
+    std::string directionName = getStringAttribute(InstanceTraits<Service>::attributeDirection);
+
+    Service::Direction direction;
+    if (!Service::directionHelper().fromString(directionName, direction)) {
+        throw Exception("Invalid service direction: " + directionName);
+    }
+
+    instance.setDirection(direction);
+}
+
 void InstanceDeserializer::enter(Ref &ref, bool isConcrete)
 {
     assert(!isConcrete);
@@ -234,6 +248,12 @@ void InstanceDeserializer::enter(ComponentCollection &instance)
 }
 
 void InstanceDeserializer::enter(SubsystemCollection &instance)
+{
+    pushElement(instance);
+    collectionCommon(instance);
+}
+
+void InstanceDeserializer::enter(ServiceCollection &instance)
 {
     pushElement(instance);
     collectionCommon(instance);

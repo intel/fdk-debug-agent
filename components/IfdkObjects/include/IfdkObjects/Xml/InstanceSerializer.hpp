@@ -87,11 +87,13 @@ private:
     virtual void enter(const instance::Component &instance, bool isConcrete) override;
     virtual void enter(const instance::Subsystem &instance) override;
     virtual void enter(const instance::System &instance) override;
+    virtual void enter(const instance::Service &instance) override;
 
     /* Main instance collections */
     virtual void enter(const instance::InstanceCollection &instance) override;
     virtual void enter(const instance::ComponentCollection &instance) override;
     virtual void enter(const instance::SubsystemCollection &instance) override;
+    virtual void enter(const instance::ServiceCollection &instance) override;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) override;

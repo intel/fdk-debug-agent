@@ -61,6 +61,14 @@ void InstanceSerializer::enter(const System &instance)
     pushElement(instance);
 }
 
+void InstanceSerializer::enter(const Service &instance)
+{
+    std::string directionName = Service::directionHelper().toString(instance.getDirection());
+
+    pushElement(instance);
+    setAttribute(InstanceTraits<Service>::attributeDirection, directionName);
+}
+
 void InstanceSerializer::enter(const Ref &ref, bool isConcrete)
 {
     assert(!isConcrete);
@@ -209,6 +217,11 @@ void InstanceSerializer::enter(const ComponentCollection &instance)
 }
 
 void InstanceSerializer::enter(const SubsystemCollection &instance)
+{
+    pushElement(instance);
+}
+
+void InstanceSerializer::enter(const ServiceCollection &instance)
 {
     pushElement(instance);
 }

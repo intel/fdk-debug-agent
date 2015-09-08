@@ -26,6 +26,7 @@
 #include "IfdkObjects/Type/Component.hpp"
 #include "IfdkObjects/Type/Subsystem.hpp"
 #include "IfdkObjects/Type/System.hpp"
+#include "IfdkObjects/Type/Service.hpp"
 #include "IfdkObjects/Type/Categories.hpp"
 #include "IfdkObjects/Type/TypeRef.hpp"
 #include "IfdkObjects/Type/ComponentRef.hpp"
@@ -246,6 +247,12 @@ struct TypeTraits<type::Subsystem>
 
 template<>
 struct TypeTraits<type::System>
+{
+    static const std::string tag;
+};
+
+template<>
+struct TypeTraits<type::Service>
 {
     static const std::string tag;
 };

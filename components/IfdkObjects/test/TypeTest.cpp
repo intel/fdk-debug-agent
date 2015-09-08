@@ -470,6 +470,50 @@ TEST_CASE("Type serializer: Type")
     CHECK(deserializedInstance == type);
 }
 
+TEST_CASE("Type serializer: Service")
+{
+    /* Serialize */
+    Service service("my_service");
+    populateDescription(service.getDescription());
+    populateCharacteristics(service.getCharacteristics());
+    populateChildren(service.getChildren());
+
+    TypeSerializer serializer;
+    service.accept(serializer);
+
+    std::string xml = serializer.getXml();
+    CHECK(xml ==
+        "<service_type Name=\"my_service\">\n"
+        "    <description>my desc</description>\n"
+        "    <characteristics>\n"
+        "        <characteristic Name=\"c1\">v1</characteristic>\n"
+        "        <characteristic Name=\"c2\">v2</characteristic>\n"
+        "        <characteristic Name=\"c3\">v3</characteristic>\n"
+        "    </characteristics>\n"
+        "    <info_parameters/>\n"
+        "    <control_parameters/>\n"
+        "    <children>\n"
+        "        <collection Name=\"types\">\n"
+        "            <type Name=\"type1\"/>\n"
+        "        </collection>\n"
+        "        <component_collection Name=\"components\">\n"
+        "            <component_type Name=\"comp1\"/>\n"
+        "        </component_collection>\n"
+        "        <service_collection Name=\"services\">\n"
+        "            <service_type Name=\"service1\"/>\n"
+        "        </service_collection>\n"
+        "    </children>\n"
+        "</service_type>\n"
+        );
+
+    /* Deserialize */
+    TypeDeserializer deserializer(xml);
+    Service deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == service);
+}
+
 TEST_CASE("Type serializer: Input")
 {
     /* Serialize */

@@ -26,6 +26,7 @@
 #include "IfdkObjects/Instance/Component.hpp"
 #include "IfdkObjects/Instance/Subsystem.hpp"
 #include "IfdkObjects/Instance/System.hpp"
+#include "IfdkObjects/Instance/Service.hpp"
 #include "IfdkObjects/Instance/Parents.hpp"
 #include "IfdkObjects/Instance/InstanceRef.hpp"
 #include "IfdkObjects/Instance/ComponentRef.hpp"
@@ -272,6 +273,14 @@ struct InstanceTraits<instance::System>
     static const std::string tag;
 };
 
+template<>
+struct InstanceTraits<instance::Service>
+{
+    static const std::string tag;
+    static const std::string attributeDirection;
+};
+
+
 /* Main instance collection */
 
 template<>
@@ -288,6 +297,12 @@ struct InstanceTraits<instance::ComponentCollection>
 
 template<>
 struct InstanceTraits<instance::SubsystemCollection>
+{
+    static const std::string tag;
+};
+
+template<>
+struct InstanceTraits<instance::ServiceCollection>
 {
     static const std::string tag;
 };

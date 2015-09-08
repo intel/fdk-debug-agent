@@ -35,6 +35,7 @@ SET(TYPE_INCS
     include/IfdkObjects/Type/Component.hpp
     include/IfdkObjects/Type/Subsystem.hpp
     include/IfdkObjects/Type/System.hpp
+    include/IfdkObjects/Type/Service.hpp
     include/IfdkObjects/Type/Ref.hpp
     include/IfdkObjects/Type/TypeRef.hpp
     include/IfdkObjects/Type/ComponentRef.hpp
@@ -66,11 +67,13 @@ SET(INSTANCE_INCS
     include/IfdkObjects/Instance/Component.hpp
     include/IfdkObjects/Instance/Subsystem.hpp
     include/IfdkObjects/Instance/System.hpp
+    include/IfdkObjects/Instance/Service.hpp
     include/IfdkObjects/Instance/BaseCollection.hpp
     include/IfdkObjects/Instance/GenericCollection.hpp
     include/IfdkObjects/Instance/InstanceCollection.hpp
     include/IfdkObjects/Instance/ComponentCollection.hpp
     include/IfdkObjects/Instance/SubsystemCollection.hpp
+    include/IfdkObjects/Instance/ServiceCollection.hpp
     include/IfdkObjects/Instance/Ref.hpp
     include/IfdkObjects/Instance/InstanceRef.hpp
     include/IfdkObjects/Instance/ComponentRef.hpp
@@ -132,6 +135,9 @@ target_include_directories(IfdkObjects PUBLIC "include")
 
 # external libraries
 link_poco(IfdkObjects)
+
+# other dependencies
+target_link_libraries(IfdkObjects Util)
 
 # adding test
 add_subdirectory("test")

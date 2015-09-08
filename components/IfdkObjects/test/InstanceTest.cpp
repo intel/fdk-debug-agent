@@ -445,6 +445,84 @@ TEST_CASE("Instance serializer: Instance collection")
     CHECK(deserializedInstance == collection);
 }
 
+TEST_CASE("Instance serializer: Service")
+{
+    /* Serialize */
+    Service service("my_service_type", "2", Service::Direction::Incoming);
+    populateParents(service.getParents());
+    populateChildren(service.getChildren());
+
+    InstanceSerializer serializer;
+    service.accept(serializer);
+
+    std::string xml = serializer.getXml();
+    CHECK(xml ==
+        "<service Direction=\"Incoming\" Id=\"2\" Type=\"my_service_type\">\n"
+        "    <info_parameters/>\n"
+        "    <control_parameters/>\n"
+        "    <parents>\n"
+        "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
+        "        <component Id=\"2\" Type=\"component_type\"/>\n"
+        "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
+        "    </parents>\n"
+        "    <children>\n"
+        "        <collection Name=\"instances\">\n"
+        "            <instance Id=\"0\" Type=\"instance1\"/>\n"
+        "        </collection>\n"
+        "        <component_collection Name=\"components\">\n"
+        "            <component Id=\"1\" Type=\"comp1\"/>\n"
+        "        </component_collection>\n"
+        "        <service_collection Name=\"services\">\n"
+        "            <service Id=\"2\" Type=\"service1\"/>\n"
+        "        </service_collection>\n"
+        "    </children>\n"
+        "</service>\n"
+        );
+
+    /* Deserialize */
+    InstanceDeserializer deserializer(xml);
+    Service deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == service);
+}
+
+TEST_CASE("Instance serializer: Service collection")
+{
+    /* Serialize */
+    ServiceCollection collection;
+    collection.add(new Service("my_service_type1", "1", Service::Direction::Incoming));
+    collection.add(new Service("my_service_type2", "2", Service::Direction::Outgoing));
+
+    InstanceSerializer serializer;
+    collection.accept(serializer);
+
+    std::string xml = serializer.getXml();
+    CHECK(xml ==
+        "<service_collection>\n"
+        "    <service Direction=\"Incoming\" Id=\"1\" Type=\"my_service_type1\">\n"
+        "        <info_parameters/>\n"
+        "        <control_parameters/>\n"
+        "        <parents/>\n"
+        "        <children/>\n"
+        "    </service>\n"
+        "    <service Direction=\"Outgoing\" Id=\"2\" Type=\"my_service_type2\">\n"
+        "        <info_parameters/>\n"
+        "        <control_parameters/>\n"
+        "        <parents/>\n"
+        "        <children/>\n"
+        "    </service>\n"
+        "</service_collection>\n"
+        );
+
+    /* Deserialize */
+    InstanceDeserializer deserializer(xml);
+    ServiceCollection deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == collection);
+}
+
 TEST_CASE("Instance serializer: Input")
 {
     /* Serialize */

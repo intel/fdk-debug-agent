@@ -54,6 +54,9 @@ const std::string InstanceTraits<Subsystem>::tag("subsystem");
 
 const std::string InstanceTraits<System>::tag("system");
 
+const std::string InstanceTraits<Service>::tag("service");
+const std::string InstanceTraits<Service>::attributeDirection("Direction");
+
 const std::string InstanceTraits<Parents>::tag("parents");
 
 const std::string InstanceTraits<Children>::tag("children");
@@ -100,6 +103,7 @@ const std::string InstanceTraits<Links>::tag("links");
 const std::string InstanceTraits<InstanceCollection>::tag("collection");
 const std::string InstanceTraits<ComponentCollection>::tag("component_collection");
 const std::string InstanceTraits<SubsystemCollection>::tag("subsystem_collection");
+const std::string InstanceTraits<ServiceCollection>::tag("service_collection");
 }
 }
 }

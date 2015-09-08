@@ -46,6 +46,7 @@ class Type;
 class Component;
 class Subsystem;
 class System;
+class Service;
 class RefCollection;
 class Characteristic;
 class Description;
@@ -174,6 +175,7 @@ public:
     virtual void enter(Component &instance, bool isConcrete) = 0;
     virtual void enter(Subsystem &instance) = 0;
     virtual void enter(System &instance) = 0;
+    virtual void enter(Service &instance) = 0;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;
@@ -227,6 +229,7 @@ public:
     virtual void enter(const Component &instance, bool isConcrete) = 0;
     virtual void enter(const Subsystem &instance) = 0;
     virtual void enter(const System &instance) = 0;
+    virtual void enter(const Service &instance) = 0;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;

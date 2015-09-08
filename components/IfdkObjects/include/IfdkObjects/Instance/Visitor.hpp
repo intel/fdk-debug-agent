@@ -47,6 +47,7 @@ class Instance;
 class Component;
 class Subsystem;
 class System;
+class Service;
 class RefCollection;
 class Description;
 class Parameters;
@@ -78,6 +79,7 @@ class GenericCollection;
 using InstanceCollection = GenericCollection<Instance>;
 using ComponentCollection = GenericCollection<Component>;
 using SubsystemCollection = GenericCollection<Subsystem>;
+using ServiceCollection = GenericCollection<Service>;
 
 /** Visitor that allows to walk into the "instance" data model
  *
@@ -132,11 +134,13 @@ public:
     virtual void enter(Component &instance, bool isConcrete) = 0;
     virtual void enter(Subsystem &instance) = 0;
     virtual void enter(System &instance) = 0;
+    virtual void enter(Service &instance) = 0;
 
     /* Main instance collections */
     virtual void enter(InstanceCollection &instance) = 0;
     virtual void enter(ComponentCollection &instance) = 0;
     virtual void enter(SubsystemCollection &instance) = 0;
+    virtual void enter(ServiceCollection &instance) = 0;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;
@@ -190,11 +194,13 @@ public:
     virtual void enter(const Component &instance, bool isConcrete) = 0;
     virtual void enter(const Subsystem &instance) = 0;
     virtual void enter(const System &instance) = 0;
+    virtual void enter(const Service &instance) = 0;
 
     /* Main instance collections */
     virtual void enter(const InstanceCollection &instance) = 0;
     virtual void enter(const ComponentCollection &instance) = 0;
     virtual void enter(const SubsystemCollection &instance) = 0;
+    virtual void enter(const ServiceCollection &instance) = 0;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;

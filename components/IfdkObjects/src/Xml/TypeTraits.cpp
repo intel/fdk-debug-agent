@@ -50,6 +50,8 @@ const std::string TypeTraits<Subsystem>::tag("subsystem_type");
 
 const std::string TypeTraits<System>::tag("system_type");
 
+const std::string TypeTraits<Service>::tag("service_type");
+
 const std::string TypeTraits<Categories>::tag("categories");
 
 const std::string TypeTraits<Children>::tag("children");
