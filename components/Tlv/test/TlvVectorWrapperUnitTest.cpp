@@ -53,9 +53,9 @@ TEST_CASE("TlvVectorWrapper", "[VectorWrapperRead]")
     CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType) * 2 + 1) == false);
     CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType) * 2 - 1) == false);
 
-    std::vector<ATestValueType> valueToBeRead { { 1234, 56, 789},
-                                                { 987, 65, 4321},
-                                                { 5484, 47, 754} };
+    std::vector<ATestValueType> valueToBeRead = { { 1234, 56, 789},
+                                                  { 987, 65, 4321},
+                                                  { 5484, 47, 754} };
     const char *rawValue = reinterpret_cast<const char *>(valueToBeRead.data());
 
     tlvVectorWrapper.readFrom(rawValue, sizeof(ATestValueType) * valueToBeRead.size());
