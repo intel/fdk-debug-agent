@@ -47,6 +47,7 @@ private:
     std::shared_ptr<ifdk_objects::type::Type> createCore();
     std::shared_ptr<ifdk_objects::type::Type> createGateway(const std::string &name);
     std::shared_ptr<ifdk_objects::type::Type> createModule(uint32_t id);
+    std::shared_ptr<ifdk_objects::type::Type> createLogService();
 
     /** Get system characteristics */
     void getSystemCharacteristics(ifdk_objects::type::Characteristics &characteristics);

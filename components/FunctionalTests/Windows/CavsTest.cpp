@@ -274,6 +274,10 @@ TEST_CASE("DebugAgent/cAVS: topology")
         { "/type/cavs.hda-host-out-gateway",        "gateway_type" },
         { "/instance/cavs.hda-host-out-gateway",    "gateway_instance_collection" },
         { "/instance/cavs.hda-host-out-gateway/1",  "gateway_instance" },
+
+        { "/type/cavs.fwlogs",                      "logservice_type" },
+        { "/instance/cavs.fwlogs",                  "logservice_instance_collection" },
+        { "/instance/cavs.fwlogs/0",                "logservice_instance" },
     };
 
     for (auto it : urlMap) {
@@ -437,42 +441,6 @@ TEST_CASE("DebugAgent/cAVS: module type control parameters "
         ));
 }
 
-TEST_CASE("DebugAgent/cAVS: log type (URL: /type/cavs.fwlogs)")
-{
-    /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
-
-    /* Setting the test vector
-    * ----------------------- */
-
-    windows::MockedDeviceCommands commands(*device);
-
-    /* Adding initial commands */
-    addInitialCommands(commands);
-
-    /* Now using the mocked device
-    * --------------------------- */
-
-    /* Creating the factory that will inject the mocked device */
-    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
-        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
-
-    /* Creating and starting the debug agent */
-    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
-
-    /* Creating the http client */
-    HttpClientSimulator client("localhost");
-
-    /* 1: Getting system information*/
-    CHECK_NOTHROW(client.request(
-        "/type/cavs.fwlogs",
-        HttpClientSimulator::Verb::Get,
-        "",
-        HttpClientSimulator::Status::Ok,
-        "text/xml",
-        xmlFile("logservice_type")));
-}
-
 TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
 {
     /* Creating the mocked device */
@@ -554,7 +522,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
 
     /* 1: Getting log parameters*/
     CHECK_NOTHROW(client.request(
-        "/instance/cavs.fwlogs/0",
+        "/instance/cavs.fwlogs/0/control_parameters",
         HttpClientSimulator::Verb::Get,
         "",
         HttpClientSimulator::Status::Ok,
@@ -563,7 +531,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
 
     /* 2: Setting log parameters ("1;Verbose;SRAM") */
     CHECK_NOTHROW(client.request(
-        "/instance/cavs.fwlogs/0",
+        "/instance/cavs.fwlogs/0/control_parameters",
         HttpClientSimulator::Verb::Put,
         xmlFile("logservice_setparam_start"),
         HttpClientSimulator::Status::Ok,
@@ -573,7 +541,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
 
     /* 3: Getting log parameters again */
     CHECK_NOTHROW(client.request(
-        "/instance/cavs.fwlogs/0",
+        "/instance/cavs.fwlogs/0/control_parameters",
         HttpClientSimulator::Verb::Get,
         "",
         HttpClientSimulator::Status::Ok,
@@ -646,7 +614,7 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
 
     /* Starting log */
     CHECK_NOTHROW(client.request(
-        "/instance/cavs.fwlogs/0",
+        "/instance/cavs.fwlogs/0/control_parameters",
         HttpClientSimulator::Verb::Put,
         xmlFile("logservice_setparam_start"),
         HttpClientSimulator::Status::Ok,

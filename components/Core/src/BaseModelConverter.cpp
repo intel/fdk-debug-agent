@@ -62,6 +62,8 @@ const std::vector<std::string> BaseModelConverter::staticTypes = {
 };
 
 const std::string BaseModelConverter::logServiceTypeName = "fwlogs";
+const std::string BaseModelConverter::logServiceId = "0";
+const std::string BaseModelConverter::logServiceDescription = "cAVS log service";
 
 const std::vector<std::string> BaseModelConverter::staticServiceTypes = {
     logServiceTypeName

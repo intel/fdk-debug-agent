@@ -70,6 +70,9 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
         addInstanceCollection(collectionMap, entry.second, createGateway(entry.first));
     }
 
+    /* Log service */
+    addInstanceCollection(collectionMap, logServiceTypeName, createLogService());
+
     return std::shared_ptr<InstanceModel>(
         new InstanceModel(createSystem(), collectionMap));
 }
@@ -228,6 +231,21 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
 
     auto coll = std::shared_ptr<SubsystemCollection>(new SubsystemCollection());
     coll->add(subsystem);
+
+    return coll;
+}
+
+std::shared_ptr<BaseCollection> InstanceModelConverter::createLogService()
+{
+    /* Log Service */
+    auto service = std::shared_ptr<Service>(
+        new Service(logServiceTypeName, logServiceId, Service::Direction::Outgoing));
+
+    /* Parents */
+    service->getParents().add(new SubsystemRef(subsystemName, subsystemId));
+
+    auto coll = std::shared_ptr<ServiceCollection>(new ServiceCollection());
+    coll->add(service);
 
     return coll;
 }

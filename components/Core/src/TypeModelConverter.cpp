@@ -60,6 +60,9 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
         addSubsystemSubType(typeMap, createGateway(it.second));
     }
 
+    /* Log service */
+    addSubsystemSubType(typeMap, createLogService());
+
     return std::shared_ptr<TypeModel>(
         new TypeModel(createSystem(), typeMap));
 }
@@ -240,6 +243,14 @@ std::shared_ptr<Type> TypeModelConverter::createModule(uint32_t id)
     ch.add(Characteristic("UUID", uuid.toString()));
 
     return module;
+}
+
+std::shared_ptr<Type> TypeModelConverter::createLogService()
+{
+    auto service = std::shared_ptr<Service>(new Service(logServiceTypeName));
+    service->getDescription().setValue(logServiceDescription);
+
+    return service;
 }
 
 void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)

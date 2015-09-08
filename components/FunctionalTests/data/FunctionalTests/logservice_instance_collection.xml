@@ -1,0 +1,10 @@
+<service_collection>
+    <service Direction="Outgoing" Id="0" Type="fwlogs">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <subsystem Id="0" Type="cavs"/>
+        </parents>
+        <children/>
+    </service>
+</service_collection>

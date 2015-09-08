@@ -212,94 +212,7 @@ void RefreshSubsystemResource::handlePost(const Request &request, Response &resp
     response.send(ContentTypeXml);
 }
 
-void SubsystemInstanceLogParametersResource::handleGet(const Request &request, Response &response)
-{
-    Logger::Parameters logParameters;
-
-    try
-    {
-        logParameters = mSystem.getLogParameters();
-    }
-    catch (System::Exception &e)
-    {
-        throw HttpError(ErrorStatus::BadRequest, "Cannot get log parameters : " +
-            std::string(e.what()));
-    }
-
-    std::ostream &out = response.send(ContentTypeXml);
-    out << "<service Direction=\"Outgoing\" Type=\"fwlogs\" Id=\"0\">\n"
-        "    <parents/>\n"
-        "    <control_parameters>\n"
-        "        <BooleanParameter Name=\"Started\">" <<
-                    logParameters.mIsStarted << "</BooleanParameter>\n"
-        "        <ParameterBlock Name=\"Buffering\">\n"
-        "            <IntegerParameter Name=\"Size\">100</IntegerParameter>\n"
-        "            <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
-        "        </ParameterBlock>\n"
-        "        <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
-        "        <EnumParameter Name=\"Verbosity\">" <<
-                    Logger::toString(logParameters.mLevel) << "</EnumParameter>\n"
-        "        <BooleanParameter Name=\"ViaPTI\">" <<
-                    (logParameters.mOutput == Logger::Output::Pti ? 1 : 0)
-                    << "</BooleanParameter>\n"
-        "    </control_parameters>\n"
-        "</service>\n";
-}
-
-void SubsystemInstanceLogParametersResource::handlePut(const Request &request, Response &response)
-{
-    Poco::XML::DOMParser parser;
-    Poco::XML::Document* document = parser.parseString(request.getRequestContentAsString());
-
-    if (!document) {
-        throw HttpError(ErrorStatus::BadRequest, "Invalid document");
-    }
-
-    static const std::string controlParametersUrl = "/service[@Type='fwlogs']/control_parameters/";
-
-    // Retrieve the Started BooleanParameter and its value
-    std::string startedNodeValue = getNodeValueFromXPath(document,
-        controlParametersUrl + "BooleanParameter[@Name='Started']");
-
-    // Retrieve the Verbosity EnumParameter and its value
-    std::string verbosityNodeValue = getNodeValueFromXPath(document,
-        controlParametersUrl + "EnumParameter[@Name='Verbosity']");
-
-    // Retrieve the ViaPTI BooleanParameter and its value
-    std::string viaPtiNodeValue = getNodeValueFromXPath(document,
-        controlParametersUrl + "BooleanParameter[@Name='ViaPTI']");
-
-    // Parse each of the parameters found into their correct type
-    Logger::Parameters logParameters;
-    try {
-        logParameters.mIsStarted =
-            Poco::NumberParser::parseBool(startedNodeValue);
-        logParameters.mLevel =
-            Logger::levelFromString(verbosityNodeValue);
-        logParameters.mOutput =
-            Poco::NumberParser::parseBool(viaPtiNodeValue) ? Logger::Output::Pti :
-                                                             Logger::Output::Sram;
-    }
-    catch (Logger::Exception &e) {
-        throw HttpError(ErrorStatus::BadRequest, std::string("Invalid value: ") + e.what());
-    }
-    catch (Poco::SyntaxException &e) {
-        throw HttpError(ErrorStatus::BadRequest,
-            std::string("Invalid Start/Stop request: ") + e.what());
-    }
-
-    try {
-        mSystem.setLogParameters(logParameters);
-    }
-    catch (System::Exception &e) {
-        throw HttpError(ErrorStatus::BadRequest, std::string("Fail to apply: ") + e.what());
-    }
-
-    std::ostream &out = response.send(ContentTypeHtml);
-    out << "<p>Done</p>";
-}
-
-void SubsystemInstanceLogControlParametersResource::handleGet(const Request &request, Response &response)
+void LogServiceInstanceControlParametersResource::handleGet(const Request &request, Response &response)
 {
     Logger::Parameters logParameters;
 
@@ -316,9 +229,9 @@ void SubsystemInstanceLogControlParametersResource::handleGet(const Request &req
     std::ostream &out = response.send(ContentTypeXml);
     out << "<control_parameters>\n"
         "    <BooleanParameter Name=\"Started\">" <<
-        logParameters.mIsStarted << "</BooleanParameter>"
+        logParameters.mIsStarted << "</BooleanParameter>\n"
         "    <ParameterBlock Name=\"Buffering\">\n"
-        "        <IntegerParameter Name=\"Size\">0</IntegerParameter>\n"
+        "        <IntegerParameter Name=\"Size\">100</IntegerParameter>\n"
         "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
         "    </ParameterBlock>\n"
         "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
@@ -329,7 +242,7 @@ void SubsystemInstanceLogControlParametersResource::handleGet(const Request &req
         "</control_parameters>\n";
 }
 
-void SubsystemInstanceLogControlParametersResource::handlePut(const Request &request, Response &response)
+void LogServiceInstanceControlParametersResource::handlePut(const Request &request, Response &response)
 {
     Poco::XML::DOMParser parser;
     Poco::XML::Document* document = parser.parseString(request.getRequestContentAsString());
@@ -382,33 +295,32 @@ void SubsystemInstanceLogControlParametersResource::handlePut(const Request &req
     out << "<p>Done</p>";
 }
 
-void SubsystemTypeLogParametersResource::handleGet(const Request &request, Response &response)
+void LogServiceTypeControlParametersResource::handleGet(const Request &request, Response &response)
 {
     std::ostream &out = response.send(ContentTypeXml);
-    out << "<service_type Name=\"fwlogs\">\n"
-        "    <control_parameters>\n"
-        "        <!-- service generic -->\n"
-        "        <BooleanParameter Name=\"Started\"/>\n"
-        "        <ParameterBlock Name=\"Buffering\">\n"
-        "            <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>\n"
-        "            <BooleanParameter Name=\"Circular\"/>\n"
-        "        </ParameterBlock>\n"
-        "        <BooleanParameter Name=\"PersistsState\"/>\n"
-        "        <!-- service specific -->\n"
-        "        <EnumParameter Size=\"8\" Name=\"Verbosity\">\n"
-        "            <ValuePair Numerical=\"2\" Literal=\"Critical\"/>\n"
-        "            <ValuePair Numerical=\"3\" Literal=\"High\"/>\n"
-        "            <ValuePair Numerical=\"4\" Literal=\"Medium\"/>\n"
-        "            <ValuePair Numerical=\"5\" Literal=\"Low\"/>\n"
-        "            <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>\n"
-        "        </EnumParameter>\n"
-        "        <BooleanParameter Name=\"ViaPTI\" " <<
-                                  "Description=\"Set to 1 if PTI interface is to be used\"/>\n"
-        "    </control_parameters>\n"
-        "</service_type>\n";
+    out <<
+        "<control_parameters>\n"
+        "    <!-- service generic -->\n"
+        "    <BooleanParameter Name=\"Started\"/>\n"
+        "    <ParameterBlock Name=\"Buffering\">\n"
+        "        <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>\n"
+        "        <BooleanParameter Name=\"Circular\"/>\n"
+        "    </ParameterBlock>\n"
+        "    <BooleanParameter Name=\"PersistsState\"/>\n"
+        "    <!-- service specific -->\n"
+        "    <EnumParameter Size=\"8\" Name=\"Verbosity\">\n"
+        "        <ValuePair Numerical=\"2\" Literal=\"Critical\"/>\n"
+        "        <ValuePair Numerical=\"3\" Literal=\"High\"/>\n"
+        "        <ValuePair Numerical=\"4\" Literal=\"Medium\"/>\n"
+        "        <ValuePair Numerical=\"5\" Literal=\"Low\"/>\n"
+        "        <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>\n"
+        "    </EnumParameter>\n"
+        "    <BooleanParameter Name=\"ViaPTI\" "
+        "Description=\"Set to 1 if PTI interface is to be used\"/>\n"
+        "</control_parameters>\n";
 }
 
-void SubsystemInstanceLogStreamResource::handleGet(const Request &request, Response &response)
+void LogServiceStreamResource::handleGet(const Request &request, Response &response)
 {
     /** Acquiring the log stream resource */
     auto resource = std::move(mSystem.tryToAcquireLogStreamResource());

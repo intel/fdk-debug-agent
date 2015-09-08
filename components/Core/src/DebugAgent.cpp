@@ -74,14 +74,13 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
      * Note: putting these hardcoded urls before the real ones because otherwise real urls
      * will be invoked first, and will fail.
      */
-    dispatcher->addResource("/instance/cavs.fwlogs/0",
-        std::shared_ptr<Resource>(new SubsystemInstanceLogParametersResource(mSystem)));
+
+    dispatcher->addResource("/type/cavs.fwlogs/control_parameters",
+        std::shared_ptr<Resource>(new LogServiceTypeControlParametersResource()));
     dispatcher->addResource("/instance/cavs.fwlogs/0/control_parameters",
-        std::shared_ptr<Resource>(new SubsystemInstanceLogControlParametersResource(mSystem)));
-    dispatcher->addResource("/type/cavs.fwlogs",
-        std::shared_ptr<Resource>(new SubsystemTypeLogParametersResource(mSystem)));
+        std::shared_ptr<Resource>(new LogServiceInstanceControlParametersResource(mSystem)));
     dispatcher->addResource("/instance/cavs.fwlogs/0/streaming",
-        std::shared_ptr<Resource>(new SubsystemInstanceLogStreamResource(mSystem)));
+        std::shared_ptr<Resource>(new LogServiceStreamResource(mSystem)));
 
     /* System */
     dispatcher->addResource("/type",

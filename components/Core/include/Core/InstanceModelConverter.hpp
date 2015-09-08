@@ -44,6 +44,7 @@ public:
 private:
     std::shared_ptr<ifdk_objects::instance::System> createSystem();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createSubsystem();
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createLogService();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createPipe();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createTask();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createCore();

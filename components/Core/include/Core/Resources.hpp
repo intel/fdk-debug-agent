@@ -109,40 +109,30 @@ private:
     ExclusiveInstanceModel &mInstanceModel;
 };
 
-/** This resource returns the Log Parameters for an Instance of a Subsystem (XML) */
-class SubsystemInstanceLogParametersResource : public SystemResource
+/** This resource returns the Log Control Parameters for an Instance of a service (XML) */
+class LogServiceInstanceControlParametersResource : public SystemResource
 {
 public:
-    SubsystemInstanceLogParametersResource(cavs::System &system) : SystemResource(system) {}
+    LogServiceInstanceControlParametersResource(cavs::System &system) : SystemResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
     virtual void handlePut(const rest::Request &request, rest::Response &response) override;
 };
 
-/** This resource returns the Log Control Parameters for an Instance of a Subsystem (XML) */
-class SubsystemInstanceLogControlParametersResource : public SystemResource
+/** This resource returns the Log Control Parameters for a type of a service (XML) */
+class LogServiceTypeControlParametersResource : public rest::Resource
 {
 public:
-    SubsystemInstanceLogControlParametersResource(cavs::System &system) : SystemResource(system) {}
-protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
-    virtual void handlePut(const rest::Request &request, rest::Response &response) override;
-};
-
-/** This resource returns the Log Parameters for a Subsystem Type (XML) */
-class SubsystemTypeLogParametersResource : public SystemResource
-{
-public:
-    SubsystemTypeLogParametersResource(cavs::System &system) : SystemResource(system) {}
+    LogServiceTypeControlParametersResource()  {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 };
 
-/** This resource returns the Log Stream for a Subsystem Instance (XML) */
-class SubsystemInstanceLogStreamResource : public SystemResource
+/** This resource returns the Log Stream for a service Instance (XML) */
+class LogServiceStreamResource : public SystemResource
 {
 public:
-    SubsystemInstanceLogStreamResource(cavs::System &system) : SystemResource(system) {}
+    LogServiceStreamResource(cavs::System &system) : SystemResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 };

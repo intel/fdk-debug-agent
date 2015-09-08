@@ -82,8 +82,10 @@ protected:
     /* List of static type names, i.e type names that are not retrieved dynamically  */
     static const std::vector<std::string> staticTypes;
 
-    /* name of the cavs log service type */
+    /* cavs log service type */
     static const std::string logServiceTypeName;
+    static const std::string logServiceId;
+    static const std::string logServiceDescription;
 
     /* list of static services types */
     static const std::vector<std::string> staticServiceTypes;
