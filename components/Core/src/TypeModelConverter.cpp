@@ -387,6 +387,15 @@ void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
                 std::to_string(controllerBaseAddr)));
         }
     }
+    if (hwConfig.isGpdmaCapsValid) {
+
+            ch.add(Characteristic(
+                "LP GPDMA0 count" + std::to_string(hwConfig.gpdmaCaps.lp_gpdma0_count)));
+            ch.add(Characteristic(
+                "LP GPDMA1 count" + std::to_string(hwConfig.gpdmaCaps.lp_gpdma0_count)));
+            ch.add(Characteristic(
+                "HP GPDMA count" + std::to_string(hwConfig.gpdmaCaps.hp_gpdma_count)));
+    }
     if (hwConfig.isGatewayCountValid) {
         ch.add(Characteristic(
             "Total number of DMA gateways",
