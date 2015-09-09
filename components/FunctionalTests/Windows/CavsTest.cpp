@@ -93,7 +93,7 @@ static const std::vector<uint8_t> nsControlParameterPayload =
 /** @return the xml file content as string */
 std::string xmlFile(const std::string &name)
 {
-    std::string fileName = "data/FunctionalTests/" + name + ".xml";
+    std::string fileName = "data/FunctionalTests/http/" + name + ".xml";
 
     std::ifstream file(fileName);
     if (!file.is_open()) {
@@ -110,7 +110,8 @@ std::string xmlFile(const std::string &name)
     return StringHelper::trim(content) + "\n"; /* Poco xml library puts a '\n' on the last line. */
 }
 
-const std::string& pfwConfigPath = "data/ParameterFrameworkConfigurationDBGA.xml";
+const std::string& pfwConfigPath =
+    "data/FunctionalTests/pfw/ParameterFrameworkConfigurationDBGA.xml";
 
 /** Helper function to set a module entry */
 void setModuleEntry(ModuleEntry &entry, const std::string &name,
