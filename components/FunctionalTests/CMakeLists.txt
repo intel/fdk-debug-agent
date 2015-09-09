@@ -51,3 +51,6 @@ link_poco(FunctionalTests)
 
 install(TARGETS FunctionalTests RUNTIME DESTINATION tests)
 install(DIRECTORY "data" DESTINATION tests)
+
+#installing pfw shared libraries
+install_pfw(tests)

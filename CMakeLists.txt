@@ -77,6 +77,21 @@ function(link_pfw target)
     target_link_libraries(${target} ${parameter_LIBRARIES})
 endfunction()
 
+#install pfw shared libraries
+function(install_pfw dir)
+   #currently working only on windows
+    if (WIN32)
+        find_package(parameter)
+
+        # Not very nice: using the include dir to find binaries.
+        # It would be better if they were supplied through a variable supplied by the pfw package.
+        set(files
+            "${parameter_CLIENT_INCLUDE_DIR}/../../../bin/parameter.dll"
+            "${parameter_CLIENT_INCLUDE_DIR}/../../../bin/libxml2-2.dll")
+        install(FILES ${files} DESTINATION ${dir})
+    endif()
+endfunction()
+
 # this function applies common settings to all debug agent projects
 function (set_common_settings projectname)
     #enabling c++11
