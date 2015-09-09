@@ -59,9 +59,10 @@ void Application::handleHelp(const std::string& name, const std::string& value)
 
 void Application::handlePort(const std::string& name, const std::string& value)
 {
+    /** @fixme use Convert */
     std::stringstream ss(value);
     ss >> mConfig.serverPort;
-    assert(ss.good());
+    assert((!ss.fail()) && (!ss.bad()));
 }
 
 void Application::handlePfwConfig(const std::string& name, const std::string& value)
