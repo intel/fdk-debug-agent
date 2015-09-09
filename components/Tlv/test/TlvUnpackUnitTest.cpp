@@ -144,6 +144,48 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         CHECK(testTlvLanguage.world == worldValue);
     }
 
+    SECTION("Read 2 TLV from buffer: one valid, one ignored") {
+
+        // Construct a test TLV list buffer
+        HelloValueType helloValue {0xDEAD, 0xBEEF};
+        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
+        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
+
+        long badValue = 0;
+        uint32_t bTag = static_cast<uint32_t>(TlvTestLanguage::Tags::BadTag);
+        uint32_t bLength = static_cast<uint32_t>(sizeof(long));
+
+        const size_t tlvListBufferSize =
+            sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
+            sizeof(bTag) + sizeof(bLength) + sizeof(badValue);
+        char tlvListBuffer[tlvListBufferSize];
+
+        size_t index = 0;
+        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
+        index += sizeof(hTag);
+        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
+        index += sizeof(hLength);
+        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
+        index += sizeof(helloValue);
+        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = bTag;
+        index += sizeof(bTag);
+        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = bLength;
+        index += sizeof(bLength);
+        *reinterpret_cast<long *>(&tlvListBuffer[index]) = badValue;
+
+        // Now test the unpacker
+        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+
+        CHECK(unpacker.readNext() == true);
+        CHECK(unpacker.readNext() == true);
+        CHECK(unpacker.readNext() == false);
+
+        CHECK(testTlvLanguage.isHelloValid == true);
+        CHECK(testTlvLanguage.hello == helloValue);
+        CHECK(testTlvLanguage.the.size() == 0);
+        CHECK(testTlvLanguage.isWorldValid == false);
+    }
+
     SECTION("Read 3 TLV from buffer, including an array one") {
 
         // Construct a test TLV list buffer

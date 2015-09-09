@@ -24,6 +24,7 @@
 #include "Tlv/TlvResponseHandlerInterface.hpp"
 #include "Tlv/TlvDictionary.hpp"
 #include "Tlv/TlvWrapper.hpp"
+#include "Tlv/TlvVoidWrapper.hpp"
 #include "Tlv/TlvVectorWrapper.hpp"
 
 using namespace debug_agent::tlv;
@@ -77,7 +78,8 @@ public:
     enum class Tags: unsigned int {
         Hello = 54,
         The = 24,
-        World = 112358
+        World = 112358,
+        BadTag = 0xBAADBEEF
     };
     static const unsigned int aTagIdWhichIsNotInTheLanguageTagsList = 42;
 
@@ -86,13 +88,20 @@ public:
         mLanguageDictionary(mTestLanguageTlvMap)
     {
         mTestLanguageTlvMap[Tags::Hello] =
-            std::unique_ptr<TlvWrapperInterface>(new TlvWrapper<HelloValueType>(hello, isHelloValid));
+            std::unique_ptr<TlvWrapperInterface>(
+                new TlvWrapper<HelloValueType>(hello, isHelloValid));
 
         mTestLanguageTlvMap[Tags::The] =
-            std::unique_ptr<TlvWrapperInterface>(new TlvVectorWrapper<TheValueType>(the));
+            std::unique_ptr<TlvWrapperInterface>(
+                new TlvVectorWrapper<TheValueType>(the));
 
         mTestLanguageTlvMap[Tags::World] =
-            std::unique_ptr<TlvWrapperInterface>(new TlvWrapper<WorldValueType>(world, isWorldValid));
+            std::unique_ptr<TlvWrapperInterface>(
+                new TlvWrapper<WorldValueType>(world, isWorldValid));
+
+        mTestLanguageTlvMap[Tags::BadTag] =
+            std::unique_ptr<TlvWrapperInterface>(
+                new TlvVoidWrapper());
     }
 
     const TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override

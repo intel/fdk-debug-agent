@@ -24,6 +24,7 @@
 set(TEST_SRCS
     TlvUnitTestMain.cpp
     TlvWrapperUnitTest.cpp
+    TlvVoidWrapperUnitTest.cpp
     TlvVectorWrapperUnitTest.cpp
     TlvDictionaryUnitTest.cpp
     TlvUnpackUnitTest.cpp)

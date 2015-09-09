@@ -28,6 +28,7 @@ set(LIB_SRCS
 set(LIB_INCS
     include/Tlv/TlvWrapperInterface.hpp
     include/Tlv/TlvWrapper.hpp
+    include/Tlv/TlvVoidWrapper.hpp
     include/Tlv/TlvVectorWrapper.hpp
     include/Tlv/TlvDictionaryInterface.hpp
     include/Tlv/TlvDictionary.hpp
