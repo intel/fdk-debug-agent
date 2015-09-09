@@ -458,11 +458,11 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createGateway(
                 switch (it->second)
                 {
                 case GatewayDirection::Input:
-                    gatewayModel->getInputs().add(Input("0", audioFormatUnknown));
+                    gatewayModel->getOutputs().add(Output("0", audioFormatUnknown));
                     break;
 
                 case GatewayDirection::Output:
-                    gatewayModel->getOutputs().add(Output("0", audioFormatUnknown));
+                    gatewayModel->getInputs().add(Input("0", audioFormatUnknown));
                     break;
 
                 default:

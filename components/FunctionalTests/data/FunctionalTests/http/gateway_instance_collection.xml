@@ -6,10 +6,10 @@
             <subsystem Id="0" Type="cavs"/>
         </parents>
         <children/>
-        <inputs/>
-        <outputs>
-            <output Format="Unknown" Id="0"/>
-        </outputs>
+        <inputs>
+            <input Format="Unknown" Id="0"/>
+        </inputs>
+        <outputs/>
         <links/>
     </component>
 </component_collection>
