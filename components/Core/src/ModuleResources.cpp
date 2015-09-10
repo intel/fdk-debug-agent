@@ -120,7 +120,12 @@ uint32_t ModuleResource::getElementMapping(
             "Mapping \"ParamId\" not found for " + elementHandle.getName());
     }
     uint32_t paramId;
-    convertTo(paramIdAsString, paramId);
+    if (!convertTo(paramIdAsString, paramId)) {
+
+        throw Resource::HttpError(
+            Resource::ErrorStatus::InternalError,
+            "Invalid mapping \"ParamId\": " + paramIdAsString);
+    }
 
     return paramId;
 }
@@ -129,7 +134,13 @@ void ControlParametersModuleInstanceResource::handleGet(const Request &request, 
 {
     /* Checking that the identifiers has been fetched */
     uint16_t instanceId;
-    convertTo(request.getIdentifierValue("instanceId"), instanceId);
+    std::string instanceIdValue(request.getIdentifierValue("instanceId"));
+    if (!convertTo(instanceIdValue, instanceId)) {
+
+        throw Resource::HttpError(
+            Resource::ErrorStatus::BadRequest,
+            "Invalid instance ID: " + instanceIdValue);
+    }
 
     std::unique_ptr<CElementHandle> moduleElementHandle = getModuleControlElement();
 
@@ -182,7 +193,13 @@ void ControlParametersModuleInstanceResource::handlePut(const Request &request, 
 
     /* Checking that the identifiers has been fetched */
     uint16_t instanceId;
-    convertTo(request.getIdentifierValue("instanceId"), instanceId);
+    std::string instanceIdValue(request.getIdentifierValue("instanceId"));
+    if (!convertTo(instanceIdValue, instanceId)) {
+
+        throw Resource::HttpError(
+            Resource::ErrorStatus::BadRequest,
+            "Invalid instance ID: " + instanceIdValue);
+    }
 
     std::unique_ptr<CElementHandle> moduleElementHandle = getModuleControlElement();
 
@@ -225,7 +242,13 @@ void ControlParametersModuleTypeResource::handleGet(const Request &request, Resp
 {
     /* Checking that the identifiers has been fetched */
     uint16_t instanceId;
-    convertTo(request.getIdentifierValue("instanceId"), instanceId);
+    std::string instanceIdValue(request.getIdentifierValue("instanceId"));
+    if (!convertTo(instanceIdValue, instanceId)) {
+
+        throw Resource::HttpError(
+            Resource::ErrorStatus::BadRequest,
+            "Invalid instance ID: " + instanceIdValue);
+    }
 
     std::unique_ptr<CElementHandle> moduleElementHandle = getModuleControlElement();
 
@@ -236,8 +259,6 @@ void ControlParametersModuleTypeResource::handleGet(const Request &request, Resp
     {
         std::unique_ptr<CElementHandle>  childElementHandle = getChildElementHandle(
             *moduleElementHandle, child);
-
-        uint32_t paramId = getElementMapping(*childElementHandle);
 
         // Get Structure information from PFW
         std::string result = childElementHandle->getStructureAsXML();

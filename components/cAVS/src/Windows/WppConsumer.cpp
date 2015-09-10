@@ -115,7 +115,8 @@ VOID WINAPI WppConsumer::ProcessWppEvent(PEVENT_RECORD pEvent)
 void WppConsumer::collectLogEntries(WppLogEntryListener &listener, const std::string &fileName)
 {
     /* Setting structure memory content to 0 */
-    EVENT_TRACE_LOGFILE traceInfo = { 0 };
+    EVENT_TRACE_LOGFILE traceInfo;
+    SecureZeroMemory(&traceInfo, sizeof(traceInfo));
 
     /* Setting trace mode
      *
