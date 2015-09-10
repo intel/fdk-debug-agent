@@ -45,6 +45,9 @@
                 <component Id="0" Type="module-src"/>
                 <component Id="3" Type="module-mixout"/>
             </component_collection>
+            <service_collection Name="services">
+                <service Id="0" Type="fwlogs"/>
+            </service_collection>
         </children>
         <inputs/>
         <outputs/>

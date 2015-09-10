@@ -204,6 +204,13 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     }
     children.add(moduleCollection);
 
+    /* Services */
+    auto serviceCollection = std::shared_ptr<ServiceRefCollection>(
+        new ServiceRefCollection(collectionName_service));
+
+    serviceCollection->add(ServiceRef(logServiceTypeName, logServiceId));
+    children.add(serviceCollection);
+
     /* Links between modules */
     for (auto &link : mTopology.links) {
         uint16_t fromModuleId, fromInstanceId;
