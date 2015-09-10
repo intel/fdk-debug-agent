@@ -224,14 +224,13 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
 
 static void requestInstanceTopologyRefresh(HttpClientSimulator &client)
 {
-    CHECK_NOTHROW(client.request(
+    client.request(
         "/instance/cavs/0/refreshed",
         HttpClientSimulator::Verb::Post,
         "",
         HttpClientSimulator::Status::Ok,
         "text/xml",
-        "")
-        );
+        "");
 }
 
 TEST_CASE("DebugAgent/cAVS: topology")
@@ -263,7 +262,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
     HttpClientSimulator client("localhost");
 
     /* Request an instance topology refresh */
-    requestInstanceTopologyRefresh(client);
+    CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
 
     /* Key: the url
      * Value: a file that contains the expected xml
@@ -367,7 +366,7 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
     HttpClientSimulator client("localhost");
 
     /* Request an instance topology refresh */
-    requestInstanceTopologyRefresh(client);
+    CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
 
     /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
@@ -378,6 +377,76 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
         "text/xml",
         xmlFile("module_instance_control_params")
         ));
+}
+
+TEST_CASE("DebugAgent/cAVS: A refresh error erases the previous topology ")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial commands */
+    addInitialCommands(commands);
+    /* Adding topology command */
+    addInstanceTopologyCommands(commands);
+
+    /* Add a bad gateway command */
+    std::vector<dsp_fw::GatewayProps> emptyList;
+    commands.addGetGatewaysCommand(
+        false,
+        STATUS_SUCCESS,
+        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        static_cast<uint32_t>(CavsTopologySample::gatewaysCount),
+        emptyList);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* Request an instance topology refresh */
+    CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
+
+    /* Access to an instance */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.module-aec/2",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        xmlFile("module_instance")));
+
+    /* Request an instance topology refresh which will fail since commands are not in device mock */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs/0/refreshed",
+        HttpClientSimulator::Verb::Post,
+        "",
+        HttpClientSimulator::Status::InternalError,
+        "text/plain",
+        "Internal error: Cannot refresh instance model: Cannot get topology from fw: "
+        "Can not retrieve gateways: Device returns an exception: OS says that io "
+        "control has failed."));
+
+    /* Access to an instance must fail since last topology refresh has failed*/
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.module-aec/2",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::InternalError,
+        "text/plain",
+        "Internal error: Instance model is undefined."));
 }
 
 TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
@@ -425,7 +494,7 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
     HttpClientSimulator client("localhost");
 
     /* Request an instance topology refresh */
-    requestInstanceTopologyRefresh(client);
+    CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
 
     /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
@@ -666,7 +735,7 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
             "",
             HttpClientSimulator::Status::Locked,
             "text/plain",
-            "Resource is locked : Logging stream resource is already used.");
+            "Resource is locked: Logging stream resource is already used.");
     }));
 
     /* Terminating the debug agent after 500ms in another thread, the client should be consuming

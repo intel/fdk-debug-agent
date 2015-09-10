@@ -103,7 +103,7 @@ public:
             std::stringstream msg;
             msg << toString(status);
             if (userMessage.length() > 0) {
-                msg << " : " << userMessage;
+                msg << ": " << userMessage;
             }
             return msg.str();
         }

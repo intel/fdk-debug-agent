@@ -149,7 +149,7 @@ void InstanceCollectionResource::handleGet(const Request &request, Response &res
 
         /* check nullptr using get() to avoid any KW error */
         if (collection.get() == nullptr) {
-            throw HttpError(Resource::ErrorStatus::BadRequest, "Uknown type: " + typeName);
+            throw HttpError(Resource::ErrorStatus::BadRequest, "Unknown type: " + typeName);
         }
 
         collection->accept(serializer);
@@ -176,7 +176,7 @@ void InstanceResource::handleGet(const Request &request, Response &response)
 
         /* check nullptr using get() to avoid any KW error */
         if (instancePtr.get() == nullptr) {
-            throw HttpError(Resource::ErrorStatus::BadRequest, "Uknown instance: type=" +
+            throw HttpError(Resource::ErrorStatus::BadRequest, "Unknown instance: type=" +
                 typeName + " instance_id=" + instanceId);
         }
 
@@ -192,6 +192,8 @@ void InstanceResource::handleGet(const Request &request, Response &response)
 void RefreshSubsystemResource::handlePost(const Request &request, Response &response)
 {
     std::shared_ptr<InstanceModel> instanceModel;
+    ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
+
     try
     {
         InstanceModelConverter converter(mSystem);
@@ -199,15 +201,15 @@ void RefreshSubsystemResource::handlePost(const Request &request, Response &resp
     }
     catch (BaseModelConverter::Exception &e)
     {
+        /* Topology retrieving has failed: invalidate the previous one */
+        handle->getResource() = nullptr;
+
         throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
             "Cannot refresh instance model: " + std::string(e.what()));
     }
 
-
-    {
-        ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
-        handle->getResource() = instanceModel;
-    }
+    /* Apply new topology */
+    handle->getResource() = instanceModel;
 
     response.send(ContentTypeXml);
 }

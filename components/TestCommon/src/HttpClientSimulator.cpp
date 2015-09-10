@@ -61,6 +61,8 @@ static HttpClientSimulator::Status translateStatus(HTTPResponse::HTTPStatus stat
         return HttpClientSimulator::Status::NotFound;
     case static_cast<HTTPResponse::HTTPStatus>(423) : /* This code is not defined by Poco */
         return HttpClientSimulator::Status::Locked;
+    case HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR:
+        return HttpClientSimulator::Status::InternalError;
     }
     throw HttpClientSimulator::RequestFailureException(std::string("Invalid http status"));
 }
@@ -94,6 +96,8 @@ std::string HttpClientSimulator::toString(Status s)
         return "VerbNotAllowed";
     case Status::Locked:
         return "Locked";
+    case Status::InternalError:
+        return "InternalError";
     }
     throw RequestFailureException(std::string("Invalid http status"));
 }
