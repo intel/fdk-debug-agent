@@ -67,9 +67,7 @@ void Application::handlePort(const std::string& name, const std::string& value)
 
 void Application::handlePfwConfig(const std::string& name, const std::string& value)
 {
-    std::stringstream ss(value);
-    ss >> mConfig.pfwConfig;
-    assert(ss.good());
+    mConfig.pfwConfig = value;
 }
 
 void Application::handleLogControlOnly(const std::string& name, const std::string& value)
