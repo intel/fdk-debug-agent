@@ -96,7 +96,6 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == false);
-        CHECK(testTlvLanguage.hello == helloValue);
         CHECK(testTlvLanguage.the.size() == 0);
         CHECK(testTlvLanguage.isWorldValid == false);
     }
