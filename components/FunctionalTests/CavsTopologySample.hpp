@@ -31,16 +31,22 @@ namespace debug_agent
 class CavsTopologySample final
 {
 public:
-    static void createFirwareObjects(
+    static void createInstanceFirmwareObjects(
         std::vector<cavs::DSModuleInstanceProps> &moduleInstances,
         std::vector<cavs::dsp_fw::GatewayProps> &gateways,
-        uint32_t &maxPplCount,
         std::vector<uint32_t> &pipelineIds,
         std::vector<cavs::DSPplProps> &pipelines,
-        std::vector<cavs::DSSchedulersInfo> &schedulers,
+        std::vector<cavs::DSSchedulersInfo> &schedulers);
+
+    static void createFirmwareObjects(
         std::vector<cavs::ModuleEntry> &modules,
         std::vector<char> &fwConfig,
         std::vector<char> &hwConfig);
+
+
+    static const size_t moduleCount;
+    static const size_t maxPplCount;
+    static const size_t gatewaysCount;
 
 private:
     CavsTopologySample();

@@ -23,6 +23,7 @@
 #include "CavsTopologySample.hpp"
 #include "cAVS/Topology.hpp"
 #include "Util/StringHelper.hpp"
+#include "Util/AssertAlways.hpp"
 #include <algorithm>
 
 using namespace debug_agent::cavs;
@@ -154,32 +155,17 @@ DSPplProps newPipeline(uint32_t id, const std::vector<uint32_t> &instanceIds,
     return props;
 }
 
-void CavsTopologySample::createFirwareObjects(
+const size_t CavsTopologySample::moduleCount = 7;
+const size_t CavsTopologySample::maxPplCount = 10;
+const size_t CavsTopologySample::gatewaysCount = 5;
+
+void CavsTopologySample::createInstanceFirmwareObjects(
     std::vector<DSModuleInstanceProps> &moduleInstances,
     std::vector<dsp_fw::GatewayProps> &gateways,
-    uint32_t &maxPplCount,
     std::vector<uint32_t> &pipelineIds,
     std::vector<DSPplProps> &pipelines,
-    std::vector<DSSchedulersInfo> &schedulers,
-    std::vector<ModuleEntry> &modules,
-    std::vector<char> &fwConfig,
-    std::vector<char> &hwConfig)
+    std::vector<DSSchedulersInfo> &schedulers)
 {
-    /* Filling module entries */
-    uint32_t i = 0;
-    for (auto &moduleName: moduleNames)
-    {
-        ModuleEntry entry;
-        StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleName);
-        for (uint32_t &intValue : entry.uuid) {
-            /* filling four bytes with i value */
-            intValue = (i << 24) | (i << 16) | (i << 8) | i;
-        }
-
-        modules.push_back(entry);
-        ++i;
-    }
-
     /* Filling module instances */
     moduleInstances = {
         /* Pipe 1 */
@@ -259,6 +245,7 @@ void CavsTopologySample::createFirwareObjects(
         newGateway(dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kDmicLinkInputClass, 1)),
         newGateway(dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostOutputClass, 1))
     };
+    ASSERT_ALWAYS(gateways.size() == gatewaysCount);
 
     /* Filling schedulers */
     schedulers = {
@@ -293,7 +280,6 @@ void CavsTopologySample::createFirwareObjects(
     };
 
     /* Filling pipelines */
-    maxPplCount = 10;
     pipelineIds = { 1, 2, 3, 4 };
     pipelines = {
         newPipeline(1, {
@@ -321,6 +307,28 @@ void CavsTopologySample::createFirwareObjects(
         },
         { 5, 6 }),
     };
+}
+
+void CavsTopologySample::createFirmwareObjects(
+    std::vector<ModuleEntry> &modules,
+    std::vector<char> &fwConfig,
+    std::vector<char> &hwConfig)
+{
+    /* Filling module entries */
+    ASSERT_ALWAYS(moduleCount == moduleNames.size());
+    uint32_t i = 0;
+    for (auto &moduleName: moduleNames)
+    {
+        ModuleEntry entry;
+        StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleName);
+        for (uint32_t &intValue : entry.uuid) {
+            /* filling four bytes with i value */
+            intValue = (i << 24) | (i << 16) | (i << 8) | i;
+        }
+
+        modules.push_back(entry);
+        ++i;
+    }
 
     /* Filling firmware config */
     fwConfig = {
@@ -339,13 +347,13 @@ void CavsTopologySample::createFirwareObjects(
         /* Length = 4 bytes */
         0x04, 0x00, 0x00, 0x00,
         /* Value */
-        static_cast<char>(moduleNames.size()), 0x00, 0x00, 0x00,
+        static_cast<char>(moduleCount), 0x00, 0x00, 0x00,
 
         /* Tag for MAX_PPL_COUNT : 9 */
         9, 0x00, 0x00, 0x00,
         /* Length = 4 bytes */
         0x04, 0x00, 0x00, 0x00,
-        /* Value : 2 */
+        /* Value */
         static_cast<char>(maxPplCount), 0x00, 0x00, 0x00
     };
 
@@ -363,7 +371,7 @@ void CavsTopologySample::createFirwareObjects(
         /* Length = 4 bytes */
         0x4, 0x00, 0x00, 0x00,
         /* Value */
-        static_cast<char>(gateways.size()), 0x00, 0x00, 0x00
+        static_cast<char>(gatewaysCount), 0x00, 0x00, 0x00
     };
 }
 

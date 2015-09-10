@@ -52,8 +52,6 @@ private:
     DebugAgent& operator=(const DebugAgent&) = delete;
 
     std::shared_ptr<TypeModel> createTypeModel();
-    std::shared_ptr<InstanceModel> createInstanceModel();
-
     std::shared_ptr<rest::Dispatcher> createDispatcher();
 
     cavs::System mSystem;

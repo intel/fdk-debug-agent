@@ -128,24 +128,11 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
 {
     /* Constructing cavs model */
     /* ----------------------- */
-
-    std::vector<DSModuleInstanceProps> moduleInstances;
-    std::vector<dsp_fw::GatewayProps> gateways;
-    uint32_t maxPplCount;
-    std::vector<uint32_t> pipelineIds;
-    std::vector<DSPplProps> pipelines;
-    std::vector<DSSchedulersInfo> schedulers;
     std::vector<ModuleEntry> modules;
     std::vector<char> fwConfig;
     std::vector<char> hwConfig;
 
-    CavsTopologySample::createFirwareObjects(
-        moduleInstances,
-        gateways,
-        maxPplCount,
-        pipelineIds,
-        pipelines,
-        schedulers,
+    CavsTopologySample::createFirmwareObjects(
         modules,
         fwConfig,
         hwConfig);
@@ -167,6 +154,22 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         static_cast<uint32_t>(modules.size()),
         modules);
+}
+
+void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
+{
+    std::vector<DSModuleInstanceProps> moduleInstances;
+    std::vector<dsp_fw::GatewayProps> gateways;
+    std::vector<uint32_t> pipelineIds;
+    std::vector<DSPplProps> pipelines;
+    std::vector<DSSchedulersInfo> schedulers;
+
+    CavsTopologySample::createInstanceFirmwareObjects(
+        moduleInstances,
+        gateways,
+        pipelineIds,
+        pipelines,
+        schedulers);
 
     /* Gateways*/
     commands.addGetGatewaysCommand(
@@ -181,7 +184,7 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
         true,
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-        maxPplCount,
+        static_cast<uint32_t>(CavsTopologySample::maxPplCount),
         pipelineIds);
 
     for (auto &pipeline : pipelines) {
@@ -219,6 +222,18 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
     }
 }
 
+static void requestInstanceTopologyRefresh(HttpClientSimulator &client)
+{
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs/0/refreshed",
+        HttpClientSimulator::Verb::Post,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/xml",
+        "")
+        );
+}
+
 TEST_CASE("DebugAgent/cAVS: topology")
 {
     /* Creating the mocked device */
@@ -231,6 +246,8 @@ TEST_CASE("DebugAgent/cAVS: topology")
 
     /* Adding initial commands */
     addInitialCommands(commands);
+    /* Adding topology command */
+    addInstanceTopologyCommands(commands);
 
     /* Now using the mocked device
     * --------------------------- */
@@ -244,6 +261,9 @@ TEST_CASE("DebugAgent/cAVS: topology")
 
     /* Creating the http client */
     HttpClientSimulator client("localhost");
+
+    /* Request an instance topology refresh */
+    requestInstanceTopologyRefresh(client);
 
     /* Key: the url
      * Value: a file that contains the expected xml
@@ -316,6 +336,9 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
 
     /* Adding initial commands */
     addInitialCommands(commands);
+    /* Adding topology command */
+    addInstanceTopologyCommands(commands);
+
     /* Add command for get module parameter */
     uint16_t moduleId = 1;
     uint16_t InstanceId = 1;
@@ -343,6 +366,9 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
     /* Creating the http client */
     HttpClientSimulator client("localhost");
 
+    /* Request an instance topology refresh */
+    requestInstanceTopologyRefresh(client);
+
     /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
         "/instance/cavs.module-aec/1/control_parameters",
@@ -367,6 +393,8 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
 
     /* Adding initial commands */
     addInitialCommands(commands);
+    /* Adding topology command */
+    addInstanceTopologyCommands(commands);
     /* Add command to set module parameter */
     uint16_t moduleId = 1;
     uint16_t InstanceId = 1;
@@ -395,6 +423,9 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
 
     /* Creating the http client */
     HttpClientSimulator client("localhost");
+
+    /* Request an instance topology refresh */
+    requestInstanceTopologyRefresh(client);
 
     /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(

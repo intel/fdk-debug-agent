@@ -52,19 +52,6 @@ std::shared_ptr<TypeModel> DebugAgent::createTypeModel()
     }
 }
 
-std::shared_ptr<InstanceModel> DebugAgent::createInstanceModel()
-{
-    try
-    {
-        InstanceModelConverter converter(mSystem);
-        return converter.createModel();
-    }
-    catch (BaseModelConverter::Exception &e)
-    {
-        throw Exception("Can not create instance model: " + std::string(e.what()));
-    }
-}
-
 std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 {
     Dispatcher *dispatcher = new rest::Dispatcher();
@@ -131,7 +118,7 @@ try :
     /* Order is important! */
     mSystem(driverFactory),
     mTypeModel(createTypeModel()),
-    mInstanceModel(createInstanceModel()),
+    mInstanceModel(nullptr),
     mParameterMgrPlatformConnector(pfwConfig),
     mRestServer(createDispatcher(), port)
 {
