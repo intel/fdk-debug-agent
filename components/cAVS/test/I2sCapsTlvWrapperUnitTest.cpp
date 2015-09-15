@@ -24,6 +24,7 @@
 #include "catch.hpp"
 
 using namespace debug_agent::cavs;
+using namespace debug_agent::tlv;
 
 static const size_t minimumI2sCapsValueSize = 8;
 #define i2sCapsValueSize(controllerCount) \
@@ -56,10 +57,11 @@ TEST_CASE("I2sCapsTlvWrapper", "[WrapperRead]")
     // Read invalid size
     const size_t invalidSize = i2sCapsValueSize(0) + 1;
     char invalidSizeTlv[invalidSize];
-    CHECK_THROWS_MSG(i2sCapsTlvWrapper.readFrom(invalidSizeTlv, invalidSize),
-                     "Invalid binary size ("
-                     + std::to_string(invalidSize)
-                     + " bytes) for a TLV I2sCaps value");
+    CHECK_THROWS_AS_MSG(i2sCapsTlvWrapper.readFrom(invalidSizeTlv, invalidSize),
+                        TlvWrapperInterface::Exception,
+                        "Invalid binary size ("
+                        + std::to_string(invalidSize)
+                        + " bytes) for a TLV I2sCaps value");
     CHECK(testValueIsValid == false);
 
     // Read inconsistent value (controller_count to high)
@@ -70,8 +72,9 @@ TEST_CASE("I2sCapsTlvWrapper", "[WrapperRead]")
             // controller_count = 2 instead of 0
             0x02, 0x00, 0x00, 0x00
     };
-    CHECK_THROWS_MSG(i2sCapsTlvWrapper.readFrom(inconsistentSizeTlv, inconstistentValueSize),
-                     "struct I2sCapabilities inconsistency");
+    CHECK_THROWS_AS_MSG(i2sCapsTlvWrapper.readFrom(inconsistentSizeTlv, inconstistentValueSize),
+                        TlvWrapperInterface::Exception,
+                        "struct I2sCapabilities inconsistency");
     CHECK(testValueIsValid == false);
 
     // Read inconsistent value (controller_count to low)
@@ -84,8 +87,9 @@ TEST_CASE("I2sCapsTlvWrapper", "[WrapperRead]")
             // First and last controller_base_addr
             0x00, 0x00, 0x00, 0x00
     };
-    CHECK_THROWS_MSG(i2sCapsTlvWrapper.readFrom(inconsistentSizeTlv, inconstistent2ValueSize),
-                     "struct I2sCapabilities inconsistency");
+    CHECK_THROWS_AS_MSG(i2sCapsTlvWrapper.readFrom(inconsistentSizeTlv, inconstistent2ValueSize),
+                        TlvWrapperInterface::Exception,
+                        "struct I2sCapabilities inconsistency");
     CHECK(testValueIsValid == false);
 
     // Read empty controller_base_addr

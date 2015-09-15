@@ -34,7 +34,8 @@ TEST_CASE("Core ID validity", "[constructor]")
     static const unsigned int maxCoreId = 15;
     static const unsigned int overMaxCoreId = 16;
 
-    CHECK_THROWS_MSG(LogBlock b(overMaxCoreId),
+    CHECK_THROWS_AS_MSG(LogBlock b(overMaxCoreId),
+        LogBlock::Exception,
         "Invalid Core ID: " + std::to_string(overMaxCoreId) + " should be in [0..15]");
 
     CHECK_NOTHROW(LogBlock b(minCoreId));
@@ -48,10 +49,13 @@ TEST_CASE("Size validity", "[streaming]")
     static const unsigned int maxBlockSize = 1234;
     static const unsigned int overmaxBlocSize = maxBlockSize + 1;
 
-    LogBlockBase<maxBlockSize> block(coreId, overmaxBlocSize);
+    using TestedLogBlocType = LogBlockBase<maxBlockSize>;
+
+    TestedLogBlocType block(coreId, overmaxBlocSize);
 
     std::stringstream blockStream;
-    CHECK_THROWS_MSG(blockStream << block,
+    CHECK_THROWS_AS_MSG(blockStream << block,
+        TestedLogBlocType::Exception,
         "Log block size exceeds maximum value");
 }
 
@@ -63,7 +67,8 @@ TEST_CASE("cAVS block size validity", "[streaming]")
     LogBlock block(coreId, overmaxBlocSize);
 
     std::stringstream blockStream;
-    CHECK_THROWS_MSG(blockStream << block,
+    CHECK_THROWS_AS_MSG(blockStream << block,
+        LogBlock::Exception,
         "Log block size exceeds maximum value");
 }
 

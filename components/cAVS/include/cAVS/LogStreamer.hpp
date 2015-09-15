@@ -40,7 +40,7 @@ public:
      * A LogStreamer writes the cAVS log to an ostream in real time, using a cavs::Logger interface.
      * @param[in] logger The Logger interface to be used to get the cAVS log
      * @param[in] moduleEntries The FW module entries table
-     * @throw LogStreamer::Exception
+     * @throw Streamer::Exception
      * @todo The LogStreamer will need a way to retrieve the "Module Entries" table in a subsequent
      * patch.
      */

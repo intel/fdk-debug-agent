@@ -106,11 +106,13 @@ TEST_CASE("Logging: setting and getting parameters")
         windows::Logger::Output::Sram);
 
     /* Checking that set log parameters command produces OS error */
-    CHECK_THROWS_MSG(logger.setParameters(inputParameters),
+    CHECK_THROWS_AS_MSG(logger.setParameters(inputParameters),
+        windows::Logger::Exception,
         "TinySet error: OS says that io control has failed.");
 
     /* Checking that set log parameters command produces driver error */
-    CHECK_THROWS_MSG(logger.setParameters(inputParameters),
+    CHECK_THROWS_AS_MSG(logger.setParameters(inputParameters),
+        windows::Logger::Exception,
         "Driver returns invalid status: " +
         std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
 
@@ -118,11 +120,13 @@ TEST_CASE("Logging: setting and getting parameters")
     CHECK_NOTHROW(logger.setParameters(inputParameters));
 
     /* Checking that get log parameters command produces OS error */
-    CHECK_THROWS_MSG(logger.getParameters(),
+    CHECK_THROWS_AS_MSG(logger.getParameters(),
+        windows::Logger::Exception,
         "TinyGet error: OS says that io control has failed.");
 
     /* Checking that get log parameters command produces driver error */
-    CHECK_THROWS_MSG(logger.getParameters(),
+    CHECK_THROWS_AS_MSG(logger.getParameters(),
+        windows::Logger::Exception,
         "Driver returns invalid status: " +
         std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
 

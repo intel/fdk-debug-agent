@@ -41,23 +41,27 @@ TEST_CASE("Format type string", "[Constructor]")
     static const int ten = 10;
 
     /* IFDK:1234567890:12345678901[1.1] is 32 characters long */
-    CHECK_THROWS_MSG(IfdkStreamHeader(long10charString, long11charString, one, one),
+    CHECK_THROWS_AS_MSG(IfdkStreamHeader(long10charString, long11charString, one, one),
+        IfdkStreamHeader::Exception,
         "Format type length exceeds 31 characters for 'IFDK:" +
         long10charString + ":" + long11charString +
         "[" + std::to_string(one) + "." +  std::to_string(one) +"]'");
 
     /* IFDK:1234567890:1234567890[1.10] is 32 characters long */
-    CHECK_THROWS_MSG(IfdkStreamHeader(long10charString, long10charString, one, ten),
+    CHECK_THROWS_AS_MSG(IfdkStreamHeader(long10charString, long10charString, one, ten),
+        IfdkStreamHeader::Exception,
         "Format type length exceeds 31 characters for 'IFDK:" +
         long10charString + ":" + long10charString +
         "[" + std::to_string(one) + "." +  std::to_string(ten) +"]'");
 
     /* Invalid System Type */
-    CHECK_THROWS_MSG(IfdkStreamHeader(empty, long10charString, 1, 1),
+    CHECK_THROWS_AS_MSG(IfdkStreamHeader(empty, long10charString, 1, 1),
+        IfdkStreamHeader::Exception,
         "Empty System Type string");
 
     /* Invalid File Type */
-    CHECK_THROWS_MSG(IfdkStreamHeader(long10charString, empty, 1, 1),
+    CHECK_THROWS_AS_MSG(IfdkStreamHeader(long10charString, empty, 1, 1),
+        IfdkStreamHeader::Exception,
         "Empty File Type string");
 
     /* IFDK:1234567890:1234567890[1.1] is 31 characters long */
@@ -81,19 +85,23 @@ TEST_CASE("Properties", "[addProperty]")
     IfdkStreamHeader systemHeader(systemType, fileType, 1, 1);
 
     /* Too short key is rejected */
-    CHECK_THROWS_MSG(systemHeader.addProperty(emptyString, maxString),
+    CHECK_THROWS_AS_MSG(systemHeader.addProperty(emptyString, maxString),
+        IfdkStreamHeader::Exception,
         "Empty property key or value for " + emptyString + equal + maxString);
 
     /* Too short value is rejected */
-    CHECK_THROWS_MSG(systemHeader.addProperty(maxString, emptyString),
+    CHECK_THROWS_AS_MSG(systemHeader.addProperty(maxString, emptyString),
+        IfdkStreamHeader::Exception,
         "Empty property key or value for " + maxString + equal + emptyString);
 
     /* Too long key is rejected */
-    CHECK_THROWS_MSG(systemHeader.addProperty(tooLongString, maxString),
+    CHECK_THROWS_AS_MSG(systemHeader.addProperty(tooLongString, maxString),
+        IfdkStreamHeader::Exception,
         "Property length exceeds for " + tooLongString + equal + maxString);
 
     /* Too long value is rejected */
-    CHECK_THROWS_MSG(systemHeader.addProperty(maxString, tooLongString),
+    CHECK_THROWS_AS_MSG(systemHeader.addProperty(maxString, tooLongString),
+        IfdkStreamHeader::Exception,
         "Property length exceeds for " + maxString + equal + tooLongString);
 
     /* Maximum key length and minimum value is accepted */
@@ -105,11 +113,13 @@ TEST_CASE("Properties", "[addProperty]")
     REQUIRE_NOTHROW(systemHeader.addProperty(oneCharString, maxString));
 
     /* Duplication is rejected */
-    CHECK_THROWS_MSG(systemHeader.addProperty(oneCharString, maxString),
+    CHECK_THROWS_AS_MSG(systemHeader.addProperty(oneCharString, maxString),
+        IfdkStreamHeader::Exception,
         "Property already exists for key '" + oneCharString + "'");
 
     /* Duplication is still rejected */
-    CHECK_THROWS_MSG(systemHeader.addProperty(oneCharString, maxString),
+    CHECK_THROWS_AS_MSG(systemHeader.addProperty(oneCharString, maxString),
+        IfdkStreamHeader::Exception,
         "Property already exists for key '" + oneCharString + "'");
 }
 

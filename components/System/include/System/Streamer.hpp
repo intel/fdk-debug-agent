@@ -50,7 +50,7 @@ public:
      * @param[in] os the std::ostream on which the stream will be streamed to
      * @param[in] s the Streamer
      * @remarks Should be called from a dedicated thread since will block until stream termination
-     * @throw streamer::Exception
+     * @throw Streamer::Exception
      */
     friend std::ostream &operator<<(std::ostream &os, Streamer &s);
 

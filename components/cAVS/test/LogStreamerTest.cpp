@@ -149,7 +149,8 @@ TEST_CASE("Test IFDK cAVS Log stream", "[stream]")
     expectedOutStream << logIfdkHeader;
     expectedOutStream << fakeLogger.getExpectedBlocksStream().str();
 
-    CHECK_THROWS_MSG(outStream << logStreamer,
+    CHECK_THROWS_AS_MSG(outStream << logStreamer,
+        Streamer::Exception,
         "Fail to read log: No more log");
 
     CHECK(outStream.str() == expectedOutStream.str());
@@ -167,7 +168,8 @@ TEST_CASE("Test module entries to stream", "[streaming]")
     LogStreamer logStreamer(fakeLogger, moduleEntries);
 
     std::stringstream outStream;
-    CHECK_THROWS_MSG(outStream << logStreamer,
+    CHECK_THROWS_AS_MSG(outStream << logStreamer,
+        Streamer::Exception,
         "Fail to read log: No more log");
 
     /* Expected stream size:

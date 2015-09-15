@@ -30,7 +30,9 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
 
     SECTION("Null pointer") {
 
-        CHECK_THROWS_MSG(TlvUnpack unpacker(testTlvLanguage, nullptr, 0), "Null pointer");
+        CHECK_THROWS_AS_MSG(TlvUnpack unpacker(testTlvLanguage, nullptr, 0),
+            TlvUnpack::Exception,
+            "Null pointer");
     }
 
     SECTION("Read from empty buffer") {
@@ -92,7 +94,9 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         // Now test the unpacker
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
-        CHECK_THROWS_MSG(unpacker.readNext(), "Cannot parse unknown tag " + std::to_string(badTag));
+        CHECK_THROWS_AS_MSG(unpacker.readNext(),
+            TlvUnpack::Exception,
+            "Cannot parse unknown tag " + std::to_string(badTag));
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == false);
@@ -290,11 +294,15 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
         CHECK(unpacker.readNext() == true);
-        CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
+        CHECK_THROWS_AS_MSG(unpacker.readNext(),
+            TlvUnpack::Exception,
+            "Error reading value for tag "
             + std::to_string(tTag) + ": Invalid binary size ("
             + std::to_string(tLength) + " instead of multiple of "
             + std::to_string(sizeof(TheValueType)) + " bytes) for TLV value read");
-        CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
+        CHECK_THROWS_AS_MSG(unpacker.readNext(),
+            TlvUnpack::Exception,
+            "Error reading value for tag "
             + std::to_string(wTag) + ": Invalid binary size ("
             + std::to_string(wLength) + " instead of "
             + std::to_string(sizeof(WorldValueType)) + " bytes) for TLV value read");
@@ -342,7 +350,9 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
         CHECK(unpacker.readNext() == true);
-        CHECK_THROWS_MSG(unpacker.readNext(), "Incomplete value for tag " + std::to_string(wTag));
+        CHECK_THROWS_AS_MSG(unpacker.readNext(),
+            TlvUnpack::Exception,
+            "Incomplete value for tag " + std::to_string(wTag));
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
@@ -386,7 +396,9 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
 
-        CHECK_THROWS_MSG(unpacker.readNext(), "Error reading value for tag "
+        CHECK_THROWS_AS_MSG(unpacker.readNext(),
+            TlvUnpack::Exception,
+            "Error reading value for tag "
             + std::to_string(hTag) + ": Invalid binary size ("
             + std::to_string(hLength) + " instead of "
             + std::to_string(sizeof(HelloValueType)) + " bytes) for TLV value read");
@@ -432,7 +444,9 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
         CHECK(unpacker.readNext() == true);
-        CHECK_THROWS_MSG(unpacker.readNext(), "Incomplete value for tag " + std::to_string(wTag));
+        CHECK_THROWS_AS_MSG(unpacker.readNext(),
+            TlvUnpack::Exception,
+            "Incomplete value for tag " + std::to_string(wTag));
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
@@ -468,7 +482,9 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
 
         CHECK(unpacker.readNext() == true);
-        CHECK_THROWS_MSG(unpacker.readNext(), "Incomplete TLV at end of buffer");
+        CHECK_THROWS_AS_MSG(unpacker.readNext(),
+            TlvUnpack::Exception,
+            "Incomplete TLV at end of buffer");
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
@@ -505,7 +521,9 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
         TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize - 2);
 
         CHECK(unpacker.readNext() == true);
-        CHECK_THROWS_MSG(unpacker.readNext(), "Incomplete TLV at end of buffer");
+        CHECK_THROWS_AS_MSG(unpacker.readNext(),
+            TlvUnpack::Exception,
+            "Incomplete TLV at end of buffer");
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
