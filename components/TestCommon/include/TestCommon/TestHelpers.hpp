@@ -25,21 +25,6 @@
 /**
  * This macro is an extension of CATCH framework
  * Check:
- * - if an exception is thrown
- * - if the exception message matches the expected one */
-#define CHECK_THROWS_MSG(expr, msg)          \
-    try {                                    \
-        { expr; }                            \
-        INFO("Exception should be thrown");  \
-        CHECK(false);                        \
-    }                                        \
-    catch (std::exception &e) {              \
-        CHECK(std::string(e.what()) == msg); \
-    }
-
-/**
- * This macro is an extension of CATCH framework
- * Check:
  * - if a specific exception is thrown
  * - if the exception message matches the expected one */
 #define CHECK_THROWS_AS_MSG(expr, eType, msg) \
@@ -54,21 +39,6 @@
     catch (...) {                             \
         INFO("Unexpected exception");         \
         CHECK(false);                         \
-    }
-
-/**
- * This macro is an extension of CATCH framework
- * Require:
- * - an exception is thrown
- * - the exception message matches the expected one */
-#define REQUIRE_THROWS_MSG(expr, msg)          \
-    try {                                      \
-        { expr; }                              \
-        INFO("Exception should be thrown");    \
-        REQUIRE(false);                        \
-    }                                          \
-    catch (std::exception &e) {                \
-        REQUIRE(std::string(e.what()) == msg); \
     }
 
 /**
