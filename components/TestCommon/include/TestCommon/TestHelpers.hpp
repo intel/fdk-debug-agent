@@ -27,7 +27,7 @@
  * Check:
  * - if an exception is thrown
  * - if the exception message matches the expected one */
-#define CHECK_THROWS_MSG(expr, msg)           \
+#define CHECK_THROWS_MSG(expr, msg)          \
     try {                                    \
         { expr; }                            \
         INFO("Exception should be thrown");  \
@@ -35,6 +35,25 @@
     }                                        \
     catch (std::exception &e) {              \
         CHECK(std::string(e.what()) == msg); \
+    }
+
+/**
+ * This macro is an extension of CATCH framework
+ * Check:
+ * - if a specific exception is thrown
+ * - if the exception message matches the expected one */
+#define CHECK_THROWS_AS_MSG(expr, eType, msg) \
+    try {                                     \
+        { expr; }                             \
+        INFO("Exception should be thrown");   \
+        CHECK(false);                         \
+    }                                         \
+    catch (eType &e) {                        \
+        CHECK(std::string(e.what()) == msg);  \
+    }                                         \
+    catch (...) {                             \
+        INFO("Unexpected exception");         \
+        CHECK(false);                         \
     }
 
 /**
@@ -50,4 +69,23 @@
     }                                          \
     catch (std::exception &e) {                \
         REQUIRE(std::string(e.what()) == msg); \
+    }
+
+/**
+ * This macro is an extension of CATCH framework
+ * Check:
+ * - if a specific exception is thrown
+ * - if the exception message matches the expected one */
+#define REQUIRE_THROWS_AS_MSG(expr, eType, msg) \
+    try {                                       \
+        { expr; }                               \
+        INFO("Exception should be thrown");     \
+        REQUIRE(false);                         \
+    }                                           \
+    catch (eType &e) {                          \
+        REQUIRE(std::string(e.what()) == msg);  \
+    }                                           \
+    catch (...) {                               \
+        INFO("Unexpected exception");           \
+        REQUIRE(false);                         \
     }
