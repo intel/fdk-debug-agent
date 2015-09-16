@@ -32,7 +32,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 # Provinding poco library
-find_package(Poco REQUIRED COMPONENTS Foundation Net Util )
+find_package(Poco REQUIRED COMPONENTS Foundation Net Util Zip)
 
 if (NOT ${Poco_FOUND})
     message( FATAL_ERROR "Poco not found : ${Poco_NOT_FOUND_MESSAGE}" )

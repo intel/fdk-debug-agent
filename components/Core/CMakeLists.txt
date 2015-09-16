@@ -39,13 +39,20 @@ set(INCS
     include/Core/InstanceModel.hpp
     include/Core/TypeModel.hpp
     include/Core/ModuleResources.hpp
-    include/Core/DebugResources.hpp)
+    include/Core/DebugResources.hpp
+# private headers
+    src/FdkToolMockGenerator.hpp
+    src/HtmlHelper.hpp
+)
 
 add_library(Core STATIC ${SRCS} ${INCS})
 set_common_settings(Core)
 
 #exporting include directory
 target_include_directories(Core PUBLIC "include")
+
+# private headers
+target_include_directories(Core PRIVATE "src")
 
 # Binding with Poco
 link_poco(Core)

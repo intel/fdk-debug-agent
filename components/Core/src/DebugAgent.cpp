@@ -67,6 +67,9 @@ std::shared_ptr<ifdk_objects::instance::System> DebugAgent::createSystemInstance
 
 std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 {
+    assert(mTypeModel != nullptr);
+    assert(mSystemInstance != nullptr);
+
     Dispatcher *dispatcher = new rest::Dispatcher();
 
     /* Log service (hardcoded urls)
@@ -125,6 +128,9 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
         std::shared_ptr<Resource>(new ModuleListDebugResource(mSystem)));
     dispatcher->addResource("/internal/topology",
         std::shared_ptr<Resource>(new TopologyDebugResource(mSystem)));
+    dispatcher->addResource("/internal/model",
+        std::shared_ptr<Resource>(new ModelDumpDebugResource(*mTypeModel, *mSystemInstance,
+        mInstanceModel)));
 
     return std::shared_ptr<rest::Dispatcher>(dispatcher);
 }

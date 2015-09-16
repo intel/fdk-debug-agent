@@ -62,7 +62,7 @@ public:
         acceptCommon(*this, visitor);
     }
 
-    virtual std::shared_ptr<Instance> getInstance(const std::string &instanceId) override
+    virtual std::shared_ptr<const Instance> getInstance(const std::string &instanceId) const override
     {
         for (auto elementPtr : mElementPtrs) {
             if (elementPtr->getInstanceId() == instanceId) {
@@ -71,6 +71,13 @@ public:
         }
 
         return nullptr;
+    }
+
+    virtual void getInstances(std::vector<std::shared_ptr<const Instance>> &list) const override
+    {
+        for (auto elementPtr : mElementPtrs) {
+                list.push_back(elementPtr);
+        }
     }
 
     void add(T *element)

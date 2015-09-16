@@ -111,7 +111,7 @@ void SystemInstanceResource::handleGet(const Request &request, Response &respons
 void TypeResource::handleGet(const Request &request, Response &response)
 {
     std::string typeName = request.getIdentifierValue("type_name");
-    std::shared_ptr<type::Type> typePtr =
+    std::shared_ptr<const type::Type> typePtr =
         mTypeModel.getType(typeName);
 
     if (typePtr == nullptr) {
@@ -137,7 +137,7 @@ void InstanceCollectionResource::handleGet(const Request &request, Response &res
         if (handle->getResource() == nullptr) {
             throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
         }
-        std::shared_ptr<instance::BaseCollection> collection =
+        std::shared_ptr<const instance::BaseCollection> collection =
             handle->getResource()->getCollection(typeName);
 
         /* check nullptr using get() to avoid any KW error */
@@ -164,7 +164,7 @@ void InstanceResource::handleGet(const Request &request, Response &response)
         if (handle->getResource() == nullptr) {
             throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
         }
-        std::shared_ptr<instance::Instance> instancePtr =
+        std::shared_ptr<const instance::Instance> instancePtr =
             handle->getResource()->getInstance(typeName, instanceId);
 
         /* check nullptr using get() to avoid any KW error */

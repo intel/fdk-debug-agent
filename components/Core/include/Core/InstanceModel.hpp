@@ -35,15 +35,15 @@ namespace core
 class InstanceModel
 {
 public:
-    using CollectionPtr = std::shared_ptr<ifdk_objects::instance::BaseCollection>;
-    using InstancePtr = std::shared_ptr<ifdk_objects::instance::Instance>;
+    using CollectionPtr = std::shared_ptr<const ifdk_objects::instance::BaseCollection>;
+    using InstancePtr = std::shared_ptr<const ifdk_objects::instance::Instance>;
 
     using CollectionMap = std::map<std::string, CollectionPtr>;
 
     InstanceModel(const CollectionMap &collectionMap) : mCollectionMap(collectionMap) {}
 
     /** @return a collection by its name, or nullptr if not found */
-    CollectionPtr getCollection(const std::string &typeName)
+    const CollectionPtr getCollection(const std::string &typeName) const
     {
         auto it = mCollectionMap.find(typeName);
         if (it == mCollectionMap.end()) {
@@ -53,13 +53,18 @@ public:
     }
 
     /** @return an instance by its type and instance id, or nullptr if not found */
-    InstancePtr getInstance(const std::string &typeName, const std::string &instanceId)
+    const InstancePtr getInstance(const std::string &typeName, const std::string &instanceId) const
     {
         CollectionPtr collection = getCollection(typeName);
         if (collection == nullptr) {
             return nullptr;
         }
         return collection->getInstance(instanceId);
+    }
+
+    const CollectionMap &getCollectionMap() const
+    {
+        return mCollectionMap;
     }
 
 private:

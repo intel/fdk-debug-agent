@@ -66,5 +66,23 @@ private:
     void dumpPins(HtmlHelper &html, const std::vector<cavs::dsp_fw::PinProps> &pins);
 };
 
+/** This debug resource dumps model cache to the fdk tool mock format */
+class ModelDumpDebugResource : public rest::Resource
+{
+public:
+    ModelDumpDebugResource(const TypeModel &typeModel,
+        const ifdk_objects::instance::System &systemInstance,
+        ExclusiveInstanceModel &instanceModel) :
+        mTypeModel(typeModel),
+        mSystemInstance(systemInstance),
+        mInstanceModel(instanceModel) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+private:
+    const TypeModel &mTypeModel;
+    const ifdk_objects::instance::System &mSystemInstance;
+    ExclusiveInstanceModel &mInstanceModel;
+};
+
 }
 }

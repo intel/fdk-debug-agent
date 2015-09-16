@@ -19,11 +19,17 @@
 *
 ********************************************************************************
 */
+
+#include "HtmlHelper.hpp"
+#include "FdkToolMockGenerator.hpp"
 #include "Core/DebugResources.hpp"
 #include "cAVS/Topology.hpp"
 #include "cAVS/FirmwareTypeHelpers.hpp"
 #include "Util/StringHelper.hpp"
 #include "Util/Uuid.hpp"
+#include <Poco/Zip/Compress.h>
+#include <Poco/Zip/ZipException.h>
+#include <Poco/MemoryStream.h>
 #include <sstream>
 #include <vector>
 #include <iomanip>
@@ -31,6 +37,7 @@
 using namespace debug_agent::rest;
 using namespace debug_agent::cavs;
 using namespace debug_agent::util;
+using namespace debug_agent::ifdk_objects;
 
 namespace debug_agent
 {
@@ -38,73 +45,7 @@ namespace core
 {
 
 static const std::string ContentTypeHtml("text/html");
-
-/** Html helper class
- *
- * It provides very basic html features, such as title, paragraph and array
- */
-class HtmlHelper
-{
-public:
-    void title(const std::string &title)
-    {
-        mContent << "<h2>" + title + "</h2>\n";
-    }
-
-    void paragraph(const std::string &text)
-    {
-        mContent << "<p>" + text + "</p>\n";
-    }
-
-    void beginTable(const std::vector<std::string> &columnNames)
-    {
-        mContent << "<table border='1'>\n";
-        beginRow();
-        for (auto &columnName : columnNames) {
-            mContent << "<td nowrap><b>" << columnName << "</b></td>\n";
-        }
-        endRow();
-    }
-
-    void endTable()
-    {
-        mContent << "</table>\n";
-    }
-
-    void beginRow()
-    {
-        mContent << "<tr>\n";
-    }
-
-    void endRow()
-    {
-        mContent << "</tr>\n";
-    }
-
-    void beginCell()
-    {
-        mContent << "<td nowrap>\n";
-    }
-
-    void endCell()
-    {
-        mContent << "</td>\n";
-    }
-
-    template <typename T>
-    void cell(const T &value)
-    {
-        mContent << "<td nowrap>" << value << "</td>\n";
-    }
-
-    std::string getHtmlContent() const
-    {
-        return "<html><body>\n" + mContent.str() + "<body><html>\n";
-    }
-
-private:
-    std::stringstream mContent;
-};
+static const std::string ContentTypeZip("application/zip");
 
 /** Helper method to convert an hash array into string */
 std::string hashToString(const uint8_t hash[DEFAULT_HASH_SHA256_LEN])
@@ -520,6 +461,30 @@ void TopologyDebugResource::dumpPins(HtmlHelper &html,
 
         html.endTable();
     }
+}
+
+void ModelDumpDebugResource::handleGet(const Request &request, Response &response)
+{
+    ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
+    if (handle->getResource() == nullptr) {
+        throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
+    }
+
+    std::stringstream ss;
+
+    try {
+        FdkToolMockGenerator generator(ss);
+        generator.setTypeModel(mTypeModel);
+        generator.setSystemInstance(mSystemInstance);
+        generator.setInstanceModel(*handle->getResource());
+    }
+    catch (FdkToolMockGenerator::Exception &e)
+    {
+        throw HttpAbort("Cannot create model archive: " + std::string(e.what()));
+    }
+
+    std::ostream &out = response.send(ContentTypeZip);
+    Poco::StreamCopier::copyStream(ss, out);
 }
 
 

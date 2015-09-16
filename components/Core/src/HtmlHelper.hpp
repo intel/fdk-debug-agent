@@ -22,63 +22,81 @@
 
 #pragma once
 
-#include "IfdkObjects/Instance/Instance.hpp"
+#include <string>
+#include <sstream>
 #include <vector>
-#include <assert.h>
 
 namespace debug_agent
 {
-namespace ifdk_objects
-{
-namespace instance
+namespace core
 {
 
-/**
- * Base class of instance collections
+/** Html helper class
  *
- * Instance collections are not polymorphic, they are collections of one instance type only:
- * Collection<Instance>
- * Collection<Component>
- * Collection<Subsystem>
- *
- * Although Component and Subsystem classes derive from Instance class, it's not possible to
- * retrieve easily each element as instance.
- *
- * That's why theses collection will inherit from this base class, that allows access to contained
- * instances.
+ * It provides very basic html features, such as title, paragraph and array
  */
-class BaseCollection
+class HtmlHelper
 {
 public:
-    virtual ~BaseCollection() = default;
-
-    virtual void accept(Visitor &visitor, bool isConcrete = true) = 0;
-    virtual void accept(ConstVisitor &visitor, bool isConcrete = true) const = 0;
-
-    /** @return the instance that matches the supplied instanceId, or nullptr if no instance is
-     * found.
-     */
-    virtual std::shared_ptr<const Instance> getInstance(const std::string &instanceId) const = 0;
-
-    /** @return all instances */
-    virtual void getInstances(std::vector<std::shared_ptr<const Instance>> &list) const = 0;
-
-    bool operator == (const BaseCollection &other) const NOEXCEPT
+    void title(const std::string &title)
     {
-        if (typeid(*this) != typeid(other)) {
-            return false;
-        }
-
-        return equalsTo(other);
+        mContent << "<h2>" + title + "</h2>\n";
     }
 
-protected:
-    virtual bool equalsTo(const BaseCollection &other) const NOEXCEPT = 0;
+    void paragraph(const std::string &text)
+    {
+        mContent << "<p>" + text + "</p>\n";
+    }
 
+    void beginTable(const std::vector<std::string> &columnNames)
+    {
+        mContent << "<table border='1'>\n";
+        beginRow();
+        for (auto &columnName : columnNames) {
+            mContent << "<td nowrap><b>" << columnName << "</b></td>\n";
+        }
+        endRow();
+    }
+
+    void endTable()
+    {
+        mContent << "</table>\n";
+    }
+
+    void beginRow()
+    {
+        mContent << "<tr>\n";
+    }
+
+    void endRow()
+    {
+        mContent << "</tr>\n";
+    }
+
+    void beginCell()
+    {
+        mContent << "<td nowrap>\n";
+    }
+
+    void endCell()
+    {
+        mContent << "</td>\n";
+    }
+
+    template <typename T>
+    void cell(const T &value)
+    {
+        mContent << "<td nowrap>" << value << "</td>\n";
+    }
+
+    std::string getHtmlContent() const
+    {
+        return "<html><body>\n" + mContent.str() + "<body><html>\n";
+    }
+
+private:
+    std::stringstream mContent;
 };
 
 }
 }
-}
-
-

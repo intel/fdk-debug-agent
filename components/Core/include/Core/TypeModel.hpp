@@ -36,8 +36,8 @@ namespace core
 class TypeModel
 {
 public:
-    using TypePtr = std::shared_ptr<ifdk_objects::type::Type>;
-    using SystemPtr = std::shared_ptr<ifdk_objects::type::System>;
+    using TypePtr = std::shared_ptr<const ifdk_objects::type::Type>;
+    using SystemPtr = std::shared_ptr<const ifdk_objects::type::System>;
 
     using TypeMap = std::map<std::string, TypePtr>;
 
@@ -46,19 +46,24 @@ public:
         mSystemPtr(systemPtr), mTypeMap(typeMap) {}
 
     /** @return the system type */
-    SystemPtr getSystem()
+    const SystemPtr getSystem() const
     {
         return mSystemPtr;
     }
 
     /** @return a type by its name, or nullptr if not found */
-    TypePtr getType(const std::string &typeName)
+    const TypePtr getType(const std::string &typeName) const
     {
         auto it = mTypeMap.find(typeName);
         if (it == mTypeMap.end()) {
             return nullptr;
         }
         return it->second;
+    }
+
+    const TypeMap &getTypeMap() const
+    {
+        return mTypeMap;
     }
 
 private:
