@@ -22,6 +22,7 @@
 
 #include "Core/DebugAgent.hpp"
 #include "Core/Resources.hpp"
+#include "Core/DebugResources.hpp"
 #include "Core/TypeModelConverter.hpp"
 #include "Core/InstanceModelConverter.hpp"
 #include "Core/ModuleResources.hpp"
@@ -118,6 +119,10 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     /* Refresh special case*/
     dispatcher->addResource("/instance/cavs/0/refreshed",
         std::shared_ptr<Resource>(new RefreshSubsystemResource(mSystem, mInstanceModel)));
+
+    /* Debug resources */
+    dispatcher->addResource("/internal/modules",
+        std::shared_ptr<Resource>(new ModuleListDebugResource(mSystem)));
 
     return std::shared_ptr<rest::Dispatcher>(dispatcher);
 }

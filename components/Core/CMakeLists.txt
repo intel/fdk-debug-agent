@@ -27,7 +27,8 @@ set(SRCS
     src/BaseModelConverter.cpp
     src/InstanceModelConverter.cpp
     src/TypeModelConverter.cpp
-    src/ModuleResources.cpp)
+    src/ModuleResources.cpp
+    src/DebugResources.cpp)
 
 set(INCS
     include/Core/DebugAgent.hpp
@@ -37,7 +38,8 @@ set(INCS
     include/Core/TypeModelConverter.hpp
     include/Core/InstanceModel.hpp
     include/Core/TypeModel.hpp
-    include/Core/ModuleResources.hpp)
+    include/Core/ModuleResources.hpp
+    include/Core/DebugResources.hpp)
 
 add_library(Core STATIC ${SRCS} ${INCS})
 set_common_settings(Core)
