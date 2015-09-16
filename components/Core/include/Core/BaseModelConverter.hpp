@@ -90,9 +90,6 @@ protected:
     /* list of static services types */
     static const std::vector<std::string> staticServiceTypes;
 
-    /* List of gateway type names (static) */
-    static const std::map<cavs::dsp_fw::ConnectorNodeId::Type, std::string> gatewayNames;
-
     /** Find a module entry using its id */
     const cavs::ModuleEntry &findModuleEntry(uint32_t moduleId);
 

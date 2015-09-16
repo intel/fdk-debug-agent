@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/FirmwareTypes.hpp"
+#include "Util/EnumHelper.hpp"
 #include <string>
 
 namespace debug_agent
@@ -33,92 +34,114 @@ namespace cavs
 class FirmwareTypeHelpers
 {
 public:
-    static std::string toString(const dsp_fw::BitDepth &bd)
-    {
-        int32_t intValue = static_cast<int32_t>(bd);
+    /* Enumeration helpers */
+    /* ------------------- */
 
-        switch (bd) {
-        case dsp_fw::DEPTH_8BIT:
-        case dsp_fw::DEPTH_16BIT:
-        case dsp_fw::DEPTH_24BIT:
-        case dsp_fw::DEPTH_32BIT:
-        case dsp_fw::DEPTH_64BIT:
-            /* Enum value is bit depth */
-            return std::to_string(intValue);
-        }
-        return "Unknown bit depth: " + std::to_string(intValue);
-    }
-
-    static std::string toString(const dsp_fw::ChannelConfig &cc)
+    static const util::EnumHelper<dsp_fw::BitDepth> &getBitDepthHelper()
     {
-        switch (cc) {
-        case dsp_fw::CHANNEL_CONFIG_MONO:
-            return "mono";
-        case dsp_fw::CHANNEL_CONFIG_STEREO:
-            return "stereo";
-        case dsp_fw::CHANNEL_CONFIG_2_POINT_1:
-            return "2.1";
-        case dsp_fw::CHANNEL_CONFIG_3_POINT_0:
-            return "3.0";
-        case dsp_fw::CHANNEL_CONFIG_3_POINT_1:
-            return "3.1";
-        case dsp_fw::CHANNEL_CONFIG_QUATRO:
-            return "quatro";
-        case dsp_fw::CHANNEL_CONFIG_4_POINT_0:
-            return "4.0";
-        case dsp_fw::CHANNEL_CONFIG_5_POINT_0:
-            return "5.0";
-        case dsp_fw::CHANNEL_CONFIG_5_POINT_1:
-            return "5.1";
-        case dsp_fw::CHANNEL_CONFIG_DUAL_MONO:
-            return "dual mono";
-        case dsp_fw::CHANNEL_CONFIG_I2S_DUAL_STEREO_0:
-            return "i2s dual stereo 0";
-        case dsp_fw::CHANNEL_CONFIG_I2S_DUAL_STEREO_1:
-            return "i2s dual stereo 1";
-        case dsp_fw::CHANNEL_CONFIG_7_POINT_1:
-            return "7.1";
-        }
-        return "Unknown channel map: " + std::to_string(static_cast<int32_t>(cc));
-    }
+        static const util::EnumHelper<dsp_fw::BitDepth> helper({
+            { dsp_fw::DEPTH_8BIT, "8" },
+            { dsp_fw::DEPTH_16BIT, "16" },
+            { dsp_fw::DEPTH_24BIT, "24" },
+            { dsp_fw::DEPTH_32BIT, "32" },
+            { dsp_fw::DEPTH_64BIT, "64" },
+        });
+        return helper;
+    };
 
-    static std::string toString(const dsp_fw::InterleavingStyle &is)
+    static const util::EnumHelper<dsp_fw::ChannelConfig> &getChannelConfigHelper()
     {
-        switch (is) {
-        case dsp_fw::CHANNELS_SAMPLES_INTERLEAVING:
-            return "sample";
-        case dsp_fw::CHANNELS_BLOCKS_INTERLEAVING:
-            return "block";
-        }
-        return "Unknown interleaving style: " + std::to_string(static_cast<int32_t>(is));
-    }
+        static const util::EnumHelper<dsp_fw::ChannelConfig> helper({
+            { dsp_fw::CHANNEL_CONFIG_MONO, "mono" },
+            { dsp_fw::CHANNEL_CONFIG_STEREO, "stereo" },
+            { dsp_fw::CHANNEL_CONFIG_2_POINT_1, "2.1" },
+            { dsp_fw::CHANNEL_CONFIG_3_POINT_0, "3.0" },
+            { dsp_fw::CHANNEL_CONFIG_3_POINT_1, "301" },
+            { dsp_fw::CHANNEL_CONFIG_QUATRO, "quatro" },
+            { dsp_fw::CHANNEL_CONFIG_4_POINT_0, "4.0" },
+            { dsp_fw::CHANNEL_CONFIG_5_POINT_0, "5.0" },
+            { dsp_fw::CHANNEL_CONFIG_5_POINT_1, "5.1" },
+            { dsp_fw::CHANNEL_CONFIG_DUAL_MONO, "dual mono" },
+            { dsp_fw::CHANNEL_CONFIG_I2S_DUAL_STEREO_0, "i2s dual stereo 0" },
+            { dsp_fw::CHANNEL_CONFIG_I2S_DUAL_STEREO_1, "i2s dual stereo 1" },
+            { dsp_fw::CHANNEL_CONFIG_7_POINT_1, "7.1" },
+        });
+        return helper;
+    };
 
-    static std::string toString(const dsp_fw::SampleType &st)
+    static const util::EnumHelper<dsp_fw::InterleavingStyle> &getInterleavingStyleHelper()
     {
-        switch (st) {
-        case dsp_fw::MSB_INTEGER:
-            return "msb integer";
-        case dsp_fw::LSB_INTEGER:
-            return "lsb integer";
-        case dsp_fw::SIGNED_INTEGER:
-            return "signed integer";
-        case dsp_fw::UNSIGNED_INTEGER:
-            return "unsigned integer";
-        case dsp_fw::FLOAT:
-            return "float";
-        }
-        return "Unknown sample type: " + std::to_string(static_cast<int32_t>(st));
-    }
+        static const util::EnumHelper<dsp_fw::InterleavingStyle> helper({
+            { dsp_fw::CHANNELS_SAMPLES_INTERLEAVING, "sample" },
+            { dsp_fw::CHANNELS_BLOCKS_INTERLEAVING, "block" },
+        });
+
+        return helper;
+    };
+
+    static const util::EnumHelper<dsp_fw::SampleType> &getSampleTypeHelper()
+    {
+        static const util::EnumHelper<dsp_fw::SampleType> helper({
+            { dsp_fw::MSB_INTEGER, "msb integer" },
+            { dsp_fw::LSB_INTEGER, "lsb integer" },
+            { dsp_fw::SIGNED_INTEGER, "signed integer" },
+            { dsp_fw::UNSIGNED_INTEGER, "unsigned integer" },
+            { dsp_fw::FLOAT, "float" },
+        });
+
+        return helper;
+    };
+
+    static const util::EnumHelper<dsp_fw::ConnectorNodeId::Type> &getGatewayHelper()
+    {
+        static const util::EnumHelper<dsp_fw::ConnectorNodeId::Type> helper({
+            { dsp_fw::ConnectorNodeId::kHdaHostOutputClass, "hda-host-out-gateway" },
+            { dsp_fw::ConnectorNodeId::kHdaHostInputClass, "hda-host-in-gateway" },
+            { dsp_fw::ConnectorNodeId::kHdaHostInoutClass, "hda-host-inout-gateway" },
+            { dsp_fw::ConnectorNodeId::kHdaLinkOutputClass, "hda-link-out-gateway" },
+            { dsp_fw::ConnectorNodeId::kHdaLinkInputClass, "hda-link-in-gateway" },
+            { dsp_fw::ConnectorNodeId::kHdaLinkInoutClass, "hda-link-inout-gateway" },
+            { dsp_fw::ConnectorNodeId::kDmicLinkInputClass, "dmic-link-in-gateway" },
+            { dsp_fw::ConnectorNodeId::kI2sLinkOutputClass, "i2s-link-out-gateway" },
+            { dsp_fw::ConnectorNodeId::kI2sLinkInputClass, "i2s-link-in-gateway" },
+            { dsp_fw::ConnectorNodeId::kSlimbusLinkOutputClass, "slimbus-link-out-gateway" },
+            { dsp_fw::ConnectorNodeId::kSlimbusLinkInputClass, "slimbus-link-in-gateway" },
+            { dsp_fw::ConnectorNodeId::kALHLinkOutputClass, "alh-link-out-gateway" },
+            { dsp_fw::ConnectorNodeId::kALHLinkInputClass, "alh-link-in-gateway" }
+        });
+
+        return helper;
+    };
+
+    static const util::EnumHelper<dsp_fw::StreamType> &getStreamTypeHelper()
+    {
+        static const util::EnumHelper<dsp_fw::StreamType> helper({
+            { dsp_fw::StreamType::STREAM_TYPE_PCM, "PCM" },
+            { dsp_fw::StreamType::STREAM_TYPE_MP3, "MP3" },
+        });
+
+        return helper;
+    };
+
+    enum StreamType
+    {
+        STREAM_TYPE_PCM = 0,
+        STREAM_TYPE_MP3 = 1
+    };
+
+    /* Firmware types to string */
+    /* ------------------------ */
 
     static std::string toString(const dsp_fw::AudioDataFormatIpc &format)
     {
-        return "config=" + toString(format.channel_config) +
-            "/bit_depth=" + toString(format.bit_depth) +
-            "/sample_type=" + toString(format.sample_type) +
-            "/interleaving=" + toString(format.interleaving_style) +
+        return "config=" + getChannelConfigHelper().toString(format.channel_config) +
+            "/bit_depth=" + getBitDepthHelper().toString(format.bit_depth) +
+            "/sample_type=" + getSampleTypeHelper().toString(format.sample_type) +
+            "/interleaving=" + getInterleavingStyleHelper().toString(format.interleaving_style) +
             "/channel_count=" + std::to_string(format.number_of_channels) +
             "/valid_bit_depth=" + std::to_string(format.valid_bit_depth);
     }
+
 private:
     FirmwareTypeHelpers();
 };

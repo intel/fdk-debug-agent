@@ -325,7 +325,7 @@ void CavsTopologySample::createFirmwareObjects(
     uint32_t i = 0;
     for (auto &moduleName: moduleNames)
     {
-        ModuleEntry entry;
+        ModuleEntry entry{};
         StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleName);
         for (uint32_t &intValue : entry.uuid) {
             /* filling four bytes with i value */

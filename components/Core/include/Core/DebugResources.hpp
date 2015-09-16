@@ -23,11 +23,15 @@
 #pragma once
 
 #include "Core/Resources.hpp"
+#include "cAVS/Topology.hpp"
 
 namespace debug_agent
 {
 namespace core
 {
+
+/* Forward declaration of an internal type */
+class HtmlHelper;
 
 /** This debug resource lists module types */
 class ModuleListDebugResource : public SystemResource
@@ -37,6 +41,29 @@ public:
         SystemResource(system) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+};
+
+/** This debug resource dumps cAVS topology */
+class TopologyDebugResource : public SystemResource
+{
+public:
+    TopologyDebugResource(cavs::System &system) :
+        SystemResource(system) {}
+protected:
+    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+
+private:
+    /* These methods dump topology elements */
+    void dumpGateways(HtmlHelper &html, const std::vector<cavs::dsp_fw::GatewayProps> &gateways);
+    void dumpPipelines(HtmlHelper &html, const std::vector<cavs::DSPplProps> &pipelines);
+    void dumpAllSchedulers(HtmlHelper &html,
+        const std::vector<cavs::DSSchedulersInfo> &allSchedulers);
+    void dumpCoreSchedulers(HtmlHelper &html, const cavs::DSSchedulersInfo &coreSchedulers);
+    void dumpTasks(HtmlHelper &html, const std::vector<cavs::DSTaskProps> &tasks);
+    void dumpModuleInstances(HtmlHelper &html,
+        const std::map<cavs::Topology::ModuleCompoundId, cavs::DSModuleInstanceProps>
+        &moduleInstances);
+    void dumpPins(HtmlHelper &html, const std::vector<cavs::dsp_fw::PinProps> &pins);
 };
 
 }

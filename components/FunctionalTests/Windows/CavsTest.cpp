@@ -90,24 +90,34 @@ static const std::vector<uint8_t> nsControlParameterPayload =
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-/** @return the xml file content as string */
-std::string xmlFile(const std::string &name)
+/** @return the file content as string */
+std::string fileContent(const std::string &name)
 {
-    std::string fileName = "data/FunctionalTests/http/" + name + ".xml";
+    std::string fileName = "data/FunctionalTests/http/" + name;
 
     std::ifstream file(fileName);
     if (!file.is_open()) {
-        throw std::logic_error("Unknown xml file: " + fileName);
+        throw std::logic_error("Unknown file: " + fileName);
     }
 
     std::string content((std::istreambuf_iterator<char>(file)),
                          std::istreambuf_iterator<char>());
 
     if (file.bad()) {
-        throw std::logic_error("Error while reading xml file: " + fileName);
+        throw std::logic_error("Error while reading file: " + fileName);
     }
 
     return StringHelper::trim(content) + "\n"; /* Poco xml library puts a '\n' on the last line. */
+}
+
+std::string xmlFile(const std::string &name)
+{
+    return fileContent(name+ ".xml");
+}
+
+std::string htmlFile(const std::string &name)
+{
+    return fileContent(name + ".html");
 }
 
 const std::string& pfwConfigPath =
@@ -337,6 +347,54 @@ TEST_CASE("DebugAgent/cAVS: topology")
 
     checkUrlMap(client, urlMap);
 }
+
+TEST_CASE("DebugAgent/cAVS: internal debug urls")
+{
+    /* Creating the mocked device */
+    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+
+    /* Adding initial commands */
+    addInitialCommands(commands);
+    /* Adding topology command */
+    addInstanceTopologyCommands(commands);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(std::move(device),
+        std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    CHECK_NOTHROW(client.request(
+        "/internal/modules",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/html",
+        htmlFile("internal_module_list")
+        ));
+
+    CHECK_NOTHROW(client.request(
+        "/internal/topology",
+        HttpClientSimulator::Verb::Get,
+        "",
+        HttpClientSimulator::Status::Ok,
+        "text/html",
+        htmlFile("internal_topology")
+        ));
+}
+
 
 TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
     "(URL: /instance/cavs.module-aec/1/control_parameters)")

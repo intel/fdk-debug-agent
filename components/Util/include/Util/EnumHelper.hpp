@@ -81,6 +81,16 @@ public:
         return it != mEnumToStringMap.end();
     }
 
+    const std::map<EnumType, std::string> &getEnumToStringMap() const
+    {
+        return mEnumToStringMap;
+    }
+
+    const std::map<std::string, EnumType> &getStringToEnumMap() const
+    {
+        return mStringToEnumMap;
+    }
+
 private:
     EnumHelper(const EnumHelper&) = delete;
     EnumHelper& operator=(const EnumHelper&) = delete;

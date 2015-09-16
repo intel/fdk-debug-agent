@@ -123,6 +123,8 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     /* Debug resources */
     dispatcher->addResource("/internal/modules",
         std::shared_ptr<Resource>(new ModuleListDebugResource(mSystem)));
+    dispatcher->addResource("/internal/topology",
+        std::shared_ptr<Resource>(new TopologyDebugResource(mSystem)));
 
     return std::shared_ptr<rest::Dispatcher>(dispatcher);
 }

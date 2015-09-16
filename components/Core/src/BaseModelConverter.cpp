@@ -21,6 +21,7 @@
 */
 #include "Core/BaseModelConverter.hpp"
 #include "Util/StringHelper.hpp"
+#include "cAVS/FirmwareTypeHelpers.hpp"
 
 using namespace debug_agent::cavs;
 
@@ -69,23 +70,6 @@ const std::vector<std::string> BaseModelConverter::staticServiceTypes = {
     logServiceTypeName
 };
 
-const std::map<dsp_fw::ConnectorNodeId::Type, std::string>
-    BaseModelConverter::gatewayNames = {
-    { dsp_fw::ConnectorNodeId::kHdaHostOutputClass, "hda-host-out-gateway" },
-    { dsp_fw::ConnectorNodeId::kHdaHostInputClass, "hda-host-in-gateway" },
-    { dsp_fw::ConnectorNodeId::kHdaHostInoutClass, "hda-host-inout-gateway" },
-    { dsp_fw::ConnectorNodeId::kHdaLinkOutputClass, "hda-link-out-gateway" },
-    { dsp_fw::ConnectorNodeId::kHdaLinkInputClass, "hda-link-in-gateway" },
-    { dsp_fw::ConnectorNodeId::kHdaLinkInoutClass, "hda-link-inout-gateway" },
-    { dsp_fw::ConnectorNodeId::kDmicLinkInputClass, "dmic-link-in-gateway" },
-    { dsp_fw::ConnectorNodeId::kI2sLinkOutputClass, "i2s-link-out-gateway" },
-    { dsp_fw::ConnectorNodeId::kI2sLinkInputClass, "i2s-link-in-gateway" },
-    { dsp_fw::ConnectorNodeId::kSlimbusLinkOutputClass, "slimbus-link-out-gateway" },
-    { dsp_fw::ConnectorNodeId::kSlimbusLinkInputClass, "slimbus-link-in-gateway" },
-    { dsp_fw::ConnectorNodeId::kALHLinkOutputClass, "alh-link-out-gateway" },
-    { dsp_fw::ConnectorNodeId::kALHLinkInputClass, "alh-link-in-gateway" }
-};
-
 const cavs::ModuleEntry &BaseModelConverter::findModuleEntry(uint32_t moduleId)
 {
     const std::vector<cavs::ModuleEntry> &entries = mSystem.getModuleEntries();
@@ -114,13 +98,13 @@ std::string BaseModelConverter::findGatewayTypeName(
     auto connectorType = static_cast<dsp_fw::ConnectorNodeId::Type>(connectorId.val.f.dma_type);
 
     /* Finding the gateway name */
-    auto it = gatewayNames.find(connectorType);
-    if (it == gatewayNames.end()) {
+    auto &helper = cavs::FirmwareTypeHelpers::getGatewayHelper();
+    if (!helper.isValid(connectorType)) {
         throw Exception(
             "Unknown gateway type: " + std::to_string(connectorId.val.f.dma_type));
     }
 
-    return it->second;
+    return helper.toString(connectorType);
 }
 
 uint32_t BaseModelConverter::findGatewayInstanceId(

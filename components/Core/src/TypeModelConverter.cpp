@@ -20,6 +20,7 @@
 ********************************************************************************
 */
 #include "Core/TypeModelConverter.hpp"
+#include "cAVS/FirmwareTypeHelpers.hpp"
 #include "Util/StringHelper.hpp"
 #include "Util/Uuid.hpp"
 #include <map>
@@ -56,8 +57,8 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
     }
 
     /* gateways */
-    for (auto &it : gatewayNames) {
-        addSubsystemSubType(typeMap, createGateway(it.second));
+    for (auto &entry : FirmwareTypeHelpers::getGatewayHelper().getEnumToStringMap()) {
+        addSubsystemSubType(typeMap, createGateway(entry.second));
     }
 
     /* Log service */
@@ -123,7 +124,7 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     auto gatewayColl = std::shared_ptr<ComponentRefCollection>(
         new ComponentRefCollection(collectionName_gateway));
 
-    for (auto &gatewayPair : gatewayNames) {
+    for (auto &gatewayPair : FirmwareTypeHelpers::getGatewayHelper().getEnumToStringMap()) {
         const std::string &gatewayName = gatewayPair.second;
 
         gatewayColl->add(ComponentRef(gatewayName));

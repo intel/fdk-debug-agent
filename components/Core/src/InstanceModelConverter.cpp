@@ -67,7 +67,7 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
     }
 
     /* Gateways */
-    for (auto &entry : gatewayNames) {
+    for (auto &entry : FirmwareTypeHelpers::getGatewayHelper().getEnumToStringMap()) {
         addInstanceCollection(collectionMap, entry.second, createGateway(entry.first));
     }
 

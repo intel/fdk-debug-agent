@@ -20,7 +20,8 @@
 ********************************************************************************
 */
 #include "Core/DebugResources.hpp"
-#include "cAVS/FirmwareTypes.hpp"
+#include "cAVS/Topology.hpp"
+#include "cAVS/FirmwareTypeHelpers.hpp"
 #include "Util/StringHelper.hpp"
 #include "Util/Uuid.hpp"
 #include <sstream>
@@ -121,6 +122,41 @@ std::string hashToString(const uint8_t hash[DEFAULT_HASH_SHA256_LEN])
     return stream.str();
 }
 
+/** Helper method to convert an simple type array into string, by separating elements by
+ * a comma */
+template <typename T>
+std::string vectorToString(const std::vector<T> &vector)
+{
+    std::stringstream stream;
+    for (auto &value : vector) {
+        stream << value;
+        stream << ", ";
+    }
+    return stream.str();
+}
+
+/** Helper method that converts a gateway into string, under the form:
+ * - if the value is valid : ( <gateway type name>(gateway type id), <instance id>)
+ *    for instance: ( my_gateway(2), 5)
+ * - if the value is undefined: return value is "none"
+ */
+std::string gatewayToString(const dsp_fw::ConnectorNodeId &connector)
+{
+    if (connector.val.dw == dsp_fw::ConnectorNodeId::kInvalidNodeId) {
+        return "none";
+    }
+
+    dsp_fw::ConnectorNodeId::Type type =
+        static_cast<dsp_fw::ConnectorNodeId::Type>(connector.val.f.dma_type);
+
+    std::stringstream stream;
+    stream << "(" << FirmwareTypeHelpers::getGatewayHelper().toString(type)
+        << "(" << connector.val.f.dma_type << "), "
+        << connector.val.f.v_index << ")";
+
+    return stream.str();
+}
+
 void ModuleListDebugResource::handleGet(const Request &request, Response &response)
 {
     /* Segment count per module entry, as defined in firmware structures */
@@ -199,6 +235,291 @@ void ModuleListDebugResource::handleGet(const Request &request, Response &respon
 
     std::ostream &out = response.send(ContentTypeHtml);
     out << html.getHtmlContent();
+}
+
+void TopologyDebugResource::handleGet(const Request &request, Response &response)
+{
+    Topology topology;
+    try
+    {
+        mSystem.getTopology(topology);
+    }
+    catch (cavs::System::Exception &e)
+    {
+        throw HttpError(ErrorStatus::InternalError,
+            "Cannot get topology from fw: " + std::string(e.what()));
+    }
+
+    HtmlHelper html;
+
+    dumpGateways(html, topology.gateways);
+    dumpPipelines(html, topology.pipelines);
+    dumpAllSchedulers(html, topology.schedulers);
+    dumpModuleInstances(html, topology.moduleInstances);
+
+    std::ostream &out = response.send(ContentTypeHtml);
+    out << html.getHtmlContent();
+}
+
+void TopologyDebugResource::dumpGateways(HtmlHelper &html,
+    const std::vector<dsp_fw::GatewayProps> &gateways)
+{
+    html.title("Gateways");
+    html.paragraph("Gateway count: " + std::to_string(gateways.size()));
+
+    static const std::vector<std::string> gatewayColumns = {
+        "type index",
+        "type name",
+        "id",
+        "attrib"
+    };
+
+    html.beginTable(gatewayColumns);
+
+    for (auto &gateway : gateways) {
+        html.beginRow();
+
+        dsp_fw::ConnectorNodeId connector(gateway.id);
+        dsp_fw::ConnectorNodeId::Type type =
+            static_cast<dsp_fw::ConnectorNodeId::Type>(connector.val.f.dma_type);
+
+        html.cell(connector.val.f.dma_type);
+        html.cell(FirmwareTypeHelpers::getGatewayHelper().toString(type));
+        html.cell(connector.val.f.v_index);
+        html.cell(gateway.attribs);
+
+        html.endRow();
+    }
+
+    html.endTable();
+}
+
+void TopologyDebugResource::dumpPipelines(HtmlHelper &html,
+    const std::vector<DSPplProps> &pipelines)
+{
+    /* Pipes */
+    html.title("Pipelines");
+    html.paragraph("Pipeline count: " + std::to_string(pipelines.size()));
+
+    static const std::vector<std::string> columns = {
+        "id",
+        "priority",
+        "total_memory_bytes",
+        "used_memory_bytes",
+        "context_pages",
+        "DP tasks",
+        "LL tasks",
+        "Module instances",
+
+    };
+
+    html.beginTable(columns);
+
+    for (auto &pipeline : pipelines) {
+        html.beginRow();
+
+        html.cell(pipeline.id);
+        html.cell(pipeline.priority);
+        html.cell(pipeline.total_memory_bytes);
+        html.cell(pipeline.used_memory_bytes);
+        html.cell(pipeline.context_pages);
+        html.cell(vectorToString(pipeline.dp_tasks));
+        html.cell(vectorToString(pipeline.ll_tasks));
+        html.cell(vectorToString(pipeline.module_instances));
+
+        html.endRow();
+    }
+
+    html.endTable();
+}
+
+void TopologyDebugResource::dumpAllSchedulers(HtmlHelper &html,
+    const std::vector<cavs::DSSchedulersInfo> &allSchedulers)
+{
+    /* Pipes */
+    html.title("Schedulers");
+    html.paragraph("Core count: " + std::to_string(allSchedulers.size()));
+
+    static const std::vector<std::string> columns = {
+        "core index",
+        "scheduler count",
+        "schedulers",
+    };
+
+    html.beginTable(columns);
+
+    std::size_t coreIndex = 0;
+    for (auto &coreSchedulers : allSchedulers) {
+        html.beginRow();
+
+        html.cell(coreIndex);
+        html.cell(coreSchedulers.scheduler_info.size());
+
+        html.beginCell();
+        dumpCoreSchedulers(html, coreSchedulers);
+        html.endCell();
+
+        html.endRow();
+        coreIndex++;
+    }
+
+    html.endTable();
+}
+
+void TopologyDebugResource::dumpCoreSchedulers(HtmlHelper &html,
+    const cavs::DSSchedulersInfo &coreSchedulers)
+{
+    static const std::vector<std::string> columns = {
+        "core_id",
+        "processing_domain",
+        "task count",
+        "tasks",
+    };
+
+    html.beginTable(columns);
+
+    for (auto &scheduler : coreSchedulers.scheduler_info) {
+        html.beginRow();
+
+        html.cell(scheduler.core_id);
+        html.cell(scheduler.processing_domain);
+        html.cell(scheduler.task_info.size());
+
+        html.beginCell();
+        dumpTasks(html, scheduler.task_info);
+        html.endCell();
+
+        html.endRow();
+    }
+
+    html.endTable();
+}
+
+void TopologyDebugResource::dumpTasks(HtmlHelper &html,
+    const std::vector<cavs::DSTaskProps> &tasks)
+{
+    static const std::vector<std::string> columns = {
+        "task_id",
+        "modules instances",
+    };
+
+    html.beginTable(columns);
+
+    for (auto &task : tasks) {
+
+        html.beginRow();
+
+        html.cell(task.task_id);
+        html.cell(vectorToString(task.module_instance_id));
+
+        html.endRow();
+    }
+
+    html.endTable();
+}
+
+void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
+    const std::map<cavs::Topology::ModuleCompoundId, DSModuleInstanceProps> &moduleInstances)
+{
+    html.title("Module instances");
+    html.paragraph("Module instance count: " + std::to_string(moduleInstances.size()));
+
+    static const std::vector<std::string> columns = {
+        "compound id",
+        "module type id",
+        "module type name",
+        "instance id",
+        "dp_queue_type",
+        "queue_alignment",
+        "cp_usage_mask",
+        "stack_bytes",
+        "bss_total_bytes",
+        "bss_used_bytes",
+        "ibs_bytes",
+        "obs_bytes",
+        "cpc",
+        "cpc_peak",
+        "input_gateway",
+        "output_gateway",
+        "input pins",
+        "output pins",
+    };
+
+    html.beginTable(columns);
+
+    for (auto &entry : moduleInstances) {
+        html.beginRow();
+
+        const DSModuleInstanceProps &module = entry.second;
+
+        uint16_t moduleId, instanceId;
+        Topology::splitModuleInstanceId(module.id, moduleId, instanceId);
+
+        std::string moduleTypeName;
+        if (moduleId < mSystem.getModuleEntries().size()) {
+            const ModuleEntry &entry = mSystem.getModuleEntries()[moduleId];
+            moduleTypeName = StringHelper::getStringFromFixedSizeArray(
+                entry.name, sizeof(entry.name));
+        }
+        else {
+            moduleTypeName = "<wrong module id>";
+        }
+
+        html.cell(module.id);
+        html.cell(moduleId);
+        html.cell(moduleTypeName);
+        html.cell(instanceId);
+        html.cell(module.dp_queue_type);
+        html.cell(module.queue_alignment);
+        html.cell(module.cp_usage_mask);
+        html.cell(module.stack_bytes);
+        html.cell(module.bss_total_bytes);
+        html.cell(module.bss_used_bytes);
+        html.cell(module.ibs_bytes);
+        html.cell(module.obs_bytes);
+        html.cell(module.cpc);
+        html.cell(module.cpc_peak);
+        html.cell(gatewayToString(module.input_gateway));
+        html.cell(gatewayToString(module.output_gateway));
+
+        html.beginCell();
+        dumpPins(html, module.input_pins.pin_info);
+        html.endCell();
+
+        html.beginCell();
+        dumpPins(html, module.output_pins.pin_info);
+        html.endCell();
+
+        html.endRow();
+    }
+
+    html.endTable();
+}
+
+void TopologyDebugResource::dumpPins(HtmlHelper &html,
+    const std::vector<cavs::dsp_fw::PinProps> &pins)
+{
+    static const std::vector<std::string> columns = {
+        "phys_queue_id",
+        "stream_type",
+        "format",
+    };
+
+    if (!pins.empty()) {
+        html.beginTable(columns);
+
+        for (auto &pin : pins) {
+            html.beginRow();
+
+            html.cell(pin.phys_queue_id);
+            html.cell(FirmwareTypeHelpers::getStreamTypeHelper().toString(pin.stream_type));
+            html.cell(FirmwareTypeHelpers::toString(pin.format));
+
+            html.endRow();
+        }
+
+        html.endTable();
+    }
 }
 
 
