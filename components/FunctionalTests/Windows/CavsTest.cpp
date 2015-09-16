@@ -233,6 +233,36 @@ static void requestInstanceTopologyRefresh(HttpClientSimulator &client)
         "");
 }
 
+/* Check that urls contained in the supplied map match the expected xml result
+ *
+ * Key of the map: the url
+ * Value of the map: a file that contains the expected xml
+ */
+static void checkUrlMap(HttpClientSimulator &client,
+    const std::map<std::string, std::string> &urlMap)
+{
+    for (auto it : urlMap) {
+        try{
+            client.request(
+                it.first,
+                HttpClientSimulator::Verb::Get,
+                "",
+                HttpClientSimulator::Status::Ok,
+                "text/xml",
+                xmlFile(it.second));
+        }
+        catch (...)
+        {
+            /* Proving some error information because catch doesn't display them. */
+            std::cout
+                << "------------------------------------------------------------" << std::endl
+                << "Error on url=" << it.first << " file=" << it.second << std::endl
+                << "------------------------------------------------------------" << std::endl;
+            CHECK_NOTHROW(throw);
+        }
+    }
+}
+
 TEST_CASE("DebugAgent/cAVS: topology")
 {
     /* Creating the mocked device */
@@ -261,12 +291,17 @@ TEST_CASE("DebugAgent/cAVS: topology")
     /* Creating the http client */
     HttpClientSimulator client("localhost");
 
+    /* System type and instance are available before refresh */
+    std::map<std::string, std::string> systemUrlMap = {
+        { "/type", "system_type" },
+        { "/instance", "system_instance" },
+    };
+    checkUrlMap(client, systemUrlMap);
+
     /* Request an instance topology refresh */
     CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
 
-    /* Key: the url
-     * Value: a file that contains the expected xml
-     */
+    /* Testing urls that depend of topology retrieval */
     std::map<std::string, std::string> urlMap = {
         { "/type",                                  "system_type" },
         { "/instance",                              "system_instance" },
@@ -300,26 +335,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
         { "/instance/cavs.fwlogs/0",                "logservice_instance" },
     };
 
-    for (auto it : urlMap) {
-        try{
-            client.request(
-                it.first,
-                HttpClientSimulator::Verb::Get,
-                "",
-                HttpClientSimulator::Status::Ok,
-                "text/xml",
-                xmlFile(it.second));
-        }
-        catch (...)
-        {
-            /* Proving some error information because catch doesn't display them. */
-            std::cout
-                << "------------------------------------------------------------" << std::endl
-                << "Error on url=" << it.first << " file=" << it.second << std::endl
-                << "------------------------------------------------------------" << std::endl;
-            CHECK_NOTHROW(throw);
-        }
-    }
+    checkUrlMap(client, urlMap);
 }
 
 TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "

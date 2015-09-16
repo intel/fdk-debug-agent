@@ -52,6 +52,18 @@ std::shared_ptr<TypeModel> DebugAgent::createTypeModel()
     }
 }
 
+std::shared_ptr<ifdk_objects::instance::System> DebugAgent::createSystemInstance()
+{
+    try
+    {
+        return InstanceModelConverter::createSystem();
+    }
+    catch (BaseModelConverter::Exception &e)
+    {
+        throw Exception("Can not create system instance: " + std::string(e.what()));
+    }
+}
+
 std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 {
     Dispatcher *dispatcher = new rest::Dispatcher();
@@ -73,7 +85,7 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     dispatcher->addResource("/type",
         std::shared_ptr<Resource>(new SystemTypeResource(*mTypeModel)));
     dispatcher->addResource("/instance",
-        std::shared_ptr<Resource>(new SystemInstanceResource(mInstanceModel)));
+        std::shared_ptr<Resource>(new SystemInstanceResource(*mSystemInstance)));
 
     /* Other types*/
     dispatcher->addResource("/type/${type_name}",
@@ -118,10 +130,13 @@ try :
     /* Order is important! */
     mSystem(driverFactory),
     mTypeModel(createTypeModel()),
+    mSystemInstance(createSystemInstance()),
     mInstanceModel(nullptr),
     mParameterMgrPlatformConnector(pfwConfig),
     mRestServer(createDispatcher(), port)
 {
+    assert(mTypeModel != nullptr);
+    assert(mSystemInstance != nullptr);
 }
 catch (rest::Dispatcher::InvalidUriException &e)
 {

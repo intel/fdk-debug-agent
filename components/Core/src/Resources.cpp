@@ -101,14 +101,7 @@ void SystemTypeResource::handleGet(const Request &request, Response &response)
 void SystemInstanceResource::handleGet(const Request &request, Response &response)
 {
     xml::InstanceSerializer serializer;
-    {
-        ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
-        if (handle->getResource() == nullptr) {
-            throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
-        }
-        assert(handle->getResource()->getSystem() != nullptr);
-        handle->getResource()->getSystem()->accept(serializer);
-    }
+    mSystemInstance.accept(serializer);
 
     std::string xml = serializer.getXml();
     std::ostream &out = response.send(ContentTypeXml);

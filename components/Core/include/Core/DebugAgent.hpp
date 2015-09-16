@@ -52,10 +52,12 @@ private:
     DebugAgent& operator=(const DebugAgent&) = delete;
 
     std::shared_ptr<TypeModel> createTypeModel();
+    static std::shared_ptr<ifdk_objects::instance::System> createSystemInstance();
     std::shared_ptr<rest::Dispatcher> createDispatcher();
 
     cavs::System mSystem;
     std::shared_ptr<TypeModel> mTypeModel;
+    std::shared_ptr<ifdk_objects::instance::System> mSystemInstance;
     util::ExclusiveResource<std::shared_ptr<InstanceModel>> mInstanceModel;
     CParameterMgrPlatformConnector mParameterMgrPlatformConnector;
     rest::Server mRestServer;

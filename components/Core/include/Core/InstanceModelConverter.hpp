@@ -39,10 +39,10 @@ class InstanceModelConverter final : public BaseModelConverter
 public:
     InstanceModelConverter(cavs::System &system) : BaseModelConverter(system) {}
 
+    static std::shared_ptr<ifdk_objects::instance::System> createSystem();
     std::shared_ptr<InstanceModel> createModel();
 
 private:
-    std::shared_ptr<ifdk_objects::instance::System> createSystem();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createSubsystem();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createLogService();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createPipe();

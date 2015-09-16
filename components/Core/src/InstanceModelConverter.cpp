@@ -74,8 +74,7 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
     /* Log service */
     addInstanceCollection(collectionMap, logServiceTypeName, createLogService());
 
-    return std::shared_ptr<InstanceModel>(
-        new InstanceModel(createSystem(), collectionMap));
+    return std::shared_ptr<InstanceModel>(new InstanceModel(collectionMap));
 }
 
 std::shared_ptr<ifdk_objects::instance::System> InstanceModelConverter::createSystem()

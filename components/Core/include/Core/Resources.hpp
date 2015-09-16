@@ -58,12 +58,12 @@ private:
 class SystemInstanceResource : public rest::Resource
 {
 public:
-    SystemInstanceResource(ExclusiveInstanceModel &instanceModel) :
-        mInstanceModel(instanceModel) {}
+    SystemInstanceResource(const ifdk_objects::instance::System &systemInstance) :
+        mSystemInstance(systemInstance) {}
 protected:
     virtual void handleGet(const rest::Request &request, rest::Response &response) override;
 private:
-    ExclusiveInstanceModel &mInstanceModel;
+    const ifdk_objects::instance::System &mSystemInstance;
 };
 
 /** This resource returns a subsystem type (XML) */

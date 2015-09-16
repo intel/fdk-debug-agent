@@ -37,19 +37,10 @@ class InstanceModel
 public:
     using CollectionPtr = std::shared_ptr<ifdk_objects::instance::BaseCollection>;
     using InstancePtr = std::shared_ptr<ifdk_objects::instance::Instance>;
-    using SystemPtr = std::shared_ptr<ifdk_objects::instance::System>;
 
     using CollectionMap = std::map<std::string, CollectionPtr>;
 
-    InstanceModel(const SystemPtr &systemPtr,
-        const CollectionMap &collectionMap) :
-        mSystemPtr(systemPtr), mCollectionMap(collectionMap) {}
-
-    /** @return the system instance */
-    SystemPtr getSystem()
-    {
-        return mSystemPtr;
-    }
+    InstanceModel(const CollectionMap &collectionMap) : mCollectionMap(collectionMap) {}
 
     /** @return a collection by its name, or nullptr if not found */
     CollectionPtr getCollection(const std::string &typeName)
@@ -75,7 +66,6 @@ private:
     InstanceModel(const InstanceModel&) = delete;
     InstanceModel &operator=(const InstanceModel&) = delete;
 
-    SystemPtr mSystemPtr;
     CollectionMap mCollectionMap;
 };
 
