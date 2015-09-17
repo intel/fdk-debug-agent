@@ -226,12 +226,12 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
             From(
                 fromName,
                 std::to_string(fromInstanceId),
-                std::to_string(link.mFromOutputId + 1) /* + 1 because 0 is dedicated to gateway */
+                std::to_string(link.mFromOutputId)
             ),
             To(
                 toName,
                 std::to_string(toInstanceId),
-                std::to_string(link.mToInputId + 1))); /* + 1 because 0 is dedicated to gateway */
+                std::to_string(link.mToInputId)));
 
         links.add(l);
     }
@@ -404,32 +404,20 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
                     std::to_string(taskId)));
             }
 
-            /* Input pins : gateway (always input #0) */
-            if (module.input_gateway.val.dw != dsp_fw::ConnectorNodeId::kInvalidNodeId) {
-                moduleModel->getInputs().add(Input("0", audioFormatUnknown));
-            }
-
             /* Input pins : connectors */
             std::size_t pinId = 0;
             for (auto &pin : module.input_pins.pin_info) {
 
-                /* pinId + 1 because 0 is reserved by gateways */
-                moduleModel->getInputs().add(Input(std::to_string(pinId + 1),
+                moduleModel->getInputs().add(Input(std::to_string(pinId),
                     cavs::FirmwareTypeHelpers::toString(pin.format)));
                 ++pinId;
-            }
-
-            /* Output pins : gateway (always output #0) */
-            if (module.output_gateway.val.dw != dsp_fw::ConnectorNodeId::kInvalidNodeId) {
-                moduleModel->getOutputs().add(Output("0", audioFormatUnknown));
             }
 
             /* output pins : connectors */
             pinId = 0;
             for (auto &pin : module.output_pins.pin_info) {
 
-                /* pinId + 1 because 0 is reserved by gateways */
-                moduleModel->getOutputs().add(Output(std::to_string(pinId + 1),
+                moduleModel->getOutputs().add(Output(std::to_string(pinId),
                     cavs::FirmwareTypeHelpers::toString(pin.format)));
                 ++pinId;
             }

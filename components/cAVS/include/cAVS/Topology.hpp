@@ -162,7 +162,7 @@ private:
                                 OutputList &unresolvedOutputs);
 
     void computeInterPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
-
+    void checkUnresolved(InputList &unresolvedInputs, OutputList &unresolvedOutputs) const;
     void addAllModuleOutputs(OutputList &list, ModuleCompoundId module) const;
     void addAllModuleInputs(InputList &list, ModuleCompoundId module) const;
 

@@ -22,6 +22,7 @@
 #include "cAVS/System.hpp"
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/LogStreamer.hpp"
+#include <algorithm>
 #include <utility>
 #include <set>
 
@@ -213,6 +214,12 @@ void System::getTopology(Topology &topology)
                 " : " + std::string(e.what()));
         }
     }
+    /* According to the SwAS the pipe collection has to be ordered from
+     * highest priority to lowest priority (highest priority is lowest value) */
+    std::sort(
+        topology.pipelines.begin(),
+        topology.pipelines.end(),
+        [] (DSPplProps pipeA, DSPplProps pipeB) { return pipeA.priority < pipeB.priority; } );
 
     /* Retrieving scheduler props*/
     if (!mHwConfig.isDspCoreCountValid) {

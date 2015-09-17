@@ -154,6 +154,8 @@ struct PinProps
     StreamType          stream_type;
     AudioDataFormatIpc  format;
     uint32_t            phys_queue_id;
+
+    static const uint32_t invalidQueueId = 0xFFFFFFFF;
 };
 
 /* This type exists in the fw header but is not easily includable, so copying it */

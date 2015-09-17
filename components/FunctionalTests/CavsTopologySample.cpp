@@ -145,11 +145,12 @@ DSSchedulersInfo newScheduler(const std::vector<DSTaskProps> &tasks)
 }
 
 /** Helper function to create pipeline */
-DSPplProps newPipeline(uint32_t id, const std::vector<uint32_t> &instanceIds,
+DSPplProps newPipeline(uint32_t id, uint32_t priority, const std::vector<uint32_t> &instanceIds,
     const std::vector<uint32_t> &taskIds)
 {
     DSPplProps props {};
     props.id = id;
+    props.priority = priority;
     props.module_instances = instanceIds;
     props.ll_tasks = taskIds;
     return props;
@@ -214,7 +215,7 @@ void CavsTopologySample::createInstanceFirmwareObjects(
         /* Pipe4 */
         newModuleInstance(module_gain, 1,
             newPinList({}),
-            newPinList({ queue_pipe4, queue_pipe3_4 }),
+            newPinList({ queue_pipe3_4, queue_pipe4 }),
             dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kDmicLinkInputClass, 1)),
 
         newModuleInstance(module_ns, 2,
@@ -279,33 +280,38 @@ void CavsTopologySample::createInstanceFirmwareObjects(
         })
     };
 
-    /* Filling pipelines */
-    pipelineIds = { 1, 2, 3, 4 };
+    /* Filling pipelines 
+     * The priority of each pipeline is set wisely in order to check the debug agent
+     * will order them by priority: from highest to lowest. Hence, pipeline are provided to
+     * the Debug Agent in this order: ID4;ID2;ID1;ID3 and the Debug Agent shall order them
+     * in this order: ID1;ID2;ID3;ID4 according chosen priorities.
+     */
+    pipelineIds = { 4, 2, 1, 3 };
     pipelines = {
-        newPipeline(1, {
-            Topology::joinModuleInstanceId(module_copier, 1),
-            Topology::joinModuleInstanceId(module_aec, 2),
-            Topology::joinModuleInstanceId(module_gain, 5),
-        },
-        { 1, 2 }),
-        newPipeline(2, {
-            Topology::joinModuleInstanceId(module_gain, 4),
-            Topology::joinModuleInstanceId(module_aec, 5),
-            Topology::joinModuleInstanceId(module_ns, 6)
-        },
-        { 3, 9 }),
-        newPipeline(3, {
-            Topology::joinModuleInstanceId(module_mixin, 1),
-            Topology::joinModuleInstanceId(module_src, 0),
-            Topology::joinModuleInstanceId(module_gain, 9)
-        },
-        { 4 }),
-        newPipeline(4, {
+        newPipeline(4, 40, {
             Topology::joinModuleInstanceId(module_gain, 1),
             Topology::joinModuleInstanceId(module_ns, 2),
             Topology::joinModuleInstanceId(module_mixout, 3)
         },
         { 5, 6 }),
+        newPipeline(2, 20, {
+            Topology::joinModuleInstanceId(module_gain, 4),
+            Topology::joinModuleInstanceId(module_aec, 5),
+            Topology::joinModuleInstanceId(module_ns, 6)
+        },
+        { 3, 9 }),
+        newPipeline(1, 10, {
+            Topology::joinModuleInstanceId(module_copier, 1),
+            Topology::joinModuleInstanceId(module_aec, 2),
+            Topology::joinModuleInstanceId(module_gain, 5),
+        },
+        { 1, 2 }),
+        newPipeline(3, 30, {
+            Topology::joinModuleInstanceId(module_mixin, 1),
+            Topology::joinModuleInstanceId(module_src, 0),
+            Topology::joinModuleInstanceId(module_gain, 9)
+        },
+        { 4 })
     };
 }
 
