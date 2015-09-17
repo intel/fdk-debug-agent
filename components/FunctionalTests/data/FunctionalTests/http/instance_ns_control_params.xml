@@ -1,0 +1,23 @@
+<ParameterBlock Name="NoiseReduction">
+  <ParameterBlock Name="switch">
+    <EnumParameter Name="value">on</EnumParameter>
+  </ParameterBlock>
+  <IntegerParameter Name="sw_flag">0</IntegerParameter>
+  <FixedPointParameter Name="atten_factor_min_val">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="ov_est_fac_band_zero">0.0000000000000</FixedPointParameter>
+  <FixedPointParameter Name="ov_est_fac_band_no_zero">0.0000000000000</FixedPointParameter>
+  <IntegerParameter Name="nr_shl_ri">-15</IntegerParameter>
+  <IntegerParameter Name="nr_shl_fa">-15</IntegerParameter>
+  <IntegerParameter Name="min_stat_len">1</IntegerParameter>
+  <FixedPointParameter Name="atte_ratio">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="correction_value">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="thresh_spe_act">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="noise_lev_enhanc_max">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="noise_lev_enhanc_min">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="noise_lev_enhanc_incre_no_sp">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="noise_lev_enhanc_incre_sp">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="agc_thresh_abs">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="agc_thresh_rel">0.0000000000</FixedPointParameter>
+  <FixedPointParameter Name="gain_factor">0.000000000000000</FixedPointParameter>
+  <FixedPointParameter Name="gain_limit">0.00000000000000</FixedPointParameter>
+</ParameterBlock>
