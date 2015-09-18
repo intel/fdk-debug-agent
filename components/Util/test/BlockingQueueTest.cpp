@@ -122,11 +122,18 @@ TEST_CASE("blocking queue: multi theading usage")
     TestQueue queue(10, &sizeTest);
 
     /* Performing add in another thread */
-    std::future<void> futureResult(std::async(std::launch::async, [&]() {
-        CHECK(queue.add(makeTest(2)));
-        CHECK(queue.add(makeTest(5)));
-        CHECK(queue.add(makeTest(3)));
+    std::future<bool> futureResult(std::async(std::launch::async, [&]() {
+        if (!queue.add(makeTest(2))) {
+            return false;
+        }
+        if (!queue.add(makeTest(5))) {
+            return false;
+        }
+        if (!queue.add(makeTest(3))) {
+            return false;
+        }
         queue.close();
+        return true;
     }));
 
     /* Consuming elements in the current thread */
@@ -146,6 +153,9 @@ TEST_CASE("blocking queue: multi theading usage")
     /* Closed: last element is null */
     element = std::move(queue.remove());
     CHECK(element == nullptr);
+
+    /* Checking that adding element is successful */
+    CHECK(futureResult.get());
 }
 
 
