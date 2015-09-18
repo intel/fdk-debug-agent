@@ -105,7 +105,8 @@ DSModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId))
 {
     DSModuleInstanceProps props {};
-    props.id = Topology::joinModuleInstanceId(type, instance);
+    props.id.moduleId = type;
+    props.id.instanceId = instance;
     props.input_gateway = inputGateway;
     props.output_gateway = outputGateway;
     props.input_pins = inputs;
@@ -123,7 +124,7 @@ dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 }
 
 /** Helper function to create task */
-DSTaskProps newTask(uint32_t id, const std::vector<uint32_t> &ids)
+DSTaskProps newTask(uint32_t id, const std::vector<CompoundModuleId> &ids)
 {
     DSTaskProps props {};
     props.task_id = id;
@@ -145,7 +146,8 @@ DSSchedulersInfo newScheduler(const std::vector<DSTaskProps> &tasks)
 }
 
 /** Helper function to create pipeline */
-DSPplProps newPipeline(uint32_t id, uint32_t priority, const std::vector<uint32_t> &instanceIds,
+DSPplProps newPipeline(uint32_t id, uint32_t priority,
+    const std::vector<CompoundModuleId> &instanceIds,
     const std::vector<uint32_t> &taskIds)
 {
     DSPplProps props {};
@@ -252,35 +254,35 @@ void CavsTopologySample::createInstanceFirmwareObjects(
     schedulers = {
         newScheduler({
             newTask(1, {
-                Topology::joinModuleInstanceId(module_copier, 1)
+                { module_copier, 1 },
             }),
             newTask(2, {
-                Topology::joinModuleInstanceId(module_aec, 2),
-                Topology::joinModuleInstanceId(module_gain, 5)
+                { module_aec, 2 },
+                { module_gain, 5 },
             }),
             newTask(3, {
-                Topology::joinModuleInstanceId(module_gain, 4)
+                { module_gain, 4 },
             }),
             newTask(9, {
-                Topology::joinModuleInstanceId(module_aec, 5),
-                Topology::joinModuleInstanceId(module_ns, 6)
+                { module_aec, 5 },
+                { module_ns, 6 },
             }),
             newTask(4, {
-                Topology::joinModuleInstanceId(module_mixin, 1),
-                Topology::joinModuleInstanceId(module_src, 0),
-                Topology::joinModuleInstanceId(module_gain, 9)
+                { module_mixin, 1 },
+                { module_src, 0 },
+                { module_gain, 9 },
             }),
             newTask(5, {
-                Topology::joinModuleInstanceId(module_gain, 1)
+                { module_gain, 1 },
             }),
             newTask(6, {
-                Topology::joinModuleInstanceId(module_ns, 2),
-                Topology::joinModuleInstanceId(module_mixout, 3)
+                { module_ns, 2 },
+                { module_mixout, 3 },
             }),
         })
     };
 
-    /* Filling pipelines 
+    /* Filling pipelines
      * The priority of each pipeline is set wisely in order to check the debug agent
      * will order them by priority: from highest to lowest. Hence, pipeline are provided to
      * the Debug Agent in this order: ID4;ID2;ID1;ID3 and the Debug Agent shall order them
@@ -289,27 +291,27 @@ void CavsTopologySample::createInstanceFirmwareObjects(
     pipelineIds = { 4, 2, 1, 3 };
     pipelines = {
         newPipeline(4, 40, {
-            Topology::joinModuleInstanceId(module_gain, 1),
-            Topology::joinModuleInstanceId(module_ns, 2),
-            Topology::joinModuleInstanceId(module_mixout, 3)
+            { module_gain, 1 },
+            { module_ns, 2 },
+            { module_mixout, 3 },
         },
         { 5, 6 }),
         newPipeline(2, 20, {
-            Topology::joinModuleInstanceId(module_gain, 4),
-            Topology::joinModuleInstanceId(module_aec, 5),
-            Topology::joinModuleInstanceId(module_ns, 6)
+            { module_gain, 4 },
+            { module_aec, 5 },
+            { module_ns, 6 },
         },
         { 3, 9 }),
         newPipeline(1, 10, {
-            Topology::joinModuleInstanceId(module_copier, 1),
-            Topology::joinModuleInstanceId(module_aec, 2),
-            Topology::joinModuleInstanceId(module_gain, 5),
+            { module_copier, 1 },
+            { module_aec, 2 },
+            { module_gain, 5 },
         },
         { 1, 2 }),
         newPipeline(3, 30, {
-            Topology::joinModuleInstanceId(module_mixin, 1),
-            Topology::joinModuleInstanceId(module_src, 0),
-            Topology::joinModuleInstanceId(module_gain, 9)
+            { module_mixin, 1 },
+            { module_src, 0 },
+            { module_gain, 9 },
         },
         { 4 })
     };

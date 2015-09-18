@@ -165,7 +165,7 @@ void System::getTopology(Topology &topology)
     topology.clear();
 
     ModuleHandler &handler = mDriver->getModuleHandler();
-    std::set<uint32_t> moduleInstanceIds;
+    std::set<CompoundModuleId> moduleInstanceIds;
 
     /* Retrieving gateways*/
     if (!mHwConfig.isGatewayCountValid) {
@@ -236,7 +236,7 @@ void System::getTopology(Topology &topology)
             /* Collecting module instance ids*/
             for (auto &scheduler : info.scheduler_info) {
                 for (auto &task : scheduler.task_info) {
-                    for (auto instanceId : task.module_instance_id) {
+                    for (auto &instanceId : task.module_instance_id) {
                         moduleInstanceIds.insert(instanceId);
                     }
                 }
@@ -250,20 +250,19 @@ void System::getTopology(Topology &topology)
     }
 
     /* Retrieving module instances*/
-    for (auto moduleInstanceId : moduleInstanceIds) {
+    for (auto &compoundId : moduleInstanceIds) {
         try
         {
-            uint16_t moduleId, instanceId;
-            Topology::splitModuleInstanceId(moduleInstanceId, moduleId, instanceId);
-
             DSModuleInstanceProps props;
-            handler.getModuleInstanceProps(moduleId, instanceId, props);
+            handler.getModuleInstanceProps(compoundId.moduleId,
+                compoundId.instanceId, props);
             topology.moduleInstances[props.id] = props;
         }
         catch (ModuleHandler::Exception &e)
         {
             throw Exception("Can not retrieve module instance with id: " +
-                std::to_string(moduleInstanceId) + " : " + std::string(e.what()));
+                std::to_string(CompoundModuleId::toInt(compoundId)) + " : " +
+                std::string(e.what()));
         }
     }
 

@@ -61,7 +61,7 @@ private:
     void dumpCoreSchedulers(HtmlHelper &html, const cavs::DSSchedulersInfo &coreSchedulers);
     void dumpTasks(HtmlHelper &html, const std::vector<cavs::DSTaskProps> &tasks);
     void dumpModuleInstances(HtmlHelper &html,
-        const std::map<cavs::Topology::ModuleCompoundId, cavs::DSModuleInstanceProps>
+        const std::map<cavs::CompoundModuleId, cavs::DSModuleInstanceProps>
         &moduleInstances);
     void dumpPins(HtmlHelper &html, const std::vector<cavs::dsp_fw::PinProps> &pins);
 };

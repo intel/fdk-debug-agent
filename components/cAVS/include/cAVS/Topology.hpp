@@ -43,12 +43,6 @@ public:
         : std::logic_error(what)
         {}
     };
-    /**
-     * To identify a module ID, module ID and module instance D are needed. They are both aggregated
-     * into a ModuleCompoundId: high significant 16 bits are module ID, lower significant 16 bits
-     * are instance ID.
-     */
-    using ModuleCompoundId = uint32_t;
 
     Topology() = default;
     Topology(const Topology&) = default;
@@ -57,8 +51,8 @@ public:
     /* Describe a link between two modules */
     struct Link
     {
-        Link(ModuleCompoundId fromModuleInstanceId, uint32_t fromOutputId,
-             ModuleCompoundId toModuleInstanceId, uint32_t toInputId) :
+        Link(const CompoundModuleId &fromModuleInstanceId, uint32_t fromOutputId,
+            const CompoundModuleId &toModuleInstanceId, uint32_t toInputId) :
             mFromModuleInstanceId(fromModuleInstanceId), mFromOutputId(fromOutputId),
             mToModuleInstanceId(toModuleInstanceId), mToInputId(toInputId)
         {}
@@ -74,10 +68,10 @@ public:
                 mToInputId == other.mToInputId;
         }
 
-        ModuleCompoundId mFromModuleInstanceId;
+        CompoundModuleId mFromModuleInstanceId;
         uint32_t mFromOutputId;
 
-        ModuleCompoundId mToModuleInstanceId;
+        CompoundModuleId mToModuleInstanceId;
         uint32_t mToInputId;
     };
 
@@ -119,19 +113,7 @@ public:
      */
     void computeLinks();
 
-    static ModuleCompoundId joinModuleInstanceId(uint16_t moduleId, uint16_t instanceId)
-    {
-        return (static_cast<ModuleCompoundId>(moduleId) << 16) | instanceId;
-    }
-
-    static void splitModuleInstanceId(ModuleCompoundId moduleInstanceId,
-        uint16_t &moduleId, uint16_t &instanceId)
-    {
-        instanceId = moduleInstanceId & 0xFFFF;
-        moduleId = moduleInstanceId >> 16;
-    }
-
-    std::map<ModuleCompoundId, DSModuleInstanceProps> moduleInstances;
+    std::map<CompoundModuleId, DSModuleInstanceProps> moduleInstances;
     std::vector<dsp_fw::GatewayProps> gateways;
     std::vector<DSPplProps> pipelines;
     std::vector<DSSchedulersInfo> schedulers;
@@ -139,32 +121,32 @@ public:
 
 private:
     /**
-     * @param moduleInstanceId the ModuleCompoundId of the wanted module instance
+     * @param moduleInstanceId the CompoundModuleId of the wanted module instance
      * @return a const reference to the DSModuleInstanceProps which correspond to the
      *         moduleInstanceId.
-     * @see ModuleCompoundId
+     * @see CompoundModuleId
      * @throw Topology::Exception
      */
-    const DSModuleInstanceProps &getModuleInstance(ModuleCompoundId moduleInstanceId) const;
+    const DSModuleInstanceProps &getModuleInstance(const CompoundModuleId &moduleInstanceId) const;
 
     using InputId = uint32_t;
-    using Input = std::pair<ModuleCompoundId, InputId>;
+    using Input = std::pair<CompoundModuleId, InputId>;
     using InputList = std::vector<Input>;
 
     using OutputId = uint32_t;
-    using Output = std::pair<ModuleCompoundId, OutputId>;
+    using Output = std::pair<CompoundModuleId, OutputId>;
     using OutputList = std::vector<Output>;
 
     void computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
-    void computeModulesPairLink(ModuleCompoundId sourceModuleId,
-                                ModuleCompoundId destinationModuleId,
+    void computeModulesPairLink(const CompoundModuleId &sourceModuleId,
+                                const CompoundModuleId &destinationModuleId,
                                 InputList &unresolvedInputs,
                                 OutputList &unresolvedOutputs);
 
     void computeInterPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
     void checkUnresolved(InputList &unresolvedInputs, OutputList &unresolvedOutputs) const;
-    void addAllModuleOutputs(OutputList &list, ModuleCompoundId module) const;
-    void addAllModuleInputs(InputList &list, ModuleCompoundId module) const;
+    void addAllModuleOutputs(OutputList &list, const CompoundModuleId &module) const;
+    void addAllModuleInputs(InputList &list, const CompoundModuleId &module) const;
 
 };
 

@@ -55,7 +55,7 @@ private:
         uint32_t moduleId);
 
     std::shared_ptr<ifdk_objects::instance::RefCollection> createModuleRef(
-        const std::vector<uint32_t> &compoundIdList);
+        const std::vector<cavs::CompoundModuleId> &compoundIdList);
 
     /* This method calculates intermediate structures required to compute instance model:
      * - parents of modules and tasks
@@ -83,7 +83,7 @@ private:
     };
 
     using TaskParentMap = std::map<uint32_t, TaskParents>;
-    using ModuleParentMap = std::map<uint32_t, ModuleParents>;
+    using ModuleParentMap = std::map<cavs::CompoundModuleId, ModuleParents>;
     using GatewayDirectionMap = std::map<uint32_t, GatewayDirection>;
 
     cavs::Topology mTopology;

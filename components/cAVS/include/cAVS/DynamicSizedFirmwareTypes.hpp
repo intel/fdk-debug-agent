@@ -29,6 +29,7 @@
 #include <stdexcept>
 #include <limits>
 #include <assert.h>
+#include <iostream>
 
 /** Some firmware structures have dynamic size and can't be fit to a C structure:
  * - PplProps
@@ -87,6 +88,54 @@ static bool operator == (const dsp_fw::ConnectorNodeId &c1, const dsp_fw::Connec
     return c1.val.dw == c2.val.dw;
 }
 
+struct CompoundModuleId
+{
+    uint16_t moduleId;
+    uint16_t instanceId;
+
+    bool operator ==(const CompoundModuleId &other) const
+    {
+        return moduleId == other.moduleId && instanceId == other.instanceId;
+    }
+
+    static inline CompoundModuleId fromInt(uint32_t id)
+    {
+        CompoundModuleId compId;
+        compId.instanceId = id & 0xFFFF;
+        compId.moduleId = id >> 16;
+        return compId;
+    }
+
+    static inline uint32_t toInt(const CompoundModuleId &compId)
+    {
+        return (static_cast<uint32_t>(compId.moduleId) << 16) | compId.instanceId;
+    }
+
+    /* Required because this class is used as key of std::map */
+    bool operator<(const CompoundModuleId& other) const
+    {
+        return toInt(*this) < toInt(other);
+    }
+
+    void fromStream(util::ByteStreamReader &reader)
+    {
+        reader.read(moduleId);
+        reader.read(instanceId);
+    }
+
+    void toStream(util::ByteStreamWriter &writer) const
+    {
+        writer.write(moduleId);
+        writer.write(instanceId);
+    }
+};
+
+static std::ostream& operator<< (std::ostream& stream, const CompoundModuleId& id)
+{
+    stream << CompoundModuleId::toInt(id);
+    return stream;
+}
+
 /* Dynamic-sized types */
 
 struct DSPplProps
@@ -97,7 +146,7 @@ struct DSPplProps
     uint32_t        total_memory_bytes;
     uint32_t        used_memory_bytes;
     uint32_t        context_pages;
-    std::vector<uint32_t> module_instances;
+    std::vector<CompoundModuleId> module_instances;
     std::vector<uint32_t> ll_tasks;
     std::vector<uint32_t> dp_tasks;
 
@@ -122,7 +171,7 @@ struct DSPplProps
         reader.read(total_memory_bytes);
         reader.read(used_memory_bytes);
         reader.read(context_pages);
-        reader.readVector<ArraySizeType>(module_instances);
+        reader.readVectorAndRecurse<ArraySizeType>(module_instances);
         reader.readVector<ArraySizeType>(ll_tasks);
         reader.readVector<ArraySizeType>(dp_tasks);
     }
@@ -135,7 +184,7 @@ struct DSPplProps
         writer.write(total_memory_bytes);
         writer.write(used_memory_bytes);
         writer.write(context_pages);
-        writer.writeVector<ArraySizeType>(module_instances);
+        writer.writeVectorAndRecurse<ArraySizeType>(module_instances);
         writer.writeVector<ArraySizeType>(ll_tasks);
         writer.writeVector<ArraySizeType>(dp_tasks);
     }
@@ -144,7 +193,7 @@ struct DSPplProps
 struct DSTaskProps
 {
     uint32_t  task_id;
-    std::vector<uint32_t>  module_instance_id;
+    std::vector<CompoundModuleId>  module_instance_id;
 
     bool operator ==(const DSTaskProps &other) const
     {
@@ -155,13 +204,13 @@ struct DSTaskProps
     void fromStream(util::ByteStreamReader &reader)
     {
         reader.read(task_id);
-        reader.readVector<ArraySizeType>(module_instance_id);
+        reader.readVectorAndRecurse<ArraySizeType>(module_instance_id);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
         writer.write(task_id);
-        writer.writeVector<ArraySizeType>(module_instance_id);
+        writer.writeVectorAndRecurse<ArraySizeType>(module_instance_id);
     }
 };
 
@@ -244,7 +293,7 @@ struct DSPinListInfo
 
 struct DSModuleInstanceProps
 {
-    uint32_t          id;
+    CompoundModuleId  id;
     uint32_t          dp_queue_type;
     uint32_t          queue_alignment;
     uint32_t          cp_usage_mask;

@@ -360,7 +360,7 @@ void TopologyDebugResource::dumpTasks(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
-    const std::map<cavs::Topology::ModuleCompoundId, DSModuleInstanceProps> &moduleInstances)
+    const std::map<CompoundModuleId, DSModuleInstanceProps> &moduleInstances)
 {
     html.title("Module instances");
     html.paragraph("Module instance count: " + std::to_string(moduleInstances.size()));
@@ -393,12 +393,9 @@ void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
 
         const DSModuleInstanceProps &module = entry.second;
 
-        uint16_t moduleId, instanceId;
-        Topology::splitModuleInstanceId(module.id, moduleId, instanceId);
-
         std::string moduleTypeName;
-        if (moduleId < mSystem.getModuleEntries().size()) {
-            const ModuleEntry &entry = mSystem.getModuleEntries()[moduleId];
+        if (module.id.moduleId < mSystem.getModuleEntries().size()) {
+            const ModuleEntry &entry = mSystem.getModuleEntries()[module.id.moduleId];
             moduleTypeName = StringHelper::getStringFromFixedSizeArray(
                 entry.name, sizeof(entry.name));
         }
@@ -406,10 +403,10 @@ void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
             moduleTypeName = "<wrong module id>";
         }
 
-        html.cell(module.id);
-        html.cell(moduleId);
+        html.cell(CompoundModuleId::toInt(module.id));
+        html.cell(module.id.moduleId);
         html.cell(moduleTypeName);
-        html.cell(instanceId);
+        html.cell(module.id.instanceId);
         html.cell(module.dp_queue_type);
         html.cell(module.queue_alignment);
         html.cell(module.cp_usage_mask);

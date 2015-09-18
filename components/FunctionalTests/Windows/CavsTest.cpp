@@ -219,15 +219,13 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
 
     /* Module instances */
     for (auto &module : moduleInstances) {
-        uint16_t moduleId, instanceId;
-        Topology::splitModuleInstanceId(module.id, moduleId, instanceId);
 
         commands.addGetModuleInstancePropsCommand(
             true,
             STATUS_SUCCESS,
             dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
-            moduleId,
-            instanceId,
+            module.id.moduleId,
+            module.id.instanceId,
             module);
     }
 }

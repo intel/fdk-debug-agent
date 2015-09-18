@@ -28,37 +28,33 @@ namespace debug_agent
 namespace cavs
 {
 
-const DSModuleInstanceProps &Topology::getModuleInstance(ModuleCompoundId moduleInstanceId) const
+const DSModuleInstanceProps &Topology::getModuleInstance(
+    const CompoundModuleId &moduleInstanceId) const
 {
     const auto it = moduleInstances.find(moduleInstanceId);
     if (it == moduleInstances.end()) {
-
-        uint16_t moduleId;
-        uint16_t instanceId;
-
-        splitModuleInstanceId(moduleInstanceId, moduleId, instanceId);
-
         throw Exception("Topology inconsistency: undefined module instance "
-                + std::to_string(instanceId) + " of module ID" + std::to_string(moduleId));
+            + std::to_string(moduleInstanceId.instanceId) + " of module ID"
+            + std::to_string(moduleInstanceId.moduleId));
     }
 
     return it->second;
 }
 
-void Topology::addAllModuleOutputs(OutputList &list, ModuleCompoundId module) const
+void Topology::addAllModuleOutputs(OutputList &list, const CompoundModuleId &module) const
 {
     const DSModuleInstanceProps &moduleProps = getModuleInstance(module);
-    
+
     OutputId outputId;
     if (moduleProps.output_gateway.val.dw == dsp_fw::ConnectorNodeId::kInvalidNodeId) {
-        
+
         outputId = 0;
     } else {
-    
+
         /* There is a gateway connected to pin id #0: ignore this pin in the next loop */
         outputId = 1;
     }
-    
+
     for ( ; outputId < moduleProps.output_pins.pin_info.size(); ++outputId) {
 
         if (moduleProps.output_pins.pin_info[outputId].phys_queue_id !=
@@ -69,20 +65,20 @@ void Topology::addAllModuleOutputs(OutputList &list, ModuleCompoundId module) co
     }
 }
 
-void Topology::addAllModuleInputs(InputList &list, ModuleCompoundId module) const
+void Topology::addAllModuleInputs(InputList &list, const CompoundModuleId &module) const
 {
     const DSModuleInstanceProps &moduleProps = getModuleInstance(module);
-    
+
     InputId inputId;
     if (moduleProps.input_gateway.val.dw == dsp_fw::ConnectorNodeId::kInvalidNodeId) {
-        
+
         inputId = 0;
     } else {
-    
+
         /* There is a gateway connected to pin id #0: ignore this pin in the next loop */
         inputId = 1;
     }
-    
+
     for ( ; inputId < moduleProps.input_pins.pin_info.size(); ++inputId) {
 
         if (moduleProps.input_pins.pin_info[inputId].phys_queue_id !=
@@ -139,8 +135,9 @@ void Topology::computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &un
              pipeModuleIndex < pipe.module_instances.size() - 1;
              ++pipeModuleIndex) {
 
-                ModuleCompoundId sourceModuleId = pipe.module_instances[pipeModuleIndex];
-                ModuleCompoundId destinationModuleId = pipe.module_instances[pipeModuleIndex + 1];
+                const CompoundModuleId &sourceModuleId = pipe.module_instances[pipeModuleIndex];
+                const CompoundModuleId &destinationModuleId =
+                    pipe.module_instances[pipeModuleIndex + 1];
 
                 computeModulesPairLink(sourceModuleId,
                                        destinationModuleId,
@@ -150,8 +147,8 @@ void Topology::computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &un
     }
 }
 
-void Topology::computeModulesPairLink(ModuleCompoundId sourceModuleId,
-                                      ModuleCompoundId destinationModuleId,
+void Topology::computeModulesPairLink(const CompoundModuleId &sourceModuleId,
+                                      const CompoundModuleId &destinationModuleId,
                                       InputList &unresolvedInputs,
                                       OutputList &unresolvedOutputs)
 {
@@ -259,18 +256,15 @@ void Topology::checkUnresolved(InputList &unresolvedInputs, OutputList &unresolv
 
         const DSModuleInstanceProps &moduleProps = getModuleInstance(output.first);
 
-        uint16_t moduleId;
-        uint16_t instanceId;
-        splitModuleInstanceId(output.first, moduleId, instanceId);
         /** @fixme use cAVS plugin log instead */
         std::cout
             << "[cAVS] Error: "
             << "Unconnected output pin #"
             << output.second
             << " of module instance ID #"
-            << instanceId
+            << output.first.instanceId
             << " (Module ID #"
-            << moduleId
+            << output.first.moduleId
             << "): expecting connection through queue ID #"
             << moduleProps.output_pins.pin_info[output.second].phys_queue_id
             << std::endl;
@@ -279,18 +273,15 @@ void Topology::checkUnresolved(InputList &unresolvedInputs, OutputList &unresolv
 
         const DSModuleInstanceProps &moduleProps = getModuleInstance(input.first);
 
-        uint16_t moduleId;
-        uint16_t instanceId;
-        splitModuleInstanceId(input.first, moduleId, instanceId);
         /** @fixme use cAVS plugin log instead */
         std::cout
             << "[cAVS] Error: "
             << "Unconnected input pin #"
             << input.second
             << " of module instance ID #"
-            << instanceId
+            << input.first.instanceId
             << " (Module ID #"
-            << moduleId
+            << input.first.moduleId
             << "): expecting connection through queue ID #"
             << moduleProps.input_pins.pin_info[input.second].phys_queue_id
             << std::endl;

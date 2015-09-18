@@ -160,13 +160,11 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     for (auto &moduleEntry : mTopology.moduleInstances) {
 
         auto &module = moduleEntry.second;
-        uint16_t moduleId, instanceId;
-        Topology::splitModuleInstanceId(module.id, moduleId, instanceId);
 
         /* Finding the module type to get the type name */
-        auto moduleName = findModuleEntryName(moduleId);
+        auto moduleName = findModuleEntryName(module.id.moduleId);
 
-        moduleCollection->add(ComponentRef(moduleName, std::to_string(instanceId)));
+        moduleCollection->add(ComponentRef(moduleName, std::to_string(module.id.instanceId)));
 
         if (module.input_gateway.val.dw != dsp_fw::ConnectorNodeId::kInvalidNodeId) {
             /* Connected to an input gateway */
@@ -179,7 +177,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
                 ),
                 To(
                     moduleName,
-                    std::to_string(instanceId),
+                    std::to_string(module.id.instanceId),
                     std::to_string(0)));  /* 0-index is dedicated to gateway */
 
             links.add(l);
@@ -191,7 +189,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
             Link l(
                 From(
                     moduleName,
-                    std::to_string(instanceId),
+                    std::to_string(module.id.instanceId),
                     std::to_string(0) /* 0-index is dedicated to gateway */
                 ),
                 To(
@@ -213,11 +211,11 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
 
     /* Links between modules */
     for (auto &link : mTopology.links) {
-        uint16_t fromModuleId, fromInstanceId;
-        uint16_t toModuleId, toInstanceId;
+        uint16_t fromModuleId = link.mFromModuleInstanceId.moduleId;
+        uint16_t fromInstanceId = link.mFromModuleInstanceId.instanceId;
 
-        Topology::splitModuleInstanceId(link.mFromModuleInstanceId, fromModuleId, fromInstanceId);
-        Topology::splitModuleInstanceId(link.mToModuleInstanceId, toModuleId, toInstanceId);
+        uint16_t toModuleId = link.mToModuleInstanceId.moduleId;
+        uint16_t toInstanceId = link.mToModuleInstanceId.instanceId;
 
         auto fromName = findModuleEntryName(fromModuleId);
         auto toName = findModuleEntryName(toModuleId);
@@ -373,16 +371,12 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
 
         auto &module = moduleInstanceEntry.second;
 
-        /* Splitting compound id */
-        uint16_t moduleId, instanceId;
-        Topology::splitModuleInstanceId(module.id, moduleId, instanceId);
-
-        if (requestedModuleId == moduleId) {
+        if (requestedModuleId == module.id.moduleId) {
 
             /* Creating module instance */
             auto moduleModel = std::shared_ptr<Component>(new Component());
-            moduleModel->setTypeName(findModuleEntryName(moduleId));
-            moduleModel->setInstanceId(std::to_string(instanceId));
+            moduleModel->setTypeName(findModuleEntryName(module.id.moduleId));
+            moduleModel->setInstanceId(std::to_string(module.id.instanceId));
 
             /* Parents */
             auto entry = mModuleParents.find(module.id);
@@ -472,16 +466,14 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createGateway(
 }
 
 std::shared_ptr<RefCollection> InstanceModelConverter::createModuleRef(
-    const std::vector<uint32_t> &compoundIdList)
+    const std::vector<CompoundModuleId> &compoundIdList)
 {
     auto coll = std::shared_ptr<ComponentRefCollection>(
         new ComponentRefCollection(collectionName_module));
 
-    for (auto compoundId : compoundIdList) {
-        uint16_t moduleId, instanceId;
-        Topology::splitModuleInstanceId(compoundId, moduleId, instanceId);
-
-        coll->add(ComponentRef(findModuleEntryName(moduleId), std::to_string(instanceId)));
+    for (auto &compoundId : compoundIdList) {
+        coll->add(ComponentRef(findModuleEntryName(compoundId.moduleId),
+            std::to_string(compoundId.instanceId)));
     }
     return coll;
 }

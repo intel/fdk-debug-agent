@@ -335,7 +335,8 @@ TEST_CASE("Module handling: getting pipeline list")
 TEST_CASE("Module handling: getting pipeline props")
 {
     static const uint32_t pipelineId = 1;
-    static const DSPplProps fwProps = { 1, 2, 3, 4, 5, 6, { 1, 2, 3 }, { 4, 5 }, {} };
+    static const DSPplProps fwProps = { 1, 2, 3, 4, 5, 6, { { 1, 0 }, { 2, 0 }, { 3, 0 } },
+        { 4, 5 }, {} };
 
     MockedDevice device;
 
@@ -414,8 +415,8 @@ TEST_CASE("Module handling: getting schedulers info")
 {
     static const uint32_t coreId = 1;
 
-    static const DSTaskProps task1 = { 3, { 1, 2 } };
-    static const DSTaskProps task2 = { 4, { 8 } };
+    static const DSTaskProps task1 = { 3, { { 1, 0 }, { 2, 0 } } };
+    static const DSTaskProps task2 = { 4, { { 8, 0 } } };
     static const DSTaskProps task3 = { 6, {} };
 
     static const DSSchedulerProps props1 = { 1, 2, { task1, task2 } };
@@ -595,7 +596,7 @@ TEST_CASE("Module handling: getting module instance properties")
     } };
 
     static const DSModuleInstanceProps fwInstanceProps = {
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
+        { 1, 0 }, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
         dsp_fw::ConnectorNodeId(12), dsp_fw::ConnectorNodeId(13)
     };
 
@@ -650,7 +651,7 @@ TEST_CASE("Module handling: getting module instance properties")
 
     static const DSModuleInstanceProps emptyProps =
     {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DSPinListInfo(), DSPinListInfo(),
+        { 0, 0 }, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DSPinListInfo(), DSPinListInfo(),
         dsp_fw::ConnectorNodeId(0), dsp_fw::ConnectorNodeId(0)
     };
     DSModuleInstanceProps props = emptyProps;
