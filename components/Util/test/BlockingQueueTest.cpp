@@ -44,7 +44,7 @@ using TestQueue = BlockingQueue<Test>;
 
 std::unique_ptr<Test> makeTest(std::size_t size)
 {
-    return std::unique_ptr<Test>(new Test(size));
+    return std::make_unique<Test>(size);
 }
 
 TEST_CASE("blocking queue: simple monothread usage")

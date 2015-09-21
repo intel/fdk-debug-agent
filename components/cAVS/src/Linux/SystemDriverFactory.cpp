@@ -29,7 +29,7 @@ namespace cavs
 
 std::unique_ptr<Driver> SystemDriverFactory::newDriver() const
 {
-    return std::unique_ptr<Driver>(new linuxx::Driver);
+    return std::make_unique<linuxx::Driver>();
 }
 
 }

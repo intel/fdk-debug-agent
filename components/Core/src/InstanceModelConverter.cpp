@@ -74,19 +74,17 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
     /* Log service */
     addInstanceCollection(collectionMap, logServiceTypeName, createLogService());
 
-    return std::shared_ptr<InstanceModel>(new InstanceModel(collectionMap));
+    return std::make_shared<InstanceModel>(collectionMap);
 }
 
 std::shared_ptr<ifdk_objects::instance::System> InstanceModelConverter::createSystem()
 {
-    auto system = std::shared_ptr<ifdk_objects::instance::System>(
-        new ifdk_objects::instance::System());
+    auto system = std::make_shared<ifdk_objects::instance::System>();
 
     system->setTypeName(systemName);
     system->setInstanceId(systemId);
 
-    auto coll = std::shared_ptr<SubsystemRefCollection>(
-        new SubsystemRefCollection(collectionName_subsystem));
+    auto coll = std::make_shared<SubsystemRefCollection>(collectionName_subsystem);
     coll->add(SubsystemRef(subsystemName, subsystemId));
     system->getChildren().add(coll);
 
@@ -95,21 +93,20 @@ std::shared_ptr<ifdk_objects::instance::System> InstanceModelConverter::createSy
 
 std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
 {
-    auto subsystem = std::shared_ptr<Subsystem>(new Subsystem());
+    auto subsystem = std::make_shared<Subsystem>();
     subsystem->setTypeName(subsystemName);
     subsystem->setInstanceId(subsystemId);
 
     Links &links = subsystem->getLinks();
 
     /* Parents */
-    subsystem->getParents().add(new SystemRef(systemName, systemId));
+    subsystem->getParents().add(std::make_shared<SystemRef>(systemName, systemId));
 
     /* Children*/
     Children &children = subsystem->getChildren();
 
     /* Pipes */
-    auto pipeCollection = std::shared_ptr<InstanceRefCollection>(
-        new InstanceRefCollection(collectionName_pipe));
+    auto pipeCollection = std::make_shared<InstanceRefCollection>(collectionName_pipe);
 
     for (auto &pipeline : mTopology.pipelines) {
         pipeCollection->add(InstanceRef(typeName_pipe, std::to_string(pipeline.id)));
@@ -117,8 +114,8 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     children.add(pipeCollection);
 
     /* Cores */
-    std::shared_ptr<InstanceRefCollection> coreCollection(
-        new InstanceRefCollection(collectionName_core));
+    std::shared_ptr<InstanceRefCollection> coreCollection =
+        std::make_shared<InstanceRefCollection>(collectionName_core);
 
     if (!mSystem.getHwConfig().isDspCoreCountValid) {
         throw Exception("Core count is invalid.");
@@ -129,8 +126,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     children.add(coreCollection);
 
     /* Tasks */
-    auto taskCollection = std::shared_ptr<InstanceRefCollection>(
-        new InstanceRefCollection(collectionName_task));
+    auto taskCollection = std::make_shared<InstanceRefCollection>(collectionName_task);
 
     for (auto &schedulersInfo : mTopology.schedulers) {
         for (auto &scheduler : schedulersInfo.scheduler_info) {
@@ -143,8 +139,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     children.add(taskCollection);
 
     /* Gateways */
-    auto gatewayCollection = std::shared_ptr<ComponentRefCollection>(
-        new ComponentRefCollection(collectionName_gateway));
+    auto gatewayCollection = std::make_shared<ComponentRefCollection>(collectionName_gateway);
 
     for (auto &gateway : mTopology.gateways) {
         dsp_fw::ConnectorNodeId connector(gateway.id);
@@ -155,8 +150,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     children.add(gatewayCollection);
 
     /* Modules and links to gateway*/
-    auto moduleCollection = std::shared_ptr<ComponentRefCollection>(
-        new ComponentRefCollection(collectionName_module));
+    auto moduleCollection = std::make_shared<ComponentRefCollection>(collectionName_module);
     for (auto &moduleEntry : mTopology.moduleInstances) {
 
         auto &module = moduleEntry.second;
@@ -203,8 +197,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     children.add(moduleCollection);
 
     /* Services */
-    auto serviceCollection = std::shared_ptr<ServiceRefCollection>(
-        new ServiceRefCollection(collectionName_service));
+    auto serviceCollection = std::make_shared<ServiceRefCollection>(collectionName_service);
 
     serviceCollection->add(ServiceRef(logServiceTypeName, logServiceId));
     children.add(serviceCollection);
@@ -234,7 +227,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
         links.add(l);
     }
 
-    auto coll = std::shared_ptr<SubsystemCollection>(new SubsystemCollection());
+    auto coll = std::make_shared<SubsystemCollection>();
     coll->add(subsystem);
 
     return coll;
@@ -243,13 +236,13 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
 std::shared_ptr<BaseCollection> InstanceModelConverter::createLogService()
 {
     /* Log Service */
-    auto service = std::shared_ptr<Service>(
-        new Service(logServiceTypeName, logServiceId, Service::Direction::Outgoing));
+    auto service =
+        std::make_shared<Service>(logServiceTypeName, logServiceId, Service::Direction::Outgoing);
 
     /* Parents */
-    service->getParents().add(new SubsystemRef(subsystemName, subsystemId));
+    service->getParents().add(std::make_shared<SubsystemRef>(subsystemName, subsystemId));
 
-    auto coll = std::shared_ptr<ServiceCollection>(new ServiceCollection());
+    auto coll = std::make_shared<ServiceCollection>();
     coll->add(service);
 
     return coll;
@@ -257,22 +250,21 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createLogService()
 
 std::shared_ptr<BaseCollection> InstanceModelConverter::createPipe()
 {
-    auto coll = std::shared_ptr<InstanceCollection>(new InstanceCollection());
+    auto coll = std::make_shared<InstanceCollection>();
 
     for (auto &pplProps : mTopology.pipelines) {
-        auto pipeline = std::shared_ptr<Instance>(new Instance());
+        auto pipeline = std::make_shared<Instance>();
         pipeline->setTypeName(typeName_pipe);
         pipeline->setInstanceId(std::to_string(pplProps.id));
 
         /* Parents */
-        pipeline->getParents().add(new SubsystemRef(subsystemName, subsystemId));
+        pipeline->getParents().add(std::make_shared<SubsystemRef>(subsystemName, subsystemId));
 
         /* Children */
         Children &children = pipeline->getChildren();
 
         /* Tasks */
-        auto taskCollection = std::shared_ptr<InstanceRefCollection>(
-            new InstanceRefCollection(collectionName_task));
+        auto taskCollection = std::make_shared<InstanceRefCollection>(collectionName_task);
 
         for (auto taskId : pplProps.ll_tasks) {
             taskCollection->add(InstanceRef(typeName_task, std::to_string(taskId)));
@@ -293,25 +285,25 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createPipe()
 
 std::shared_ptr<BaseCollection> InstanceModelConverter::createTask()
 {
-    auto coll = std::shared_ptr<InstanceCollection>(new InstanceCollection());
+    auto coll = std::make_shared<InstanceCollection>();
 
     for (auto &schedulersInfo : mTopology.schedulers) {
         for (auto &scheduler : schedulersInfo.scheduler_info) {
             for (auto &task : scheduler.task_info) {
 
-                auto taskModel = std::shared_ptr<Instance>(new Instance());
+                auto taskModel = std::make_shared<Instance>();
                 taskModel->setTypeName(typeName_task);
                 taskModel->setInstanceId(std::to_string(task.task_id));
 
                 /* Parent : core */
-                taskModel->getParents().add(new InstanceRef(typeName_core,
+                taskModel->getParents().add(std::make_shared<InstanceRef>(typeName_core,
                     std::to_string(scheduler.core_id)));
 
                 /* Parent : pipe */
                 auto it = mTaskParents.find(task.task_id);
                 assert(it != mTaskParents.end());
                 for (auto pipeId : it->second.pipeIds) {
-                    taskModel->getParents().add(new InstanceRef(typeName_pipe,
+                    taskModel->getParents().add(std::make_shared<InstanceRef>(typeName_pipe,
                         std::to_string(pipeId)));
                 }
 
@@ -331,7 +323,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createTask()
 
 std::shared_ptr<BaseCollection> InstanceModelConverter::createCore()
 {
-    auto coll = std::shared_ptr<InstanceCollection>(new InstanceCollection());
+    auto coll = std::make_shared<InstanceCollection>();
     for (auto &schedulersInfo : mTopology.schedulers) {
         if (!mTopology.schedulers.empty()) {
             /* Gettting core Id */
@@ -339,16 +331,15 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createCore()
             uint32_t coreId = scheduler.core_id;
 
             /* Creating core instance */
-            auto core = std::shared_ptr<Instance>(new Instance());
+            auto core = std::make_shared<Instance>();
             core->setTypeName(typeName_core);
             core->setInstanceId(std::to_string(coreId));
 
             /* Parent : subsystem */
-            core->getParents().add(new SubsystemRef(subsystemName, subsystemId));
+            core->getParents().add(std::make_shared<SubsystemRef>(subsystemName, subsystemId));
 
             /* Children: tasks */
-            auto taskCollection = std::shared_ptr<InstanceRefCollection>(
-                new InstanceRefCollection(collectionName_task));
+            auto taskCollection = std::make_shared<InstanceRefCollection>(collectionName_task);
 
             for (auto &sched : schedulersInfo.scheduler_info) {
                 for (auto &task : sched.task_info) {
@@ -366,7 +357,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createCore()
 
 std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t requestedModuleId)
 {
-    auto coll = std::shared_ptr<ComponentCollection>(new ComponentCollection());
+    auto coll = std::make_shared<ComponentCollection>();
     for (auto &moduleInstanceEntry : mTopology.moduleInstances) {
 
         auto &module = moduleInstanceEntry.second;
@@ -374,7 +365,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
         if (requestedModuleId == module.id.moduleId) {
 
             /* Creating module instance */
-            auto moduleModel = std::shared_ptr<Component>(new Component());
+            auto moduleModel = std::make_shared<Component>();
             moduleModel->setTypeName(findModuleEntryName(module.id.moduleId));
             moduleModel->setInstanceId(std::to_string(module.id.instanceId));
 
@@ -384,18 +375,19 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
             ModuleParents &parents = entry->second;
 
             /* Subsystem */
-            moduleModel->getParents().add(new SubsystemRef(subsystemName, subsystemId));
+            moduleModel->getParents().add(
+                std::make_shared<SubsystemRef>(subsystemName, subsystemId));
 
             /* Parents: pipe*/
             for (auto pipeId : parents.pipeIds) {
-                moduleModel->getParents().add(new InstanceRef(typeName_pipe,
-                    std::to_string(pipeId)));
+                moduleModel->getParents().add(
+                    std::make_shared<InstanceRef>(typeName_pipe, std::to_string(pipeId)));
             }
 
             /* Parents: tasks */
             for (auto taskId : parents.taskIds) {
-                moduleModel->getParents().add(new InstanceRef(typeName_task,
-                    std::to_string(taskId)));
+                moduleModel->getParents().add(
+                    std::make_shared<InstanceRef>(typeName_task, std::to_string(taskId)));
             }
 
             /* Input pins : connectors */
@@ -427,19 +419,20 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
 std::shared_ptr<BaseCollection> InstanceModelConverter::createGateway(
     const dsp_fw::ConnectorNodeId::Type &gatewayType)
 {
-    auto coll = std::shared_ptr<ComponentCollection>(new ComponentCollection());
+    auto coll = std::make_shared<ComponentCollection>();
     for (auto &gateway : mTopology.gateways) {
         dsp_fw::ConnectorNodeId connector(gateway.id);
 
         if (connector.val.f.dma_type == gatewayType) {
 
             /* Creating gateway model */
-            auto gatewayModel = std::shared_ptr<Component>(new Component());
+            auto gatewayModel = std::make_shared<Component>();
             gatewayModel->setTypeName(findGatewayTypeName(connector));
             gatewayModel->setInstanceId(std::to_string(findGatewayInstanceId(connector)));
 
             /* Parent : subsystem */
-            gatewayModel->getParents().add(new SubsystemRef(subsystemName, subsystemId));
+            gatewayModel->getParents().add(
+                std::make_shared<SubsystemRef>(subsystemName, subsystemId));
 
             /* Inputs and outputs */
             auto it = mGatewayDirections.find(gateway.id);
@@ -468,8 +461,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createGateway(
 std::shared_ptr<RefCollection> InstanceModelConverter::createModuleRef(
     const std::vector<CompoundModuleId> &compoundIdList)
 {
-    auto coll = std::shared_ptr<ComponentRefCollection>(
-        new ComponentRefCollection(collectionName_module));
+    auto coll = std::make_shared<ComponentRefCollection>(collectionName_module);
 
     for (auto &compoundId : compoundIdList) {
         coll->add(ComponentRef(findModuleEntryName(compoundId.moduleId),

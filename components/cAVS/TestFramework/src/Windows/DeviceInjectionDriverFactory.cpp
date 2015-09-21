@@ -42,8 +42,9 @@ std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
     assert(mInjectedWppClientFactory != nullptr);
 
     /* After this call mInjectedDevice will be null */
-    return std::unique_ptr<cavs::Driver>(new windows::Driver(std::move(mInjectedDevice),
-        std::move(mInjectedWppClientFactory)));
+    return std::make_unique<windows::Driver>(
+        std::move(mInjectedDevice),
+        std::move(mInjectedWppClientFactory));
 }
 
 }

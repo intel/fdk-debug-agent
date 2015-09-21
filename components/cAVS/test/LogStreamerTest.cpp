@@ -96,7 +96,7 @@ public:
         const unsigned int coreId = 0;
         const std::string logData("Test log block number " + std::to_string(blockNumber));
 
-        std::unique_ptr<LogBlock> block(new LogBlock(coreId, logData.size()));
+        std::unique_ptr<LogBlock> block = std::make_unique<LogBlock>(coreId, logData.size());
         std::copy(logData.begin(), logData.end(), block->getLogData().begin());
 
         return block;

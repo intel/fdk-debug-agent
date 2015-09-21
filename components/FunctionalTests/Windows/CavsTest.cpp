@@ -274,7 +274,7 @@ static void checkUrlMap(HttpClientSimulator &client,
 TEST_CASE("DebugAgent/cAVS: topology")
 {
     /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+    std::unique_ptr<windows::MockedDevice> device = std::make_unique<windows::MockedDevice>();
 
     /* Setting the test vector
     * ----------------------- */
@@ -349,7 +349,7 @@ TEST_CASE("DebugAgent/cAVS: topology")
 TEST_CASE("DebugAgent/cAVS: internal debug urls")
 {
     /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+    std::unique_ptr<windows::MockedDevice> device = std::make_unique<windows::MockedDevice>();
 
     /* Setting the test vector
     * ----------------------- */
@@ -398,7 +398,7 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
     "(URL: /instance/cavs.module-aec/1/control_parameters)")
 {
     /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+    std::unique_ptr<windows::MockedDevice> device = std::make_unique<windows::MockedDevice>();
 
     /* Setting the test vector
     * ----------------------- */
@@ -454,7 +454,7 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
 TEST_CASE("DebugAgent/cAVS: A refresh error erases the previous topology ")
 {
     /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+    std::unique_ptr<windows::MockedDevice> device = std::make_unique<windows::MockedDevice>();
 
     /* Setting the test vector
     * ----------------------- */
@@ -525,7 +525,7 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
     "(URL: /instance/cavs.module-aec/1/control_parameters)")
 {
     /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+    std::unique_ptr<windows::MockedDevice> device = std::make_unique<windows::MockedDevice>();
 
     /* Setting the test vector
     * ----------------------- */
@@ -583,7 +583,7 @@ TEST_CASE("DebugAgent/cAVS: module type control parameters "
     "(URL: /type/cavs.module-aec/1/control_parameters)")
 {
     /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+    std::unique_ptr<windows::MockedDevice> device = std::make_unique<windows::MockedDevice>();
 
     /* Setting the test vector
     * ----------------------- */
@@ -617,7 +617,7 @@ TEST_CASE("DebugAgent/cAVS: module type control parameters "
 TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
 {
     /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+    std::unique_ptr<windows::MockedDevice> device = std::make_unique<windows::MockedDevice>();
 
     /* Setting the test vector
     * ----------------------- */
@@ -729,7 +729,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
 TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log")
 {
     /* Creating the mocked device */
-    std::unique_ptr<windows::MockedDevice> device(new windows::MockedDevice());
+    std::unique_ptr<windows::MockedDevice> device = std::make_unique<windows::MockedDevice>();
 
     /* Setting the test vector
     * ----------------------- */

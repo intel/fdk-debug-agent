@@ -86,6 +86,8 @@ void Application::defineOptions(OptionSet& options)
     .required(false)
     .repeatable(false)
     .argument("value")
+    /* Poco forces us to use operator new here: the Option takes the ownership of the IntValidator.
+     */
     .validator(new IntValidator(1024, 65535))
     .callback(OptionCallback<Application>(this, &Application::handlePort)));
 

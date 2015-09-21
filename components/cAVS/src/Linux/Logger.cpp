@@ -52,7 +52,7 @@ std::unique_ptr<LogBlock> Logger::readLogBlock()
     static const std::string msg("Fake log from Linux driver");
     static const int fakeCoreID = 0x0F; // a 0x0F is a valid core ID and easy to see in hex editor
 
-    std::unique_ptr<LogBlock> block(new LogBlock(fakeCoreID, msg.size()));
+    std::unique_ptr<LogBlock> block = std::make_unique<LogBlock>(fakeCoreID, msg.size());
     std::copy(msg.begin(), msg.end(), block->getLogData().begin());
 
     /* Bandwidth limiter !

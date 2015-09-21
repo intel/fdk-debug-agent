@@ -87,11 +87,11 @@ public:
      * @tparam OtherDerived all instantiable types
      */
     template <class Base, class Derived, class... OtherDerived >
-    static Base *createInstanceFromTag(const std::string& name)
+    static std::shared_ptr<Base> createInstanceFromTag(const std::string& name)
     {
         /* If the current type matches the tag, create an instance of that type */
         if (Traits<Derived>::tag == name) {
-            return new Derived;
+            return std::make_shared<Derived>();
         }
 
         /* Otherwise recurse on the next type */
@@ -103,7 +103,7 @@ private:
 
     /** Called if all types have been iterated, i.e. no class matches the supplied tag */
     template <class Base>
-    static Base *createInstanceFromTag(const std::string& name)
+    static std::shared_ptr<Base> createInstanceFromTag(const std::string& name)
     {
         throw Exception("No class matches the '" + name + "' tag.");
     }

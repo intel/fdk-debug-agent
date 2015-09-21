@@ -61,7 +61,9 @@ public:
         /* Starting a locked context */
         std::unique_lock<std::mutex> locker(mutex);
 
-        /* Starting the thread that will execute the user function */
+        /* Starting the thread that will execute the user function. The operator 'new' is used
+         * explicitly since the Thread cannot be deleted in case we have no other choice than
+         * abandon it. */
         std::thread *thread = new std::thread(functionThread,
             function, std::ref(mutex), std::ref(var));
 

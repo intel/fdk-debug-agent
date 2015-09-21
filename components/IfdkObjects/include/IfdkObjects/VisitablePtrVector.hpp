@@ -83,12 +83,6 @@ public:
         acceptCommon(*this, visitor);
     }
 
-    void add(ElementType *element)
-    {
-        assert(element != nullptr);
-        mElementPtrs.push_back(std::shared_ptr<ElementType>(element));
-    }
-
     void add(std::shared_ptr<ElementType> element)
     {
         assert(element != nullptr);

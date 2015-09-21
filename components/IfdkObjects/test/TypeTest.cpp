@@ -42,13 +42,16 @@ void populateCharacteristics(Characteristics &characteristics)
 
 void populateChildren(Children &children)
 {
-    TypeRefCollection* typeColl = new TypeRefCollection("types");
+    std::shared_ptr<TypeRefCollection> typeColl =
+        std::make_shared<TypeRefCollection>("types");
     typeColl->add(TypeRef("type1"));
 
-    ComponentRefCollection* compColl = new ComponentRefCollection("components");
+    std::shared_ptr<ComponentRefCollection> compColl =
+        std::make_shared<ComponentRefCollection>("components");
     compColl->add(ComponentRef("comp1"));
 
-    ServiceRefCollection* servColl = new ServiceRefCollection("services");
+    std::shared_ptr<ServiceRefCollection> servColl =
+        std::make_shared<ServiceRefCollection>("services");
     servColl->add(ServiceRef("service1"));
 
     children.add(typeColl);
@@ -71,9 +74,9 @@ void populateOutputs(Outputs &outputs)
 
 void populateCategories(Categories &categories)
 {
-    categories.add(new TypeRef("type1"));
-    categories.add(new ComponentRef("comp1"));
-    categories.add(new ServiceRef("serv1"));
+    categories.add(std::make_shared<TypeRef>("type1"));
+    categories.add(std::make_shared<ComponentRef>("comp1"));
+    categories.add(std::make_shared<ServiceRef>("serv1"));
 }
 
 TEST_CASE("Type serializer: TypeRef")
@@ -156,9 +159,9 @@ TEST_CASE("Type serializer: Categories")
 {
     /* Serialize */
     Categories categories;
-    categories.add(new TypeRef("type2"));
-    categories.add(new ComponentRef("comp2"));
-    categories.add(new ServiceRef("serv2"));
+    categories.add(std::make_shared<TypeRef>("type2"));
+    categories.add(std::make_shared<ComponentRef>("comp2"));
+    categories.add(std::make_shared<ServiceRef>("serv2"));
 
     TypeSerializer serializer;
     categories.accept(serializer);
@@ -727,7 +730,8 @@ TEST_CASE("Type serializer: System")
     populateDescription(system.getDescription());
     populateCharacteristics(system.getCharacteristics());
 
-    SubsystemRefCollection *coll = new SubsystemRefCollection("subsystems");
+    std::shared_ptr<SubsystemRefCollection> coll =
+        std::make_shared<SubsystemRefCollection>("subsystems");
     coll->add(SubsystemRef("subsystem1"));
     coll->add(SubsystemRef("subsystem2"));
     system.getChildren().add(coll);

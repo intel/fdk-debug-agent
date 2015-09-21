@@ -95,22 +95,23 @@ public:
         using Tags = dsp_fw::HwConfigParams;
         using namespace tlv;
 
-        mHwConfigTlvMap[Tags::cAVS_VER_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
-            new TlvWrapper<uint32_t>(cavsVersion, isCavsVersionValid));
-        mHwConfigTlvMap[Tags::DSP_CORES_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
-            new TlvWrapper<uint32_t>(dspCoreCount, isDspCoreCountValid));
-        mHwConfigTlvMap[Tags::MEM_PAGE_BYTES_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
-            new TlvWrapper<uint32_t>(memPageSize, isMemPageSizeValid));
-        mHwConfigTlvMap[Tags::TOTAL_PHYS_MEM_PAGES_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
-            new TlvWrapper<uint32_t>(totalPhysicalMemoryPage, isTotalPhysicalMemoryPageValid));
-        mHwConfigTlvMap[Tags::I2S_CAPS_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
-            new I2sCapsTlvWrapper(i2sCaps, isI2sCapsValid));
-        mHwConfigTlvMap[Tags::GPDMA_CAPS_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
-            new TlvWrapper<GpdmaCapabilities>(gpdmaCaps, isGpdmaCapsValid));
-        mHwConfigTlvMap[Tags::GATEWAY_COUNT_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
-            new TlvWrapper<uint32_t>(gatewayCount, isGatewayCountValid));
-        mHwConfigTlvMap[Tags::EBB_COUNT_HW_CFG] = std::unique_ptr<TlvWrapperInterface>(
-            new TlvWrapper<uint32_t>(ebbCount, isEbbCountValid));
+        mHwConfigTlvMap[Tags::cAVS_VER_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t> >(cavsVersion, isCavsVersionValid);
+        mHwConfigTlvMap[Tags::DSP_CORES_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t> >(dspCoreCount, isDspCoreCountValid);
+        mHwConfigTlvMap[Tags::MEM_PAGE_BYTES_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t> >(memPageSize, isMemPageSizeValid);
+        mHwConfigTlvMap[Tags::TOTAL_PHYS_MEM_PAGES_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t> >(totalPhysicalMemoryPage,
+            isTotalPhysicalMemoryPageValid);
+        mHwConfigTlvMap[Tags::I2S_CAPS_HW_CFG] =
+            std::make_unique<I2sCapsTlvWrapper>(i2sCaps, isI2sCapsValid);
+        mHwConfigTlvMap[Tags::GPDMA_CAPS_HW_CFG] =
+            std::make_unique<TlvWrapper<GpdmaCapabilities> >(gpdmaCaps, isGpdmaCapsValid);
+        mHwConfigTlvMap[Tags::GATEWAY_COUNT_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t> >(gatewayCount, isGatewayCountValid);
+        mHwConfigTlvMap[Tags::EBB_COUNT_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t> >(ebbCount, isEbbCountValid);
     }
 
     const tlv::TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override

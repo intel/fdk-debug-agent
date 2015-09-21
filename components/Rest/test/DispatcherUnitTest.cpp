@@ -42,14 +42,14 @@ public:
 void checkAddResourceWithWrongURI(const std::string uri)
 {
     Dispatcher dispatcher;
-    std::shared_ptr<Resource> resource(new DummyResource());
+    std::shared_ptr<Resource> resource = std::make_shared<DummyResource>();
     REQUIRE_THROWS(dispatcher.addResource(uri, resource));
 }
 
 /* This method adds a resource into the dispatcher and checks that the URI is valid. */
 void checkAddResourceWithValidURI(Dispatcher &dispatcher, const std::string uri)
 {
-    std::shared_ptr<Resource> resource(new DummyResource());
+    std::shared_ptr<Resource> resource = std::make_shared<DummyResource>();
     REQUIRE_NOTHROW(dispatcher.addResource(uri, resource));
 }
 

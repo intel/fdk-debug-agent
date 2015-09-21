@@ -212,7 +212,8 @@ void ControlParametersModuleInstanceResource::handlePut(const Request &request, 
 
         uint32_t paramId = getElementMapping(*childElementHandle);
 
-        /* Create XML document from the XML node of each child */
+        /* Create XML document from the XML node of each child. The usage of operator new is needed
+         * here to comply with poco AutoPtr. */
         Poco::XML::AutoPtr<Poco::XML::Document> childDocument = new Poco::XML::Document;
         childDocument->appendChild(childDocument->importNode(
             document->getNodeByPath(controlParametersUrl + "ParameterBlock[@Name='"

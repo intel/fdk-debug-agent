@@ -231,7 +231,7 @@ void InstanceDeserializer::collectionCommon(GenericCollection<T> &collection)
 {
     std::size_t childCount = getChildElementCount();
     for (std::size_t i = 0; i < childCount; ++i) {
-        collection.add(new T());
+        collection.add(std::make_shared<T>());
     }
 }
 

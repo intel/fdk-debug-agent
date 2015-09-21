@@ -153,6 +153,8 @@ Request::Verb RestResourceRequestHandler::translateVerb(const std::string &verbL
 
 HTTPRequestHandler* RequestHandlerFactory::createRequestHandler(const HTTPServerRequest &req)
 {
+    /* Poco forces us to use operator new here: the HttpServer will take the ownership of this new
+     * RestResourceRequestHandler. */
     return new RestResourceRequestHandler(mDispatcher);
 }
 

@@ -251,13 +251,13 @@ protected:
                 try
                 {
                     /* Creating the instance that matches the tag */
-                    Base *instance = DynamicFactory<Traits>::
+                    std::shared_ptr<Base> instance = DynamicFactory<Traits>::
                         template createInstanceFromTag<Base, Derived...>(node->nodeName());
                     if (instance == nullptr) {
                         throw Exception("Invalid type ref name: " + node->nodeName());
                     }
 
-                    vector.push_back(std::shared_ptr<Base>(instance));
+                    vector.push_back(instance);
                 }
                 catch (typename DynamicFactory<Traits>::Exception &e)
                 {

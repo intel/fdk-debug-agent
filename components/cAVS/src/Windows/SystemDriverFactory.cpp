@@ -55,7 +55,7 @@ std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
     std::unique_ptr<windows::Device> device;
     try
     {
-        device = std::move(std::unique_ptr<windows::Device>(new windows::SystemDevice(deviceId)));
+        device = std::make_unique<windows::SystemDevice>(deviceId);
     }
     catch (windows::Device::Exception &e)
     {
@@ -72,8 +72,7 @@ std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
     }
 
     /* Creating Driver interface */
-    return std::unique_ptr<Driver>(new windows::Driver(std::move(device),
-        std::move(wppClientFactory)));
+    return std::make_unique<windows::Driver>(std::move(device), std::move(wppClientFactory));
 }
 
 }

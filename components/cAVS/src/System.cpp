@@ -130,6 +130,9 @@ const HwConfig &System::getHwConfig() const NOEXCEPT
 
 std::unique_ptr<System::LogStreamResource> System::tryToAcquireLogStreamResource()
 {
+    /* Cannot use std::make_unique here since System::LogStreamResource constructor
+     * is private and only System is friend.
+     */
     std::unique_ptr<System::LogStreamResource> resource(new System::LogStreamResource(*this));
     if (resource->tryLock()) {
         return resource;

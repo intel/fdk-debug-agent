@@ -73,7 +73,7 @@ void Logger::LogProducer::produceEntries()
 void Logger::LogProducer::onLogEntry(uint32_t coreId, uint8_t *buffer,
     uint32_t bufferSize)
 {
-    std::unique_ptr<LogBlock> logBlock(new LogBlock(coreId, bufferSize));
+    std::unique_ptr<LogBlock> logBlock = std::make_unique<LogBlock>(coreId, bufferSize);
     std::copy(buffer, buffer + bufferSize, logBlock->getLogData().begin());
 
     if (!mQueue.add(std::move(logBlock))) {

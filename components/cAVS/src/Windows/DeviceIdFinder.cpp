@@ -146,6 +146,10 @@ std::string DeviceIdFinder::getInterfaceName(HDEVINFO devList,
     assert(ret == FALSE); /* Always return false when getting size... */
 
     /* Allocating detail data buffer */
+    /**
+     * @todo remove the usage of operator 'new' once std::make_unique for fixed size array (C++14)
+     * is supported by Visual Studio.
+     */
     std::unique_ptr<char[]> detailDataBuffer(new char[requiredSize]);
     SP_INTERFACE_DEVICE_DETAIL_DATA *detailData =
         reinterpret_cast<SP_INTERFACE_DEVICE_DETAIL_DATA*>(detailDataBuffer.get());

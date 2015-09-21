@@ -70,7 +70,7 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     assert(mTypeModel != nullptr);
     assert(mSystemInstance != nullptr);
 
-    Dispatcher *dispatcher = new rest::Dispatcher();
+    std::shared_ptr<rest::Dispatcher> dispatcher = std::make_shared<rest::Dispatcher>();
 
     /* Log service (hardcoded urls)
      *
@@ -79,25 +79,25 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
      */
 
     dispatcher->addResource("/type/cavs.fwlogs/control_parameters",
-        std::shared_ptr<Resource>(new LogServiceTypeControlParametersResource()));
+        std::make_shared<LogServiceTypeControlParametersResource>());
     dispatcher->addResource("/instance/cavs.fwlogs/0/control_parameters",
-        std::shared_ptr<Resource>(new LogServiceInstanceControlParametersResource(mSystem)));
+        std::make_shared<LogServiceInstanceControlParametersResource>(mSystem));
     dispatcher->addResource("/instance/cavs.fwlogs/0/streaming",
-        std::shared_ptr<Resource>(new LogServiceStreamResource(mSystem)));
+        std::make_shared<LogServiceStreamResource>(mSystem));
 
     /* System */
     dispatcher->addResource("/type",
-        std::shared_ptr<Resource>(new SystemTypeResource(*mTypeModel)));
+        std::make_shared<SystemTypeResource>(*mTypeModel));
     dispatcher->addResource("/instance",
-        std::shared_ptr<Resource>(new SystemInstanceResource(*mSystemInstance)));
+        std::make_shared<SystemInstanceResource>(*mSystemInstance));
 
     /* Other types*/
     dispatcher->addResource("/type/${type_name}",
-        std::shared_ptr<Resource>(new TypeResource(*mTypeModel)));
+        std::make_shared<TypeResource>(*mTypeModel));
     dispatcher->addResource("/instance/${type_name}",
-        std::shared_ptr<Resource>(new InstanceCollectionResource(mInstanceModel)));
+        std::make_shared<InstanceCollectionResource>(mInstanceModel));
     dispatcher->addResource("/instance/${type_name}/${instance_id}",
-        std::shared_ptr<Resource>(new InstanceResource(mInstanceModel)));
+        std::make_shared<InstanceResource>(mInstanceModel));
 
     /* Create one resource instance for each module type*/
     uint16_t    moduleId = 0;
@@ -108,31 +108,30 @@ std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 
         dispatcher->addResource(
             "/instance/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
-            std::shared_ptr<Resource>(new ControlParametersModuleInstanceResource(
-            mSystem, mParameterMgrPlatformConnector, moduleName, moduleId)));
+            std::make_shared<ControlParametersModuleInstanceResource>(
+                mSystem, mParameterMgrPlatformConnector, moduleName, moduleId));
 
         dispatcher->addResource(
             "/type/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
-            std::shared_ptr<Resource>(new ControlParametersModuleTypeResource(
-            mSystem, mParameterMgrPlatformConnector, moduleName, moduleId)));
+            std::make_shared<ControlParametersModuleTypeResource>(
+                mSystem, mParameterMgrPlatformConnector, moduleName, moduleId));
 
         moduleId++;
     }
 
     /* Refresh special case*/
     dispatcher->addResource("/instance/cavs/0/refreshed",
-        std::shared_ptr<Resource>(new RefreshSubsystemResource(mSystem, mInstanceModel)));
+        std::make_shared<RefreshSubsystemResource>(mSystem, mInstanceModel));
 
     /* Debug resources */
     dispatcher->addResource("/internal/modules",
-        std::shared_ptr<Resource>(new ModuleListDebugResource(mSystem)));
+        std::make_shared<ModuleListDebugResource>(mSystem));
     dispatcher->addResource("/internal/topology",
-        std::shared_ptr<Resource>(new TopologyDebugResource(mSystem)));
+        std::make_shared<TopologyDebugResource>(mSystem));
     dispatcher->addResource("/internal/model",
-        std::shared_ptr<Resource>(new ModelDumpDebugResource(*mTypeModel, *mSystemInstance,
-        mInstanceModel)));
+        std::make_shared<ModelDumpDebugResource>(*mTypeModel, *mSystemInstance, mInstanceModel));
 
-    return std::shared_ptr<rest::Dispatcher>(dispatcher);
+    return dispatcher;
 }
 
 DebugAgent::DebugAgent(

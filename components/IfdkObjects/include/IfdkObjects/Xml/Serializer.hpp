@@ -52,6 +52,7 @@ template<template<class> class Traits>
 class Serializer
 {
 public:
+    /* The usage of operator new cannot be avoided since needed with Poco::AutoPtr. */
     Serializer() : mDocument(new Poco::XML::Document()) {}
 
     /** Return the serialized xml */

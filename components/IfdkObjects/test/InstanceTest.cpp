@@ -28,13 +28,16 @@ using namespace debug_agent::ifdk_objects::xml;
 
 void populateChildren(Children &children)
 {
-    InstanceRefCollection* instanceColl = new InstanceRefCollection("instances");
+    std::shared_ptr<InstanceRefCollection> instanceColl =
+        std::make_shared<InstanceRefCollection>("instances");
     instanceColl->add(InstanceRef("instance1","0"));
 
-    ComponentRefCollection* compColl = new ComponentRefCollection("components");
+    std::shared_ptr<ComponentRefCollection> compColl =
+        std::make_shared<ComponentRefCollection>("components");
     compColl->add(ComponentRef("comp1","1"));
 
-    ServiceRefCollection* servColl = new ServiceRefCollection("services");
+    std::shared_ptr<ServiceRefCollection> servColl =
+        std::make_shared<ServiceRefCollection>("services");
     servColl->add(ServiceRef("service1", "2"));
 
     children.add(instanceColl);
@@ -44,9 +47,9 @@ void populateChildren(Children &children)
 
 void populateParents(Parents &parents)
 {
-    parents.add(new InstanceRef("instance_type", "1"));
-    parents.add(new ComponentRef("component_type", "2"));
-    parents.add(new SubsystemRef("subsystem_type", "3"));
+    parents.add(std::make_shared<InstanceRef>("instance_type", "1"));
+    parents.add(std::make_shared<ComponentRef>("component_type", "2"));
+    parents.add(std::make_shared<SubsystemRef>("subsystem_type", "3"));
 }
 
 void populateInputs(Inputs &inputs)
@@ -413,8 +416,8 @@ TEST_CASE("Instance serializer: Instance collection")
 {
     /* Serialize */
     InstanceCollection collection;
-    collection.add(new Instance("my_instance_type1", "1"));
-    collection.add(new Instance("my_instance_type2", "2"));
+    collection.add(std::make_shared<Instance>("my_instance_type1", "1"));
+    collection.add(std::make_shared<Instance>("my_instance_type2", "2"));
 
     InstanceSerializer serializer;
     collection.accept(serializer);
@@ -491,8 +494,10 @@ TEST_CASE("Instance serializer: Service collection")
 {
     /* Serialize */
     ServiceCollection collection;
-    collection.add(new Service("my_service_type1", "1", Service::Direction::Incoming));
-    collection.add(new Service("my_service_type2", "2", Service::Direction::Outgoing));
+    collection.add(
+        std::make_shared<Service>("my_service_type1", "1", Service::Direction::Incoming));
+    collection.add(
+        std::make_shared<Service>("my_service_type2", "2", Service::Direction::Outgoing));
 
     InstanceSerializer serializer;
     collection.accept(serializer);
@@ -782,8 +787,8 @@ TEST_CASE("Instance serializer: ComponentCollection")
 {
     /* Serialize */
     ComponentCollection collection;
-    collection.add(new Component("my_comp_type1", "1"));
-    collection.add(new Component("my_comp_type2", "2"));
+    collection.add(std::make_shared<Component>("my_comp_type1", "1"));
+    collection.add(std::make_shared<Component>("my_comp_type2", "2"));
 
     InstanceSerializer serializer;
     collection.accept(serializer);
@@ -888,8 +893,8 @@ TEST_CASE("Instance serializer: SubsystemCollection")
 {
     /* Serialize */
     SubsystemCollection collection;
-    collection.add(new Subsystem("subsystem_type1", "1"));
-    collection.add(new Subsystem("subsystem_type2", "2"));
+    collection.add(std::make_shared<Subsystem>("subsystem_type1", "1"));
+    collection.add(std::make_shared<Subsystem>("subsystem_type2", "2"));
 
     InstanceSerializer serializer;
     collection.accept(serializer);
@@ -931,7 +936,8 @@ TEST_CASE("Instance serializer: System")
     /* Serialize */
     System system("my_system_type", "4");
 
-    SubsystemRefCollection *coll = new SubsystemRefCollection("subsystems");
+    std::shared_ptr<SubsystemRefCollection> coll =
+        std::make_shared<SubsystemRefCollection>("subsystems");
     coll->add(SubsystemRef("subsystem1","1"));
     coll->add(SubsystemRef("subsystem2","2"));
     system.getChildren().add(coll);

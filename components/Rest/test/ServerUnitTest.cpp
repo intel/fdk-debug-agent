@@ -60,7 +60,7 @@ private:
 TEST_CASE("Request test", "[Server]")
 {
     /* Initializing the dispatcher and the client */
-    std::shared_ptr<Dispatcher> dispatcher(new Dispatcher());
+    std::shared_ptr<Dispatcher> dispatcher = std::make_shared<Dispatcher>();
     HttpClientSimulator client("localhost");
 
     SECTION("Resource not found")
@@ -83,8 +83,7 @@ TEST_CASE("Request test", "[Server]")
     SECTION("Resource without identifier") {
 
         /* Adding resource */
-        dispatcher->addResource("/test/test2",
-            std::shared_ptr<Resource>(new EchoResource("text/html")));
+        dispatcher->addResource("/test/test2", std::make_shared<EchoResource>("text/html"));
 
         /* Starting the server */
         Server server(dispatcher, HttpClientSimulator::DefaultPort);
@@ -111,7 +110,7 @@ TEST_CASE("Request test", "[Server]")
 
         /* Adding resource */
         dispatcher->addResource("/test/${i1}/titi/${i2}/lulu",
-            std::shared_ptr<Resource>(new EchoResource("text/html")));
+            std::make_shared<EchoResource>("text/html"));
 
         /* Starting the server */
         Server server(dispatcher, HttpClientSimulator::DefaultPort);

@@ -88,20 +88,16 @@ public:
         mLanguageDictionary(mTestLanguageTlvMap)
     {
         mTestLanguageTlvMap[Tags::Hello] =
-            std::unique_ptr<TlvWrapperInterface>(
-                new TlvWrapper<HelloValueType>(hello, isHelloValid));
+            std::make_unique<TlvWrapper<HelloValueType> >(hello, isHelloValid);
 
         mTestLanguageTlvMap[Tags::The] =
-            std::unique_ptr<TlvWrapperInterface>(
-                new TlvVectorWrapper<TheValueType>(the));
+            std::make_unique<TlvVectorWrapper<TheValueType>>(the);
 
         mTestLanguageTlvMap[Tags::World] =
-            std::unique_ptr<TlvWrapperInterface>(
-                new TlvWrapper<WorldValueType>(world, isWorldValid));
+            std::make_unique<TlvWrapper<WorldValueType> >(world, isWorldValid);
 
         mTestLanguageTlvMap[Tags::BadTag] =
-            std::unique_ptr<TlvWrapperInterface>(
-                new TlvVoidWrapper());
+            std::make_unique<TlvVoidWrapper>();
     }
 
     const TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override

@@ -88,6 +88,7 @@ public:
      */
     HandlePtr acquireResource()
     {
+        /* The Handle constructor is private: cannot remove the usage of operator 'new' */
         return std::unique_ptr<Handle>(new Handle(mResourceMutex, mResource));
     }
 
