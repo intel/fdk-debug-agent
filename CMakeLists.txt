@@ -90,8 +90,8 @@ endfunction()
 
 # this function applies common settings to all debug agent projects
 function (set_common_settings projectname)
-    #enabling c++11
-    set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD 11)
+    #enabling c++14
+    set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD 14)
     set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD_REQUIRED ON)
 if (WIN32)
     # Windows does not support noexcept: fall back to throw()
