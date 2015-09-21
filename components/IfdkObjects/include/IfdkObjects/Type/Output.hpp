@@ -23,7 +23,7 @@
 #pragma once
 
 #include "IfdkObjects/Type/Connector.hpp"
-#include <assert.h>
+#include <cassert>
 
 namespace debug_agent
 {

@@ -23,7 +23,7 @@
 #pragma once
 
 #include <vector>
-#include <assert.h>
+#include <cassert>
 
 namespace debug_agent
 {

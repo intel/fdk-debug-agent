@@ -24,7 +24,7 @@
 
 #include <vector>
 #include <stdexcept>
-#include <assert.h>
+#include <cassert>
 #include <inttypes.h>
 
 namespace debug_agent

@@ -25,7 +25,7 @@
 #include "Core/DebugAgent.hpp"
 #include <Poco/Util/HelpFormatter.h>
 #include <Poco/Util/IntValidator.h>
-#include <assert.h>
+#include <cassert>
 
 using namespace debug_agent::core;
 using namespace debug_agent::cavs;

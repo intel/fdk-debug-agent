@@ -21,7 +21,7 @@
 */
 
 #include "IfdkObjects/Xml/InstanceSerializer.hpp"
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 
 using namespace Poco;

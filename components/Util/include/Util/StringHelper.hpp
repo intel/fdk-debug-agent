@@ -23,7 +23,7 @@
 
 #include <sstream>
 #include <string>
-#include <assert.h>
+#include <cassert>
 #include <cctype>
 
 /* The visual studio toolchain define the "min" macro, which makes fail the call to

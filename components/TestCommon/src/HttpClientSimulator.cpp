@@ -26,7 +26,7 @@
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/StreamCopier.h>
-#include <assert.h>
+#include <cassert>
 #include <algorithm>
 
 /** Unfortunately <Poco/Net/HTTPRequest.h> defines the "min" macro, which makes fail the

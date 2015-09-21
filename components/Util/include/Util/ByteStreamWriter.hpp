@@ -24,7 +24,7 @@
 
 #include <vector>
 #include <limits>
-#include <assert.h>
+#include <cassert>
 #include <inttypes.h>
 
 /* The visual studio toolchain define the "max" macro, which makes fail the call to

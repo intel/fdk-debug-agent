@@ -25,7 +25,7 @@
 #include <string>
 #include <cstring>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 
 /** Unfortunetely windows.h define "min" as macro, making fail the call std::min()
  * So undefining it */

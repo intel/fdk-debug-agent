@@ -24,7 +24,7 @@
 
 #include <vector>
 #include <memory>
-#include <assert.h>
+#include <cassert>
 
 namespace debug_agent
 {

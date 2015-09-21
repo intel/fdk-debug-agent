@@ -27,7 +27,7 @@
 #include <memory>
 #include <sstream>
 #include <iomanip>
-#include <assert.h>
+#include <cassert>
 #include <codecvt>
 
 namespace debug_agent

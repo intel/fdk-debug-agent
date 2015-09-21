@@ -23,7 +23,7 @@
 #pragma once
 
 #include "IfdkObjects/Instance/Parameters.hpp"
-#include <assert.h>
+#include <cassert>
 
 namespace debug_agent
 {

@@ -25,7 +25,7 @@
 #include <string>
 #include <inttypes.h>
 #include <exception>
-#include <assert.h>
+#include <cassert>
 #include <stdexcept>
 
 namespace debug_agent

@@ -28,7 +28,7 @@
 #include "Poco/Net/HTTPServerRequest.h"
 #include "Poco/Net/HTTPServerResponse.h"
 #include "Poco/Net/NetException.h"
-#include <assert.h>
+#include <cassert>
 
 using namespace Poco::Net;
 

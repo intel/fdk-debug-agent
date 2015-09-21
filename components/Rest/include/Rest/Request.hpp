@@ -27,7 +27,7 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <iostream>
 #include <map>
-#include <assert.h>
+#include <cassert>
 
 namespace debug_agent
 {

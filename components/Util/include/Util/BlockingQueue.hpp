@@ -28,7 +28,7 @@
 #include <queue>
 #include <stdexcept>
 #include <string>
-#include <assert.h>
+#include <cassert>
 #include <memory>
 
 namespace debug_agent

@@ -24,7 +24,7 @@
 
 #include "IfdkObjects/Type/RefCollection.hpp"
 #include <vector>
-#include <assert.h>
+#include <cassert>
 
 namespace debug_agent
 {

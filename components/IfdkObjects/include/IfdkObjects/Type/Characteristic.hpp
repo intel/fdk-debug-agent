@@ -24,7 +24,7 @@
 
 #include "IfdkObjects/Type/Visitor.hpp"
 #include <string>
-#include <assert.h>
+#include <cassert>
 
 namespace debug_agent
 {
