@@ -114,12 +114,12 @@ protected:
     /* Helper class to set text content to the current node */
     void setText(const std::string &txt)
     {
-        Poco::XML::Text *textNode = mDocument->createTextNode(txt);
+        Poco::AutoPtr<Poco::XML::Text> textNode(mDocument->createTextNode(txt));
         topElement().appendChild(textNode);
     }
 
 private:
-    using ElementStack = std::stack<Poco::XML::Element*>;
+    using ElementStack = std::stack<Poco::XML::Element *>;
 
     Serializer(const Serializer&) = delete;
     Serializer& operator = (const Serializer&) = delete;
