@@ -22,8 +22,6 @@
 
 #include "IfdkObjects/Xml/TypeDeserializer.hpp"
 
-using namespace Poco;
-using namespace Poco::XML;
 using namespace debug_agent::ifdk_objects::type;
 
 namespace debug_agent

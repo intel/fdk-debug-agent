@@ -24,8 +24,6 @@
 #include <cassert>
 #include <sstream>
 
-using namespace Poco;
-using namespace Poco::XML;
 using namespace debug_agent::ifdk_objects::instance;
 
 namespace debug_agent

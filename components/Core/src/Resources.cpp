@@ -236,7 +236,8 @@ Resource::ResponsePtr LogServiceInstanceControlParametersResource::handleGet(con
 Resource::ResponsePtr LogServiceInstanceControlParametersResource::handlePut(const Request &request)
 {
     Poco::XML::DOMParser parser;
-    Poco::XML::Document* document = parser.parseString(request.getRequestContentAsString());
+    Poco::AutoPtr<Poco::XML::Document> document(
+        parser.parseString(request.getRequestContentAsString()));
 
     if (!document) {
         throw Response::HttpError(Response::ErrorStatus::BadRequest, "Invalid document");
