@@ -24,7 +24,8 @@
 
 #include "cAVS/ModuleHandler.hpp"
 #include "cAVS/Windows/Device.hpp"
-#include "cAVS/Windows/IoCtlStructureHelpers.hpp"
+#include "cAVS/Windows/DriverTypes.hpp"
+#include "cAVS/Windows/Buffer.hpp"
 #include "tlv/TlvResponseHandlerInterface.hpp"
 
 namespace debug_agent
@@ -58,9 +59,6 @@ public:
         std::vector<uint8_t> &parameterPayload) override;
 
 private:
-    /** The module parameter access feature has only one parameter, therefore its index is 0 */
-    static const uint32_t moduleParameterAccessParameterId = 0;
-
     template<typename TlvResponseHandlerInterface>
     void readTlvParameters(TlvResponseHandlerInterface &responseHandler,
                            dsp_fw::BaseFwParams parameterId);
@@ -75,27 +73,23 @@ private:
      * several kind of information (Wake On voice...), here the "module access parameter" is used
      * to retrieve firmware structures.
      *
-     * @tparam FirmwareType the firmware type, according to the baseFwParam parameter
-     *                      For instance: AdspProperties, ModulesInfo...
-     * @param[in, out] output A structure that will receive ioctl result.
+     * @param[in] isGet true for BigGet ioctl, false for BigSet ioctl.
+     * @param[in] moduleId the target module type id
+     * @param[in] instanceId the target module instance id
+     * @param[in] moduleParamId the module parameter id
+     * @param[in] suppliedOutputBuffer the input parameter payload
+     * @param[in] returnedOutputBuffer the output parameter payload
+     */
+    void bigCmdModuleAccessIoctl(bool isGet,uint16_t moduleId, uint16_t instanceId,
+        uint32_t moduleParamId, const std::vector<uint8_t> &suppliedOutputBuffer,
+        std::vector<uint8_t> &returnedOutputBuffer);
+
+    /** Template method that performs a big get and returns the result as supplied parameter
+     * type.
      */
     template<typename FirmwareParameterType>
-    void bigModuleAccessIoctl(bool isGet,
-        BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output);
-
-    /** Helper that performs large GET ioctl */
-    template<typename FirmwareParameterType>
-    void bigGetModuleAccessIoctl(BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output)
-    {
-        bigModuleAccessIoctl<FirmwareParameterType>(true, output);
-    }
-
-    /** Helper that performs large SET ioctl */
-    template<typename FirmwareParameterType>
-    void bigSetModuleAccessIoctl(BigCmdModuleAccessIoctlOutput<FirmwareParameterType> &output)
-    {
-        bigModuleAccessIoctl<FirmwareParameterType>(false, output);
-    }
+    void bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instanceId,
+        uint32_t moduleParamId, std::size_t fwParameterSize, FirmwareParameterType &result);
 };
 
 }

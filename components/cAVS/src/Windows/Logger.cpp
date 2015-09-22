@@ -22,10 +22,13 @@
 #include "cAVS/Windows/Logger.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
 #include "Util/PointerHelper.hpp"
+#include "Util/ByteStreamReader.hpp"
+#include "Util/ByteStreamWriter.hpp"
 #include <string>
 #include <cstring>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 /** Unfortunetely windows.h define "min" as macro, making fail the call std::min()
  * So undefining it */
@@ -275,45 +278,91 @@ void Logger::updateLogLocked(const Parameters &parameters)
 
 void Logger::setLogParameterIoctl(const Parameters &parameters)
 {
-    TinyCmdLogParameterIoctl content;
-
     /* Seting supplied parameters.
     * May throw Logger::Exception */
-    content.getFwLogsState() = translateToDriver(parameters);
+    driver::IoctlFwLogsState inputFwParams = translateToDriver(parameters);
+
+    /* Unused, nothing is returned when setting log parameters */
+    driver::IoctlFwLogsState outputParams;
 
     /* Performing the ioctl */
-    logParameterIoctl(IoCtlType::Set, content);
+    logParameterIoctl(IoCtlType::Set, inputFwParams, outputParams);
 }
 
 Logger::Parameters Logger::getParameters()
 {
-    TinyCmdLogParameterIoctl content;
+    /** Initializing inputParams with invalid values, to ensure that they will be overwritten by
+     * the driver */
+    driver::IoctlFwLogsState inputFwParams = {
+        static_cast<driver::IOCTL_LOG_STATE>(0xFFFFFFFF),
+        static_cast<driver::FW_LOG_LEVEL>(0xFFFFFFFF),
+        static_cast<driver::FW_LOG_OUTPUT>(0xFFFFFFFF),
+    };
+    driver::IoctlFwLogsState outputFwParams;
 
     /* Performing the ioctl */
-    logParameterIoctl(IoCtlType::Get, content);
+    logParameterIoctl(IoCtlType::Get, inputFwParams, outputFwParams);
 
     /* Returning the parameters
      * May throws Logger::Exception */
-    return translateFromDriver(content.getFwLogsState());
+    return translateFromDriver(outputFwParams);
 }
 
-void Logger::logParameterIoctl(IoCtlType type, TinyCmdLogParameterIoctl &content)
+void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &inputFwParams,
+    driver::IoctlFwLogsState &outputFwParams)
 {
+    /* Creating ioctl output buffer */
+    util::ByteStreamWriter outputWriter;
+
+    /* Intc_App_TinyCmd structure */
+    driver::Intc_App_TinyCmd tinyCmd(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
+        driver::logParametersCommandparameterId);
+    tinyCmd.toStream(outputWriter);
+
+    /* IoctlFwLogsState structure */
+    inputFwParams.toStream(outputWriter);
+
+    /* Performing ioctl */
     uint32_t ioControlCode = getIoControlCodeFromType(type);
+
+    Buffer buffer(outputWriter.getBuffer());
 
     try
     {
-        mDevice.ioControl(ioControlCode, &content.getBuffer(), &content.getBuffer());
+        mDevice.ioControl(ioControlCode, &buffer, &buffer);
     }
     catch (Device::Exception &e)
     {
         throw Exception(getIoControlTypeName(type) + " error: " + e.what());
     }
 
-    NTSTATUS status = content.getTinyCmd().Body.Status;
-    if (!NT_SUCCESS(status)) {
-        throw Exception("Driver returns invalid status: " +
-            std::to_string(static_cast<uint32_t>(status)));
+    try {
+        util::ByteStreamReader reader(buffer.getElements());
+
+        /* Reading Intc_App_TinyCmd structure */
+        tinyCmd.fromStream(reader);
+
+        NTSTATUS status = tinyCmd.Body.Status;
+        if (!NT_SUCCESS(status)) {
+            throw Exception("Driver returns invalid status: " +
+                std::to_string(static_cast<uint32_t>(status)));
+        }
+
+        /* Reading IoctlFwLogsState structure */
+        outputFwParams.fromStream(reader);
+
+        if (!reader.isEOS()) {
+            /** @todo use logging or throw an exception */
+            std::cout << "Log parameter ioctl buffer has not been fully consumed,"
+                << " IsGet=" << ((type == IoCtlType::Get) ? true : false)
+                << " pointer=" << reader.getPointerOffset()
+                << " size=" << reader.getBuffer().size()
+                << " remaining= " << (reader.getBuffer().size() - reader.getBuffer().size());
+        }
+    }
+    catch (util::ByteStreamReader::Exception &e)
+    {
+        throw Exception("Can not decode log parameter ioctl buffer: " + std::string(e.what()));
     }
 }
 

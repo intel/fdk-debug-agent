@@ -62,6 +62,18 @@ public:
         mIndex += elementSize;
     }
 
+    /** Read an array of elements
+    * @param array the array that will receive elements
+    * @param count the element count to read
+    * @tparam T the element type
+    */
+    template <typename T>
+    void readArray(T *array, std::size_t count) {
+        for (std::size_t i = 0; i < count; ++i) {
+            read(array[i]);
+        }
+    }
+
     /* Read a vector of type supplied as template parameter
      * The vector size is firstly read from the stream (The type of this size is supplied
      * as template parameter).
@@ -76,12 +88,18 @@ public:
         /* Reading the size */
         read(size);
 
-        /* Resizing the vector */
-        vector.resize(size);
+        /* Do not resize the vector to the read size: if the size is erroneous, it may make the
+         * allocation fail.
+         *
+         * It's safer to use the "auto-growth" feature of the std::vector. In this way the
+         * end of stream will be reached before saturating the memory.
+         */
 
         /* Reading each element */
-        for (auto &element : vector) {
+        for (std::size_t i = 0; i < size; ++i) {
+            T element;
             read(element);
+            vector.push_back(element);
         }
     }
 
@@ -101,13 +119,30 @@ public:
         /* Reading the size */
         read(size);
 
-        /* Resizing the vector */
-        vector.resize(size);
-
         /* Calling recursively fromStream() on each element */
-        for (auto &element : vector) {
+        for (std::size_t i = 0; i < size; ++i) {
+            T element;
             element.fromStream(*this);
+            vector.push_back(element);
         }
+    }
+
+    /** @return true if stream is fully consumed, i.e. end of stream is reached */
+    bool isEOS() const
+    {
+        return mIndex == mBuffer.size();
+    }
+
+    /** @return the underlying buffer */
+    const std::vector<uint8_t> &getBuffer() const
+    {
+        return mBuffer;
+    }
+
+    /** @return the current stream pointer index */
+    std::size_t getPointerOffset()
+    {
+        return mIndex;
     }
 
 private:

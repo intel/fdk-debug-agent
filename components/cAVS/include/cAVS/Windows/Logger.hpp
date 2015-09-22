@@ -21,8 +21,8 @@
 */
 #pragma once
 
+#include "cAVS/Windows/DriverTypes.hpp"
 #include "cAVS/Windows/Device.hpp"
-#include "cAVS/Windows/IoCtlStructureHelpers.hpp"
 #include "cAVS/Windows/WppClientFactory.hpp"
 #include "Util/BlockingQueue.hpp"
 #include "cAVS/Logger.hpp"
@@ -134,7 +134,8 @@ private:
     }
 
     /** Set/Get log parameters using a Tiny(Get|Set) ioctl */
-    void logParameterIoctl(IoCtlType type, TinyCmdLogParameterIoctl &content);
+    void logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &inputFwParams,
+        driver::IoctlFwLogsState &outputFwParams);
 
     void setLogParameterIoctl(const Parameters &parameters);
     void startLogLocked(const Parameters &parameters);

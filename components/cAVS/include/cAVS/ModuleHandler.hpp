@@ -94,12 +94,14 @@ public:
         std::vector<uint8_t> &parameterPayload) = 0;
 
     /** @return extended parameter id that contains the targeted module part id */
-    static uint32_t getExtendedParameterId(uint32_t parameterTypeId, uint32_t parameterInstanceId)
+    static uint32_t getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,
+        uint32_t parameterInstanceId)
     {
-        assert(parameterTypeId < (1 << 8));
+        uint32_t parameterTypeIdAsInt = static_cast<uint32_t>(parameterTypeId);
+        assert(parameterTypeIdAsInt < (1 << 8));
         assert(parameterInstanceId < (1 << 24));
 
-        return (parameterTypeId & 0xFF) | (parameterInstanceId << 8);
+        return (parameterTypeIdAsInt & 0xFF) | (parameterInstanceId << 8);
     }
 
 private:

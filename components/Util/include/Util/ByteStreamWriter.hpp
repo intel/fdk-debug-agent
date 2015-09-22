@@ -57,6 +57,24 @@ public:
         mBuffer.insert(mBuffer.end(), valuePtr, valuePtr + elementSize);
     }
 
+    /** Write an array of elements
+      * @param array the array to write
+      * @param count the array size
+      * @tparam T the element type
+      */
+    template <typename T>
+    void writeArray(const T *array, std::size_t count) {
+        for (std::size_t i = 0; i < count; ++i) {
+            write(array[i]);
+        }
+    }
+
+    /** Write a raw buffer. Its size is not written in the stream */
+    void writeRawBuffer(const std::vector<uint8_t> &buffer)
+    {
+        mBuffer.insert(mBuffer.end(), buffer.begin(), buffer.end());
+    }
+
     /* Write a vector of type supplied as template parameter
      * The vector size is firstly written to the stream (The type of this size is supplied
      * as template parameter).

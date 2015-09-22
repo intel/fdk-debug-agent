@@ -57,7 +57,7 @@ public:
      * @throw Device::Exception
      */
     void addGetModuleEntriesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         uint32_t moduleCount,
         const std::vector<dsp_fw::ModuleEntry> &returnedEntries);
 
@@ -77,7 +77,7 @@ public:
      * @throw Device::Exception
      */
     void addGetFwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         const std::vector<char> &fwConfigTlvList);
 
     /**
@@ -96,7 +96,7 @@ public:
      * @throw Device::Exception
      */
     void addGetHwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         const std::vector<char> &hwConfigTlvList);
 
     /** Add a get log parameters command
@@ -144,7 +144,7 @@ public:
      * @throw Device::Exception
      */
     void addGetPipelineListCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         uint32_t maxPplCount,
         const std::vector<uint32_t> &pipelineIds);
 
@@ -164,7 +164,7 @@ public:
      * @throw Device::Exception
      */
     void addGetPipelinePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         uint32_t pipelineId,
         const dsp_fw::DSPplProps &pipelineProps);
 
@@ -184,7 +184,7 @@ public:
      * @throw Device::Exception
      */
     void addGetSchedulersInfoCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         uint32_t coreId,
         const dsp_fw::DSSchedulersInfo &info);
 
@@ -204,7 +204,7 @@ public:
      * @throw Device::Exception
      */
     void addGetGatewaysCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         uint32_t gatewayCount,
         const std::vector<dsp_fw::GatewayProps> &gateways);
 
@@ -225,7 +225,7 @@ public:
     * @throw Device::Exception
     */
     void addGetModuleInstancePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         uint16_t moduleId, uint16_t instanceId,
         const dsp_fw::DSModuleInstanceProps &props);
 
@@ -242,7 +242,7 @@ public:
     * @throw Device::Exception
     */
     void addSetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
         const std::vector<uint8_t> &parameterPayload);
 
@@ -264,7 +264,7 @@ public:
     * @throw Device::Exception
     */
     void addGetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
         const std::vector<uint8_t> &parameterPayload);
 
@@ -279,29 +279,40 @@ private:
     };
 
     void addTlvParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-        dsp_fw::Message::IxcStatus returnedFirmwareStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus,
         const std::vector<char> &tlvList, dsp_fw::BaseFwParams parameterId);
 
-    /** Template method that adds a module access ioctl
-     *
-     * @tparam FirmwareParameterType the firmware paramerter type, for instance
-     * AdspProperties or ModulesInfo */
-    template <typename FirmwareParameterType>
-    void addModuleParameterCommand(Command command, uint32_t parameterTypeId,
-        const Buffer &returnedParameterContent, bool ioctlSuccess,
-        NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-        uint16_t moduleId = baseFirwareModuleId, uint16_t instanceId = baseFirwareInstanceId);
+    /** Common method to add "module access param" ioctl command */
+    void addModuleParameterCommand(Command command,
+        uint16_t moduleId, uint16_t instanceId, uint32_t parameterTypeId,
+        const std::vector<uint8_t> &expectedParameterContent,
+        const std::vector<uint8_t> &returnedParameterContent, bool ioctlSuccess,
+        NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus);
 
-    /** Template method that adds a module access ioctl
+
+    /** Template method that aims to add a "get module access param" ioctl command using
+     * the supplied firmware parameter
      *
-     * @tparam FirmwareParameterType the firmware paramerter type, for instance
-     * AdspProperties or ModulesInfo */
+     * @FirmwareParameterType The type of the firwmare parameter that will be returned
+     */
     template <typename FirmwareParameterType>
-    void addModuleParameterCommand(Command command, uint32_t parameterTypeId,
-        const Buffer &expectedParameterContent,
-        const Buffer &returnedParameterContent, bool ioctlSuccess,
-        NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-        uint16_t moduleId = baseFirwareModuleId, uint16_t instanceId = baseFirwareInstanceId);
+    void addGetModuleParameterCommand(
+        uint16_t moduleId,
+        uint16_t instanceId,
+        uint32_t parameterTypeId,
+        std::size_t expectedOutputBufferSize,
+        const FirmwareParameterType &parameter,
+        bool ioctlSuccess,
+        NTSTATUS returnedDriverStatus,
+        dsp_fw::IxcStatus returnedFirmwareStatus);
+
+    /** Common method to add log get/set parameters */
+    void addLogParameterCommand(
+        Command command,
+        const driver::IoctlFwLogsState &inputFwParams,
+        const driver::IoctlFwLogsState &outputFwParams,
+        bool ioctlSuccess,
+        NTSTATUS returnedDriverStatus);
 
     MockedDevice &mDevice;
 };

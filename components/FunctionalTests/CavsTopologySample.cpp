@@ -88,7 +88,7 @@ dsp_fw::DSPinListInfo newPinList(const std::vector<uint32_t> queueIds)
     for (auto queueId : queueIds) {
         dsp_fw::PinProps props {};
         props.format = audioFormat;
-        props.stream_type = dsp_fw::STREAM_TYPE_PCM;
+        props.stream_type = dsp_fw::StreamType::STREAM_TYPE_PCM;
         props.phys_queue_id = queueId;
 
         info.pin_info.push_back(props);

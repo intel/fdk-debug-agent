@@ -40,11 +40,11 @@ public:
     static const util::EnumHelper<dsp_fw::BitDepth> &getBitDepthHelper()
     {
         static const util::EnumHelper<dsp_fw::BitDepth> helper({
-            { dsp_fw::DEPTH_8BIT, "8" },
-            { dsp_fw::DEPTH_16BIT, "16" },
-            { dsp_fw::DEPTH_24BIT, "24" },
-            { dsp_fw::DEPTH_32BIT, "32" },
-            { dsp_fw::DEPTH_64BIT, "64" },
+            { dsp_fw::BitDepth::DEPTH_8BIT, "8" },
+            { dsp_fw::BitDepth::DEPTH_16BIT, "16" },
+            { dsp_fw::BitDepth::DEPTH_24BIT, "24" },
+            { dsp_fw::BitDepth::DEPTH_32BIT, "32" },
+            { dsp_fw::BitDepth::DEPTH_64BIT, "64" },
         });
         return helper;
     };
@@ -52,19 +52,19 @@ public:
     static const util::EnumHelper<dsp_fw::ChannelConfig> &getChannelConfigHelper()
     {
         static const util::EnumHelper<dsp_fw::ChannelConfig> helper({
-            { dsp_fw::CHANNEL_CONFIG_MONO, "mono" },
-            { dsp_fw::CHANNEL_CONFIG_STEREO, "stereo" },
-            { dsp_fw::CHANNEL_CONFIG_2_POINT_1, "2.1" },
-            { dsp_fw::CHANNEL_CONFIG_3_POINT_0, "3.0" },
-            { dsp_fw::CHANNEL_CONFIG_3_POINT_1, "301" },
-            { dsp_fw::CHANNEL_CONFIG_QUATRO, "quatro" },
-            { dsp_fw::CHANNEL_CONFIG_4_POINT_0, "4.0" },
-            { dsp_fw::CHANNEL_CONFIG_5_POINT_0, "5.0" },
-            { dsp_fw::CHANNEL_CONFIG_5_POINT_1, "5.1" },
-            { dsp_fw::CHANNEL_CONFIG_DUAL_MONO, "dual mono" },
-            { dsp_fw::CHANNEL_CONFIG_I2S_DUAL_STEREO_0, "i2s dual stereo 0" },
-            { dsp_fw::CHANNEL_CONFIG_I2S_DUAL_STEREO_1, "i2s dual stereo 1" },
-            { dsp_fw::CHANNEL_CONFIG_7_POINT_1, "7.1" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_MONO, "mono" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_STEREO, "stereo" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_2_POINT_1, "2.1" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_3_POINT_0, "3.0" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_3_POINT_1, "301" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_QUATRO, "quatro" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_4_POINT_0, "4.0" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_5_POINT_0, "5.0" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_5_POINT_1, "5.1" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_DUAL_MONO, "dual mono" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_I2S_DUAL_STEREO_0, "i2s dual stereo 0" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_I2S_DUAL_STEREO_1, "i2s dual stereo 1" },
+            { dsp_fw::ChannelConfig::CHANNEL_CONFIG_7_POINT_1, "7.1" },
         });
         return helper;
     };
@@ -72,8 +72,8 @@ public:
     static const util::EnumHelper<dsp_fw::InterleavingStyle> &getInterleavingStyleHelper()
     {
         static const util::EnumHelper<dsp_fw::InterleavingStyle> helper({
-            { dsp_fw::CHANNELS_SAMPLES_INTERLEAVING, "sample" },
-            { dsp_fw::CHANNELS_BLOCKS_INTERLEAVING, "block" },
+            { dsp_fw::InterleavingStyle::CHANNELS_SAMPLES_INTERLEAVING, "sample" },
+            { dsp_fw::InterleavingStyle::CHANNELS_BLOCKS_INTERLEAVING, "block" },
         });
 
         return helper;
@@ -82,11 +82,11 @@ public:
     static const util::EnumHelper<dsp_fw::SampleType> &getSampleTypeHelper()
     {
         static const util::EnumHelper<dsp_fw::SampleType> helper({
-            { dsp_fw::MSB_INTEGER, "msb integer" },
-            { dsp_fw::LSB_INTEGER, "lsb integer" },
-            { dsp_fw::SIGNED_INTEGER, "signed integer" },
-            { dsp_fw::UNSIGNED_INTEGER, "unsigned integer" },
-            { dsp_fw::FLOAT, "float" },
+            { dsp_fw::SampleType::MSB_INTEGER, "msb integer" },
+            { dsp_fw::SampleType::LSB_INTEGER, "lsb integer" },
+            { dsp_fw::SampleType::SIGNED_INTEGER, "signed integer" },
+            { dsp_fw::SampleType::UNSIGNED_INTEGER, "unsigned integer" },
+            { dsp_fw::SampleType::FLOAT, "float" },
         });
 
         return helper;
@@ -121,12 +121,6 @@ public:
         });
 
         return helper;
-    };
-
-    enum StreamType
-    {
-        STREAM_TYPE_PCM = 0,
-        STREAM_TYPE_MP3 = 1
     };
 
     /* Firmware types to string */

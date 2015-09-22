@@ -61,35 +61,10 @@ namespace cavs
 namespace dsp_fw
 {
 
+/* IMPORTANT: this header is a mess and will be split in a subsequent patch. */
+
 /* All firmware array sizes are stored on 32 bits unsigned integer*/
 using ArraySizeType = uint32_t;
-
-/* Operator == for fw types */
-
-static bool operator == (const dsp_fw::AudioDataFormatIpc &f1, const dsp_fw::AudioDataFormatIpc &f2)
-{
-    return f1.bit_depth == f2.bit_depth &&
-        f1.channel_config == f2.channel_config &&
-        f1.channel_map == f2.channel_map &&
-        f1.interleaving_style == f2.interleaving_style &&
-        f1.number_of_channels == f2.number_of_channels &&
-        f1.reserved == f2.reserved &&
-        f1.sample_type == f2.sample_type &&
-        f1.sampling_frequency == f2.sampling_frequency &&
-        f1.valid_bit_depth == f2.valid_bit_depth;
-}
-
-static bool operator == (const dsp_fw::PinProps &p1, const dsp_fw::PinProps &p2)
-{
-    return p1.phys_queue_id == p2.phys_queue_id &&
-        p1.format == p2.format &&
-        p1.stream_type == p2.stream_type;
-}
-
-static bool operator == (const dsp_fw::ConnectorNodeId &c1, const dsp_fw::ConnectorNodeId c2)
-{
-    return c1.val.dw == c2.val.dw;
-}
 
 struct CompoundModuleId
 {
@@ -276,15 +251,7 @@ struct DSPinListInfo
 
     bool operator == (const DSPinListInfo& other) const
     {
-        if (pin_info.size() != other.pin_info.size()) {
-            return false;
-        }
-        for (std::size_t i = 0; i < pin_info.size(); i++) {
-            if (!(pin_info[i] == other.pin_info[i])) {
-                return false;
-            }
-        }
-        return true;
+        return pin_info == other.pin_info;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -373,6 +340,32 @@ struct DSModuleInstanceProps
         output_pins.toStream(writer);
         writer.write(input_gateway);
         writer.write(output_gateway);
+    }
+};
+
+struct PipelinesListInfo
+{
+    using PipeLineIdType = uint32_t;
+    std::vector<PipeLineIdType> ppl_id;
+
+    static std::size_t getAllocationSize(std::size_t count)
+    {
+        return sizeof(ArraySizeType)+ count * sizeof(PipeLineIdType);
+    }
+
+    bool operator == (const PipelinesListInfo& other) const
+    {
+        return ppl_id == other.ppl_id;
+    }
+
+    void fromStream(util::ByteStreamReader &reader)
+    {
+        reader.readVector<ArraySizeType>(ppl_id);
+    }
+
+    void toStream(util::ByteStreamWriter &writer) const
+    {
+        writer.writeVector<ArraySizeType>(ppl_id);
     }
 };
 

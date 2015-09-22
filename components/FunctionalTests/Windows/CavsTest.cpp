@@ -151,17 +151,17 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
     commands.addGetFwConfigCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwConfig);
     commands.addGetHwConfigCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         hwConfig);
     commands.addGetModuleEntriesCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         static_cast<uint32_t>(modules.size()),
         modules);
 }
@@ -185,7 +185,7 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
     commands.addGetGatewaysCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         static_cast<uint32_t>(gateways.size()),
         gateways);
 
@@ -193,7 +193,7 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
     commands.addGetPipelineListCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         static_cast<uint32_t>(CavsTopologySample::maxPplCount),
         pipelineIds);
 
@@ -201,7 +201,7 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
         commands.addGetPipelinePropsCommand(
             true,
             STATUS_SUCCESS,
-            dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+            dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
             pipeline.id,
             pipeline);
     }
@@ -212,7 +212,7 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
         commands.addGetSchedulersInfoCommand(
             true,
             STATUS_SUCCESS,
-            dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+            dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
             coreId++,
             scheduler);
     }
@@ -223,7 +223,7 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
         commands.addGetModuleInstancePropsCommand(
             true,
             STATUS_SUCCESS,
-            dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+            dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
             module.id.moduleId,
             module.id.instanceId,
             module);
@@ -416,12 +416,12 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
     uint32_t ParamId = 0;
     commands.addGetModuleParameterCommand(true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, InstanceId, ParamId,
         aecControlParameterPayload);
     commands.addGetModuleParameterCommand(true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, InstanceId, 25,
         nsControlParameterPayload);
     /* Now using the mocked device
@@ -471,7 +471,7 @@ TEST_CASE("DebugAgent/cAVS: A refresh error erases the previous topology ")
     commands.addGetGatewaysCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         static_cast<uint32_t>(CavsTopologySample::gatewaysCount),
         emptyList);
 
@@ -542,13 +542,13 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
     uint32_t ParamId = 0;
     commands.addSetModuleParameterCommand(true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, InstanceId, ParamId,
         aecControlParameterPayload);
 
     commands.addSetModuleParameterCommand(true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, InstanceId, 25,
         nsControlParameterPayload);
 
@@ -633,7 +633,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
     */
 
     windows::driver::IoctlFwLogsState initialLogParams = {
-        false,
+        windows::driver::IOCTL_LOG_STATE::STOPPED,
         windows::driver::FW_LOG_LEVEL::LOG_CRITICAL,
         windows::driver::FW_LOG_OUTPUT::OUTPUT_PTI
     };
@@ -648,7 +648,7 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
     * - output: sram
     */
     windows::driver::IoctlFwLogsState setLogParams = {
-        true,
+        windows::driver::IOCTL_LOG_STATE::STARTED,
         windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
         windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM
     };
@@ -740,7 +740,7 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
 
     /* 1: start log command */
     windows::driver::IoctlFwLogsState setLogParams = {
-        true,
+        windows::driver::IOCTL_LOG_STATE::STARTED,
         windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
         windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM
     };
@@ -750,7 +750,7 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
         setLogParams);
 
     /* 2: Stop log command, will be called by the debug agent termination */
-    setLogParams.started = false;
+    setLogParams.started = windows::driver::IOCTL_LOG_STATE::STOPPED;
     setLogParams.level = windows::driver::FW_LOG_LEVEL::LOG_VERBOSE;
     setLogParams.output = windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM;
     commands.addSetLogParametersCommand(

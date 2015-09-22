@@ -48,7 +48,7 @@ static const std::string ContentTypeHtml("text/html");
 static const std::string ContentTypeZip("application/zip");
 
 /** Helper method to convert an hash array into string */
-std::string hashToString(const uint8_t hash[DEFAULT_HASH_SHA256_LEN])
+std::string hashToString(const uint8_t hash[dsp_fw::ModuleEntry::DEFAULT_HASH_SHA256_LEN])
 {
     std::stringstream stream;
 
@@ -56,7 +56,7 @@ std::string hashToString(const uint8_t hash[DEFAULT_HASH_SHA256_LEN])
     stream << std::setfill('0') << std::hex << std::uppercase;
 
     /* Each byte */
-    for (std::size_t i = 0; i < DEFAULT_HASH_SHA256_LEN; i++) {
+    for (std::size_t i = 0; i < dsp_fw::ModuleEntry::DEFAULT_HASH_SHA256_LEN; i++) {
         stream << std::setw(2) << static_cast<uint32_t>(hash[i]);
     }
 

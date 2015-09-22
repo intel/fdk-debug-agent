@@ -140,15 +140,14 @@ private:
 
     void computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
     void computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModuleId,
-                                const dsp_fw::CompoundModuleId &destinationModuleId,
-                                InputList &unresolvedInputs,
-                                OutputList &unresolvedOutputs);
+        const dsp_fw::CompoundModuleId &destinationModuleId,
+        InputList &unresolvedInputs,
+        OutputList &unresolvedOutputs);
 
     void computeInterPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
     void checkUnresolved(InputList &unresolvedInputs, OutputList &unresolvedOutputs) const;
     void addAllModuleOutputs(OutputList &list, const dsp_fw::CompoundModuleId &module) const;
     void addAllModuleInputs(InputList &list, const dsp_fw::CompoundModuleId &module) const;
-
 };
 
 }

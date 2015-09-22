@@ -105,7 +105,7 @@ TEST_CASE("Module handling: getting module entries")
     commands.addGetModuleEntriesCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleCount,
         std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
@@ -113,7 +113,7 @@ TEST_CASE("Module handling: getting module entries")
     commands.addGetModuleEntriesCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleCount,
         std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
@@ -121,7 +121,7 @@ TEST_CASE("Module handling: getting module entries")
     commands.addGetModuleEntriesCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         moduleCount,
         std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
@@ -129,7 +129,7 @@ TEST_CASE("Module handling: getting module entries")
     commands.addGetModuleEntriesCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleCount,
         produceModuleEntries(moduleCount));
 
@@ -157,7 +157,7 @@ TEST_CASE("Module handling: getting module entries")
     CHECK_THROWS_AS_MSG(moduleHandler.getModulesEntries(moduleCount, entries),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
 
     CHECK(entries.empty());
 
@@ -191,28 +191,28 @@ TEST_CASE("Module handling: getting FW configs")
     commands.addGetFwConfigCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwConfigTlvList); /* unused parameter */
 
     /* Simulating a driver error during getting fw config */
     commands.addGetFwConfigCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwConfigTlvList); /* unused parameter */
 
     /* Simulating a firmware error during getting fw config */
     commands.addGetFwConfigCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         fwConfigTlvList); /* unused parameter */
 
     /* Successful get fw config command */
     commands.addGetFwConfigCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwConfigTlvList);
 
 
@@ -240,7 +240,7 @@ TEST_CASE("Module handling: getting FW configs")
     CHECK_THROWS_AS_MSG(moduleHandler.getFwConfig(fwConfig),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(fwConfig.isFwVersionValid == false);
 
     /* Successful get fw config command */
@@ -271,7 +271,7 @@ TEST_CASE("Module handling: getting pipeline list")
     commands.addGetPipelineListCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwMaxPplCount,
         std::vector<uint32_t>()); /* unused parameter */
 
@@ -279,7 +279,7 @@ TEST_CASE("Module handling: getting pipeline list")
     commands.addGetPipelineListCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwMaxPplCount,
         std::vector<uint32_t>()); /* unused parameter */
 
@@ -287,7 +287,7 @@ TEST_CASE("Module handling: getting pipeline list")
     commands.addGetPipelineListCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         fwMaxPplCount,
         std::vector<uint32_t>()); /* unused parameter */
 
@@ -295,7 +295,7 @@ TEST_CASE("Module handling: getting pipeline list")
     commands.addGetPipelineListCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwMaxPplCount,
         fwPipelineIdList);
 
@@ -324,7 +324,7 @@ TEST_CASE("Module handling: getting pipeline list")
     CHECK_THROWS_AS_MSG(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(pipelineIds.empty());
 
     /*Successful get pipeline list command */
@@ -348,7 +348,7 @@ TEST_CASE("Module handling: getting pipeline props")
     commands.addGetPipelinePropsCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         pipelineId,
         dsp_fw::DSPplProps()); /* unused parameter */
 
@@ -356,7 +356,7 @@ TEST_CASE("Module handling: getting pipeline props")
     commands.addGetPipelinePropsCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         pipelineId,
         dsp_fw::DSPplProps()); /* unused parameter */
 
@@ -364,7 +364,7 @@ TEST_CASE("Module handling: getting pipeline props")
     commands.addGetPipelinePropsCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         pipelineId,
         dsp_fw::DSPplProps()); /* unused parameter */
 
@@ -372,7 +372,7 @@ TEST_CASE("Module handling: getting pipeline props")
     commands.addGetPipelinePropsCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         pipelineId,
         fwProps);
 
@@ -403,7 +403,7 @@ TEST_CASE("Module handling: getting pipeline props")
     CHECK_THROWS_AS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(emptyProps == props);
 
     /*Successful command */
@@ -434,7 +434,7 @@ TEST_CASE("Module handling: getting schedulers info")
     commands.addGetSchedulersInfoCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         coreId,
         dsp_fw::DSSchedulersInfo()); /* unused parameter */
 
@@ -442,7 +442,7 @@ TEST_CASE("Module handling: getting schedulers info")
     commands.addGetSchedulersInfoCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         coreId,
         dsp_fw::DSSchedulersInfo()); /* unused parameter */
 
@@ -450,7 +450,7 @@ TEST_CASE("Module handling: getting schedulers info")
     commands.addGetSchedulersInfoCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         coreId,
         dsp_fw::DSSchedulersInfo()); /* unused parameter */
 
@@ -458,7 +458,7 @@ TEST_CASE("Module handling: getting schedulers info")
     commands.addGetSchedulersInfoCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         coreId,
         fwSchedulersInfo);
 
@@ -489,7 +489,7 @@ TEST_CASE("Module handling: getting schedulers info")
     CHECK_THROWS_AS_MSG(moduleHandler.getSchedulersInfo(coreId, info),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(emptyInfo == info);
 
     /*Successful command */
@@ -512,7 +512,7 @@ TEST_CASE("Module handling: getting gateways")
     commands.addGetGatewaysCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwGatewayCount,
         std::vector<dsp_fw::GatewayProps>()); /* unused parameter */
 
@@ -520,7 +520,7 @@ TEST_CASE("Module handling: getting gateways")
     commands.addGetGatewaysCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwGatewayCount,
         std::vector<dsp_fw::GatewayProps>()); /* unused parameter */
 
@@ -528,7 +528,7 @@ TEST_CASE("Module handling: getting gateways")
     commands.addGetGatewaysCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         fwGatewayCount,
         std::vector<dsp_fw::GatewayProps>()); /* unused parameter */
 
@@ -536,7 +536,7 @@ TEST_CASE("Module handling: getting gateways")
     commands.addGetGatewaysCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         fwGatewayCount,
         fwGateways);
 
@@ -564,7 +564,7 @@ TEST_CASE("Module handling: getting gateways")
     CHECK_THROWS_AS_MSG(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(gateways.empty());
 
     /*Successful get pipeline list command */
@@ -613,7 +613,7 @@ TEST_CASE("Module handling: getting module instance properties")
     commands.addGetModuleInstancePropsCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId,
         dsp_fw::DSModuleInstanceProps()); /* unused parameter */
 
@@ -621,7 +621,7 @@ TEST_CASE("Module handling: getting module instance properties")
     commands.addGetModuleInstancePropsCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId,
         dsp_fw::DSModuleInstanceProps()); /* unused parameter */
 
@@ -629,7 +629,7 @@ TEST_CASE("Module handling: getting module instance properties")
     commands.addGetModuleInstancePropsCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         moduleId, instanceId,
         dsp_fw::DSModuleInstanceProps()); /* unused parameter */
 
@@ -637,7 +637,7 @@ TEST_CASE("Module handling: getting module instance properties")
     commands.addGetModuleInstancePropsCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId,
         fwInstanceProps);
 
@@ -672,7 +672,7 @@ TEST_CASE("Module handling: getting module instance properties")
     CHECK_THROWS_AS_MSG(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(emptyProps == props);
 
     /*Successful command */
@@ -699,7 +699,7 @@ TEST_CASE("Module handling: getting module parameter")
     commands.addGetModuleParameterCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId, parameterId,
         std::vector<uint8_t>()); /* unused parameter */
 
@@ -707,7 +707,7 @@ TEST_CASE("Module handling: getting module parameter")
     commands.addGetModuleParameterCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId, parameterId,
         std::vector<uint8_t>()); /* unused parameter */
 
@@ -715,7 +715,7 @@ TEST_CASE("Module handling: getting module parameter")
     commands.addGetModuleParameterCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         moduleId, instanceId, parameterId,
         std::vector<uint8_t>()); /* unused parameter */
 
@@ -723,7 +723,7 @@ TEST_CASE("Module handling: getting module parameter")
     commands.addGetModuleParameterCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId, parameterId,
         fwParameterPayload);
 
@@ -755,7 +755,7 @@ TEST_CASE("Module handling: getting module parameter")
         parameterPayload),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(parameterPayload.empty());
 
     /*Successful command */
@@ -782,7 +782,7 @@ TEST_CASE("Module handling: setting module parameter")
     commands.addSetModuleParameterCommand(
         false,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId, parameterId,
         parameterPayload);
 
@@ -790,7 +790,7 @@ TEST_CASE("Module handling: setting module parameter")
     commands.addSetModuleParameterCommand(
         true,
         STATUS_FLOAT_DIVIDE_BY_ZERO,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId, parameterId,
         parameterPayload);
 
@@ -798,7 +798,7 @@ TEST_CASE("Module handling: setting module parameter")
     commands.addSetModuleParameterCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
+        dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         moduleId, instanceId, parameterId,
         parameterPayload);
 
@@ -806,7 +806,7 @@ TEST_CASE("Module handling: setting module parameter")
     commands.addSetModuleParameterCommand(
         true,
         STATUS_SUCCESS,
-        dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId, parameterId,
         parameterPayload);
 
@@ -834,7 +834,7 @@ TEST_CASE("Module handling: setting module parameter")
         parameterPayload),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
-        std::to_string(static_cast<uint32_t>(dsp_fw::Message::ADSP_IPC_FAILURE)));
+        std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
 
     /*Successful command */
     CHECK_NOTHROW(moduleHandler.setModuleParameter(moduleId, instanceId, parameterId,

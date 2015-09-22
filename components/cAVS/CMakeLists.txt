@@ -46,7 +46,6 @@ set(LIB_INCS
     include/cAVS/Topology.hpp)
 
 set(LIBRAIRIES)
-SET(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/external/cAVS/firmware/include")
 
 # Target specific source and header files
 if (WIN32)
@@ -66,9 +65,6 @@ target_link_libraries(cAVS ${LIBRAIRIES})
 
 # exporting "include" directory
 target_include_directories(cAVS PUBLIC "include")
-
-# Adding include directories
-target_include_directories(cAVS PUBLIC ${INCLUDE_DIRS})
 
 link_poco(cAVS)
 

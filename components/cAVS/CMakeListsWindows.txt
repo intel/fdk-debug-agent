@@ -44,7 +44,6 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/DeviceIdFinder.hpp
     include/cAVS/Windows/DriverTypes.hpp
     include/cAVS/Windows/ModuleHandler.hpp
-    include/cAVS/Windows/IoCtlStructureHelpers.hpp
     include/cAVS/Windows/WindowsTypes.hpp
     include/cAVS/Windows/WppConsumer.hpp
     include/cAVS/Windows/WppCommon.hpp
@@ -65,7 +64,3 @@ source_group("Header Files\\Windows" FILES ${WINDOWS_LIB_INCS})
 set(LIBRAIRIES
     ${LIBRAIRIES}
     Setupapi)
-
-set(INCLUDE_DIRS
-    ${INCLUDE_DIRS}
-    "${PROJECT_SOURCE_DIR}/external/cAVS/driver/include")
