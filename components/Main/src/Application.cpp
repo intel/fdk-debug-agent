@@ -88,7 +88,7 @@ void Application::defineOptions(OptionSet& options)
     .argument("value")
     /* Poco forces us to use operator new here: the Option takes the ownership of the IntValidator.
      */
-    .validator(new IntValidator(1024, 65535))
+    .validator(new IntValidator(22, 65535))
     .callback(OptionCallback<Application>(this, &Application::handlePort)));
 
     options.addOption(Option("pfwConfig", "pf",
