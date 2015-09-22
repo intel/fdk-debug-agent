@@ -60,13 +60,13 @@ private:
 TEST_CASE("Request test", "[Server]")
 {
     /* Initializing the dispatcher and the client */
-    std::shared_ptr<Dispatcher> dispatcher = std::make_shared<Dispatcher>();
+    std::unique_ptr<Dispatcher> dispatcher = std::make_unique<Dispatcher>();
     HttpClientSimulator client("localhost");
 
     SECTION("Resource not found")
     {
         /* Starting the server */
-        Server server(dispatcher, HttpClientSimulator::DefaultPort);
+        Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
         /* Performing the http request */
         CHECK_NOTHROW(
@@ -86,7 +86,7 @@ TEST_CASE("Request test", "[Server]")
         dispatcher->addResource("/test/test2", std::make_shared<EchoResource>("text/html"));
 
         /* Starting the server */
-        Server server(dispatcher, HttpClientSimulator::DefaultPort);
+        Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
         /* Setting the expected response content */
         std::string expectedResponseContent =
@@ -113,7 +113,7 @@ TEST_CASE("Request test", "[Server]")
             std::make_shared<EchoResource>("text/html"));
 
         /* Starting the server */
-        Server server(dispatcher, HttpClientSimulator::DefaultPort);
+        Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
         /* Setting the expected response content */
         std::string expectedResponseContent =

@@ -40,14 +40,18 @@ namespace debug_agent
 namespace rest
 {
 
-/** Http request handler dedicated to REST
- * This handlers uses the dispatcher to resolve the resource, and then forwards the
- * request to this resource.*/
+/**
+ * Http request handler dedicated to REST which handles a request to a resource.
+ */
 class RestResourceRequestHandler : public HTTPRequestHandler
 {
 public:
-    RestResourceRequestHandler(std::shared_ptr<const Dispatcher> dispatcher) :
-        mDispatcher(dispatcher) {}
+    RestResourceRequestHandler(
+        std::shared_ptr<Resource> resource,
+        std::unique_ptr<Dispatcher::Identifiers> identifiers):
+        mResource(resource),
+        mIdentifiers(std::move(identifiers))
+    {}
 
     virtual void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp);
 
@@ -64,20 +68,21 @@ private:
 
     static rest::Request::Verb translateVerb(const std::string &verbLiteral);
 
-    std::shared_ptr<const Dispatcher> mDispatcher;
+    std::shared_ptr<Resource> mResource;
+    std::unique_ptr<Dispatcher::Identifiers> mIdentifiers;
 };
 
 /* Http request handler factory required by Poco */
 class RequestHandlerFactory : public HTTPRequestHandlerFactory
 {
 public:
-    RequestHandlerFactory(std::shared_ptr<const Dispatcher> dispatcher) :
-        mDispatcher(dispatcher) {}
+    RequestHandlerFactory(std::unique_ptr<const Dispatcher> dispatcher) :
+        mDispatcher(std::move(dispatcher)) {}
 
     virtual HTTPRequestHandler* createRequestHandler(const HTTPServerRequest &req);
 
 private:
-    std::shared_ptr<const Dispatcher> mDispatcher;
+    std::unique_ptr<const Dispatcher> mDispatcher;
 };
 
 }

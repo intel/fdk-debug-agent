@@ -35,6 +35,12 @@ namespace rest
 
 void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
+    if (mResource == nullptr)
+    {
+        sendHttpError(HTTPResponse::HTTP_NOT_FOUND, "Resource not found: " + req.getURI(), resp);
+        return;
+    }
+
     Request::Verb verb;
     try {
         verb = translateVerb(req.getMethod());
@@ -45,24 +51,13 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
         return;
     }
 
-    /* Resolving the resource */
-    Dispatcher::Identifiers identifiers;
-    std::shared_ptr<Resource> resource =
-        mDispatcher->resolveResource(req.getURI(), identifiers);
-
-    if (resource == nullptr)
-    {
-        sendHttpError(HTTPResponse::HTTP_NOT_FOUND, "Resource not found: " + req.getURI(), resp);
-        return;
-    }
-
     /* Forwarding the request to the resource, that will handle it. */
-    Request request(verb, req.stream(), identifiers);
+    Request request(verb, req.stream(), *mIdentifiers);
     Response response(resp);
 
     try
     {
-        resource->handleRequest(request, response);
+        mResource->handleRequest(request, response);
     }
     catch (Resource::HttpError &e)
     {
@@ -153,9 +148,15 @@ Request::Verb RestResourceRequestHandler::translateVerb(const std::string &verbL
 
 HTTPRequestHandler* RequestHandlerFactory::createRequestHandler(const HTTPServerRequest &req)
 {
+    /* Resolving the resource */
+    std::unique_ptr<Dispatcher::Identifiers> identifiers =
+        std::make_unique<Dispatcher::Identifiers>();
+    std::shared_ptr<Resource> resource =
+        mDispatcher->resolveResource(req.getURI(), *identifiers);
+
     /* Poco forces us to use operator new here: the HttpServer will take the ownership of this new
      * RestResourceRequestHandler. */
-    return new RestResourceRequestHandler(mDispatcher);
+    return new RestResourceRequestHandler(resource, std::move(identifiers));
 }
 
 }

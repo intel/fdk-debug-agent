@@ -58,7 +58,7 @@ public:
 TEST_CASE("Request test on default Resource rejecting all verbs", "[Server]")
 {
     /* Initializing the dispatcher and the client */
-    std::shared_ptr<Dispatcher> dispatcher = std::make_shared<Dispatcher>();
+    std::unique_ptr<Dispatcher> dispatcher = std::make_unique<Dispatcher>();
     HttpClientSimulator client("localhost");
 
     /* Each request will fail with Verb not allowed */
@@ -69,7 +69,7 @@ TEST_CASE("Request test on default Resource rejecting all verbs", "[Server]")
     dispatcher->addResource(testUri, std::make_shared<Resource>());
 
     /* Starting the server */
-    Server server(dispatcher, HttpClientSimulator::DefaultPort);
+    Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
     SECTION("GET") {
 
@@ -134,7 +134,7 @@ TEST_CASE("Request test on default Resource rejecting all verbs", "[Server]")
 TEST_CASE("Default verb handler", "[Server]")
 {
     /* Initializing the dispatcher and the client */
-    std::shared_ptr<Dispatcher> dispatcher = std::make_shared<Dispatcher>();
+    std::unique_ptr<Dispatcher> dispatcher = std::make_unique<Dispatcher>();
     HttpClientSimulator client("localhost");
 
     /* Adding resource */
@@ -142,7 +142,7 @@ TEST_CASE("Default verb handler", "[Server]")
     dispatcher->addResource(testUri, std::make_shared<VerbEchoResource>());
 
     /* Starting the server */
-    Server server(dispatcher, HttpClientSimulator::DefaultPort);
+    Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
     SECTION("GET") {
 

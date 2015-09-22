@@ -65,12 +65,12 @@ std::shared_ptr<ifdk_objects::instance::System> DebugAgent::createSystemInstance
     }
 }
 
-std::shared_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
+std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 {
     assert(mTypeModel != nullptr);
     assert(mSystemInstance != nullptr);
 
-    std::shared_ptr<rest::Dispatcher> dispatcher = std::make_shared<rest::Dispatcher>();
+    std::unique_ptr<rest::Dispatcher> dispatcher = std::make_unique<rest::Dispatcher>();
 
     /* Log service (hardcoded urls)
      *
