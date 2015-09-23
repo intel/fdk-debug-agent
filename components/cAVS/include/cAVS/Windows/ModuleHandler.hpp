@@ -25,7 +25,6 @@
 #include "cAVS/ModuleHandler.hpp"
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
-#include "cAVS/Windows/Buffer.hpp"
 #include "tlv/TlvResponseHandlerInterface.hpp"
 
 namespace debug_agent

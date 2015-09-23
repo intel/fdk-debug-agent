@@ -63,16 +63,14 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
         static_cast<uint32_t>(outputWriter.getBuffer().size()));
     ioctlInput.toStream(inputWriter);
 
-    /* Using buffers (will be removed in a subsequent patch) */
-    Buffer inputBuffer(inputWriter.getBuffer());
-    Buffer outputBuffer(outputWriter.getBuffer());
+    util::Buffer outputBuffer(outputWriter.getBuffer());
 
     /* Performing the io ctl */
     try
     {
         mDevice.ioControl(
             isGet ? IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET,
-            &inputBuffer, &outputBuffer);
+            &inputWriter.getBuffer(), &outputBuffer);
     }
     catch (Device::Exception &e)
     {
@@ -80,7 +78,7 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
     }
 
     /* Reading the result */
-    util::ByteStreamReader reader(outputBuffer.getElements());
+    util::ByteStreamReader reader(outputBuffer);
 
     try
     {

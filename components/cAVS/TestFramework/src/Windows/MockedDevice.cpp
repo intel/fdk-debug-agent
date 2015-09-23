@@ -21,6 +21,9 @@
  */
 
 #include "cAVS/Windows/MockedDevice.hpp"
+#include <cassert>
+
+using namespace debug_agent::util;
 
 namespace debug_agent
 {
@@ -57,7 +60,7 @@ MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expec
             /* Because of previous check it's sure that returnedOutputBuffer != nullptr */
             assert(returnedOutputBuffer != nullptr);
 
-            if (expectedOutputBuffer->getSize() < returnedOutputBuffer->getSize()) {
+            if (expectedOutputBuffer->size() < returnedOutputBuffer->size()) {
                 throw Exception(
                     "Expected buffer size shall be greater or equal than the returned buffer size");
             }
@@ -165,8 +168,7 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
 
         /* The returned output buffer size may be lesser or equal than the output one's size:
          * resize the output buffer accordingly before the copy */
-        output->resize(entry.getReturnedOutputBuffer()->getSize());
-        output->copyFrom(*entry.getReturnedOutputBuffer());
+        *output = *entry.getReturnedOutputBuffer();
     }
 }
 
@@ -179,11 +181,11 @@ void MockedDevice::compareBuffers(
         if (expectedBuffer != nullptr) {
 
             /* Checking size */
-            if (candidateBuffer->getSize() != expectedBuffer->getSize()) {
+            if (candidateBuffer->size() != expectedBuffer->size()) {
                 entryFailure(bufferName+" candidate with size " +
-                    std::to_string(candidateBuffer->getSize()) +
+                    std::to_string(candidateBuffer->size()) +
                     " differs from required size: " +
-                    std::to_string(expectedBuffer->getSize()));
+                    std::to_string(expectedBuffer->size()));
             }
 
 

@@ -20,7 +20,6 @@
 ********************************************************************************
 */
 #include "cAVS/Windows/WppController.hpp"
-#include "cAVS/Windows/Buffer.hpp"
 #include "cAVS/Windows/LastError.hpp"
 #include <iostream>
 

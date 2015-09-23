@@ -22,10 +22,13 @@
 
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "TestCommon/TestHelpers.hpp"
+#include "Util/Buffer.hpp"
+#include "Util/TypedBuffer.hpp"
 #include <catch.hpp>
 #include <memory>
 
 using namespace debug_agent::cavs::windows;
+using namespace debug_agent::util;
 
 /* Defining some ioctl codes */
 static const uint32_t IoCtl1 = 1;

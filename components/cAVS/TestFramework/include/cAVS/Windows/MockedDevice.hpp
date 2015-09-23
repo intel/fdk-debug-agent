@@ -80,8 +80,8 @@ public:
      *
      * Note: Supplied buffers are cloned, ownership is not transferred.
      */
-    void addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
-        const Buffer *expectedOutput, const Buffer *returnedOutput);
+    void addSuccessfulIoctlEntry(uint32_t ioControlCode, const util::Buffer *expectedInput,
+        const util::Buffer *expectedOutput, const util::Buffer *returnedOutput);
 
     /** Add a failed ioctl entry into the test vector.
     *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
@@ -98,10 +98,10 @@ public:
     *
     * Note: Supplied buffers are cloned, ownership is not transferred.
     */
-    void addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
-        const Buffer *expectedOutput);
+    void addFailedIoctlEntry(uint32_t ioControlCode, const util::Buffer *expectedInput,
+        const util::Buffer *expectedOutput);
 
-    virtual void ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output) override;
+    virtual void ioControl(uint32_t ioControlCode, const util::Buffer *input, util::Buffer *output) override;
 
 private:
     /** An IO control entry, which is a 5-tuple */
@@ -109,8 +109,8 @@ private:
     {
     public:
         /** Supplied buffers are cloned, ownership is not transferred. */
-        IoCtlEntry(uint32_t ioControlCode, const Buffer *expectedInputBuffer,
-            const Buffer *expectedOutputBuffer, const Buffer *returnedOutputBuffer,
+        IoCtlEntry(uint32_t ioControlCode, const util::Buffer *expectedInputBuffer,
+            const util::Buffer *expectedOutputBuffer, const util::Buffer *returnedOutputBuffer,
             bool successsful);
 
         uint32_t getIOControlCode() const
@@ -118,17 +118,17 @@ private:
             return mIoControlCode;
         }
 
-        const Buffer *getExpectedInputBuffer() const
+        const util::Buffer *getExpectedInputBuffer() const
         {
             return mExpectedInputBuffer.get();
         }
 
-        const Buffer *getExpectedOutputBuffer() const
+        const util::Buffer *getExpectedOutputBuffer() const
         {
             return mExpectedOutputBuffer.get();
         }
 
-        const Buffer *getReturnedOutputBuffer() const
+        const util::Buffer *getReturnedOutputBuffer() const
         {
             return mReturnedOutputBuffer.get();
         }
@@ -140,9 +140,9 @@ private:
 
     private:
         uint32_t mIoControlCode;
-        std::shared_ptr<Buffer> mExpectedInputBuffer;
-        std::shared_ptr<Buffer> mExpectedOutputBuffer;
-        std::shared_ptr<Buffer> mReturnedOutputBuffer;
+        std::shared_ptr<util::Buffer> mExpectedInputBuffer;
+        std::shared_ptr<util::Buffer> mExpectedOutputBuffer;
+        std::shared_ptr<util::Buffer> mReturnedOutputBuffer;
         bool mSuccesssful;
     };
 
@@ -172,8 +172,8 @@ private:
     /** Compare two buffers, each buffer can be null */
     void compareBuffers(
         const std::string &bufferName,
-        const Buffer *candidateBuffer,
-        const Buffer *expectedBuffer);
+        const util::Buffer *candidateBuffer,
+        const util::Buffer *expectedBuffer);
 
     using EntryCollection = std::vector<IoCtlEntry>;
 

@@ -33,7 +33,9 @@ set(INCS
     include/Util/ExclusiveResource.hpp
     include/Util/AssertAlways.hpp
     include/Util/convert.hpp
-    include/Util/EnumHelper.hpp)
+    include/Util/EnumHelper.hpp
+    include/Util/Buffer.hpp
+    include/Util/TypedBuffer.hpp)
 
 add_library(Util STATIC ${SRCS} ${INCS})
 set_common_settings(Util)

@@ -23,6 +23,8 @@
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/ModuleHandler.hpp"
 
+using namespace debug_agent::util;
+
 namespace debug_agent
 {
 namespace cavs
@@ -66,18 +68,14 @@ void MockedDeviceCommands::addModuleParameterCommand(
         static_cast<uint32_t>(expectedOutputWriter.getBuffer().size()));
     ioctlInput.toStream(inputWriter);
 
-    /* Using buffers (will be removed in a subsequent patch) */
-    Buffer inputBuffer(inputWriter.getBuffer());
-    Buffer expectedOutputBuffer(expectedOutputWriter.getBuffer());
-
     uint32_t ioctlCode = command == Command::Get ?
         IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET;
 
     if (!ioctlSuccess) {
         mDevice.addFailedIoctlEntry(
             ioctlCode,
-            &inputBuffer,
-            &expectedOutputBuffer);
+            &inputWriter.getBuffer(),
+            &expectedOutputWriter.getBuffer());
         return;
     }
 
@@ -101,12 +99,9 @@ void MockedDeviceCommands::addModuleParameterCommand(
         }
     }
 
-    /* Using buffers (will be removed in a subsequent patch) */
-    Buffer returnedOutputBuffer(returnedOutputWriter.getBuffer());
-
     /* Adding entry */
-    mDevice.addSuccessfulIoctlEntry(ioctlCode, &inputBuffer,
-        &expectedOutputBuffer, &returnedOutputBuffer);
+    mDevice.addSuccessfulIoctlEntry(ioctlCode, &inputWriter.getBuffer(),
+        &expectedOutputWriter.getBuffer(), &returnedOutputWriter.getBuffer());
 }
 
 template <typename FirmwareParameterType>
@@ -155,14 +150,12 @@ void MockedDeviceCommands::addLogParameterCommand(
     /* IoctlFwLogsState structure*/
     inputFwParams.toStream(expectedWriter);
 
-    /* Using buffers (will be removed in a subsequent patch) */
-    Buffer expected(expectedWriter.getBuffer());
-
     uint32_t ioctlCode = command == Command::Get ?
     IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
 
     if (!ioctlSuccess) {
-        mDevice.addFailedIoctlEntry(ioctlCode, &expected, &expected);
+        mDevice.addFailedIoctlEntry(ioctlCode, &expectedWriter.getBuffer(),
+            &expectedWriter.getBuffer());
         return;
     }
 
@@ -179,11 +172,9 @@ void MockedDeviceCommands::addLogParameterCommand(
         outputFwParams.toStream(returnedWriter);
     }
 
-    /* Using buffers (will be removed in a subsequent patch) */
-    Buffer returned(returnedWriter.getBuffer());
-
     /* Adding entry */
-    mDevice.addSuccessfulIoctlEntry(ioctlCode, &expected, &expected, &returned);
+    mDevice.addSuccessfulIoctlEntry(ioctlCode, &expectedWriter.getBuffer(),
+        &expectedWriter.getBuffer(), &returnedWriter.getBuffer());
 }
 
 void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess,

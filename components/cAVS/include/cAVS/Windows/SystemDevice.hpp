@@ -41,7 +41,8 @@ public:
 
     virtual ~SystemDevice();
 
-    virtual void ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output) override;
+    virtual void ioControl(uint32_t ioControlCode, const util::Buffer *input, util::Buffer *output)
+        override;
 
 private:
     HANDLE mDeviceHandle;

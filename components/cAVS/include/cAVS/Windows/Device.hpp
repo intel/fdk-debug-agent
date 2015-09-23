@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "cAVS/Windows/Buffer.hpp"
+#include "util/Buffer.hpp"
 #include <exception>
 #include <string>
 #include <inttypes.h>
@@ -63,7 +63,8 @@ public:
      *                             according to the IO control response.
      * @throw Device::Exception if the io control has failed
      */
-    virtual void ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output) = 0;
+    virtual void ioControl(uint32_t ioControlCode, const util::Buffer *input,
+        util::Buffer *output) = 0;
 
 private:
     Device(const Device &) = delete;

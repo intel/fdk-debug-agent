@@ -325,7 +325,7 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
     /* Performing ioctl */
     uint32_t ioControlCode = getIoControlCodeFromType(type);
 
-    Buffer buffer(outputWriter.getBuffer());
+    util::Buffer buffer(outputWriter.getBuffer());
 
     try
     {
@@ -337,7 +337,7 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
     }
 
     try {
-        util::ByteStreamReader reader(buffer.getElements());
+        util::ByteStreamReader reader(buffer);
 
         /* Reading Intc_App_TinyCmd structure */
         tinyCmd.fromStream(reader);

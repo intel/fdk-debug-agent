@@ -22,6 +22,7 @@
 
 #include "cAVS/Windows/SystemDevice.hpp"
 #include "cAVS/Windows/DeviceIdFinder.hpp"
+#include "Util/TypedBuffer.hpp"
 #include <catch.hpp>
 #include <memory>
 #include <iostream>
@@ -36,6 +37,7 @@
 #pragma warning( pop )
 
 using namespace debug_agent::cavs::windows;
+using namespace debug_agent::util;
 
 /**
  * This functional test retrieves the baud rate of serial devices.

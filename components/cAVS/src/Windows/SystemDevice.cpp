@@ -23,6 +23,8 @@
 #include "cAVS/Windows/SystemDevice.hpp"
 #include "cAVS/Windows/LastError.hpp"
 
+using namespace debug_agent::util;
+
 namespace debug_agent
 {
 namespace cavs
@@ -69,15 +71,15 @@ void SystemDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
     if (input != nullptr) {
         /* Unfortunatley DeviceIoControl() input buffer parameter
         * is not const, so casting it from const to non const */
-        inputBufferPtr = const_cast<LPVOID>(input->getPtr());
-        inputBufferSize = static_cast<DWORD>(input->getSize());
+        inputBufferPtr = const_cast<LPVOID>(reinterpret_cast<LPCVOID>(input->data()));
+        inputBufferSize = static_cast<DWORD>(input->size());
     }
 
     LPVOID outputBufferPtr = nullptr;
     DWORD outputBufferSize = 0;
     if (output != nullptr) {
-        outputBufferPtr = output->getPtr();
-        outputBufferSize = static_cast<DWORD>(output->getSize());
+        outputBufferPtr = output->data();
+        outputBufferSize = static_cast<DWORD>(output->size());
     }
 
     BOOL result = DeviceIoControl(
@@ -94,11 +96,11 @@ void SystemDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
         throw Exception("IOControl failure: " + LastError::get());
     }
 
-    if (returnedSize > output->getSize()) {
+    if (returnedSize > output->size()) {
         throw Exception("IOControl response larger than buffer ("
             + std::to_string(returnedSize)
             + " while output buffer is "
-            + std::to_string(output->getSize())
+            + std::to_string(output->size())
             + ")");
     }
 
