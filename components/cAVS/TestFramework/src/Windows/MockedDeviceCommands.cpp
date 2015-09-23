@@ -22,6 +22,7 @@
 
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/ModuleHandler.hpp"
+#include "Util/Buffer.hpp"
 
 using namespace debug_agent::util;
 
@@ -37,8 +38,8 @@ void MockedDeviceCommands::addModuleParameterCommand(
     uint16_t moduleId,
     uint16_t instanceId,
     uint32_t parameterTypeId,
-    const std::vector<uint8_t> &expectedParameterContent,
-    const std::vector<uint8_t> &returnedParameterContent,
+    const util::Buffer &expectedParameterContent,
+    const util::Buffer &returnedParameterContent,
     bool ioctlSuccess,
     NTSTATUS returnedDriverStatus,
     dsp_fw::IxcStatus returnedFirmwareStatus)
@@ -115,7 +116,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
     NTSTATUS returnedDriverStatus,
     dsp_fw::IxcStatus returnedFirmwareStatus)
 {
-    std::vector<uint8_t> expectedOutput(expectedOutputBufferSize, 0xFF);
+    util::Buffer expectedOutput(expectedOutputBufferSize, 0xFF);
 
     util::ByteStreamWriter writer;
     parameter.toStream(writer);
@@ -183,8 +184,8 @@ void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess,
                                                   const std::vector<char> &tlvList,
                                                   dsp_fw::BaseFwParams parameterId)
 {
-    std::vector<uint8_t> expectedOutput(ModuleHandler::cavsTlvBufferSize, 0xFF);
-    std::vector<uint8_t> returnedOutput;
+    util::Buffer expectedOutput(ModuleHandler::cavsTlvBufferSize, 0xFF);
+    util::Buffer returnedOutput;
     returnedOutput.resize(tlvList.size());
     for (std::size_t i = 0; i < tlvList.size(); ++i) {
         returnedOutput[i] = static_cast<uint8_t>(tlvList[i]);
@@ -355,7 +356,7 @@ void MockedDeviceCommands::addGetModuleInstancePropsCommand(bool ioctlSuccess, N
 void MockedDeviceCommands::addSetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
     dsp_fw::IxcStatus returnedFirmwareStatus,
     uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    const std::vector<uint8_t> &parameterPayload)
+    const util::Buffer &parameterPayload)
 {
     addModuleParameterCommand(
         Command::Set,
@@ -370,14 +371,14 @@ void MockedDeviceCommands::addSetModuleParameterCommand(bool ioctlSuccess, NTSTA
 void MockedDeviceCommands::addGetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
     dsp_fw::IxcStatus returnedFirmwareStatus,
     uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    const std::vector<uint8_t> &parameterPayload)
+    const util::Buffer &parameterPayload)
 {
     addModuleParameterCommand(
         Command::Get,
         moduleId,
         instanceId,
         parameterId,
-        std::vector<uint8_t>(ModuleHandler::maxParameterPayloadSize, 0xFF),
+        util::Buffer(ModuleHandler::maxParameterPayloadSize, 0xFF),
         parameterPayload,
         ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }

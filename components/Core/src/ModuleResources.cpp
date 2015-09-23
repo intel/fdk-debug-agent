@@ -24,6 +24,7 @@
 #include "Core/BaseModelConverter.hpp"
 #include "Util/Uuid.hpp"
 #include "Util/convert.hpp"
+#include "Util/Buffer.hpp"
 #include <Poco/NumberParser.h>
 #include <Poco/StringTokenizer.h>
 #include <Poco/XML/XML.h>
@@ -123,7 +124,7 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handleGet(
         uint32_t paramId = getParamId(children[childId]);
 
         // Get binary from IOCTL
-        std::vector<uint8_t> parameterPayload;
+        util::Buffer parameterPayload;
         try
         {
             mSystem.getModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
@@ -196,7 +197,7 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(
         writer.writeNode(output, childDocument);
 
         // Send XML string to PFW
-        std::vector<uint8_t> parameterPayload;
+        util::Buffer parameterPayload;
         // Convert XML to binary
         try
         {

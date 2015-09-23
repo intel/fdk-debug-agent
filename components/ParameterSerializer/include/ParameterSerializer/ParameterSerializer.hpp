@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Util/EnumHelper.hpp"
+#include "Util/Buffer.hpp"
 #include <string>
 #include <stdexcept>
 #include <vector>
@@ -120,7 +121,7 @@ public:
      * @return a binary payload containing the parameter settings
      * @throw ParameterSerializer::Exception
      */
-    std::vector<uint8_t> xmlToBinary(
+    util::Buffer xmlToBinary(
         const std::string &subsystemName,
         const std::string &elementName,
         ParameterKind parameterKind,
@@ -143,7 +144,7 @@ public:
         const std::string &elementName,
         ParameterKind parameterKind,
         const std::string &parameterName,
-        const std::vector<uint8_t> &parameterPayload) const;
+        const util::Buffer &parameterPayload) const;
 
     /**
      * This method returns the structure of a parameter

@@ -19,9 +19,9 @@
 *
 ********************************************************************************
 */
-#include <Util/ByteStreamReader.hpp>
-#include <Util/ByteStreamWriter.hpp>
-#include "catch.hpp"
+#include "Util/ByteStreamReader.hpp"
+#include "Util/ByteStreamWriter.hpp"
+#include <catch.hpp>
 
 using namespace debug_agent::util;
 
@@ -52,7 +52,7 @@ struct TestStruct
     }
 };
 
-const std::vector<uint8_t> expectedBuffer = {
+const Buffer expectedBuffer = {
     1,              // 1 as uint8
     2, 0, 0, 0,     // 2 as uint32
     2, 0, 0, 0,     // array size
@@ -110,7 +110,7 @@ TEST_CASE("Byte stream reader")
 
 TEST_CASE("Byte stream reader : end of stream")
 {
-    std::vector<uint8_t> v;
+    Buffer v;
     v.push_back(1); /* Adding only one byte */
 
     ByteStreamReader reader(v);

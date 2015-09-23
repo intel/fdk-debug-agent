@@ -150,14 +150,14 @@ void System::doLogStreamInternal(std::ostream &os)
 }
 
 void System::setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    const std::vector<uint8_t> &parameterPayload)
+    const util::Buffer &parameterPayload)
 {
     mDriver->getModuleHandler().setModuleParameter(moduleId, instanceId, parameterId,
         parameterPayload);
 }
 
 void System::getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    std::vector<uint8_t> &parameterPayload)
+    util::Buffer &parameterPayload)
 {
     mDriver->getModuleHandler().getModuleParameter(moduleId, instanceId, parameterId,
         parameterPayload);

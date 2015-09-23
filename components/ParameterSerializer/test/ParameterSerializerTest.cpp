@@ -22,6 +22,7 @@
 
 #include <ParameterSerializer/ParameterSerializer.hpp>
 #include <Util/StringHelper.hpp>
+#include <Util/Buffer.hpp>
 #include <TestCommon/TestHelpers.hpp>
 #include <ostream>
 #include <string>
@@ -36,7 +37,7 @@ using namespace debug_agent::util;
 
 static const std::string pfwConfFilePath = "data/FunctionalTests/pfw/ParameterFrameworkConfigurationDBGA.xml";
 
-static const std::vector<uint8_t> aecControlParameterPayload =
+static const Buffer aecControlParameterPayload =
 { 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00,
 0x01, 0x00, 0xF1, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF1, 0xFF, 0xF1, 0xFF,
 0xF1, 0xFF, 0xF1, 0xFF, 0x00, 0x00, 0xF1, 0xFF, 0xF1, 0xFF, 0x00, 0x00, 0xF1, 0xFF, 0x00, 0x00,
@@ -78,7 +79,7 @@ static const std::vector<uint8_t> aecControlParameterPayload =
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0xAA };
-static const std::vector<uint8_t> nsControlParameterPayload =
+static const Buffer nsControlParameterPayload =
 { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF1, 0xFF, 0xF1, 0xFF, 0x01, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -225,7 +226,7 @@ TEST_CASE("Test parameter serializer binary to xml")
 
     std::string aecControlParameter;
     // Check bad payload behavior
-    const std::vector<uint8_t> badPayload = { 0xDD };
+    const Buffer badPayload = { 0xDD };
     CHECK_THROWS_AS_MSG(aecControlParameter = parameterSerializer.binaryToXml(
         "cavs",
         "aec",
@@ -278,7 +279,7 @@ TEST_CASE("Test parameter serializer xml to binary")
         "aec",
         ParameterSerializer::ParameterKind::Control);
 
-    std::vector<uint8_t> localAecControlParameterPayload;
+    Buffer localAecControlParameterPayload;
     // Check case when XML content is bad.
     CHECK_THROWS_AS_MSG(localAecControlParameterPayload = parameterSerializer.xmlToBinary(
         "cavs",
@@ -302,7 +303,7 @@ TEST_CASE("Test parameter serializer xml to binary")
     CHECK(localAecControlParameterPayload == aecControlParameterPayload);
 
     // Check child 1 which is ns parameter
-    std::vector<uint8_t> localNsControlParameterPayload;
+    Buffer localNsControlParameterPayload;
     CHECK_NOTHROW(localNsControlParameterPayload =
         parameterSerializer.xmlToBinary("cavs",
         "aec",
@@ -322,7 +323,7 @@ TEST_CASE("Test parameter serializer get structure XML")
         "aec",
         ParameterSerializer::ParameterKind::Control);
 
-    std::vector<uint8_t> localAecControlParameterPayload;
+    Buffer localAecControlParameterPayload;
 
     std::string aecControlParameter;
     CHECK_NOTHROW(aecControlParameter = parameterSerializer.getStructureXml(

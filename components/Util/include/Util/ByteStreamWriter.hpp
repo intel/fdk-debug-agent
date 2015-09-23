@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "Util/Buffer.hpp"
 #include <vector>
 #include <limits>
 #include <cassert>
@@ -70,7 +71,7 @@ public:
     }
 
     /** Write a raw buffer. Its size is not written in the stream */
-    void writeRawBuffer(const std::vector<uint8_t> &buffer)
+    void writeRawBuffer(const util::Buffer &buffer)
     {
         mBuffer.insert(mBuffer.end(), buffer.begin(), buffer.end());
     }
@@ -124,13 +125,13 @@ public:
     }
 
     /** Return the produced buffer */
-    const std::vector<uint8_t> &getBuffer() const
+    const util::Buffer &getBuffer() const
     {
         return mBuffer;
     }
 
 private:
-    std::vector<uint8_t> mBuffer;
+    util::Buffer mBuffer;
 };
 
 }

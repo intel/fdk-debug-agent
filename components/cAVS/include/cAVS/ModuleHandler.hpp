@@ -91,11 +91,11 @@ public:
 
     /** set module parameter */
     virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        const std::vector<uint8_t> &parameterPayload) = 0;
+        const util::Buffer &parameterPayload) = 0;
 
     /** @return module parameter */
     virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        std::vector<uint8_t> &parameterPayload) = 0;
+        util::Buffer &parameterPayload) = 0;
 
     /** @return extended parameter id that contains the targeted module part id */
     static uint32_t getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,

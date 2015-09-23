@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "Util/Buffer.hpp"
 #include <vector>
 #include <stdexcept>
 #include <cassert>
@@ -45,7 +46,7 @@ public:
     };
 
     /** @param vector: the input buffer */
-    ByteStreamReader(const std::vector<uint8_t> &vector) : mIndex(0), mBuffer(vector) {}
+    ByteStreamReader(const util::Buffer &vector) : mIndex(0), mBuffer(vector) {}
 
     /** Read a value of type supplied as template parameter
      * @tparam T the type of the value to read
@@ -134,7 +135,7 @@ public:
     }
 
     /** @return the underlying buffer */
-    const std::vector<uint8_t> &getBuffer() const
+    const util::Buffer &getBuffer() const
     {
         return mBuffer;
     }
@@ -147,7 +148,7 @@ public:
 
 private:
     std::size_t mIndex;
-    std::vector<uint8_t> mBuffer;
+    util::Buffer mBuffer;
 };
 
 }

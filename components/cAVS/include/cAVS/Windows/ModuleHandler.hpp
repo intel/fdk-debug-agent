@@ -53,9 +53,9 @@ public:
     virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
         dsp_fw::ModuleInstanceProps &props) override;
     virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        const std::vector<uint8_t> &parameterPayload) override;
+        const util::Buffer &parameterPayload) override;
     virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        std::vector<uint8_t> &parameterPayload) override;
+        util::Buffer &parameterPayload) override;
 
 private:
     template<typename TlvResponseHandlerInterface>
@@ -80,8 +80,8 @@ private:
      * @param[in] returnedOutputBuffer the output parameter payload
      */
     void bigCmdModuleAccessIoctl(bool isGet,uint16_t moduleId, uint16_t instanceId,
-        uint32_t moduleParamId, const std::vector<uint8_t> &suppliedOutputBuffer,
-        std::vector<uint8_t> &returnedOutputBuffer);
+        uint32_t moduleParamId, const util::Buffer &suppliedOutputBuffer,
+        util::Buffer &returnedOutputBuffer);
 
     /** Template method that performs a big get and returns the result as supplied parameter
      * type.

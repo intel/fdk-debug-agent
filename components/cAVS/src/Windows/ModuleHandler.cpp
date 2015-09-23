@@ -35,8 +35,8 @@ namespace windows
 {
 
 void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint16_t instanceId,
-    uint32_t moduleParamId, const std::vector<uint8_t> &suppliedOutputBuffer,
-    std::vector<uint8_t> &returnedOutputBuffer)
+    uint32_t moduleParamId, const util::Buffer &suppliedOutputBuffer,
+    util::Buffer &returnedOutputBuffer)
 {
     /* Creating ioctl output buffer */
     util::ByteStreamWriter outputWriter;
@@ -118,8 +118,8 @@ template<typename FirmwareParameterType>
 void ModuleHandler::bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instanceId,
     uint32_t moduleParamId, std::size_t fwParameterSize, FirmwareParameterType &result)
 {
-    std::vector<uint8_t> suppliedBuffer(fwParameterSize, 0xFF);
-    std::vector<uint8_t> returnedBuffer;
+    util::Buffer suppliedBuffer(fwParameterSize, 0xFF);
+    util::Buffer returnedBuffer;
     bigCmdModuleAccessIoctl(true, moduleId, instanceId, moduleParamId, suppliedBuffer,
         returnedBuffer);
 
@@ -170,8 +170,8 @@ template<typename TlvResponseHandlerInterface>
 void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandler,
                                       dsp_fw::BaseFwParams parameterId)
 {
-    std::vector<uint8_t> suppliedBuffer(cavsTlvBufferSize, 0xFF);
-    std::vector<uint8_t> returnedBuffer;
+    util::Buffer suppliedBuffer(cavsTlvBufferSize, 0xFF);
+    util::Buffer returnedBuffer;
     bigCmdModuleAccessIoctl(true, driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
         static_cast<uint32_t>(parameterId), suppliedBuffer, returnedBuffer);
 
@@ -287,9 +287,9 @@ void ModuleHandler::getModuleInstanceProps(uint16_t moduleId, uint16_t instanceI
 }
 
 void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    const std::vector<uint8_t> &parameterPayload)
+    const util::Buffer &parameterPayload)
 {
-    std::vector<uint8_t> returnedBuffer;
+    util::Buffer returnedBuffer;
 
     /* Performing ioctl */
     bigCmdModuleAccessIoctl(false, moduleId, instanceId,
@@ -299,9 +299,9 @@ void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId, u
 }
 
 void ModuleHandler::getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    std::vector<uint8_t> &parameterPayload)
+    util::Buffer &parameterPayload)
 {
-    std::vector<uint8_t> suppliedBuffer(maxParameterPayloadSize, 0xFF);
+    util::Buffer suppliedBuffer(maxParameterPayloadSize, 0xFF);
 
     /* Performing ioctl */
     bigCmdModuleAccessIoctl(true, moduleId, instanceId,

@@ -24,6 +24,7 @@
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/ModuleHandler.hpp"
+#include "Util/Buffer.hpp"
 #include <catch.hpp>
 #include <memory>
 #include <iostream>
@@ -36,6 +37,7 @@
 
 using namespace debug_agent::cavs;
 using namespace debug_agent::cavs::windows;
+using namespace debug_agent::util;
 
 /** Compares type memory content */
 template <typename T>
@@ -683,7 +685,7 @@ TEST_CASE("Module handling: getting module instance properties")
 
 TEST_CASE("Module handling: getting module parameter")
 {
-    static const std::vector<uint8_t> fwParameterPayload = { 1, 2, 3 };
+    static const Buffer fwParameterPayload = { 1, 2, 3 };
 
     static const uint16_t moduleId = 1;
     static const uint16_t instanceId = 2;
@@ -701,7 +703,7 @@ TEST_CASE("Module handling: getting module parameter")
         STATUS_SUCCESS,
         dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId, parameterId,
-        std::vector<uint8_t>()); /* unused parameter */
+        Buffer()); /* unused parameter */
 
     /* Simulating a driver error */
     commands.addGetModuleParameterCommand(
@@ -709,7 +711,7 @@ TEST_CASE("Module handling: getting module parameter")
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId, parameterId,
-        std::vector<uint8_t>()); /* unused parameter */
+        Buffer()); /* unused parameter */
 
     /* Simulating a firmware error */
     commands.addGetModuleParameterCommand(
@@ -717,7 +719,7 @@ TEST_CASE("Module handling: getting module parameter")
         STATUS_SUCCESS,
         dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         moduleId, instanceId, parameterId,
-        std::vector<uint8_t>()); /* unused parameter */
+        Buffer()); /* unused parameter */
 
     /* Successful command */
     commands.addGetModuleParameterCommand(
@@ -734,7 +736,7 @@ TEST_CASE("Module handling: getting module parameter")
     windows::ModuleHandler moduleHandler(device);
 
     /* Simulating an os error */
-    std::vector<uint8_t> parameterPayload;
+    Buffer parameterPayload;
 
     CHECK_THROWS_AS_MSG(moduleHandler.getModuleParameter(moduleId, instanceId, parameterId,
         parameterPayload),
@@ -766,7 +768,7 @@ TEST_CASE("Module handling: getting module parameter")
 
 TEST_CASE("Module handling: setting module parameter")
 {
-    static const std::vector<uint8_t> parameterPayload = { 4, 5, 6 };
+    static const Buffer parameterPayload = { 4, 5, 6 };
 
     static const uint16_t moduleId = 1;
     static const uint16_t instanceId = 2;

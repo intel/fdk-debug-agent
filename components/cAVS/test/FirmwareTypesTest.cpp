@@ -55,7 +55,7 @@ TEST_CASE("DSFirmwareTypes : PplProps")
 {
     PplProps props = { 1, 2, 3, 4, 5, 6, { { 1, 6 }, { 2, 7 }, { 3, 8 } }, { 4, 5 }, {} };
 
-    const std::vector<uint8_t> expected = {
+    const Buffer expected = {
         1, 0, 0, 0,
         2, 0, 0, 0,
         3, 0, 0, 0,
@@ -98,7 +98,7 @@ TEST_CASE("DSFirmwareTypes : SchedulersInfo")
 
     SchedulersInfo infos = { { props1, props2 } };
 
-    const std::vector<uint8_t> expected = {
+    const Buffer expected = {
         2, 0, 0, 0,
 
         1, 0, 0, 0,
@@ -140,7 +140,7 @@ TEST_CASE("DSFirmwareTypes : PinListInfo")
         { static_cast<StreamType>(1), audioFormat, 3 }
     }};
 
-    const std::vector<uint8_t> expected = {
+    const Buffer expected = {
         1, 0, 0, 0,
         1, 0, 0, 0,
         AUDIOFORMAT_MEMORY,
@@ -174,7 +174,7 @@ TEST_CASE("DSFirmwareTypes : ModuleInstanceProps")
         ConnectorNodeId(12), ConnectorNodeId(13)
     };
 
-    static const std::vector<uint8_t> expected = {
+    static const Buffer expected = {
         9, 0, 1, 0,
         2, 0, 0, 0,
         3, 0, 0, 0,

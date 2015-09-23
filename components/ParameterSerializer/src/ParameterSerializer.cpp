@@ -146,7 +146,7 @@ std::string ParameterSerializer::getMapping(
     return paramId;
 }
 
-std::vector<uint8_t> ParameterSerializer::xmlToBinary(
+util::Buffer ParameterSerializer::xmlToBinary(
     const std::string &subsystemName,
     const std::string &elementName,
     ParameterKind parameterKind,
@@ -173,7 +173,7 @@ std::string ParameterSerializer::binaryToXml(
     const std::string &elementName,
     ParameterKind parameterKind,
     const std::string &parameterName,
-    const std::vector<uint8_t> &parameterPayload) const
+    const util::Buffer &parameterPayload) const
 {
     std::unique_ptr<CElementHandle> childElementHandle =
         getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);

@@ -250,7 +250,7 @@ public:
     void addSetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::IxcStatus returnedFirmwareStatus,
         uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        const std::vector<uint8_t> &parameterPayload);
+        const util::Buffer &parameterPayload);
 
     /** Add a get module parameter command.
     *
@@ -272,7 +272,7 @@ public:
     void addGetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::IxcStatus returnedFirmwareStatus,
         uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        const std::vector<uint8_t> &parameterPayload);
+        const util::Buffer &parameterPayload);
 
 private:
     MockedDeviceCommands(const MockedDeviceCommands&) = delete;
@@ -291,8 +291,8 @@ private:
     /** Common method to add "module access param" ioctl command */
     void addModuleParameterCommand(Command command,
         uint16_t moduleId, uint16_t instanceId, uint32_t parameterTypeId,
-        const std::vector<uint8_t> &expectedParameterContent,
-        const std::vector<uint8_t> &returnedParameterContent, bool ioctlSuccess,
+        const util::Buffer &expectedParameterContent,
+        const util::Buffer &returnedParameterContent, bool ioctlSuccess,
         NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus);
 
 
