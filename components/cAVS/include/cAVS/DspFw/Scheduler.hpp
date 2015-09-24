@@ -33,12 +33,12 @@ namespace cavs
 namespace dsp_fw
 {
 
-struct DSTaskProps
+struct TaskProps
 {
     uint32_t  task_id;
     std::vector<CompoundModuleId>  module_instance_id;
 
-    bool operator ==(const DSTaskProps &other) const
+    bool operator ==(const TaskProps &other) const
     {
         return task_id == other.task_id &&
             module_instance_id == other.module_instance_id;
@@ -57,13 +57,13 @@ struct DSTaskProps
     }
 };
 
-struct DSSchedulerProps
+struct SchedulerProps
 {
     uint32_t   processing_domain;
     uint32_t   core_id;
-    std::vector<DSTaskProps>  task_info;
+    std::vector<TaskProps>  task_info;
 
-    bool operator ==(const DSSchedulerProps &other) const
+    bool operator ==(const SchedulerProps &other) const
     {
         return processing_domain == other.processing_domain &&
             core_id == other.core_id &&
@@ -85,11 +85,11 @@ struct DSSchedulerProps
     }
 };
 
-struct DSSchedulersInfo
+struct SchedulersInfo
 {
-    std::vector<DSSchedulerProps>  scheduler_info;
+    std::vector<SchedulerProps>  scheduler_info;
 
-    bool operator ==(const DSSchedulersInfo &other) const
+    bool operator ==(const SchedulersInfo &other) const
     {
         return scheduler_info == other.scheduler_info;
     }

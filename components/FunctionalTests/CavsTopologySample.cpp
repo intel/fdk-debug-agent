@@ -76,15 +76,15 @@ enum Queue
 };
 
 /** Helper function to create empty pin list */
-dsp_fw::DSPinListInfo newEmptyPinList()
+dsp_fw::PinListInfo newEmptyPinList()
 {
-    return dsp_fw::DSPinListInfo();
+    return dsp_fw::PinListInfo();
 }
 
 /** Helper function to create pin list */
-dsp_fw::DSPinListInfo newPinList(const std::vector<uint32_t> queueIds)
+dsp_fw::PinListInfo newPinList(const std::vector<uint32_t> queueIds)
 {
-    dsp_fw::DSPinListInfo info{};
+    dsp_fw::PinListInfo info{};
     for (auto queueId : queueIds) {
         dsp_fw::PinProps props {};
         props.format = audioFormat;
@@ -97,14 +97,14 @@ dsp_fw::DSPinListInfo newPinList(const std::vector<uint32_t> queueIds)
 }
 
 /** Helper function to create module instance */
-dsp_fw::DSModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
-    const dsp_fw::DSPinListInfo &inputs, const dsp_fw::DSPinListInfo &outputs,
+dsp_fw::ModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
+    const dsp_fw::PinListInfo &inputs, const dsp_fw::PinListInfo &outputs,
     const dsp_fw::ConnectorNodeId &inputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
     const dsp_fw::ConnectorNodeId &outputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId))
 {
-    dsp_fw::DSModuleInstanceProps props{};
+    dsp_fw::ModuleInstanceProps props{};
     props.id.moduleId = type;
     props.id.instanceId = instance;
     props.input_gateway = inputGateway;
@@ -124,33 +124,33 @@ dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 }
 
 /** Helper function to create task */
-dsp_fw::DSTaskProps newTask(uint32_t id, const std::vector<dsp_fw::CompoundModuleId> &ids)
+dsp_fw::TaskProps newTask(uint32_t id, const std::vector<dsp_fw::CompoundModuleId> &ids)
 {
-    dsp_fw::DSTaskProps props{};
+    dsp_fw::TaskProps props{};
     props.task_id = id;
     props.module_instance_id = ids;
     return props;
 }
 
 /** Helper function to create scheduler */
-dsp_fw::DSSchedulersInfo newScheduler(const std::vector<dsp_fw::DSTaskProps> &tasks)
+dsp_fw::SchedulersInfo newScheduler(const std::vector<dsp_fw::TaskProps> &tasks)
 {
-    dsp_fw::DSSchedulerProps props{};
+    dsp_fw::SchedulerProps props{};
     props.core_id = 0;
     props.task_info = tasks;
 
-    dsp_fw::DSSchedulersInfo info;
+    dsp_fw::SchedulersInfo info;
     info.scheduler_info.push_back(props);
 
     return info;
 }
 
 /** Helper function to create pipeline */
-dsp_fw::DSPplProps newPipeline(uint32_t id, uint32_t priority,
+dsp_fw::PplProps newPipeline(uint32_t id, uint32_t priority,
     const std::vector<dsp_fw::CompoundModuleId> &instanceIds,
     const std::vector<uint32_t> &taskIds)
 {
-    dsp_fw::DSPplProps props{};
+    dsp_fw::PplProps props{};
     props.id = id;
     props.priority = priority;
     props.module_instances = instanceIds;
@@ -163,11 +163,11 @@ const size_t CavsTopologySample::maxPplCount = 10;
 const size_t CavsTopologySample::gatewaysCount = 5;
 
 void CavsTopologySample::createInstanceFirmwareObjects(
-    std::vector<dsp_fw::DSModuleInstanceProps> &moduleInstances,
+    std::vector<dsp_fw::ModuleInstanceProps> &moduleInstances,
     std::vector<dsp_fw::GatewayProps> &gateways,
     std::vector<uint32_t> &pipelineIds,
-    std::vector<dsp_fw::DSPplProps> &pipelines,
-    std::vector<dsp_fw::DSSchedulersInfo> &schedulers)
+    std::vector<dsp_fw::PplProps> &pipelines,
+    std::vector<dsp_fw::SchedulersInfo> &schedulers)
 {
     /* Filling module instances */
     moduleInstances = {
@@ -234,8 +234,8 @@ void CavsTopologySample::createInstanceFirmwareObjects(
     /* Module instances ioctls are ordered by the module instace id, so sorting the array
      * to reflect the same order */
     std::sort(moduleInstances.begin(), moduleInstances.end(),
-        [](const dsp_fw::DSModuleInstanceProps &p1,
-           const dsp_fw::DSModuleInstanceProps& p2) -> bool
+        [](const dsp_fw::ModuleInstanceProps &p1,
+           const dsp_fw::ModuleInstanceProps& p2) -> bool
         {
             return p1.id < p2.id;
         }

@@ -117,21 +117,21 @@ public:
      */
     void computeLinks();
 
-    std::map<dsp_fw::CompoundModuleId, dsp_fw::DSModuleInstanceProps> moduleInstances;
+    std::map<dsp_fw::CompoundModuleId, dsp_fw::ModuleInstanceProps> moduleInstances;
     std::vector<dsp_fw::GatewayProps> gateways;
-    std::vector<dsp_fw::DSPplProps> pipelines;
-    std::vector<dsp_fw::DSSchedulersInfo> schedulers;
+    std::vector<dsp_fw::PplProps> pipelines;
+    std::vector<dsp_fw::SchedulersInfo> schedulers;
     std::vector<Link> links;
 
 private:
     /**
      * @param moduleInstanceId the CompoundModuleId of the wanted module instance
-     * @return a const reference to the DSModuleInstanceProps which correspond to the
+     * @return a const reference to the ModuleInstanceProps which correspond to the
      *         moduleInstanceId.
      * @see CompoundModuleId
      * @throw Topology::Exception
      */
-    const dsp_fw::DSModuleInstanceProps &getModuleInstance(
+    const dsp_fw::ModuleInstanceProps &getModuleInstance(
         const dsp_fw::CompoundModuleId &moduleInstanceId) const;
 
     using InputId = uint32_t;

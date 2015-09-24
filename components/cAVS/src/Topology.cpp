@@ -28,7 +28,7 @@ namespace debug_agent
 namespace cavs
 {
 
-const dsp_fw::DSModuleInstanceProps &Topology::getModuleInstance(
+const dsp_fw::ModuleInstanceProps &Topology::getModuleInstance(
     const dsp_fw::CompoundModuleId &moduleInstanceId) const
 {
     const auto it = moduleInstances.find(moduleInstanceId);
@@ -43,7 +43,7 @@ const dsp_fw::DSModuleInstanceProps &Topology::getModuleInstance(
 
 void Topology::addAllModuleOutputs(OutputList &list, const dsp_fw::CompoundModuleId &module) const
 {
-    const dsp_fw::DSModuleInstanceProps &moduleProps = getModuleInstance(module);
+    const dsp_fw::ModuleInstanceProps &moduleProps = getModuleInstance(module);
 
     OutputId outputId;
     if (moduleProps.output_gateway.val.dw == dsp_fw::ConnectorNodeId::kInvalidNodeId) {
@@ -67,7 +67,7 @@ void Topology::addAllModuleOutputs(OutputList &list, const dsp_fw::CompoundModul
 
 void Topology::addAllModuleInputs(InputList &list, const dsp_fw::CompoundModuleId &module) const
 {
-    const dsp_fw::DSModuleInstanceProps &moduleProps = getModuleInstance(module);
+    const dsp_fw::ModuleInstanceProps &moduleProps = getModuleInstance(module);
 
     InputId inputId;
     if (moduleProps.input_gateway.val.dw == dsp_fw::ConnectorNodeId::kInvalidNodeId) {
@@ -163,7 +163,7 @@ void Topology::computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModu
     /* For each output of source module... */
     for (Output const &output : sourceOutputs) {
 
-        const dsp_fw::DSModuleInstanceProps &sourceModule = getModuleInstance(sourceModuleId);
+        const dsp_fw::ModuleInstanceProps &sourceModule = getModuleInstance(sourceModuleId);
         const dsp_fw::PinProps &outputPin = sourceModule.output_pins.pin_info[output.second];
         bool connectionFound = false;
 
@@ -171,7 +171,7 @@ void Topology::computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModu
         for (auto inputIt = destinationInputs.begin();
              inputIt != destinationInputs.end(); ) {
 
-            const dsp_fw::DSModuleInstanceProps &destinationModule =
+            const dsp_fw::ModuleInstanceProps &destinationModule =
                 getModuleInstance(destinationModuleId);
             const dsp_fw::PinProps &inputPin =
                 destinationModule.input_pins.pin_info[inputIt->second];
@@ -216,14 +216,14 @@ void Topology::computeInterPipeLinks(InputList &unresolvedInputs, OutputList &un
 
         connectionFound = false;
 
-        const dsp_fw::DSModuleInstanceProps &sourceModule = getModuleInstance(outputIt->first);
+        const dsp_fw::ModuleInstanceProps &sourceModule = getModuleInstance(outputIt->first);
         const dsp_fw::PinProps &outputPinProps =
             sourceModule.output_pins.pin_info[outputIt->second];
 
         for (auto inputIt = unresolvedInputs.begin();
              inputIt != unresolvedInputs.end(); ) {
 
-            const dsp_fw::DSModuleInstanceProps &destinationModule =
+            const dsp_fw::ModuleInstanceProps &destinationModule =
                 getModuleInstance(inputIt->first);
             const dsp_fw::PinProps &inputPinProps =
                 destinationModule.input_pins.pin_info[inputIt->second];
@@ -256,7 +256,7 @@ void Topology::checkUnresolved(InputList &unresolvedInputs, OutputList &unresolv
 {
     for (auto const &output : unresolvedOutputs) {
 
-        const dsp_fw::DSModuleInstanceProps &moduleProps = getModuleInstance(output.first);
+        const dsp_fw::ModuleInstanceProps &moduleProps = getModuleInstance(output.first);
 
         /** @fixme use cAVS plugin log instead */
         std::cout
@@ -273,7 +273,7 @@ void Topology::checkUnresolved(InputList &unresolvedInputs, OutputList &unresolv
     }
     for (auto const &input : unresolvedInputs) {
 
-        const dsp_fw::DSModuleInstanceProps &moduleProps = getModuleInstance(input.first);
+        const dsp_fw::ModuleInstanceProps &moduleProps = getModuleInstance(input.first);
 
         /** @fixme use cAVS plugin log instead */
         std::cout

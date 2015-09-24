@@ -53,13 +53,13 @@ private:
             std::vector<dsp_fw::ModuleEntry> &modulesEntries) override {}
         virtual void getPipelineIdList(uint32_t maxPplCount,
             std::vector<uint32_t> &pipelinesIds) override {}
-        virtual void getPipelineProps(uint32_t pipelineId, dsp_fw::DSPplProps &props) override {}
+        virtual void getPipelineProps(uint32_t pipelineId, dsp_fw::PplProps &props) override {}
         virtual void getSchedulersInfo(uint32_t coreId,
-            dsp_fw::DSSchedulersInfo &schedulers) override {}
+            dsp_fw::SchedulersInfo &schedulers) override {}
         virtual void getGatewaysInfo(uint32_t gatewayCount,
             std::vector<dsp_fw::GatewayProps> &gateways) override {}
         virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-            dsp_fw::DSModuleInstanceProps &props) override {}
+            dsp_fw::ModuleInstanceProps &props) override {}
         virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
             uint32_t parameterId, const std::vector<uint8_t> &parameterPayload) override {}
         virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId,

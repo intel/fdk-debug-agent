@@ -60,7 +60,7 @@ struct PipelinesListInfo
     }
 };
 
-struct DSPplProps
+struct PplProps
 {
     uint32_t        id;
     uint32_t        priority;
@@ -72,7 +72,7 @@ struct DSPplProps
     std::vector<uint32_t> ll_tasks;
     std::vector<uint32_t> dp_tasks;
 
-    bool operator ==(const DSPplProps &other) const
+    bool operator ==(const PplProps &other) const
     {
         return id == other.id &&
             priority == other.priority &&

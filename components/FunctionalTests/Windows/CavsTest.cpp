@@ -168,11 +168,11 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
 
 void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
 {
-    std::vector<dsp_fw::DSModuleInstanceProps> moduleInstances;
+    std::vector<dsp_fw::ModuleInstanceProps> moduleInstances;
     std::vector<dsp_fw::GatewayProps> gateways;
     std::vector<uint32_t> pipelineIds;
-    std::vector<dsp_fw::DSPplProps> pipelines;
-    std::vector<dsp_fw::DSSchedulersInfo> schedulers;
+    std::vector<dsp_fw::PplProps> pipelines;
+    std::vector<dsp_fw::SchedulersInfo> schedulers;
 
     CavsTopologySample::createInstanceFirmwareObjects(
         moduleInstances,

@@ -202,7 +202,7 @@ void System::getTopology(Topology &topology)
     /* Retrieving pipeline props*/
     for (auto pplId : pipelineIds) {
         try {
-            dsp_fw::DSPplProps props;
+            dsp_fw::PplProps props;
             handler.getPipelineProps(pplId, props);
             topology.pipelines.push_back(props);
 
@@ -222,7 +222,7 @@ void System::getTopology(Topology &topology)
     std::sort(
         topology.pipelines.begin(),
         topology.pipelines.end(),
-        [](dsp_fw::DSPplProps pipeA, dsp_fw::DSPplProps pipeB)
+        [](dsp_fw::PplProps pipeA, dsp_fw::PplProps pipeB)
         { return pipeA.priority < pipeB.priority; });
 
     /* Retrieving scheduler props*/
@@ -233,7 +233,7 @@ void System::getTopology(Topology &topology)
     for (uint32_t coreId = 0; coreId < mHwConfig.dspCoreCount; coreId++) {
         try
         {
-            dsp_fw::DSSchedulersInfo info;
+            dsp_fw::SchedulersInfo info;
             handler.getSchedulersInfo(coreId, info);
             topology.schedulers.push_back(info);
 
@@ -257,7 +257,7 @@ void System::getTopology(Topology &topology)
     for (auto &compoundId : moduleInstanceIds) {
         try
         {
-            dsp_fw::DSModuleInstanceProps props;
+            dsp_fw::ModuleInstanceProps props;
             handler.getModuleInstanceProps(compoundId.moduleId,
                 compoundId.instanceId, props);
             topology.moduleInstances[props.id] = props;

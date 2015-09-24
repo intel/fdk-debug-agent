@@ -55,14 +55,14 @@ protected:
 private:
     /* These methods dump topology elements */
     void dumpGateways(HtmlHelper &html, const std::vector<cavs::dsp_fw::GatewayProps> &gateways);
-    void dumpPipelines(HtmlHelper &html, const std::vector<cavs::dsp_fw::DSPplProps> &pipelines);
+    void dumpPipelines(HtmlHelper &html, const std::vector<cavs::dsp_fw::PplProps> &pipelines);
     void dumpAllSchedulers(HtmlHelper &html,
-        const std::vector<cavs::dsp_fw::DSSchedulersInfo> &allSchedulers);
+        const std::vector<cavs::dsp_fw::SchedulersInfo> &allSchedulers);
     void dumpCoreSchedulers(HtmlHelper &html,
-        const cavs::dsp_fw::DSSchedulersInfo &coreSchedulers);
-    void dumpTasks(HtmlHelper &html, const std::vector<cavs::dsp_fw::DSTaskProps> &tasks);
+        const cavs::dsp_fw::SchedulersInfo &coreSchedulers);
+    void dumpTasks(HtmlHelper &html, const std::vector<cavs::dsp_fw::TaskProps> &tasks);
     void dumpModuleInstances(HtmlHelper &html,
-        const std::map<cavs::dsp_fw::CompoundModuleId, cavs::dsp_fw::DSModuleInstanceProps>
+        const std::map<cavs::dsp_fw::CompoundModuleId, cavs::dsp_fw::ModuleInstanceProps>
         &moduleInstances);
     void dumpPins(HtmlHelper &html, const std::vector<cavs::dsp_fw::PinProps> &pins);
 };

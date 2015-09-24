@@ -51,9 +51,9 @@ static const AudioDataFormatIpc audioFormat = {
     5, 0, 0, 0, \
     6, 7, 8, 9
 
-TEST_CASE("DSFirmwareTypes : DSPplProps")
+TEST_CASE("DSFirmwareTypes : PplProps")
 {
-    DSPplProps props = { 1, 2, 3, 4, 5, 6, { { 1, 6 }, { 2, 7 }, { 3, 8 } }, { 4, 5 }, {} };
+    PplProps props = { 1, 2, 3, 4, 5, 6, { { 1, 6 }, { 2, 7 }, { 3, 8 } }, { 4, 5 }, {} };
 
     const std::vector<uint8_t> expected = {
         1, 0, 0, 0,
@@ -81,22 +81,22 @@ TEST_CASE("DSFirmwareTypes : DSPplProps")
     CHECK(writer.getBuffer() == expected);
 
     ByteStreamReader reader(expected);
-    DSPplProps readProps;
+    PplProps readProps;
     readProps.fromStream(reader);
 
     CHECK(readProps == props);
 }
 
-TEST_CASE("DSFirmwareTypes : DSSchedulersInfo")
+TEST_CASE("DSFirmwareTypes : SchedulersInfo")
 {
-    DSTaskProps task1 = { 3, { { 1, 0 }, { 2, 0} } };
-    DSTaskProps task2 = { 4, { { 8, 0 } } };
-    DSTaskProps task3 = { 6, {} };
+    TaskProps task1 = { 3, { { 1, 0 }, { 2, 0} } };
+    TaskProps task2 = { 4, { { 8, 0 } } };
+    TaskProps task3 = { 6, {} };
 
-    DSSchedulerProps props1 = { 1, 2, { task1, task2 } };
-    DSSchedulerProps props2 = { 4, 2, { task3 } };
+    SchedulerProps props1 = { 1, 2, { task1, task2 } };
+    SchedulerProps props2 = { 4, 2, { task3 } };
 
-    DSSchedulersInfo infos = { { props1, props2 } };
+    SchedulersInfo infos = { { props1, props2 } };
 
     const std::vector<uint8_t> expected = {
         2, 0, 0, 0,
@@ -128,15 +128,15 @@ TEST_CASE("DSFirmwareTypes : DSSchedulersInfo")
     CHECK(writer.getBuffer() == expected);
 
     ByteStreamReader reader(expected);
-    DSSchedulersInfo readInfos;
+    SchedulersInfo readInfos;
     readInfos.fromStream(reader);
 
     CHECK(readInfos == infos);
 }
 
-TEST_CASE("DSFirmwareTypes : DSPinListInfo")
+TEST_CASE("DSFirmwareTypes : PinListInfo")
 {
-    static const DSPinListInfo list = {{
+    static const PinListInfo list = {{
         { static_cast<StreamType>(1), audioFormat, 3 }
     }};
 
@@ -153,23 +153,23 @@ TEST_CASE("DSFirmwareTypes : DSPinListInfo")
     CHECK(writer.getBuffer() == expected);
 
     ByteStreamReader reader(expected);
-    DSPinListInfo readList;
+    PinListInfo readList;
     readList.fromStream(reader);
 
     CHECK(readList == list);
 }
 
-TEST_CASE("DSFirmwareTypes : DSModuleInstanceProps")
+TEST_CASE("DSFirmwareTypes : ModuleInstanceProps")
 {
-    static const DSPinListInfo input_pins = { {
+    static const PinListInfo input_pins = { {
         { static_cast<StreamType>(1), audioFormat, 3 }
     } };
-    static const DSPinListInfo output_pins = { {
+    static const PinListInfo output_pins = { {
         { static_cast<StreamType>(4), audioFormat, 5 },
         { static_cast<StreamType>(6), audioFormat, 7 }
     } };
 
-    static const DSModuleInstanceProps instanceProps = {
+    static const ModuleInstanceProps instanceProps = {
         { 1, 9 }, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
         ConnectorNodeId(12), ConnectorNodeId(13)
     };
@@ -210,7 +210,7 @@ TEST_CASE("DSFirmwareTypes : DSModuleInstanceProps")
     CHECK(writer.getBuffer() == expected);
 
     ByteStreamReader reader(expected);
-    DSModuleInstanceProps readInstanceProps;
+    ModuleInstanceProps readInstanceProps;
     readInstanceProps.fromStream(reader);
 
     CHECK(readInstanceProps == instanceProps);

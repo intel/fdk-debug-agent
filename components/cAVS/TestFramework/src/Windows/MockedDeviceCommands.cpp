@@ -296,7 +296,7 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(
     NTSTATUS returnedDriverStatus,
     dsp_fw::IxcStatus returnedFirmwareStatus,
     uint32_t pipelineId,
-    const dsp_fw::DSPplProps &props)
+    const dsp_fw::PplProps &props)
 {
     /* Using extended parameter id to supply the pipeline id*/
     uint32_t paramId = ModuleHandler::getExtendedParameterId(
@@ -314,7 +314,7 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(
     NTSTATUS returnedDriverStatus,
     dsp_fw::IxcStatus returnedFirmwareStatus,
     uint32_t coreId,
-    const dsp_fw::DSSchedulersInfo &info)
+    const dsp_fw::SchedulersInfo &info)
 {
     /* Using extended parameter id to supply the core id*/
     uint32_t paramId = ModuleHandler::getExtendedParameterId(
@@ -351,7 +351,7 @@ void MockedDeviceCommands::addGetGatewaysCommand(
 void MockedDeviceCommands::addGetModuleInstancePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
     dsp_fw::IxcStatus returnedFirmwareStatus,
     uint16_t moduleId, uint16_t instanceId,
-    const dsp_fw::DSModuleInstanceProps &props)
+    const dsp_fw::ModuleInstanceProps &props)
 {
     addGetModuleParameterCommand(
         moduleId,

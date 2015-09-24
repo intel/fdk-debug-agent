@@ -158,11 +158,11 @@ struct PinProps
 };
 static_assert(sizeof(PinProps) == 32, "Wrong PinProps size");
 
-struct DSPinListInfo
+struct PinListInfo
 {
     std::vector<PinProps> pin_info;
 
-    bool operator == (const DSPinListInfo& other) const
+    bool operator == (const PinListInfo& other) const
     {
         return pin_info == other.pin_info;
     }
@@ -179,7 +179,7 @@ struct DSPinListInfo
 };
 
 
-struct DSModuleInstanceProps
+struct ModuleInstanceProps
 {
     CompoundModuleId  id;
     uint32_t          dp_queue_type;
@@ -192,12 +192,12 @@ struct DSModuleInstanceProps
     uint32_t          obs_bytes;
     uint32_t          cpc;
     uint32_t          cpc_peak;
-    DSPinListInfo       input_pins;
-    DSPinListInfo       output_pins;
+    PinListInfo       input_pins;
+    PinListInfo       output_pins;
     ConnectorNodeId   input_gateway;
     ConnectorNodeId   output_gateway;
 
-    bool operator == (const DSModuleInstanceProps& other) const
+    bool operator == (const ModuleInstanceProps& other) const
     {
         return
             id == other.id &&

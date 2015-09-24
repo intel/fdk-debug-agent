@@ -233,7 +233,7 @@ void TopologyDebugResource::dumpGateways(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpPipelines(HtmlHelper &html,
-    const std::vector<dsp_fw::DSPplProps> &pipelines)
+    const std::vector<dsp_fw::PplProps> &pipelines)
 {
     /* Pipes */
     html.title("Pipelines");
@@ -272,7 +272,7 @@ void TopologyDebugResource::dumpPipelines(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpAllSchedulers(HtmlHelper &html,
-    const std::vector<dsp_fw::DSSchedulersInfo> &allSchedulers)
+    const std::vector<dsp_fw::SchedulersInfo> &allSchedulers)
 {
     /* Pipes */
     html.title("Schedulers");
@@ -305,7 +305,7 @@ void TopologyDebugResource::dumpAllSchedulers(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpCoreSchedulers(HtmlHelper &html,
-    const dsp_fw::DSSchedulersInfo &coreSchedulers)
+    const dsp_fw::SchedulersInfo &coreSchedulers)
 {
     static const std::vector<std::string> columns = {
         "core_id",
@@ -334,7 +334,7 @@ void TopologyDebugResource::dumpCoreSchedulers(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpTasks(HtmlHelper &html,
-    const std::vector<dsp_fw::DSTaskProps> &tasks)
+    const std::vector<dsp_fw::TaskProps> &tasks)
 {
     static const std::vector<std::string> columns = {
         "task_id",
@@ -357,7 +357,7 @@ void TopologyDebugResource::dumpTasks(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
-    const std::map<dsp_fw::CompoundModuleId, dsp_fw::DSModuleInstanceProps> &moduleInstances)
+    const std::map<dsp_fw::CompoundModuleId, dsp_fw::ModuleInstanceProps> &moduleInstances)
 {
     html.title("Module instances");
     html.paragraph("Module instance count: " + std::to_string(moduleInstances.size()));
@@ -388,7 +388,7 @@ void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
     for (auto &entry : moduleInstances) {
         html.beginRow();
 
-        const dsp_fw::DSModuleInstanceProps &module = entry.second;
+        const dsp_fw::ModuleInstanceProps &module = entry.second;
 
         std::string moduleTypeName;
         if (module.id.moduleId < mSystem.getModuleEntries().size()) {

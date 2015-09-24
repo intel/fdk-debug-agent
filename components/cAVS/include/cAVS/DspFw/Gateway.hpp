@@ -33,7 +33,6 @@ namespace cavs
 namespace dsp_fw
 {
 
-
 struct GatewayProps
 {
     /**

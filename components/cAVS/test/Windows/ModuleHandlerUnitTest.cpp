@@ -335,7 +335,7 @@ TEST_CASE("Module handling: getting pipeline list")
 TEST_CASE("Module handling: getting pipeline props")
 {
     static const uint32_t pipelineId = 1;
-    static const dsp_fw::DSPplProps fwProps = { 1, 2, 3, 4, 5, 6, { { 1, 0 }, { 2, 0 }, { 3, 0 } },
+    static const dsp_fw::PplProps fwProps = { 1, 2, 3, 4, 5, 6, { { 1, 0 }, { 2, 0 }, { 3, 0 } },
         { 4, 5 }, {} };
 
     MockedDevice device;
@@ -350,7 +350,7 @@ TEST_CASE("Module handling: getting pipeline props")
         STATUS_SUCCESS,
         dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         pipelineId,
-        dsp_fw::DSPplProps()); /* unused parameter */
+        dsp_fw::PplProps()); /* unused parameter */
 
     /* Simulating a driver error */
     commands.addGetPipelinePropsCommand(
@@ -358,7 +358,7 @@ TEST_CASE("Module handling: getting pipeline props")
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         pipelineId,
-        dsp_fw::DSPplProps()); /* unused parameter */
+        dsp_fw::PplProps()); /* unused parameter */
 
     /* Simulating a firmware error */
     commands.addGetPipelinePropsCommand(
@@ -366,7 +366,7 @@ TEST_CASE("Module handling: getting pipeline props")
         STATUS_SUCCESS,
         dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         pipelineId,
-        dsp_fw::DSPplProps()); /* unused parameter */
+        dsp_fw::PplProps()); /* unused parameter */
 
     /* Successful command */
     commands.addGetPipelinePropsCommand(
@@ -384,8 +384,8 @@ TEST_CASE("Module handling: getting pipeline props")
 
     /* Simulating an os error */
 
-    static const dsp_fw::DSPplProps emptyProps = { 0, 0, 0, 0, 0, 0, {}, {}, {} };
-    dsp_fw::DSPplProps props = emptyProps;
+    static const dsp_fw::PplProps emptyProps = { 0, 0, 0, 0, 0, 0, {}, {}, {} };
+    dsp_fw::PplProps props = emptyProps;
 
     CHECK_THROWS_AS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
         debug_agent::cavs::ModuleHandler::Exception,
@@ -415,14 +415,14 @@ TEST_CASE("Module handling: getting schedulers info")
 {
     static const uint32_t coreId = 1;
 
-    static const dsp_fw::DSTaskProps task1 = { 3, { { 1, 0 }, { 2, 0 } } };
-    static const dsp_fw::DSTaskProps task2 = { 4, { { 8, 0 } } };
-    static const dsp_fw::DSTaskProps task3 = { 6, {} };
+    static const dsp_fw::TaskProps task1 = { 3, { { 1, 0 }, { 2, 0 } } };
+    static const dsp_fw::TaskProps task2 = { 4, { { 8, 0 } } };
+    static const dsp_fw::TaskProps task3 = { 6, {} };
 
-    static const dsp_fw::DSSchedulerProps props1 = { 1, 2, { task1, task2 } };
-    static const dsp_fw::DSSchedulerProps props2 = { 4, 2, { task3 } };
+    static const dsp_fw::SchedulerProps props1 = { 1, 2, { task1, task2 } };
+    static const dsp_fw::SchedulerProps props2 = { 4, 2, { task3 } };
 
-    static const dsp_fw::DSSchedulersInfo fwSchedulersInfo = { { props1, props2 } };
+    static const dsp_fw::SchedulersInfo fwSchedulersInfo = { { props1, props2 } };
 
     MockedDevice device;
 
@@ -436,7 +436,7 @@ TEST_CASE("Module handling: getting schedulers info")
         STATUS_SUCCESS,
         dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         coreId,
-        dsp_fw::DSSchedulersInfo()); /* unused parameter */
+        dsp_fw::SchedulersInfo()); /* unused parameter */
 
     /* Simulating a driver error */
     commands.addGetSchedulersInfoCommand(
@@ -444,7 +444,7 @@ TEST_CASE("Module handling: getting schedulers info")
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         coreId,
-        dsp_fw::DSSchedulersInfo()); /* unused parameter */
+        dsp_fw::SchedulersInfo()); /* unused parameter */
 
     /* Simulating a firmware error */
     commands.addGetSchedulersInfoCommand(
@@ -452,7 +452,7 @@ TEST_CASE("Module handling: getting schedulers info")
         STATUS_SUCCESS,
         dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         coreId,
-        dsp_fw::DSSchedulersInfo()); /* unused parameter */
+        dsp_fw::SchedulersInfo()); /* unused parameter */
 
     /* Successful command */
     commands.addGetSchedulersInfoCommand(
@@ -470,8 +470,8 @@ TEST_CASE("Module handling: getting schedulers info")
 
     /* Simulating an os error */
 
-    static const dsp_fw::DSSchedulersInfo emptyInfo = {};
-    dsp_fw::DSSchedulersInfo info = emptyInfo;
+    static const dsp_fw::SchedulersInfo emptyInfo = {};
+    dsp_fw::SchedulersInfo info = emptyInfo;
 
     CHECK_THROWS_AS_MSG(moduleHandler.getSchedulersInfo(coreId, info),
         debug_agent::cavs::ModuleHandler::Exception,
@@ -587,15 +587,15 @@ TEST_CASE("Module handling: getting module instance properties")
         9
     };
 
-    static const dsp_fw::DSPinListInfo input_pins = { {
+    static const dsp_fw::PinListInfo input_pins = { {
         { static_cast<dsp_fw::StreamType>(1), audioFormat, 3 }
     } };
-    static const dsp_fw::DSPinListInfo output_pins = { {
+    static const dsp_fw::PinListInfo output_pins = { {
         { static_cast<dsp_fw::StreamType>(4), audioFormat, 5 },
         { static_cast<dsp_fw::StreamType>(6), audioFormat, 7 }
     } };
 
-    static const dsp_fw::DSModuleInstanceProps fwInstanceProps = {
+    static const dsp_fw::ModuleInstanceProps fwInstanceProps = {
         { 1, 0 }, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
         dsp_fw::ConnectorNodeId(12), dsp_fw::ConnectorNodeId(13)
     };
@@ -615,7 +615,7 @@ TEST_CASE("Module handling: getting module instance properties")
         STATUS_SUCCESS,
         dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId,
-        dsp_fw::DSModuleInstanceProps()); /* unused parameter */
+        dsp_fw::ModuleInstanceProps()); /* unused parameter */
 
     /* Simulating a driver error */
     commands.addGetModuleInstancePropsCommand(
@@ -623,7 +623,7 @@ TEST_CASE("Module handling: getting module instance properties")
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId,
-        dsp_fw::DSModuleInstanceProps()); /* unused parameter */
+        dsp_fw::ModuleInstanceProps()); /* unused parameter */
 
     /* Simulating a firmware error */
     commands.addGetModuleInstancePropsCommand(
@@ -631,7 +631,7 @@ TEST_CASE("Module handling: getting module instance properties")
         STATUS_SUCCESS,
         dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
         moduleId, instanceId,
-        dsp_fw::DSModuleInstanceProps()); /* unused parameter */
+        dsp_fw::ModuleInstanceProps()); /* unused parameter */
 
     /* Successful command */
     commands.addGetModuleInstancePropsCommand(
@@ -649,12 +649,12 @@ TEST_CASE("Module handling: getting module instance properties")
 
     /* Simulating an os error */
 
-    static const dsp_fw::DSModuleInstanceProps emptyProps =
+    static const dsp_fw::ModuleInstanceProps emptyProps =
     {
-        { 0, 0 }, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dsp_fw::DSPinListInfo(), dsp_fw::DSPinListInfo(),
+        { 0, 0 }, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dsp_fw::PinListInfo(), dsp_fw::PinListInfo(),
         dsp_fw::ConnectorNodeId(0), dsp_fw::ConnectorNodeId(0)
     };
-    dsp_fw::DSModuleInstanceProps props = emptyProps;
+    dsp_fw::ModuleInstanceProps props = emptyProps;
 
     CHECK_THROWS_AS_MSG(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
         debug_agent::cavs::ModuleHandler::Exception,
