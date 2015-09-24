@@ -44,7 +44,7 @@ public:
      * @todo The LogStreamer will need a way to retrieve the "Module Entries" table in a subsequent
      * patch.
      */
-    LogStreamer(Logger &logger, const std::vector<ModuleEntry> &moduleEntries);
+    LogStreamer(Logger &logger, const std::vector<dsp_fw::ModuleEntry> &moduleEntries);
 
 private:
     virtual void streamFormatHeader(std::ostream &os) override;
@@ -58,7 +58,7 @@ private:
     /**
      * The module entries table retrieved from FW once, at initialization
      */
-    const std::vector<ModuleEntry> &mModuleEntries;
+    const std::vector<dsp_fw::ModuleEntry> &mModuleEntries;
 
     /**
      * The stream is produced in the IFDK stream format which requires a system type (cavs)

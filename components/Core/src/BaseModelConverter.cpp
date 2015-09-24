@@ -70,9 +70,9 @@ const std::vector<std::string> BaseModelConverter::staticServiceTypes = {
     logServiceTypeName
 };
 
-const cavs::ModuleEntry &BaseModelConverter::findModuleEntry(uint32_t moduleId)
+const dsp_fw::ModuleEntry &BaseModelConverter::findModuleEntry(uint32_t moduleId)
 {
-    const std::vector<cavs::ModuleEntry> &entries = mSystem.getModuleEntries();
+    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
     if (moduleId > entries.size()) {
         throw Exception("Wrong module id: " + std::to_string(moduleId) + " max: " +
             std::to_string(entries.size() - 1));
@@ -82,7 +82,7 @@ const cavs::ModuleEntry &BaseModelConverter::findModuleEntry(uint32_t moduleId)
 
 std::string BaseModelConverter::findModuleEntryName(uint32_t moduleId)
 {
-    const cavs::ModuleEntry &entry = findModuleEntry(moduleId);
+    const dsp_fw::ModuleEntry &entry = findModuleEntry(moduleId);
 
     /** According to the SwAS, module type name is "module-<module name>", for instance
      * "module-aec".
@@ -92,13 +92,13 @@ std::string BaseModelConverter::findModuleEntryName(uint32_t moduleId)
 }
 
 std::string BaseModelConverter::findGatewayTypeName(
-    const cavs::dsp_fw::ConnectorNodeId &connectorId)
+    const dsp_fw::ConnectorNodeId &connectorId)
 {
     /* Casting the type into the associated enum */
     auto connectorType = static_cast<dsp_fw::ConnectorNodeId::Type>(connectorId.val.f.dma_type);
 
     /* Finding the gateway name */
-    auto &helper = cavs::FirmwareTypeHelpers::getGatewayHelper();
+    auto &helper = FirmwareTypeHelpers::getGatewayHelper();
     if (!helper.isValid(connectorType)) {
         throw Exception(
             "Unknown gateway type: " + std::to_string(connectorId.val.f.dma_type));
@@ -108,7 +108,7 @@ std::string BaseModelConverter::findGatewayTypeName(
 }
 
 uint32_t BaseModelConverter::findGatewayInstanceId(
-    const cavs::dsp_fw::ConnectorNodeId &connectorId)
+    const dsp_fw::ConnectorNodeId &connectorId)
 {
     return connectorId.val.f.v_index;
 }

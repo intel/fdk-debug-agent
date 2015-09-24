@@ -72,7 +72,7 @@ void ModuleHandler::bigModuleAccessIoctl(
 }
 
 void ModuleHandler::getModulesEntries(uint32_t moduleCount,
-    std::vector<ModuleEntry> &modulesEntries)
+    std::vector<dsp_fw::ModuleEntry> &modulesEntries)
 {
     std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize(moduleCount);
 
@@ -174,7 +174,7 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t
     }
 }
 
-void ModuleHandler::getPipelineProps(uint32_t pipelineId, DSPplProps &props)
+void ModuleHandler::getPipelineProps(uint32_t pipelineId, dsp_fw::DSPplProps &props)
 {
     /* Using extended parameter id to supply the pipeline id*/
     uint32_t paramId = getExtendedParameterId(dsp_fw::PIPELINE_PROPS_GET, pipelineId);
@@ -200,7 +200,7 @@ void ModuleHandler::getPipelineProps(uint32_t pipelineId, DSPplProps &props)
     }
 }
 
-void ModuleHandler::getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers)
+void ModuleHandler::getSchedulersInfo(uint32_t coreId, dsp_fw::DSSchedulersInfo &schedulers)
 {
     /* Using extended parameter id to supply the core id*/
     uint32_t paramId = getExtendedParameterId(dsp_fw::SCHEDULERS_INFO_GET, coreId);
@@ -256,7 +256,7 @@ void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
 }
 
 void ModuleHandler::getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-    DSModuleInstanceProps &props)
+    dsp_fw::DSModuleInstanceProps &props)
 {
     /* Constructing ioctl output structure */
     BigCmdModuleAccessIoctlOutput<char> ioctlOutput(

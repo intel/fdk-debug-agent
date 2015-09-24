@@ -459,7 +459,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createGateway(
 }
 
 std::shared_ptr<RefCollection> InstanceModelConverter::createModuleRef(
-    const std::vector<CompoundModuleId> &compoundIdList)
+    const std::vector<dsp_fw::CompoundModuleId> &compoundIdList)
 {
     auto coll = std::make_shared<ComponentRefCollection>(collectionName_module);
 

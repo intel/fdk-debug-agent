@@ -124,7 +124,7 @@ const std::string& pfwConfigPath =
     "data/FunctionalTests/pfw/ParameterFrameworkConfigurationDBGA.xml";
 
 /** Helper function to set a module entry */
-void setModuleEntry(ModuleEntry &entry, const std::string &name,
+void setModuleEntry(dsp_fw::ModuleEntry &entry, const std::string &name,
     const Uuid &uuid)
 {
     /* Setting name */
@@ -138,7 +138,7 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
 {
     /* Constructing cavs model */
     /* ----------------------- */
-    std::vector<ModuleEntry> modules;
+    std::vector<dsp_fw::ModuleEntry> modules;
     std::vector<char> fwConfig;
     std::vector<char> hwConfig;
 
@@ -168,11 +168,11 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
 
 void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
 {
-    std::vector<DSModuleInstanceProps> moduleInstances;
+    std::vector<dsp_fw::DSModuleInstanceProps> moduleInstances;
     std::vector<dsp_fw::GatewayProps> gateways;
     std::vector<uint32_t> pipelineIds;
-    std::vector<DSPplProps> pipelines;
-    std::vector<DSSchedulersInfo> schedulers;
+    std::vector<dsp_fw::DSPplProps> pipelines;
+    std::vector<dsp_fw::DSSchedulersInfo> schedulers;
 
     CavsTopologySample::createInstanceFirmwareObjects(
         moduleInstances,

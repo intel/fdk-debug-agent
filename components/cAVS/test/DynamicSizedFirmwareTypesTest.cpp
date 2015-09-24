@@ -19,21 +19,21 @@
 *
 ********************************************************************************
 */
-#include <cAVS/DynamicSizedFirmwareTypes.hpp>
+#include "cAVS/DynamicSizedFirmwareTypes.hpp"
 #include "catch.hpp"
 
 using namespace debug_agent::util;
-using namespace debug_agent::cavs;
+using namespace debug_agent::cavs::dsp_fw;
 
-static const dsp_fw::AudioDataFormatIpc audioFormat = {
-    static_cast<dsp_fw::SamplingFrequency>(1),
-    static_cast<dsp_fw::BitDepth>(2),
-    static_cast<dsp_fw::ChannelMap>(3),
-    static_cast<dsp_fw::ChannelConfig>(4),
-    static_cast<dsp_fw::InterleavingStyle>(5),
+static const AudioDataFormatIpc audioFormat = {
+    static_cast<SamplingFrequency>(1),
+    static_cast<BitDepth>(2),
+    static_cast<ChannelMap>(3),
+    static_cast<ChannelConfig>(4),
+    static_cast<InterleavingStyle>(5),
     6,
     7,
-    static_cast<dsp_fw::SampleType>(8),
+    static_cast<SampleType>(8),
     9
 };
 
@@ -131,7 +131,7 @@ TEST_CASE("DSFirmwareTypes : DSSchedulersInfo")
 TEST_CASE("DSFirmwareTypes : DSPinListInfo")
 {
     static const DSPinListInfo list = {{
-        { static_cast<dsp_fw::StreamType>(1), audioFormat, 3 }
+        { static_cast<StreamType>(1), audioFormat, 3 }
     }};
 
     const std::vector<uint8_t> expected = {
@@ -156,16 +156,16 @@ TEST_CASE("DSFirmwareTypes : DSPinListInfo")
 TEST_CASE("DSFirmwareTypes : DSModuleInstanceProps")
 {
     static const DSPinListInfo input_pins = { {
-        { static_cast<dsp_fw::StreamType>(1), audioFormat, 3 }
+        { static_cast<StreamType>(1), audioFormat, 3 }
     } };
     static const DSPinListInfo output_pins = { {
-        { static_cast<dsp_fw::StreamType>(4), audioFormat, 5 },
-        { static_cast<dsp_fw::StreamType>(6), audioFormat, 7 }
+        { static_cast<StreamType>(4), audioFormat, 5 },
+        { static_cast<StreamType>(6), audioFormat, 7 }
     } };
 
     static const DSModuleInstanceProps instanceProps = {
         { 1, 9 }, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
-        dsp_fw::ConnectorNodeId(12), dsp_fw::ConnectorNodeId(13)
+        ConnectorNodeId(12), ConnectorNodeId(13)
     };
 
     static const std::vector<uint8_t> expected = {

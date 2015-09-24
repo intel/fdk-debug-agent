@@ -32,14 +32,14 @@ class CavsTopologySample final
 {
 public:
     static void createInstanceFirmwareObjects(
-        std::vector<cavs::DSModuleInstanceProps> &moduleInstances,
+        std::vector<cavs::dsp_fw::DSModuleInstanceProps> &moduleInstances,
         std::vector<cavs::dsp_fw::GatewayProps> &gateways,
         std::vector<uint32_t> &pipelineIds,
-        std::vector<cavs::DSPplProps> &pipelines,
-        std::vector<cavs::DSSchedulersInfo> &schedulers);
+        std::vector<cavs::dsp_fw::DSPplProps> &pipelines,
+        std::vector<cavs::dsp_fw::DSSchedulersInfo> &schedulers);
 
     static void createFirmwareObjects(
-        std::vector<cavs::ModuleEntry> &modules,
+        std::vector<cavs::dsp_fw::ModuleEntry> &modules,
         std::vector<char> &fwConfig,
         std::vector<char> &hwConfig);
 

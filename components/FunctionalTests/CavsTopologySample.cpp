@@ -76,15 +76,15 @@ enum Queue
 };
 
 /** Helper function to create empty pin list */
-DSPinListInfo newEmptyPinList()
+dsp_fw::DSPinListInfo newEmptyPinList()
 {
-    return DSPinListInfo();
+    return dsp_fw::DSPinListInfo();
 }
 
 /** Helper function to create pin list */
-DSPinListInfo newPinList(const std::vector<uint32_t> queueIds)
+dsp_fw::DSPinListInfo newPinList(const std::vector<uint32_t> queueIds)
 {
-    DSPinListInfo info {};
+    dsp_fw::DSPinListInfo info{};
     for (auto queueId : queueIds) {
         dsp_fw::PinProps props {};
         props.format = audioFormat;
@@ -97,14 +97,14 @@ DSPinListInfo newPinList(const std::vector<uint32_t> queueIds)
 }
 
 /** Helper function to create module instance */
-DSModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
-    const DSPinListInfo &inputs, const DSPinListInfo &outputs,
+dsp_fw::DSModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
+    const dsp_fw::DSPinListInfo &inputs, const dsp_fw::DSPinListInfo &outputs,
     const dsp_fw::ConnectorNodeId &inputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
     const dsp_fw::ConnectorNodeId &outputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId))
 {
-    DSModuleInstanceProps props {};
+    dsp_fw::DSModuleInstanceProps props{};
     props.id.moduleId = type;
     props.id.instanceId = instance;
     props.input_gateway = inputGateway;
@@ -124,33 +124,33 @@ dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 }
 
 /** Helper function to create task */
-DSTaskProps newTask(uint32_t id, const std::vector<CompoundModuleId> &ids)
+dsp_fw::DSTaskProps newTask(uint32_t id, const std::vector<dsp_fw::CompoundModuleId> &ids)
 {
-    DSTaskProps props {};
+    dsp_fw::DSTaskProps props{};
     props.task_id = id;
     props.module_instance_id = ids;
     return props;
 }
 
 /** Helper function to create scheduler */
-DSSchedulersInfo newScheduler(const std::vector<DSTaskProps> &tasks)
+dsp_fw::DSSchedulersInfo newScheduler(const std::vector<dsp_fw::DSTaskProps> &tasks)
 {
-    DSSchedulerProps props {};
+    dsp_fw::DSSchedulerProps props{};
     props.core_id = 0;
     props.task_info = tasks;
 
-    DSSchedulersInfo info;
+    dsp_fw::DSSchedulersInfo info;
     info.scheduler_info.push_back(props);
 
     return info;
 }
 
 /** Helper function to create pipeline */
-DSPplProps newPipeline(uint32_t id, uint32_t priority,
-    const std::vector<CompoundModuleId> &instanceIds,
+dsp_fw::DSPplProps newPipeline(uint32_t id, uint32_t priority,
+    const std::vector<dsp_fw::CompoundModuleId> &instanceIds,
     const std::vector<uint32_t> &taskIds)
 {
-    DSPplProps props {};
+    dsp_fw::DSPplProps props{};
     props.id = id;
     props.priority = priority;
     props.module_instances = instanceIds;
@@ -163,11 +163,11 @@ const size_t CavsTopologySample::maxPplCount = 10;
 const size_t CavsTopologySample::gatewaysCount = 5;
 
 void CavsTopologySample::createInstanceFirmwareObjects(
-    std::vector<DSModuleInstanceProps> &moduleInstances,
+    std::vector<dsp_fw::DSModuleInstanceProps> &moduleInstances,
     std::vector<dsp_fw::GatewayProps> &gateways,
     std::vector<uint32_t> &pipelineIds,
-    std::vector<DSPplProps> &pipelines,
-    std::vector<DSSchedulersInfo> &schedulers)
+    std::vector<dsp_fw::DSPplProps> &pipelines,
+    std::vector<dsp_fw::DSSchedulersInfo> &schedulers)
 {
     /* Filling module instances */
     moduleInstances = {
@@ -234,7 +234,8 @@ void CavsTopologySample::createInstanceFirmwareObjects(
     /* Module instances ioctls are ordered by the module instace id, so sorting the array
      * to reflect the same order */
     std::sort(moduleInstances.begin(), moduleInstances.end(),
-        [](const DSModuleInstanceProps &p1, const DSModuleInstanceProps& p2) -> bool
+        [](const dsp_fw::DSModuleInstanceProps &p1,
+           const dsp_fw::DSModuleInstanceProps& p2) -> bool
         {
             return p1.id < p2.id;
         }
@@ -318,7 +319,7 @@ void CavsTopologySample::createInstanceFirmwareObjects(
 }
 
 void CavsTopologySample::createFirmwareObjects(
-    std::vector<ModuleEntry> &modules,
+    std::vector<dsp_fw::ModuleEntry> &modules,
     std::vector<char> &fwConfig,
     std::vector<char> &hwConfig)
 {
@@ -327,7 +328,7 @@ void CavsTopologySample::createFirmwareObjects(
     uint32_t i = 0;
     for (auto &moduleName: moduleNames)
     {
-        ModuleEntry entry{};
+        dsp_fw::ModuleEntry entry{};
         StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleName);
         for (uint32_t &intValue : entry.uuid) {
             /* filling four bytes with i value */

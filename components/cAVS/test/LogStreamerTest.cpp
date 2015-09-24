@@ -108,11 +108,11 @@ public:
     Parameters mMockedParameter;
 };
 
-void initFakeModuleEntries(std::vector<ModuleEntry> &moduleEntries, size_t nbEntries)
+void initFakeModuleEntries(std::vector<dsp_fw::ModuleEntry> &moduleEntries, size_t nbEntries)
 {
     for (size_t i = 0; i < nbEntries; ++i) {
 
-        ModuleEntry entry;
+        dsp_fw::ModuleEntry entry;
         /* Fill UUID with current entry value shifted by uuid word index to get a pattern like:
          * uuid[0] = 0x000000<i>
          * uuid[1] = 0x0000<i>00
@@ -135,7 +135,7 @@ void initFakeModuleEntries(std::vector<ModuleEntry> &moduleEntries, size_t nbEnt
 TEST_CASE("Test IFDK cAVS Log stream", "[stream]")
 {
     // Create a fake module entries table with no entries
-    std::vector<ModuleEntry> moduleEntries;
+    std::vector<dsp_fw::ModuleEntry> moduleEntries;
 
     // Create a LogStreamer to be tested, using a fake TestLoggerMock as Logger
     TestLoggerMock fakeLogger(50);
@@ -159,7 +159,7 @@ TEST_CASE("Test IFDK cAVS Log stream", "[stream]")
 TEST_CASE("Test module entries to stream", "[streaming]")
 {
     // Create a fake module entries table
-    std::vector<ModuleEntry> moduleEntries;
+    std::vector<dsp_fw::ModuleEntry> moduleEntries;
     initFakeModuleEntries(moduleEntries, 3);
 
     // Create a LogStreamer to be tested, using a fake TestLoggerMock as Logger which will not

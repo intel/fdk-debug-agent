@@ -28,8 +28,8 @@ namespace debug_agent
 namespace cavs
 {
 
-const DSModuleInstanceProps &Topology::getModuleInstance(
-    const CompoundModuleId &moduleInstanceId) const
+const dsp_fw::DSModuleInstanceProps &Topology::getModuleInstance(
+    const dsp_fw::CompoundModuleId &moduleInstanceId) const
 {
     const auto it = moduleInstances.find(moduleInstanceId);
     if (it == moduleInstances.end()) {
@@ -41,9 +41,9 @@ const DSModuleInstanceProps &Topology::getModuleInstance(
     return it->second;
 }
 
-void Topology::addAllModuleOutputs(OutputList &list, const CompoundModuleId &module) const
+void Topology::addAllModuleOutputs(OutputList &list, const dsp_fw::CompoundModuleId &module) const
 {
-    const DSModuleInstanceProps &moduleProps = getModuleInstance(module);
+    const dsp_fw::DSModuleInstanceProps &moduleProps = getModuleInstance(module);
 
     OutputId outputId;
     if (moduleProps.output_gateway.val.dw == dsp_fw::ConnectorNodeId::kInvalidNodeId) {
@@ -65,9 +65,9 @@ void Topology::addAllModuleOutputs(OutputList &list, const CompoundModuleId &mod
     }
 }
 
-void Topology::addAllModuleInputs(InputList &list, const CompoundModuleId &module) const
+void Topology::addAllModuleInputs(InputList &list, const dsp_fw::CompoundModuleId &module) const
 {
-    const DSModuleInstanceProps &moduleProps = getModuleInstance(module);
+    const dsp_fw::DSModuleInstanceProps &moduleProps = getModuleInstance(module);
 
     InputId inputId;
     if (moduleProps.input_gateway.val.dw == dsp_fw::ConnectorNodeId::kInvalidNodeId) {
@@ -135,22 +135,22 @@ void Topology::computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &un
              pipeModuleIndex < pipe.module_instances.size() - 1;
              ++pipeModuleIndex) {
 
-                const CompoundModuleId &sourceModuleId = pipe.module_instances[pipeModuleIndex];
-                const CompoundModuleId &destinationModuleId =
+            const dsp_fw::CompoundModuleId &sourceModuleId = pipe.module_instances[pipeModuleIndex];
+            const dsp_fw::CompoundModuleId &destinationModuleId =
                     pipe.module_instances[pipeModuleIndex + 1];
 
-                computeModulesPairLink(sourceModuleId,
-                                       destinationModuleId,
-                                       unresolvedInputs,
-                                       unresolvedOutputs);
+            computeModulesPairLink(sourceModuleId,
+                                    destinationModuleId,
+                                    unresolvedInputs,
+                                    unresolvedOutputs);
         }
     }
 }
 
-void Topology::computeModulesPairLink(const CompoundModuleId &sourceModuleId,
-                                      const CompoundModuleId &destinationModuleId,
-                                      InputList &unresolvedInputs,
-                                      OutputList &unresolvedOutputs)
+void Topology::computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModuleId,
+    const dsp_fw::CompoundModuleId &destinationModuleId,
+    InputList &unresolvedInputs,
+    OutputList &unresolvedOutputs)
 {
     /* List all destination module outputs */
     OutputList sourceOutputs;
@@ -163,7 +163,7 @@ void Topology::computeModulesPairLink(const CompoundModuleId &sourceModuleId,
     /* For each output of source module... */
     for (Output const &output : sourceOutputs) {
 
-        const DSModuleInstanceProps &sourceModule = getModuleInstance(sourceModuleId);
+        const dsp_fw::DSModuleInstanceProps &sourceModule = getModuleInstance(sourceModuleId);
         const dsp_fw::PinProps &outputPin = sourceModule.output_pins.pin_info[output.second];
         bool connectionFound = false;
 
@@ -171,7 +171,8 @@ void Topology::computeModulesPairLink(const CompoundModuleId &sourceModuleId,
         for (auto inputIt = destinationInputs.begin();
              inputIt != destinationInputs.end(); ) {
 
-            const DSModuleInstanceProps &destinationModule = getModuleInstance(destinationModuleId);
+            const dsp_fw::DSModuleInstanceProps &destinationModule =
+                getModuleInstance(destinationModuleId);
             const dsp_fw::PinProps &inputPin =
                 destinationModule.input_pins.pin_info[inputIt->second];
 
@@ -215,14 +216,15 @@ void Topology::computeInterPipeLinks(InputList &unresolvedInputs, OutputList &un
 
         connectionFound = false;
 
-        const DSModuleInstanceProps &sourceModule = getModuleInstance(outputIt->first);
+        const dsp_fw::DSModuleInstanceProps &sourceModule = getModuleInstance(outputIt->first);
         const dsp_fw::PinProps &outputPinProps =
             sourceModule.output_pins.pin_info[outputIt->second];
 
         for (auto inputIt = unresolvedInputs.begin();
              inputIt != unresolvedInputs.end(); ) {
 
-            const DSModuleInstanceProps &destinationModule = getModuleInstance(inputIt->first);
+            const dsp_fw::DSModuleInstanceProps &destinationModule =
+                getModuleInstance(inputIt->first);
             const dsp_fw::PinProps &inputPinProps =
                 destinationModule.input_pins.pin_info[inputIt->second];
 
@@ -254,7 +256,7 @@ void Topology::checkUnresolved(InputList &unresolvedInputs, OutputList &unresolv
 {
     for (auto const &output : unresolvedOutputs) {
 
-        const DSModuleInstanceProps &moduleProps = getModuleInstance(output.first);
+        const dsp_fw::DSModuleInstanceProps &moduleProps = getModuleInstance(output.first);
 
         /** @fixme use cAVS plugin log instead */
         std::cout
@@ -271,7 +273,7 @@ void Topology::checkUnresolved(InputList &unresolvedInputs, OutputList &unresolv
     }
     for (auto const &input : unresolvedInputs) {
 
-        const DSModuleInstanceProps &moduleProps = getModuleInstance(input.first);
+        const dsp_fw::DSModuleInstanceProps &moduleProps = getModuleInstance(input.first);
 
         /** @fixme use cAVS plugin log instead */
         std::cout

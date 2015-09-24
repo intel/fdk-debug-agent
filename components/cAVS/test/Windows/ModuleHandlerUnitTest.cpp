@@ -56,12 +56,12 @@ void setArbitraryContent(T &value)
 
 /** Produce a module entry vector of the supplied size.
  * Each entry is filled with an arbitrary content. */
-std::vector<ModuleEntry> produceModuleEntries(std::size_t expectedModuleCount)
+std::vector<dsp_fw::ModuleEntry> produceModuleEntries(std::size_t expectedModuleCount)
 {
-    ModuleEntry moduleEntry;
+    dsp_fw::ModuleEntry moduleEntry;
     setArbitraryContent(moduleEntry);
 
-    std::vector<ModuleEntry> entries;
+    std::vector<dsp_fw::ModuleEntry> entries;
     for (std::size_t i = 0; i < expectedModuleCount; ++i) {
         entries.push_back(moduleEntry);
     }
@@ -78,12 +78,12 @@ bool isSameGateway(const dsp_fw::GatewayProps &a, const dsp_fw::GatewayProps &b)
 void checkModuleEntryIoctl(windows::ModuleHandler& moduleHandler, std::size_t expectedModuleCount)
 {
     /*Successful get module info command */
-    std::vector<ModuleEntry> entries;
+    std::vector<dsp_fw::ModuleEntry> entries;
     CHECK_NOTHROW(
         moduleHandler.getModulesEntries(static_cast<uint32_t>(expectedModuleCount), entries));
 
     /* Checking result */
-    ModuleEntry expectedModuleEntry;
+    dsp_fw::ModuleEntry expectedModuleEntry;
     setArbitraryContent(expectedModuleEntry);
     CHECK(entries.size() == expectedModuleCount);
     for (auto &candidateModuleEntry : entries) {
@@ -107,7 +107,7 @@ TEST_CASE("Module handling: getting module entries")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         moduleCount,
-        std::vector<ModuleEntry>()); /* unused parameter */
+        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
     /* Simulating a driver error during getting module entries */
     commands.addGetModuleEntriesCommand(
@@ -115,7 +115,7 @@ TEST_CASE("Module handling: getting module entries")
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         moduleCount,
-        std::vector<ModuleEntry>()); /* unused parameter */
+        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
     /* Simulating a firmware error during getting module entries */
     commands.addGetModuleEntriesCommand(
@@ -123,7 +123,7 @@ TEST_CASE("Module handling: getting module entries")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
         moduleCount,
-        std::vector<ModuleEntry>()); /* unused parameter */
+        std::vector<dsp_fw::ModuleEntry>()); /* unused parameter */
 
     /* Successful get module info command with 2 modules */
     commands.addGetModuleEntriesCommand(
@@ -140,7 +140,7 @@ TEST_CASE("Module handling: getting module entries")
     windows::ModuleHandler moduleHandler(device);
 
     /* Simulating an os error during getting module entries */
-    std::vector<ModuleEntry> entries;
+    std::vector<dsp_fw::ModuleEntry> entries;
     CHECK_THROWS_AS_MSG(moduleHandler.getModulesEntries(moduleCount, entries),
         debug_agent::cavs::ModuleHandler::Exception,
         "Device returns an exception: OS says that io control has failed.");
@@ -335,7 +335,7 @@ TEST_CASE("Module handling: getting pipeline list")
 TEST_CASE("Module handling: getting pipeline props")
 {
     static const uint32_t pipelineId = 1;
-    static const DSPplProps fwProps = { 1, 2, 3, 4, 5, 6, { { 1, 0 }, { 2, 0 }, { 3, 0 } },
+    static const dsp_fw::DSPplProps fwProps = { 1, 2, 3, 4, 5, 6, { { 1, 0 }, { 2, 0 }, { 3, 0 } },
         { 4, 5 }, {} };
 
     MockedDevice device;
@@ -350,7 +350,7 @@ TEST_CASE("Module handling: getting pipeline props")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         pipelineId,
-        DSPplProps()); /* unused parameter */
+        dsp_fw::DSPplProps()); /* unused parameter */
 
     /* Simulating a driver error */
     commands.addGetPipelinePropsCommand(
@@ -358,7 +358,7 @@ TEST_CASE("Module handling: getting pipeline props")
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         pipelineId,
-        DSPplProps()); /* unused parameter */
+        dsp_fw::DSPplProps()); /* unused parameter */
 
     /* Simulating a firmware error */
     commands.addGetPipelinePropsCommand(
@@ -366,7 +366,7 @@ TEST_CASE("Module handling: getting pipeline props")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
         pipelineId,
-        DSPplProps()); /* unused parameter */
+        dsp_fw::DSPplProps()); /* unused parameter */
 
     /* Successful command */
     commands.addGetPipelinePropsCommand(
@@ -384,8 +384,8 @@ TEST_CASE("Module handling: getting pipeline props")
 
     /* Simulating an os error */
 
-    static const DSPplProps emptyProps = { 0, 0, 0, 0, 0, 0, {}, {}, {} };
-    DSPplProps props = emptyProps;
+    static const dsp_fw::DSPplProps emptyProps = { 0, 0, 0, 0, 0, 0, {}, {}, {} };
+    dsp_fw::DSPplProps props = emptyProps;
 
     CHECK_THROWS_AS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
         debug_agent::cavs::ModuleHandler::Exception,
@@ -415,14 +415,14 @@ TEST_CASE("Module handling: getting schedulers info")
 {
     static const uint32_t coreId = 1;
 
-    static const DSTaskProps task1 = { 3, { { 1, 0 }, { 2, 0 } } };
-    static const DSTaskProps task2 = { 4, { { 8, 0 } } };
-    static const DSTaskProps task3 = { 6, {} };
+    static const dsp_fw::DSTaskProps task1 = { 3, { { 1, 0 }, { 2, 0 } } };
+    static const dsp_fw::DSTaskProps task2 = { 4, { { 8, 0 } } };
+    static const dsp_fw::DSTaskProps task3 = { 6, {} };
 
-    static const DSSchedulerProps props1 = { 1, 2, { task1, task2 } };
-    static const DSSchedulerProps props2 = { 4, 2, { task3 } };
+    static const dsp_fw::DSSchedulerProps props1 = { 1, 2, { task1, task2 } };
+    static const dsp_fw::DSSchedulerProps props2 = { 4, 2, { task3 } };
 
-    static const DSSchedulersInfo fwSchedulersInfo = { { props1, props2 } };
+    static const dsp_fw::DSSchedulersInfo fwSchedulersInfo = { { props1, props2 } };
 
     MockedDevice device;
 
@@ -436,7 +436,7 @@ TEST_CASE("Module handling: getting schedulers info")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         coreId,
-        DSSchedulersInfo()); /* unused parameter */
+        dsp_fw::DSSchedulersInfo()); /* unused parameter */
 
     /* Simulating a driver error */
     commands.addGetSchedulersInfoCommand(
@@ -444,7 +444,7 @@ TEST_CASE("Module handling: getting schedulers info")
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         coreId,
-        DSSchedulersInfo()); /* unused parameter */
+        dsp_fw::DSSchedulersInfo()); /* unused parameter */
 
     /* Simulating a firmware error */
     commands.addGetSchedulersInfoCommand(
@@ -452,7 +452,7 @@ TEST_CASE("Module handling: getting schedulers info")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
         coreId,
-        DSSchedulersInfo()); /* unused parameter */
+        dsp_fw::DSSchedulersInfo()); /* unused parameter */
 
     /* Successful command */
     commands.addGetSchedulersInfoCommand(
@@ -470,8 +470,8 @@ TEST_CASE("Module handling: getting schedulers info")
 
     /* Simulating an os error */
 
-    static const DSSchedulersInfo emptyInfo = {};
-    DSSchedulersInfo info = emptyInfo;
+    static const dsp_fw::DSSchedulersInfo emptyInfo = {};
+    dsp_fw::DSSchedulersInfo info = emptyInfo;
 
     CHECK_THROWS_AS_MSG(moduleHandler.getSchedulersInfo(coreId, info),
         debug_agent::cavs::ModuleHandler::Exception,
@@ -587,15 +587,15 @@ TEST_CASE("Module handling: getting module instance properties")
         9
     };
 
-    static const DSPinListInfo input_pins = { {
+    static const dsp_fw::DSPinListInfo input_pins = { {
         { static_cast<dsp_fw::StreamType>(1), audioFormat, 3 }
     } };
-    static const DSPinListInfo output_pins = { {
+    static const dsp_fw::DSPinListInfo output_pins = { {
         { static_cast<dsp_fw::StreamType>(4), audioFormat, 5 },
         { static_cast<dsp_fw::StreamType>(6), audioFormat, 7 }
     } };
 
-    static const DSModuleInstanceProps fwInstanceProps = {
+    static const dsp_fw::DSModuleInstanceProps fwInstanceProps = {
         { 1, 0 }, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
         dsp_fw::ConnectorNodeId(12), dsp_fw::ConnectorNodeId(13)
     };
@@ -615,7 +615,7 @@ TEST_CASE("Module handling: getting module instance properties")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId,
-        DSModuleInstanceProps()); /* unused parameter */
+        dsp_fw::DSModuleInstanceProps()); /* unused parameter */
 
     /* Simulating a driver error */
     commands.addGetModuleInstancePropsCommand(
@@ -623,7 +623,7 @@ TEST_CASE("Module handling: getting module instance properties")
         STATUS_FLOAT_DIVIDE_BY_ZERO,
         dsp_fw::Message::IxcStatus::ADSP_IPC_SUCCESS,
         moduleId, instanceId,
-        DSModuleInstanceProps()); /* unused parameter */
+        dsp_fw::DSModuleInstanceProps()); /* unused parameter */
 
     /* Simulating a firmware error */
     commands.addGetModuleInstancePropsCommand(
@@ -631,7 +631,7 @@ TEST_CASE("Module handling: getting module instance properties")
         STATUS_SUCCESS,
         dsp_fw::Message::IxcStatus::ADSP_IPC_FAILURE,
         moduleId, instanceId,
-        DSModuleInstanceProps()); /* unused parameter */
+        dsp_fw::DSModuleInstanceProps()); /* unused parameter */
 
     /* Successful command */
     commands.addGetModuleInstancePropsCommand(
@@ -649,12 +649,12 @@ TEST_CASE("Module handling: getting module instance properties")
 
     /* Simulating an os error */
 
-    static const DSModuleInstanceProps emptyProps =
+    static const dsp_fw::DSModuleInstanceProps emptyProps =
     {
-        { 0, 0 }, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DSPinListInfo(), DSPinListInfo(),
+        { 0, 0 }, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, dsp_fw::DSPinListInfo(), dsp_fw::DSPinListInfo(),
         dsp_fw::ConnectorNodeId(0), dsp_fw::ConnectorNodeId(0)
     };
-    DSModuleInstanceProps props = emptyProps;
+    dsp_fw::DSModuleInstanceProps props = emptyProps;
 
     CHECK_THROWS_AS_MSG(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
         debug_agent::cavs::ModuleHandler::Exception,

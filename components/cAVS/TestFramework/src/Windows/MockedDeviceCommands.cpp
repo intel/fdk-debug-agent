@@ -156,7 +156,7 @@ void MockedDeviceCommands::addGetHwConfigCommand(bool ioctlSuccess,
 
 void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
     NTSTATUS returnedDriverStatus, dsp_fw::Message::IxcStatus returnedFirmwareStatus,
-    uint32_t moduleCount, const std::vector<ModuleEntry> &returnedEntries)
+    uint32_t moduleCount, const std::vector<dsp_fw::ModuleEntry> &returnedEntries)
 {
     std::size_t moduleInfoSize = ModulesInfoHelper::getAllocationSize(moduleCount);
 
@@ -254,7 +254,7 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(
     NTSTATUS returnedDriverStatus,
     dsp_fw::Message::IxcStatus returnedFirmwareStatus,
     uint32_t pipelineId,
-    const DSPplProps &props)
+    const dsp_fw::DSPplProps &props)
 {
     /* Constructing expected output structure */
     Buffer expectedOutput(ModuleHandler::maxParameterPayloadSize);
@@ -280,7 +280,7 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(
     NTSTATUS returnedDriverStatus,
     dsp_fw::Message::IxcStatus returnedFirmwareStatus,
     uint32_t coreId,
-    const DSSchedulersInfo &info)
+    const dsp_fw::DSSchedulersInfo &info)
 {
     /* Constructing expected output structure */
     Buffer expectedOutput(ModuleHandler::maxParameterPayloadSize);
@@ -327,7 +327,7 @@ void MockedDeviceCommands::addGetGatewaysCommand(
 void MockedDeviceCommands::addGetModuleInstancePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
     dsp_fw::Message::IxcStatus returnedFirmwareStatus,
     uint16_t moduleId, uint16_t instanceId,
-    const DSModuleInstanceProps &props)
+    const dsp_fw::DSModuleInstanceProps &props)
 {
     /* Constructing expected output structure */
     Buffer expectedOutput(ModuleHandler::maxParameterPayloadSize);

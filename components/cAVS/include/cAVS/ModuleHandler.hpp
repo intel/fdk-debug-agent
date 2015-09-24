@@ -60,7 +60,7 @@ public:
 
     /** @return the firmware module entries */
     virtual void getModulesEntries(uint32_t moduleCount,
-        std::vector<ModuleEntry> &modulesEntries) = 0;
+        std::vector<dsp_fw::ModuleEntry> &modulesEntries) = 0;
 
     /** @return the firmware configuration */
     virtual void getFwConfig(FwConfig &fwConfig) = 0;
@@ -72,10 +72,10 @@ public:
     virtual void getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t> &pipelinesIds) = 0;
 
     /** @return the properties of one pipeline */
-    virtual void getPipelineProps(uint32_t pipelineId, DSPplProps &props) = 0;
+    virtual void getPipelineProps(uint32_t pipelineId, dsp_fw::DSPplProps &props) = 0;
 
     /** @return the schedulers of one core */
-    virtual void getSchedulersInfo(uint32_t coreId, DSSchedulersInfo &schedulers) = 0;
+    virtual void getSchedulersInfo(uint32_t coreId, dsp_fw::DSSchedulersInfo &schedulers) = 0;
 
     /** @return the gateways */
     virtual void getGatewaysInfo(uint32_t gatewayCount,
@@ -83,7 +83,7 @@ public:
 
     /** @return the properties of one module instance */
     virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-        DSModuleInstanceProps &props) = 0;
+        dsp_fw::DSModuleInstanceProps &props) = 0;
 
     /** set module parameter */
     virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,

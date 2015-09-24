@@ -59,7 +59,7 @@ public:
     void addGetModuleEntriesCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
         uint32_t moduleCount,
-        const std::vector<ModuleEntry> &returnedEntries);
+        const std::vector<dsp_fw::ModuleEntry> &returnedEntries);
 
     /**
      * Add a get fw config command.
@@ -166,7 +166,7 @@ public:
     void addGetPipelinePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
         uint32_t pipelineId,
-        const DSPplProps &pipelineProps);
+        const dsp_fw::DSPplProps &pipelineProps);
 
     /** Add a get schedulers info command.
      *
@@ -186,7 +186,7 @@ public:
     void addGetSchedulersInfoCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
         uint32_t coreId,
-        const DSSchedulersInfo &info);
+        const dsp_fw::DSSchedulersInfo &info);
 
     /** Add a get gateways command.
      *
@@ -227,7 +227,7 @@ public:
     void addGetModuleInstancePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::Message::IxcStatus returnedFirmwareStatus,
         uint16_t moduleId, uint16_t instanceId,
-        const DSModuleInstanceProps &props);
+        const dsp_fw::DSModuleInstanceProps &props);
 
     /** Add a set module parameter command.
     *

@@ -104,7 +104,7 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
     static const std::size_t segmentCount = 3;
 
     /* Retrieving module entries, doesn't throw exception */
-    const std::vector<ModuleEntry> &entries = mSystem.getModuleEntries();
+    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
 
     HtmlHelper html;
     html.title("Module type list");
@@ -234,7 +234,7 @@ void TopologyDebugResource::dumpGateways(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpPipelines(HtmlHelper &html,
-    const std::vector<DSPplProps> &pipelines)
+    const std::vector<dsp_fw::DSPplProps> &pipelines)
 {
     /* Pipes */
     html.title("Pipelines");
@@ -273,7 +273,7 @@ void TopologyDebugResource::dumpPipelines(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpAllSchedulers(HtmlHelper &html,
-    const std::vector<cavs::DSSchedulersInfo> &allSchedulers)
+    const std::vector<dsp_fw::DSSchedulersInfo> &allSchedulers)
 {
     /* Pipes */
     html.title("Schedulers");
@@ -306,7 +306,7 @@ void TopologyDebugResource::dumpAllSchedulers(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpCoreSchedulers(HtmlHelper &html,
-    const cavs::DSSchedulersInfo &coreSchedulers)
+    const dsp_fw::DSSchedulersInfo &coreSchedulers)
 {
     static const std::vector<std::string> columns = {
         "core_id",
@@ -335,7 +335,7 @@ void TopologyDebugResource::dumpCoreSchedulers(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpTasks(HtmlHelper &html,
-    const std::vector<cavs::DSTaskProps> &tasks)
+    const std::vector<dsp_fw::DSTaskProps> &tasks)
 {
     static const std::vector<std::string> columns = {
         "task_id",
@@ -358,7 +358,7 @@ void TopologyDebugResource::dumpTasks(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
-    const std::map<CompoundModuleId, DSModuleInstanceProps> &moduleInstances)
+    const std::map<dsp_fw::CompoundModuleId, dsp_fw::DSModuleInstanceProps> &moduleInstances)
 {
     html.title("Module instances");
     html.paragraph("Module instance count: " + std::to_string(moduleInstances.size()));
@@ -389,11 +389,11 @@ void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
     for (auto &entry : moduleInstances) {
         html.beginRow();
 
-        const DSModuleInstanceProps &module = entry.second;
+        const dsp_fw::DSModuleInstanceProps &module = entry.second;
 
         std::string moduleTypeName;
         if (module.id.moduleId < mSystem.getModuleEntries().size()) {
-            const ModuleEntry &entry = mSystem.getModuleEntries()[module.id.moduleId];
+            const dsp_fw::ModuleEntry &entry = mSystem.getModuleEntries()[module.id.moduleId];
             moduleTypeName = StringHelper::getStringFromFixedSizeArray(
                 entry.name, sizeof(entry.name));
         }

@@ -51,8 +51,8 @@ public:
     /* Describe a link between two modules */
     struct Link
     {
-        Link(const CompoundModuleId &fromModuleInstanceId, uint32_t fromOutputId,
-            const CompoundModuleId &toModuleInstanceId, uint32_t toInputId) :
+        Link(const dsp_fw::CompoundModuleId &fromModuleInstanceId, uint32_t fromOutputId,
+            const dsp_fw::CompoundModuleId &toModuleInstanceId, uint32_t toInputId) :
             mFromModuleInstanceId(fromModuleInstanceId), mFromOutputId(fromOutputId),
             mToModuleInstanceId(toModuleInstanceId), mToInputId(toInputId)
         {}
@@ -68,10 +68,10 @@ public:
                 mToInputId == other.mToInputId;
         }
 
-        CompoundModuleId mFromModuleInstanceId;
+        dsp_fw::CompoundModuleId mFromModuleInstanceId;
         uint32_t mFromOutputId;
 
-        CompoundModuleId mToModuleInstanceId;
+        dsp_fw::CompoundModuleId mToModuleInstanceId;
         uint32_t mToInputId;
     };
 
@@ -113,10 +113,10 @@ public:
      */
     void computeLinks();
 
-    std::map<CompoundModuleId, DSModuleInstanceProps> moduleInstances;
+    std::map<dsp_fw::CompoundModuleId, dsp_fw::DSModuleInstanceProps> moduleInstances;
     std::vector<dsp_fw::GatewayProps> gateways;
-    std::vector<DSPplProps> pipelines;
-    std::vector<DSSchedulersInfo> schedulers;
+    std::vector<dsp_fw::DSPplProps> pipelines;
+    std::vector<dsp_fw::DSSchedulersInfo> schedulers;
     std::vector<Link> links;
 
 private:
@@ -127,26 +127,27 @@ private:
      * @see CompoundModuleId
      * @throw Topology::Exception
      */
-    const DSModuleInstanceProps &getModuleInstance(const CompoundModuleId &moduleInstanceId) const;
+    const dsp_fw::DSModuleInstanceProps &getModuleInstance(
+        const dsp_fw::CompoundModuleId &moduleInstanceId) const;
 
     using InputId = uint32_t;
-    using Input = std::pair<CompoundModuleId, InputId>;
+    using Input = std::pair<dsp_fw::CompoundModuleId, InputId>;
     using InputList = std::vector<Input>;
 
     using OutputId = uint32_t;
-    using Output = std::pair<CompoundModuleId, OutputId>;
+    using Output = std::pair<dsp_fw::CompoundModuleId, OutputId>;
     using OutputList = std::vector<Output>;
 
     void computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
-    void computeModulesPairLink(const CompoundModuleId &sourceModuleId,
-                                const CompoundModuleId &destinationModuleId,
+    void computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModuleId,
+                                const dsp_fw::CompoundModuleId &destinationModuleId,
                                 InputList &unresolvedInputs,
                                 OutputList &unresolvedOutputs);
 
     void computeInterPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
     void checkUnresolved(InputList &unresolvedInputs, OutputList &unresolvedOutputs) const;
-    void addAllModuleOutputs(OutputList &list, const CompoundModuleId &module) const;
-    void addAllModuleInputs(InputList &list, const CompoundModuleId &module) const;
+    void addAllModuleOutputs(OutputList &list, const dsp_fw::CompoundModuleId &module) const;
+    void addAllModuleInputs(InputList &list, const dsp_fw::CompoundModuleId &module) const;
 
 };
 

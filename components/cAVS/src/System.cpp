@@ -113,7 +113,7 @@ Logger::Parameters System::getLogParameters()
     }
 }
 
-const std::vector<ModuleEntry> &System::getModuleEntries() const NOEXCEPT
+const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const NOEXCEPT
 {
     return mModuleEntries;
 }
@@ -168,7 +168,7 @@ void System::getTopology(Topology &topology)
     topology.clear();
 
     ModuleHandler &handler = mDriver->getModuleHandler();
-    std::set<CompoundModuleId> moduleInstanceIds;
+    std::set<dsp_fw::CompoundModuleId> moduleInstanceIds;
 
     /* Retrieving gateways*/
     if (!mHwConfig.isGatewayCountValid) {
@@ -202,7 +202,7 @@ void System::getTopology(Topology &topology)
     /* Retrieving pipeline props*/
     for (auto pplId : pipelineIds) {
         try {
-            DSPplProps props;
+            dsp_fw::DSPplProps props;
             handler.getPipelineProps(pplId, props);
             topology.pipelines.push_back(props);
 
@@ -222,7 +222,8 @@ void System::getTopology(Topology &topology)
     std::sort(
         topology.pipelines.begin(),
         topology.pipelines.end(),
-        [] (DSPplProps pipeA, DSPplProps pipeB) { return pipeA.priority < pipeB.priority; } );
+        [](dsp_fw::DSPplProps pipeA, dsp_fw::DSPplProps pipeB)
+        { return pipeA.priority < pipeB.priority; });
 
     /* Retrieving scheduler props*/
     if (!mHwConfig.isDspCoreCountValid) {
@@ -232,7 +233,7 @@ void System::getTopology(Topology &topology)
     for (uint32_t coreId = 0; coreId < mHwConfig.dspCoreCount; coreId++) {
         try
         {
-            DSSchedulersInfo info;
+            dsp_fw::DSSchedulersInfo info;
             handler.getSchedulersInfo(coreId, info);
             topology.schedulers.push_back(info);
 
@@ -256,7 +257,7 @@ void System::getTopology(Topology &topology)
     for (auto &compoundId : moduleInstanceIds) {
         try
         {
-            DSModuleInstanceProps props;
+            dsp_fw::DSModuleInstanceProps props;
             handler.getModuleInstanceProps(compoundId.moduleId,
                 compoundId.instanceId, props);
             topology.moduleInstances[props.id] = props;

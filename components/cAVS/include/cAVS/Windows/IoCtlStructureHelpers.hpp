@@ -190,7 +190,7 @@ public:
         /* "moduleCount - 1" because the ModulesInfo structure contains one module
          * entry */
         return sizeof(dsp_fw::ModulesInfo)
-            + (moduleCount - 1) * sizeof(ModuleEntry);
+            + (moduleCount - 1) * sizeof(dsp_fw::ModuleEntry);
     }
 
 private:

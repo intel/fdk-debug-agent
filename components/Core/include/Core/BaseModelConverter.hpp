@@ -91,7 +91,7 @@ protected:
     static const std::vector<std::string> staticServiceTypes;
 
     /** Find a module entry using its id */
-    const cavs::ModuleEntry &findModuleEntry(uint32_t moduleId);
+    const cavs::dsp_fw::ModuleEntry &findModuleEntry(uint32_t moduleId);
 
     /** Find a module entry name using its id */
     std::string findModuleEntryName(uint32_t moduleId);

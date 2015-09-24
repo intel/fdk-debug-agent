@@ -35,7 +35,7 @@ namespace cavs
  * @param[in] moduleEntries the module entries table to be serialized
  * @return ostream containing original ostream plus serialized IfdkStreamHeader
  */
-std::ostream &operator<<(std::ostream &os, const std::vector<ModuleEntry> &moduleEntries)
+std::ostream &operator<<(std::ostream &os, const std::vector<dsp_fw::ModuleEntry> &moduleEntries)
 {
     /**
      * @fixme For each entry, versions (major, minor, build and hotfix) have to be streamed out.
@@ -84,7 +84,7 @@ const std::string LogStreamer::formatType = "fwlogs";
 const int LogStreamer::majorVersion = 1;
 const int LogStreamer::minorVersion = 0;
 
-LogStreamer::LogStreamer(Logger &logger, const std::vector<ModuleEntry> &moduleEntries):
+LogStreamer::LogStreamer(Logger &logger, const std::vector<dsp_fw::ModuleEntry> &moduleEntries) :
     base(systemType, formatType, majorVersion, minorVersion),
     mLogger(logger),
     mModuleEntries(moduleEntries)

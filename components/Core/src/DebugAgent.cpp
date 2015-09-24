@@ -101,7 +101,7 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 
     /* Create one resource instance for each module type*/
     uint16_t    moduleId = 0;
-    for (const cavs::ModuleEntry &entry : mSystem.getModuleEntries())
+    for (const cavs::dsp_fw::ModuleEntry &entry : mSystem.getModuleEntries())
     {
         std::string moduleName = StringHelper::getStringFromFixedSizeArray(
             entry.name, sizeof(entry.name));

@@ -29,6 +29,14 @@ namespace debug_agent
 namespace cavs
 {
 
+#include "adsp_types.h"
+
+/** Including the firmware types into the debug_agent::cavs::dsp_fw namespace */
+namespace dsp_fw
+{
+#include "fw_manifest_common.h"
+}
+
 /** This header already defines the dsp_fw namespace, so including it into debug_agent::cavs ...*/
 #include "basefw_config.h"
 

@@ -103,7 +103,7 @@ public:
     /**
      * Get module entries
      */
-    const std::vector<ModuleEntry> &getModuleEntries() const NOEXCEPT;
+    const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const NOEXCEPT;
 
     /**
      * Get firmware configuration
@@ -154,7 +154,7 @@ private:
     /**
      * The module entries table retrieved from FW once, at initialization
      */
-    std::vector<ModuleEntry> mModuleEntries;
+    std::vector<dsp_fw::ModuleEntry> mModuleEntries;
 
     /**
      * The FW config structure retrieved from FW once, at initialization

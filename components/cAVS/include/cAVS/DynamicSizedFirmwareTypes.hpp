@@ -58,6 +58,8 @@ namespace debug_agent
 {
 namespace cavs
 {
+namespace dsp_fw
+{
 
 /* All firmware array sizes are stored on 32 bits unsigned integer*/
 using ArraySizeType = uint32_t;
@@ -375,5 +377,6 @@ struct DSModuleInstanceProps
 };
 
 
+}
 }
 }
