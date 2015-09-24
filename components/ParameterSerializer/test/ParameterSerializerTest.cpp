@@ -178,6 +178,41 @@ TEST_CASE("Test parameter serializer getChildren()")
     CHECK(childrenCount == 2);
 }
 
+TEST_CASE("Test parameter serializer getMapping()")
+{
+   ParameterSerializer parameterSerializer(pfwConfFilePath);
+
+    std::map<uint32_t, std::string> children = parameterSerializer.getChildren(
+        "cavs",
+        "aec",
+        ParameterSerializer::ParameterKind::Control);
+
+    std::string mapping;
+    // Check bad mapping key behavior
+    CHECK_THROWS_AS_MSG(mapping = parameterSerializer.getMapping(
+        "cavs",
+        "aec",
+        children[1],
+        "badMappingKey"),
+        ParameterSerializer::Exception,
+        "Mapping \"badMappingKey\" not found for "
+        "/BXTN/cavs/categories/aec/control/NoiseReduction");
+
+    // Check bad subsystem name behavior
+    CHECK_NOTHROW(mapping = parameterSerializer.getMapping(
+        "cavs",
+        "aec",
+        children[1],
+        "ParamId"));
+
+    CHECK(mapping == "25");
+
+    // module "aec" is compound of 1 "aec parameter" and one "ns parameter".
+    // Check module aec has 2 parameters
+    size_t childrenCount = children.size();
+    CHECK(childrenCount == 2);
+}
+
 TEST_CASE("Test parameter serializer binary to xml")
 {
     ParameterSerializer parameterSerializer(pfwConfFilePath);

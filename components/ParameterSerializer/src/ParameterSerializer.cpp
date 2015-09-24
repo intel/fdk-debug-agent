@@ -126,6 +126,26 @@ std::map<uint32_t, std::string>  ParameterSerializer::getChildren(
     return children;
 }
 
+std::string ParameterSerializer::getMapping(
+    const std::string &subsystemName,
+    const std::string &elementName,
+    const std::string &parameterName,
+    const std::string &key) const
+{
+    std::string paramId;
+
+    std::unique_ptr<CElementHandle> elementHandle = getChildElementHandle(
+        subsystemName, elementName, ParameterKind::Control, parameterName);
+
+    if (!elementHandle->getMappingData(key, paramId))
+    {
+        throw Exception(
+            "Mapping \"" + key + "\" not found for " + elementHandle->getPath());
+    }
+
+    return paramId;
+}
+
 std::vector<uint8_t> ParameterSerializer::xmlToBinary(
     const std::string &subsystemName,
     const std::string &elementName,
