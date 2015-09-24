@@ -130,6 +130,21 @@ public:
         const std::string &parameterName,
         const std::vector<uint8_t> &parameterPayload) const;
 
+    /**
+     * This method returns the structure of a parameter
+     * @param[in] subsystemName is the name of the subsystem (eg. cavs)
+     * @param[in] elementName is the name of the element
+     * @param[in] parameterKind is the kind of subnode (eg. control or info)
+     * @param[in] parameterName is the name of the parameter whose structure will be returned
+     * @return a string contaning the parameter structure in XML format
+     * @throw ParameterSerializer::Exception
+     */
+    std::string getStructureXml(
+        const std::string &subsystemName,
+        const std::string &elementName,
+        ParameterKind parameterKind,
+        const std::string &parameterName) const;
+
 private:
     std::unique_ptr<CElementHandle> getElement(
         const std::string &subsystemName,
@@ -141,6 +156,8 @@ private:
         const std::string &elementName,
         ParameterKind parameterKind,
         const std::string &parameterName) const;
+
+    static void stripFirstLine(std::string &document);
 
     const std::unique_ptr<CParameterMgrPlatformConnector> mParameterMgrPlatformConnector;
 

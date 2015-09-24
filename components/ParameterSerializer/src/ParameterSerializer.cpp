@@ -99,6 +99,13 @@ std::unique_ptr<CElementHandle> ParameterSerializer::getChildElementHandle(
     return childElementHandle;
 }
 
+void ParameterSerializer::stripFirstLine(std::string &document)
+{
+    std::size_t endLinePos = document.find("\n");
+    assert(endLinePos != std::string::npos);
+    document.erase(0, endLinePos + 1);
+}
+
 std::map<uint32_t, std::string>  ParameterSerializer::getChildren(
     const std::string &subsystemName,
     const std::string &elementName,
@@ -160,9 +167,23 @@ std::string ParameterSerializer::binaryToXml(
     }
     std::string result = childElementHandle->getAsXML();
     // Remove first line which is XML document header
-    std::size_t endLinePos = result.find("\n");
-    assert(endLinePos != std::string::npos);
-    return result.erase(0, endLinePos + 1);
+    stripFirstLine(result);
+    return result;
+}
+
+std::string ParameterSerializer::getStructureXml(
+    const std::string &subsystemName,
+    const std::string &elementName,
+    ParameterKind parameterKind,
+    const std::string &parameterName) const
+{
+    std::unique_ptr<CElementHandle> childElementHandle =
+        getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);
+
+    std::string result = childElementHandle->getStructureAsXML();
+    // Remove first line which is XML document header
+    stripFirstLine(result);
+    return result;
 }
 
 }

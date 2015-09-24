@@ -277,3 +277,25 @@ TEST_CASE("Test parameter serializer xml to binary")
 
     CHECK(localNsControlParameterPayload == nsControlParameterPayload);
 }
+
+TEST_CASE("Test parameter serializer get structure XML")
+{
+    ParameterSerializer parameterSerializer(pfwConfFilePath);
+
+    std::map<uint32_t, std::string> children = parameterSerializer.getChildren(
+        "cavs",
+        "aec",
+        ParameterSerializer::ParameterKind::Control);
+
+    std::vector<uint8_t> localAecControlParameterPayload;
+
+    std::string aecControlParameter;
+    CHECK_NOTHROW(aecControlParameter = parameterSerializer.getStructureXml(
+        "cavs",
+        "aec",
+        ParameterSerializer::ParameterKind::Control,
+        children[0]));
+
+    CHECK(aecControlParameter == xmlFile("parameter_aec_type_control_params"));
+}
+
