@@ -320,8 +320,8 @@ void CavsTopologySample::createInstanceFirmwareObjects(
 
 void CavsTopologySample::createFirmwareObjects(
     std::vector<dsp_fw::ModuleEntry> &modules,
-    std::vector<char> &fwConfig,
-    std::vector<char> &hwConfig)
+    Buffer &fwConfig,
+    Buffer &hwConfig)
 {
     /* Filling module entries */
     ASSERT_ALWAYS(moduleCount == moduleNames.size());

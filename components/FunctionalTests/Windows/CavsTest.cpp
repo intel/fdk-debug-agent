@@ -139,8 +139,8 @@ void addInitialCommands(windows::MockedDeviceCommands &commands)
     /* Constructing cavs model */
     /* ----------------------- */
     std::vector<dsp_fw::ModuleEntry> modules;
-    std::vector<char> fwConfig;
-    std::vector<char> hwConfig;
+    Buffer fwConfig;
+    Buffer hwConfig;
 
     CavsTopologySample::createFirmwareObjects(
         modules,

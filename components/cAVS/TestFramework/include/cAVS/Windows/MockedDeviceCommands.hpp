@@ -32,6 +32,7 @@
 #include "cAVS/DspFw/Infrastructure.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
+#include "Util/Buffer.hpp"
 #include <vector>
 
 namespace debug_agent
@@ -84,7 +85,7 @@ public:
      */
     void addGetFwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::IxcStatus returnedFirmwareStatus,
-        const std::vector<char> &fwConfigTlvList);
+        const util::Buffer &fwConfigTlvList);
 
     /**
      * Add a get hw config command.
@@ -103,7 +104,7 @@ public:
      */
     void addGetHwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::IxcStatus returnedFirmwareStatus,
-        const std::vector<char> &hwConfigTlvList);
+        const util::Buffer &hwConfigTlvList);
 
     /** Add a get log parameters command
     *
@@ -286,7 +287,7 @@ private:
 
     void addTlvParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
         dsp_fw::IxcStatus returnedFirmwareStatus,
-        const std::vector<char> &tlvList, dsp_fw::BaseFwParams parameterId);
+        const util::Buffer &tlvList, dsp_fw::BaseFwParams parameterId);
 
     /** Common method to add "module access param" ioctl command */
     void addModuleParameterCommand(Command command,

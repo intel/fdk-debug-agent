@@ -27,6 +27,7 @@
 #include "cAVS/DspFw/ModuleInstance.hpp"
 #include "cAVS/DspFw/ModuleType.hpp"
 #include "cAVS/DspFw/Scheduler.hpp"
+#include "Util/Buffer.hpp"
 
 namespace debug_agent
 {
@@ -44,8 +45,8 @@ public:
 
     static void createFirmwareObjects(
         std::vector<cavs::dsp_fw::ModuleEntry> &modules,
-        std::vector<char> &fwConfig,
-        std::vector<char> &hwConfig);
+        util::Buffer &fwConfig,
+        util::Buffer &hwConfig);
 
 
     static const size_t moduleCount;

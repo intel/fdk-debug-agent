@@ -181,15 +181,12 @@ void MockedDeviceCommands::addLogParameterCommand(
 void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess,
                                                   NTSTATUS returnedDriverStatus,
                                                   dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                  const std::vector<char> &tlvList,
+                                                  const Buffer &tlvList,
                                                   dsp_fw::BaseFwParams parameterId)
 {
     util::Buffer expectedOutput(ModuleHandler::cavsTlvBufferSize, 0xFF);
     util::Buffer returnedOutput;
-    returnedOutput.resize(tlvList.size());
-    for (std::size_t i = 0; i < tlvList.size(); ++i) {
-        returnedOutput[i] = static_cast<uint8_t>(tlvList[i]);
-    }
+    returnedOutput = tlvList;
 
     addModuleParameterCommand(
         Command::Get,
@@ -206,7 +203,7 @@ void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess,
 void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess,
                                                  NTSTATUS returnedDriverStatus,
                                                  dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                 const std::vector<char> &fwConfigTlvList)
+                                                 const Buffer &fwConfigTlvList)
 {
     addTlvParameterCommand(ioctlSuccess,
                            returnedDriverStatus,
@@ -218,7 +215,7 @@ void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess,
 void MockedDeviceCommands::addGetHwConfigCommand(bool ioctlSuccess,
                                                  NTSTATUS returnedDriverStatus,
                                                  dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                 const std::vector<char> &hwConfigTlvList)
+                                                 const Buffer &hwConfigTlvList)
 {
     addTlvParameterCommand(ioctlSuccess,
                            returnedDriverStatus,

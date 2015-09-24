@@ -21,6 +21,7 @@
 */
 #pragma once
 
+#include "Util/Buffer.hpp"
 #include <vector>
 #include <iostream>
 #include <stdexcept>
@@ -47,9 +48,9 @@ public:
     };
 
     /**
-     * Log data are stored into a std::vector<char>
+     * Log data are stored into a buffer
      */
-     using LogData = std::vector<char>;
+    using LogData = util::Buffer;
 
     /**
      * @param[in] coreId The ID of the log block producer core (in [0..15])
@@ -159,10 +160,10 @@ std::ostream &operator<<(std::ostream &os, const LogBlockBase<maxSize> &logBlock
     blockHeader |= static_cast<uint32_t>(logBlock.getLogSize());
 
     /* Serialize block header */
-    os.write(reinterpret_cast<char *>(&blockHeader), sizeof(blockHeader));
+    os.write(reinterpret_cast<const char *>(&blockHeader), sizeof(blockHeader));
 
     /* Serialize block log data */
-    os.write(logBlock.getLogData().data(), logBlock.getLogSize());
+    os.write(reinterpret_cast<const char *>(logBlock.getLogData().data()), logBlock.getLogSize());
 
     return os;
 }

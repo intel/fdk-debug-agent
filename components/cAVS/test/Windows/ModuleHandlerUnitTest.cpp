@@ -171,7 +171,7 @@ TEST_CASE("Module handling: getting FW configs")
 {
     static const size_t fwVersionValueOffsetInTlv = 8;
 
-    static const std::vector<char> fwConfigTlvList{
+    static const Buffer fwConfigTlvList{
         /* Tag for FW_VERSION: 0x00000000 */
         0x00, 0x00, 0x00, 0x00,
         /* Length = 8 bytes */
