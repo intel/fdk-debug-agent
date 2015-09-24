@@ -23,7 +23,7 @@
 #pragma once
 
 #include "Core/Resources.hpp"
-#include "ParameterMgrPlatformConnector.h"
+#include "ParameterSerializer/ParameterSerializer.hpp"
 #include "ElementHandle.h"
 #include <memory>
 
@@ -31,39 +31,26 @@ namespace debug_agent
 {
 namespace core
 {
-/** Base class for resources using PFW */
-class PFWResource : public SystemResource
-{
-public:
-    PFWResource(cavs::System &system,
-        CParameterMgrPlatformConnector &parameterMgrPlatformConnector);
-protected:
-    const CParameterMgrPlatformConnector &getParameterMgrPlatformConnector() const
-    {
-        return mParameterMgrPlatformConnector;
-    }
-private:
-    CParameterMgrPlatformConnector &mParameterMgrPlatformConnector;
-
-};
-
 /** Base class for module resources*/
-class ModuleResource : public PFWResource
+class ModuleResource : public SystemResource
 {
 public:
     ModuleResource(cavs::System &system,
-        CParameterMgrPlatformConnector &parameterMgrPlatformConnector,
+        parameterSerializer::ParameterSerializer &parameterSerializer,
         const std::string moduleName,
         const uint16_t moduleId) :
-        PFWResource(system, parameterMgrPlatformConnector),
+        SystemResource(system),
+        mParameterSerializer(parameterSerializer),
         mModuleName(moduleName),
         mModuleId(moduleId) {}
 
 protected:
-    std::unique_ptr<CElementHandle> getModuleControlElement() const;
-    std::unique_ptr<CElementHandle> getChildElementHandle(
-        const CElementHandle &moduleElementHandle, uint32_t childId) const;
-    uint32_t getElementMapping(const CElementHandle &elementHandle) const;
+    std::map<uint32_t, std::string>  getChildren(
+        parameterSerializer::ParameterSerializer::ParameterKind parameterKind) const;
+    uint16_t getInstanceId(const rest::Request &request) const;
+    uint32_t getParamId(const std::string parameterName) const;
+
+    parameterSerializer::ParameterSerializer &mParameterSerializer;
     const std::string mModuleName;
     const uint16_t mModuleId;
 };
@@ -73,10 +60,10 @@ class ControlParametersModuleInstanceResource : public ModuleResource
 {
 public:
     ControlParametersModuleInstanceResource(cavs::System &system,
-        CParameterMgrPlatformConnector &parameterMgrPlatformConnector,
+        parameterSerializer::ParameterSerializer &parameterSerializer,
         const std::string moduleName,
         const uint16_t moduleId) :
-        ModuleResource(system, parameterMgrPlatformConnector, moduleName, moduleId) {}
+        ModuleResource(system, parameterSerializer, moduleName, moduleId) {}
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
     virtual ResponsePtr handlePut(const rest::Request &request) override;
@@ -87,10 +74,10 @@ class ControlParametersModuleTypeResource : public ModuleResource
 {
 public:
     ControlParametersModuleTypeResource(cavs::System &system,
-        CParameterMgrPlatformConnector &parameterMgrPlatformConnector,
+        parameterSerializer::ParameterSerializer &parameterSerializer,
         const std::string moduleName,
         const uint16_t moduleId) :
-        ModuleResource(system, parameterMgrPlatformConnector, moduleName, moduleId) {}
+        ModuleResource(system, parameterSerializer, moduleName, moduleId) {}
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
 };

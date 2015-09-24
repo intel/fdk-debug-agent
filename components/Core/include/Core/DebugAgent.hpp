@@ -25,7 +25,7 @@
 #include "cAVS/System.hpp"
 #include "Rest/Server.hpp"
 #include "Util/ExclusiveResource.hpp"
-#include "ParameterMgrPlatformConnector.h"
+#include "ParameterSerializer/ParameterSerializer.hpp"
 #include <inttypes.h>
 
 namespace debug_agent
@@ -60,7 +60,7 @@ private:
     std::shared_ptr<TypeModel> mTypeModel;
     std::shared_ptr<ifdk_objects::instance::System> mSystemInstance;
     util::ExclusiveResource<std::shared_ptr<InstanceModel>> mInstanceModel;
-    CParameterMgrPlatformConnector mParameterMgrPlatformConnector;
+    parameterSerializer::ParameterSerializer mParameterSerializer;
     rest::Server mRestServer;
 };
 

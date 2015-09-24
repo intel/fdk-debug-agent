@@ -57,8 +57,5 @@ target_include_directories(Core PRIVATE "src")
 # Binding with Poco
 link_poco(Core)
 
-# Binding with pfw
-link_pfw(Core)
-
 # Needed components
-target_link_libraries(Core cAVS Rest Util IfdkObjects)
+target_link_libraries(Core cAVS Rest Util IfdkObjects ParameterSerializer)

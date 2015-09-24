@@ -109,12 +109,12 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
         dispatcher->addResource(
             "/instance/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
             std::make_shared<ControlParametersModuleInstanceResource>(
-                mSystem, mParameterMgrPlatformConnector, moduleName, moduleId));
+            mSystem, mParameterSerializer, moduleName, moduleId));
 
         dispatcher->addResource(
             "/type/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
             std::make_shared<ControlParametersModuleTypeResource>(
-                mSystem, mParameterMgrPlatformConnector, moduleName, moduleId));
+            mSystem, mParameterSerializer, moduleName, moduleId));
 
         moduleId++;
     }
@@ -145,7 +145,7 @@ try :
     mTypeModel(createTypeModel()),
     mSystemInstance(createSystemInstance()),
     mInstanceModel(nullptr),
-    mParameterMgrPlatformConnector(pfwConfig),
+    mParameterSerializer(pfwConfig),
     mRestServer(createDispatcher(), port, isVerbose)
 {
     assert(mTypeModel != nullptr);

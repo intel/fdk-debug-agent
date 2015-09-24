@@ -38,6 +38,7 @@
 
 using namespace debug_agent::rest;
 using namespace debug_agent::cavs;
+using namespace debug_agent::parameterSerializer;
 
 namespace debug_agent
 {
@@ -45,83 +46,56 @@ namespace core
 {
     static const std::string ContentTypeHtml("text/html");
     static const std::string ContentTypeXml("text/xml");
+    static const std::string InstanceId("instanceId");
+    static const std::string ParamId("ParamId");
 
-PFWResource::PFWResource(cavs::System &system,
-    CParameterMgrPlatformConnector &parameterMgrPlatformConnector) :
-    SystemResource(system),
-    mParameterMgrPlatformConnector(parameterMgrPlatformConnector)
+std::map<uint32_t, std::string> ModuleResource::getChildren(
+    ParameterSerializer::ParameterKind parameterKind) const
 {
-    std::string error;
-    if (!mParameterMgrPlatformConnector.isStarted())
+    std::map<uint32_t, std::string>  children;
+    try
     {
-        if (!mParameterMgrPlatformConnector.start(error))
-        {
-            throw Response::HttpError(
-                Response::ErrorStatus::InternalError,
-                "Parameter framework fails to start : " + error);
-
-        }
+        children = mParameterSerializer.getChildren(
+            "cavs", mModuleName, parameterKind);
     }
-}
-
-std::unique_ptr<CElementHandle> ModuleResource::getModuleControlElement()
-    const
-{
-    std::string error;
-    std::string rootElementName =
-        getParameterMgrPlatformConnector().createElementHandle("/", error)->getName();
-
-    // compute module control element path from URL
-    std::string moduleControlPath = std::string("/") + rootElementName
-        + "/cavs/categories/" + mModuleName + "/control/";
-
-    std::unique_ptr<CElementHandle> mModuleElementHandle(
-        getParameterMgrPlatformConnector().createElementHandle(moduleControlPath, error));
-
-    if (mModuleElementHandle == nullptr) {
-        throw Response::HttpError(
-            Response::ErrorStatus::NotFound,
-            "Invalid parameters format: node for path \"" + moduleControlPath + "\" not found");
-    }
-
-    return mModuleElementHandle;
-}
-
-std::unique_ptr<CElementHandle> ModuleResource::getChildElementHandle(
-    const CElementHandle &moduleElementHandle, uint32_t childId) const
-{
-    std::string childName;
-    if (!moduleElementHandle.getChildName(childId, childName)) {
-        throw Response::HttpError(
-            Response::ErrorStatus::BadRequest,
-            "Child name not found for childId=" + std::to_string(childId));
-    }
-
-    std::string error;
-    std::unique_ptr<CElementHandle> childElementHandle(
-        getParameterMgrPlatformConnector().createElementHandle(
-            moduleElementHandle.getPath() + "/" + childName, error));
-
-    if (childElementHandle == nullptr) {
-        throw Response::HttpError(
-            Response::ErrorStatus::BadRequest,
-            "Child " + childName + " not found for " + moduleElementHandle.getName());
-    }
-
-    return childElementHandle;
-}
-
-uint32_t ModuleResource::getElementMapping(
-    const CElementHandle &elementHandle) const
-{
-    std::string paramIdAsString;
-    if (!elementHandle.getMappingData("ParamId", paramIdAsString))
+    catch (ParameterSerializer::Exception &e)
     {
         throw Response::HttpError(
-            Response::ErrorStatus::BadRequest,
-            "Mapping \"ParamId\" not found for " + elementHandle.getName());
+            Response::ErrorStatus::InternalError,
+            "Module resource does not manage to get children: " + std::string(e.what()));
     }
+    return children;
+}
+
+uint16_t ModuleResource::getInstanceId(const Request &request) const
+{
+    uint16_t instanceId;
+    std::string instanceIdValue(request.getIdentifierValue(InstanceId));
+    if (!convertTo(instanceIdValue, instanceId)) {
+
+        throw Response::HttpError(
+            Response::ErrorStatus::BadRequest,
+            "Invalid instance ID: " + instanceIdValue);
+    }
+    return instanceId;
+}
+
+uint32_t ModuleResource::getParamId(const std::string parameterName) const
+{
     uint32_t paramId;
+    std::string paramIdAsString;
+    try
+    {
+        paramIdAsString = mParameterSerializer.getMapping(
+            "cavs", mModuleName, parameterName, ParamId);
+    }
+    catch (ParameterSerializer::Exception &e)
+    {
+        throw Response::HttpError(
+            Response::ErrorStatus::InternalError,
+            "Module resource does not manage to retrieve mapping: " + std::string(e.what()));
+    }
+
     if (!convertTo(paramIdAsString, paramId)) {
 
         throw Response::HttpError(
@@ -136,44 +110,46 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handleGet(
     const Request &request)
 {
     /* Checking that the identifiers has been fetched */
-    uint16_t instanceId;
-    std::string instanceIdValue(request.getIdentifierValue("instanceId"));
-    if (!convertTo(instanceIdValue, instanceId)) {
-
-        throw Response::HttpError(
-            Response::ErrorStatus::BadRequest,
-            "Invalid instance ID: " + instanceIdValue);
-    }
-
-    std::unique_ptr<CElementHandle> moduleElementHandle = getModuleControlElement();
+    uint16_t instanceId = getInstanceId(request);
 
     /* Loop through children to get Settings */
-    std::string controlParameters;
-    uint32_t childrenCount = moduleElementHandle->getChildrenCount();
-    for (uint32_t child = 0; child < childrenCount; child++)
-    {
-        std::unique_ptr<CElementHandle> childElementHandle =
-            getChildElementHandle(*moduleElementHandle, child);
+    std::map<uint32_t, std::string>  children = getChildren(
+        ParameterSerializer::ParameterKind::Control);
 
-        uint32_t paramId = getElementMapping(*childElementHandle);
+    std::string controlParameters;
+    for (uint32_t childId = 0; childId < children.size(); childId++)
+    {
+        uint32_t paramId = getParamId(children[childId]);
 
         // Get binary from IOCTL
         std::vector<uint8_t> parameterPayload;
-        mSystem.getModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
-        // Send binary to PFW
-        std::string error;
-        if (!childElementHandle->setAsBytes(parameterPayload, error))
+        try
+        {
+            mSystem.getModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
+        }
+        catch (ModuleHandler::Exception &e)
         {
             throw Response::HttpError(
-                Response::ErrorStatus::BadRequest,
-                "Not able to set payload for " + childElementHandle->getName() + " : " + error);
+                Response::ErrorStatus::InternalError,
+                "Cannot get module parameter: " + std::string(e.what()));
         }
-        //childElementHandle->setAsBytes()
-        std::string result = childElementHandle->getAsXML();
-        // Remove first line which is XML document header
-        std::size_t endLinePos = result.find("\n");
-        assert(endLinePos != std::string::npos);
-        controlParameters += result.erase(0, endLinePos + 1);
+
+        // Convert to XML
+        try
+        {
+            controlParameters += mParameterSerializer.binaryToXml(
+                "cavs",
+                mModuleName,
+                ParameterSerializer::ParameterKind::Control,
+                children[childId],
+                parameterPayload);
+        }
+        catch (ParameterSerializer::Exception &e)
+        {
+            throw Response::HttpError(
+                Response::ErrorStatus::InternalError,
+                "Binary to Xml conversion failed: " + std::string(e.what()));
+        }
     }
 
     auto out = std::make_unique<std::stringstream>();
@@ -198,48 +174,55 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(
     static const std::string controlParametersUrl = "/control_parameters/";
 
     /* Checking that the identifiers has been fetched */
-    uint16_t instanceId;
-    std::string instanceIdValue(request.getIdentifierValue("instanceId"));
-    if (!convertTo(instanceIdValue, instanceId)) {
+    uint16_t instanceId = getInstanceId(request);
 
-        throw Response::HttpError(
-            Response::ErrorStatus::BadRequest,
-            "Invalid instance ID: " + instanceIdValue);
-    }
+    std::map<uint32_t, std::string>  children = getChildren(
+        ParameterSerializer::ParameterKind::Control);
 
-    std::unique_ptr<CElementHandle> moduleElementHandle = getModuleControlElement();
-
-    /* Loop through children to get Settings */
-    uint32_t childrenCount = moduleElementHandle->getChildrenCount();
-    for (uint32_t child = 0; child < childrenCount; child++)
+    for (uint32_t childId = 0; childId < children.size(); childId++)
     {
-        std::unique_ptr<CElementHandle> childElementHandle =
-            getChildElementHandle(*moduleElementHandle, child);
-
-        uint32_t paramId = getElementMapping(*childElementHandle);
+        uint32_t paramId = getParamId(children[childId]);
 
         /* Create XML document from the XML node of each child. The usage of operator new is needed
          * here to comply with poco AutoPtr. */
         Poco::XML::AutoPtr<Poco::XML::Document> childDocument = new Poco::XML::Document;
         childDocument->appendChild(childDocument->importNode(
             document->getNodeByPath(controlParametersUrl + "ParameterBlock[@Name='"
-            + childElementHandle->getName() + "']"), true));
+            + children[childId] + "']"), true));
         /* Serialize the document in a stream*/
         Poco::XML::DOMWriter writer;
         std::stringstream output;
         writer.writeNode(output, childDocument);
 
         // Send XML string to PFW
-        if (!childElementHandle->setAsXML(output.str(), error))
+        std::vector<uint8_t> parameterPayload;
+        // Convert XML to binary
+        try
+        {
+            parameterPayload = mParameterSerializer.xmlToBinary(
+                "cavs",
+                mModuleName,
+                ParameterSerializer::ParameterKind::Control,
+                children[childId],
+                output.str());
+        }
+        catch (ParameterSerializer::Exception &e)
         {
             throw Response::HttpError(
-                Response::ErrorStatus::BadRequest,
-                "Not able to set XML stream for " + childElementHandle->getName() + " : " + error);
+                Response::ErrorStatus::InternalError,
+                "Xml to binary conversion failed: " + std::string(e.what()));
         }
-        // Read binary back from PFW
-        std::vector<uint8_t> parameterPayload = childElementHandle->getAsBytes();
         // Send binary to IOCTL
-        mSystem.setModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
+        try
+        {
+            mSystem.setModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
+        }
+        catch (ModuleHandler::Exception &e)
+        {
+            throw Response::HttpError(
+                Response::ErrorStatus::InternalError,
+                "Cannot set module parameter: " + std::string(e.what()));
+        }
     }
 
     return std::make_unique<Response>();
@@ -249,31 +232,29 @@ Resource::ResponsePtr ControlParametersModuleTypeResource::handleGet(
     const Request &request)
 {
     /* Checking that the identifiers has been fetched */
-    uint16_t instanceId;
-    std::string instanceIdValue(request.getIdentifierValue("instanceId"));
-    if (!convertTo(instanceIdValue, instanceId)) {
-
-        throw Response::HttpError(
-            Response::ErrorStatus::BadRequest,
-            "Invalid instance ID: " + instanceIdValue);
-    }
-
-    std::unique_ptr<CElementHandle> moduleElementHandle = getModuleControlElement();
+    uint16_t instanceId = getInstanceId(request);
 
     /* Loop through children to get Settings */
-    std::string controlParameters;
-    uint32_t childrenCount = moduleElementHandle->getChildrenCount();
-    for (uint32_t child = 0; child < childrenCount; child++)
-    {
-        std::unique_ptr<CElementHandle>  childElementHandle = getChildElementHandle(
-            *moduleElementHandle, child);
+    std::map<uint32_t, std::string>  children = getChildren(
+        ParameterSerializer::ParameterKind::Control);
 
-        // Get Structure information from PFW
-        std::string result = childElementHandle->getStructureAsXML();
-        // Remove first line which is XML document header
-        std::size_t endLinePos = result.find("\n");
-        assert(endLinePos != std::string::npos);
-        controlParameters += result.erase(0, endLinePos + 1);
+    std::string controlParameters;
+    for (uint32_t childId = 0; childId < children.size(); childId++)
+    {
+        try
+        {
+            controlParameters += mParameterSerializer.getStructureXml(
+                "cavs",
+                mModuleName,
+                ParameterSerializer::ParameterKind::Control,
+                children[childId]);
+        }
+        catch (ParameterSerializer::Exception &e)
+        {
+            throw Response::HttpError(
+                Response::ErrorStatus::InternalError,
+                "Failed to get Xml structure: " + std::string(e.what()));
+        };
     }
 
     auto out = std::make_unique<std::stringstream>();
