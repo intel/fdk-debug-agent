@@ -22,10 +22,14 @@
 
 #pragma once
 
-#include "cAVS/FirmwareTypes.hpp"
-#include "cAVS/DynamicSizedFirmwareTypes.hpp"
-#include "cAVS/FwConfig.hpp"
-#include "cAVS/HwConfig.hpp"
+#include "cAVS/DspFw/ModuleType.hpp"
+#include "cAVS/DspFw/ModuleInstance.hpp"
+#include "cAVS/DspFw/FwConfig.hpp"
+#include "cAVS/DspFw/HwConfig.hpp"
+#include "cAVS/DspFw/Pipeline.hpp"
+#include "cAVS/DspFw/Gateway.hpp"
+#include "cAVS/DspFw/Scheduler.hpp"
+#include "cAVS/DspFw/Infrastructure.hpp"
 #include <stdexcept>
 #include <vector>
 
@@ -63,10 +67,10 @@ public:
         std::vector<dsp_fw::ModuleEntry> &modulesEntries) = 0;
 
     /** @return the firmware configuration */
-    virtual void getFwConfig(FwConfig &fwConfig) = 0;
+    virtual void getFwConfig(dsp_fw::FwConfig &fwConfig) = 0;
 
     /** @return the hardware configuration */
-    virtual void getHwConfig(HwConfig &hwConfig) = 0;
+    virtual void getHwConfig(dsp_fw::HwConfig &hwConfig) = 0;
 
     /** @return the pipeline identifier list */
     virtual void getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t> &pipelinesIds) = 0;

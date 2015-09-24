@@ -43,8 +43,8 @@ public:
 
     virtual void getModulesEntries(uint32_t moduleCount,
         std::vector<dsp_fw::ModuleEntry> &modulesEntries) override;
-    virtual void getFwConfig(FwConfig &fwConfig) override;
-    virtual void getHwConfig(HwConfig &hwConfig) override;
+    virtual void getFwConfig(dsp_fw::FwConfig &fwConfig) override;
+    virtual void getHwConfig(dsp_fw::HwConfig &hwConfig) override;
     virtual void getPipelineIdList(uint32_t maxPplCount,
         std::vector<uint32_t> &pipelinesIds) override;
     virtual void getPipelineProps(uint32_t pipelineId, dsp_fw::DSPplProps &props) override;

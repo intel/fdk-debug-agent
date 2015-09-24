@@ -21,7 +21,11 @@
 */
 #pragma once
 
-#include "cAVS/DynamicSizedFirmwareTypes.hpp"
+#include "cAVS/DspFw/Gateway.hpp"
+#include "cAVS/DspFw/Pipeline.hpp"
+#include "cAVS/DspFw/ModuleInstance.hpp"
+#include "cAVS/DspFw/ModuleType.hpp"
+#include "cAVS/DspFw/Scheduler.hpp"
 #include <utility>
 #include <vector>
 #include <map>

@@ -20,7 +20,6 @@
 ********************************************************************************
 */
 #include "Core/InstanceModelConverter.hpp"
-#include "cAVS/FirmwareTypeHelpers.hpp"
 #include "Util/StringHelper.hpp"
 
 using namespace debug_agent::cavs;
@@ -67,7 +66,7 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
     }
 
     /* Gateways */
-    for (auto &entry : FirmwareTypeHelpers::getGatewayHelper().getEnumToStringMap()) {
+    for (auto &entry : dsp_fw::ConnectorNodeId::getTypeEnumHelper().getEnumToStringMap()) {
         addInstanceCollection(collectionMap, entry.second, createGateway(entry.first));
     }
 
@@ -395,7 +394,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
             for (auto &pin : module.input_pins.pin_info) {
 
                 moduleModel->getInputs().add(Input(std::to_string(pinId),
-                    cavs::FirmwareTypeHelpers::toString(pin.format)));
+                    pin.format.toString()));
                 ++pinId;
             }
 
@@ -404,7 +403,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
             for (auto &pin : module.output_pins.pin_info) {
 
                 moduleModel->getOutputs().add(Output(std::to_string(pinId),
-                    cavs::FirmwareTypeHelpers::toString(pin.format)));
+                    pin.format.toString()));
                 ++pinId;
             }
 

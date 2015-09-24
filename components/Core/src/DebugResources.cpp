@@ -25,7 +25,6 @@
 #include "Core/DebugResources.hpp"
 #include "Rest/StreamResponse.hpp"
 #include "cAVS/Topology.hpp"
-#include "cAVS/FirmwareTypeHelpers.hpp"
 #include "Util/StringHelper.hpp"
 #include "Util/Uuid.hpp"
 #include <Poco/Zip/Compress.h>
@@ -91,7 +90,7 @@ std::string gatewayToString(const dsp_fw::ConnectorNodeId &connector)
         static_cast<dsp_fw::ConnectorNodeId::Type>(connector.val.f.dma_type);
 
     std::stringstream stream;
-    stream << "(" << FirmwareTypeHelpers::getGatewayHelper().toString(type)
+    stream << "(" << dsp_fw::ConnectorNodeId::getTypeEnumHelper().toString(type)
         << "(" << connector.val.f.dma_type << "), "
         << connector.val.f.v_index << ")";
 
@@ -223,7 +222,7 @@ void TopologyDebugResource::dumpGateways(HtmlHelper &html,
             static_cast<dsp_fw::ConnectorNodeId::Type>(connector.val.f.dma_type);
 
         html.cell(connector.val.f.dma_type);
-        html.cell(FirmwareTypeHelpers::getGatewayHelper().toString(type));
+        html.cell(dsp_fw::ConnectorNodeId::getTypeEnumHelper().toString(type));
         html.cell(connector.val.f.v_index);
         html.cell(gateway.attribs);
 
@@ -448,8 +447,8 @@ void TopologyDebugResource::dumpPins(HtmlHelper &html,
             html.beginRow();
 
             html.cell(pin.phys_queue_id);
-            html.cell(FirmwareTypeHelpers::getStreamTypeHelper().toString(pin.stream_type));
-            html.cell(FirmwareTypeHelpers::toString(pin.format));
+            html.cell(dsp_fw::getStreamTypeHelper().toString(pin.stream_type));
+            html.cell(pin.format.toString());
 
             html.endRow();
         }

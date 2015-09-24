@@ -19,8 +19,14 @@
 *
 ********************************************************************************
 */
-#include "cAVS/DynamicSizedFirmwareTypes.hpp"
-#include "catch.hpp"
+#include "cAVS/DspFw/ModuleType.hpp"
+#include "cAVS/DspFw/ModuleInstance.hpp"
+#include "cAVS/DspFw/FwConfig.hpp"
+#include "cAVS/DspFw/HwConfig.hpp"
+#include "cAVS/DspFw/Pipeline.hpp"
+#include "cAVS/DspFw/Gateway.hpp"
+#include "cAVS/DspFw/Scheduler.hpp"
+#include <catch.hpp>
 
 using namespace debug_agent::util;
 using namespace debug_agent::cavs::dsp_fw;

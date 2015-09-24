@@ -26,7 +26,6 @@
 #include "Core/TypeModelConverter.hpp"
 #include "Core/InstanceModelConverter.hpp"
 #include "Core/ModuleResources.hpp"
-#include "cAVS/FirmwareTypes.hpp"
 #include "cAVS/System.hpp"
 #include "Util/StringHelper.hpp"
 #include <memory>

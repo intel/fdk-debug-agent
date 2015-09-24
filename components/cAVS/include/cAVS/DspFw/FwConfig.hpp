@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include "cAVS/FirmwareTypes.hpp"
+#include "cAVS/DspFw/ConfigTypes.hpp"
 #include "Tlv/TlvResponseHandlerInterface.hpp"
 #include "Tlv/TlvDictionary.hpp"
 #include "Tlv/TlvWrapper.hpp"
@@ -30,6 +30,8 @@
 namespace debug_agent
 {
 namespace cavs
+{
+namespace dsp_fw
 {
 
 /**
@@ -43,7 +45,7 @@ namespace cavs
 class FwConfig final: public tlv::TlvResponseHandlerInterface
 {
 public:
-    dsp_fw::FwVersion fwVersion;
+    FwVersion fwVersion;
     bool isFwVersionValid;
 
     uint32_t memoryReclaimed;
@@ -55,7 +57,7 @@ public:
     uint32_t fastClockFreqHz;
     bool isFastClockFreqHzValid;
 
-    std::vector<dsp_fw::DmaBufferConfig> dmaBufferConfig;
+    std::vector<DmaBufferConfig> dmaBufferConfig;
 
     /* We do not use the FW type 'enum AlhSupportLevel' since we cannot guarantee that the
      * debug agent will consume 4 bytes for an enum. */
@@ -99,11 +101,11 @@ public:
         mFwConfigTlvMap(),
         mFwConfigTlvDictionary(mFwConfigTlvMap)
     {
-        using Tags = dsp_fw::FwConfigParams;
+        using Tags = FwConfigParams;
         using namespace tlv;
 
         mFwConfigTlvMap[Tags::FW_VERSION_FW_CFG] =
-            std::make_unique<TlvWrapper<dsp_fw::FwVersion> >(fwVersion, isFwVersionValid);
+            std::make_unique<TlvWrapper<FwVersion> >(fwVersion, isFwVersionValid);
         mFwConfigTlvMap[Tags::MEMORY_RECLAIMED_FW_CFG] =
             std::make_unique<TlvWrapper<uint32_t> >(memoryReclaimed, isMemoryReclaimedValid);
         mFwConfigTlvMap[Tags::SLOW_CLOCK_FREQ_HZ_FW_CFG] =
@@ -111,7 +113,7 @@ public:
         mFwConfigTlvMap[Tags::FAST_CLOCK_FREQ_HZ_FW_CFG] =
             std::make_unique<TlvWrapper<uint32_t> >(fastClockFreqHz, isFastClockFreqHzValid);
         mFwConfigTlvMap[Tags::DMA_BUFFER_CONFIG_FW_CFG] =
-            std::make_unique<TlvVectorWrapper<dsp_fw::DmaBufferConfig> >(dmaBufferConfig);
+            std::make_unique<TlvVectorWrapper<DmaBufferConfig> >(dmaBufferConfig);
         mFwConfigTlvMap[Tags::ALH_SUPPORT_LEVEL_FW_CFG] =
             std::make_unique<TlvWrapper<uint32_t> >(alhSupportLevel, isAlhSupportLevelValid);
         mFwConfigTlvMap[Tags::IPC_DL_MAILBOX_BYTES_FW_CFG] =
@@ -144,9 +146,10 @@ public:
     }
 
 private:
-    tlv::TlvDictionary<dsp_fw::FwConfigParams>::TlvMap mFwConfigTlvMap;
-    tlv::TlvDictionary<dsp_fw::FwConfigParams> mFwConfigTlvDictionary;
+    tlv::TlvDictionary<FwConfigParams>::TlvMap mFwConfigTlvMap;
+    tlv::TlvDictionary<FwConfigParams> mFwConfigTlvDictionary;
 };
 
+}
 }
 }

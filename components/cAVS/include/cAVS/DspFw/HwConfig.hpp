@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include "cAVS/FirmwareTypes.hpp"
+#include "cAVS/DspFw/ConfigTypes.hpp"
 #include "Tlv/TlvResponseHandlerInterface.hpp"
 #include "Tlv/TlvDictionary.hpp"
 #include "Tlv/TlvWrapper.hpp"
@@ -31,6 +31,8 @@
 namespace debug_agent
 {
 namespace cavs
+{
+namespace dsp_fw
 {
 
 /**
@@ -92,7 +94,7 @@ public:
         mHwConfigTlvMap(),
         mHwConfigTlvDictionary(mHwConfigTlvMap)
     {
-        using Tags = dsp_fw::HwConfigParams;
+        using Tags = HwConfigParams;
         using namespace tlv;
 
         mHwConfigTlvMap[Tags::cAVS_VER_HW_CFG] =
@@ -120,8 +122,8 @@ public:
     }
 
     /**
-     * A dedicated TLV wrapper for type dsp_fw::I2sCapabilities.
-     * @see dsp_fw::I2sCapabilities
+     * A dedicated TLV wrapper for type I2sCapabilities.
+     * @see I2sCapabilities
      * @remarks this inner class should be private, but have it public allows to unit test it.
      */
     class I2sCapsTlvWrapper final: public tlv::TlvWrapperInterface
@@ -194,7 +196,7 @@ public:
          * check value consistency: the controller_base_addr array number of element must be equal
          * to controllerCount.
          * @param[in] binaryValueSize a binary size to be validated
-         * @param[in] controllerCount the dsp_fw::I2sCapabilities.controller_count value
+         * @param[in] controllerCount the I2sCapabilities.controller_count value
          * @see I2sCapsTlvWrapper::readFrom
          */
         bool isValidSize(size_t binaryValueSize, uint32_t controllerCount) const NOEXCEPT
@@ -209,7 +211,7 @@ public:
         }
 
         /*
-         * A dsp_fw::I2sCapabilities value minimum size is 8 bytes
+         * A I2sCapabilities value minimum size is 8 bytes
          * (version + controller_count fields)
          */
         static const size_t minimumI2sCapsSize = 8;
@@ -219,9 +221,10 @@ public:
     };
 
 private:
-    tlv::TlvDictionary<dsp_fw::HwConfigParams>::TlvMap mHwConfigTlvMap;
-    tlv::TlvDictionary<dsp_fw::HwConfigParams> mHwConfigTlvDictionary;
+    tlv::TlvDictionary<HwConfigParams>::TlvMap mHwConfigTlvMap;
+    tlv::TlvDictionary<HwConfigParams> mHwConfigTlvDictionary;
 };
 
+}
 }
 }

@@ -22,8 +22,8 @@
 #pragma once
 
 #include "cAVS/Driver.hpp"
-#include "cAVS/FwConfig.hpp"
-#include "cAVS/HwConfig.hpp"
+#include "cAVS/DspFw/FwConfig.hpp"
+#include "cAVS/DspFw/HwConfig.hpp"
 #include "cAVS/Linux/Logger.hpp"
 
 namespace debug_agent
@@ -47,8 +47,8 @@ private:
     class DummyModuleHandler : public ModuleHandler
     {
     public:
-        virtual void getFwConfig(FwConfig &fwConfig) override {}
-        virtual void getHwConfig(HwConfig &hwConfig) override {}
+        virtual void getFwConfig(dsp_fw::FwConfig &fwConfig) override {}
+        virtual void getHwConfig(dsp_fw::HwConfig &hwConfig) override {}
         virtual void getModulesEntries(uint32_t moduleCount,
             std::vector<dsp_fw::ModuleEntry> &modulesEntries) override {}
         virtual void getPipelineIdList(uint32_t maxPplCount,

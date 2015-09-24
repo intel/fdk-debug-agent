@@ -19,11 +19,11 @@
 *
 ********************************************************************************
 */
-#include "cAVS/HwConfig.hpp"
+#include "cAVS/DspFw/HwConfig.hpp"
 #include "TestCommon/TestHelpers.hpp"
 #include "catch.hpp"
 
-using namespace debug_agent::cavs;
+using namespace debug_agent::cavs::dsp_fw;
 using namespace debug_agent::tlv;
 
 static const size_t minimumI2sCapsValueSize = 8;

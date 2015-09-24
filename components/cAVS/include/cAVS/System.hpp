@@ -108,12 +108,12 @@ public:
     /**
      * Get firmware configuration
      */
-    const FwConfig &getFwConfig() const NOEXCEPT;
+    const dsp_fw::FwConfig &getFwConfig() const NOEXCEPT;
 
     /**
      * Get hardware configuration
      */
-    const HwConfig &getHwConfig() const NOEXCEPT;
+    const dsp_fw::HwConfig &getHwConfig() const NOEXCEPT;
 
     /**
      * Try to acquire the log stream resource
@@ -159,12 +159,12 @@ private:
     /**
      * The FW config structure retrieved from FW once, at initialization
      */
-    FwConfig mFwConfig;
+    dsp_fw::FwConfig mFwConfig;
 
     /**
      * The HW config structure retrieved from FW once, at initialization
      */
-    HwConfig mHwConfig;
+    dsp_fw::HwConfig mHwConfig;
 
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;

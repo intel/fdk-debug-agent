@@ -37,13 +37,25 @@ set(LIB_INCS
     include/cAVS/DriverFactory.hpp
     include/cAVS/SystemDriverFactory.hpp
     include/cAVS/System.hpp
-    include/cAVS/FirmwareTypes.hpp
-    include/cAVS/FirmwareTypeHelpers.hpp
-    include/cAVS/DynamicSizedFirmwareTypes.hpp
     include/cAVS/ModuleHandler.hpp
-    include/cAVS/FwConfig.hpp
-    include/cAVS/HwConfig.hpp
     include/cAVS/Topology.hpp)
+
+# firwmare include files
+set(FW_INCS
+    include/cAVS/DspFw/AudioFormat.hpp
+    include/cAVS/DspFw/ConfigTypes.hpp
+    include/cAVS/DspFw/FwConfig.hpp
+    include/cAVS/DspFw/HwConfig.hpp
+    include/cAVS/DspFw/ModuleInstance.hpp
+    include/cAVS/DspFw/Pipeline.hpp
+    include/cAVS/DspFw/Common.hpp
+    include/cAVS/DspFw/Gateway.hpp
+    include/cAVS/DspFw/Infrastructure.hpp
+    include/cAVS/DspFw/ModuleType.hpp
+    include/cAVS/DspFw/Scheduler.hpp)
+
+source_group("Header Files\\DspFw" FILES ${FW_INCS})
+set(LIB_INCS ${LIB_INCS} ${FW_INCS})
 
 set(LIBRAIRIES)
 

@@ -118,12 +118,12 @@ const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const NOEXCEP
     return mModuleEntries;
 }
 
-const FwConfig &System::getFwConfig() const NOEXCEPT
+const dsp_fw::FwConfig &System::getFwConfig() const NOEXCEPT
 {
     return mFwConfig;
 }
 
-const HwConfig &System::getHwConfig() const NOEXCEPT
+const dsp_fw::HwConfig &System::getHwConfig() const NOEXCEPT
 {
     return mHwConfig;
 }

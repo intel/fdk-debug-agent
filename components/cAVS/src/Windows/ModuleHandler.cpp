@@ -202,14 +202,14 @@ void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandl
 
 }
 
-void ModuleHandler::getFwConfig(FwConfig &fwConfig)
+void ModuleHandler::getFwConfig(dsp_fw::FwConfig &fwConfig)
 {
-    readTlvParameters<FwConfig>(fwConfig, dsp_fw::BaseFwParams::FW_CONFIG);
+    readTlvParameters<dsp_fw::FwConfig>(fwConfig, dsp_fw::BaseFwParams::FW_CONFIG);
 }
 
-void ModuleHandler::getHwConfig(HwConfig &hwConfig)
+void ModuleHandler::getHwConfig(dsp_fw::HwConfig &hwConfig)
 {
-    readTlvParameters<HwConfig>(hwConfig, dsp_fw::BaseFwParams::HW_CONFIG_GET);
+    readTlvParameters<dsp_fw::HwConfig>(hwConfig, dsp_fw::BaseFwParams::HW_CONFIG_GET);
 }
 
 void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t> &pipelinesIds)

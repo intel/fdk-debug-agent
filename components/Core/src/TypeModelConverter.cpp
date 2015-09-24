@@ -20,7 +20,6 @@
 ********************************************************************************
 */
 #include "Core/TypeModelConverter.hpp"
-#include "cAVS/FirmwareTypeHelpers.hpp"
 #include "Util/StringHelper.hpp"
 #include "Util/Uuid.hpp"
 #include <map>
@@ -57,7 +56,7 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
     }
 
     /* gateways */
-    for (auto &entry : FirmwareTypeHelpers::getGatewayHelper().getEnumToStringMap()) {
+    for (auto &entry : dsp_fw::ConnectorNodeId::getTypeEnumHelper().getEnumToStringMap()) {
         addSubsystemSubType(typeMap, createGateway(entry.second));
     }
 
@@ -119,7 +118,7 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     /* Gateways */
     auto gatewayColl = std::make_shared<ComponentRefCollection>(collectionName_gateway);
 
-    for (auto &gatewayPair : FirmwareTypeHelpers::getGatewayHelper().getEnumToStringMap()) {
+    for (auto &gatewayPair : dsp_fw::ConnectorNodeId::getTypeEnumHelper().getEnumToStringMap()) {
         const std::string &gatewayName = gatewayPair.second;
 
         gatewayColl->add(ComponentRef(gatewayName));
@@ -248,7 +247,7 @@ std::shared_ptr<Type> TypeModelConverter::createLogService()
 void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
 {
     // Add FW config
-    const FwConfig &fwConfig = mSystem.getFwConfig();
+    const dsp_fw::FwConfig &fwConfig = mSystem.getFwConfig();
     if (fwConfig.isFwVersionValid) {
         ch.add(Characteristic(
             "Firmware version",
@@ -346,7 +345,7 @@ void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
     }
 
     // Add HW config
-    const HwConfig &hwConfig = mSystem.getHwConfig();
+    const dsp_fw::HwConfig &hwConfig = mSystem.getHwConfig();
     if (hwConfig.isCavsVersionValid) {
         ch.add(Characteristic(
             "cAVS Version",

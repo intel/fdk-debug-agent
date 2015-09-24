@@ -21,7 +21,6 @@
 */
 #include "Core/BaseModelConverter.hpp"
 #include "Util/StringHelper.hpp"
-#include "cAVS/FirmwareTypeHelpers.hpp"
 
 using namespace debug_agent::cavs;
 
@@ -98,7 +97,7 @@ std::string BaseModelConverter::findGatewayTypeName(
     auto connectorType = static_cast<dsp_fw::ConnectorNodeId::Type>(connectorId.val.f.dma_type);
 
     /* Finding the gateway name */
-    auto &helper = FirmwareTypeHelpers::getGatewayHelper();
+    auto &helper = dsp_fw::ConnectorNodeId::getTypeEnumHelper();
     if (!helper.isValid(connectorType)) {
         throw Exception(
             "Unknown gateway type: " + std::to_string(connectorId.val.f.dma_type));

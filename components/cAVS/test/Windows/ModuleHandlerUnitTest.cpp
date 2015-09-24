@@ -223,7 +223,7 @@ TEST_CASE("Module handling: getting FW configs")
     windows::ModuleHandler moduleHandler(device);
 
     /* Simulating an os error during getting fw config */
-    FwConfig fwConfig;
+    dsp_fw::FwConfig fwConfig;
     CHECK_THROWS_AS_MSG(moduleHandler.getFwConfig(fwConfig),
         debug_agent::cavs::ModuleHandler::Exception,
         "Device returns an exception: OS says that io control has failed.");

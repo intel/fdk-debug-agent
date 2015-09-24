@@ -22,8 +22,14 @@
 
 #pragma once
 
-#include "cAVS/FirmwareTypes.hpp"
-#include "cAVS/DynamicSizedFirmwareTypes.hpp"
+#include "cAVS/DspFw/ModuleType.hpp"
+#include "cAVS/DspFw/ModuleInstance.hpp"
+#include "cAVS/DspFw/FwConfig.hpp"
+#include "cAVS/DspFw/HwConfig.hpp"
+#include "cAVS/DspFw/Pipeline.hpp"
+#include "cAVS/DspFw/Gateway.hpp"
+#include "cAVS/DspFw/Scheduler.hpp"
+#include "cAVS/DspFw/Infrastructure.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
 #include <vector>
