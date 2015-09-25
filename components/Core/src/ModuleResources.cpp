@@ -21,6 +21,7 @@
 */
 #include "Core/ModuleResources.hpp"
 #include "Rest/StreamResponse.hpp"
+#include "Core/BaseModelConverter.hpp"
 #include "Util/Uuid.hpp"
 #include "Util/convert.hpp"
 #include <Poco/NumberParser.h>
@@ -56,7 +57,7 @@ std::map<uint32_t, std::string> ModuleResource::getChildren(
     try
     {
         children = mParameterSerializer.getChildren(
-            "cavs", mModuleName, parameterKind);
+            BaseModelConverter::subsystemName, mModuleName, parameterKind);
     }
     catch (ParameterSerializer::Exception &e)
     {
@@ -87,7 +88,7 @@ uint32_t ModuleResource::getParamId(const std::string parameterName) const
     try
     {
         paramIdAsString = mParameterSerializer.getMapping(
-            "cavs", mModuleName, parameterName, ParamId);
+            BaseModelConverter::subsystemName, mModuleName, parameterName, ParamId);
     }
     catch (ParameterSerializer::Exception &e)
     {
@@ -138,7 +139,7 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handleGet(
         try
         {
             controlParameters += mParameterSerializer.binaryToXml(
-                "cavs",
+                BaseModelConverter::subsystemName,
                 mModuleName,
                 ParameterSerializer::ParameterKind::Control,
                 children[childId],
@@ -200,7 +201,7 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(
         try
         {
             parameterPayload = mParameterSerializer.xmlToBinary(
-                "cavs",
+                BaseModelConverter::subsystemName,
                 mModuleName,
                 ParameterSerializer::ParameterKind::Control,
                 children[childId],
@@ -244,7 +245,7 @@ Resource::ResponsePtr ControlParametersModuleTypeResource::handleGet(
         try
         {
             controlParameters += mParameterSerializer.getStructureXml(
-                "cavs",
+                BaseModelConverter::subsystemName,
                 mModuleName,
                 ParameterSerializer::ParameterKind::Control,
                 children[childId]);

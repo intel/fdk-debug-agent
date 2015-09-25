@@ -49,6 +49,7 @@ public:
     BaseModelConverter(cavs::System &system) : mSystem(system) {}
     virtual ~BaseModelConverter() {}
 
+    static const std::string subsystemName;
 
 protected:
     /* Defining model names as constants */
@@ -56,7 +57,6 @@ protected:
     static const std::string systemDescription;
     static const std::string systemId;
 
-    static const std::string subsystemName;
     static const std::string subsystemDescription;
     static const std::string subsystemId;
 
