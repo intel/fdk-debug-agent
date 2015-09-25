@@ -62,10 +62,6 @@ private:
         UnknownVerbException(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
-    /** Returns an error to the client, using the supplied status code and error message */
-    void sendHttpError(HTTPResponse::HTTPStatus status, const std::string &message,
-        HTTPServerResponse &resp);
-
     static rest::Request::Verb translateVerb(const std::string &verbLiteral);
 
     std::shared_ptr<Resource> mResource;

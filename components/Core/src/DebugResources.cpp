@@ -23,13 +23,13 @@
 #include "HtmlHelper.hpp"
 #include "FdkToolMockGenerator.hpp"
 #include "Core/DebugResources.hpp"
+#include "Rest/StreamResponse.hpp"
 #include "cAVS/Topology.hpp"
 #include "cAVS/FirmwareTypeHelpers.hpp"
 #include "Util/StringHelper.hpp"
 #include "Util/Uuid.hpp"
 #include <Poco/Zip/Compress.h>
 #include <Poco/Zip/ZipException.h>
-#include <Poco/MemoryStream.h>
 #include <sstream>
 #include <vector>
 #include <iomanip>
@@ -98,7 +98,7 @@ std::string gatewayToString(const dsp_fw::ConnectorNodeId &connector)
     return stream.str();
 }
 
-void ModuleListDebugResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
 {
     /* Segment count per module entry, as defined in firmware structures */
     static const std::size_t segmentCount = 3;
@@ -174,11 +174,10 @@ void ModuleListDebugResource::handleGet(const Request &request, Response &respon
 
     html.endTable();
 
-    std::ostream &out = response.send(ContentTypeHtml);
-    out << html.getHtmlContent();
+    return std::make_unique<Response>(ContentTypeHtml, html.getHtmlContent());
 }
 
-void TopologyDebugResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr TopologyDebugResource::handleGet(const Request &request)
 {
     Topology topology;
     try
@@ -187,7 +186,7 @@ void TopologyDebugResource::handleGet(const Request &request, Response &response
     }
     catch (cavs::System::Exception &e)
     {
-        throw HttpError(ErrorStatus::InternalError,
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
             "Cannot get topology from fw: " + std::string(e.what()));
     }
 
@@ -198,8 +197,7 @@ void TopologyDebugResource::handleGet(const Request &request, Response &response
     dumpAllSchedulers(html, topology.schedulers);
     dumpModuleInstances(html, topology.moduleInstances);
 
-    std::ostream &out = response.send(ContentTypeHtml);
-    out << html.getHtmlContent();
+    return std::make_unique<Response>(ContentTypeHtml, html.getHtmlContent());
 }
 
 void TopologyDebugResource::dumpGateways(HtmlHelper &html,
@@ -460,28 +458,30 @@ void TopologyDebugResource::dumpPins(HtmlHelper &html,
     }
 }
 
-void ModelDumpDebugResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr ModelDumpDebugResource::handleGet(const Request &request)
 {
     ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
     if (handle->getResource() == nullptr) {
-        throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
+            "Instance model is undefined.");
     }
 
-    std::stringstream ss;
+    auto ss = std::make_unique<std::stringstream>();
 
-    try {
-        FdkToolMockGenerator generator(ss);
+    try
+    {
+        FdkToolMockGenerator generator(*ss);
         generator.setTypeModel(mTypeModel);
         generator.setSystemInstance(mSystemInstance);
         generator.setInstanceModel(*handle->getResource());
     }
     catch (FdkToolMockGenerator::Exception &e)
     {
-        throw HttpAbort("Cannot create model archive: " + std::string(e.what()));
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
+            std::string("Cannot create model archive: ") + e.what());
     }
 
-    std::ostream &out = response.send(ContentTypeZip);
-    Poco::StreamCopier::copyStream(ss, out);
+    return std::make_unique<StreamResponse>(ContentTypeZip, std::move(ss));
 }
 
 

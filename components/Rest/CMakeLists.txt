@@ -31,9 +31,10 @@ set(LIB_INCS
     include/Rest/Server.hpp
     include/Rest/Request.hpp
     include/Rest/Response.hpp
+    include/Rest/StreamResponse.hpp
+    include/Rest/CustomResponse.hpp
     include/Rest/Dispatcher.hpp
     include/Rest/Resource.hpp
-    include/Rest/HttpMessageProperties.hpp
     include/Rest/ErrorHandler.hpp
     src/ServerRequestHandling.hpp) # private header
 

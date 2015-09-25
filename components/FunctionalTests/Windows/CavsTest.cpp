@@ -237,7 +237,7 @@ static void requestInstanceTopologyRefresh(HttpClientSimulator &client)
         HttpClientSimulator::Verb::Post,
         "",
         HttpClientSimulator::Status::Ok,
-        "text/xml",
+        "",
         "");
 }
 
@@ -568,14 +568,13 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
     /* Request an instance topology refresh */
     CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
 
-    /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
         "/instance/cavs.module-aec/1/control_parameters",
         HttpClientSimulator::Verb::Put,
         xmlFile("module_instance_control_params"),
         HttpClientSimulator::Status::Ok,
-        "text/html",
-        "<p>Done</p>"
+        "",
+        ""
         ));
 }
 
@@ -708,8 +707,8 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
         HttpClientSimulator::Verb::Put,
         xmlFile("logservice_setparam_start"),
         HttpClientSimulator::Status::Ok,
-        "text/html",
-        "<p>Done</p>"
+        "",
+        ""
         ));
 
     /* 3: Getting log parameters again */
@@ -791,8 +790,8 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
         HttpClientSimulator::Verb::Put,
         xmlFile("logservice_setparam_start"),
         HttpClientSimulator::Status::Ok,
-        "text/html",
-        "<p>Done</p>"
+        "",
+        ""
         ));
 
     /* Trying to get log data in another thread after 250 ms. This should result on "resource

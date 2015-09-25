@@ -40,7 +40,7 @@ public:
     ModuleListDebugResource(cavs::System &system) :
         SystemResource(system) {}
 protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+    virtual ResponsePtr handleGet(const rest::Request &request) override;
 };
 
 /** This debug resource dumps cAVS topology */
@@ -50,7 +50,7 @@ public:
     TopologyDebugResource(cavs::System &system) :
         SystemResource(system) {}
 protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+    virtual ResponsePtr handleGet(const rest::Request &request) override;
 
 private:
     /* These methods dump topology elements */
@@ -77,7 +77,7 @@ public:
         mSystemInstance(systemInstance),
         mInstanceModel(instanceModel) {}
 protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+    virtual ResponsePtr handleGet(const rest::Request &request) override;
 private:
     const TypeModel &mTypeModel;
     const ifdk_objects::instance::System &mSystemInstance;

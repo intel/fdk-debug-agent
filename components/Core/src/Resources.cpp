@@ -21,6 +21,8 @@
 */
 #include "Core/Resources.hpp"
 #include "Core/InstanceModelConverter.hpp"
+#include "Rest/CustomResponse.hpp"
+#include "Rest/StreamResponse.hpp"
 #include "Util/Uuid.hpp"
 #include "Util/convert.hpp"
 #include "IfdkObjects/Xml/TypeDeserializer.hpp"
@@ -64,7 +66,7 @@ static const std::string ContentTypeXml("text/xml");
 *    know which <subsystem>:<file format> the resource is.
 * @remarks http://www.iana.org/assignments/media-types/media-types.xhtml
 */
-static const std::string ContentTypeBin("application/vnd.ifdk-file");
+static const std::string ContentTypeIfdkFile("application/vnd.ifdk-file");
 
 /** This method returns the value of a node part of an XML document, based on an XPath expression
  *
@@ -82,52 +84,45 @@ static const std::string getNodeValueFromXPath(const Poco::XML::Document* docume
     }
     else
     {
-        throw debug_agent::rest::Resource::HttpError (
-            debug_agent::rest::Resource::ErrorStatus::BadRequest,
+        throw Response::HttpError (
+            Response::ErrorStatus::BadRequest,
             "Invalid parameters format: node for path \"" + url + "\" not found");
     }
 }
 
-void SystemTypeResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr SystemTypeResource::handleGet(const Request &request)
 {
     xml::TypeSerializer serializer;
     mTypeModel.getSystem()->accept(serializer);
-    std::string xml = serializer.getXml();
 
-    std::ostream &out = response.send(ContentTypeXml);
-    out << xml;
+    return std::make_unique<Response>(ContentTypeXml, serializer.getXml());
 }
 
-void SystemInstanceResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr SystemInstanceResource::handleGet(const Request &request)
 {
     xml::InstanceSerializer serializer;
     mSystemInstance.accept(serializer);
 
-    std::string xml = serializer.getXml();
-    std::ostream &out = response.send(ContentTypeXml);
-    out << xml;
+    return std::make_unique<Response>(ContentTypeXml, serializer.getXml());
 }
 
-void TypeResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr TypeResource::handleGet(const Request &request)
 {
     std::string typeName = request.getIdentifierValue("type_name");
     std::shared_ptr<const type::Type> typePtr =
         mTypeModel.getType(typeName);
 
     if (typePtr == nullptr) {
-        throw HttpError(Resource::ErrorStatus::BadRequest, "Unknown type: " + typeName);
+        throw Response::HttpError(Response::ErrorStatus::BadRequest, "Unknown type: " + typeName);
     }
 
     xml::TypeSerializer serializer;
     typePtr->accept(serializer);
 
-    std::string xml = serializer.getXml();
-
-    std::ostream &out = response.send(ContentTypeXml);
-    out << xml;
+    return std::make_unique<Response>(ContentTypeXml, serializer.getXml());
 }
 
-void InstanceCollectionResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr InstanceCollectionResource::handleGet(const Request &request)
 {
     xml::InstanceSerializer serializer;
     std::string typeName = request.getIdentifierValue("type_name");
@@ -135,25 +130,25 @@ void InstanceCollectionResource::handleGet(const Request &request, Response &res
     {
         ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
         if (handle->getResource() == nullptr) {
-            throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
+            throw Response::HttpError(Response::ErrorStatus::InternalError,
+                "Instance model is undefined.");
         }
         std::shared_ptr<const instance::BaseCollection> collection =
             handle->getResource()->getCollection(typeName);
 
         /* check nullptr using get() to avoid any KW error */
         if (collection.get() == nullptr) {
-            throw HttpError(Resource::ErrorStatus::BadRequest, "Unknown type: " + typeName);
+            throw Response::HttpError(Response::ErrorStatus::BadRequest,
+                "Unknown type: " + typeName);
         }
 
         collection->accept(serializer);
     }
 
-    std::string xml = serializer.getXml();
-    std::ostream &out = response.send(ContentTypeXml);
-    out << xml;
+    return std::make_unique<Response>(ContentTypeXml, serializer.getXml());
 }
 
-void InstanceResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr InstanceResource::handleGet(const Request &request)
 {
     xml::InstanceSerializer serializer;
     std::string typeName = request.getIdentifierValue("type_name");
@@ -162,27 +157,26 @@ void InstanceResource::handleGet(const Request &request, Response &response)
     {
         ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
         if (handle->getResource() == nullptr) {
-            throw HttpError(Resource::ErrorStatus::InternalError, "Instance model is undefined.");
+            throw Response::HttpError(Response::ErrorStatus::InternalError,
+                "Instance model is undefined.");
         }
         std::shared_ptr<const instance::Instance> instancePtr =
             handle->getResource()->getInstance(typeName, instanceId);
 
         /* check nullptr using get() to avoid any KW error */
         if (instancePtr.get() == nullptr) {
-            throw HttpError(Resource::ErrorStatus::BadRequest, "Unknown instance: type=" +
-                typeName + " instance_id=" + instanceId);
+            throw Response::HttpError(Response::ErrorStatus::BadRequest,
+                "Unknown instance: type=" + typeName + " instance_id=" + instanceId);
         }
 
         instancePtr->accept(serializer);
     }
 
-    std::string xml = serializer.getXml();
-    std::ostream &out = response.send(ContentTypeXml);
-    out << xml;
+    return std::make_unique<Response>(ContentTypeXml, serializer.getXml());
 }
 
 
-void RefreshSubsystemResource::handlePost(const Request &request, Response &response)
+Resource::ResponsePtr RefreshSubsystemResource::handlePost(const Request &request)
 {
     std::shared_ptr<InstanceModel> instanceModel;
     ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
@@ -197,17 +191,17 @@ void RefreshSubsystemResource::handlePost(const Request &request, Response &resp
         /* Topology retrieving has failed: invalidate the previous one */
         handle->getResource() = nullptr;
 
-        throw HttpError(debug_agent::rest::Resource::ErrorStatus::InternalError,
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
             "Cannot refresh instance model: " + std::string(e.what()));
     }
 
     /* Apply new topology */
     handle->getResource() = instanceModel;
 
-    response.send(ContentTypeXml);
+    return std::make_unique<Response>();
 }
 
-void LogServiceInstanceControlParametersResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr LogServiceInstanceControlParametersResource::handleGet(const Request &request)
 {
     Logger::Parameters logParameters;
 
@@ -217,12 +211,12 @@ void LogServiceInstanceControlParametersResource::handleGet(const Request &reque
     }
     catch (System::Exception &e)
     {
-        throw HttpError(ErrorStatus::BadRequest, "Cannot get log parameters : " +
-            std::string(e.what()));
+        throw Response::HttpError(Response::ErrorStatus::BadRequest,
+            std::string("Cannot get log parameters : ") + e.what());
     }
 
-    std::ostream &out = response.send(ContentTypeXml);
-    out << "<control_parameters>\n"
+    auto xml = std::make_unique<std::stringstream>();
+    *xml << "<control_parameters>\n"
         "    <BooleanParameter Name=\"Started\">" <<
         logParameters.mIsStarted << "</BooleanParameter>\n"
         "    <ParameterBlock Name=\"Buffering\">\n"
@@ -235,15 +229,17 @@ void LogServiceInstanceControlParametersResource::handleGet(const Request &reque
         "    <BooleanParameter Name=\"ViaPTI\">" <<
         (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>\n"
         "</control_parameters>\n";
+
+    return std::make_unique<StreamResponse>(ContentTypeXml, std::move(xml));
 }
 
-void LogServiceInstanceControlParametersResource::handlePut(const Request &request, Response &response)
+Resource::ResponsePtr LogServiceInstanceControlParametersResource::handlePut(const Request &request)
 {
     Poco::XML::DOMParser parser;
     Poco::XML::Document* document = parser.parseString(request.getRequestContentAsString());
 
     if (!document) {
-        throw HttpError(ErrorStatus::BadRequest, "Invalid document");
+        throw Response::HttpError(Response::ErrorStatus::BadRequest, "Invalid document");
     }
 
     static const std::string controlParametersUrl = "/control_parameters/";
@@ -272,10 +268,11 @@ void LogServiceInstanceControlParametersResource::handlePut(const Request &reque
             Logger::Output::Sram;
     }
     catch (Logger::Exception &e) {
-        throw HttpError(ErrorStatus::BadRequest, std::string("Invalid value: ") + e.what());
+        throw Response::HttpError(Response::ErrorStatus::BadRequest,
+            std::string("Invalid value: ") + e.what());
     }
     catch (Poco::SyntaxException &e) {
-        throw HttpError(ErrorStatus::BadRequest,
+        throw Response::HttpError(Response::ErrorStatus::BadRequest,
             std::string("Invalid Start/Stop request: ") + e.what());
     }
 
@@ -283,17 +280,17 @@ void LogServiceInstanceControlParametersResource::handlePut(const Request &reque
         mSystem.setLogParameters(logParameters);
     }
     catch (System::Exception &e) {
-        throw HttpError(ErrorStatus::InternalError, std::string("Fail to apply: ") + e.what());
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
+            std::string("Fail to apply: ") + e.what());
     }
 
-    std::ostream &out = response.send(ContentTypeHtml);
-    out << "<p>Done</p>";
+    return std::make_unique<Response>();
 }
 
-void LogServiceTypeControlParametersResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr LogServiceTypeControlParametersResource::handleGet(const Request &request)
 {
-    std::ostream &out = response.send(ContentTypeXml);
-    out <<
+    auto xml = std::make_unique<std::stringstream>();
+    *xml <<
         "<control_parameters>\n"
         "    <!-- service generic -->\n"
         "    <BooleanParameter Name=\"Started\"/>\n"
@@ -313,29 +310,59 @@ void LogServiceTypeControlParametersResource::handleGet(const Request &request, 
         "    <BooleanParameter Name=\"ViaPTI\" "
         "Description=\"Set to 1 if PTI interface is to be used\"/>\n"
         "</control_parameters>\n";
+
+    return std::make_unique<StreamResponse>(ContentTypeXml, std::move(xml));
 }
 
-void LogServiceStreamResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request)
 {
-    /** Acquiring the log stream resource */
-    auto resource = std::move(mSystem.tryToAcquireLogStreamResource());
-    if (resource == nullptr) {
-        throw HttpError(ErrorStatus::Locked, "Logging stream resource is already used.");
-    }
-
-    std::ostream &out = response.send(ContentTypeBin);
-
-    try {
-        resource->doLogStream(out);
-    }
-    catch (System::Exception &e)
+    /**
+     * @todo Once C++14 is fully supported by compilers used for Debug Agent, this LogStreamResponse
+     * class shall be removed, and the Rest::CustomResponse shall be refactored to take the
+     * doBody method as lambda and become final.
+     */
+    class LogStreamResponse: public CustomResponse
     {
-        /* Here a successful http response has already be sent to the server. So
-        * it is not possible to throw the exception */
+    public:
+        LogStreamResponse(const std::string &contentType,
+            std::unique_ptr<System::LogStreamResource> logStreamResource):
+            CustomResponse(contentType),
+            mLogStreamResource(std::move(logStreamResource))
+        {
+        }
 
-        /** @todo use logging */
-        std::cout << "Exception while getting logs from system: " << e.what();
+        void doBodyResponse(std::ostream &out) override
+        {
+            try
+            {
+                mLogStreamResource->doLogStream(out);
+            }
+            catch (System::Exception &e)
+            {
+                throw Response::HttpAbort(std::string("cAVS Log stream error: ") + e.what());
+            }
+        }
+
+    private:
+        std::unique_ptr<System::LogStreamResource> mLogStreamResource;
+    };
+
+    /** Acquiring the log stream resource */
+    auto &&resource = mSystem.tryToAcquireLogStreamResource();
+    if (resource == nullptr) {
+        throw Response::HttpError(Response::ErrorStatus::Locked,
+            "Logging stream resource is already used.");
     }
+
+    return std::make_unique<LogStreamResponse>(ContentTypeIfdkFile, std::move(resource));
+    /**
+     * @remarks Using C++14 lambda generalized capture, the return would be changed for:
+     * @code
+     * return std::make_unique<CustomResponse>(
+     *   ContentTypeIfdkFile,
+     *   [logResource = std::move(resource)](std::ostream out)
+     *       {logResource->doLogStream(out);});
+     */
 }
 
 }

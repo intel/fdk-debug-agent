@@ -26,44 +26,40 @@ namespace debug_agent
 namespace rest
 {
 
-void Resource::handleRequest(const Request &request, Response &response)
+Resource::ResponsePtr Resource::handleRequest(const Request &request)
 {
     switch (request.getVerb())
     {
     case Request::Verb::Get:
-        handleGet(request, response);
-        return;
+        return handleGet(request);
     case Request::Verb::Put:
-        handlePut(request, response);
-        return;
+        return handlePut(request);
     case Request::Verb::Post:
-        handlePost(request, response);
-        return;
+        return handlePost(request);
     case Request::Verb::Delete:
-        handleDelete(request, response);
-        return;
+        return handleDelete(request);
     }
-    throw HttpError(ErrorStatus::VerbNotAllowed);
+    throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
-void Resource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr Resource::handleGet(const Request &request)
 {
-    throw HttpError(ErrorStatus::VerbNotAllowed);
+    throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
-void Resource::handlePut(const Request &request, Response &response)
+Resource::ResponsePtr Resource::handlePut(const Request &request)
 {
-    throw HttpError(ErrorStatus::VerbNotAllowed);
+    throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
-void Resource::handlePost(const Request &request, Response &response)
+Resource::ResponsePtr Resource::handlePost(const Request &request)
 {
-    throw HttpError(ErrorStatus::VerbNotAllowed);
+    throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
-void Resource::handleDelete(const Request &request, Response &response)
+Resource::ResponsePtr Resource::handleDelete(const Request &request)
 {
-    throw HttpError(ErrorStatus::VerbNotAllowed);
+    throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
 }

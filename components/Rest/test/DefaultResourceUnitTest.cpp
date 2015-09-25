@@ -30,25 +30,21 @@ using namespace debug_agent::test_common;
 class VerbEchoResource : public Resource
 {
 public:
-    virtual void handleGet(const Request &request, Response &response) override
+    virtual std::unique_ptr<Response> handleGet(const Request &request) override
     {
-        std::ostream &out = response.send("text/plain");
-        out << "GET";
+        return std::make_unique<Response>("text/plain", "GET");
     }
-    virtual void handlePut(const Request &request, Response &response) override
+    virtual std::unique_ptr<Response> handlePut(const Request &request) override
     {
-        std::ostream &out = response.send("text/plain");
-        out << "PUT";
+        return std::make_unique<Response>("text/plain", "PUT");
     }
-    virtual void handlePost(const Request &request, Response &response) override
+    virtual std::unique_ptr<Response> handlePost(const Request &request) override
     {
-        std::ostream &out = response.send("text/plain");
-        out << "POST";
+        return std::make_unique<Response>("text/plain", "POST");
     }
-    virtual void handleDelete(const Request &request, Response &response) override
+    virtual std::unique_ptr<Response> handleDelete(const Request &request) override
     {
-        std::ostream &out = response.send("text/plain");
-        out << "DELETE";
+        return std::make_unique<Response>("text/plain", "DELETE");
     }
 };
 

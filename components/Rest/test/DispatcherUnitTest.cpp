@@ -30,10 +30,10 @@ using namespace debug_agent::rest;
 class DummyResource : public Resource
 {
 public:
-    virtual void handleRequest(const Request &request, Response &response)
+    virtual std::unique_ptr<Response> handleRequest(const Request &request)
     {
         (void)request;
-        (void)response;
+        return nullptr;
     }
 };
 

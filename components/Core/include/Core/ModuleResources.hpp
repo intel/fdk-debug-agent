@@ -78,8 +78,8 @@ public:
         const uint16_t moduleId) :
         ModuleResource(system, parameterMgrPlatformConnector, moduleName, moduleId) {}
 protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
-    virtual void handlePut(const rest::Request &request, rest::Response &response) override;
+    virtual ResponsePtr handleGet(const rest::Request &request) override;
+    virtual ResponsePtr handlePut(const rest::Request &request) override;
 };
 
 /** This resource returns control parameters of a module type of a Subsystem (XML) */
@@ -92,7 +92,7 @@ public:
         const uint16_t moduleId) :
         ModuleResource(system, parameterMgrPlatformConnector, moduleName, moduleId) {}
 protected:
-    virtual void handleGet(const rest::Request &request, rest::Response &response) override;
+    virtual ResponsePtr handleGet(const rest::Request &request) override;
 };
 
 }

@@ -35,11 +35,11 @@ class EchoResource : public Resource
 public:
     EchoResource(const std::string contentType) : mContentType(contentType) {}
 
-    virtual void handleRequest(const Request &request, Response &response)
+    virtual std::unique_ptr<Response> handleRequest(const Request &request)
     {
         /* Writing request properties into the response stream */
 
-        std::ostream &responseStream = response.send(mContentType);
+        std::stringstream responseStream;
         responseStream << "Verb: " << Request::toString(request.getVerb()) << "\n"
             << "Identifiers:";
 
@@ -51,6 +51,8 @@ public:
         }
 
         responseStream << "\nRequest content: " << requestContent;
+
+        return std::make_unique<Response>(mContentType, responseStream.str());
     }
 
 private:

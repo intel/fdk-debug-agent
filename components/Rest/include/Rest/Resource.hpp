@@ -22,11 +22,9 @@
 
 #pragma once
 
-#include "Request.hpp"
-#include "Response.hpp"
-#include <exception>
-#include <sstream>
-#include <stdexcept>
+#include "Rest/Request.hpp"
+#include "Rest/Response.hpp"
+#include <memory>
 
 namespace debug_agent
 {
@@ -38,128 +36,60 @@ namespace rest
 class Resource
 {
 public:
-    enum class ErrorStatus
-    {
-        NotFound = 404,
-        BadRequest = 400,
-        VerbNotAllowed = 405,
-        Locked = 423,
-        InternalError = 500
-    };
-
-    static std::string toString(ErrorStatus status)
-    {
-        switch (status)
-        {
-        case ErrorStatus::NotFound:
-            return "Resource not found";
-        case ErrorStatus::BadRequest:
-            return "Bad request";
-        case ErrorStatus::VerbNotAllowed:
-            return "Verb not allowed";
-        case ErrorStatus::Locked:
-            return "Resource is locked";
-        case ErrorStatus::InternalError:
-            return "Internal error";
-        }
-        abort();
-    }
-
-    /**
-    * HttpAbort exception
-    * This exception is intended to be raised
-    * where it is not possible to send an HTTP error since part of the response
-    * has already been sent after response.send(ContentType) has been called.
-    * @param[in] what The message to be carried on by the exception object
-    */
-    class HttpAbort : public std::logic_error
-    {
-    public:
-        explicit HttpAbort(const std::string &what)
-        : std::logic_error(what)
-        {}
-    };
-
-    /**
-    * HttpError exception
-    * This exception is intended to be raised basically any HTTP session errors,
-    * where response has not already been sent.
-    * @param[in] status The error status of the HTTP response to be sent
-    * @param[in] what The message to be carried on by the exception object
-    */
-    class HttpError : public std::logic_error
-    {
-    public:
-        HttpError(ErrorStatus status, const std::string &userMessage = "") :
-            std::logic_error(getErrorMessage(status, userMessage).c_str()), mStatus(status) {}
-
-        ErrorStatus getStatus() { return mStatus; }
-
-    private:
-        ErrorStatus mStatus;
-
-        static std::string getErrorMessage(ErrorStatus status, const std::string &userMessage)
-        {
-            std::stringstream msg;
-            msg << toString(status);
-            if (userMessage.length() > 0) {
-                msg << ": " << userMessage;
-            }
-            return msg.str();
-        }
-    };
-
     Resource() {}
     virtual ~Resource() {}
 
-    /* The default request handler which dispatches requests to the default request handlers.
+    using ResponsePtr = std::unique_ptr<Response>;
+
+    /**
+     * The default request handler which dispatches requests to the default request handlers.
      * This method calls the default handler according to the request verb.
      * @param[in] request The request to be handled
-     * @param[in] response The response to be forwarded
-     * @throw HttpError or HttpAbort
+     * @return the Response to be sent to the client
+     * @throw HttpError
      * @see handleGet
      * @see handlePut
      * @see handlePost
      * @see handleDelete
      */
-    virtual void handleRequest(const Request &request, Response &response);
+    virtual ResponsePtr handleRequest(const Request &request);
 
 protected:
     /**
      * Default GET handler: raises HttpError (ErrorStatus::VerbNotAllowed)
      * This method is intended to be overridden if the Resource subclass handles GET
      * @param[in] request The GET request to be handled
-     * @param[in] response The response to be forwarded
-     * @throw HttpError or HttpAbort
+     * @return the Response to be sent to the client
+     * @throw HttpError
      */
-    virtual void handleGet(const Request &request, Response &response);
+    virtual ResponsePtr handleGet(const Request &request);
 
     /**
      * Default PUT handler: raises HttpError (ErrorStatus::VerbNotAllowed)
      * This method is intended to be overridden if the Resource subclass handles PUT
      * @param[in] request The PUT request to be handled
-     * @param[in] response The response to be forwarded
-     * @throw HttpError or HttpAbort
+     * @return the Response to be sent to the client
+     * @throw HttpError
      */
-    virtual void handlePut(const Request &request, Response &response);
+    virtual ResponsePtr handlePut(const Request &request);
 
     /**
      * Default POST handler: raises HttpError (ErrorStatus::VerbNotAllowed)
      * This method is intended to be overridden if the Resource subclasses handles POST
      * @param[in] request The POST request to be handled
-     * @param[in] response The response to be forwarded
-     * @throw HttpError or HttpAbort
+     * @return the Response to be sent to the client
+     * @throw HttpError
      */
-    virtual void handlePost(const Request &request, Response &response);
+    virtual ResponsePtr handlePost(const Request &request);
 
     /**
      * Default DELETE handler: raises HttpError (ErrorStatus::VerbNotAllowed)
      * This method is intended to be overridden if the Resource subclass handles DELETE
      * @param[in] request The DELETE request to be handled
-     * @param[in] response The response to be forwarded
-     * @throw HttpError or HttpAbort
+     * @return the Response to be sent to the client
+     * @throw HttpError
      */
-    virtual void handleDelete(const Request &request, Response &response);
+    virtual ResponsePtr handleDelete(const Request &request);
 
 private:
     Resource(const Resource&) = delete;

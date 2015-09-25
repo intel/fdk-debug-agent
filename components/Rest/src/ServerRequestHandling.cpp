@@ -21,7 +21,7 @@
 */
 
 #include "ServerRequestHandling.hpp"
-#include "Rest/HttpMessageProperties.hpp"
+#include "Util/AssertAlways.hpp"
 #include <Poco/Exception.h>
 #include <sstream>
 
@@ -37,7 +37,8 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
 {
     if (mResource == nullptr)
     {
-        sendHttpError(HTTPResponse::HTTP_NOT_FOUND, "Resource not found: " + req.getURI(), resp);
+        Response::sendHttpError(
+            HTTPResponse::HTTP_NOT_FOUND, "Resource not found: " + req.getURI(), resp);
         return;
     }
 
@@ -47,89 +48,70 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
     }
     catch (UnknownVerbException &e)
     {
-        sendHttpError(HTTPResponse::HTTPStatus::HTTP_METHOD_NOT_ALLOWED, e.what(), resp);
+        Response::sendHttpError(
+            HTTPResponse::HTTPStatus::HTTP_METHOD_NOT_ALLOWED, e.what(), resp);
         return;
     }
 
     /* Forwarding the request to the resource, that will handle it. */
     Request request(verb, req.stream(), *mIdentifiers);
-    Response response(resp);
+
+    Resource::ResponsePtr response;
 
     try
     {
-        mResource->handleRequest(request, response);
-    }
-    catch (Resource::HttpError &e)
-    {
-        HTTPResponse::HTTPStatus pocoStatus =
-            static_cast<HTTPResponse::HTTPStatus>(e.getStatus());
+        try
+        {
+            response = mResource->handleRequest(request);
+            if (response == nullptr) {
 
-        if (!resp.sent()) {
-            // HTTP error has to be sent to the client
-            sendHttpError(pocoStatus, e.what(), resp);
+                throw Response::HttpError(Response::ErrorStatus::InternalError, "Response is null");
+            }
         }
-        else {
-            // we cannot do anything else that log the issue
-            // This should not happen
-            /** @todo Use logging instead */
-            std::cout << "Internal error: "
-                << "HttpError exception while response has already been sent: "
-                << req.getURI() << ": " << e.what() << std::endl;
+        catch (Response::HttpError &e)
+        {
+            /* Design is made to avoid this situation: always assert since HTTP header must have
+             * not been sent already */
+            ASSERT_ALWAYS(!resp.sent());
+
+            HTTPResponse::HTTPStatus pocoStatus =
+                static_cast<HTTPResponse::HTTPStatus>(e.getStatus());
+
+            // HTTP error has to be sent to the client and we are done
+            Response::sendHttpError(pocoStatus, e.what(), resp);
+            return;
         }
-    }
-    catch (Resource::HttpAbort &e)
-    {
-        /** @todo Use logging instead */
-        if (!resp.sent()) {
-            // Should not happen
-            /** @todo Use logging instead */
-            std::cout << "Internal error: HttpAbort exception while response has not been sent: "
-                << req.getURI() << ": " << e.what() << std::endl;
-            // HTTP error has to be sent to the client
-            sendHttpError(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, e.what(), resp);
+
+        // Send HTTP response header
+        response->sendHttpHeader(resp);
+
+        try
+        {
+            // Send HTTP response body
+            response->sendHttpBody();
         }
-        else {
+        catch (Response::HttpAbort &e)
+        {
+            /* Design is made to avoid this situation: always assert since HTTP header must have
+             * been sent already */
+            ASSERT_ALWAYS(resp.sent());
+
             // we cannot do anything else that log the issue and abandon the client
             /** @todo Use logging instead */
-            std::cout << "Abort request on " << req.getURI() << ": " << e.what() << std::endl;
+            std::cout << "Abort HTTP response on " << req.getURI() << ": "
+                << e.what() << std::endl;
         }
     }
     catch (std::exception &e)
     {
+        std::stringstream msg("Internal error: unexpected exception ");
+        msg << typeid(e).name() << ": " << e.what();
+
         /** @todo Use logging instead */
-        std::cout << "Abort request on " << req.getURI() << " due to unexpected exception: "
-            << typeid(e).name() << ": " << e.what() << std::endl;
-    }
-
-    // Ensure we send at least an HTTP error response to the client
-    if (!resp.sent()) {
-        std::string msg("Internal error: no response sent out for: " + req.getURI());
-        /** @todo Use logging instead */
-        std::cout << msg;
-        sendHttpError(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, msg, resp);
-    }
-}
-
-void RestResourceRequestHandler::sendHttpError(HTTPResponse::HTTPStatus status,
-                                               const std::string &message,
-                                               HTTPServerResponse &resp)
-{
-    /* @todo Use logging instead */
-    std::cout << "Request failure: " << message << std::endl;
-
-    HttpMessageProperties::setCommonProperties(resp);
-    resp.setStatus(status);
-    resp.setContentType("text/plain");
-
-    try
-    {
-        std::ostream &out = resp.send();
-        out << message;
-    }
-    catch (ConnectionAbortedException &)
-    {
-        /* @todo Use logging instead */
-        std::cout << "Connection aborted." << std::endl;
+        std::cout << msg.str();
+        if (!resp.sent()) {
+            Response::sendHttpError(HTTPResponse::HTTP_INTERNAL_SERVER_ERROR, msg.str(), resp);
+        }
     }
 }
 

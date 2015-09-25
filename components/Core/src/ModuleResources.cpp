@@ -20,6 +20,7 @@
 ********************************************************************************
 */
 #include "Core/ModuleResources.hpp"
+#include "Rest/StreamResponse.hpp"
 #include "Util/Uuid.hpp"
 #include "Util/convert.hpp"
 #include <Poco/NumberParser.h>
@@ -32,6 +33,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/AutoPtr.h>
+#include <sstream>
 #include <cassert>
 
 using namespace debug_agent::rest;
@@ -54,8 +56,8 @@ PFWResource::PFWResource(cavs::System &system,
     {
         if (!mParameterMgrPlatformConnector.start(error))
         {
-            throw Resource::HttpError(
-                Resource::ErrorStatus::InternalError,
+            throw Response::HttpError(
+                Response::ErrorStatus::InternalError,
                 "Parameter framework fails to start : " + error);
 
         }
@@ -77,8 +79,8 @@ std::unique_ptr<CElementHandle> ModuleResource::getModuleControlElement()
         getParameterMgrPlatformConnector().createElementHandle(moduleControlPath, error));
 
     if (mModuleElementHandle == nullptr) {
-        throw Resource::HttpError(
-            Resource::ErrorStatus::NotFound,
+        throw Response::HttpError(
+            Response::ErrorStatus::NotFound,
             "Invalid parameters format: node for path \"" + moduleControlPath + "\" not found");
     }
 
@@ -90,8 +92,8 @@ std::unique_ptr<CElementHandle> ModuleResource::getChildElementHandle(
 {
     std::string childName;
     if (!moduleElementHandle.getChildName(childId, childName)) {
-        throw Resource::HttpError(
-            Resource::ErrorStatus::BadRequest,
+        throw Response::HttpError(
+            Response::ErrorStatus::BadRequest,
             "Child name not found for childId=" + std::to_string(childId));
     }
 
@@ -101,8 +103,8 @@ std::unique_ptr<CElementHandle> ModuleResource::getChildElementHandle(
             moduleElementHandle.getPath() + "/" + childName, error));
 
     if (childElementHandle == nullptr) {
-        throw Resource::HttpError(
-            Resource::ErrorStatus::BadRequest,
+        throw Response::HttpError(
+            Response::ErrorStatus::BadRequest,
             "Child " + childName + " not found for " + moduleElementHandle.getName());
     }
 
@@ -115,30 +117,31 @@ uint32_t ModuleResource::getElementMapping(
     std::string paramIdAsString;
     if (!elementHandle.getMappingData("ParamId", paramIdAsString))
     {
-        throw Resource::HttpError(
-            Resource::ErrorStatus::BadRequest,
+        throw Response::HttpError(
+            Response::ErrorStatus::BadRequest,
             "Mapping \"ParamId\" not found for " + elementHandle.getName());
     }
     uint32_t paramId;
     if (!convertTo(paramIdAsString, paramId)) {
 
-        throw Resource::HttpError(
-            Resource::ErrorStatus::InternalError,
+        throw Response::HttpError(
+            Response::ErrorStatus::InternalError,
             "Invalid mapping \"ParamId\": " + paramIdAsString);
     }
 
     return paramId;
 }
 
-void ControlParametersModuleInstanceResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr ControlParametersModuleInstanceResource::handleGet(
+    const Request &request)
 {
     /* Checking that the identifiers has been fetched */
     uint16_t instanceId;
     std::string instanceIdValue(request.getIdentifierValue("instanceId"));
     if (!convertTo(instanceIdValue, instanceId)) {
 
-        throw Resource::HttpError(
-            Resource::ErrorStatus::BadRequest,
+        throw Response::HttpError(
+            Response::ErrorStatus::BadRequest,
             "Invalid instance ID: " + instanceIdValue);
     }
 
@@ -161,8 +164,8 @@ void ControlParametersModuleInstanceResource::handleGet(const Request &request, 
         std::string error;
         if (!childElementHandle->setAsBytes(parameterPayload, error))
         {
-            throw Resource::HttpError(
-                Resource::ErrorStatus::BadRequest,
+            throw Response::HttpError(
+                Response::ErrorStatus::BadRequest,
                 "Not able to set payload for " + childElementHandle->getName() + " : " + error);
         }
         //childElementHandle->setAsBytes()
@@ -173,17 +176,20 @@ void ControlParametersModuleInstanceResource::handleGet(const Request &request, 
         controlParameters += result.erase(0, endLinePos + 1);
     }
 
-    std::ostream &out = response.send(ContentTypeXml);
-    out << "<control_parameters Type=\"module-";
-    out << mModuleName;
-    out << "\" Id=\"";
-    out << mModuleId;
-    out << "\">\n";
-    out << controlParameters;
-    out << "</control_parameters>\n";
+    auto out = std::make_unique<std::stringstream>();
+    *out << "<control_parameters Type=\"module-"
+        << mModuleName
+        << "\" Id=\""
+        << mModuleId
+        << "\">\n"
+        << controlParameters
+        << "</control_parameters>\n";
+
+    return std::make_unique<StreamResponse>(ContentTypeXml, std::move(out));
 }
 
-void ControlParametersModuleInstanceResource::handlePut(const Request &request, Response &response)
+Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(
+    const Request &request)
 {
     std::string error;
     Poco::XML::DOMParser parser;
@@ -196,8 +202,8 @@ void ControlParametersModuleInstanceResource::handlePut(const Request &request, 
     std::string instanceIdValue(request.getIdentifierValue("instanceId"));
     if (!convertTo(instanceIdValue, instanceId)) {
 
-        throw Resource::HttpError(
-            Resource::ErrorStatus::BadRequest,
+        throw Response::HttpError(
+            Response::ErrorStatus::BadRequest,
             "Invalid instance ID: " + instanceIdValue);
     }
 
@@ -226,8 +232,8 @@ void ControlParametersModuleInstanceResource::handlePut(const Request &request, 
         // Send XML string to PFW
         if (!childElementHandle->setAsXML(output.str(), error))
         {
-            throw Resource::HttpError(
-                Resource::ErrorStatus::BadRequest,
+            throw Response::HttpError(
+                Response::ErrorStatus::BadRequest,
                 "Not able to set XML stream for " + childElementHandle->getName() + " : " + error);
         }
         // Read binary back from PFW
@@ -235,19 +241,20 @@ void ControlParametersModuleInstanceResource::handlePut(const Request &request, 
         // Send binary to IOCTL
         mSystem.setModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
     }
-    std::ostream &out = response.send(ContentTypeHtml);
-    out << "<p>Done</p>";
+
+    return std::make_unique<Response>();
 }
 
-void ControlParametersModuleTypeResource::handleGet(const Request &request, Response &response)
+Resource::ResponsePtr ControlParametersModuleTypeResource::handleGet(
+    const Request &request)
 {
     /* Checking that the identifiers has been fetched */
     uint16_t instanceId;
     std::string instanceIdValue(request.getIdentifierValue("instanceId"));
     if (!convertTo(instanceIdValue, instanceId)) {
 
-        throw Resource::HttpError(
-            Resource::ErrorStatus::BadRequest,
+        throw Response::HttpError(
+            Response::ErrorStatus::BadRequest,
             "Invalid instance ID: " + instanceIdValue);
     }
 
@@ -269,14 +276,16 @@ void ControlParametersModuleTypeResource::handleGet(const Request &request, Resp
         controlParameters += result.erase(0, endLinePos + 1);
     }
 
-    std::ostream &out = response.send(ContentTypeXml);
-    out << "<control_parameters Type=\"module-";
-    out << mModuleName;
-    out << "\" Id=\"";
-    out << mModuleId;
-    out << "\">\n";
-    out << controlParameters;
-    out << "</control_parameters>\n";
+    auto out = std::make_unique<std::stringstream>();
+    *out << "<control_parameters Type=\"module-"
+        << mModuleName
+        << "\" Id=\""
+        << mModuleId
+        << "\">\n"
+        << controlParameters
+        << "</control_parameters>\n";
+
+    return std::make_unique<StreamResponse>(ContentTypeXml, std::move(out));
 }
 
 }
