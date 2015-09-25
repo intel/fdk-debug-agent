@@ -263,8 +263,9 @@ void System::getTopology(Topology &topology)
         }
         catch (ModuleHandler::Exception &e)
         {
-            throw Exception("Can not retrieve module instance with id: " +
-                std::to_string(CompoundModuleId::toInt(compoundId)) + " : " +
+            throw Exception("Can not retrieve module instance with id: (" +
+                std::to_string(compoundId.moduleId) + "," +
+                std::to_string(compoundId.instanceId) + ") : " +
                 std::string(e.what()));
         }
     }

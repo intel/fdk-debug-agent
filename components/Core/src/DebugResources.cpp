@@ -403,7 +403,7 @@ void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
             moduleTypeName = "<wrong module id>";
         }
 
-        html.cell(CompoundModuleId::toInt(module.id));
+        html.cell(module.id.toString());
         html.cell(module.id.moduleId);
         html.cell(moduleTypeName);
         html.cell(module.id.instanceId);

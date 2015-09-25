@@ -47,7 +47,7 @@ static const dsp_fw::AudioDataFormatIpc audioFormat = {
 
 TEST_CASE("DSFirmwareTypes : DSPplProps")
 {
-    DSPplProps props = { 1, 2, 3, 4, 5, 6, { { 1, 0 }, { 2, 0 }, { 3, 0 } }, { 4, 5 }, {} };
+    DSPplProps props = { 1, 2, 3, 4, 5, 6, { { 1, 6 }, { 2, 7 }, { 3, 8 } }, { 4, 5 }, {} };
 
     const std::vector<uint8_t> expected = {
         1, 0, 0, 0,
@@ -58,9 +58,9 @@ TEST_CASE("DSFirmwareTypes : DSPplProps")
         6, 0, 0, 0,
 
         3, 0, 0, 0,
-        1, 0, 0, 0,
-        2, 0, 0, 0,
-        3, 0, 0, 0,
+        6, 0, 1, 0,
+        7, 0, 2, 0,
+        8, 0, 3, 0,
 
         2, 0, 0, 0,
         4, 0, 0, 0,
@@ -101,12 +101,12 @@ TEST_CASE("DSFirmwareTypes : DSSchedulersInfo")
 
         3, 0, 0, 0,
         2, 0, 0, 0,
-        1, 0, 0, 0,
-        2, 0, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 2, 0,
 
         4, 0, 0, 0,
         1, 0, 0, 0,
-        8, 0, 0, 0,
+        0, 0, 8, 0,
 
         4, 0, 0, 0,
         2, 0, 0, 0,
@@ -164,12 +164,12 @@ TEST_CASE("DSFirmwareTypes : DSModuleInstanceProps")
     } };
 
     static const DSModuleInstanceProps instanceProps = {
-        { 1, 0 }, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
+        { 1, 9 }, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, input_pins, output_pins,
         dsp_fw::ConnectorNodeId(12), dsp_fw::ConnectorNodeId(13)
     };
 
     static const std::vector<uint8_t> expected = {
-        1, 0, 0, 0,
+        9, 0, 1, 0,
         2, 0, 0, 0,
         3, 0, 0, 0,
         4, 0, 0, 0,

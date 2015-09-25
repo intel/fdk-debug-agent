@@ -30,6 +30,7 @@
 #include <limits>
 #include <assert.h>
 #include <iostream>
+#include <string>
 
 /** Some firmware structures have dynamic size and can't be fit to a C structure:
  * - PplProps
@@ -98,19 +99,6 @@ struct CompoundModuleId
         return moduleId == other.moduleId && instanceId == other.instanceId;
     }
 
-    static inline CompoundModuleId fromInt(uint32_t id)
-    {
-        CompoundModuleId compId;
-        compId.instanceId = id & 0xFFFF;
-        compId.moduleId = id >> 16;
-        return compId;
-    }
-
-    static inline uint32_t toInt(const CompoundModuleId &compId)
-    {
-        return (static_cast<uint32_t>(compId.moduleId) << 16) | compId.instanceId;
-    }
-
     /* Required because this class is used as key of std::map */
     bool operator<(const CompoundModuleId& other) const
     {
@@ -119,20 +107,38 @@ struct CompoundModuleId
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.read(moduleId);
+        /* In the firmware structure the compound id is store on an uint32_t:
+         * - 16 left bits -> module id
+         * - 16 right bits-> instance id
+         * Therefore the memory mapping is:
+         * - first 16 bits: instance id
+         * - next 16 bits: module id
+         */
         reader.read(instanceId);
+        reader.read(moduleId);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.write(moduleId);
         writer.write(instanceId);
+        writer.write(moduleId);
+    }
+
+    std::string toString() const
+    {
+        return "(" + std::to_string(moduleId) + "," + std::to_string(instanceId) + ")";
+    }
+
+private:
+    static inline uint32_t toInt(const CompoundModuleId &compId)
+    {
+        return (static_cast<uint32_t>(compId.moduleId) << 16) | compId.instanceId;
     }
 };
 
 static std::ostream& operator<< (std::ostream& stream, const CompoundModuleId& id)
 {
-    stream << CompoundModuleId::toInt(id);
+    stream << id.toString();
     return stream;
 }
 
@@ -331,7 +337,7 @@ struct DSModuleInstanceProps
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.read(id);
+        id.fromStream(reader);
         reader.read(dp_queue_type);
         reader.read(queue_alignment);
         reader.read(cp_usage_mask);
@@ -350,7 +356,7 @@ struct DSModuleInstanceProps
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.write(id);
+        id.toStream(writer);
         writer.write(dp_queue_type);
         writer.write(queue_alignment);
         writer.write(cp_usage_mask);
