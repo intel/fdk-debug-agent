@@ -300,7 +300,10 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createTask()
 
                 /* Parent : pipe */
                 auto it = mTaskParents.find(task.task_id);
-                assert(it != mTaskParents.end());
+                if (it == mTaskParents.end()) {
+                    throw Exception("Task with id=" + std::to_string(task.task_id) +
+                        " not found.");
+                }
                 for (auto pipeId : it->second.pipeIds) {
                     taskModel->getParents().add(std::make_shared<InstanceRef>(typeName_pipe,
                         std::to_string(pipeId)));
@@ -370,7 +373,12 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
 
             /* Parents */
             auto entry = mModuleParents.find(module.id);
-            assert(entry != mModuleParents.end());
+            if (entry == mModuleParents.end()) {
+                throw Exception("Module instance with type_id=" +
+                    std::to_string(module.id.moduleId) + " instance_id=" +
+                    std::to_string(module.id.instanceId) + " not found.");
+            }
+
             ModuleParents &parents = entry->second;
 
             /* Subsystem */

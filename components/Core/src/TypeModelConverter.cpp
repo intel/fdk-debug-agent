@@ -95,6 +95,7 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     Categories &categories = subsystem->getCategories();
 
     /* Static types */
+    /* Asserting because these two collections are statically defined in the debug agent */
     assert(staticTypeCollections.size() == staticTypes.size());
     for (std::size_t i = 0; i < staticTypeCollections.size(); ++i) {
         auto coll = std::make_shared<TypeRefCollection>(staticTypeCollections[i]);
@@ -215,6 +216,7 @@ std::shared_ptr<Type> TypeModelConverter::createGateway(const std::string &name)
 
 std::shared_ptr<Type> TypeModelConverter::createModule(uint32_t id)
 {
+    /* Asserting because id is the result of iteration in [0..mSystem.getModuleEntries().size()[*/
     assert(id < mSystem.getModuleEntries().size());
 
     auto module = std::make_shared<Component>();
