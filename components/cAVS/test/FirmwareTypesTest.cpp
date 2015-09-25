@@ -51,43 +51,115 @@ static const AudioDataFormatIpc audioFormat = {
     5, 0, 0, 0, \
     6, 7, 8, 9
 
-TEST_CASE("DSFirmwareTypes : PplProps")
+#define HASH_MEMORY \
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, \
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+
+/* This template method tests serialization, deserialization and operator == of the supplied
+ *  type.
+ */
+template <typename T>
+void testType(const T& expectedValue, const Buffer &expectedBuffer)
 {
-    PplProps props = { 1, 2, 3, 4, 5, 6, { { 1, 6 }, { 2, 7 }, { 3, 8 } }, { 4, 5 }, {} };
-
-    const Buffer expected = {
-        1, 0, 0, 0,
-        2, 0, 0, 0,
-        3, 0, 0, 0,
-        4, 0, 0, 0,
-        5, 0, 0, 0,
-        6, 0, 0, 0,
-
-        3, 0, 0, 0,
-        6, 0, 1, 0,
-        7, 0, 2, 0,
-        8, 0, 3, 0,
-
-        2, 0, 0, 0,
-        4, 0, 0, 0,
-        5, 0, 0, 0,
-
-        0, 0, 0, 0,
-    };
-
     ByteStreamWriter writer;
-    props.toStream(writer);
+    expectedValue.toStream(writer);
+    CHECK(writer.getBuffer() == expectedBuffer);
 
-    CHECK(writer.getBuffer() == expected);
-
-    ByteStreamReader reader(expected);
-    PplProps readProps;
-    readProps.fromStream(reader);
-
-    CHECK(readProps == props);
+    ByteStreamReader reader(expectedBuffer);
+    T readValue;
+    readValue.fromStream(reader);
+    CHECK(readValue == expectedValue);
 }
 
-TEST_CASE("DSFirmwareTypes : SchedulersInfo")
+/** AUDIOFORMAT */
+
+TEST_CASE("FirmwareTypes : AudioDataFormatIpc")
+{
+    testType(audioFormat, { AUDIOFORMAT_MEMORY });
+}
+
+/** PIPELINE */
+
+TEST_CASE("FirmwareTypes : PipelinesListInfo")
+{
+    testType(
+        PipelinesListInfo{ { 1, 3 } },
+        {
+            2, 0, 0, 0,
+            1, 0, 0, 0,
+            3, 0, 0, 0
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : PplProps")
+{
+    testType(
+        PplProps{ 1, 2, 3, 4, 5, 6, { { 1, 6 }, { 2, 7 }, { 3, 8 } }, { 4, 5 }, {} },
+        {
+            1, 0, 0, 0,
+            2, 0, 0, 0,
+            3, 0, 0, 0,
+            4, 0, 0, 0,
+            5, 0, 0, 0,
+            6, 0, 0, 0,
+
+            3, 0, 0, 0,
+            6, 0, 1, 0,
+            7, 0, 2, 0,
+            8, 0, 3, 0,
+
+            2, 0, 0, 0,
+            4, 0, 0, 0,
+            5, 0, 0, 0,
+
+            0, 0, 0, 0,
+        }
+    );
+}
+
+/** SCHEDULER */
+
+TEST_CASE("FirmwareTypes : TaskProps")
+{
+    testType(
+        TaskProps{ 1, { { 2, 3 }, { 4, 5 } } },
+        {
+            1, 0, 0, 0,
+            2, 0, 0, 0,
+            3, 0, 2, 0,
+            5, 0, 4, 0
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : SchedulderProps")
+{
+    TaskProps task1 = { 3, { { 1, 3 }, { 2, 4 } } };
+    TaskProps task2 = { 4, { { 8, 5 } } };
+
+    SchedulerProps props = { 1, 2, { task1, task2 } };
+
+    testType(
+        props,
+        {
+            1, 0, 0, 0,
+            2, 0, 0, 0,
+            2, 0, 0, 0,
+
+            3, 0, 0, 0,
+            2, 0, 0, 0,
+            3, 0, 1, 0,
+            4, 0, 2, 0,
+
+            4, 0, 0, 0,
+            1, 0, 0, 0,
+            5, 0, 8, 0,
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : SchedulersInfo")
 {
     TaskProps task1 = { 3, { { 1, 0 }, { 2, 0} } };
     TaskProps task2 = { 4, { { 8, 0 } } };
@@ -98,68 +170,62 @@ TEST_CASE("DSFirmwareTypes : SchedulersInfo")
 
     SchedulersInfo infos = { { props1, props2 } };
 
-    const Buffer expected = {
-        2, 0, 0, 0,
+    testType(
+        infos,
+        {
+            2, 0, 0, 0,
 
-        1, 0, 0, 0,
-        2, 0, 0, 0,
-        2, 0, 0, 0,
+            1, 0, 0, 0,
+            2, 0, 0, 0,
+            2, 0, 0, 0,
 
-        3, 0, 0, 0,
-        2, 0, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 2, 0,
+            3, 0, 0, 0,
+            2, 0, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 2, 0,
 
-        4, 0, 0, 0,
-        1, 0, 0, 0,
-        0, 0, 8, 0,
+            4, 0, 0, 0,
+            1, 0, 0, 0,
+            0, 0, 8, 0,
 
-        4, 0, 0, 0,
-        2, 0, 0, 0,
-        1, 0, 0, 0,
+            4, 0, 0, 0,
+            2, 0, 0, 0,
+            1, 0, 0, 0,
 
-        6, 0, 0, 0,
-        0, 0, 0, 0,
-    };
-
-    ByteStreamWriter writer;
-    infos.toStream(writer);
-
-    CHECK(writer.getBuffer() == expected);
-
-    ByteStreamReader reader(expected);
-    SchedulersInfo readInfos;
-    readInfos.fromStream(reader);
-
-    CHECK(readInfos == infos);
+            6, 0, 0, 0,
+            0, 0, 0, 0,
+        }
+    );
 }
 
-TEST_CASE("DSFirmwareTypes : PinListInfo")
+/** MODULE INSTANCES */
+
+TEST_CASE("FirmwareTypes : PinProps")
 {
-    static const PinListInfo list = {{
-        { static_cast<StreamType>(1), audioFormat, 3 }
-    }};
-
-    const Buffer expected = {
-        1, 0, 0, 0,
-        1, 0, 0, 0,
-        AUDIOFORMAT_MEMORY,
-        3, 0, 0, 0
-    };
-
-    ByteStreamWriter writer;
-    list.toStream(writer);
-
-    CHECK(writer.getBuffer() == expected);
-
-    ByteStreamReader reader(expected);
-    PinListInfo readList;
-    readList.fromStream(reader);
-
-    CHECK(readList == list);
+    testType(
+        PinProps{ StreamType::STREAM_TYPE_PCM, audioFormat, 2 },
+        {
+            static_cast<uint8_t>(StreamType::STREAM_TYPE_PCM), 0, 0, 0,
+            AUDIOFORMAT_MEMORY,
+            2, 0, 0, 0,
+        }
+    );
 }
 
-TEST_CASE("DSFirmwareTypes : ModuleInstanceProps")
+TEST_CASE("FirmwareTypes : PinListInfo")
+{
+    testType(
+        PinListInfo{{{ StreamType::STREAM_TYPE_PCM, audioFormat, 3 }}},
+        {
+            1, 0, 0, 0,
+            static_cast<uint8_t>(StreamType::STREAM_TYPE_PCM), 0, 0, 0,
+            AUDIOFORMAT_MEMORY,
+            3, 0, 0, 0
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : ModuleInstanceProps")
 {
     static const PinListInfo input_pins = { {
         { static_cast<StreamType>(1), audioFormat, 3 }
@@ -174,45 +240,178 @@ TEST_CASE("DSFirmwareTypes : ModuleInstanceProps")
         ConnectorNodeId(12), ConnectorNodeId(13)
     };
 
-    static const Buffer expected = {
-        9, 0, 1, 0,
-        2, 0, 0, 0,
-        3, 0, 0, 0,
-        4, 0, 0, 0,
-        5, 0, 0, 0,
-        6, 0, 0, 0,
-        7, 0, 0, 0,
-        8, 0, 0, 0,
-        9, 0, 0, 0,
-        10, 0, 0, 0,
-        11, 0, 0, 0,
+    testType(
+        instanceProps,
+        {
+            9, 0, 1, 0,
+            2, 0, 0, 0,
+            3, 0, 0, 0,
+            4, 0, 0, 0,
+            5, 0, 0, 0,
+            6, 0, 0, 0,
+            7, 0, 0, 0,
+            8, 0, 0, 0,
+            9, 0, 0, 0,
+            10, 0, 0, 0,
+            11, 0, 0, 0,
 
-        1, 0, 0, 0,
-        1, 0, 0, 0,
-        AUDIOFORMAT_MEMORY,
-        3, 0, 0, 0,
+            1, 0, 0, 0,
+            1, 0, 0, 0,
+            AUDIOFORMAT_MEMORY,
+            3, 0, 0, 0,
 
-        2, 0, 0, 0,
-        4, 0, 0, 0,
-        AUDIOFORMAT_MEMORY,
-        5, 0, 0, 0,
-        6, 0, 0, 0,
-        AUDIOFORMAT_MEMORY,
-        7, 0, 0, 0,
+            2, 0, 0, 0,
+            4, 0, 0, 0,
+            AUDIOFORMAT_MEMORY,
+            5, 0, 0, 0,
+            6, 0, 0, 0,
+            AUDIOFORMAT_MEMORY,
+            7, 0, 0, 0,
 
-        12, 0, 0, 0,
-        13, 0, 0, 0
-    };
-
-    ByteStreamWriter writer;
-    instanceProps.toStream(writer);
-
-    CHECK(writer.getBuffer() == expected);
-
-    ByteStreamReader reader(expected);
-    ModuleInstanceProps readInstanceProps;
-    readInstanceProps.fromStream(reader);
-
-    CHECK(readInstanceProps == instanceProps);
+            12, 0, 0, 0,
+            13, 0, 0, 0
+        }
+    );
 }
 
+/** GATEWAY */
+
+TEST_CASE("FirmwareTypes : GatewayProps")
+{
+    testType(
+        GatewayProps{ 1, 2},
+        {
+            1, 0, 0, 0,
+            2, 0, 0, 0
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : GatewaysInfo")
+{
+    testType(
+        GatewaysInfo{ { { 1, 2 }, { 3, 4 } } },
+        {
+            2, 0, 0, 0,
+            1, 0, 0, 0,
+            2, 0, 0, 0,
+            3, 0, 0, 0,
+            4, 0, 0, 0,
+        }
+    );
+}
+
+/** MODULE TYPE */
+
+TEST_CASE("FirmwareTypes : SegmentFlags")
+{
+    testType(
+        SegmentFlags{ 3 },
+        {
+            3, 0, 0, 0,
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : SegmentDesc")
+{
+    testType(
+        SegmentDesc{ { 1 }, 2, 3 },
+        {
+            1, 0, 0, 0,
+            2, 0, 0, 0,
+            3, 0, 0, 0,
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : ModuleType")
+{
+    testType(
+        ModuleType{ 3 },
+        {
+            3, 0, 0, 0,
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : ModuleEntry and ModulesInfo")
+{
+    const ModuleEntry module{
+        1,
+        { 0, 1, 2, 3, 4, 5, 6, 7 },
+        { 1, 2, 3, 4 },
+        { 5 },
+        { HASH_MEMORY },
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        { { { 1 }, 2, 3 },
+            { { 4 }, 5, 6 },
+            { { 7 }, 8, 9 }
+        }
+    };
+
+    const Buffer moduleMemory = {
+        1, 0, 0, 0,
+        0, 1, 2, 3, 4, 5, 6, 7,
+
+        1, 0, 0, 0,
+        2, 0, 0, 0,
+        3, 0, 0, 0,
+        4, 0, 0, 0,
+
+        5, 0, 0, 0,
+
+        HASH_MEMORY,
+
+        1, 0, 0, 0,
+        2, 0, 3, 0,
+        4, 0, 0, 0,
+        5, 0, 6, 0,
+
+        1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0,
+        4, 0, 0, 0, 5, 0, 0, 0, 6, 0, 0, 0,
+        7, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0
+    };
+
+    testType(module, moduleMemory);
+
+    ModulesInfo modulesInfo;
+    modulesInfo.module_info.push_back(module);
+
+    /* Putting array size */
+    Buffer modulesInfoMemory = { 1, 0, 0, 0 };
+
+    /* Putting module entry content */
+    modulesInfoMemory.insert(modulesInfoMemory.end(), moduleMemory.begin(), moduleMemory.end());
+
+    testType(modulesInfo, modulesInfoMemory);
+
+}
+
+/** CONFIG */
+
+TEST_CASE("FirmwareTypes : FwVersion")
+{
+    testType(
+        FwVersion{ 1, 2, 3, 4 },
+        {
+            1, 0, 2, 0, 3, 0, 4, 0
+        }
+    );
+}
+
+TEST_CASE("FirmwareTypes : DmaBufferConfig")
+{
+    testType(
+        DmaBufferConfig{ 1, 2 },
+        {
+            1, 0, 0, 0,
+            2, 0, 0, 0
+        }
+    );
+}
