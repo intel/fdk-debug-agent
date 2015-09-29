@@ -123,8 +123,10 @@ enum class ChannelConfig : uint32_t
     CHANNEL_CONFIG_5_POINT_0 = 7, /**< L, C, R, Ls & Rs. */
     CHANNEL_CONFIG_5_POINT_1 = 8, /**< L, C, R, Ls, Rs & LFE. */
     CHANNEL_CONFIG_DUAL_MONO = 9, /**< One channel replicated in two. */
-    CHANNEL_CONFIG_I2S_DUAL_STEREO_0 = 10, /**< Stereo (L,R) in 4 slots, 1st stream: [ L, R, -, - ] */
-    CHANNEL_CONFIG_I2S_DUAL_STEREO_1 = 11, /**< Stereo (L,R) in 4 slots, 2nd stream: [ -, -, L, R ] */
+    CHANNEL_CONFIG_I2S_DUAL_STEREO_0 = 10, /**< Stereo (L,R) in 4 slots, 1st stream:
+                                            * [ L, R, -, - ] */
+    CHANNEL_CONFIG_I2S_DUAL_STEREO_1 = 11, /**< Stereo (L,R) in 4 slots, 2nd stream:
+                                            * [ -, -, L, R ] */
     CHANNEL_CONFIG_7_POINT_1 = 12, /**< L, C, R, Ls, Rs & LFE., LS, RS */
     CHANNEL_CONFIG_INVALID
 };

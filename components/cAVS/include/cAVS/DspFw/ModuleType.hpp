@@ -104,7 +104,8 @@ union ModuleType
     struct
     {
         uint32_t     load_type : 4; // MT_BUILTIN, MT_LOADABLE
-        uint32_t     auto_start : 1; // 0 - manually created, 1 - single instance created by Module Manager
+        uint32_t     auto_start : 1; // 0 - manually created, 1 - single instance created by
+                                     // Module Manager
         uint32_t     domain_ll : 1; // support LL domain
         uint32_t     domain_dp : 1; // support DP domain
         uint32_t     _rsvd : 25;
@@ -157,7 +158,8 @@ public:
     uint16_t    cfg_count;
     uint32_t    affinity_mask;              // bit-mask of cores allowed to exec module
     uint16_t    instance_max_count;         // max number of instances
-    uint16_t    instance_stack_size;        // size of stack that instance requires for its task (DP) [bytes]
+    uint16_t    instance_stack_size;        // size of stack that instance requires for its task
+                                            // (DP) [bytes]
     SegmentDesc segments[SEGMENT_COUNT];
 
     bool operator == (const ModuleEntry &other) const

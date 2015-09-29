@@ -133,7 +133,8 @@ public:
         mFwConfigTlvMap[Tags::MAX_MOD_INST_COUNT_FW_CFG] =
             std::make_unique<TlvWrapper<uint32_t> >(maxModInstCount, isMaxModInstCountValid);
         mFwConfigTlvMap[Tags::MAX_LL_TASKS_PER_PRI_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(maxLlTasksPerPriCount, isMaxLlTasksPerPriCountValid);
+            std::make_unique<TlvWrapper<uint32_t> >(maxLlTasksPerPriCount,
+            isMaxLlTasksPerPriCountValid);
         mFwConfigTlvMap[Tags::LL_PRI_COUNT] =
             std::make_unique<TlvWrapper<uint32_t> >(llPriCount, isLlPriCountValid);
         mFwConfigTlvMap[Tags::MAX_DP_TASKS_COUNT_FW_CFG] =

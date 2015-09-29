@@ -137,7 +137,8 @@ enum class FwConfigParams
     MAX_PPL_CNT_FW_CFG = 9,
     /**
     * Maximum number of A-state table entries that may be configured by the driver.
-    * Driver may also use this value to estimate the size of data retrieved as ASTATE_TABLE property.
+    * Driver may also use this value to estimate the size of data retrieved as ASTATE_TABLE
+    * property.
     */
     MAX_ASTATE_COUNT_FW_CFG = 10,
     /**
@@ -186,8 +187,10 @@ enum class HwConfigParams
     */
     TOTAL_PHYS_MEM_PAGES_HW_CFG = 3,
     /**
-    * SSP capabilities. Number of items in controller_base_addr array is specified by controller_count.
-    * Note: Lower 16 bits of I2sVersion may be used in future to indicate implementation revision if necessary.
+    * SSP capabilities. Number of items in controller_base_addr array is specified by
+    * controller_count.
+    * Note: Lower 16 bits of I2sVersion may be used in future to indicate implementation revision
+    * if necessary.
     */
     I2S_CAPS_HW_CFG = 4,
     /**
