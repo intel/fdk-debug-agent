@@ -122,6 +122,16 @@ struct ConnectorNodeId
     {
         return val.dw == other.val.dw;
     }
+
+    void fromStream(util::ByteStreamReader &reader)
+    {
+        reader.read(val.dw);
+    }
+
+    void toStream(util::ByteStreamWriter &writer) const
+    {
+        writer.write(val.dw);
+    }
 };
 static_assert(sizeof(ConnectorNodeId) == 4, "Wrong ConnectorNodeId size");
 
@@ -144,17 +154,16 @@ struct PinProps
     void fromStream(util::ByteStreamReader &reader)
     {
         reader.read(stream_type);
-        reader.read(format);
+        format.fromStream(reader);
         reader.read(phys_queue_id);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
         writer.write(stream_type);
-        writer.write(format);
+        format.toStream(writer);
         writer.write(phys_queue_id);
     }
-
 };
 static_assert(sizeof(PinProps) == 32, "Wrong PinProps size");
 
@@ -169,12 +178,12 @@ struct PinListInfo
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.readVector<ArraySizeType>(pin_info);
+        reader.readVectorAndRecurse<ArraySizeType>(pin_info);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.writeVector<ArraySizeType>(pin_info);
+        writer.writeVectorAndRecurse<ArraySizeType>(pin_info);
     }
 };
 
@@ -232,8 +241,8 @@ struct ModuleInstanceProps
         reader.read(cpc_peak);
         input_pins.fromStream(reader);
         output_pins.fromStream(reader);
-        reader.read(input_gateway);
-        reader.read(output_gateway);
+        input_gateway.fromStream(reader);
+        output_gateway.fromStream(reader);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
@@ -251,8 +260,8 @@ struct ModuleInstanceProps
         writer.write(cpc_peak);
         input_pins.toStream(writer);
         output_pins.toStream(writer);
-        writer.write(input_gateway);
-        writer.write(output_gateway);
+        input_gateway.toStream(writer);
+        output_gateway.toStream(writer);
     }
 };
 

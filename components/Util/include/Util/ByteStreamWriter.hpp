@@ -27,6 +27,7 @@
 #include <limits>
 #include <cassert>
 #include <inttypes.h>
+#include <type_traits>
 
 /* The visual studio toolchain define the "max" macro, which makes fail the call to
  * std::numeric_limits<SizeType>::max(). So undefining it.
@@ -47,10 +48,12 @@ public:
     ByteStreamWriter() {}
 
     /** Write a value of type supplied as template parameter
-     * @tparam T the type of the value to write
+     * @tparam T the type of the value to write, shall be an enum or an integral type
      */
     template <typename T>
-    void write(const T& value) {
+    typename std::enable_if<std::is_integral<T>::value ||
+                            std::is_enum<T>::value>::type /* Only integral or enum types */
+    write(const T& value) {
         std::size_t elementSize = sizeof(T);
         const uint8_t *valuePtr = reinterpret_cast<const uint8_t*>(&value);
 

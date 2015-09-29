@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <inttypes.h>
+#include <type_traits>
 
 namespace debug_agent
 {
@@ -49,11 +50,13 @@ public:
     ByteStreamReader(const util::Buffer &vector) : mIndex(0), mBuffer(vector) {}
 
     /** Read a value of type supplied as template parameter
-     * @tparam T the type of the value to read
+     * @tparam T the type of the value to read, shall be an enum or an integral type
      * @throw ByteStreamReader::Exception if the end of stream is reached
      */
     template <typename T>
-    void read(T &value) {
+    typename std::enable_if<std::is_integral<T>::value ||
+        std::is_enum<T>::value>::type /* Only integral or enum types */
+    read(T &value) {
         std::size_t elementSize = sizeof(T);
         if (mIndex + elementSize > mBuffer.size()) {
             throw Exception("Read failed: end of stream reached");
