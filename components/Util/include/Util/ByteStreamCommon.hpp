@@ -22,72 +22,33 @@
 
 #pragma once
 
-#include "cAVS/DspFw/Common.hpp"
-#include "Util/ByteStreamReader.hpp"
-#include "Util/ByteStreamWriter.hpp"
+#include <type_traits>
 
 namespace debug_agent
 {
-namespace cavs
-{
-namespace dsp_fw
+namespace util
 {
 
-struct GatewayProps
+/** The "value" member of this structure is true if the supplied type should be serialized using a
+ * simple memory copy.
+ *
+ * Currently "simple serializable" types are integral types and enum types.
+ */
+template <typename T>
+struct IsSimpleSerializableType
 {
-    /**
-    * Gateway ID (refer to ConnectorNodeId).
-    */
-    uint32_t  id;
-    /**
-    * Gateway attributes (refer to GatewayAttributes).
-    */
-    uint32_t  attribs;
-
-    bool operator == (const GatewayProps &other) const
-    {
-        return id == other.id &&
-            attribs == other.attribs;
-    }
-
-    void fromStream(util::ByteStreamReader &reader)
-    {
-        reader.read(id);
-        reader.read(attribs);
-    }
-
-    void toStream(util::ByteStreamWriter &writer) const
-    {
-        writer.write(id);
-        writer.write(attribs);
-    }
-};
-static_assert(sizeof(GatewayProps) == 8, "Wrong GatewayProps size");
-
-struct GatewaysInfo
-{
-    std::vector<GatewayProps> gateways;
-
-    static std::size_t getAllocationSize(std::size_t count) {
-        return sizeof(ArraySizeType)+count * sizeof(GatewayProps);
-    }
-
-    bool operator == (const GatewaysInfo &other) const
-    {
-        return gateways == other.gateways;
-    }
-
-    void fromStream(util::ByteStreamReader &reader)
-    {
-        reader.readVector<ArraySizeType>(gateways);
-    }
-
-    void toStream(util::ByteStreamWriter &writer) const
-    {
-        writer.writeVector<ArraySizeType>(gateways);
-    }
+    static const bool value = std::is_integral<T>::value || std::is_enum<T>::value;
 };
 
-}
+/** The "value" member  of this structure is true if the supplied type is composite and should be
+ * serialized using it implicit toStream() and fromStream() interface, because simple memory copy
+ * doesn't work in this case.
+ */
+template <typename T>
+struct IsCompoundSerializableType
+{
+    static const bool value = !IsSimpleSerializableType<T>::value;
+};
+
 }
 }

@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "Util/ByteStreamCommon.hpp"
 #include "Util/Buffer.hpp"
 #include <vector>
 #include <stdexcept>
@@ -49,13 +50,15 @@ public:
     /** @param vector: the input buffer */
     ByteStreamReader(const util::Buffer &vector) : mIndex(0), mBuffer(vector) {}
 
-    /** Read a value of type supplied as template parameter
+    /** Read a "simple type" value.
+     *
+     * "Simple types" are integral types and enum types, they can be serialized
+     * using a simple memory copy.
+     *
      * @tparam T the type of the value to read, shall be an enum or an integral type
-     * @throw ByteStreamReader::Exception if the end of stream is reached
      */
     template <typename T>
-    typename std::enable_if<std::is_integral<T>::value ||
-        std::is_enum<T>::value>::type /* Only integral or enum types */
+    typename std::enable_if<IsSimpleSerializableType<T>::value>::type
     read(T &value) {
         std::size_t elementSize = sizeof(T);
         if (mIndex + elementSize > mBuffer.size()) {
@@ -66,11 +69,24 @@ public:
         mIndex += elementSize;
     }
 
-    /** Read an array of elements
-    * @param array the array that will receive elements
-    * @param count the element count to read
-    * @tparam T the element type
-    */
+    /** Read a "compound type" value.
+     *
+     * "Compound types" implement the fromStream() method in order to serialize contained members.
+     *
+     * @tparam T the type of the value to read, shall implement the fromStream() implicit
+     *           interface.
+     */
+    template <typename T>
+    typename std::enable_if<IsCompoundSerializableType<T>::value>::type
+    read(T &value) {
+        value.fromStream(*this);
+    }
+
+    /** Read an array of elements, the supplied type could be either simple or composite.
+     * @param array the array that will receive elements
+     * @param count the element count to read
+     * @tparam T the element type
+     */
     template <typename T>
     void readArray(T *array, std::size_t count) {
         for (std::size_t i = 0; i < count; ++i) {
@@ -78,7 +94,9 @@ public:
         }
     }
 
-    /* Read a vector of type supplied as template parameter
+    /* Read a vector of type supplied as template parameter, the supplied type could be either
+     * simple or composite.
+     *
      * The vector size is firstly read from the stream (The type of this size is supplied
      * as template parameter).
      * Then the vector elements are read.
@@ -103,30 +121,6 @@ public:
         for (std::size_t i = 0; i < size; ++i) {
             T element;
             read(element);
-            vector.push_back(element);
-        }
-    }
-
-    /* Read a vector of type supplied as template parameter. The supplied type should implements
-     * the following method, which is called on all vector elements in order to recurse
-     * the serialization:
-     *
-     * void fromStream(ByteStreamReader &reader);
-     *
-     * @tparam SizeType the type of vector size read from the stream
-     * @tparam T the type of the vector elements, which implements the fromStream() method.
-     * @throw ByteStreamReader::Exception if the end of stream is reached
-     */
-    template <typename SizeType, typename T>
-    void readVectorAndRecurse(std::vector<T> &vector) {
-        SizeType size;
-        /* Reading the size */
-        read(size);
-
-        /* Calling recursively fromStream() on each element */
-        for (std::size_t i = 0; i < size; ++i) {
-            T element;
-            element.fromStream(*this);
             vector.push_back(element);
         }
     }

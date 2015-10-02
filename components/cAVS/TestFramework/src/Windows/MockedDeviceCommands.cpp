@@ -49,12 +49,12 @@ void MockedDeviceCommands::addModuleParameterCommand(
 
     /* Adding driver Intc_App_Cmd_Body structure */
     driver::Intc_App_Cmd_Body bodyCmd;
-    bodyCmd.toStream(expectedOutputWriter);
+    expectedOutputWriter.write(bodyCmd);
 
     /* Adding driver IoctlFwModuleParam structure */
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, parameterTypeId,
         static_cast<uint32_t>(expectedParameterContent.size()));
-    moduleParam.toStream(expectedOutputWriter);
+    expectedOutputWriter.write(moduleParam);
 
     /* Adding parameter content */
     expectedOutputWriter.writeRawBuffer(expectedParameterContent);
@@ -67,7 +67,7 @@ void MockedDeviceCommands::addModuleParameterCommand(
         static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_FW_MODULE_PARAM),
         driver::moduleParameterAccessCommandParameterId,
         static_cast<uint32_t>(expectedOutputWriter.getBuffer().size()));
-    ioctlInput.toStream(inputWriter);
+    inputWriter.write(ioctlInput);
 
     uint32_t ioctlCode = command == Command::Get ?
         IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET;
@@ -85,13 +85,13 @@ void MockedDeviceCommands::addModuleParameterCommand(
 
     /* Adding driver Intc_App_Cmd_Body structure */
     bodyCmd.Status = returnedDriverStatus;
-    bodyCmd.toStream(returnedOutputWriter);
+    returnedOutputWriter.write(bodyCmd);
 
     if (NT_SUCCESS(returnedDriverStatus)) {
 
         /* Adding driver IoctlFwModuleParam structure */
         moduleParam.fw_status = static_cast<ULONG>(returnedFirmwareStatus);
-        moduleParam.toStream(returnedOutputWriter);
+        returnedOutputWriter.write(moduleParam);
 
         if (returnedFirmwareStatus == dsp_fw::IxcStatus::ADSP_IPC_SUCCESS) {
 
@@ -119,7 +119,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
     util::Buffer expectedOutput(expectedOutputBufferSize, 0xFF);
 
     util::ByteStreamWriter writer;
-    parameter.toStream(writer);
+    writer.write(parameter);
 
     addModuleParameterCommand(
         Command::Get,
@@ -146,10 +146,10 @@ void MockedDeviceCommands::addLogParameterCommand(
     /* Intc_App_TinyCmd structure */
     driver::Intc_App_TinyCmd tinyCmd(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
         driver::logParametersCommandparameterId);
-    tinyCmd.toStream(expectedWriter);
+    expectedWriter.write(tinyCmd);
 
     /* IoctlFwLogsState structure*/
-    inputFwParams.toStream(expectedWriter);
+    expectedWriter.write(inputFwParams);
 
     uint32_t ioctlCode = command == Command::Get ?
     IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
@@ -165,12 +165,12 @@ void MockedDeviceCommands::addLogParameterCommand(
 
     /* Intc_App_TinyCmd structure */
     tinyCmd.Body.Status = returnedDriverStatus;
-    tinyCmd.toStream(returnedWriter);
+    returnedWriter.write(tinyCmd);
 
     if (NT_SUCCESS(returnedDriverStatus)) {
 
         /* IoctlFwLogsState structure*/
-        outputFwParams.toStream(returnedWriter);
+        returnedWriter.write(outputFwParams);
     }
 
     /* Adding entry */

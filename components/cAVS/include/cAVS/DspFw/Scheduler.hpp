@@ -47,13 +47,13 @@ struct TaskProps
     void fromStream(util::ByteStreamReader &reader)
     {
         reader.read(task_id);
-        reader.readVectorAndRecurse<ArraySizeType>(module_instance_id);
+        reader.readVector<ArraySizeType>(module_instance_id);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
         writer.write(task_id);
-        writer.writeVectorAndRecurse<ArraySizeType>(module_instance_id);
+        writer.writeVector<ArraySizeType>(module_instance_id);
     }
 };
 
@@ -74,14 +74,14 @@ struct SchedulerProps
     {
         reader.read(processing_domain);
         reader.read(core_id);
-        reader.readVectorAndRecurse<ArraySizeType>(task_info);
+        reader.readVector<ArraySizeType>(task_info);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
         writer.write(processing_domain);
         writer.write(core_id);
-        writer.writeVectorAndRecurse<ArraySizeType>(task_info);
+        writer.writeVector<ArraySizeType>(task_info);
     }
 };
 
@@ -96,12 +96,12 @@ struct SchedulersInfo
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.readVectorAndRecurse<ArraySizeType>(scheduler_info);
+        reader.readVector<ArraySizeType>(scheduler_info);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.writeVectorAndRecurse<ArraySizeType>(scheduler_info);
+        writer.writeVector<ArraySizeType>(scheduler_info);
     }
 };
 

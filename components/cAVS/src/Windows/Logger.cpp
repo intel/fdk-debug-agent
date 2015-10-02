@@ -317,10 +317,10 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
     /* Intc_App_TinyCmd structure */
     driver::Intc_App_TinyCmd tinyCmd(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
         driver::logParametersCommandparameterId);
-    tinyCmd.toStream(outputWriter);
+    outputWriter.write(tinyCmd);
 
     /* IoctlFwLogsState structure */
-    inputFwParams.toStream(outputWriter);
+    outputWriter.write(inputFwParams);
 
     /* Performing ioctl */
     uint32_t ioControlCode = getIoControlCodeFromType(type);
@@ -340,7 +340,7 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
         util::ByteStreamReader reader(buffer);
 
         /* Reading Intc_App_TinyCmd structure */
-        tinyCmd.fromStream(reader);
+        reader.read(tinyCmd);
 
         NTSTATUS status = tinyCmd.Body.Status;
         if (!NT_SUCCESS(status)) {
@@ -349,7 +349,7 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
         }
 
         /* Reading IoctlFwLogsState structure */
-        outputFwParams.fromStream(reader);
+        reader.read(outputFwParams);
 
         if (!reader.isEOS()) {
             /** @todo use logging or throw an exception */

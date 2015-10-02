@@ -82,7 +82,7 @@ TEST_CASE("Byte stream writer")
     structs.push_back(TestStruct(1, 2));
     structs.push_back(TestStruct(3, 4));
 
-    writer.writeVectorAndRecurse<uint32_t>(structs);
+    writer.writeVector<uint32_t>(structs);
 
     CHECK(writer.getBuffer() == expectedBuffer);
 }
@@ -104,7 +104,7 @@ TEST_CASE("Byte stream reader")
     CHECK(v == std::vector<uint32_t>({ 1, 2 }));
 
     std::vector<TestStruct> structs;
-    reader.readVectorAndRecurse<uint32_t>(structs);
+    reader.readVector<uint32_t>(structs);
     CHECK(structs == std::vector<TestStruct>({ { 1, 2 }, { 3, 4 } }));
 }
 

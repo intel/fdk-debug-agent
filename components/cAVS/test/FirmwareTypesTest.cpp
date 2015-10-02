@@ -62,12 +62,12 @@ template <typename T>
 void testType(const T& expectedValue, const Buffer &expectedBuffer)
 {
     ByteStreamWriter writer;
-    expectedValue.toStream(writer);
+    writer.write(expectedValue);
     CHECK(writer.getBuffer() == expectedBuffer);
 
     ByteStreamReader reader(expectedBuffer);
     T readValue;
-    readValue.fromStream(reader);
+    reader.read(readValue);
     CHECK(readValue == expectedValue);
 }
 

@@ -84,14 +84,14 @@ struct SegmentDesc
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        flags.fromStream(reader);
+        reader.read(flags);
         reader.read(v_base_addr);
         reader.read(file_offset);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        flags.toStream(writer);
+        writer.write(flags);
         writer.write(v_base_addr);
         writer.write(file_offset);
     }
@@ -183,7 +183,7 @@ public:
         reader.read(struct_id);
         reader.readArray(name, MAX_MODULE_NAME_LEN);
         reader.readArray(uuid, UUID_LEN);
-        type.fromStream(reader);
+        reader.read(type);
         reader.readArray(hash, DEFAULT_HASH_SHA256_LEN);
         reader.read(entry_point);
         reader.read(cfg_offset);
@@ -193,7 +193,7 @@ public:
         reader.read(instance_stack_size);
 
         for (std::size_t i = 0; i < SEGMENT_COUNT; i++) {
-            segments[i].fromStream(reader);
+            reader.read(segments[i]);
         }
     }
 
@@ -202,7 +202,7 @@ public:
         writer.write(struct_id);
         writer.writeArray(name, MAX_MODULE_NAME_LEN);
         writer.writeArray(uuid, UUID_LEN);
-        type.toStream(writer);
+        writer.write(type);
         writer.writeArray(hash, DEFAULT_HASH_SHA256_LEN);
         writer.write(entry_point);
         writer.write(cfg_offset);
@@ -212,7 +212,7 @@ public:
         writer.write(instance_stack_size);
 
         for (std::size_t i = 0; i < SEGMENT_COUNT; i++) {
-            segments[i].toStream(writer);
+            writer.write(segments[i]);
         }
     }
 };
@@ -233,12 +233,12 @@ struct ModulesInfo
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.readVectorAndRecurse<ArraySizeType>(module_info);
+        reader.readVector<ArraySizeType>(module_info);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.writeVectorAndRecurse<ArraySizeType>(module_info);
+        writer.writeVector<ArraySizeType>(module_info);
     }
 };
 

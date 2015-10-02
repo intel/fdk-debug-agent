@@ -154,14 +154,14 @@ struct PinProps
     void fromStream(util::ByteStreamReader &reader)
     {
         reader.read(stream_type);
-        format.fromStream(reader);
+        reader.read(format);
         reader.read(phys_queue_id);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
         writer.write(stream_type);
-        format.toStream(writer);
+        writer.write(format);
         writer.write(phys_queue_id);
     }
 };
@@ -178,12 +178,12 @@ struct PinListInfo
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.readVectorAndRecurse<ArraySizeType>(pin_info);
+        reader.readVector<ArraySizeType>(pin_info);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.writeVectorAndRecurse<ArraySizeType>(pin_info);
+        writer.writeVector<ArraySizeType>(pin_info);
     }
 };
 
@@ -228,7 +228,7 @@ struct ModuleInstanceProps
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        id.fromStream(reader);
+        reader.read(id);
         reader.read(dp_queue_type);
         reader.read(queue_alignment);
         reader.read(cp_usage_mask);
@@ -239,15 +239,15 @@ struct ModuleInstanceProps
         reader.read(obs_bytes);
         reader.read(cpc);
         reader.read(cpc_peak);
-        input_pins.fromStream(reader);
-        output_pins.fromStream(reader);
-        input_gateway.fromStream(reader);
-        output_gateway.fromStream(reader);
+        reader.read(input_pins);
+        reader.read(output_pins);
+        reader.read(input_gateway);
+        reader.read(output_gateway);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        id.toStream(writer);
+        writer.write(id);
         writer.write(dp_queue_type);
         writer.write(queue_alignment);
         writer.write(cp_usage_mask);
@@ -258,10 +258,10 @@ struct ModuleInstanceProps
         writer.write(obs_bytes);
         writer.write(cpc);
         writer.write(cpc_peak);
-        input_pins.toStream(writer);
-        output_pins.toStream(writer);
-        input_gateway.toStream(writer);
-        output_gateway.toStream(writer);
+        writer.write(input_pins);
+        writer.write(output_pins);
+        writer.write(input_gateway);
+        writer.write(output_gateway);
     }
 };
 

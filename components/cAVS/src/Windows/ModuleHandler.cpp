@@ -43,12 +43,12 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
 
     /* Adding driver Intc_App_Cmd_Body structure */
     driver::Intc_App_Cmd_Body bodyCmd;
-    bodyCmd.toStream(outputWriter);
+    outputWriter.write(bodyCmd);
 
     /* Adding driver IoctlFwModuleParam structure */
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, moduleParamId,
         static_cast<uint32_t>(suppliedOutputBuffer.size()));
-    moduleParam.toStream(outputWriter);
+    outputWriter.write(moduleParam);
 
     /* Adding parameter content */
     outputWriter.writeRawBuffer(suppliedOutputBuffer);
@@ -61,7 +61,7 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
         static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_FW_MODULE_PARAM),
         driver::moduleParameterAccessCommandParameterId,
         static_cast<uint32_t>(outputWriter.getBuffer().size()));
-    ioctlInput.toStream(inputWriter);
+    inputWriter.write(ioctlInput);
 
     util::Buffer outputBuffer(outputWriter.getBuffer());
 
@@ -83,7 +83,7 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
     try
     {
         /* Reading driver Intc_App_Cmd_Body structure */
-        bodyCmd.fromStream(reader);
+        reader.read(bodyCmd);
 
         /* Checking driver status */
         if (!NT_SUCCESS(bodyCmd.Status))
@@ -93,7 +93,7 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
         }
 
         /* Reading driver IoctlFwModuleParam structure*/
-        moduleParam.fromStream(reader);
+        reader.read(moduleParam);
 
         /* Checking firwmare status */
         if (moduleParam.fw_status !=
@@ -127,7 +127,7 @@ void ModuleHandler::bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instance
     try
     {
         /* Reading parameter */
-        result.fromStream(reader);
+        reader.read(result);
 
         if (!reader.isEOS()) {
             /** @todo use logging or throw an exception */

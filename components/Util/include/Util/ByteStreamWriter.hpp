@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "Util/ByteStreamCommon.hpp"
 #include "Util/Buffer.hpp"
 #include <vector>
 #include <limits>
@@ -47,12 +48,15 @@ class ByteStreamWriter
 public:
     ByteStreamWriter() {}
 
-    /** Write a value of type supplied as template parameter
+    /** Write a "simple type" value.
+     *
+     * "Simple types" are integral types and enum types, they can be serialized
+     * using a simple memory copy.
+     *
      * @tparam T the type of the value to write, shall be an enum or an integral type
      */
     template <typename T>
-    typename std::enable_if<std::is_integral<T>::value ||
-                            std::is_enum<T>::value>::type /* Only integral or enum types */
+    typename std::enable_if<IsSimpleSerializableType<T>::value>::type
     write(const T& value) {
         std::size_t elementSize = sizeof(T);
         const uint8_t *valuePtr = reinterpret_cast<const uint8_t*>(&value);
@@ -61,7 +65,19 @@ public:
         mBuffer.insert(mBuffer.end(), valuePtr, valuePtr + elementSize);
     }
 
-    /** Write an array of elements
+    /** Write a "compound type" value.
+     *
+     * "Compound types" implement the toStream() method in order to serialize contained members.
+     *
+     * @tparam T the type of the value to write, shall implement the toStream() implicit interface.
+     */
+    template <typename T>
+    typename std::enable_if<IsCompoundSerializableType<T>::value>::type
+        write(const T& value) {
+            value.toStream(*this);
+        }
+
+    /** Write an array of elements, the supplied type could be either simple or composite.
       * @param array the array to write
       * @param count the array size
       * @tparam T the element type
@@ -79,7 +95,9 @@ public:
         mBuffer.insert(mBuffer.end(), buffer.begin(), buffer.end());
     }
 
-    /* Write a vector of type supplied as template parameter
+    /* Write a vector of type supplied as template parameter, the supplied type could be either
+     * simple or composite.
+     *
      * The vector size is firstly written to the stream (The type of this size is supplied
      * as template parameter).
      * Then the vector elements are written.
@@ -99,31 +117,6 @@ public:
         /* Writing the elements*/
         for (auto &element : vector) {
             write(element);
-        }
-    }
-
-    /** Write a vector of type supplied as template parameter. The supplied type should implements
-     * the following method, which is called on all vector elements in order to recurse
-     * the serialization:
-     *
-     * void toStream(ByteStreamWriter &writer) const;
-     *
-     * @tparam SizeType the type of vector size written to the stream
-     * @tparam T the type of the vector elements, which implements the toStream() method.
-     */
-    template <typename SizeType, typename T>
-    void writeVectorAndRecurse(const std::vector<T> &vector) {
-
-        /* Checking that size can be encoded with the supplied type */
-        assert(vector.size() <= std::numeric_limits<SizeType>::max());
-
-        SizeType size = static_cast<SizeType>(vector.size());
-        /* Writing the size */
-        write(size);
-
-        /* Calling recursively toStream() on each element */
-        for (auto &element : vector) {
-            element.toStream(*this);
         }
     }
 

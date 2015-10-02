@@ -176,14 +176,14 @@ struct Intc_App_TinyCmd
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        Header.fromStream(reader);
-        Body.fromStream(reader);
+        reader.read(Header);
+        reader.read(Body);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        Header.toStream(writer);
-        Body.toStream(writer);
+        writer.write(Header);
+        writer.write(Body);
     }
 };
 

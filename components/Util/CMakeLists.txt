@@ -27,6 +27,7 @@ set(INCS
     include/Util/Uuid.hpp
     include/Util/BlockingQueue.hpp
     include/Util/PointerHelper.hpp
+    include/Util/ByteStreamCommon.hpp
     include/Util/ByteStreamReader.hpp
     include/Util/ByteStreamWriter.hpp
     include/Util/StringHelper.hpp

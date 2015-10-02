@@ -93,7 +93,7 @@ struct PplProps
         reader.read(total_memory_bytes);
         reader.read(used_memory_bytes);
         reader.read(context_pages);
-        reader.readVectorAndRecurse<ArraySizeType>(module_instances);
+        reader.readVector<ArraySizeType>(module_instances);
         reader.readVector<ArraySizeType>(ll_tasks);
         reader.readVector<ArraySizeType>(dp_tasks);
     }
@@ -106,7 +106,7 @@ struct PplProps
         writer.write(total_memory_bytes);
         writer.write(used_memory_bytes);
         writer.write(context_pages);
-        writer.writeVectorAndRecurse<ArraySizeType>(module_instances);
+        writer.writeVector<ArraySizeType>(module_instances);
         writer.writeVector<ArraySizeType>(ll_tasks);
         writer.writeVector<ArraySizeType>(dp_tasks);
     }
