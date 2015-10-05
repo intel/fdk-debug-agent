@@ -47,9 +47,9 @@ void MockedDeviceCommands::addModuleParameterCommand(
     /* Expected output buffer*/
     util::ByteStreamWriter expectedOutputWriter;
 
-    /* Adding driver Intc_App_Cmd_Body structure */
-    driver::Intc_App_Cmd_Body bodyCmd;
-    expectedOutputWriter.write(bodyCmd);
+    /* Adding driver Intc_App_Cmd_Status structure */
+    driver::Intc_App_Cmd_Status statusCmd;
+    expectedOutputWriter.write(statusCmd);
 
     /* Adding driver IoctlFwModuleParam structure */
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, parameterTypeId,
@@ -83,9 +83,9 @@ void MockedDeviceCommands::addModuleParameterCommand(
     /* Expected returned buffer*/
     util::ByteStreamWriter returnedOutputWriter;
 
-    /* Adding driver Intc_App_Cmd_Body structure */
-    bodyCmd.Status = returnedDriverStatus;
-    returnedOutputWriter.write(bodyCmd);
+    /* Adding driver Intc_App_Cmd_Status structure */
+    statusCmd.status = returnedDriverStatus;
+    returnedOutputWriter.write(statusCmd);
 
     if (NT_SUCCESS(returnedDriverStatus)) {
 
@@ -144,12 +144,12 @@ void MockedDeviceCommands::addLogParameterCommand(
     util::ByteStreamWriter expectedWriter;
 
     /* Intc_App_TinyCmd structure */
-    driver::Intc_App_TinyCmd tinyCmd(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
-        driver::logParametersCommandparameterId);
-    expectedWriter.write(tinyCmd);
+    driver::Intc_App_TinyCmd<driver::IoctlFwLogsState> tinyCmd(
+        static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
+        driver::logParametersCommandparameterId,
+        inputFwParams);
 
-    /* IoctlFwLogsState structure*/
-    expectedWriter.write(inputFwParams);
+    expectedWriter.write(tinyCmd);
 
     uint32_t ioctlCode = command == Command::Get ?
     IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
@@ -164,14 +164,12 @@ void MockedDeviceCommands::addLogParameterCommand(
     util::ByteStreamWriter returnedWriter;
 
     /* Intc_App_TinyCmd structure */
-    tinyCmd.Body.Status = returnedDriverStatus;
-    returnedWriter.write(tinyCmd);
-
+    tinyCmd.status.status = returnedDriverStatus;
     if (NT_SUCCESS(returnedDriverStatus)) {
 
-        /* IoctlFwLogsState structure*/
-        returnedWriter.write(outputFwParams);
+        tinyCmd.body = outputFwParams;
     }
+    returnedWriter.write(tinyCmd);
 
     /* Adding entry */
     mDevice.addSuccessfulIoctlEntry(ioctlCode, &expectedWriter.getBuffer(),

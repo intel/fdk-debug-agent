@@ -136,54 +136,62 @@ struct Intc_App_Cmd_Header
     }
 };
 
-struct Intc_App_Cmd_Body
+struct Intc_App_Cmd_Status
 {
-    NTSTATUS Status;
+    NTSTATUS status;
 
-    Intc_App_Cmd_Body() : Status(0xFFFFFFFF) {}
+    Intc_App_Cmd_Status() : status(0xFFFFFFFF) {}
 
 
-    bool operator == (const Intc_App_Cmd_Body &other)
+    bool operator == (const Intc_App_Cmd_Status &other)
     {
-        return Status == other.Status;
+        return status == other.status;
     }
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.read(Status);
+        reader.read(status);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.write(Status);
+        writer.write(status);
     }
 };
 
+template <class T>
 struct Intc_App_TinyCmd
 {
-    Intc_App_Cmd_Header Header;
-    Intc_App_Cmd_Body Body;
+    Intc_App_Cmd_Header header;
+    Intc_App_Cmd_Status status;
+    T body;
 
-    Intc_App_TinyCmd(ULONG featureID, ULONG parameterID) :
-        Header(featureID, parameterID, 0xFFFFFFFF),
-        Body() {}
+    Intc_App_TinyCmd(ULONG featureID, ULONG parameterID, const T &body) :
+        header(featureID, parameterID, sizeof(T)),
+        status(),
+        body(body)
+    {
+    }
 
     bool operator == (const Intc_App_TinyCmd &other)
     {
-        return Header == other.Header &&
-            Body == other.Body;
+        return header == other.header &&
+            status == other.status &&
+            body == other.body;
     }
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.read(Header);
-        reader.read(Body);
+        reader.read(header);
+        reader.read(status);
+        reader.read(body);
     }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.write(Header);
-        writer.write(Body);
+        writer.write(header);
+        writer.write(status);
+        writer.write(body);
     }
 };
 

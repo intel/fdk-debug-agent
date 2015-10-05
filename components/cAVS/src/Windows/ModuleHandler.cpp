@@ -41,9 +41,9 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
     /* Creating ioctl output buffer */
     util::ByteStreamWriter outputWriter;
 
-    /* Adding driver Intc_App_Cmd_Body structure */
-    driver::Intc_App_Cmd_Body bodyCmd;
-    outputWriter.write(bodyCmd);
+    /* Adding driver Intc_App_Cmd_Status structure */
+    driver::Intc_App_Cmd_Status statusCmd;
+    outputWriter.write(statusCmd);
 
     /* Adding driver IoctlFwModuleParam structure */
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, moduleParamId,
@@ -82,14 +82,14 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
 
     try
     {
-        /* Reading driver Intc_App_Cmd_Body structure */
-        reader.read(bodyCmd);
+        /* Reading driver Intc_App_Cmd_Status structure */
+        reader.read(statusCmd);
 
         /* Checking driver status */
-        if (!NT_SUCCESS(bodyCmd.Status))
+        if (!NT_SUCCESS(statusCmd.status))
         {
             throw Exception("Driver returns invalid status: " +
-                std::to_string(static_cast<uint32_t>(bodyCmd.Status)));
+                std::to_string(static_cast<uint32_t>(statusCmd.status)));
         }
 
         /* Reading driver IoctlFwModuleParam structure*/

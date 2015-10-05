@@ -315,12 +315,12 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
     util::ByteStreamWriter outputWriter;
 
     /* Intc_App_TinyCmd structure */
-    driver::Intc_App_TinyCmd tinyCmd(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
-        driver::logParametersCommandparameterId);
-    outputWriter.write(tinyCmd);
+    driver::Intc_App_TinyCmd<driver::IoctlFwLogsState>
+        tinyCmd(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
+            driver::logParametersCommandparameterId,
+            inputFwParams);
 
-    /* IoctlFwLogsState structure */
-    outputWriter.write(inputFwParams);
+    outputWriter.write(tinyCmd);
 
     /* Performing ioctl */
     uint32_t ioControlCode = getIoControlCodeFromType(type);
@@ -342,14 +342,12 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
         /* Reading Intc_App_TinyCmd structure */
         reader.read(tinyCmd);
 
-        NTSTATUS status = tinyCmd.Body.Status;
-        if (!NT_SUCCESS(status)) {
+        driver::Intc_App_Cmd_Status statusCmd = tinyCmd.status;
+        if (!NT_SUCCESS(statusCmd.status)) {
             throw Exception("Driver returns invalid status: " +
-                std::to_string(static_cast<uint32_t>(status)));
+                std::to_string(static_cast<uint32_t>(statusCmd.status)));
         }
-
-        /* Reading IoctlFwLogsState structure */
-        reader.read(outputFwParams);
+        outputFwParams = tinyCmd.body;
 
         if (!reader.isEOS()) {
             /** @todo use logging or throw an exception */
