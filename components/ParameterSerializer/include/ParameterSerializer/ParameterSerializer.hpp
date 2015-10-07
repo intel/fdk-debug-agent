@@ -173,10 +173,16 @@ private:
         ParameterKind parameterKind,
         const std::string &parameterName) const;
 
+    /**
+     * Raise an exception if the Parameter Platform Connector is not correctly instantiated nor
+     * started.
+     * @throw ParameterSerializer::Exception
+     */
+    void checkParameterMgrPlatformConnector() const;
+
     static void stripFirstLine(std::string &document);
 
-    const std::unique_ptr<CParameterMgrPlatformConnector> mParameterMgrPlatformConnector;
-
+    std::unique_ptr<CParameterMgrPlatformConnector> mParameterMgrPlatformConnector;
 };
 
 }

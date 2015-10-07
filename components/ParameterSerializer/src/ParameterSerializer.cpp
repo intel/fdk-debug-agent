@@ -26,6 +26,7 @@
 #include <vector>
 #include <map>
 #include <cassert>
+#include <iostream>
 
 using namespace debug_agent::util;
 
@@ -35,12 +36,19 @@ namespace parameterSerializer
 {
 
 ParameterSerializer::ParameterSerializer(const std::string configurationFilePath) :
-mParameterMgrPlatformConnector(std::make_unique<CParameterMgrPlatformConnector>(configurationFilePath))
+    mParameterMgrPlatformConnector(nullptr)
 {
+    auto parameterMgrPlatformConnector =
+        std::make_unique<CParameterMgrPlatformConnector>(configurationFilePath);
+
     std::string error;
-    if (!mParameterMgrPlatformConnector->start(error))
-    {
-        throw Exception("Parameter framework fails to start : " + error);
+    if (!parameterMgrPlatformConnector->start(error)) {
+
+        /** @todo Use log instead */
+        std::cout << "[Error] Parameter framework fails to start: " << error;
+    } else {
+
+        mParameterMgrPlatformConnector = std::move(parameterMgrPlatformConnector);
     }
 }
 
@@ -51,6 +59,8 @@ std::unique_ptr<CElementHandle> ParameterSerializer::getElement(
     const std::string &moduleName,
     ParameterKind parameterKind) const
 {
+    checkParameterMgrPlatformConnector();
+
     std::string error;
 
     std::string rootElementName =
@@ -82,6 +92,7 @@ std::unique_ptr<CElementHandle> ParameterSerializer::getChildElementHandle(
     ParameterKind parameterKind,
     const std::string &parameterName) const
 {
+    checkParameterMgrPlatformConnector();
 
     std::unique_ptr<CElementHandle> elementHandle = getElement(
         subsystemName, elementName, parameterKind);
@@ -111,6 +122,8 @@ std::map<uint32_t, std::string>  ParameterSerializer::getChildren(
     const std::string &elementName,
     ParameterKind parameterKind) const
 {
+    checkParameterMgrPlatformConnector();
+
     std::unique_ptr<CElementHandle> elementHandle = getElement(
         subsystemName, elementName, parameterKind);
 
@@ -132,6 +145,8 @@ std::string ParameterSerializer::getMapping(
     const std::string &parameterName,
     const std::string &key) const
 {
+    checkParameterMgrPlatformConnector();
+
     std::string paramId;
 
     std::unique_ptr<CElementHandle> elementHandle = getChildElementHandle(
@@ -153,6 +168,8 @@ util::Buffer ParameterSerializer::xmlToBinary(
     const std::string &parameterName,
     const std::string parameterAsXml) const
 {
+    checkParameterMgrPlatformConnector();
+
     std::unique_ptr<CElementHandle> childElementHandle =
         getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);
 
@@ -175,6 +192,8 @@ std::string ParameterSerializer::binaryToXml(
     const std::string &parameterName,
     const util::Buffer &parameterPayload) const
 {
+    checkParameterMgrPlatformConnector();
+
     std::unique_ptr<CElementHandle> childElementHandle =
         getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);
 
@@ -197,6 +216,8 @@ std::string ParameterSerializer::getStructureXml(
     ParameterKind parameterKind,
     const std::string &parameterName) const
 {
+    checkParameterMgrPlatformConnector();
+
     std::unique_ptr<CElementHandle> childElementHandle =
         getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);
 
@@ -204,6 +225,14 @@ std::string ParameterSerializer::getStructureXml(
     // Remove first line which is XML document header
     stripFirstLine(result);
     return result;
+}
+
+void ParameterSerializer::checkParameterMgrPlatformConnector() const
+{
+    if (mParameterMgrPlatformConnector == nullptr)
+    {
+        throw Exception("Platform connector not available");
+    }
 }
 
 }

@@ -115,19 +115,13 @@ std::string htmlFile(const std::string &name)
 }
 TEST_CASE("Test parameter serializer instanciation fails")
 {
-    try
-    {
-        ParameterSerializer parameterSerializer("badFilePath");
-    }
-    catch (ParameterSerializer::Exception &e)
-    {
-        /* Mocked device destructor throws an exception when the test vector is not consumed */
-        CHECK(std::string(e.what()) ==
-            "Parameter framework fails to start : Could not parse document \nFile : badFilePath");
-        return;
-    }
-    INFO("ParameterSerializer::Exception should have been thrown.");
-    CHECK(false);
+    ParameterSerializer parameterSerializer("badFilePath");
+
+    std::map<uint32_t, std::string> children;
+    CHECK_THROWS_AS_MSG(children = parameterSerializer.getChildren("foo","bar",
+        ParameterSerializer::ParameterKind::Control),
+        ParameterSerializer::Exception,
+        "Platform connector not available");
 }
 
 TEST_CASE("Test parameter serializer instanciation succeed")
