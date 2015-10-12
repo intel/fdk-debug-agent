@@ -167,7 +167,7 @@ struct Intc_App_TinyCmd
     T body;
 
     Intc_App_TinyCmd(ULONG featureID, ULONG parameterID, const T &body) :
-        header(featureID, parameterID, sizeof(Intc_App_Cmd_Status) + sizeof(T)),
+        header(featureID, parameterID, sizeof(T)),
         status(),
         body(body)
     {
