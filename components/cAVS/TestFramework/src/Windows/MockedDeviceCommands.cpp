@@ -140,16 +140,22 @@ void MockedDeviceCommands::addLogParameterCommand(
     bool ioctlSuccess,
     NTSTATUS returnedDriverStatus)
 {
-    /* Creating ioctl expected buffer */
+    /* First creating expected body to know its serialized size */
+    util::ByteStreamWriter expectedBodyWriter;
+    driver::Intc_App_Cmd_Body body;
+    expectedBodyWriter.write(body);
+    expectedBodyWriter.write(inputFwParams);
+    ULONG bodySize = static_cast<ULONG>(expectedBodyWriter.getBuffer().size());
+
+    /* Creating header */
+    driver::Intc_App_Cmd_Header header(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
+        driver::logParametersCommandparameterId,
+        bodySize);
+
+    /* Creating ioctl expected buffer containing header + body */
     util::ByteStreamWriter expectedWriter;
-
-    /* Intc_App_TinyCmd structure */
-    driver::Intc_App_TinyCmd tinyCmd(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
-        driver::logParametersCommandparameterId);
-    expectedWriter.write(tinyCmd);
-
-    /* IoctlFwLogsState structure*/
-    expectedWriter.write(inputFwParams);
+    expectedWriter.write(header);
+    expectedWriter.writeRawBuffer(expectedBodyWriter.getBuffer());
 
     uint32_t ioctlCode = command == Command::Get ?
     IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
@@ -163,9 +169,12 @@ void MockedDeviceCommands::addLogParameterCommand(
     /* Creating ioctl returned buffer */
     util::ByteStreamWriter returnedWriter;
 
-    /* Intc_App_TinyCmd structure */
-    tinyCmd.Body.Status = returnedDriverStatus;
-    returnedWriter.write(tinyCmd);
+    /* Putting same header */
+    returnedWriter.write(header);
+
+    /* Putting body with error code set*/
+    body.Status = returnedDriverStatus;
+    returnedWriter.write(body);
 
     if (NT_SUCCESS(returnedDriverStatus)) {
 

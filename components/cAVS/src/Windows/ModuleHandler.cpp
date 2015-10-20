@@ -21,6 +21,7 @@
  */
 #include "cAVS/Windows/ModuleHandler.hpp"
 #include "cAVS/Windows/WindowsTypes.hpp"
+#include "cAVS/Windows/IoctlHelpers.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Tlv/TlvUnpack.hpp"
 #include <vector>
@@ -38,39 +39,30 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
     uint32_t moduleParamId, const util::Buffer &suppliedOutputBuffer,
     util::Buffer &returnedOutputBuffer)
 {
-    /* Creating ioctl output buffer */
-    util::ByteStreamWriter outputWriter;
-
-    /* Adding driver Intc_App_Cmd_Body structure */
-    driver::Intc_App_Cmd_Body bodyCmd;
-    outputWriter.write(bodyCmd);
-
-    /* Adding driver IoctlFwModuleParam structure */
+    /* Creating the body payload using the IoctlFwModuleParam type */
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, moduleParamId,
         static_cast<uint32_t>(suppliedOutputBuffer.size()));
-    outputWriter.write(moduleParam);
 
-    /* Adding parameter content */
-    outputWriter.writeRawBuffer(suppliedOutputBuffer);
+    util::ByteStreamWriter bodyPayloadWriter;
+    bodyPayloadWriter.write(moduleParam);
+    bodyPayloadWriter.writeRawBuffer(suppliedOutputBuffer);
 
-    /* Creating the ioctl input buffer*/
-    util::ByteStreamWriter inputWriter;
-
-    /* Adding driver Intc_App_Cmd_Header structure */
-    driver::Intc_App_Cmd_Header ioctlInput(
+    /* Creating BigGet/Set ioctl buffers */
+    util::Buffer headerBuffer;
+    util::Buffer bodyBuffer;
+    IoctlHelpers::toBigCmdBuffers(
         static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_FW_MODULE_PARAM),
         driver::moduleParameterAccessCommandParameterId,
-        static_cast<uint32_t>(outputWriter.getBuffer().size()));
-    inputWriter.write(ioctlInput);
-
-    util::Buffer outputBuffer(outputWriter.getBuffer());
+        bodyPayloadWriter.getBuffer(),
+        headerBuffer,
+        bodyBuffer);
 
     /* Performing the io ctl */
     try
     {
         mDevice.ioControl(
             isGet ? IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET,
-            &inputWriter.getBuffer(), &outputBuffer);
+            &headerBuffer, &bodyBuffer);
     }
     catch (Device::Exception &e)
     {
@@ -78,21 +70,23 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
     }
 
     /* Reading the result */
-    util::ByteStreamReader reader(outputBuffer);
-
     try
     {
-        /* Reading driver Intc_App_Cmd_Body structure */
-        reader.read(bodyCmd);
+        NTSTATUS driverStatus;
+        util::Buffer bodyPayloadBuffer;
+
+        /* Parsing returned output buffer */
+        IoctlHelpers::fromBigCmdBodyBuffer(bodyBuffer, driverStatus, bodyPayloadBuffer);
 
         /* Checking driver status */
-        if (!NT_SUCCESS(bodyCmd.Status))
+        if (!NT_SUCCESS(driverStatus))
         {
             throw Exception("Driver returns invalid status: " +
-                std::to_string(static_cast<uint32_t>(bodyCmd.Status)));
+                std::to_string(static_cast<uint32_t>(driverStatus)));
         }
 
-        /* Reading driver IoctlFwModuleParam structure*/
+        /* Reading driver IoctlFwModuleParam structure from body payload */
+        util::ByteStreamReader reader(bodyPayloadBuffer);
         reader.read(moduleParam);
 
         /* Checking firwmare status */

@@ -159,34 +159,6 @@ struct Intc_App_Cmd_Body
     }
 };
 
-struct Intc_App_TinyCmd
-{
-    Intc_App_Cmd_Header Header;
-    Intc_App_Cmd_Body Body;
-
-    Intc_App_TinyCmd(ULONG featureID, ULONG parameterID) :
-        Header(featureID, parameterID, 0xFFFFFFFF),
-        Body() {}
-
-    bool operator == (const Intc_App_TinyCmd &other)
-    {
-        return Header == other.Header &&
-            Body == other.Body;
-    }
-
-    void fromStream(util::ByteStreamReader &reader)
-    {
-        reader.read(Header);
-        reader.read(Body);
-    }
-
-    void toStream(util::ByteStreamWriter &writer) const
-    {
-        writer.write(Header);
-        writer.write(Body);
-    }
-};
-
 struct IoctlFwModuleParam
 {
     ULONG  fw_status;

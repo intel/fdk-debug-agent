@@ -21,6 +21,7 @@
 */
 #include "cAVS/Windows/Logger.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
+#include "cAVS/Windows/IoctlHelpers.hpp"
 #include "Util/PointerHelper.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
@@ -311,21 +312,20 @@ Logger::Parameters Logger::getParameters()
 void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &inputFwParams,
     driver::IoctlFwLogsState &outputFwParams)
 {
-    /* Creating ioctl output buffer */
-    util::ByteStreamWriter outputWriter;
+    /* Creating the body payload using the IoctlFwLogsState type */
+    util::ByteStreamWriter bodyPayloadWriter;
+    bodyPayloadWriter.write(inputFwParams);
 
-    /* Intc_App_TinyCmd structure */
-    driver::Intc_App_TinyCmd tinyCmd(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
-        driver::logParametersCommandparameterId);
-    outputWriter.write(tinyCmd);
-
-    /* IoctlFwLogsState structure */
-    outputWriter.write(inputFwParams);
+    /* Creating the TinySet/Get ioctl buffer */
+    util::Buffer buffer;
+    IoctlHelpers::toTinyCmdBuffer(
+        static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
+        driver::logParametersCommandparameterId,
+        bodyPayloadWriter.getBuffer(),
+        buffer);
 
     /* Performing ioctl */
     uint32_t ioControlCode = getIoControlCodeFromType(type);
-
-    util::Buffer buffer(outputWriter.getBuffer());
 
     try
     {
@@ -337,18 +337,19 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
     }
 
     try {
-        util::ByteStreamReader reader(buffer);
+        NTSTATUS driverStatus;
+        util::Buffer bodyPayloadBuffer;
 
-        /* Reading Intc_App_TinyCmd structure */
-        reader.read(tinyCmd);
+        /* Parsing returned buffer */
+        IoctlHelpers::fromTinyCmdBuffer(buffer, driverStatus, bodyPayloadBuffer);
 
-        NTSTATUS status = tinyCmd.Body.Status;
-        if (!NT_SUCCESS(status)) {
+        if (!NT_SUCCESS(driverStatus)) {
             throw Exception("Driver returns invalid status: " +
-                std::to_string(static_cast<uint32_t>(status)));
+                std::to_string(static_cast<uint32_t>(driverStatus)));
         }
 
-        /* Reading IoctlFwLogsState structure */
+        /* Reading IoctlFwLogsState structure from body payload */
+        util::ByteStreamReader reader(bodyPayloadBuffer);
         reader.read(outputFwParams);
 
         if (!reader.isEOS()) {
