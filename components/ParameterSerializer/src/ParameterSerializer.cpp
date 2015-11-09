@@ -54,7 +54,7 @@ ParameterSerializer::ParameterSerializer(const std::string configurationFilePath
 
 ParameterSerializer::~ParameterSerializer() {}
 
-std::unique_ptr<CElementHandle> ParameterSerializer::getElement(
+std::unique_ptr<ElementHandle> ParameterSerializer::getElement(
     const std::string &subsystemName,
     const std::string &moduleName,
     ParameterKind parameterKind) const
@@ -75,7 +75,7 @@ std::unique_ptr<CElementHandle> ParameterSerializer::getElement(
         + "/" + subsystemName + "/categories/" + moduleName + "/"
         + parameterKindHelper().toString(parameterKind) + "/";
 
-    std::unique_ptr<CElementHandle> moduleElementHandle(
+    std::unique_ptr<ElementHandle> moduleElementHandle(
         mParameterMgrPlatformConnector->createElementHandle(moduleControlPath, error));
 
     if (moduleElementHandle == nullptr) {
@@ -86,7 +86,7 @@ std::unique_ptr<CElementHandle> ParameterSerializer::getElement(
     return moduleElementHandle;
 }
 
-std::unique_ptr<CElementHandle> ParameterSerializer::getChildElementHandle(
+std::unique_ptr<ElementHandle> ParameterSerializer::getChildElementHandle(
     const std::string &subsystemName,
     const std::string &elementName,
     ParameterKind parameterKind,
@@ -94,11 +94,11 @@ std::unique_ptr<CElementHandle> ParameterSerializer::getChildElementHandle(
 {
     checkParameterMgrPlatformConnector();
 
-    std::unique_ptr<CElementHandle> elementHandle = getElement(
+    std::unique_ptr<ElementHandle> elementHandle = getElement(
         subsystemName, elementName, parameterKind);
 
     std::string error;
-    std::unique_ptr<CElementHandle> childElementHandle(
+    std::unique_ptr<ElementHandle> childElementHandle(
         mParameterMgrPlatformConnector->createElementHandle(
         elementHandle->getPath() + "/" + parameterName, error));
 
@@ -124,17 +124,15 @@ std::map<uint32_t, std::string>  ParameterSerializer::getChildren(
 {
     checkParameterMgrPlatformConnector();
 
-    std::unique_ptr<CElementHandle> elementHandle = getElement(
+    std::unique_ptr<ElementHandle> elementHandle = getElement(
         subsystemName, elementName, parameterKind);
 
     std::map<uint32_t, std::string> children;
-    for (uint32_t childId = 0; childId < elementHandle->getChildrenCount(); childId++)
+    uint32_t childId = 0;
+    for (const auto &handle : elementHandle->getChildren())
     {
-        std::string childName;
-        if (!elementHandle->getChildName(childId, childName)) {
-            throw Exception("Child name not found for childId=" + std::to_string(childId));
-        }
-        children[childId] = childName;
+        children[childId] = handle.getName();
+        childId++;
     }
     return children;
 }
@@ -149,7 +147,7 @@ std::string ParameterSerializer::getMapping(
 
     std::string paramId;
 
-    std::unique_ptr<CElementHandle> elementHandle = getChildElementHandle(
+    std::unique_ptr<ElementHandle> elementHandle = getChildElementHandle(
         subsystemName, elementName, ParameterKind::Control, parameterName);
 
     if (!elementHandle->getMappingData(key, paramId))
@@ -170,19 +168,23 @@ util::Buffer ParameterSerializer::xmlToBinary(
 {
     checkParameterMgrPlatformConnector();
 
-    std::unique_ptr<CElementHandle> childElementHandle =
+    std::unique_ptr<ElementHandle> childElementHandle =
         getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);
 
     // Send XML string to PFW
     std::string error;
-    if (!childElementHandle->setAsXML(parameterAsXml, error))
-    {
+    if (!childElementHandle->setAsXML(parameterAsXml, error)) {
         throw Exception(
             "Not able to set XML stream for " + childElementHandle->getPath() + " : " + error);
     }
 
     // Read binary back from PFW
-    return childElementHandle->getAsBytes();
+    util::Buffer buffer;
+    if (!childElementHandle->getAsBytes(buffer, error)) {
+        throw Exception("Not able to get element as bytes for " + childElementHandle->getPath() +
+            " : " + error);
+    }
+    return buffer;
 }
 
 std::string ParameterSerializer::binaryToXml(
@@ -194,7 +196,7 @@ std::string ParameterSerializer::binaryToXml(
 {
     checkParameterMgrPlatformConnector();
 
-    std::unique_ptr<CElementHandle> childElementHandle =
+    std::unique_ptr<ElementHandle> childElementHandle =
         getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);
 
     // Send binary to PFW
@@ -204,7 +206,11 @@ std::string ParameterSerializer::binaryToXml(
         throw Exception(
             "Not able to set payload for " + childElementHandle->getName() + " : " + error);
     }
-    std::string result = childElementHandle->getAsXML();
+    std::string result;
+    if (!childElementHandle->getAsXML(result, error)) {
+        throw Exception("Not able to get element as xml for " + childElementHandle->getPath() +
+            " : " + error);
+    }
     // Remove first line which is XML document header
     stripFirstLine(result);
     return result;
@@ -218,10 +224,16 @@ std::string ParameterSerializer::getStructureXml(
 {
     checkParameterMgrPlatformConnector();
 
-    std::unique_ptr<CElementHandle> childElementHandle =
+    std::unique_ptr<ElementHandle> childElementHandle =
         getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);
 
-    std::string result = childElementHandle->getStructureAsXML();
+    std::string error;
+    std::string result;
+    if (!childElementHandle->getStructureAsXML(result, error)) {
+        throw Exception("Not able to get element as structure xml for " +
+            childElementHandle->getPath() + " : " + error);
+    }
+
     // Remove first line which is XML document header
     stripFirstLine(result);
     return result;

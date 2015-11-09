@@ -55,6 +55,3 @@ target_link_libraries(Main Core)
 
 # Installation step
 install(TARGETS Main RUNTIME DESTINATION bin)
-
-#installing pfw shared libraries
-install_pfw(bin)

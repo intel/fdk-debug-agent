@@ -35,10 +35,8 @@ set_common_settings(ParameterSerializer)
 target_include_directories(ParameterSerializer PUBLIC "include")
 
 # other dependencies
-target_link_libraries(ParameterSerializer Util)
+target_link_libraries(ParameterSerializer Util parameter)
 
 # Adding test
-add_subdirectory("test")
-
-# Binding with pfw
-link_pfw(ParameterSerializer)
+# temporary: deactivating test that uses binary serialization
+# add_subdirectory("test")

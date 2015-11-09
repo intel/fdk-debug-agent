@@ -70,25 +70,6 @@ function(link_catch target)
     target_include_directories(${target} SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/external/catch/include")
 endfunction()
 
-#link with parameter-framework
-function(link_pfw target)
-    find_package(parameter)
-    target_include_directories(${target} PUBLIC "${parameter_CLIENT_INCLUDE_DIR}")
-    target_link_libraries(${target} ${parameter_LIBRARIES})
-endfunction()
-
-#install pfw shared libraries
-function(install_pfw dir)
-   #currently working only on windows
-    if (WIN32)
-        find_package(parameter)
-        install(FILES ${parameter_WIN32_DEBUG_BINARIES} DESTINATION ${dir} CONFIGURATIONS Debug )
-        install(FILES ${parameter_WIN32_RELEASE_BINARIES} DESTINATION ${dir} CONFIGURATIONS Release )
-    else ()
-        install(FILES ${parameter_LIBRARIES} DESTINATION ${dir})
-    endif()
-endfunction()
-
 # this function applies common settings to all debug agent projects
 function (set_common_settings projectname)
     #enabling c++14
@@ -113,9 +94,36 @@ add_subdirectory("components/cAVS")
 add_subdirectory("components/ParameterSerializer")
 add_subdirectory("components/Core")
 add_subdirectory("components/Main")
-add_subdirectory("components/FunctionalTests")
+
+# temporary: deactivating test that uses binary serialization
+#add_subdirectory("components/FunctionalTests")
 
 # Windows only components
 if (WIN32)
     add_subdirectory("components/LogGrabber")
 endif()
+
+#
+# Add the Parameter Framework project
+#
+
+# Don't test the Parameter Framework in the context of the Debug Agent
+set(OLD_BUILD_TESTING ${BUILD_TESTING})
+set(BUILD_TESTING off CACHE BOOL "" FORCE)
+
+# No need for the bindings
+set(PYTHON_BINDINGS off CACHE BOOL "" FORCE)
+set(C_BINDINGS off CACHE BOOL "" FORCE)
+
+# Backup and reset cmake flags
+set(OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "")
+
+add_subdirectory("external/parameter-framework")
+
+# Restore the previous value of BUILD_TESTING and CMAKE_CXX_FLAGS since we
+# overrode them for the Parameter Framework but don't want to mess up our own
+# cache.
+set(BUILD_TESTING "${OLD_BUILD_TESTING}" CACHE BOOL "" FORCE)
+set(CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}" CACHE STRING "" FORCE)
+

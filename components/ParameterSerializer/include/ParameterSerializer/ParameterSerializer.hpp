@@ -31,7 +31,7 @@
 
 /* Forward declaration of internal types */
 class CParameterMgrPlatformConnector;
-class CElementHandle;
+class ElementHandle;
 
 namespace debug_agent
 {
@@ -162,12 +162,12 @@ public:
         const std::string &parameterName) const;
 
 private:
-    std::unique_ptr<CElementHandle> getElement(
+    std::unique_ptr<ElementHandle> getElement(
         const std::string &subsystemName,
         const std::string &elementName,
         ParameterKind parameterKind) const;
 
-    std::unique_ptr<CElementHandle> getChildElementHandle(
+    std::unique_ptr<ElementHandle> getChildElementHandle(
         const std::string &subsystemName,
         const std::string &elementName,
         ParameterKind parameterKind,

@@ -24,7 +24,6 @@
 
 #include "Core/Resources.hpp"
 #include "ParameterSerializer/ParameterSerializer.hpp"
-#include "ElementHandle.h"
 #include <memory>
 
 namespace debug_agent
