@@ -30,6 +30,7 @@ set(TEST_SRCS
 set(TEST_INCS)
 
 add_executable(RestUnitTest ${TEST_SRCS} ${TEST_INCS})
+add_catch_test(RestUnitTest ${CMAKE_CURRENT_LIST_DIR})
 set_common_settings(RestUnitTest)
 
 # external libraries
@@ -41,5 +42,3 @@ target_link_libraries(RestUnitTest Rest)
 
 # Binding with test common in order to use the HttpClientSimulator
 target_link_libraries(RestUnitTest TestCommon)
-
-install(TARGETS RestUnitTest RUNTIME DESTINATION tests)

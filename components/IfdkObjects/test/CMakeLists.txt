@@ -28,6 +28,7 @@ set(TEST_SRCS
 set(TEST_INCS)
 
 add_executable(IfdkObjectsTest ${TEST_SRCS} ${TEST_INCS})
+add_catch_test(IfdkObjectsTest ${CMAKE_CURRENT_LIST_DIR})
 set_common_settings(IfdkObjectsTest)
 
 # external libraries
@@ -36,5 +37,3 @@ link_catch(IfdkObjectsTest)
 
 # Used libraries
 target_link_libraries(IfdkObjectsTest IfdkObjects TestCommon)
-
-install(TARGETS IfdkObjectsTest RUNTIME DESTINATION tests)

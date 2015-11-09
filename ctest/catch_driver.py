@@ -1,3 +1,5 @@
+#! python
+
 ################################################################################
 #                              INTEL CONFIDENTIAL
 #   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
@@ -18,27 +20,31 @@
 #
 ################################################################################
 
-# cmake configuration file of the "Tlv" component unit test
+import subprocess
+import sys
+import os
 
-# test
-set(TEST_SRCS
-    TlvUnitTestMain.cpp
-    TlvWrapperUnitTest.cpp
-    TlvVoidWrapperUnitTest.cpp
-    TlvVectorWrapperUnitTest.cpp
-    TlvDictionaryUnitTest.cpp
-    TlvUnpackUnitTest.cpp)
+def main(test_executable, reporter, output_dir):
+    args = []
 
-set(TEST_INCS)
+    if reporter:
+        args += ["-r", reporter]
 
-add_executable(TlvUnitTest ${TEST_SRCS} ${TEST_INCS})
-add_catch_test(TlvUnitTest ${CMAKE_CURRENT_LIST_DIR})
-set_common_settings(TlvUnitTest)
+    if output_dir:
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
-# external libraries
-link_catch(TlvUnitTest)
+        exe_basename = os.path.basename(test_executable)
+        exe_basename = os.path.splitext(exe_basename)[0]
+        output_path = os.path.join(output_dir, "testLog{}.txt".format(exe_basename))
+        output_arg = ["-o", output_path]
 
-# Binding with Tlv library
-target_link_libraries(TlvUnitTest Tlv)
-# Binding with test common
-target_link_libraries(TlvUnitTest TestCommon)
+        args += output_arg
+
+    status = subprocess.call([test_executable] + args)
+    sys.exit(status)
+
+if __name__ == '__main__':
+    main(sys.argv[1],
+         os.environ.get('CATCH_REPORTER', None),
+         os.environ.get('CATCH_OUTPUT_DIR', None))

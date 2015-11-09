@@ -83,6 +83,13 @@ else ()
 endif ()
 endfunction()
 
+# We want to *include* this file before adding any test because it calls
+# "include(CTest)"
+include("ctest/CMakeLists.txt")
+
+# Adding imported external libraries
+add_subdirectory("external/cmake")
+
 # Adding components in the right order (less dependent first)
 add_subdirectory("components/Util")
 add_subdirectory("components/IfdkObjects")
@@ -135,12 +142,7 @@ else()
     set(LIBXML2_SHARED_LIB ${PROJECT_SOURCE_DIR}/external/libxml2/Linux64/lib/libxml2.so)
 endif()
 
-# installing libxml2 shared library into bin/ and test/ directories
-install(FILES ${LIBXML2_SHARED_LIB} DESTINATION bin)
-install(FILES ${LIBXML2_SHARED_LIB} DESTINATION tests)
-
-# installing parameter-framework and remote-processor shared libraries in test/ directory
-# note: these shared libraries are already installed into the bin/ directory.
-install(FILES $<TARGET_FILE:parameter> $<TARGET_FILE:remote-processor> DESTINATION tests)
+# installing libxml2 shared library into bin/ directories
+install(FILES $<TARGET_FILE:libxml2::deployment> DESTINATION bin)
 
 

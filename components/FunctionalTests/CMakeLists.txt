@@ -37,6 +37,8 @@ else ()
 endif ()
 
 add_executable(FunctionalTests ${TEST_SRCS} ${TEST_INCS})
+add_catch_test(FunctionalTests ${CMAKE_CURRENT_LIST_DIR})
+add_test_dependencies(FunctionalTests parameter libxml2::deployment)
 set_common_settings(FunctionalTests)
 
 # include private headers in the same directory as sources
@@ -49,5 +51,4 @@ link_catch(FunctionalTests)
 target_link_libraries(FunctionalTests Core TestCommon cAVSTestFramework)
 link_poco(FunctionalTests)
 
-install(TARGETS FunctionalTests RUNTIME DESTINATION tests)
 install(DIRECTORY "data" DESTINATION tests)

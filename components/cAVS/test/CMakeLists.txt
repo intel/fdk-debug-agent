@@ -42,6 +42,7 @@ else ()
 endif ()
 
 add_executable(CavsUnitTest ${TEST_SRCS} ${TEST_INCS})
+add_catch_test(CavsUnitTest ${CMAKE_CURRENT_LIST_DIR}/Windows)
 set_common_settings(CavsUnitTest)
 
 # external libraries
@@ -52,9 +53,6 @@ target_link_libraries(CavsUnitTest cAVS cAVSTestFramework)
 
 # Binding with test common in order to use the HttpClientSimulator
 target_link_libraries(CavsUnitTest TestCommon)
-
-#installing executable
-install(TARGETS CavsUnitTest RUNTIME DESTINATION tests)
 
 # installing data files (if at least one exists)
 if (DATA_DIRECTORIES)

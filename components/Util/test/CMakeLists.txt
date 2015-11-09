@@ -32,11 +32,10 @@ set(TEST_INCS)
 
 add_executable(UtilTest ${TEST_SRCS} ${TEST_INCS})
 set_common_settings(UtilTest)
+add_catch_test(UtilTest ${CMAKE_CURRENT_LIST_DIR})
 
 # external libraries
 link_catch(UtilTest)
 
 # Binding with Util library
 target_link_libraries(UtilTest Util TestCommon)
-
-install(TARGETS UtilTest RUNTIME DESTINATION tests)

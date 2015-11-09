@@ -29,6 +29,7 @@ set(TEST_SRCS
 set(TEST_INCS)
 
 add_executable(SystemTest ${TEST_SRCS} ${TEST_INCS})
+add_catch_test(SystemTest ${CMAKE_CURRENT_LIST_DIR})
 set_common_settings(SystemTest)
 
 # external libraries
@@ -38,5 +39,3 @@ link_catch(SystemTest)
 target_link_libraries(SystemTest System)
 # Binding with test common
 target_link_libraries(SystemTest TestCommon)
-
-install(TARGETS SystemTest RUNTIME DESTINATION tests)

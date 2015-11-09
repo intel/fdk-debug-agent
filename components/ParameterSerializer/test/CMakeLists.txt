@@ -27,6 +27,8 @@ set(TEST_SRCS
 set(TEST_INCS)
 
 add_executable(ParameterSerializerTest ${TEST_SRCS} ${TEST_INCS})
+add_catch_test(ParameterSerializerTest "${PROJECT_SOURCE_DIR}/components/FunctionalTests")
+add_test_dependencies(ParameterSerializerTest parameter libxml2::deployment)
 set_common_settings(ParameterSerializerTest)
 
 # external libraries
@@ -36,5 +38,3 @@ link_catch(ParameterSerializerTest)
 target_link_libraries(ParameterSerializerTest ParameterSerializer Util)
 # Binding with test common
 target_link_libraries(ParameterSerializerTest TestCommon)
-
-install(TARGETS ParameterSerializerTest RUNTIME DESTINATION tests)
