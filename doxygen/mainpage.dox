@@ -1,0 +1,20 @@
+/**
+@mainpage Table of content
+
+@ref hld
+
+<b>Debug Agent subcomponents</b>
+- @ref debug_agent::core "Core"
+- @ref debug_agent::ifdk_objects "IFDK model objects"
+
+<b>Debug Agent plugins</b>
+- @ref debug_agent::cavs "cAVS"
+
+<b>Standalone components</b>
+- @ref debug_agent::rest "RESTful framework"
+- @ref debug_agent::parameterSerializer "Parameter Serializer"
+- @ref debug_agent::tlv "Type Length Value (TLV) framework"
+- @ref debug_agent::util "Utility classes"
+- @ref debug_agent::test_common "Test framework"
+
+*/

@@ -1,0 +1,344 @@
+/**
+@page hld High Level Design (HLD)
+@tableofcontents
+
+@section feature FDK Debugging feature overview
+
+This feature enables the debugging of a DSP firmware (and potentially other similar systems) while
+it is running on a target. The debug features of the FDK 0.5 are focused onto the cAVS firmware.
+Here are the currently supported features:
+- Module topology discovery
+- Module control through parameters
+- Firmware log retrieval
+
+Three actors are required to enable debugging:
+- The FDK tool, the debug engineer front-end.
+- A target that embeds a cAVS DSP firmware and the associated audio drivers
+- And finally a Debug Agent application instance, that runs on the target user space.
+  This application makes the bridge between the FDK tool and the cAVS firmware
+
+@startuml
+title FDK debugging feature involved components
+
+node Host {
+    [FDK tool]
+}
+node Target {
+    package UserSpace {
+        [Debug Agent] #aqua
+    }
+    package KernelSpace {
+        [Audio Driver]
+    }
+    [Audio DSP Firmware]
+}
+
+[FDK tool] - [Debug Agent] : tcp socket
+[Debug Agent] - [Audio Driver]
+[Audio Driver] - [Audio DSP Firmware]
+@enduml
+
+@section requirements Debug Agent requirements
+
+@subsection firmware_abstraction Firmware abstraction
+
+The FDK tool shall communicate with the Debug Agent using a generic interface that is common to all
+audio DSP firmware. In this way the FDK tool can connect to new firmware without specific knowledge.
+
+To achieve this requirement a generic data model describing firmware features (topology, logs,
+probing...) has been proposed in the SwAS.
+
+But obviously the firmware internal data model differs from the generic FDK model. Therefore
+"Firmware plugins" are needed to perform conversion from the firwmare specific model to the generic
+model (see diagram below). These plugins are part of the Debug Agent component.
+
+@subsection platform_abstraction Platform abstraction
+
+The FDK tool shall allow to debug same firmware embedded on distinct platforms. Several platforms
+lead to several OS, i.e. several drivers.
+
+Therefore Firmware plugins shall have a platform-specific part that matches the current platform
+(see diagram below)
+
+These two requirements involves the design shown in the following diagram:
+
+@startuml
+
+title Debug Agent design involved by firmware and platform abstraction
+
+node Host {
+    [FDK tool]
+}
+() "FDK data model (through HTTP)" as DataModel
+node Target {
+    package DebugAgent {
+        [Core]
+        [FirmwareA Plugin]
+        [FirmwareA Platform abstraction]
+        [FirmwareB Plugin]
+        [FirmwareB Platform abstraction]
+    }
+
+     package Driver {
+        [FirmwareA Driver]
+        [FirmwareB Driver]
+    }
+
+    node FirmwareA
+    node FirmwareB
+}
+[FDK tool] .> DataModel
+DataModel - [Core]
+[Core] -- [FirmwareA Plugin]
+[Core] -- [FirmwareB Plugin]
+[FirmwareA Plugin] -- [FirmwareA Platform abstraction]
+[FirmwareB Plugin] -- [FirmwareB Platform abstraction]
+[FirmwareA Platform abstraction] - [FirmwareA Driver]
+[FirmwareB Platform abstraction] - [FirmwareB Driver]
+[FirmwareA Driver] - FirmwareA
+[FirmwareB Driver] - FirmwareB
+
+note right of DataModel : Same API for all firmware plugins
+note right of [FirmwareB Plugin]
+    Make translation FirmwareB model <--> FDK generic model\nCommon to all platforms.
+end note
+note right of [FirmwareB Platform abstraction] : Platform-specific
+note right of [FirmwareB Driver] : Platform-specific
+
+@enduml
+
+@section dependencies Dependencies
+
+- cmake >= 3.3.0 (https://cmake.org/)
+- Poco (http://pocoproject.org/)
+- parameter framework 3.1 (https://github.com/01org/parameter-framework)
+- catch test framework (https://github.com/philsquared/Catch)
+- compilation toolchains
+    - Windows: Microsoft Visual Studio 2015
+    - Linux : gcc >= 4.9.1
+- C++ 14 with exceptions
+
+@section design Design overview
+
+First the "planned" design will be introduced. This is the ideal and theoretical design, but for
+several reasons it has not been fully implemented.
+
+That's why in a second time the currently implemented design will be presented. Differences with
+"planned" design will be explaineds.
+
+@subsection planned_design Planned design
+
+Here is the component diagram of the planned design:
+
+@startuml
+
+title Component diagram of planned design
+
+package DebugAgent {
+    () Subsystem
+    [Main]
+    [Core]
+    [Rest]
+    [Poco Http]
+    [IFDKObjects]
+}
+[Other Subsystem]
+package "cAVS plugin" {
+    [TLV]
+    [ParameterSerializer]
+    [cAVS Subsystem]
+    [cAVS]
+    () FwProxy
+    [MockedFwProxy] #aqua
+    package "cAVS Windows" {
+        [WindowsFwProxy]
+        () Device
+        [MockedDevice] #aqua
+        [SystemDevice]
+    }
+
+    package "cAVS Linux" {
+        [LinuxFwProxy]
+    }
+
+}
+
+[Main] ..> [Core]
+[Core] ..> Subsystem
+[Core] .> [Rest]
+[Rest] .> [Poco Http]
+Subsystem .> [IFDKObjects]
+Subsystem -- [Other Subsystem]
+Subsystem -- [cAVS Subsystem]
+[cAVS Subsystem] .> [ParameterSerializer]
+[cAVS Subsystem] ..> [cAVS]
+[cAVS] .> [TLV]
+[cAVS] ..> FwProxy
+FwProxy -- [WindowsFwProxy]
+[WindowsFwProxy] ..> Device
+Device -- [MockedDevice]
+Device -- [SystemDevice]
+FwProxy -- [LinuxFwProxy]
+FwProxy -- [MockedFwProxy]
+
+@enduml
+
+Here are  the brief descriptions of involved components:
+- <b>Main</b> : just contains the application main() method, and command-line argument parsing.
+- <b>Core</b> : This is the Debug Agent main component. It owns the Http Server and the Firmware plugins.
+- <b>Rest</b> : A framework that allows to expose RESTful API.
+- <b>Poco Http</b> : The RESTful framework uses Poco as Http library.
+- <b>IFDKObjects</b> : Objects of FDK data model.
+- <b>Subsystem</b> : firmware plugin API.
+- <b>cAVS Subsystem</b> : Firmware plugin dedicated to cAVS. Makes translation cAVS model <--> FDK tool model.
+- <b>ParameterSerializer</b> : performs binary encoding using the Parameter Framework format.
+- <b>cAVS</b> : Main facade of the cAVS-specific API.
+- <b>TLV</b> : Library used to retrieve properties encoded with the "Type Length Value" format.
+- <b>FwProxy</b> : Firmware proxy interface that intends to hide the platform specificities.
+- <b>WindowsFwProxy</b> : Firmware proxy dedicated to Windows platforms
+- <b>Device</b> : Interface describing a Windows device (through IOCTLs)
+- <b>SystemDevice</b> : Real Windows Device used in production.
+- <b>MockedDevice</b> : Mocked device used to test the WindowsFwProxy component.
+- <b>MockedFwProxy</b> : Mocked firmware abstraction used to perform functional test over the platform-agnostic part of the Debug Agent.
+- <b>LinuxFwProxy</b> : Firmware proxy dedicated to Linux platforms, currently stubbed.
+
+@subsection current_design Current design
+
+Here is the component diagram of the current implemented design:
+
+@startuml
+
+title Component diagram of current implemented design
+
+package DebugAgent {
+    [Main]
+    [Core]
+    [Rest]
+    [Poco Http]
+    [IFDKObjects]
+    [ParameterSerializer]
+    package cAVS {
+        [cAVS]
+        [TLV]
+        () FwProxy
+        package "cAVS Windows" {
+            [WindowsFwProxy]
+            () Device
+            [MockedDevice] #aqua
+            [SystemDevice]
+        }
+        package "cAVS Linux" {
+            [LinuxFwProxy]
+        }
+    }
+}
+
+[Main] ..> [Core]
+[Core] .> [Rest]
+[Core] .> [IFDKObjects]
+[Core] .> [ParameterSerializer]
+[Core] ..> [cAVS]
+[Rest] .> [Poco Http]
+[cAVS] .> [TLV]
+[cAVS] ..> FwProxy
+FwProxy -- [WindowsFwProxy]
+[WindowsFwProxy] ..> Device
+Device -- [MockedDevice]
+Device -- [SystemDevice]
+FwProxy -- [LinuxFwProxy]
+
+@enduml
+
+The major difference with the planned design is the absence of firmware plugins.
+Firmware plugins don't have been implemented for two reasons:
+- the FDK 0.5 release requires the support of one firmware only: the cAVS firmware.
+- Firmware plugin API uses the FDK data model, and FDK data model has been specified in the SwAS lately.
+
+@section testing Functional test overview
+
+Functional tests intend to run all test-cases (linked to sysreq) over the Debug Agent, by mocking
+its neighbourhood:
+- the FDK tool, mocked using a http client powered by the http Poco library.
+- the Audio Driver, mocked through the OS driver interface (Ioctls for windows,
+DebugFS for linux...)
+
+A test-case involves a deterministic call sequence over the DebugAgent and its neighbourhood.
+This sequence will be used to fill the test vectors for each mocked component:
+
+@startuml
+
+title A test-case run in production mode
+
+FDKTool -> DebugAgent
+DebugAgent -> Driver
+Driver -> DebugAgent
+DebugAgent -> Driver
+Driver -> DebugAgent
+DebugAgent -> FDKTool
+
+@enduml
+
+@startuml
+
+title The same test-case run in functional test mode
+
+participant MockedFDKTool #aqua
+participant DebugAgent
+participant MockedDriver #aqua
+MockedFDKTool -> DebugAgent
+DebugAgent -> MockedDriver
+MockedDriver -> DebugAgent
+DebugAgent -> MockedDriver
+MockedDriver -> DebugAgent
+DebugAgent -> MockedFDKTool
+
+@enduml
+
+<br><br><br><br><br><br>
+Here is how functional tests are working:
+
+@startuml
+
+title Component diagram of functional test
+
+package FunctionalTest {
+    [FunctionalTest]
+    [HttpClient]
+    [Core]
+    [Rest]
+    [Poco Http]
+    [IFDKObjects]
+    [ParameterSerializer]
+    package cAVS {
+        [cAVS]
+        [TLV]
+        () FwProxy
+        package "cAVS Windows" {
+            [WindowsFwProxy]
+            () Device
+            [MockedDevice] #aqua
+        }
+    }
+}
+
+[FunctionalTest] --> [MockedDevice] : inject dependency
+[FunctionalTest] .> [HttpClient]
+[FunctionalTest] ..> [Core]
+[HttpClient] --> [Poco Http] : Send http request to
+[Core] ..> [Rest]
+[Core] ..> [IFDKObjects]
+[Core] ..> [ParameterSerializer]
+[Core] ..> [cAVS]
+[Rest] .> [Poco Http]
+[cAVS] .> [TLV]
+[cAVS] ..> FwProxy
+FwProxy -- [WindowsFwProxy]
+[WindowsFwProxy] ..> Device
+Device -- [MockedDevice]
+
+note top of [HttpClient] : Used to mock the FDK tool.
+note bottom of [MockedDevice] : Used to mock Windows ioctl calls using a test vector that matches a test case.
+
+@enduml
+
+*/
