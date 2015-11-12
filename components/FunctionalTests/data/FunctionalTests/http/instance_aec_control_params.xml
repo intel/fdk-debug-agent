@@ -1,4 +1,4 @@
-<ParameterBlock Name="AcousticEchoCanceler">
+<ParameterBlock xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ParameterBlock.xsd" Name="AcousticEchoCanceler">
   <ParameterBlock Name="switch">
     <EnumParameter Name="value">on</EnumParameter>
   </ParameterBlock>

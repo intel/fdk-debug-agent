@@ -228,7 +228,7 @@ TEST_CASE("Test parameter serializer binary to xml")
         children[0],
         badPayload),
         ParameterSerializer::Exception,
-        "Not able to set payload for AcousticEchoCanceler : Wrong size:\nExpected: 642\n"
+        "Not able to set payload for AcousticEchoCanceler : Wrong size: Expected: 642 "
         "Provided: 1");
 
     // Check bad parameter name behavior
@@ -283,7 +283,7 @@ TEST_CASE("Test parameter serializer xml to binary")
         "<badXmlContent>"),
         ParameterSerializer::Exception,
         "Not able to set XML stream for /BXTN/cavs/categories/aec/control/AcousticEchoCanceler : "
-        "Could not parse document ");
+        ":1:16: Premature end of data in tag badXmlContent line 1\n\nlibxml failed to read");
 
     // Check child 0 which is aec parameter
     CHECK_NOTHROW(localAecControlParameterPayload =

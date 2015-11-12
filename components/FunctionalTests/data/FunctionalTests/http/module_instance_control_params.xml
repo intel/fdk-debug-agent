@@ -1,5 +1,5 @@
 <control_parameters Type="module-aec" Id="1">
-<ParameterBlock Name="AcousticEchoCanceler">
+<ParameterBlock xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ParameterBlock.xsd" Name="AcousticEchoCanceler">
   <ParameterBlock Name="switch">
     <EnumParameter Name="value">on</EnumParameter>
   </ParameterBlock>
@@ -66,7 +66,7 @@
   <IntegerParameter Name="sub_5_real">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</IntegerParameter>
   <IntegerParameter Name="sub_5_im">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 43520</IntegerParameter>
 </ParameterBlock>
-<ParameterBlock Name="NoiseReduction">
+<ParameterBlock xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ParameterBlock.xsd" Name="NoiseReduction">
   <ParameterBlock Name="switch">
     <EnumParameter Name="value">on</EnumParameter>
   </ParameterBlock>

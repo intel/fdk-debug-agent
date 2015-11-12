@@ -94,9 +94,7 @@ add_subdirectory("components/cAVS")
 add_subdirectory("components/ParameterSerializer")
 add_subdirectory("components/Core")
 add_subdirectory("components/Main")
-
-# temporary: deactivating test that uses binary serialization
-#add_subdirectory("components/FunctionalTests")
+add_subdirectory("components/FunctionalTests")
 
 # Windows only components
 if (WIN32)

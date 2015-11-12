@@ -38,5 +38,4 @@ target_include_directories(ParameterSerializer PUBLIC "include")
 target_link_libraries(ParameterSerializer Util parameter)
 
 # Adding test
-# temporary: deactivating test that uses binary serialization
-# add_subdirectory("test")
+add_subdirectory("test")
