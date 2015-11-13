@@ -127,3 +127,22 @@ add_subdirectory("external/parameter-framework")
 set(BUILD_TESTING "${OLD_BUILD_TESTING}" CACHE BOOL "" FORCE)
 set(CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}" CACHE STRING "" FORCE)
 
+#
+# Installation of shared libraries
+#
+
+if(WIN32)
+    set(LIBXML2_SHARED_LIB ${PROJECT_SOURCE_DIR}/external/libxml2/Win64/bin/libxml2.dll)
+else()
+    set(LIBXML2_SHARED_LIB ${PROJECT_SOURCE_DIR}/external/libxml2/Linux64/lib/libxml2.so)
+endif()
+
+# installing libxml2 shared library into bin/ and test/ directories
+install(FILES ${LIBXML2_SHARED_LIB} DESTINATION bin)
+install(FILES ${LIBXML2_SHARED_LIB} DESTINATION tests)
+
+# installing parameter-framework and remote-processor shared libraries in test/ directory
+# note: these shared libraries are already installed into the bin/ directory.
+install(FILES $<TARGET_FILE:parameter> $<TARGET_FILE:remote-processor> DESTINATION tests)
+
+
