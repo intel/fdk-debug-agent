@@ -24,6 +24,7 @@ set(SRCS
     src/Uuid.cpp)
 
 set(INCS
+    include/Util/Locker.hpp
     include/Util/Uuid.hpp
     include/Util/BlockingQueue.hpp
     include/Util/PointerHelper.hpp
