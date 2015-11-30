@@ -83,15 +83,19 @@ private:
      * #define WPP_CONTROL_GUIDS \
      *     WPP_DEFINE_CONTROL_GUID(\
      *     BusCtrlGuid, (b3a109ec, 1cb3, 4947, 95ed, 431033eeb1b4), \
-     *         WPP_DEFINE_BIT(POWER)            \ Power: bit 0,    flag = 1 << 0 = 1
-     *         WPP_DEFINE_BIT(OE_BUS)           \ Bus: bit 1,      flag = 1 << 1 = 2
-     *         WPP_DEFINE_BIT(OE_FW)            \ Firmware: bit 2, flag = 1 << 2 = 4
-     *         WPP_DEFINE_BIT(OE_HW)            \ Hardware: bit 3, flag = 1 << 3 = 8
-     *         ...
+     *     \
+     *     WPP_DEFINE_BIT(TRACE_DRIVER)    \
+     *     WPP_DEFINE_BIT(TRACE_QUEUE)             \
+     *     WPP_DEFINE_BIT(OE_PIPENODE)             \
+     *     WPP_DEFINE_BIT(OE_PIPELINE)             \
+     *     WPP_DEFINE_BIT(OE_IFACE)                \
+     *     WPP_DEFINE_BIT(OE_FW)                   \
+     *     WPP_DEFINE_BIT(OE_HW)                   \
+     *     ...
      *
-     * Therefore the firmware flag is  1 << 2 = 4
+     * Therefore the firmware flag is 6th bit of the mask: 1 << 5
      */
-    static const ULONG fwLogFlag = 1 << 2;
+    static const ULONG fwLogFlag = 1 << 5;
 
     /** Wpp requires a structure that contains an EVENT_TRACE_PROPERTIES instance followed by
      * the session name, then the log file name.
