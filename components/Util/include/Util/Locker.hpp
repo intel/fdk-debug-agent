@@ -34,13 +34,31 @@ namespace util
  * Methods of the original object can be accessed through the -> operator and
  * each method call will lock the whole object.
  *
- * Usage example:
+ * Usage example for atomic method call:
  *
  *     int f(Locker &critical)
  *     {
  *         int a = critical->method1(); // atomic call w.r.t. the "critical" object
  *         a += critical->method2(); // atomic call w.r.t. the "critical" object
  *
+ *         return a;
+ *     }
+ *
+ * Usage example for atomic sessions:
+ *
+ *
+ *     void f(Locker &critical)
+ *     {
+ *         int a;
+ *
+ *         { // critical section
+ *             auto locked = critical.lock();
+ *
+ *             a = locked->method1();
+ *             a += locked->method2();
+ *         }
+ *
+ *         a += 1;
  *         return a;
  *     }
  *
@@ -64,8 +82,13 @@ public:
     {
     public:
         /** Access the wrapped object
+         *
+         * @{
          */
         U *operator->() const { return &mWrapped; }
+
+        U* get() const { return &mWrapped; }
+        /** @} */
 
     private:
         friend Locker<T>;
@@ -98,6 +121,23 @@ public:
     }
 
     Guard<const T> operator->() const {
+        return { mWrapped, mMutex };
+    }
+
+    /** @} */
+
+    /** Lock and return a guard wrapper around the underlying object
+     *
+     * The underlying object is unlocked when the guard wrapper is destroyed.
+     * This allows for scoped locking, using the same idiom as std::lock_guard.
+     *
+     * @{
+     */
+    Guard<T> lock() {
+        return { mWrapped, mMutex };
+    }
+
+    Guard<const T> lock() const {
         return { mWrapped, mMutex };
     }
     /** @} */
