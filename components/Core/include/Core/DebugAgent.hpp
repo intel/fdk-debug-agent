@@ -25,6 +25,7 @@
 #include "cAVS/System.hpp"
 #include "Rest/Server.hpp"
 #include "Util/ExclusiveResource.hpp"
+#include "Util/Locker.hpp"
 #include "ParameterSerializer/ParameterSerializer.hpp"
 #include <inttypes.h>
 
@@ -60,7 +61,7 @@ private:
     std::shared_ptr<TypeModel> mTypeModel;
     std::shared_ptr<ifdk_objects::instance::System> mSystemInstance;
     util::ExclusiveResource<std::shared_ptr<InstanceModel>> mInstanceModel;
-    parameterSerializer::ParameterSerializer mParameterSerializer;
+    util::Locker<parameterSerializer::ParameterSerializer> mParameterSerializer;
     rest::Server mRestServer;
 };
 

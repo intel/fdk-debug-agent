@@ -57,7 +57,7 @@ std::map<uint32_t, std::string> ModuleResource::getChildren(
     std::map<uint32_t, std::string>  children;
     try
     {
-        children = mParameterSerializer.getChildren(
+        children = mParameterSerializer->getChildren(
             BaseModelConverter::subsystemName, mModuleName, parameterKind);
     }
     catch (ParameterSerializer::Exception &e)
@@ -88,7 +88,7 @@ uint32_t ModuleResource::getParamId(const std::string parameterName) const
     std::string paramIdAsString;
     try
     {
-        paramIdAsString = mParameterSerializer.getMapping(
+        paramIdAsString = mParameterSerializer->getMapping(
             BaseModelConverter::subsystemName, mModuleName, parameterName, ParamId);
     }
     catch (ParameterSerializer::Exception &e)
@@ -139,7 +139,7 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handleGet(
         // Convert to XML
         try
         {
-            controlParameters += mParameterSerializer.binaryToXml(
+            controlParameters += mParameterSerializer->binaryToXml(
                 BaseModelConverter::subsystemName,
                 mModuleName,
                 ParameterSerializer::ParameterKind::Control,
@@ -201,7 +201,7 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(
         // Convert XML to binary
         try
         {
-            parameterPayload = mParameterSerializer.xmlToBinary(
+            parameterPayload = mParameterSerializer->xmlToBinary(
                 BaseModelConverter::subsystemName,
                 mModuleName,
                 ParameterSerializer::ParameterKind::Control,
@@ -245,7 +245,7 @@ Resource::ResponsePtr ControlParametersModuleTypeResource::handleGet(
     {
         try
         {
-            controlParameters += mParameterSerializer.getStructureXml(
+            controlParameters += mParameterSerializer->getStructureXml(
                 BaseModelConverter::subsystemName,
                 mModuleName,
                 ParameterSerializer::ParameterKind::Control,

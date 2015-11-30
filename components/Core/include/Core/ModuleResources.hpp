@@ -24,6 +24,7 @@
 
 #include "Core/Resources.hpp"
 #include "ParameterSerializer/ParameterSerializer.hpp"
+#include "Util/Locker.hpp"
 #include <memory>
 
 namespace debug_agent
@@ -35,7 +36,7 @@ class ModuleResource : public SystemResource
 {
 public:
     ModuleResource(cavs::System &system,
-        parameterSerializer::ParameterSerializer &parameterSerializer,
+        util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
         const std::string moduleName,
         const uint16_t moduleId) :
         SystemResource(system),
@@ -49,7 +50,7 @@ protected:
     uint16_t getInstanceId(const rest::Request &request) const;
     uint32_t getParamId(const std::string parameterName) const;
 
-    parameterSerializer::ParameterSerializer &mParameterSerializer;
+    util::Locker<parameterSerializer::ParameterSerializer> &mParameterSerializer;
     const std::string mModuleName;
     const uint16_t mModuleId;
 };
@@ -59,7 +60,7 @@ class ControlParametersModuleInstanceResource : public ModuleResource
 {
 public:
     ControlParametersModuleInstanceResource(cavs::System &system,
-        parameterSerializer::ParameterSerializer &parameterSerializer,
+        util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
         const std::string moduleName,
         const uint16_t moduleId) :
         ModuleResource(system, parameterSerializer, moduleName, moduleId) {}
@@ -73,7 +74,7 @@ class ControlParametersModuleTypeResource : public ModuleResource
 {
 public:
     ControlParametersModuleTypeResource(cavs::System &system,
-        parameterSerializer::ParameterSerializer &parameterSerializer,
+        util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
         const std::string moduleName,
         const uint16_t moduleId) :
         ModuleResource(system, parameterSerializer, moduleName, moduleId) {}
