@@ -459,8 +459,9 @@ void TopologyDebugResource::dumpPins(HtmlHelper &html,
 
 Resource::ResponsePtr ModelDumpDebugResource::handleGet(const Request &request)
 {
-    ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
-    if (handle->getResource() == nullptr) {
+    auto guard = mInstanceModel.lock();
+    auto handle = guard->get();
+    if (handle == nullptr) {
         throw Response::HttpError(Response::ErrorStatus::InternalError,
             "Instance model is undefined.");
     }
@@ -472,7 +473,7 @@ Resource::ResponsePtr ModelDumpDebugResource::handleGet(const Request &request)
         FdkToolMockGenerator generator(*ss);
         generator.setTypeModel(mTypeModel);
         generator.setSystemInstance(mSystemInstance);
-        generator.setInstanceModel(*handle->getResource());
+        generator.setInstanceModel(*handle);
     }
     catch (FdkToolMockGenerator::Exception &e)
     {

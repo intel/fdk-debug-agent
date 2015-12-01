@@ -26,14 +26,14 @@
 #include "Core/InstanceModel.hpp"
 #include "Rest/Resource.hpp"
 #include "cAVS/System.hpp"
-#include "Util/ExclusiveResource.hpp"
+#include "Util/Locker.hpp"
 
 namespace debug_agent
 {
 namespace core
 {
 
-using ExclusiveInstanceModel = util::ExclusiveResource<std::shared_ptr<InstanceModel>>;
+using ExclusiveInstanceModel = util::Locker<std::shared_ptr<InstanceModel>>;
 
 class SystemResource : public rest::Resource
 {

@@ -128,13 +128,14 @@ Resource::ResponsePtr InstanceCollectionResource::handleGet(const Request &reque
     std::string typeName = request.getIdentifierValue("type_name");
 
     {
-        ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
-        if (handle->getResource() == nullptr) {
+        const auto guard = mInstanceModel.lock();
+        auto handle = guard->get();
+        if (handle == nullptr) {
             throw Response::HttpError(Response::ErrorStatus::InternalError,
                 "Instance model is undefined.");
         }
         std::shared_ptr<const instance::BaseCollection> collection =
-            handle->getResource()->getCollection(typeName);
+            handle->getCollection(typeName);
 
         /* check nullptr using get() to avoid any KW error */
         if (collection.get() == nullptr) {
@@ -155,13 +156,14 @@ Resource::ResponsePtr InstanceResource::handleGet(const Request &request)
     std::string instanceId = request.getIdentifierValue("instance_id");
 
     {
-        ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
-        if (handle->getResource() == nullptr) {
+        auto guard = mInstanceModel.lock();
+        auto handle = guard->get();
+        if (handle == nullptr) {
             throw Response::HttpError(Response::ErrorStatus::InternalError,
                 "Instance model is undefined.");
         }
         std::shared_ptr<const instance::Instance> instancePtr =
-            handle->getResource()->getInstance(typeName, instanceId);
+            handle->getInstance(typeName, instanceId);
 
         /* check nullptr using get() to avoid any KW error */
         if (instancePtr.get() == nullptr) {
@@ -179,7 +181,7 @@ Resource::ResponsePtr InstanceResource::handleGet(const Request &request)
 Resource::ResponsePtr RefreshSubsystemResource::handlePost(const Request &request)
 {
     std::shared_ptr<InstanceModel> instanceModel;
-    ExclusiveInstanceModel::HandlePtr handle = mInstanceModel.acquireResource();
+    auto guard = mInstanceModel.lock();
 
     try
     {
@@ -189,14 +191,14 @@ Resource::ResponsePtr RefreshSubsystemResource::handlePost(const Request &reques
     catch (BaseModelConverter::Exception &e)
     {
         /* Topology retrieving has failed: invalidate the previous one */
-        handle->getResource() = nullptr;
+        guard->reset();
 
         throw Response::HttpError(Response::ErrorStatus::InternalError,
             "Cannot refresh instance model: " + std::string(e.what()));
     }
 
     /* Apply new topology */
-    handle->getResource() = instanceModel;
+    *guard.get() = instanceModel;
 
     return std::make_unique<Response>();
 }
