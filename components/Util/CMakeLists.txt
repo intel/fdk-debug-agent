@@ -32,7 +32,6 @@ set(INCS
     include/Util/ByteStreamReader.hpp
     include/Util/ByteStreamWriter.hpp
     include/Util/StringHelper.hpp
-    include/Util/ExclusiveResource.hpp
     include/Util/AssertAlways.hpp
     include/Util/convert.hpp
     include/Util/EnumHelper.hpp
