@@ -41,15 +41,13 @@ public:
 
     using TypeMap = std::map<std::string, TypePtr>;
 
-    TypeModel(const SystemPtr &systemPtr,
-        const TypeMap &typeMap) :
-        mSystemPtr(systemPtr), mTypeMap(typeMap) {}
+    TypeModel(const SystemPtr &systemPtr, const TypeMap &typeMap)
+        : mSystemPtr(systemPtr), mTypeMap(typeMap)
+    {
+    }
 
     /** @return the system type */
-    const SystemPtr getSystem() const
-    {
-        return mSystemPtr;
-    }
+    const SystemPtr getSystem() const { return mSystemPtr; }
 
     /** @return a type by its name, or nullptr if not found */
     const TypePtr getType(const std::string &typeName) const
@@ -61,20 +59,14 @@ public:
         return it->second;
     }
 
-    const TypeMap &getTypeMap() const
-    {
-        return mTypeMap;
-    }
+    const TypeMap &getTypeMap() const { return mTypeMap; }
 
 private:
-    TypeModel(const TypeModel&) = delete;
-    TypeModel &operator=(const TypeModel&) = delete;
+    TypeModel(const TypeModel &) = delete;
+    TypeModel &operator=(const TypeModel &) = delete;
 
     SystemPtr mSystemPtr;
     TypeMap mTypeMap;
 };
-
 }
 }
-
-

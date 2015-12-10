@@ -36,5 +36,3 @@ using Parents = VisitablePtrVector<Ref, Visitor, ConstVisitor>;
 }
 }
 }
-
-

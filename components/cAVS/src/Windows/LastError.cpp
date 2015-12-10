@@ -46,14 +46,8 @@ std::string LastError::get()
      * windows.h, which is then undefined by the POCO library. */
 
     DWORD bufLen = FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        error,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR)&msgBuf,
-        0, NULL);
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&msgBuf, 0, NULL);
 
     if (bufLen) {
         /* Format message appends \r\n chars at the end of the string. Removing them */
@@ -64,14 +58,12 @@ std::string LastError::get()
         LPCSTR lpMsgStr = (LPCSTR)msgBuf;
         errorMessage = std::string(lpMsgStr, bufLen);
         LocalFree(msgBuf);
-    }
-    else {
+    } else {
         errorMessage = "Unable to get error message";
     }
 
     return "ERR " + std::to_string(error) + ": " + errorMessage;
 }
-
 }
 }
 }

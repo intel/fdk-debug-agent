@@ -50,6 +50,7 @@ public:
     SystemTypeResource(TypeModel &model) : mTypeModel(model) {}
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
+
 private:
     TypeModel &mTypeModel;
 };
@@ -58,10 +59,14 @@ private:
 class SystemInstanceResource : public rest::Resource
 {
 public:
-    SystemInstanceResource(const ifdk_objects::instance::System &systemInstance) :
-        mSystemInstance(systemInstance) {}
+    SystemInstanceResource(const ifdk_objects::instance::System &systemInstance)
+        : mSystemInstance(systemInstance)
+    {
+    }
+
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
+
 private:
     const ifdk_objects::instance::System &mSystemInstance;
 };
@@ -73,6 +78,7 @@ public:
     TypeResource(TypeModel &model) : mTypeModel(model) {}
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
+
 private:
     TypeModel &mTypeModel;
 };
@@ -83,6 +89,7 @@ public:
     InstanceResource(ExclusiveInstanceModel &instanceModel) : mInstanceModel(instanceModel) {}
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
+
 private:
     ExclusiveInstanceModel &mInstanceModel;
 };
@@ -90,10 +97,14 @@ private:
 class InstanceCollectionResource : public rest::Resource
 {
 public:
-    InstanceCollectionResource(ExclusiveInstanceModel &instanceModel) :
-        mInstanceModel(instanceModel) {}
+    InstanceCollectionResource(ExclusiveInstanceModel &instanceModel)
+        : mInstanceModel(instanceModel)
+    {
+    }
+
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
+
 private:
     ExclusiveInstanceModel &mInstanceModel;
 };
@@ -101,10 +112,14 @@ private:
 class RefreshSubsystemResource : public SystemResource
 {
 public:
-    RefreshSubsystemResource(cavs::System &system, ExclusiveInstanceModel &instanceModel) :
-        SystemResource(system), mInstanceModel(instanceModel) {}
+    RefreshSubsystemResource(cavs::System &system, ExclusiveInstanceModel &instanceModel)
+        : SystemResource(system), mInstanceModel(instanceModel)
+    {
+    }
+
 protected:
     virtual ResponsePtr handlePost(const rest::Request &request) override;
+
 private:
     ExclusiveInstanceModel &mInstanceModel;
 };
@@ -123,7 +138,7 @@ protected:
 class LogServiceTypeControlParametersResource : public rest::Resource
 {
 public:
-    LogServiceTypeControlParametersResource()  {}
+    LogServiceTypeControlParametersResource() {}
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
 };
@@ -136,8 +151,5 @@ public:
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
 };
-
 }
 }
-
-

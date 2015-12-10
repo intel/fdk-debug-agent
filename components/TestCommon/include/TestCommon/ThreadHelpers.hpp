@@ -51,8 +51,7 @@ public:
      *
      * That's why this method should only be used in test context.
      */
-    static void ensureNonBlocking(std::function<void()> function,
-        std::size_t timeoutMs = 5000)
+    static void ensureNonBlocking(std::function<void()> function, std::size_t timeoutMs = 5000)
     {
         std::mutex mutex;
         std::condition_variable var;
@@ -64,8 +63,8 @@ public:
         /* Starting the thread that will execute the user function. The operator 'new' is used
          * explicitly since the Thread cannot be deleted in case we have no other choice than
          * abandon it. */
-        std::thread *thread = new std::thread(functionThread,
-            function, std::ref(mutex), std::ref(var));
+        std::thread *thread =
+            new std::thread(functionThread, function, std::ref(mutex), std::ref(var));
 
         /* The mutex will be released by the wait_for() method, and only after that, the thread
          * that executes the user function will be able to notify the condition variable, making
@@ -76,8 +75,7 @@ public:
         if (status == std::cv_status::timeout) {
             /* The thread is not terminated, so abandoning it and throwing an exception */
             throw Exception("Unable to join thread: timeout reached.");
-        }
-        else {
+        } else {
             /* The function has returned before the timeout: joining and deleting the thread. */
             thread->join();
             delete thread;
@@ -88,8 +86,8 @@ private:
     ThreadHelpers() = delete;
 
     /** Launched in a dedicated thread */
-    static void functionThread(std::function<void()> function,
-        std::mutex &mutex, std::condition_variable &var)
+    static void functionThread(std::function<void()> function, std::mutex &mutex,
+                               std::condition_variable &var)
     {
         /* Executing user function */
         function();
@@ -102,6 +100,5 @@ private:
         var.notify_one();
     }
 };
-
 }
 }

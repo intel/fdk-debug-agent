@@ -46,11 +46,11 @@ public:
     using ElementPtrVector = std::vector<std::shared_ptr<ElementType>>;
 
     VisitablePtrVector() = default;
-    explicit VisitablePtrVector(const VisitablePtrVector& other) = default;
+    explicit VisitablePtrVector(const VisitablePtrVector &other) = default;
     VisitablePtrVector &operator=(const VisitablePtrVector &other) = default;
 
     /** The == operator tests pointed value, not the pointer value */
-    bool operator == (const VisitablePtrVector &other) const NOEXCEPT
+    bool operator==(const VisitablePtrVector &other) const NOEXCEPT
     {
         if (mElementPtrs.size() != other.mElementPtrs.size()) {
             return false;
@@ -66,22 +66,13 @@ public:
         return true;
     }
 
-    bool operator != (const VisitablePtrVector &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const VisitablePtrVector &other) const NOEXCEPT { return !(*this == other); }
 
     /* A visitable element should implement the accept() methods (const and non const) */
 
-    void accept(Visitor &visitor)
-    {
-        acceptCommon(*this, visitor);
-    }
+    void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 
-    void accept(ConstVisitor &visitor) const
-    {
-        acceptCommon(*this, visitor);
-    }
+    void accept(ConstVisitor &visitor) const { acceptCommon(*this, visitor); }
 
     void add(std::shared_ptr<ElementType> element)
     {
@@ -89,10 +80,7 @@ public:
         mElementPtrs.push_back(element);
     }
 
-    ElementPtrVector &getElements()
-    {
-        return mElementPtrs;
-    }
+    ElementPtrVector &getElements() { return mElementPtrs; }
 
 private:
     /* This template trick is used to factorize the accept() method for both const and non-const
@@ -111,9 +99,5 @@ private:
 
     ElementPtrVector mElementPtrs;
 };
-
 }
 }
-
-
-

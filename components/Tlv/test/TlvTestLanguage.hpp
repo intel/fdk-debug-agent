@@ -29,27 +29,26 @@
 
 using namespace debug_agent::tlv;
 
-struct HelloValueType {
+struct HelloValueType
+{
     int whoTalk;
     int whoListen;
 
     bool operator==(const HelloValueType &other) const
     {
-        return whoTalk == other.whoTalk
-            && whoListen == other.whoListen;
+        return whoTalk == other.whoTalk && whoListen == other.whoListen;
     }
 };
 
-struct TheValueType {
+struct TheValueType
+{
     int itMustBe42;
 
-    bool operator==(const TheValueType &other) const
-    {
-        return itMustBe42 == other.itMustBe42;
-    }
+    bool operator==(const TheValueType &other) const { return itMustBe42 == other.itMustBe42; }
 };
 
-struct WorldValueType {
+struct WorldValueType
+{
     char plankRandomGeneratorSeed;
     int universeId;
     long long galaxyId;
@@ -57,14 +56,12 @@ struct WorldValueType {
 
     bool operator==(const WorldValueType &other) const
     {
-        return plankRandomGeneratorSeed == other.plankRandomGeneratorSeed
-            && universeId == other.universeId
-            && galaxyId == other.galaxyId
-            && planetId == planetId;
+        return plankRandomGeneratorSeed == other.plankRandomGeneratorSeed &&
+               universeId == other.universeId && galaxyId == other.galaxyId && planetId == planetId;
     }
 };
 
-class TlvTestLanguage final: public TlvResponseHandlerInterface
+class TlvTestLanguage final : public TlvResponseHandlerInterface
 {
 public:
     HelloValueType hello;
@@ -75,7 +72,8 @@ public:
     WorldValueType world;
     bool isWorldValid;
 
-    enum class Tags: unsigned int {
+    enum class Tags : unsigned int
+    {
         Hello = 54,
         The = 24,
         World = 112358,
@@ -83,21 +81,17 @@ public:
     };
     static const unsigned int aTagIdWhichIsNotInTheLanguageTagsList = 42;
 
-    TlvTestLanguage():
-        mTestLanguageTlvMap(),
-        mLanguageDictionary(mTestLanguageTlvMap)
+    TlvTestLanguage() : mTestLanguageTlvMap(), mLanguageDictionary(mTestLanguageTlvMap)
     {
         mTestLanguageTlvMap[Tags::Hello] =
-            std::make_unique<TlvWrapper<HelloValueType> >(hello, isHelloValid);
+            std::make_unique<TlvWrapper<HelloValueType>>(hello, isHelloValid);
 
-        mTestLanguageTlvMap[Tags::The] =
-            std::make_unique<TlvVectorWrapper<TheValueType>>(the);
+        mTestLanguageTlvMap[Tags::The] = std::make_unique<TlvVectorWrapper<TheValueType>>(the);
 
         mTestLanguageTlvMap[Tags::World] =
-            std::make_unique<TlvWrapper<WorldValueType> >(world, isWorldValid);
+            std::make_unique<TlvWrapper<WorldValueType>>(world, isWorldValid);
 
-        mTestLanguageTlvMap[Tags::BadTag] =
-            std::make_unique<TlvVoidWrapper>();
+        mTestLanguageTlvMap[Tags::BadTag] = std::make_unique<TlvVoidWrapper>();
     }
 
     const TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override
@@ -105,10 +99,7 @@ public:
         return mLanguageDictionary;
     }
 
-    TlvWrapperInterface *getReferenceWrapper(Tags tag)
-    {
-        return mTestLanguageTlvMap[tag].get();
-    }
+    TlvWrapperInterface *getReferenceWrapper(Tags tag) { return mTestLanguageTlvMap[tag].get(); }
 
 private:
     TlvDictionary<Tags>::TlvMap mTestLanguageTlvMap;

@@ -36,5 +36,3 @@ using Children = VisitablePtrVector<RefCollection, Visitor, ConstVisitor>;
 }
 }
 }
-
-

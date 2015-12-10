@@ -48,7 +48,7 @@ namespace xml
  *
  * For more information about the traits format, see the Deserialize class.
  */
-template<template<class> class Traits>
+template <template <class> class Traits>
 class Serializer
 {
 public:
@@ -74,7 +74,7 @@ protected:
      * The xml tag name is deduced from the type using traits.
      */
     template <class C>
-    void pushElement(C& e)
+    void pushElement(C &e)
     {
         using NonConstC = typename std::remove_const<C>::type;
 
@@ -83,8 +83,7 @@ protected:
 
         if (mElementStack.empty()) {
             mDocument->appendChild(element);
-        }
-        else {
+        } else {
             topElement().appendChild(element);
         }
 
@@ -121,15 +120,12 @@ protected:
 private:
     using ElementStack = std::stack<Poco::XML::Element *>;
 
-    Serializer(const Serializer&) = delete;
-    Serializer& operator = (const Serializer&) = delete;
+    Serializer(const Serializer &) = delete;
+    Serializer &operator=(const Serializer &) = delete;
 
     Poco::AutoPtr<Poco::XML::Document> mDocument;
     ElementStack mElementStack;
 };
-
 }
 }
 }
-
-

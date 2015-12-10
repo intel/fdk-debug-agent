@@ -48,7 +48,6 @@ public:
         Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
     };
 
-
     /** @param[in] dispatcher The dispatcher that will be used by the server to resolve the
      * resources
      *
@@ -58,15 +57,12 @@ public:
     ~Server();
 
 private:
-    Server(const Server&) = delete;
+    Server(const Server &) = delete;
     Server &operator=(const Server &) = delete;
 
     Poco::Net::ServerSocket mServerSocket;
     Poco::ThreadPool mThreadPool;
     Poco::Net::HTTPServer mHttpServer;
 };
-
 }
 }
-
-

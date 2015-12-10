@@ -40,9 +40,7 @@ public:
     class Exception final : public std::logic_error
     {
     public:
-        explicit Exception(const std::string &what)
-        : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
     /**
@@ -52,10 +50,8 @@ public:
      * @param[in] minorVersion the minor version of the file type stream format
      * @throw IfdkStreamHeader::Exception
      */
-    explicit IfdkStreamHeader(const std::string &systemType,
-                              const std::string &fileType,
-                              unsigned int majorVersion,
-                              unsigned int minorVersion);
+    explicit IfdkStreamHeader(const std::string &systemType, const std::string &fileType,
+                              unsigned int majorVersion, unsigned int minorVersion);
 
     /**
      * Add a property to the stream.
@@ -88,6 +84,5 @@ private:
     static const size_t propertyValueMaxLength;
     static const size_t formatTypeMaxLength;
 };
-
 }
 }

@@ -46,12 +46,11 @@ namespace rest
 class RestResourceRequestHandler : public HTTPRequestHandler
 {
 public:
-    RestResourceRequestHandler(
-        std::shared_ptr<Resource> resource,
-        std::unique_ptr<Dispatcher::Identifiers> identifiers):
-        mResource(resource),
-        mIdentifiers(std::move(identifiers))
-    {}
+    RestResourceRequestHandler(std::shared_ptr<Resource> resource,
+                               std::unique_ptr<Dispatcher::Identifiers> identifiers)
+        : mResource(resource), mIdentifiers(std::move(identifiers))
+    {
+    }
 
     virtual void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp);
 
@@ -72,15 +71,16 @@ private:
 class RequestHandlerFactory : public HTTPRequestHandlerFactory
 {
 public:
-    RequestHandlerFactory(std::unique_ptr<const Dispatcher> dispatcher, bool isVerbose) :
-        mDispatcher(std::move(dispatcher)), mVerbose(isVerbose) {}
+    RequestHandlerFactory(std::unique_ptr<const Dispatcher> dispatcher, bool isVerbose)
+        : mDispatcher(std::move(dispatcher)), mVerbose(isVerbose)
+    {
+    }
 
-    virtual HTTPRequestHandler* createRequestHandler(const HTTPServerRequest &req);
+    virtual HTTPRequestHandler *createRequestHandler(const HTTPServerRequest &req);
 
 private:
     std::unique_ptr<const Dispatcher> mDispatcher;
     bool mVerbose;
 };
-
 }
 }

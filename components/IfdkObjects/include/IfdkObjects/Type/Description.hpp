@@ -38,40 +38,22 @@ class Description
 {
 public:
     Description() = default;
-    explicit Description(const std::string& value) : mValue(value) {}
-    explicit Description(const Description& other) = default;
+    explicit Description(const std::string &value) : mValue(value) {}
+    explicit Description(const Description &other) = default;
     virtual ~Description() = default;
     Description &operator=(const Description &other) = default;
 
-    bool operator == (const Description &other) const NOEXCEPT
-    {
-        return mValue == other.mValue;
-    }
+    bool operator==(const Description &other) const NOEXCEPT { return mValue == other.mValue; }
 
-    bool operator != (const Description &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Description &other) const NOEXCEPT { return !(*this == other); }
 
-    void accept(Visitor &visitor)
-    {
-        acceptCommon(*this, visitor);
-    }
+    void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 
-    void accept(ConstVisitor &visitor) const
-    {
-        acceptCommon(*this, visitor);
-    }
+    void accept(ConstVisitor &visitor) const { acceptCommon(*this, visitor); }
 
-    std::string getValue() const
-    {
-        return mValue;
-    }
+    std::string getValue() const { return mValue; }
 
-    void setValue(const std::string &value)
-    {
-        mValue = value;
-    }
+    void setValue(const std::string &value) { mValue = value; }
 
 private:
     template <typename T, typename Visitor>
@@ -83,9 +65,6 @@ private:
 
     std::string mValue;
 };
-
 }
 }
 }
-
-

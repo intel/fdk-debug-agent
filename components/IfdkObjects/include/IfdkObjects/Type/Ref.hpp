@@ -37,12 +37,12 @@ class Ref
 {
 public:
     Ref() = default;
-    explicit Ref(const std::string& refName) : mRefName(refName) {}
-    explicit Ref(const Ref& other) = default;
+    explicit Ref(const std::string &refName) : mRefName(refName) {}
+    explicit Ref(const Ref &other) = default;
     virtual ~Ref() = default;
     Ref &operator=(const Ref &other) = default;
 
-    bool operator == (const Ref &other) const NOEXCEPT
+    bool operator==(const Ref &other) const NOEXCEPT
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -51,10 +51,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator != (const Ref &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Ref &other) const NOEXCEPT { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -66,21 +63,12 @@ public:
         acceptCommon(*this, visitor, isConcrete);
     }
 
-    std::string getRefName() const
-    {
-        return mRefName;
-    }
+    std::string getRefName() const { return mRefName; }
 
-    void setRefName(const std::string &refName)
-    {
-        mRefName = refName;
-    }
+    void setRefName(const std::string &refName) { mRefName = refName; }
 
 protected:
-    virtual bool equalsTo(const Ref &other) const NOEXCEPT
-    {
-        return mRefName == other.mRefName;
-    }
+    virtual bool equalsTo(const Ref &other) const NOEXCEPT { return mRefName == other.mRefName; }
 
 private:
     template <typename T, typename Visitor>
@@ -92,9 +80,6 @@ private:
 
     std::string mRefName;
 };
-
 }
 }
 }
-
-

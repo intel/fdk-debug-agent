@@ -41,7 +41,8 @@ Application::Application()
     setUnixOptions(true);
 }
 
-void Application::usage(){
+void Application::usage()
+{
     HelpFormatter helpFormatter(options());
     helpFormatter.setCommand(commandName());
     helpFormatter.setUsage("OPTIONS");
@@ -50,14 +51,14 @@ void Application::usage(){
     helpFormatter.format(std::cout);
 }
 
-void Application::handleHelp(const std::string& name, const std::string& value)
+void Application::handleHelp(const std::string &name, const std::string &value)
 {
     mConfig.helpRequested = true;
     usage();
     stopOptionsProcessing();
 }
 
-void Application::handlePort(const std::string& name, const std::string& value)
+void Application::handlePort(const std::string &name, const std::string &value)
 {
     /** @fixme use Convert */
     std::stringstream ss(value);
@@ -65,88 +66,86 @@ void Application::handlePort(const std::string& name, const std::string& value)
     assert((!ss.fail()) && (!ss.bad()));
 }
 
-void Application::handlePfwConfig(const std::string& name, const std::string& value)
+void Application::handlePfwConfig(const std::string &name, const std::string &value)
 {
     mConfig.pfwConfig = value;
 }
 
-void Application::handleLogControlOnly(const std::string& name, const std::string& value)
+void Application::handleLogControlOnly(const std::string &name, const std::string &value)
 {
     mConfig.logControlOnly = true;
 }
 
-void Application::handleVerbose(const std::string& name, const std::string& value){
+void Application::handleVerbose(const std::string &name, const std::string &value)
+{
     mConfig.serverIsVerbose = true;
 }
 
-void Application::defineOptions(OptionSet& options)
+void Application::defineOptions(OptionSet &options)
 {
     options.addOption(Option("help", "h", "Display DebugAgent help.")
-    .required(false)
-    .repeatable(false)
-    .callback(OptionCallback<Application>(this, &Application::handleHelp)));
+                          .required(false)
+                          .repeatable(false)
+                          .callback(OptionCallback<Application>(this, &Application::handleHelp)));
 
     options.addOption(Option("port", "p", "Set HTTP server port")
-    .required(false)
-    .repeatable(false)
-    .argument("value")
+                          .required(false)
+                          .repeatable(false)
+                          .argument("value")
 
-    /* Poco forces us to use operator new here: the Option takes the ownership of the IntValidator.
-     */
-    .validator(new IntValidator(22, 65535))
-    .callback(OptionCallback<Application>(this, &Application::handlePort)));
+                          /* Poco forces us to use operator new here: the Option takes the ownership
+                           * of the IntValidator.
+                           */
+                          .validator(new IntValidator(22, 65535))
+                          .callback(OptionCallback<Application>(this, &Application::handlePort)));
 
-    options.addOption(Option("pfwConfig", "pf",
-        "Set configuration file for parameter-framework instance")
-    .required(true)
-    .repeatable(false)
-    .argument("value")
-    .callback(OptionCallback<Application>(this, &Application::handlePfwConfig)));
+    options.addOption(
+        Option("pfwConfig", "pf", "Set configuration file for parameter-framework instance")
+            .required(true)
+            .repeatable(false)
+            .argument("value")
+            .callback(OptionCallback<Application>(this, &Application::handlePfwConfig)));
 
-    options.addOption(Option("control", "c",
-        "Disable CAVS FW log data path, and keep CAVS FW log control capabilities of DebugAgent")
-    .required(false)
-    .repeatable(false)
-    .callback(OptionCallback<Application>(this, &Application::handleLogControlOnly)));
+    options.addOption(
+        Option("control", "c", "Disable CAVS FW log data path, and keep CAVS FW log control "
+                               "capabilities of DebugAgent")
+            .required(false)
+            .repeatable(false)
+            .callback(OptionCallback<Application>(this, &Application::handleLogControlOnly)));
 
-    options.addOption(Option("verbose", "v", "Enable verbose logging")
-    .required(false)
-    .repeatable(false)
-    .callback(OptionCallback<Application>(this, &Application::handleVerbose)));
+    options.addOption(
+        Option("verbose", "v", "Enable verbose logging")
+            .required(false)
+            .repeatable(false)
+            .callback(OptionCallback<Application>(this, &Application::handleVerbose)));
 }
 
-int Application::main(const std::vector<std::string>&)
+int Application::main(const std::vector<std::string> &)
 {
-    if (mConfig.helpRequested){
+    if (mConfig.helpRequested) {
         return Application::EXIT_OK;
     }
 
-    try
-    {
+    try {
         SystemDriverFactory driverFactory(mConfig.logControlOnly);
         DebugAgent debugAgent(driverFactory, mConfig.serverPort, mConfig.pfwConfig,
                               mConfig.serverIsVerbose);
 
         std::cout << "DebugAgent started" << std::endl;
 
-        waitForTerminationRequest();  /* wait for CTRL-C or kill */
+        waitForTerminationRequest(); /* wait for CTRL-C or kill */
 
         std::cout << std::endl << "Shutting down DebugAgent..." << std::endl;
-    }
-    catch (DebugAgent::Exception &e)
-    {
+    } catch (DebugAgent::Exception &e) {
         std::cout << "DebugAgent exception: " << e.what() << std::endl;
         return Application::EXIT_SOFTWARE;
-    }
-    catch (std::exception &e)
-    {
+    } catch (std::exception &e) {
         /* This block should not be reached */
         std::cout << "Unexpected std::exception of type '" << typeid(e).name() << "': " << e.what()
-            << std::endl;
+                  << std::endl;
         return Application::EXIT_SOFTWARE;
     }
     return Application::EXIT_OK;
 }
-
 }
 }

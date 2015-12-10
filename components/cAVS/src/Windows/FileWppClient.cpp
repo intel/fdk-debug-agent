@@ -29,8 +29,7 @@ namespace cavs
 namespace windows
 {
 
-FileWppClient::FileWppClient(const std::string &fileName) :
-    mFileName(fileName), mStopRequest(false)
+FileWppClient::FileWppClient(const std::string &fileName) : mFileName(fileName), mStopRequest(false)
 {
     if (mFileName.empty()) {
         throw Exception("FileWppClient: supplied log file name is empty.");
@@ -46,15 +45,11 @@ void FileWppClient::collectLogEntries(WppLogEntryListener &listener)
         }
     }
 
-    try
-    {
+    try {
         WppConsumer::collectLogEntries(listener, mFileName);
-    }
-    catch (WppConsumer::Exception &e)
-    {
+    } catch (WppConsumer::Exception &e) {
         throw Exception("Cannot collect entries with wpp consumer: " + std::string(e.what()));
     }
-
 }
 
 void FileWppClient::stop()
@@ -72,7 +67,6 @@ void FileWppClient::stop()
      * matter than stop() does not interrupt collectLogEntries() immediately.
      */
 }
-
 }
 }
 }

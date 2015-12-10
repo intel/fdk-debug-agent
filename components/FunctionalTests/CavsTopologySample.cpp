@@ -29,7 +29,8 @@
 using namespace debug_agent::cavs;
 using namespace debug_agent::util;
 
-namespace debug_agent {
+namespace debug_agent
+{
 
 const dsp_fw::AudioDataFormatIpc audioFormat = {
     dsp_fw::SamplingFrequency::FS_48000HZ,
@@ -40,8 +41,7 @@ const dsp_fw::AudioDataFormatIpc audioFormat = {
     1,
     0,
     dsp_fw::SampleType::SIGNED_INTEGER,
-    0
-};
+    0};
 
 enum Modules
 {
@@ -54,15 +54,8 @@ enum Modules
     module_mixout
 };
 
-const std::vector<std::string> moduleNames = {
-    "copier",
-    "aec",
-    "gain",
-    "ns",
-    "mixin",
-    "src",
-    "mixout"
-};
+const std::vector<std::string> moduleNames = {"copier", "aec", "gain",  "ns",
+                                              "mixin",  "src", "mixout"};
 
 enum Queue
 {
@@ -86,7 +79,7 @@ dsp_fw::PinListInfo newPinList(const std::vector<uint32_t> queueIds)
 {
     dsp_fw::PinListInfo info{};
     for (auto queueId : queueIds) {
-        dsp_fw::PinProps props {};
+        dsp_fw::PinProps props{};
         props.format = audioFormat;
         props.stream_type = dsp_fw::StreamType::STREAM_TYPE_PCM;
         props.phys_queue_id = queueId;
@@ -97,8 +90,9 @@ dsp_fw::PinListInfo newPinList(const std::vector<uint32_t> queueIds)
 }
 
 /** Helper function to create module instance */
-dsp_fw::ModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
-    const dsp_fw::PinListInfo &inputs, const dsp_fw::PinListInfo &outputs,
+dsp_fw::ModuleInstanceProps newModuleInstance(
+    uint32_t type, uint32_t instance, const dsp_fw::PinListInfo &inputs,
+    const dsp_fw::PinListInfo &outputs,
     const dsp_fw::ConnectorNodeId &inputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
     const dsp_fw::ConnectorNodeId &outputGateway =
@@ -117,7 +111,7 @@ dsp_fw::ModuleInstanceProps newModuleInstance(uint32_t type, uint32_t instance,
 /** Helper function to create gateway */
 dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 {
-    dsp_fw::GatewayProps p {};
+    dsp_fw::GatewayProps p{};
     p.attribs = 0;
     p.id = connectorId.val.dw;
     return p;
@@ -147,8 +141,8 @@ dsp_fw::SchedulersInfo newScheduler(const std::vector<dsp_fw::TaskProps> &tasks)
 
 /** Helper function to create pipeline */
 dsp_fw::PplProps newPipeline(uint32_t id, uint32_t priority,
-    const std::vector<dsp_fw::CompoundModuleId> &instanceIds,
-    const std::vector<uint32_t> &taskIds)
+                             const std::vector<dsp_fw::CompoundModuleId> &instanceIds,
+                             const std::vector<uint32_t> &taskIds)
 {
     dsp_fw::PplProps props{};
     props.id = id;
@@ -164,82 +158,54 @@ const size_t CavsTopologySample::gatewaysCount = 5;
 
 void CavsTopologySample::createInstanceFirmwareObjects(
     std::vector<dsp_fw::ModuleInstanceProps> &moduleInstances,
-    std::vector<dsp_fw::GatewayProps> &gateways,
-    std::vector<uint32_t> &pipelineIds,
-    std::vector<dsp_fw::PplProps> &pipelines,
-    std::vector<dsp_fw::SchedulersInfo> &schedulers)
+    std::vector<dsp_fw::GatewayProps> &gateways, std::vector<uint32_t> &pipelineIds,
+    std::vector<dsp_fw::PplProps> &pipelines, std::vector<dsp_fw::SchedulersInfo> &schedulers)
 {
     /* Filling module instances */
     moduleInstances = {
         /* Pipe 1 */
-        newModuleInstance(module_copier, 1,
-            newEmptyPinList(),
-            newPinList({ queue_pipe1 }),
-            dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostInputClass, 1)),
+        newModuleInstance(module_copier, 1, newEmptyPinList(), newPinList({queue_pipe1}),
+                          dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostInputClass, 1)),
 
-        newModuleInstance(module_aec, 2,
-            newPinList({ queue_pipe1 }),
-            newPinList({ queue_pipe1 })),
+        newModuleInstance(module_aec, 2, newPinList({queue_pipe1}), newPinList({queue_pipe1})),
 
-        newModuleInstance(module_gain, 5,
-            newPinList({ queue_pipe1 }),
-            newPinList({ queue_pipe1_3 })),
+        newModuleInstance(module_gain, 5, newPinList({queue_pipe1}), newPinList({queue_pipe1_3})),
 
         /* Pipe 2*/
-        newModuleInstance(module_gain, 4,
-            newEmptyPinList(),
-            newPinList({ queue_pipe2 }),
-            dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostInputClass, 2)),
+        newModuleInstance(module_gain, 4, newEmptyPinList(), newPinList({queue_pipe2}),
+                          dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostInputClass, 2)),
 
-        newModuleInstance(module_aec, 5,
-            newPinList({ queue_pipe2 }),
-            newPinList({ queue_pipe2 })),
+        newModuleInstance(module_aec, 5, newPinList({queue_pipe2}), newPinList({queue_pipe2})),
 
-        newModuleInstance(module_ns, 6,
-            newPinList({ queue_pipe2 }),
-            newPinList({ queue_pipe2_3 })),
+        newModuleInstance(module_ns, 6, newPinList({queue_pipe2}), newPinList({queue_pipe2_3})),
 
         /* Pipe 3*/
-        newModuleInstance(module_mixin, 1,
-            newPinList({ queue_pipe1_3, queue_pipe2_3 }),
-            newPinList({ queue_pipe3 })),
+        newModuleInstance(module_mixin, 1, newPinList({queue_pipe1_3, queue_pipe2_3}),
+                          newPinList({queue_pipe3})),
 
-        newModuleInstance(module_src, 0,
-            newPinList({ queue_pipe3 }),
-            newPinList({ queue_pipe3 })),
+        newModuleInstance(module_src, 0, newPinList({queue_pipe3}), newPinList({queue_pipe3})),
 
-        newModuleInstance(module_gain, 9,
-            newPinList({ queue_pipe3, queue_pipe3_4 }),
-            newEmptyPinList(),
-            dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
-            dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaLinkOutputClass, 1)),
+        newModuleInstance(module_gain, 9, newPinList({queue_pipe3, queue_pipe3_4}),
+                          newEmptyPinList(),
+                          dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
+                          dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaLinkOutputClass, 1)),
 
         /* Pipe4 */
-        newModuleInstance(module_gain, 1,
-            newPinList({}),
-            newPinList({ queue_pipe3_4, queue_pipe4 }),
-            dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kDmicLinkInputClass, 1)),
+        newModuleInstance(module_gain, 1, newPinList({}), newPinList({queue_pipe3_4, queue_pipe4}),
+                          dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kDmicLinkInputClass, 1)),
 
-        newModuleInstance(module_ns, 2,
-            newPinList({ queue_pipe4 }),
-            newPinList({ queue_pipe4 })),
+        newModuleInstance(module_ns, 2, newPinList({queue_pipe4}), newPinList({queue_pipe4})),
 
-        newModuleInstance(module_mixout, 3,
-            newPinList({ queue_pipe4 }),
-            newEmptyPinList(),
-            dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
-            dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostOutputClass, 1)),
+        newModuleInstance(module_mixout, 3, newPinList({queue_pipe4}), newEmptyPinList(),
+                          dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
+                          dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostOutputClass, 1)),
     };
 
     /* Module instances ioctls are ordered by the module instace id, so sorting the array
      * to reflect the same order */
     std::sort(moduleInstances.begin(), moduleInstances.end(),
-        [](const dsp_fw::ModuleInstanceProps &p1,
-           const dsp_fw::ModuleInstanceProps& p2) -> bool
-        {
-            return p1.id < p2.id;
-        }
-    );
+              [](const dsp_fw::ModuleInstanceProps &p1,
+                 const dsp_fw::ModuleInstanceProps &p2) -> bool { return p1.id < p2.id; });
 
     /* Filling gateways */
     gateways = {
@@ -247,41 +213,40 @@ void CavsTopologySample::createInstanceFirmwareObjects(
         newGateway(dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostInputClass, 2)),
         newGateway(dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaLinkOutputClass, 1)),
         newGateway(dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kDmicLinkInputClass, 1)),
-        newGateway(dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostOutputClass, 1))
-    };
+        newGateway(dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kHdaHostOutputClass, 1))};
     ASSERT_ALWAYS(gateways.size() == gatewaysCount);
 
     /* Filling schedulers */
-    schedulers = {
-        newScheduler({
-            newTask(1, {
-                { module_copier, 1 },
-            }),
-            newTask(2, {
-                { module_aec, 2 },
-                { module_gain, 5 },
-            }),
-            newTask(3, {
-                { module_gain, 4 },
-            }),
-            newTask(9, {
-                { module_aec, 5 },
-                { module_ns, 6 },
-            }),
-            newTask(4, {
-                { module_mixin, 1 },
-                { module_src, 0 },
-                { module_gain, 9 },
-            }),
-            newTask(5, {
-                { module_gain, 1 },
-            }),
-            newTask(6, {
-                { module_ns, 2 },
-                { module_mixout, 3 },
-            }),
-        })
-    };
+    schedulers = {newScheduler({
+        newTask(1,
+                {
+                    {module_copier, 1},
+                }),
+        newTask(2,
+                {
+                    {module_aec, 2}, {module_gain, 5},
+                }),
+        newTask(3,
+                {
+                    {module_gain, 4},
+                }),
+        newTask(9,
+                {
+                    {module_aec, 5}, {module_ns, 6},
+                }),
+        newTask(4,
+                {
+                    {module_mixin, 1}, {module_src, 0}, {module_gain, 9},
+                }),
+        newTask(5,
+                {
+                    {module_gain, 1},
+                }),
+        newTask(6,
+                {
+                    {module_ns, 2}, {module_mixout, 3},
+                }),
+    })};
 
     /* Filling pipelines
      * The priority of each pipeline is set wisely in order to check the debug agent
@@ -289,45 +254,36 @@ void CavsTopologySample::createInstanceFirmwareObjects(
      * the Debug Agent in this order: ID4;ID2;ID1;ID3 and the Debug Agent shall order them
      * in this order: ID1;ID2;ID3;ID4 according chosen priorities.
      */
-    pipelineIds = { 4, 2, 1, 3 };
-    pipelines = {
-        newPipeline(4, 40, {
-            { module_gain, 1 },
-            { module_ns, 2 },
-            { module_mixout, 3 },
-        },
-        { 5, 6 }),
-        newPipeline(2, 20, {
-            { module_gain, 4 },
-            { module_aec, 5 },
-            { module_ns, 6 },
-        },
-        { 3, 9 }),
-        newPipeline(1, 10, {
-            { module_copier, 1 },
-            { module_aec, 2 },
-            { module_gain, 5 },
-        },
-        { 1, 2 }),
-        newPipeline(3, 30, {
-            { module_mixin, 1 },
-            { module_src, 0 },
-            { module_gain, 9 },
-        },
-        { 4 })
-    };
+    pipelineIds = {4, 2, 1, 3};
+    pipelines = {newPipeline(4, 40,
+                             {
+                                 {module_gain, 1}, {module_ns, 2}, {module_mixout, 3},
+                             },
+                             {5, 6}),
+                 newPipeline(2, 20,
+                             {
+                                 {module_gain, 4}, {module_aec, 5}, {module_ns, 6},
+                             },
+                             {3, 9}),
+                 newPipeline(1, 10,
+                             {
+                                 {module_copier, 1}, {module_aec, 2}, {module_gain, 5},
+                             },
+                             {1, 2}),
+                 newPipeline(3, 30,
+                             {
+                                 {module_mixin, 1}, {module_src, 0}, {module_gain, 9},
+                             },
+                             {4})};
 }
 
-void CavsTopologySample::createFirmwareObjects(
-    std::vector<dsp_fw::ModuleEntry> &modules,
-    Buffer &fwConfig,
-    Buffer &hwConfig)
+void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> &modules,
+                                               Buffer &fwConfig, Buffer &hwConfig)
 {
     /* Filling module entries */
     ASSERT_ALWAYS(moduleCount == moduleNames.size());
     uint32_t i = 0;
-    for (auto &moduleName: moduleNames)
-    {
+    for (auto &moduleName : moduleNames) {
         dsp_fw::ModuleEntry entry{};
         StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleName);
         for (uint32_t &intValue : entry.uuid) {
@@ -340,48 +296,43 @@ void CavsTopologySample::createFirmwareObjects(
     }
 
     /* Filling firmware config */
-    fwConfig = {
-        /* Tag for FW_VERSION: 0x00000000 */
-        0x00, 0x00, 0x00, 0x00,
-        /* Length = 8 bytes */
-        0x08, 0x00, 0x00, 0x00,
-        /* Value */
-        /* major and minor */
-        0x01, 0x00, 0x02, 0x00,
-        /* hot fix and build */
-        0x03, 0x00, 0x04, 0x00,
+    fwConfig = {/* Tag for FW_VERSION: 0x00000000 */
+                0x00, 0x00, 0x00, 0x00,
+                /* Length = 8 bytes */
+                0x08, 0x00, 0x00, 0x00,
+                /* Value */
+                /* major and minor */
+                0x01, 0x00, 0x02, 0x00,
+                /* hot fix and build */
+                0x03, 0x00, 0x04, 0x00,
 
-        /* Tag for MODULES_COUNT : 12 */
-        12, 0x00, 0x00, 0x00,
-        /* Length = 4 bytes */
-        0x04, 0x00, 0x00, 0x00,
-        /* Value */
-        static_cast<char>(moduleCount), 0x00, 0x00, 0x00,
+                /* Tag for MODULES_COUNT : 12 */
+                12, 0x00, 0x00, 0x00,
+                /* Length = 4 bytes */
+                0x04, 0x00, 0x00, 0x00,
+                /* Value */
+                static_cast<char>(moduleCount), 0x00, 0x00, 0x00,
 
-        /* Tag for MAX_PPL_COUNT : 9 */
-        9, 0x00, 0x00, 0x00,
-        /* Length = 4 bytes */
-        0x04, 0x00, 0x00, 0x00,
-        /* Value */
-        static_cast<char>(maxPplCount), 0x00, 0x00, 0x00
-    };
+                /* Tag for MAX_PPL_COUNT : 9 */
+                9, 0x00, 0x00, 0x00,
+                /* Length = 4 bytes */
+                0x04, 0x00, 0x00, 0x00,
+                /* Value */
+                static_cast<char>(maxPplCount), 0x00, 0x00, 0x00};
 
     /* Filling hardware config */
-    hwConfig = {
-        /* Tag for DSP_CORES: 0x00000001 */
-        0x01, 0x00, 0x00, 0x00,
-        /* Length = 4 bytes */
-        0x04, 0x00, 0x00, 0x00,
-        /* Value: nb core */
-        0x01, 0x00, 0x00, 0x00,
+    hwConfig = {/* Tag for DSP_CORES: 0x00000001 */
+                0x01, 0x00, 0x00, 0x00,
+                /* Length = 4 bytes */
+                0x04, 0x00, 0x00, 0x00,
+                /* Value: nb core */
+                0x01, 0x00, 0x00, 0x00,
 
-        /* Tag for GATEWAY_COUNT : 6 */
-        0x06, 0x00, 0x00, 0x00,
-        /* Length = 4 bytes */
-        0x4, 0x00, 0x00, 0x00,
-        /* Value */
-        static_cast<char>(gatewaysCount), 0x00, 0x00, 0x00
-    };
+                /* Tag for GATEWAY_COUNT : 6 */
+                0x06, 0x00, 0x00, 0x00,
+                /* Length = 4 bytes */
+                0x4, 0x00, 0x00, 0x00,
+                /* Value */
+                static_cast<char>(gatewaysCount), 0x00, 0x00, 0x00};
 }
-
 }

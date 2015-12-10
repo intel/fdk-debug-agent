@@ -38,16 +38,15 @@ struct GatewayProps
     /**
     * Gateway ID (refer to ConnectorNodeId).
     */
-    uint32_t  id;
+    uint32_t id;
     /**
     * Gateway attributes (refer to GatewayAttributes).
     */
-    uint32_t  attribs;
+    uint32_t attribs;
 
-    bool operator == (const GatewayProps &other) const
+    bool operator==(const GatewayProps &other) const
     {
-        return id == other.id &&
-            attribs == other.attribs;
+        return id == other.id && attribs == other.attribs;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -68,26 +67,20 @@ struct GatewaysInfo
 {
     std::vector<GatewayProps> gateways;
 
-    static std::size_t getAllocationSize(std::size_t count) {
-        return sizeof(ArraySizeType)+count * sizeof(GatewayProps);
+    static std::size_t getAllocationSize(std::size_t count)
+    {
+        return sizeof(ArraySizeType) + count * sizeof(GatewayProps);
     }
 
-    bool operator == (const GatewaysInfo &other) const
-    {
-        return gateways == other.gateways;
-    }
+    bool operator==(const GatewaysInfo &other) const { return gateways == other.gateways; }
 
-    void fromStream(util::ByteStreamReader &reader)
-    {
-        reader.readVector<ArraySizeType>(gateways);
-    }
+    void fromStream(util::ByteStreamReader &reader) { reader.readVector<ArraySizeType>(gateways); }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
         writer.writeVector<ArraySizeType>(gateways);
     }
 };
-
 }
 }
 }

@@ -37,8 +37,7 @@ class HtmlHelper;
 class ModuleListDebugResource : public SystemResource
 {
 public:
-    ModuleListDebugResource(cavs::System &system) :
-        SystemResource(system) {}
+    ModuleListDebugResource(cavs::System &system) : SystemResource(system) {}
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
 };
@@ -47,8 +46,7 @@ protected:
 class TopologyDebugResource : public SystemResource
 {
 public:
-    TopologyDebugResource(cavs::System &system) :
-        SystemResource(system) {}
+    TopologyDebugResource(cavs::System &system) : SystemResource(system) {}
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
 
@@ -57,13 +55,12 @@ private:
     void dumpGateways(HtmlHelper &html, const std::vector<cavs::dsp_fw::GatewayProps> &gateways);
     void dumpPipelines(HtmlHelper &html, const std::vector<cavs::dsp_fw::PplProps> &pipelines);
     void dumpAllSchedulers(HtmlHelper &html,
-        const std::vector<cavs::dsp_fw::SchedulersInfo> &allSchedulers);
-    void dumpCoreSchedulers(HtmlHelper &html,
-        const cavs::dsp_fw::SchedulersInfo &coreSchedulers);
+                           const std::vector<cavs::dsp_fw::SchedulersInfo> &allSchedulers);
+    void dumpCoreSchedulers(HtmlHelper &html, const cavs::dsp_fw::SchedulersInfo &coreSchedulers);
     void dumpTasks(HtmlHelper &html, const std::vector<cavs::dsp_fw::TaskProps> &tasks);
     void dumpModuleInstances(HtmlHelper &html,
-        const std::map<cavs::dsp_fw::CompoundModuleId, cavs::dsp_fw::ModuleInstanceProps>
-        &moduleInstances);
+                             const std::map<cavs::dsp_fw::CompoundModuleId,
+                                            cavs::dsp_fw::ModuleInstanceProps> &moduleInstances);
     void dumpPins(HtmlHelper &html, const std::vector<cavs::dsp_fw::PinProps> &pins);
 };
 
@@ -72,18 +69,19 @@ class ModelDumpDebugResource : public rest::Resource
 {
 public:
     ModelDumpDebugResource(const TypeModel &typeModel,
-        const ifdk_objects::instance::System &systemInstance,
-        ExclusiveInstanceModel &instanceModel) :
-        mTypeModel(typeModel),
-        mSystemInstance(systemInstance),
-        mInstanceModel(instanceModel) {}
+                           const ifdk_objects::instance::System &systemInstance,
+                           ExclusiveInstanceModel &instanceModel)
+        : mTypeModel(typeModel), mSystemInstance(systemInstance), mInstanceModel(instanceModel)
+    {
+    }
+
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
+
 private:
     const TypeModel &mTypeModel;
     const ifdk_objects::instance::System &mSystemInstance;
     ExclusiveInstanceModel &mInstanceModel;
 };
-
 }
 }

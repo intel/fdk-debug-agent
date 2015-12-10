@@ -28,8 +28,7 @@ namespace cavs
 
 const std::string &Logger::toString(Output output)
 {
-    switch (output)
-    {
+    switch (output) {
     case Output::Sram:
         return sram;
     case Output::Pti:
@@ -41,8 +40,7 @@ const std::string &Logger::toString(Output output)
 
 const std::string &Logger::toString(Level level)
 {
-    switch (level)
-    {
+    switch (level) {
     case Level::Critical:
         return critical;
         break;
@@ -97,6 +95,5 @@ const std::string Logger::verbose("Verbose");
 
 const std::string Logger::sram("SRAM");
 const std::string Logger::pti("PTI");
-
 };
 };

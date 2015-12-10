@@ -34,9 +34,6 @@ namespace type
 
 /** Named collection of subsystem references */
 using SubsystemRefCollection = GenericRefCollection<SubsystemRef>;
-
 }
 }
 }
-
-

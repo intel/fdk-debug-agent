@@ -40,12 +40,10 @@ struct FwVersion
     uint16_t hotfix;
     uint16_t build;
 
-    bool operator == (const FwVersion &other)
+    bool operator==(const FwVersion &other)
     {
-        return major == other.major &&
-            minor == other.minor &&
-            hotfix == other.hotfix &&
-            build == other.build;
+        return major == other.major && minor == other.minor && hotfix == other.hotfix &&
+               build == other.build;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -71,10 +69,9 @@ struct DmaBufferConfig
     uint32_t min_size_bytes;
     uint32_t max_size_bytes;
 
-    bool operator == (const DmaBufferConfig &other)
+    bool operator==(const DmaBufferConfig &other)
     {
-        return min_size_bytes == other.min_size_bytes &&
-            max_size_bytes == other.max_size_bytes;
+        return min_size_bytes == other.min_size_bytes && max_size_bytes == other.max_size_bytes;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -206,7 +203,6 @@ enum class HwConfigParams
     */
     EBB_COUNT_HW_CFG = 7
 };
-
 }
 }
 }

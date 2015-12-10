@@ -43,10 +43,11 @@ class Subsystem : public Component
 {
 private:
     using base = Component;
+
 public:
     Subsystem() = default;
-    explicit Subsystem(const std::string& name) : base(name) {}
-    explicit Subsystem(const Subsystem& other) = default;
+    explicit Subsystem(const std::string &name) : base(name) {}
+    explicit Subsystem(const Subsystem &other) = default;
     Subsystem &operator=(const Subsystem &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -61,10 +62,7 @@ public:
         acceptCommon(*this, visitor);
     }
 
-    Categories &getCategories()
-    {
-        return mCategories;
-    }
+    Categories &getCategories() { return mCategories; }
 
 protected:
     virtual bool equalsTo(const Type &other) const NOEXCEPT override
@@ -73,7 +71,7 @@ protected:
             return false;
         }
 
-        const Subsystem *otherComp = dynamic_cast<const Subsystem*>(&other);
+        const Subsystem *otherComp = dynamic_cast<const Subsystem *>(&other);
         if (otherComp == nullptr) {
             return false;
         }
@@ -99,5 +97,3 @@ private:
 }
 }
 }
-
-

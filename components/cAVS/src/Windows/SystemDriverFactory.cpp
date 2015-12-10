@@ -35,45 +35,36 @@ namespace cavs
 static const std::string DriverInterfaceSubstr = "intelapp2audiodspiface";
 
 /** OED driver class */
-const GUID DriverInterfaceGuid =
-{ 0xd562b888, 0xcf36, 0x4c54, { 0x84, 0x1d, 0x10, 0xff, 0x7b, 0xff, 0x4f, 0x60 } };
+const GUID DriverInterfaceGuid = {
+    0xd562b888, 0xcf36, 0x4c54, {0x84, 0x1d, 0x10, 0xff, 0x7b, 0xff, 0x4f, 0x60}};
 
 std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
 {
     /* Finding device id */
     std::string deviceId;
-    try
-    {
-        deviceId = windows::DeviceIdFinder::findOne(DriverInterfaceGuid,
-            DriverInterfaceSubstr);
-    }
-    catch (windows::DeviceIdFinder::Exception &e)
-    {
+    try {
+        deviceId = windows::DeviceIdFinder::findOne(DriverInterfaceGuid, DriverInterfaceSubstr);
+    } catch (windows::DeviceIdFinder::Exception &e) {
         throw Exception("Cannot get device identifier: " + std::string(e.what()));
     }
 
     std::unique_ptr<windows::Device> device;
-    try
-    {
+    try {
         device = std::make_unique<windows::SystemDevice>(deviceId);
-    }
-    catch (windows::Device::Exception &e)
-    {
+    } catch (windows::Device::Exception &e) {
         throw Exception("Cannot create device: " + std::string(e.what()));
     }
 
     /* Creating the WppClientFactory */
     std::unique_ptr<windows::WppClientFactory> wppClientFactory;
-    if (mLogControlOnly){
+    if (mLogControlOnly) {
         wppClientFactory = std::make_unique<windows::StubbedWppClientFactory>();
-    }
-    else {
+    } else {
         wppClientFactory = std::make_unique<windows::RealTimeWppClientFactory>();
     }
 
     /* Creating Driver interface */
     return std::make_unique<windows::Driver>(std::move(device), std::move(wppClientFactory));
 }
-
 }
 }

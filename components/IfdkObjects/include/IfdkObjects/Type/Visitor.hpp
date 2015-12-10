@@ -234,9 +234,6 @@ public:
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;
 };
-
 }
 }
 }
-
-

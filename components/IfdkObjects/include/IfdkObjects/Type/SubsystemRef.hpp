@@ -36,10 +36,11 @@ class SubsystemRef : public Ref
 {
 private:
     using base = Ref;
+
 public:
     SubsystemRef() = default;
-    explicit SubsystemRef(const std::string& name) : base(name) {}
-    explicit SubsystemRef(const SubsystemRef& other) = default;
+    explicit SubsystemRef(const std::string &name) : base(name) {}
+    explicit SubsystemRef(const SubsystemRef &other) = default;
     SubsystemRef &operator=(const SubsystemRef &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -61,7 +62,7 @@ protected:
             return false;
         }
 
-        const SubsystemRef *otherInstance = dynamic_cast<const SubsystemRef*>(&other);
+        const SubsystemRef *otherInstance = dynamic_cast<const SubsystemRef *>(&other);
         if (otherInstance == nullptr) {
             return false;
         }
@@ -81,5 +82,3 @@ private:
 }
 }
 }
-
-

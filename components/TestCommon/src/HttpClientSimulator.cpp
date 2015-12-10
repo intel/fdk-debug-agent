@@ -37,8 +37,6 @@
 #undef min
 #endif
 
-
-
 using namespace Poco::Net;
 
 namespace debug_agent
@@ -51,15 +49,14 @@ const std::string HttpClientSimulator::AnyContent("<any_content>");
 /* Translate the Poco status into the HttpClientSimulator::Status enum*/
 static HttpClientSimulator::Status translateStatus(HTTPResponse::HTTPStatus status)
 {
-    switch (status)
-    {
+    switch (status) {
     case HTTPResponse::HTTPStatus::HTTP_OK:
         return HttpClientSimulator::Status::Ok;
     case HTTPResponse::HTTPStatus::HTTP_METHOD_NOT_ALLOWED:
         return HttpClientSimulator::Status::VerbNotAllowed;
     case HTTPResponse::HTTPStatus::HTTP_NOT_FOUND:
         return HttpClientSimulator::Status::NotFound;
-    case static_cast<HTTPResponse::HTTPStatus>(423) : /* This code is not defined by Poco */
+    case static_cast<HTTPResponse::HTTPStatus>(423): /* This code is not defined by Poco */
         return HttpClientSimulator::Status::Locked;
     case HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR:
         return HttpClientSimulator::Status::InternalError;
@@ -70,8 +67,7 @@ static HttpClientSimulator::Status translateStatus(HTTPResponse::HTTPStatus stat
 /* Translate the HttpClientSimulator::Verb enum into Poco verb strings*/
 const std::string &HttpClientSimulator::toString(Verb verb)
 {
-    switch (verb)
-    {
+    switch (verb) {
     case Verb::Post:
         return HTTPRequest::HTTP_POST;
     case Verb::Get:
@@ -86,8 +82,7 @@ const std::string &HttpClientSimulator::toString(Verb verb)
 
 std::string HttpClientSimulator::toString(Status s)
 {
-    switch (s)
-    {
+    switch (s) {
     case Status::Ok:
         return "Ok";
     case Status::NotFound:
@@ -103,14 +98,13 @@ std::string HttpClientSimulator::toString(Status s)
 }
 
 std::string HttpClientSimulator::getSubStringSafe(const std::string &str, std::size_t index,
-    std::size_t length)
+                                                  std::size_t length)
 {
     /* Changing the substring length if it exceeds the input string size */
     std::size_t safeLength;
     if (index + length <= str.length()) {
         safeLength = length;
-    }
-    else {
+    } else {
         safeLength = str.length() - index;
     }
 
@@ -118,25 +112,21 @@ std::string HttpClientSimulator::getSubStringSafe(const std::string &str, std::s
 }
 
 std::size_t HttpClientSimulator::getStringDiffOffset(const std::string &str1,
-    const std::string &str2)
+                                                     const std::string &str2)
 {
     std::size_t minSize = std::min(str1.length(), str2.length());
 
-    for (std::size_t i = 0; i < minSize; i++)
-    {
+    for (std::size_t i = 0; i < minSize; i++) {
         if (str1[i] != str2[i])
             return i;
     }
     return minSize;
 }
 
-void HttpClientSimulator::request(
-    const std::string &uri,
-    Verb verb,
-    const std::string &requestContent,
-    Status expectedStatus,
-    const std::string &expectedContentType,
-    const std::string &expectedResponseContent)
+void HttpClientSimulator::request(const std::string &uri, Verb verb,
+                                  const std::string &requestContent, Status expectedStatus,
+                                  const std::string &expectedContentType,
+                                  const std::string &expectedResponseContent)
 {
     HTTPClientSession session(mServer, mPort);
 
@@ -144,13 +134,12 @@ void HttpClientSimulator::request(
     HTTPResponse response;
     std::string responseContent;
 
-    try
-    {
+    try {
         request.setChunkedTransferEncoding(true);
         request.setKeepAlive(true);
 
         /* Sending the request header */
-        std::ostream& requestStream = session.sendRequest(request);
+        std::ostream &requestStream = session.sendRequest(request);
 
         /* Sending the request content */
         requestStream << requestContent;
@@ -160,27 +149,23 @@ void HttpClientSimulator::request(
 
         /* Receiving the response content */
         Poco::StreamCopier::copyToString(responseStream, responseContent);
-    }
-    catch (NetException &e)
-    {
+    } catch (NetException &e) {
         throw NetworkException(std::string("Network error: ") + e.what());
     }
 
     /* Checking status */
     Status status = translateStatus(response.getStatus());
     if (status != expectedStatus) {
-        throw RequestFailureException("Wrong status: '" + toString(status) +
-            "' instead of '" + toString(expectedStatus) + "'");
-
+        throw RequestFailureException("Wrong status: '" + toString(status) + "' instead of '" +
+                                      toString(expectedStatus) + "'");
     }
     /* Checking response content type */
     if (response.getContentType() != expectedContentType) {
         throw RequestFailureException("Wrong content-type: '" + response.getContentType() +
-            "' instead of '" + expectedContentType + "'");
-
+                                      "' instead of '" + expectedContentType + "'");
     }
     /* Checking response content*/
-    if (expectedResponseContent != AnyContent  && responseContent != expectedResponseContent) {
+    if (expectedResponseContent != AnyContent && responseContent != expectedResponseContent) {
 
         /* The substring that contains difference will not exceed 15 chars */
         static const std::size_t diffLength = 15;
@@ -192,17 +177,15 @@ void HttpClientSimulator::request(
         std::string substringContent = getSubStringSafe(responseContent, diffIndex, diffLength);
 
         /* "Expected" content substring that contains the difference */
-        std::string substringExpectedContent = getSubStringSafe(expectedResponseContent, diffIndex,
-            diffLength);
+        std::string substringExpectedContent =
+            getSubStringSafe(expectedResponseContent, diffIndex, diffLength);
 
-        throw RequestFailureException(
-            "Wrong response content, got:\n" + responseContent +
-            "\nexpected: '" + expectedResponseContent + "' at index " + std::to_string(diffIndex)
-            + ": got substring: '" + substringContent + "' expected substring: '" +
-            substringExpectedContent + "'");
+        throw RequestFailureException("Wrong response content, got:\n" + responseContent +
+                                      "\nexpected: '" + expectedResponseContent + "' at index " +
+                                      std::to_string(diffIndex) + ": got substring: '" +
+                                      substringContent + "' expected substring: '" +
+                                      substringExpectedContent + "'");
     }
 }
-
 }
 }
-

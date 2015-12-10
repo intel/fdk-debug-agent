@@ -57,8 +57,8 @@ public:
     {
         auto it = mEnumToStringMap.find(value);
         if (it == mEnumToStringMap.end()) {
-            return "Unknown value '" + std::to_string(static_cast<int32_t>(value)) +
-                "' of " + getEnumTypeName();
+            return "Unknown value '" + std::to_string(static_cast<int32_t>(value)) + "' of " +
+                   getEnumTypeName();
         }
         return it->second;
     }
@@ -81,28 +81,18 @@ public:
         return it != mEnumToStringMap.end();
     }
 
-    const std::map<EnumType, std::string> &getEnumToStringMap() const
-    {
-        return mEnumToStringMap;
-    }
+    const std::map<EnumType, std::string> &getEnumToStringMap() const { return mEnumToStringMap; }
 
-    const std::map<std::string, EnumType> &getStringToEnumMap() const
-    {
-        return mStringToEnumMap;
-    }
+    const std::map<std::string, EnumType> &getStringToEnumMap() const { return mStringToEnumMap; }
 
 private:
-    EnumHelper(const EnumHelper&) = delete;
-    EnumHelper& operator=(const EnumHelper&) = delete;
+    EnumHelper(const EnumHelper &) = delete;
+    EnumHelper &operator=(const EnumHelper &) = delete;
 
     std::map<EnumType, std::string> mEnumToStringMap;
     std::map<std::string, EnumType> mStringToEnumMap;
 
-    static std::string getEnumTypeName()
-    {
-        return typeid(EnumType).name();
-    }
+    static std::string getEnumTypeName() { return typeid(EnumType).name(); }
 };
-
 }
 }

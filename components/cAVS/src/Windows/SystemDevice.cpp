@@ -32,20 +32,14 @@ namespace cavs
 namespace windows
 {
 
-SystemDevice::SystemDevice(const std::string &deviceId) :
-    mDeviceHandle(INVALID_HANDLE_VALUE)
+SystemDevice::SystemDevice(const std::string &deviceId) : mDeviceHandle(INVALID_HANDLE_VALUE)
 {
     /** CreateFileA is the ansi version of the Windows CreateFile method. It has to be called
      * explicitly because "CreateFile" is a macro defined by windows.h,
      * which is then undefined by the POCO library. */
-    HANDLE handle =
-        CreateFileA(deviceId.c_str(),
-                   GENERIC_READ | GENERIC_WRITE,
-                   FILE_SHARE_READ | FILE_SHARE_WRITE,
-                   NULL,
-                   OPEN_EXISTING,
-                   FILE_ATTRIBUTE_NORMAL,
-                   NULL);
+    HANDLE handle = CreateFileA(deviceId.c_str(), GENERIC_READ | GENERIC_WRITE,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
+                                FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (handle == INVALID_HANDLE_VALUE) {
         throw Exception("Can not open device " + deviceId + " : " + LastError::get());
@@ -82,31 +76,20 @@ void SystemDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
         outputBufferSize = static_cast<DWORD>(output->size());
     }
 
-    BOOL result = DeviceIoControl(
-        mDeviceHandle,
-        ioControlCode,
-        inputBufferPtr,
-        inputBufferSize,
-        outputBufferPtr,
-        outputBufferSize,
-        &returnedSize,
-        NULL);
+    BOOL result = DeviceIoControl(mDeviceHandle, ioControlCode, inputBufferPtr, inputBufferSize,
+                                  outputBufferPtr, outputBufferSize, &returnedSize, NULL);
 
     if (result == FALSE) {
         throw Exception("IOControl failure: " + LastError::get());
     }
 
     if (returnedSize > output->size()) {
-        throw Exception("IOControl response larger than buffer ("
-            + std::to_string(returnedSize)
-            + " while output buffer is "
-            + std::to_string(output->size())
-            + ")");
+        throw Exception("IOControl response larger than buffer (" + std::to_string(returnedSize) +
+                        " while output buffer is " + std::to_string(output->size()) + ")");
     }
 
     output->resize(returnedSize);
 }
-
 }
 }
 }

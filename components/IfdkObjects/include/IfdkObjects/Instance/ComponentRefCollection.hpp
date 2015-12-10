@@ -34,9 +34,6 @@ namespace instance
 
 /** Named collection of component references */
 using ComponentRefCollection = GenericRefCollection<ComponentRef>;
-
 }
 }
 }
-
-

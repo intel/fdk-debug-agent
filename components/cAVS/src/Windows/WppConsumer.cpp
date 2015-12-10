@@ -22,7 +22,6 @@
 #include "cAVS/Windows/WppConsumer.hpp"
 #include <evntcons.h>
 
-
 namespace debug_agent
 {
 namespace cavs
@@ -31,9 +30,8 @@ namespace windows
 {
 
 /** GUID of the log provider */
-static const GUID AudioDspProviderGuid =
-{ 0xDB264037, 0x6BA1, 0x4DC0, { 0xAE, 0x16, 0x5C, 0x60, 0xAD, 0x47, 0x0E, 0xDD } };
-
+static const GUID AudioDspProviderGuid = {
+    0xDB264037, 0x6BA1, 0x4DC0, {0xAE, 0x16, 0x5C, 0x60, 0xAD, 0x47, 0x0E, 0xDD}};
 
 VOID WINAPI WppConsumer::ProcessWppEvent(PEVENT_RECORD pEvent)
 {
@@ -69,13 +67,13 @@ VOID WINAPI WppConsumer::ProcessWppEvent(PEVENT_RECORD pEvent)
     }
 
     /* Now we can safely cast it */
-    FwLogEntry &entry = *static_cast<FwLogEntry*>(pEvent->UserData);
+    FwLogEntry &entry = *static_cast<FwLogEntry *>(pEvent->UserData);
 
     /* Checking that buffer size returned by the driver and buffer size returned by wpp are the
      * same. */
     if (entry.size != entry.wppBufferSize) {
-        std::cout << "Warning: entry size " << entry.size << " differs from wpp size " <<
-            entry.wppBufferSize << std::endl;
+        std::cout << "Warning: entry size " << entry.size << " differs from wpp size "
+                  << entry.wppBufferSize << std::endl;
         return;
     }
 
@@ -95,8 +93,7 @@ VOID WINAPI WppConsumer::ProcessWppEvent(PEVENT_RECORD pEvent)
      * Therefore the exact formula is:
      * whole wpp event size >= (FwLogEntry struct size - 1)  + fw log buffer size
      */
-    if (pEvent->UserDataLength < (sizeof(FwLogEntry) - 1) + entry.size)
-    {
+    if (pEvent->UserDataLength < (sizeof(FwLogEntry) - 1) + entry.size) {
         std::cout << "Warning: the wpp event size doesn't fit the fw log buffer size" << std::endl;
         return;
     }
@@ -108,7 +105,7 @@ VOID WINAPI WppConsumer::ProcessWppEvent(PEVENT_RECORD pEvent)
     }
 
     /* And finally notifying the listener... */
-    WppLogEntryListener &listener = *static_cast<WppLogEntryListener*>(pEvent->UserContext);
+    WppLogEntryListener &listener = *static_cast<WppLogEntryListener *>(pEvent->UserContext);
     listener.onLogEntry(entry.coreId, entry.buffer, entry.size);
 }
 
@@ -133,7 +130,7 @@ void WppConsumer::collectLogEntries(WppLogEntryListener &listener, const std::st
 
         /* Setting session name
          * Unfortunately the EVENT_TRACE_LOGFILE structure doesn't use const for input members */
-        traceInfo.LoggerName = const_cast<char*>(wppSessionName);
+        traceInfo.LoggerName = const_cast<char *>(wppSessionName);
 
         /* Adding PROCESS_TRACE_MODE_REAL_TIME trace mode:
          *
@@ -142,13 +139,12 @@ void WppConsumer::collectLogEntries(WppLogEntryListener &listener, const std::st
          */
 
         traceInfo.ProcessTraceMode |= PROCESS_TRACE_MODE_REAL_TIME;
-    }
-    else {
+    } else {
         /* Logging from file */
 
         /* Setting log file name
          * Unfortunately the EVENT_TRACE_LOGFILE structure doesn't use const for input members */
-        traceInfo.LogFileName = const_cast<char*>(fileName.c_str());
+        traceInfo.LogFileName = const_cast<char *>(fileName.c_str());
 
         /* Session name is not used */
         traceInfo.LoggerName = nullptr;
@@ -163,23 +159,19 @@ void WppConsumer::collectLogEntries(WppLogEntryListener &listener, const std::st
     /* Opening the consumer session */
     SafeTraceHandler handle;
     handle.get() = OpenTrace(&traceInfo);
-    if (!handle.isValid())
-    {
+    if (!handle.isValid()) {
         throw Exception("Unable to open consumer trace session.");
     }
 
     /* Looping on log entries until termination. */
-    ULONG status = ProcessTrace(
-        &handle.get(),
-        1, /* handle count, one in our case */
-        0, /* start time, not used */
-        0); /* end time, not used */
+    ULONG status = ProcessTrace(&handle.get(), 1, /* handle count, one in our case */
+                                0,                /* start time, not used */
+                                0);               /* end time, not used */
 
     if (status != ERROR_SUCCESS) {
         throw Exception("Unable to collect log entries: err=" + std::to_string(status));
     }
 }
-
 }
 }
 }

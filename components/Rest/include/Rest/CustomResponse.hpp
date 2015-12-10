@@ -39,7 +39,7 @@ namespace rest
  * generalized capture, this class shall be final, and the doBodyResponse method shall be provided
  * as argument to the constructor.
  */
-class CustomResponse: public Response
+class CustomResponse : public Response
 {
 public:
     using base = Response;
@@ -47,24 +47,18 @@ public:
     /**
      * @param[in] contentType The HTTP MIME type corresponding to the HTTP body data
      */
-    explicit CustomResponse(const std::string &contentType):
-        base(contentType)
-    {
-    }
+    explicit CustomResponse(const std::string &contentType) : base(contentType) {}
 
     CustomResponse() = delete;
 
     virtual void sendHttpBody() override final
     {
-        try
-        {
+        try {
             base::sendHttpBody();
             doBodyResponse(*mOut);
-        }
-        catch (std::exception &e)
-        {
-            throw HttpAbort(
-                std::string("HTTP abort due to exception: ") + typeid(e).name() + ": " + e.what());
+        } catch (std::exception &e) {
+            throw HttpAbort(std::string("HTTP abort due to exception: ") + typeid(e).name() + ": " +
+                            e.what());
         }
     }
 
@@ -78,8 +72,5 @@ protected:
      */
     virtual void doBodyResponse(std::ostream &out) = 0;
 };
-
 }
 }
-
-

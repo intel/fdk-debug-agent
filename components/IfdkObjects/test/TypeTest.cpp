@@ -42,8 +42,7 @@ void populateCharacteristics(Characteristics &characteristics)
 
 void populateChildren(Children &children)
 {
-    std::shared_ptr<TypeRefCollection> typeColl =
-        std::make_shared<TypeRefCollection>("types");
+    std::shared_ptr<TypeRefCollection> typeColl = std::make_shared<TypeRefCollection>("types");
     typeColl->add(TypeRef("type1"));
 
     std::shared_ptr<ComponentRefCollection> compColl =
@@ -167,12 +166,11 @@ TEST_CASE("Type serializer: Categories")
     categories.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<categories>\n"
-        "    <type Name=\"type2\"/>\n"
-        "    <component_type Name=\"comp2\"/>\n"
-        "    <service_type Name=\"serv2\"/>\n"
-        "</categories>\n");
+    CHECK(xml == "<categories>\n"
+                 "    <type Name=\"type2\"/>\n"
+                 "    <component_type Name=\"comp2\"/>\n"
+                 "    <service_type Name=\"serv2\"/>\n"
+                 "</categories>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -194,12 +192,10 @@ TEST_CASE("Type serializer: type ref collection")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<collection Name=\"my_type_ref_coll\">\n"
-        "    <type Name=\"type1\"/>\n"
-        "    <type Name=\"type2\"/>\n"
-        "</collection>\n"
-        );
+    CHECK(xml == "<collection Name=\"my_type_ref_coll\">\n"
+                 "    <type Name=\"type1\"/>\n"
+                 "    <type Name=\"type2\"/>\n"
+                 "</collection>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -221,12 +217,10 @@ TEST_CASE("Type serializer: compo ref collection")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<component_collection Name=\"my_comp_ref_coll\">\n"
-        "    <component_type Name=\"compo1\"/>\n"
-        "    <component_type Name=\"compo2\"/>\n"
-        "</component_collection>\n"
-        );
+    CHECK(xml == "<component_collection Name=\"my_comp_ref_coll\">\n"
+                 "    <component_type Name=\"compo1\"/>\n"
+                 "    <component_type Name=\"compo2\"/>\n"
+                 "</component_collection>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -248,12 +242,10 @@ TEST_CASE("Type serializer: service ref collection")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<service_collection Name=\"my_service_ref_coll\">\n"
-        "    <service_type Name=\"service1\"/>\n"
-        "    <service_type Name=\"service2\"/>\n"
-        "</service_collection>\n"
-        );
+    CHECK(xml == "<service_collection Name=\"my_service_ref_coll\">\n"
+                 "    <service_type Name=\"service1\"/>\n"
+                 "    <service_type Name=\"service2\"/>\n"
+                 "</service_collection>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -275,12 +267,10 @@ TEST_CASE("Type serializer: subsystem ref collection")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<subsystem_collection Name=\"my_subsystem_ref_coll\">\n"
-        "    <subsystem_type Name=\"subsystem1\"/>\n"
-        "    <subsystem_type Name=\"subsystem2\"/>\n"
-        "</subsystem_collection>\n"
-        );
+    CHECK(xml == "<subsystem_collection Name=\"my_subsystem_ref_coll\">\n"
+                 "    <subsystem_type Name=\"subsystem1\"/>\n"
+                 "    <subsystem_type Name=\"subsystem2\"/>\n"
+                 "</subsystem_collection>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -341,12 +331,11 @@ TEST_CASE("Type serializer: Characteristics")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<characteristics>\n"
-        "    <characteristic Name=\"c1\">v1</characteristic>\n"
-        "    <characteristic Name=\"c2\">v2</characteristic>\n"
-        "    <characteristic Name=\"c3\">v3</characteristic>\n"
-        "</characteristics>\n");
+    CHECK(xml == "<characteristics>\n"
+                 "    <characteristic Name=\"c1\">v1</characteristic>\n"
+                 "    <characteristic Name=\"c2\">v2</characteristic>\n"
+                 "    <characteristic Name=\"c3\">v3</characteristic>\n"
+                 "</characteristics>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -407,19 +396,17 @@ TEST_CASE("Type serializer: children")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<children>\n"
-        "    <collection Name=\"types\">\n"
-        "        <type Name=\"type1\"/>\n"
-        "    </collection>\n"
-        "    <component_collection Name=\"components\">\n"
-        "        <component_type Name=\"comp1\"/>\n"
-        "    </component_collection>\n"
-        "    <service_collection Name=\"services\">\n"
-        "        <service_type Name=\"service1\"/>\n"
-        "    </service_collection>\n"
-        "</children>\n"
-        );
+    CHECK(xml == "<children>\n"
+                 "    <collection Name=\"types\">\n"
+                 "        <type Name=\"type1\"/>\n"
+                 "    </collection>\n"
+                 "    <component_collection Name=\"components\">\n"
+                 "        <component_type Name=\"comp1\"/>\n"
+                 "    </component_collection>\n"
+                 "    <service_collection Name=\"services\">\n"
+                 "        <service_type Name=\"service1\"/>\n"
+                 "    </service_collection>\n"
+                 "</children>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -441,29 +428,27 @@ TEST_CASE("Type serializer: Type")
     type.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<type Name=\"my_type\">\n"
-        "    <description>my desc</description>\n"
-        "    <characteristics>\n"
-        "        <characteristic Name=\"c1\">v1</characteristic>\n"
-        "        <characteristic Name=\"c2\">v2</characteristic>\n"
-        "        <characteristic Name=\"c3\">v3</characteristic>\n"
-        "    </characteristics>\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <children>\n"
-        "        <collection Name=\"types\">\n"
-        "            <type Name=\"type1\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"components\">\n"
-        "            <component_type Name=\"comp1\"/>\n"
-        "        </component_collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service_type Name=\"service1\"/>\n"
-        "        </service_collection>\n"
-        "    </children>\n"
-        "</type>\n"
-        );
+    CHECK(xml == "<type Name=\"my_type\">\n"
+                 "    <description>my desc</description>\n"
+                 "    <characteristics>\n"
+                 "        <characteristic Name=\"c1\">v1</characteristic>\n"
+                 "        <characteristic Name=\"c2\">v2</characteristic>\n"
+                 "        <characteristic Name=\"c3\">v3</characteristic>\n"
+                 "    </characteristics>\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <children>\n"
+                 "        <collection Name=\"types\">\n"
+                 "            <type Name=\"type1\"/>\n"
+                 "        </collection>\n"
+                 "        <component_collection Name=\"components\">\n"
+                 "            <component_type Name=\"comp1\"/>\n"
+                 "        </component_collection>\n"
+                 "        <service_collection Name=\"services\">\n"
+                 "            <service_type Name=\"service1\"/>\n"
+                 "        </service_collection>\n"
+                 "    </children>\n"
+                 "</type>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -485,29 +470,27 @@ TEST_CASE("Type serializer: Service")
     service.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<service_type Name=\"my_service\">\n"
-        "    <description>my desc</description>\n"
-        "    <characteristics>\n"
-        "        <characteristic Name=\"c1\">v1</characteristic>\n"
-        "        <characteristic Name=\"c2\">v2</characteristic>\n"
-        "        <characteristic Name=\"c3\">v3</characteristic>\n"
-        "    </characteristics>\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <children>\n"
-        "        <collection Name=\"types\">\n"
-        "            <type Name=\"type1\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"components\">\n"
-        "            <component_type Name=\"comp1\"/>\n"
-        "        </component_collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service_type Name=\"service1\"/>\n"
-        "        </service_collection>\n"
-        "    </children>\n"
-        "</service_type>\n"
-        );
+    CHECK(xml == "<service_type Name=\"my_service\">\n"
+                 "    <description>my desc</description>\n"
+                 "    <characteristics>\n"
+                 "        <characteristic Name=\"c1\">v1</characteristic>\n"
+                 "        <characteristic Name=\"c2\">v2</characteristic>\n"
+                 "        <characteristic Name=\"c3\">v3</characteristic>\n"
+                 "    </characteristics>\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <children>\n"
+                 "        <collection Name=\"types\">\n"
+                 "            <type Name=\"type1\"/>\n"
+                 "        </collection>\n"
+                 "        <component_collection Name=\"components\">\n"
+                 "            <component_type Name=\"comp1\"/>\n"
+                 "        </component_collection>\n"
+                 "        <service_collection Name=\"services\">\n"
+                 "            <service_type Name=\"service1\"/>\n"
+                 "        </service_collection>\n"
+                 "    </children>\n"
+                 "</service_type>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -566,12 +549,10 @@ TEST_CASE("Type serializer: Inputs")
     connectors.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<inputs>\n"
-        "    <input Id=\"id1\" Name=\"name1\"/>\n"
-        "    <input Id=\"id2\" Name=\"name2\"/>\n"
-        "</inputs>\n"
-        );
+    CHECK(xml == "<inputs>\n"
+                 "    <input Id=\"id1\" Name=\"name1\"/>\n"
+                 "    <input Id=\"id2\" Name=\"name2\"/>\n"
+                 "</inputs>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -591,13 +572,11 @@ TEST_CASE("Type serializer: Outputs")
     connectors.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<outputs>\n"
-        "    <output Id=\"id1\" Name=\"name1\"/>\n"
-        "    <output Id=\"id2\" Name=\"name2\"/>\n"
-        "    <output Id=\"id3\" Name=\"name3\"/>\n"
-        "</outputs>\n"
-        );
+    CHECK(xml == "<outputs>\n"
+                 "    <output Id=\"id1\" Name=\"name1\"/>\n"
+                 "    <output Id=\"id2\" Name=\"name2\"/>\n"
+                 "    <output Id=\"id3\" Name=\"name3\"/>\n"
+                 "</outputs>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -621,38 +600,36 @@ TEST_CASE("Type serializer: Component")
     compo.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<component_type Name=\"my_compo\">\n"
-        "    <description>my desc</description>\n"
-        "    <characteristics>\n"
-        "        <characteristic Name=\"c1\">v1</characteristic>\n"
-        "        <characteristic Name=\"c2\">v2</characteristic>\n"
-        "        <characteristic Name=\"c3\">v3</characteristic>\n"
-        "    </characteristics>\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <children>\n"
-        "        <collection Name=\"types\">\n"
-        "            <type Name=\"type1\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"components\">\n"
-        "            <component_type Name=\"comp1\"/>\n"
-        "        </component_collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service_type Name=\"service1\"/>\n"
-        "        </service_collection>\n"
-        "    </children>\n"
-        "    <inputs>\n"
-        "        <input Id=\"id1\" Name=\"name1\"/>\n"
-        "        <input Id=\"id2\" Name=\"name2\"/>\n"
-        "    </inputs>\n"
-        "    <outputs>\n"
-        "        <output Id=\"id1\" Name=\"name1\"/>\n"
-        "        <output Id=\"id2\" Name=\"name2\"/>\n"
-        "        <output Id=\"id3\" Name=\"name3\"/>\n"
-        "    </outputs>\n"
-        "</component_type>\n"
-        );
+    CHECK(xml == "<component_type Name=\"my_compo\">\n"
+                 "    <description>my desc</description>\n"
+                 "    <characteristics>\n"
+                 "        <characteristic Name=\"c1\">v1</characteristic>\n"
+                 "        <characteristic Name=\"c2\">v2</characteristic>\n"
+                 "        <characteristic Name=\"c3\">v3</characteristic>\n"
+                 "    </characteristics>\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <children>\n"
+                 "        <collection Name=\"types\">\n"
+                 "            <type Name=\"type1\"/>\n"
+                 "        </collection>\n"
+                 "        <component_collection Name=\"components\">\n"
+                 "            <component_type Name=\"comp1\"/>\n"
+                 "        </component_collection>\n"
+                 "        <service_collection Name=\"services\">\n"
+                 "            <service_type Name=\"service1\"/>\n"
+                 "        </service_collection>\n"
+                 "    </children>\n"
+                 "    <inputs>\n"
+                 "        <input Id=\"id1\" Name=\"name1\"/>\n"
+                 "        <input Id=\"id2\" Name=\"name2\"/>\n"
+                 "    </inputs>\n"
+                 "    <outputs>\n"
+                 "        <output Id=\"id1\" Name=\"name1\"/>\n"
+                 "        <output Id=\"id2\" Name=\"name2\"/>\n"
+                 "        <output Id=\"id3\" Name=\"name3\"/>\n"
+                 "    </outputs>\n"
+                 "</component_type>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -677,43 +654,41 @@ TEST_CASE("Type serializer: Subsystem")
     subsystem.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<subsystem_type Name=\"my_subsystem\">\n"
-        "    <description>my desc</description>\n"
-        "    <characteristics>\n"
-        "        <characteristic Name=\"c1\">v1</characteristic>\n"
-        "        <characteristic Name=\"c2\">v2</characteristic>\n"
-        "        <characteristic Name=\"c3\">v3</characteristic>\n"
-        "    </characteristics>\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <children>\n"
-        "        <collection Name=\"types\">\n"
-        "            <type Name=\"type1\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"components\">\n"
-        "            <component_type Name=\"comp1\"/>\n"
-        "        </component_collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service_type Name=\"service1\"/>\n"
-        "        </service_collection>\n"
-        "    </children>\n"
-        "    <inputs>\n"
-        "        <input Id=\"id1\" Name=\"name1\"/>\n"
-        "        <input Id=\"id2\" Name=\"name2\"/>\n"
-        "    </inputs>\n"
-        "    <outputs>\n"
-        "        <output Id=\"id1\" Name=\"name1\"/>\n"
-        "        <output Id=\"id2\" Name=\"name2\"/>\n"
-        "        <output Id=\"id3\" Name=\"name3\"/>\n"
-        "    </outputs>\n"
-        "    <categories>\n"
-        "        <type Name=\"type1\"/>\n"
-        "        <component_type Name=\"comp1\"/>\n"
-        "        <service_type Name=\"serv1\"/>\n"
-        "    </categories>\n"
-        "</subsystem_type>\n"
-        );
+    CHECK(xml == "<subsystem_type Name=\"my_subsystem\">\n"
+                 "    <description>my desc</description>\n"
+                 "    <characteristics>\n"
+                 "        <characteristic Name=\"c1\">v1</characteristic>\n"
+                 "        <characteristic Name=\"c2\">v2</characteristic>\n"
+                 "        <characteristic Name=\"c3\">v3</characteristic>\n"
+                 "    </characteristics>\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <children>\n"
+                 "        <collection Name=\"types\">\n"
+                 "            <type Name=\"type1\"/>\n"
+                 "        </collection>\n"
+                 "        <component_collection Name=\"components\">\n"
+                 "            <component_type Name=\"comp1\"/>\n"
+                 "        </component_collection>\n"
+                 "        <service_collection Name=\"services\">\n"
+                 "            <service_type Name=\"service1\"/>\n"
+                 "        </service_collection>\n"
+                 "    </children>\n"
+                 "    <inputs>\n"
+                 "        <input Id=\"id1\" Name=\"name1\"/>\n"
+                 "        <input Id=\"id2\" Name=\"name2\"/>\n"
+                 "    </inputs>\n"
+                 "    <outputs>\n"
+                 "        <output Id=\"id1\" Name=\"name1\"/>\n"
+                 "        <output Id=\"id2\" Name=\"name2\"/>\n"
+                 "        <output Id=\"id3\" Name=\"name3\"/>\n"
+                 "    </outputs>\n"
+                 "    <categories>\n"
+                 "        <type Name=\"type1\"/>\n"
+                 "        <component_type Name=\"comp1\"/>\n"
+                 "        <service_type Name=\"serv1\"/>\n"
+                 "    </categories>\n"
+                 "</subsystem_type>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -740,26 +715,24 @@ TEST_CASE("Type serializer: System")
     system.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<system_type Name=\"my_system\">\n"
-        "    <description>my desc</description>\n"
-        "    <characteristics>\n"
-        "        <characteristic Name=\"c1\">v1</characteristic>\n"
-        "        <characteristic Name=\"c2\">v2</characteristic>\n"
-        "        <characteristic Name=\"c3\">v3</characteristic>\n"
-        "    </characteristics>\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <children>\n"
-        "        <subsystem_collection Name=\"subsystems\">\n"
-        "            <subsystem_type Name=\"subsystem1\"/>\n"
-        "            <subsystem_type Name=\"subsystem2\"/>\n"
-        "        </subsystem_collection>\n"
-        "    </children>\n"
-        "    <inputs/>\n"
-        "    <outputs/>\n"
-        "</system_type>\n"
-        );
+    CHECK(xml == "<system_type Name=\"my_system\">\n"
+                 "    <description>my desc</description>\n"
+                 "    <characteristics>\n"
+                 "        <characteristic Name=\"c1\">v1</characteristic>\n"
+                 "        <characteristic Name=\"c2\">v2</characteristic>\n"
+                 "        <characteristic Name=\"c3\">v3</characteristic>\n"
+                 "    </characteristics>\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <children>\n"
+                 "        <subsystem_collection Name=\"subsystems\">\n"
+                 "            <subsystem_type Name=\"subsystem1\"/>\n"
+                 "            <subsystem_type Name=\"subsystem2\"/>\n"
+                 "        </subsystem_collection>\n"
+                 "    </children>\n"
+                 "    <inputs/>\n"
+                 "    <outputs/>\n"
+                 "</system_type>\n");
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
@@ -768,6 +741,3 @@ TEST_CASE("Type serializer: System")
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == system);
 }
-
-
-

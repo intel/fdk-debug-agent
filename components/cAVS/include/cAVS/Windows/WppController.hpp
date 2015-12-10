@@ -27,7 +27,6 @@
 #include <mutex>
 #include <stdexcept>
 
-
 namespace debug_agent
 {
 namespace cavs
@@ -70,7 +69,8 @@ private:
      *
      * (ClientContext member)
      */
-    enum ClientContextValues {
+    enum ClientContextValues
+    {
         PerformanceCounter = 1,
         SystemTime = 2,
         CPUCycleCount = 3
@@ -129,7 +129,7 @@ private:
     };
 
     WppController(const WppController &) = delete;
-    WppController &operator=(const WppController&) = delete;
+    WppController &operator=(const WppController &) = delete;
 
     /* If a previous session exists, delete it. */
     void cleanupOldSession();
@@ -141,7 +141,6 @@ private:
     std::mutex mHandleMutex;
     TraceProperties mTraceProperties;
 };
-
 }
 }
 }

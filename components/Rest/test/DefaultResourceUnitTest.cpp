@@ -67,60 +67,52 @@ TEST_CASE("Request test on default Resource rejecting all verbs", "[Server]")
     /* Starting the server */
     Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
-    SECTION("GET") {
+    SECTION ("GET") {
 
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                testUri, // uri
-                HttpClientSimulator::Verb::Get, // verb
-                "You will fail!", // request content
-                HttpClientSimulator::Status::VerbNotAllowed, // expected status
-                "text/plain", // expected content type
-                expectedResponseContent) // expected response content
-            );
+        CHECK_NOTHROW(client.request(testUri,                                     // uri
+                                     HttpClientSimulator::Verb::Get,              // verb
+                                     "You will fail!",                            // request content
+                                     HttpClientSimulator::Status::VerbNotAllowed, // expected status
+                                     "text/plain",            // expected content type
+                                     expectedResponseContent) // expected response content
+                      );
     }
 
-    SECTION("POST") {
+    SECTION ("POST") {
 
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                testUri, // uri
-                HttpClientSimulator::Verb::Post, // verb
-                "You will fail!", // request content
-                HttpClientSimulator::Status::VerbNotAllowed, // expected status
-                "text/plain", // expected content type
-                expectedResponseContent) // expected response content
-            );
+        CHECK_NOTHROW(client.request(testUri,                                     // uri
+                                     HttpClientSimulator::Verb::Post,             // verb
+                                     "You will fail!",                            // request content
+                                     HttpClientSimulator::Status::VerbNotAllowed, // expected status
+                                     "text/plain",            // expected content type
+                                     expectedResponseContent) // expected response content
+                      );
     }
 
-    SECTION("PUT") {
+    SECTION ("PUT") {
 
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                testUri, // uri
-                HttpClientSimulator::Verb::Put, // verb
-                "You will fail!", // request content
-                HttpClientSimulator::Status::VerbNotAllowed, // expected status
-                "text/plain", // expected content type
-                expectedResponseContent) //expected response content
-            );
+        CHECK_NOTHROW(client.request(testUri,                                     // uri
+                                     HttpClientSimulator::Verb::Put,              // verb
+                                     "You will fail!",                            // request content
+                                     HttpClientSimulator::Status::VerbNotAllowed, // expected status
+                                     "text/plain",            // expected content type
+                                     expectedResponseContent) // expected response content
+                      );
     }
 
-    SECTION("DELETE") {
+    SECTION ("DELETE") {
 
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                testUri, // uri
-                HttpClientSimulator::Verb::Delete, // verb
-                "You will fail!", // request content
-                HttpClientSimulator::Status::VerbNotAllowed, // expected status
-                "text/plain", // expected content type
-                expectedResponseContent) // expected response content
-            );
+        CHECK_NOTHROW(client.request(testUri,                                     // uri
+                                     HttpClientSimulator::Verb::Delete,           // verb
+                                     "You will fail!",                            // request content
+                                     HttpClientSimulator::Status::VerbNotAllowed, // expected status
+                                     "text/plain",            // expected content type
+                                     expectedResponseContent) // expected response content
+                      );
     }
 }
 
@@ -140,63 +132,55 @@ TEST_CASE("Default verb handler", "[Server]")
     /* Starting the server */
     Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
-    SECTION("GET") {
+    SECTION ("GET") {
 
         std::string expectedResponseContent = "GET";
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                testUri, // uri
-                HttpClientSimulator::Verb::Get, // verb
-                "", // request content
-                HttpClientSimulator::Status::Ok, // expected status
-                "text/plain", // expected content type
-                expectedResponseContent) // expected response content
-            );
+        CHECK_NOTHROW(client.request(testUri,                         // uri
+                                     HttpClientSimulator::Verb::Get,  // verb
+                                     "",                              // request content
+                                     HttpClientSimulator::Status::Ok, // expected status
+                                     "text/plain",                    // expected content type
+                                     expectedResponseContent)         // expected response content
+                      );
     }
 
-    SECTION("PUT") {
+    SECTION ("PUT") {
 
         std::string expectedResponseContent = "PUT";
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                testUri, // uri
-                HttpClientSimulator::Verb::Put, // verb
-                "", // request content
-                HttpClientSimulator::Status::Ok, // expected status
-                "text/plain", // expected content type
-                expectedResponseContent) // expected response content
-            );
+        CHECK_NOTHROW(client.request(testUri,                         // uri
+                                     HttpClientSimulator::Verb::Put,  // verb
+                                     "",                              // request content
+                                     HttpClientSimulator::Status::Ok, // expected status
+                                     "text/plain",                    // expected content type
+                                     expectedResponseContent)         // expected response content
+                      );
     }
 
-    SECTION("POST") {
+    SECTION ("POST") {
 
         std::string expectedResponseContent = "POST";
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                testUri, // uri
-                HttpClientSimulator::Verb::Post, // verb
-                "", // request content
-                HttpClientSimulator::Status::Ok, // expected status
-                "text/plain", // expected content type
-                expectedResponseContent) // expected response content
-            );
+        CHECK_NOTHROW(client.request(testUri,                         // uri
+                                     HttpClientSimulator::Verb::Post, // verb
+                                     "",                              // request content
+                                     HttpClientSimulator::Status::Ok, // expected status
+                                     "text/plain",                    // expected content type
+                                     expectedResponseContent)         // expected response content
+                      );
     }
 
-    SECTION("DELETE") {
+    SECTION ("DELETE") {
 
         std::string expectedResponseContent = "DELETE";
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                testUri, // uri
-                HttpClientSimulator::Verb::Delete, // verb
-                "", // request content
-                HttpClientSimulator::Status::Ok, // expected status
-                "text/plain", // expected content type
-                expectedResponseContent) // expected response content
-            );
+        CHECK_NOTHROW(client.request(testUri,                           // uri
+                                     HttpClientSimulator::Verb::Delete, // verb
+                                     "",                                // request content
+                                     HttpClientSimulator::Status::Ok,   // expected status
+                                     "text/plain",                      // expected content type
+                                     expectedResponseContent)           // expected response content
+                      );
     }
 }

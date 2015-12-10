@@ -31,10 +31,10 @@
  * But for an unknown reason including Ntddser.h leads to macro redefinition warnings.
  * Some investigation has been performed, but without result. So disabling the warning,
  * it's acceptable for a functional test */
-#pragma warning( push )
-#pragma warning(disable:4005)
+#pragma warning(push)
+#pragma warning(disable : 4005)
 #include <Ntddser.h>
-#pragma warning( pop )
+#pragma warning(pop)
 
 using namespace debug_agent::cavs::windows;
 using namespace debug_agent::util;
@@ -54,8 +54,7 @@ TEST_CASE("SystemDevice: getting device baud rate")
     std::cout << "Serial devices found: " << deviceIds.size() << std::endl;
 
     /* Iterating on each device */
-    for (auto &device : deviceIds)
-    {
+    for (auto &device : deviceIds) {
         try {
             /* Creating a system device using the current device identifier */
             SystemDevice systemDevice(device);
@@ -66,9 +65,7 @@ TEST_CASE("SystemDevice: getting device baud rate")
 
             /* Printing the baud rate */
             std::cout << "  Baud rate: " << output->BaudRate << std::endl;
-        }
-        catch (Device::Exception &)
-        {
+        } catch (Device::Exception &) {
             /* The Device::Exception is thrown by the SystemDevice constructor. The constructor
              * call cannot be surrounded by CHECK_NOTHROW because this macro uses a try/catch
              * block, making unreachable the created instance.
@@ -79,4 +76,3 @@ TEST_CASE("SystemDevice: getting device baud rate")
         }
     }
 }
-

@@ -37,13 +37,15 @@ class Ref
 {
 public:
     Ref() = default;
-    explicit Ref(const std::string &typeName, const std::string &instanceId) :
-        mTypeName(typeName), mInstanceId(instanceId) {}
-    explicit Ref(const Ref& other) = default;
+    explicit Ref(const std::string &typeName, const std::string &instanceId)
+        : mTypeName(typeName), mInstanceId(instanceId)
+    {
+    }
+    explicit Ref(const Ref &other) = default;
     virtual ~Ref() = default;
     Ref &operator=(const Ref &other) = default;
 
-    bool operator == (const Ref &other) const NOEXCEPT
+    bool operator==(const Ref &other) const NOEXCEPT
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -52,10 +54,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator != (const Ref &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Ref &other) const NOEXCEPT { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -67,32 +66,18 @@ public:
         acceptCommon(*this, visitor, isConcrete);
     }
 
-    std::string getTypeName() const
-    {
-        return mTypeName;
-    }
+    std::string getTypeName() const { return mTypeName; }
 
-    void setTypeName(const std::string &typeName)
-    {
-        mTypeName = typeName;
-    }
+    void setTypeName(const std::string &typeName) { mTypeName = typeName; }
 
-    std::string getInstanceId() const
-    {
-        return mInstanceId;
-    }
+    std::string getInstanceId() const { return mInstanceId; }
 
-    void setInstanceId(const std::string &instanceId)
-    {
-        mInstanceId = instanceId;
-    }
+    void setInstanceId(const std::string &instanceId) { mInstanceId = instanceId; }
 
 protected:
     virtual bool equalsTo(const Ref &other) const NOEXCEPT
     {
-         return
-             mTypeName == other.mTypeName &&
-             mInstanceId == other.mInstanceId;
+        return mTypeName == other.mTypeName && mInstanceId == other.mInstanceId;
     }
 
 private:
@@ -106,9 +91,6 @@ private:
     std::string mTypeName;
     std::string mInstanceId;
 };
-
 }
 }
 }
-
-

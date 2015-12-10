@@ -73,7 +73,7 @@ struct InstanceTraits
 
 /* References */
 
-template<>
+template <>
 struct InstanceTraits<instance::Ref>
 {
     /* No tag because this class cannot be serializable */
@@ -81,65 +81,64 @@ struct InstanceTraits<instance::Ref>
     static const std::string attributeInstanceId;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::InstanceRef>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::ComponentRef>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::ServiceRef>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::SubsystemRef>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::SystemRef>
 {
     static const std::string tag;
 };
 
-
 /* Named reference collections */
 
-template<>
+template <>
 struct InstanceTraits<instance::RefCollection>
 {
     /* No tag because this class cannot be serializable */
     static const std::string attributeName;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::InstanceRefCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::ComponentRefCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::ServiceRefCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::SubsystemRefCollection>
 {
     static const std::string tag;
@@ -147,13 +146,13 @@ struct InstanceTraits<instance::SubsystemRefCollection>
 
 /* Parents & Children */
 
-template<>
+template <>
 struct InstanceTraits<instance::Parents>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Children>
 {
     static const std::string tag;
@@ -161,19 +160,19 @@ struct InstanceTraits<instance::Children>
 
 /* Parameters */
 
-template<>
+template <>
 struct InstanceTraits<instance::Parameters>
 {
     /* No tag because this class cannot be serializable */
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::InfoParameters>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::ControlParameters>
 {
     static const std::string tag;
@@ -181,7 +180,7 @@ struct InstanceTraits<instance::ControlParameters>
 
 /* Inputs / Outputs */
 
-template<>
+template <>
 struct InstanceTraits<instance::Connector>
 {
     /* No tag because this class cannot be serializable */
@@ -189,25 +188,25 @@ struct InstanceTraits<instance::Connector>
     static const std::string attributeFormat;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Input>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Output>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Inputs>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Outputs>
 {
     static const std::string tag;
@@ -215,7 +214,7 @@ struct InstanceTraits<instance::Outputs>
 
 /* Links*/
 
-template<>
+template <>
 struct InstanceTraits<instance::To>
 {
     static const std::string tag;
@@ -224,7 +223,7 @@ struct InstanceTraits<instance::To>
     static const std::string attributeInputId;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::From>
 {
     static const std::string tag;
@@ -233,13 +232,13 @@ struct InstanceTraits<instance::From>
     static const std::string attributeOutputId;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Link>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Links>
 {
     static const std::string tag;
@@ -247,7 +246,7 @@ struct InstanceTraits<instance::Links>
 
 /* Main type classes */
 
-template<>
+template <>
 struct InstanceTraits<instance::Instance>
 {
     static const std::string tag;
@@ -255,60 +254,56 @@ struct InstanceTraits<instance::Instance>
     static const std::string attributeInstanceId;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Component>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Subsystem>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::System>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::Service>
 {
     static const std::string tag;
     static const std::string attributeDirection;
 };
 
-
 /* Main instance collection */
 
-template<>
+template <>
 struct InstanceTraits<instance::InstanceCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::ComponentCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::SubsystemCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct InstanceTraits<instance::ServiceCollection>
 {
     static const std::string tag;
 };
-
 }
 }
 }
-
-

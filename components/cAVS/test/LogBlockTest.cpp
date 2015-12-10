@@ -34,9 +34,9 @@ TEST_CASE("Core ID validity", "[constructor]")
     static const unsigned int maxCoreId = 15;
     static const unsigned int overMaxCoreId = 16;
 
-    CHECK_THROWS_AS_MSG(LogBlock b(overMaxCoreId),
-        LogBlock::Exception,
-        "Invalid Core ID: " + std::to_string(overMaxCoreId) + " should be in [0..15]");
+    CHECK_THROWS_AS_MSG(LogBlock b(overMaxCoreId), LogBlock::Exception,
+                        "Invalid Core ID: " + std::to_string(overMaxCoreId) +
+                            " should be in [0..15]");
 
     CHECK_NOTHROW(LogBlock b(minCoreId));
 
@@ -54,9 +54,8 @@ TEST_CASE("Size validity", "[streaming]")
     TestedLogBlocType block(coreId, overmaxBlocSize);
 
     std::stringstream blockStream;
-    CHECK_THROWS_AS_MSG(blockStream << block,
-        TestedLogBlocType::Exception,
-        "Log block size exceeds maximum value");
+    CHECK_THROWS_AS_MSG(blockStream << block, TestedLogBlocType::Exception,
+                        "Log block size exceeds maximum value");
 }
 
 TEST_CASE("cAVS block size validity", "[streaming]")
@@ -67,9 +66,8 @@ TEST_CASE("cAVS block size validity", "[streaming]")
     LogBlock block(coreId, overmaxBlocSize);
 
     std::stringstream blockStream;
-    CHECK_THROWS_AS_MSG(blockStream << block,
-        LogBlock::Exception,
-        "Log block size exceeds maximum value");
+    CHECK_THROWS_AS_MSG(blockStream << block, LogBlock::Exception,
+                        "Log block size exceeds maximum value");
 }
 
 TEST_CASE("Stream empty LogBlock", "[streaming]")
@@ -89,7 +87,7 @@ TEST_CASE("Stream empty LogBlock", "[streaming]")
     unsigned char expectedBlockStreamBytes[blockHeaderStreamLength] = {0, 0, 0, coreId << 4};
 
     std::string expectedBlockStream(reinterpret_cast<char *>(expectedBlockStreamBytes),
-        blockHeaderStreamLength);
+                                    blockHeaderStreamLength);
 
     CHECK(blockStream.str() == expectedBlockStream);
 }
@@ -118,8 +116,7 @@ TEST_CASE("Stream LogBlock", "[streaming]")
         "*   express and approved by Intel in writing."
         "*"
         "********************************************************************************"
-        "*/"
-    );
+        "*/");
     /* Create the log block */
     LogBlock block(coreId, aBeautifulLog.size());
     /* Fill log block log data vector with aBeautifulLog */
@@ -139,7 +136,7 @@ TEST_CASE("Stream LogBlock", "[streaming]")
         0, /* This unit test is designed for a aBeautifulLog.size() < 65536 */
         coreId << 4};
     std::string expectedBlockStreamHeader(reinterpret_cast<char *>(blockHeaderStream),
-        blockHeaderStreamLength);
+                                          blockHeaderStreamLength);
 
     /* Expected block stream is the concatenation of the expected block header and the expected
      * block log data */

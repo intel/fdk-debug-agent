@@ -49,6 +49,5 @@ struct IsCompoundSerializableType
 {
     static const bool value = !IsSimpleSerializableType<T>::value;
 };
-
 }
 }

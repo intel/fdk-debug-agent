@@ -46,9 +46,7 @@ public:
     class Exception final : public std::logic_error
     {
     public:
-        explicit Exception(const std::string &what)
-        : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
     /**
@@ -74,6 +72,5 @@ public:
 
     virtual ~TlvWrapperInterface() {}
 };
-
 }
 }

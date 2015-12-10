@@ -34,7 +34,7 @@ struct Test
 };
 
 /* Returns the virtual size of the dummy structure */
-std::size_t sizeTest(const Test& test)
+std::size_t sizeTest(const Test &test)
 {
     return test.mSize;
 }
@@ -101,15 +101,12 @@ TEST_CASE("blocking queue: clearing")
     CHECK(queue.getElementCount() == 0);
 }
 
-
 TEST_CASE("blocking queue: multithread closing")
 {
     TestQueue queue(10, &sizeTest);
 
     /* Closing in another thread */
-    std::future<void> result(std::async(std::launch::async, [&]() {
-        queue.close();
-    }));
+    std::future<void> result(std::async(std::launch::async, [&]() { queue.close(); }));
 
     TestPtr element(queue.remove());
     CHECK(element == nullptr);
@@ -157,5 +154,3 @@ TEST_CASE("blocking queue: multi theading usage")
     /* Checking that adding element is successful */
     CHECK(futureResult.get());
 }
-
-

@@ -64,7 +64,7 @@ namespace util
  *
  * @tparam T The class to be wrapped
  */
-template<class T>
+template <class T>
 class Locker final
 {
 public:
@@ -77,7 +77,7 @@ public:
      *  - unique_lock can't be copied.
      *  - the semantics of moving from a const is unclear.
      */
-    template<class U>
+    template <class U>
     class Guard final
     {
     public:
@@ -87,7 +87,7 @@ public:
          */
         U *operator->() const { return &mWrapped; }
 
-        U* get() const { return &mWrapped; }
+        U *get() const { return &mWrapped; }
         /** @} */
 
     private:
@@ -99,7 +99,9 @@ public:
     };
 
     template <class... Args>
-    Locker(Args &&... args) : mWrapped(std::forward<Args>(args)...) {}
+    Locker(Args &&... args) : mWrapped(std::forward<Args>(args)...)
+    {
+    }
 
     /** Call a method on the wrapped object, atomically
      *
@@ -116,13 +118,9 @@ public:
      * http://en.cppreference.com/w/cpp/language/operator_member_access#Built-in_member_access_operators
      * (§3 at the time of writing).
      */
-    Guard<T> operator->() {
-        return { mWrapped, mMutex };
-    }
+    Guard<T> operator->() { return {mWrapped, mMutex}; }
 
-    Guard<const T> operator->() const {
-        return { mWrapped, mMutex };
-    }
+    Guard<const T> operator->() const { return {mWrapped, mMutex}; }
 
     /** @} */
 
@@ -133,13 +131,9 @@ public:
      *
      * @{
      */
-    Guard<T> lock() {
-        return { mWrapped, mMutex };
-    }
+    Guard<T> lock() { return {mWrapped, mMutex}; }
 
-    Guard<const T> lock() const {
-        return { mWrapped, mMutex };
-    }
+    Guard<const T> lock() const { return {mWrapped, mMutex}; }
     /** @} */
 
 private:

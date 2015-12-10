@@ -37,10 +37,11 @@ class ControlParameters : public Parameters
 {
 private:
     using base = Parameters;
+
 public:
     ControlParameters() = default;
-    explicit ControlParameters(const ControlParameters& other) = default;
-    ControlParameters& operator=(const ControlParameters& other) = default;
+    explicit ControlParameters(const ControlParameters &other) = default;
+    ControlParameters &operator=(const ControlParameters &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
     {
@@ -53,6 +54,7 @@ public:
         assert(isConcrete);
         acceptCommon(*this, visitor);
     }
+
 private:
     template <typename T, typename Visitor>
     static void acceptCommon(T &me, Visitor &visitor)
@@ -62,9 +64,6 @@ private:
         visitor.leave();
     }
 };
-
 }
 }
 }
-
-

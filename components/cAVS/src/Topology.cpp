@@ -33,9 +33,9 @@ const dsp_fw::ModuleInstanceProps &Topology::getModuleInstance(
 {
     const auto it = moduleInstances.find(moduleInstanceId);
     if (it == moduleInstances.end()) {
-        throw Exception("Topology inconsistency: undefined module instance "
-            + std::to_string(moduleInstanceId.instanceId) + " of module ID"
-            + std::to_string(moduleInstanceId.moduleId));
+        throw Exception("Topology inconsistency: undefined module instance " +
+                        std::to_string(moduleInstanceId.instanceId) + " of module ID" +
+                        std::to_string(moduleInstanceId.moduleId));
     }
 
     return it->second;
@@ -55,7 +55,7 @@ void Topology::addAllModuleOutputs(OutputList &list, const dsp_fw::CompoundModul
         outputId = 1;
     }
 
-    for ( ; outputId < moduleProps.output_pins.pin_info.size(); ++outputId) {
+    for (; outputId < moduleProps.output_pins.pin_info.size(); ++outputId) {
 
         if (moduleProps.output_pins.pin_info[outputId].phys_queue_id !=
             dsp_fw::PinProps::invalidQueueId) {
@@ -79,7 +79,7 @@ void Topology::addAllModuleInputs(InputList &list, const dsp_fw::CompoundModuleI
         inputId = 1;
     }
 
-    for ( ; inputId < moduleProps.input_pins.pin_info.size(); ++inputId) {
+    for (; inputId < moduleProps.input_pins.pin_info.size(); ++inputId) {
 
         if (moduleProps.input_pins.pin_info[inputId].phys_queue_id !=
             dsp_fw::PinProps::invalidQueueId) {
@@ -131,26 +131,22 @@ void Topology::computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &un
         }
 
         /* Now search for links between modules within the current pipe */
-        for (size_t pipeModuleIndex = 0;
-             pipeModuleIndex < pipe.module_instances.size() - 1;
+        for (size_t pipeModuleIndex = 0; pipeModuleIndex < pipe.module_instances.size() - 1;
              ++pipeModuleIndex) {
 
             const dsp_fw::CompoundModuleId &sourceModuleId = pipe.module_instances[pipeModuleIndex];
             const dsp_fw::CompoundModuleId &destinationModuleId =
-                    pipe.module_instances[pipeModuleIndex + 1];
+                pipe.module_instances[pipeModuleIndex + 1];
 
-            computeModulesPairLink(sourceModuleId,
-                                    destinationModuleId,
-                                    unresolvedInputs,
-                                    unresolvedOutputs);
+            computeModulesPairLink(sourceModuleId, destinationModuleId, unresolvedInputs,
+                                   unresolvedOutputs);
         }
     }
 }
 
 void Topology::computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModuleId,
-    const dsp_fw::CompoundModuleId &destinationModuleId,
-    InputList &unresolvedInputs,
-    OutputList &unresolvedOutputs)
+                                      const dsp_fw::CompoundModuleId &destinationModuleId,
+                                      InputList &unresolvedInputs, OutputList &unresolvedOutputs)
 {
     /* List all destination module outputs */
     OutputList sourceOutputs;
@@ -168,8 +164,7 @@ void Topology::computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModu
         bool connectionFound = false;
 
         /* ...look for an input connected to the same queue */
-        for (auto inputIt = destinationInputs.begin();
-             inputIt != destinationInputs.end(); ) {
+        for (auto inputIt = destinationInputs.begin(); inputIt != destinationInputs.end();) {
 
             const dsp_fw::ModuleInstanceProps &destinationModule =
                 getModuleInstance(destinationModuleId);
@@ -179,8 +174,7 @@ void Topology::computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModu
             if (outputPin.phys_queue_id == inputPin.phys_queue_id) {
 
                 /* Output and input are connected to the same queue: we've just found a link */
-                links.push_back(Link(output.first, output.second,
-                                     inputIt->first, inputIt->second));
+                links.push_back(Link(output.first, output.second, inputIt->first, inputIt->second));
 
                 // Remind the output has a connection with an input
                 connectionFound = true;
@@ -203,16 +197,14 @@ void Topology::computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModu
     }
 
     /* Remaining inputs of the destination module are unresolved */
-    unresolvedInputs.insert(unresolvedInputs.end(),
-                            destinationInputs.begin(),
+    unresolvedInputs.insert(unresolvedInputs.end(), destinationInputs.begin(),
                             destinationInputs.end());
 }
 
 void Topology::computeInterPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs)
 {
     bool connectionFound;
-    for (auto outputIt = unresolvedOutputs.begin();
-             outputIt != unresolvedOutputs.end(); ) {
+    for (auto outputIt = unresolvedOutputs.begin(); outputIt != unresolvedOutputs.end();) {
 
         connectionFound = false;
 
@@ -220,8 +212,7 @@ void Topology::computeInterPipeLinks(InputList &unresolvedInputs, OutputList &un
         const dsp_fw::PinProps &outputPinProps =
             sourceModule.output_pins.pin_info[outputIt->second];
 
-        for (auto inputIt = unresolvedInputs.begin();
-             inputIt != unresolvedInputs.end(); ) {
+        for (auto inputIt = unresolvedInputs.begin(); inputIt != unresolvedInputs.end();) {
 
             const dsp_fw::ModuleInstanceProps &destinationModule =
                 getModuleInstance(inputIt->first);
@@ -231,8 +222,8 @@ void Topology::computeInterPipeLinks(InputList &unresolvedInputs, OutputList &un
             if (outputPinProps.phys_queue_id == inputPinProps.phys_queue_id) {
 
                 connectionFound = true;
-                links.push_back(Link(outputIt->first, outputIt->second,
-                                     inputIt->first, inputIt->second));
+                links.push_back(
+                    Link(outputIt->first, outputIt->second, inputIt->first, inputIt->second));
 
                 unresolvedInputs.erase(inputIt);
                 break;
@@ -259,38 +250,23 @@ void Topology::checkUnresolved(InputList &unresolvedInputs, OutputList &unresolv
         const dsp_fw::ModuleInstanceProps &moduleProps = getModuleInstance(output.first);
 
         /** @fixme use cAVS plugin log instead */
-        std::cout
-            << "[cAVS] Error: "
-            << "Unconnected output pin #"
-            << output.second
-            << " of module instance ID #"
-            << output.first.instanceId
-            << " (Module ID #"
-            << output.first.moduleId
-            << "): expecting connection through queue ID #"
-            << moduleProps.output_pins.pin_info[output.second].phys_queue_id
-            << std::endl;
+        std::cout << "[cAVS] Error: "
+                  << "Unconnected output pin #" << output.second << " of module instance ID #"
+                  << output.first.instanceId << " (Module ID #" << output.first.moduleId
+                  << "): expecting connection through queue ID #"
+                  << moduleProps.output_pins.pin_info[output.second].phys_queue_id << std::endl;
     }
     for (auto const &input : unresolvedInputs) {
 
         const dsp_fw::ModuleInstanceProps &moduleProps = getModuleInstance(input.first);
 
         /** @fixme use cAVS plugin log instead */
-        std::cout
-            << "[cAVS] Error: "
-            << "Unconnected input pin #"
-            << input.second
-            << " of module instance ID #"
-            << input.first.instanceId
-            << " (Module ID #"
-            << input.first.moduleId
-            << "): expecting connection through queue ID #"
-            << moduleProps.input_pins.pin_info[input.second].phys_queue_id
-            << std::endl;
+        std::cout << "[cAVS] Error: "
+                  << "Unconnected input pin #" << input.second << " of module instance ID #"
+                  << input.first.instanceId << " (Module ID #" << input.first.moduleId
+                  << "): expecting connection through queue ID #"
+                  << moduleProps.input_pins.pin_info[input.second].phys_queue_id << std::endl;
     }
 }
-
 }
 }
-
-

@@ -44,11 +44,14 @@ class Component : public Instance
 {
 private:
     using base = Instance;
+
 public:
     Component() = default;
-    explicit Component(const std::string& typeName, const std::string& instanceId) :
-        base(typeName, instanceId) {}
-    explicit Component(const Component& other) = default;
+    explicit Component(const std::string &typeName, const std::string &instanceId)
+        : base(typeName, instanceId)
+    {
+    }
+    explicit Component(const Component &other) = default;
     Component &operator=(const Component &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -61,20 +64,11 @@ public:
         acceptCommon(*this, visitor, isConcrete);
     }
 
-    Inputs &getInputs()
-    {
-        return mInputs;
-    }
+    Inputs &getInputs() { return mInputs; }
 
-    Outputs &getOutputs()
-    {
-        return mOutputs;
-    }
+    Outputs &getOutputs() { return mOutputs; }
 
-    Links &getLinks()
-    {
-        return mLinks;
-    }
+    Links &getLinks() { return mLinks; }
 
 protected:
     virtual bool equalsTo(const Instance &other) const NOEXCEPT override
@@ -83,15 +77,13 @@ protected:
             return false;
         }
 
-        const Component *otherComp = dynamic_cast<const Component*>(&other);
+        const Component *otherComp = dynamic_cast<const Component *>(&other);
         if (otherComp == nullptr) {
             return false;
         }
 
-        return
-            mInputs == otherComp->mInputs &&
-            mOutputs == otherComp->mOutputs &&
-            mLinks == otherComp->mLinks;
+        return mInputs == otherComp->mInputs && mOutputs == otherComp->mOutputs &&
+               mLinks == otherComp->mLinks;
     }
 
 private:
@@ -113,9 +105,6 @@ private:
     Outputs mOutputs;
     Links mLinks;
 };
-
 }
 }
 }
-
-

@@ -36,20 +36,17 @@ static const std::string formatType = "fwlogs";
 static const int majorVersion = 1;
 static const int minorVersion = 0;
 
-class TestLoggerMock: public Logger
+class TestLoggerMock : public Logger
 {
 public:
-    TestLoggerMock(size_t nbBlocks):
-        mNbBlocks(nbBlocks),
-        mBlockNumber(0),
-        mExpectedBlocksStream(),
-        mMockedParameter()
+    TestLoggerMock(size_t nbBlocks)
+        : mNbBlocks(nbBlocks), mBlockNumber(0), mExpectedBlocksStream(), mMockedParameter()
     {
         /* Write the number of module entries, and the module entry table.
         *  In this test, there is no module entry table, but we still have to write the
         *  number of module entries, i.e. 0 */
         static const int nbModuleEntriesBytesLength = 4;
-        char nbModuleEntriesBytes[nbModuleEntriesBytesLength] = { 0x00, 0x00, 0x00, 0x00 };
+        char nbModuleEntriesBytes[nbModuleEntriesBytesLength] = {0x00, 0x00, 0x00, 0x00};
         mExpectedBlocksStream.write(nbModuleEntriesBytes, nbModuleEntriesBytesLength);
 
         /* Write the log blocks */
@@ -59,20 +56,14 @@ public:
         }
     }
 
-    const std::stringstream &getExpectedBlocksStream()
-    {
-        return mExpectedBlocksStream;
-    }
+    const std::stringstream &getExpectedBlocksStream() { return mExpectedBlocksStream; }
 
     virtual void setParameters(const Parameters &parameters) override
     {
         mMockedParameter = parameters;
     }
 
-    virtual Logger::Parameters getParameters() override
-    {
-        return mMockedParameter;
-    }
+    virtual Logger::Parameters getParameters() override { return mMockedParameter; }
 
     virtual std::unique_ptr<LogBlock> readLogBlock() override
     {
@@ -87,9 +78,7 @@ public:
         }
     }
 
-    virtual void stop() NOEXCEPT override
-    {
-    }
+    virtual void stop() NOEXCEPT override {}
 
     static std::unique_ptr<LogBlock> generateLogBlock(size_t blockNumber)
     {
@@ -149,9 +138,8 @@ TEST_CASE("Test IFDK cAVS Log stream", "[stream]")
     expectedOutStream << logIfdkHeader;
     expectedOutStream << fakeLogger.getExpectedBlocksStream().str();
 
-    CHECK_THROWS_AS_MSG(outStream << logStreamer,
-        Streamer::Exception,
-        "Fail to read log: No more log");
+    CHECK_THROWS_AS_MSG(outStream << logStreamer, Streamer::Exception,
+                        "Fail to read log: No more log");
 
     CHECK(outStream.str() == expectedOutStream.str());
 }
@@ -168,9 +156,8 @@ TEST_CASE("Test module entries to stream", "[streaming]")
     LogStreamer logStreamer(fakeLogger, moduleEntries);
 
     std::stringstream outStream;
-    CHECK_THROWS_AS_MSG(outStream << logStreamer,
-        Streamer::Exception,
-        "Fail to read log: No more log");
+    CHECK_THROWS_AS_MSG(outStream << logStreamer, Streamer::Exception,
+                        "Fail to read log: No more log");
 
     /* Expected stream size:
      * - 4 bytes for Module ID per entry
@@ -183,40 +170,31 @@ TEST_CASE("Test module entries to stream", "[streaming]")
      */
     char expectedOutModuleEntriesStreamBytes[expectedOutModuleEntriesStreamLength] = {
         // Number of Module Entries (little endian)
-            0x03, 0x00, 0x00, 0x00,
+        0x03, 0x00, 0x00, 0x00,
         // Entry 1
-            // Module ID (little endian)
-            0x00, 0x00, 0x00, 0x00,
-            // UUID
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
-            // Versions (little endian)
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
+        // Module ID (little endian)
+        0x00, 0x00, 0x00, 0x00,
+        // UUID
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00,
+        // Versions (little endian)
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         // Entry 2
-            // Module ID (little endian)
-            0x01, 0x00, 0x00, 0x00,
-            // UUID
-            0x01, 0x00, 0x00, 0x00,
-            0x00, 0x01, 0x00, 0x00,
-            0x00, 0x00, 0x01, 0x00,
-            0x00, 0x00, 0x00, 0x01,
-            // Versions (little endian)
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
+        // Module ID (little endian)
+        0x01, 0x00, 0x00, 0x00,
+        // UUID
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+        0x01,
+        // Versions (little endian)
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         // Entry 3
-            // Module ID (little endian)
-            0x02, 0x00, 0x00, 0x00,
-            // UUID
-            0x02, 0x00, 0x00, 0x00,
-            0x00, 0x02, 0x00, 0x00,
-            0x00, 0x00, 0x02, 0x00,
-            0x00, 0x00, 0x00, 0x02,
-            // Versions (little endian)
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
+        // Module ID (little endian)
+        0x02, 0x00, 0x00, 0x00,
+        // UUID
+        0x02, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
+        0x02,
+        // Versions (little endian)
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     };
 
     // Expected stream: IFDK header + expectedOutModuleEntriesStreamBytes

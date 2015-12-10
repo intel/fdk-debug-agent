@@ -34,9 +34,6 @@ namespace type
 
 /** List of output conenctors */
 using Outputs = VisitableVector<Output, Visitor, ConstVisitor>;
-
 }
 }
 }
-
-

@@ -40,9 +40,7 @@ public:
     class Exception final : public std::logic_error
     {
     public:
-        explicit Exception(const std::string &what)
-        : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
     /**
@@ -54,8 +52,7 @@ public:
      * @param[in] tlvBufferSize The TLV list buffer size
      * @throw TlvUnpack::Exception
      */
-    TlvUnpack(const TlvResponseHandlerInterface &responseHandler,
-              const char *tlvBuffer,
+    TlvUnpack(const TlvResponseHandlerInterface &responseHandler, const char *tlvBuffer,
               std::size_t tlvBufferSize);
 
     /**
@@ -77,6 +74,5 @@ private:
 
     std::size_t mReadIndex;
 };
-
 }
 }

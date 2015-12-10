@@ -37,18 +37,14 @@ namespace tlv
  * @see TlvWrapperInterface
  */
 template <typename ValueType>
-class TlvVectorWrapper final: public TlvWrapperInterface
+class TlvVectorWrapper final : public TlvWrapperInterface
 {
 public:
     /**
      * @param[in] value the reference to the shadow runtime variable
      * @param[in] valid the reference to the shadow runtime variable valid flag
      */
-    TlvVectorWrapper(std::vector<ValueType> &values):
-        mValues(values)
-    {
-        invalidate();
-    }
+    TlvVectorWrapper(std::vector<ValueType> &values) : mValues(values) { invalidate(); }
 
     virtual bool isValidSize(size_t binaryValueSize) const NOEXCEPT override
     {
@@ -59,10 +55,9 @@ public:
     {
         if (!isValidSize(binaryValueSize)) {
 
-            throw Exception(std::string("Invalid binary size (")
-                + std::to_string(binaryValueSize)
-                + " instead of multiple of " + std::to_string(sizeof(ValueType))
-                + " bytes) for TLV value read");
+            throw Exception(std::string("Invalid binary size (") + std::to_string(binaryValueSize) +
+                            " instead of multiple of " + std::to_string(sizeof(ValueType)) +
+                            " bytes) for TLV value read");
         }
         size_t nbElements = binaryValueSize / sizeof(ValueType);
         const ValueType *firstElement = reinterpret_cast<const ValueType *>(binarySource);
@@ -70,14 +65,10 @@ public:
         mValues.assign(firstElement, firstElement + nbElements);
     }
 
-    virtual void invalidate() NOEXCEPT override
-    {
-        mValues.clear();
-    }
+    virtual void invalidate() NOEXCEPT override { mValues.clear(); }
 
 private:
     std::vector<ValueType> &mValues;
 };
-
 }
 }

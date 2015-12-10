@@ -79,8 +79,10 @@ public:
         NetworkException(const std::string &msg) : RequestFailureException(msg.c_str()) {}
     };
 
-    HttpClientSimulator(const std::string &server, uint32_t port = DefaultPort) :
-        mServer(server), mPort(port) {}
+    HttpClientSimulator(const std::string &server, uint32_t port = DefaultPort)
+        : mServer(server), mPort(port)
+    {
+    }
 
     /* Perform an http request and checks the result. If the result is not the expected one,
      * the exception RequestFailureException is thrown
@@ -93,16 +95,12 @@ public:
      * @param[in] expectedResponseContent the expected response content returned by the server.
      *                                    Use the AnyContent constant to accept any content.
      */
-    void request(
-        const std::string &uri,
-        Verb verb,
-        const std::string &requestContent,
-        Status expectedStatus,
-        const std::string &expectedContentType,
-        const std::string &expectedResponseContent);
+    void request(const std::string &uri, Verb verb, const std::string &requestContent,
+                 Status expectedStatus, const std::string &expectedContentType,
+                 const std::string &expectedResponseContent);
 
 private:
-    HttpClientSimulator(const HttpClientSimulator&) = delete;
+    HttpClientSimulator(const HttpClientSimulator &) = delete;
     HttpClientSimulator &operator=(const HttpClientSimulator &) = delete;
 
     /** Returns a substring. If the substring exceeds the string length (i.e.
@@ -110,7 +108,7 @@ private:
      * chars from [index..str.length()] )
      */
     static std::string getSubStringSafe(const std::string &str, std::size_t index,
-        std::size_t length);
+                                        std::size_t length);
 
     /** Returns the index of the first different char */
     std::size_t getStringDiffOffset(const std::string &str1, const std::string &str2);
@@ -118,8 +116,5 @@ private:
     const std::string mServer;
     const uint32_t mPort;
 };
-
 }
 }
-
-

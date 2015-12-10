@@ -24,7 +24,7 @@
 #include "Rest/ErrorHandler.hpp"
 #include "catch.hpp"
 
-int main(int argc, char* const argv[])
+int main(int argc, char *const argv[])
 {
     /* Installing the rest error handler in order to hide ConnectionAbortedException */
     debug_agent::rest::ErrorHandler handler;

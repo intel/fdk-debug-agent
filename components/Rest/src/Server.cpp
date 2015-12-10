@@ -39,30 +39,24 @@ namespace rest
 /* Poco forces us to use operator new here: the HttpServer takes the ownership of the
  * RequestHandlerFactory and the HTTPServerParams.
  */
-Server::Server(std::unique_ptr<const Dispatcher> dispatcher, uint32_t port, bool isVerbose)
-try: mServerSocket(port),
-     mHttpServer(new RequestHandlerFactory(std::move(dispatcher), isVerbose),
-                 mThreadPool, mServerSocket, new HTTPServerParams())
-{
+Server::Server(std::unique_ptr<const Dispatcher> dispatcher, uint32_t port, bool isVerbose) try
+    : mServerSocket(port),
+      mHttpServer(new RequestHandlerFactory(std::move(dispatcher), isVerbose), mThreadPool,
+                  mServerSocket, new HTTPServerParams()) {
     mHttpServer.start();
-}
-catch (Poco::Net::NetException &e)
-{
+} catch (Poco::Net::NetException &e) {
     throw Exception("Unable to start http server: " + std::string(e.what()));
 }
 
 Server::~Server()
 {
-    try
-    {
+    try {
         /* Stopping the http server immediately, leading to close current http connections.
         * The http server cannot wait that all client disconnect. If one client is doing
         * streaming (log retrieval...) the server would never be able to close.
         */
         mHttpServer.stopAll(true);
-    }
-    catch (Poco::Net::NetException &e)
-    {
+    } catch (Poco::Net::NetException &e) {
         /* Exception is swallowed because there is no way to handle the issue */
         /* @todo: use logging */
         std::cout << "Unable to stop http server: " << e.what() << std::endl;
@@ -71,6 +65,5 @@ Server::~Server()
     /* Now all sockets are closed, the http request threads should finish. Joining them */
     mThreadPool.joinAll();
 }
-
 }
 }

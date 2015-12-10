@@ -33,9 +33,6 @@ namespace instance
 {
 
 using SubsystemCollection = GenericCollection<Subsystem>;
-
 }
 }
 }
-
-

@@ -42,21 +42,48 @@ namespace details
 {
 
 /** Helper class to limit instantiation of templates */
-template<typename T>
+template <typename T>
 struct ConvertionAllowed;
 
 /* List of allowed types for conversion */
-template<> struct ConvertionAllowed<bool> {};
-template<> struct ConvertionAllowed<uint64_t> {};
-template<> struct ConvertionAllowed<int64_t> {};
-template<> struct ConvertionAllowed<uint32_t> {};
-template<> struct ConvertionAllowed<int32_t> {};
-template<> struct ConvertionAllowed<uint16_t> {};
-template<> struct ConvertionAllowed<int16_t> {};
-template<> struct ConvertionAllowed<float> {};
-template<> struct ConvertionAllowed<double> {};
+template <>
+struct ConvertionAllowed<bool>
+{
+};
+template <>
+struct ConvertionAllowed<uint64_t>
+{
+};
+template <>
+struct ConvertionAllowed<int64_t>
+{
+};
+template <>
+struct ConvertionAllowed<uint32_t>
+{
+};
+template <>
+struct ConvertionAllowed<int32_t>
+{
+};
+template <>
+struct ConvertionAllowed<uint16_t>
+{
+};
+template <>
+struct ConvertionAllowed<int16_t>
+{
+};
+template <>
+struct ConvertionAllowed<float>
+{
+};
+template <>
+struct ConvertionAllowed<double>
+{
+};
 
-template<typename T>
+template <typename T>
 static inline bool convertTo(const std::string &str, T &result)
 {
     /* Check that conversion to that type is allowed.
@@ -71,8 +98,7 @@ static inline bool convertTo(const std::string &str, T &result)
     /* Check for a '-' in string. If type is unsigned and a - is found, the
      * parsing fails. This is made necessary because "-1" is read as 65535 for
      * uint16_t, for example */
-    if (str.find("-") != std::string::npos
-        && !std::numeric_limits<T>::is_signed) {
+    if (str.find("-") != std::string::npos && !std::numeric_limits<T>::is_signed) {
         return false;
     }
 
@@ -83,8 +109,7 @@ static inline bool convertTo(const std::string &str, T &result)
     if (str.substr(0, 2) == "0x") {
         if (std::numeric_limits<T>::is_integer) {
             ss >> std::hex >> result;
-        }
-        else {
+        } else {
             /* Conversion undefined for non integers */
             return false;
         }
@@ -112,7 +137,7 @@ static inline bool convertTo(const std::string &str, T &result)
  *
  * @return true if conversion was successful, false otherwise.
  */
-template<typename T>
+template <typename T>
 static inline bool convertTo(const std::string &str, T &result)
 {
     return details::convertTo<T>(str, result);
@@ -132,7 +157,7 @@ static inline bool convertTo(const std::string &str, T &result)
  *
  * @return true if conversion was successful, false otherwise.
  */
-template<>
+template <>
 inline bool convertTo<int16_t>(const std::string &str, int16_t &result)
 {
     int64_t res;
@@ -164,7 +189,7 @@ inline bool convertTo<int16_t>(const std::string &str, int16_t &result)
  *
  * @return true if conversion was successful, false otherwise.
  */
-template<>
+template <>
 inline bool convertTo<float>(const std::string &str, float &result)
 {
     if (!details::convertTo(str, result)) {
@@ -193,7 +218,7 @@ inline bool convertTo<float>(const std::string &str, float &result)
  *
  * @return true if conversion was successful, false otherwise.
  */
-template<>
+template <>
 inline bool convertTo<double>(const std::string &str, double &result)
 {
     if (!details::convertTo(str, result)) {
@@ -224,7 +249,7 @@ inline bool convertTo<double>(const std::string &str, double &result)
  *
  * @return true if conversion was successful, false otherwise.
  */
-template<>
+template <>
 inline bool convertTo<bool>(const std::string &str, bool &result)
 {
     if (str == "0" || str == "FALSE" || str == "false") {

@@ -28,38 +28,38 @@ TEST_CASE("TlvDictionary", "[Dictionary]")
 
     const TlvDictionaryInterface &dictionary = testTlvLanguage.getTlvDictionary();
 
-    SECTION("Check all value are invalidated by default") {
+    SECTION ("Check all value are invalidated by default") {
 
         CHECK(testTlvLanguage.isHelloValid == false);
         CHECK(testTlvLanguage.the.size() == 0);
         CHECK(testTlvLanguage.isWorldValid == false);
     }
 
-    SECTION("Check Dictionary TlvWrapper retrieving") {
+    SECTION ("Check Dictionary TlvWrapper retrieving") {
 
         TlvWrapperInterface *tlvWrapper;
 
         // Retrieve the HELLO TLV wrapper
-        tlvWrapper = dictionary.getTlvWrapperForTag
-            (static_cast<unsigned int>(TlvTestLanguage::Tags::Hello));
+        tlvWrapper =
+            dictionary.getTlvWrapperForTag(static_cast<unsigned int>(TlvTestLanguage::Tags::Hello));
         CHECK(tlvWrapper != nullptr);
         CHECK(tlvWrapper == testTlvLanguage.getReferenceWrapper(TlvTestLanguage::Tags::Hello));
 
         // Retrieve the THE TLV wrapper
-        tlvWrapper = dictionary.getTlvWrapperForTag
-            (static_cast<unsigned int>(TlvTestLanguage::Tags::The));
+        tlvWrapper =
+            dictionary.getTlvWrapperForTag(static_cast<unsigned int>(TlvTestLanguage::Tags::The));
         CHECK(tlvWrapper != nullptr);
         CHECK(tlvWrapper == testTlvLanguage.getReferenceWrapper(TlvTestLanguage::Tags::The));
 
         // Retrieve the WORLD TLV wrapper
-        tlvWrapper = dictionary.getTlvWrapperForTag
-            (static_cast<unsigned int>(TlvTestLanguage::Tags::World));
+        tlvWrapper =
+            dictionary.getTlvWrapperForTag(static_cast<unsigned int>(TlvTestLanguage::Tags::World));
         CHECK(tlvWrapper != nullptr);
         CHECK(tlvWrapper == testTlvLanguage.getReferenceWrapper(TlvTestLanguage::Tags::World));
 
         // Check that unknown tag does not retrieve any TLV wrapper
-        tlvWrapper = dictionary.getTlvWrapperForTag
-            (static_cast<unsigned int>(TlvTestLanguage::aTagIdWhichIsNotInTheLanguageTagsList));
+        tlvWrapper = dictionary.getTlvWrapperForTag(
+            static_cast<unsigned int>(TlvTestLanguage::aTagIdWhichIsNotInTheLanguageTagsList));
         CHECK(tlvWrapper == nullptr);
     }
 }

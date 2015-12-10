@@ -24,7 +24,6 @@
 
 using namespace debug_agent::tlv;
 
-
 TEST_CASE("TlvVoidWrapper", "[WrapperRead]")
 {
     TlvVoidWrapper tlvVoidWrapper;

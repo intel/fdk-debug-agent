@@ -56,24 +56,18 @@ static std::string to_string(const GUID &guid)
 class DevInfoPtr final
 {
 public:
-    DevInfoPtr(const GUID &guid) :
-        mDevInfo(SetupDiGetClassDevs(&guid, 0, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT))
+    DevInfoPtr(const GUID &guid)
+        : mDevInfo(SetupDiGetClassDevs(&guid, 0, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT))
     {
         if (mDevInfo == INVALID_HANDLE_VALUE) {
             throw DeviceIdFinder::Exception("No device interface found for GUID " +
-                to_string(guid));
+                                            to_string(guid));
         }
     }
 
-    HDEVINFO getHandle() const
-    {
-        return mDevInfo;
-    }
+    HDEVINFO getHandle() const { return mDevInfo; }
 
-    ~DevInfoPtr()
-    {
-        SetupDiDestroyDeviceInfoList(mDevInfo);
-    }
+    ~DevInfoPtr() { SetupDiDestroyDeviceInfoList(mDevInfo); }
 
 private:
     DevInfoPtr(const DevInfoPtr &) = delete;
@@ -82,22 +76,18 @@ private:
     HDEVINFO mDevInfo;
 };
 
-
 void DeviceIdFinder::getDevices(HDEVINFO devList, std::vector<SP_DEVINFO_DATA> &devices)
 {
     /* Enumerating devices */
-    for (DWORD index = 0;; index++)
-    {
+    for (DWORD index = 0;; index++) {
         SP_DEVINFO_DATA devInfo;
         devInfo.cbSize = sizeof(SP_DEVINFO_DATA);
 
-        if (SetupDiEnumDeviceInfo(devList, index, &devInfo) != TRUE)
-        {
+        if (SetupDiEnumDeviceInfo(devList, index, &devInfo) != TRUE) {
             DWORD error = GetLastError();
             if (error == ERROR_NO_MORE_ITEMS) {
                 break;
-            }
-            else {
+            } else {
                 throw Exception("Error during device enumeration: " + LastError::get());
             }
         }
@@ -106,22 +96,19 @@ void DeviceIdFinder::getDevices(HDEVINFO devList, std::vector<SP_DEVINFO_DATA> &
     }
 }
 
-void DeviceIdFinder::getInterfaces(const GUID &guid, HDEVINFO devList,
-    SP_DEVINFO_DATA &device, const std::string &substring, std::set<std::string> &deviceIds)
+void DeviceIdFinder::getInterfaces(const GUID &guid, HDEVINFO devList, SP_DEVINFO_DATA &device,
+                                   const std::string &substring, std::set<std::string> &deviceIds)
 {
     /* Enumerating interfaces */
-    for (DWORD index = 0;; index++)
-    {
+    for (DWORD index = 0;; index++) {
         SP_INTERFACE_DEVICE_DATA ifInfo;
         ifInfo.cbSize = sizeof(SP_INTERFACE_DEVICE_DATA);
 
-        if (SetupDiEnumDeviceInterfaces(devList, &device, &guid, index, &ifInfo) != TRUE)
-        {
+        if (SetupDiEnumDeviceInterfaces(devList, &device, &guid, index, &ifInfo) != TRUE) {
             DWORD error = GetLastError();
             if (error == ERROR_NO_MORE_ITEMS) {
                 break;
-            }
-            else {
+            } else {
                 throw Exception("Error during device interface enumeration: " + LastError::get());
             }
         }
@@ -137,12 +124,12 @@ void DeviceIdFinder::getInterfaces(const GUID &guid, HDEVINFO devList,
 }
 
 std::string DeviceIdFinder::getInterfaceName(HDEVINFO devList,
-    SP_INTERFACE_DEVICE_DATA &deviceInterface)
+                                             SP_INTERFACE_DEVICE_DATA &deviceInterface)
 {
     /* Getting detail size : first call to SetupDiGetDeviceInterfaceDetail function ...*/
     DWORD requiredSize;
-    BOOL ret = SetupDiGetDeviceInterfaceDetail(devList, &deviceInterface, NULL, NULL,
-        &requiredSize, NULL);
+    BOOL ret =
+        SetupDiGetDeviceInterfaceDetail(devList, &deviceInterface, NULL, NULL, &requiredSize, NULL);
     assert(ret == FALSE); /* Always return false when getting size... */
 
     /* Allocating detail data buffer */
@@ -152,12 +139,12 @@ std::string DeviceIdFinder::getInterfaceName(HDEVINFO devList,
      */
     std::unique_ptr<char[]> detailDataBuffer(new char[requiredSize]);
     SP_INTERFACE_DEVICE_DETAIL_DATA *detailData =
-        reinterpret_cast<SP_INTERFACE_DEVICE_DETAIL_DATA*>(detailDataBuffer.get());
+        reinterpret_cast<SP_INTERFACE_DEVICE_DETAIL_DATA *>(detailDataBuffer.get());
     detailData->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
 
     /* Retrieving details : second call to SetupDiGetDeviceInterfaceDetail function ... */
-    ret = SetupDiGetDeviceInterfaceDetail(devList, &deviceInterface, detailData, requiredSize,
-        NULL, NULL);
+    ret = SetupDiGetDeviceInterfaceDetail(devList, &deviceInterface, detailData, requiredSize, NULL,
+                                          NULL);
     if (ret != TRUE) {
         throw Exception("Can not retrieve interface detail content: " + LastError::get());
     }
@@ -166,7 +153,7 @@ std::string DeviceIdFinder::getInterfaceName(HDEVINFO devList,
 }
 
 void DeviceIdFinder::findAll(const GUID &guid, std::set<std::string> &deviceIds,
-    const std::string &substring)
+                             const std::string &substring)
 {
     DevInfoPtr devInfoList(guid);
 
@@ -193,8 +180,6 @@ std::string DeviceIdFinder::findOne(const GUID &guid, const std::string &substri
 
     return *deviceIds.begin();
 }
-
-
 }
 }
 }

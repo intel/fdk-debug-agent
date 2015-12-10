@@ -79,11 +79,10 @@ public:
      * @param[in] uri the resource URI
      * @param[out] identifiers The fetched identifiers
      * @return the resolved resource, or nullptr if not found. */
-    std::shared_ptr<Resource> resolveResource(const std::string &uri, Identifiers &identifiers)
-        const;
+    std::shared_ptr<Resource> resolveResource(const std::string &uri,
+                                              Identifiers &identifiers) const;
 
 private:
-
     /* Contain information related to a resource */
     class ResourceEntry
     {
@@ -100,7 +99,6 @@ private:
         std::shared_ptr<Resource> getResource() const { return mResource; }
 
     private:
-
         /* The regular expression used to resolve the entry */
         std::regex mUriRegExp;
 
@@ -114,15 +112,12 @@ private:
         std::shared_ptr<Resource> mResource;
     };
 
-    using ResourceEntryCollection = std::vector< ResourceEntry >;
+    using ResourceEntryCollection = std::vector<ResourceEntry>;
 
-    Dispatcher(const Dispatcher&) = delete;
+    Dispatcher(const Dispatcher &) = delete;
     Dispatcher &operator=(const Dispatcher &) = delete;
 
     ResourceEntryCollection mResourceEntryCollection;
 };
-
 }
 }
-
-

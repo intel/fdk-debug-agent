@@ -37,10 +37,11 @@ class Input : public Connector
 {
 private:
     using base = Connector;
+
 public:
     Input() = default;
-    explicit Input(const std::string &id, const std::string& name) : Connector(id, name) {}
-    explicit Input(const Input& other) = default;
+    explicit Input(const std::string &id, const std::string &name) : Connector(id, name) {}
+    explicit Input(const Input &other) = default;
     Input &operator=(const Input &) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -54,6 +55,7 @@ public:
         assert(isConcrete);
         acceptCommon(*this, visitor);
     }
+
 private:
     template <typename T, typename Visitor>
     static void acceptCommon(T &me, Visitor &visitor)
@@ -63,9 +65,6 @@ private:
         visitor.leave();
     }
 };
-
 }
 }
 }
-
-

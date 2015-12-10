@@ -31,7 +31,7 @@ using namespace debug_agent::test_common;
 /** Unfortunately these tests don't collect firmware log entries because it's not possible on host.
  */
 
-static const char* LogFileName = "data/cAVS/fw_log_38_entries.etl";
+static const char *LogFileName = "data/cAVS/fw_log_38_entries.etl";
 static const std::size_t LogFileEntryCount = 38;
 
 /** This log entry listener counts retrieved entries */
@@ -48,10 +48,7 @@ public:
         ++mEntryCount;
     }
 
-    std::size_t getEntryCount()
-    {
-        return mEntryCount;
-    }
+    std::size_t getEntryCount() { return mEntryCount; }
 
 private:
     std::size_t mEntryCount;
@@ -66,7 +63,7 @@ TEST_CASE("RealTimeWppClient: stopping before collecting")
 
     /** Then calling collect entries: it should returns immediatedly */
     CounterListener listener;
-    ThreadHelpers::ensureNonBlocking( [&] () { client.collectLogEntries(listener); } );
+    ThreadHelpers::ensureNonBlocking([&]() { client.collectLogEntries(listener); });
 }
 
 TEST_CASE("RealTimeWppClient: stopping while collecting")
@@ -122,5 +119,3 @@ TEST_CASE("FileWppClient: counting entries")
     /* Checking entry count */
     CHECK(listener.getEntryCount() == LogFileEntryCount);
 }
-
-

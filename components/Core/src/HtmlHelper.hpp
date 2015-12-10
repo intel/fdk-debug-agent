@@ -38,15 +38,9 @@ namespace core
 class HtmlHelper
 {
 public:
-    void title(const std::string &title)
-    {
-        mContent << "<h2>" + title + "</h2>\n";
-    }
+    void title(const std::string &title) { mContent << "<h2>" + title + "</h2>\n"; }
 
-    void paragraph(const std::string &text)
-    {
-        mContent << "<p>" + text + "</p>\n";
-    }
+    void paragraph(const std::string &text) { mContent << "<p>" + text + "</p>\n"; }
 
     void beginTable(const std::vector<std::string> &columnNames)
     {
@@ -58,30 +52,15 @@ public:
         endRow();
     }
 
-    void endTable()
-    {
-        mContent << "</table>\n";
-    }
+    void endTable() { mContent << "</table>\n"; }
 
-    void beginRow()
-    {
-        mContent << "<tr>\n";
-    }
+    void beginRow() { mContent << "<tr>\n"; }
 
-    void endRow()
-    {
-        mContent << "</tr>\n";
-    }
+    void endRow() { mContent << "</tr>\n"; }
 
-    void beginCell()
-    {
-        mContent << "<td nowrap>\n";
-    }
+    void beginCell() { mContent << "<td nowrap>\n"; }
 
-    void endCell()
-    {
-        mContent << "</td>\n";
-    }
+    void endCell() { mContent << "</td>\n"; }
 
     template <typename T>
     void cell(const T &value)
@@ -97,6 +76,5 @@ public:
 private:
     std::stringstream mContent;
 };
-
 }
 }

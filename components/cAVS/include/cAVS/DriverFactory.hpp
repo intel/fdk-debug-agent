@@ -46,9 +46,8 @@ public:
 
 private:
     /* Make this class non copyable */
-    DriverFactory(const DriverFactory&) = delete;
-    DriverFactory & operator=(const DriverFactory&) = delete;
+    DriverFactory(const DriverFactory &) = delete;
+    DriverFactory &operator=(const DriverFactory &) = delete;
 };
-
 }
 }

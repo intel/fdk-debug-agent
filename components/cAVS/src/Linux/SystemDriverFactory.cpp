@@ -31,6 +31,5 @@ std::unique_ptr<Driver> SystemDriverFactory::newDriver() const
 {
     return std::make_unique<linuxx::Driver>();
 }
-
 }
 }

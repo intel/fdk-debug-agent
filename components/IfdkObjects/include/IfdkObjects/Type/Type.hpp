@@ -49,12 +49,12 @@ class Type
 {
 public:
     Type() = default;
-    explicit Type(const std::string& name) : mName(name) {}
-    explicit Type(const Type& other) = default;
+    explicit Type(const std::string &name) : mName(name) {}
+    explicit Type(const Type &other) = default;
     virtual ~Type() = default;
     Type &operator=(const Type &other) = default;
 
-    bool operator == (const Type &other) const NOEXCEPT
+    bool operator==(const Type &other) const NOEXCEPT
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -63,10 +63,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator != (const Type &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Type &other) const NOEXCEPT { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -78,41 +75,23 @@ public:
         acceptCommon(*this, visitor, isConcrete);
     }
 
-    std::string getName() const
-    {
-        return mName;
-    }
+    std::string getName() const { return mName; }
 
-    void setName(const std::string &name)
-    {
-        mName = name;
-    }
+    void setName(const std::string &name) { mName = name; }
 
-    Description &getDescription()
-    {
-        return mDescription;
-    }
+    Description &getDescription() { return mDescription; }
 
-    Characteristics &getCharacteristics()
-    {
-        return mCharacteristics;
-    }
+    Characteristics &getCharacteristics() { return mCharacteristics; }
 
-    Children &getChildren()
-    {
-        return mChildren;
-    }
+    Children &getChildren() { return mChildren; }
 
 protected:
     virtual bool equalsTo(const Type &other) const NOEXCEPT
     {
-        return
-            mName == other.mName &&
-            mDescription == other.mDescription &&
-            mCharacteristics == other.mCharacteristics &&
-            mInfoParameters == other.mInfoParameters &&
-            mControlParameters == other.mControlParameters &&
-            mChildren == other.mChildren;
+        return mName == other.mName && mDescription == other.mDescription &&
+               mCharacteristics == other.mCharacteristics &&
+               mInfoParameters == other.mInfoParameters &&
+               mControlParameters == other.mControlParameters && mChildren == other.mChildren;
     }
 
 private:
@@ -138,9 +117,6 @@ private:
     ControlParameters mControlParameters;
     Children mChildren;
 };
-
 }
 }
 }
-
-

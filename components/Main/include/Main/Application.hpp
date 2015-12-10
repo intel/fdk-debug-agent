@@ -35,35 +35,36 @@ class Application : public Poco::Util::ServerApplication
 {
 public:
     Application();
-    virtual ~Application() {};
+    virtual ~Application(){};
 
 protected:
-    virtual void defineOptions(Poco::Util::OptionSet& options) override;
+    virtual void defineOptions(Poco::Util::OptionSet &options) override;
 
-    virtual int main(const std::vector<std::string>&) override;
+    virtual int main(const std::vector<std::string> &) override;
 
 private:
     void usage();
 
     /* Option handlers */
-    void handleHelp(const std::string& name, const std::string& value);
-    void handlePort(const std::string& name, const std::string& value);
-    void handlePfwConfig(const std::string& name, const std::string& value);
-    void handleLogControlOnly(const std::string& name, const std::string& value);
-    void handleVerbose(const std::string& name, const std::string& value);
+    void handleHelp(const std::string &name, const std::string &value);
+    void handlePort(const std::string &name, const std::string &value);
+    void handlePfwConfig(const std::string &name, const std::string &value);
+    void handleLogControlOnly(const std::string &name, const std::string &value);
+    void handleVerbose(const std::string &name, const std::string &value);
 
-    struct Config {
+    struct Config
+    {
         bool helpRequested;
         uint32_t serverPort;
         std::string pfwConfig;
         bool logControlOnly;
         bool serverIsVerbose;
-        Config() : helpRequested(false), serverPort(9090), logControlOnly(false),
-                   serverIsVerbose(false) {};
+        Config()
+            : helpRequested(false), serverPort(9090), logControlOnly(false),
+              serverIsVerbose(false){};
     };
 
     Config mConfig;
 };
-
 }
 }

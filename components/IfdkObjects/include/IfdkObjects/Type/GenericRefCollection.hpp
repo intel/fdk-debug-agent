@@ -44,10 +44,11 @@ class GenericRefCollection : public RefCollection
 {
 private:
     using base = RefCollection;
+
 public:
     GenericRefCollection() = default;
     GenericRefCollection(const std::string &name) : base(name) {}
-    explicit GenericRefCollection(const GenericRefCollection& other) = default;
+    explicit GenericRefCollection(const GenericRefCollection &other) = default;
     GenericRefCollection &operator=(const GenericRefCollection &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -62,15 +63,9 @@ public:
         acceptCommon(*this, visitor);
     }
 
-    void add(const T &element)
-    {
-        mElements.push_back(element);
-    }
+    void add(const T &element) { mElements.push_back(element); }
 
-    void resize(std::size_t size)
-    {
-        mElements.resize(size);
-    }
+    void resize(std::size_t size) { mElements.resize(size); }
 
 protected:
     virtual bool equalsTo(const RefCollection &other) const NOEXCEPT override
@@ -80,7 +75,7 @@ protected:
         }
 
         const GenericRefCollection<T> *otherColl =
-            dynamic_cast<const GenericRefCollection<T>*>(&other);
+            dynamic_cast<const GenericRefCollection<T> *>(&other);
         if (otherColl == nullptr) {
             return false;
         }
@@ -117,9 +112,6 @@ private:
 
     ElementVector mElements;
 };
-
 }
 }
 }
-
-

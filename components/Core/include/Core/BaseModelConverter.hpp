@@ -105,11 +105,8 @@ protected:
     cavs::System &mSystem;
 
 private:
-    BaseModelConverter(const BaseModelConverter&) = delete;
-    BaseModelConverter &operator=(const BaseModelConverter&) = delete;
+    BaseModelConverter(const BaseModelConverter &) = delete;
+    BaseModelConverter &operator=(const BaseModelConverter &) = delete;
 };
-
 }
 }
-
-

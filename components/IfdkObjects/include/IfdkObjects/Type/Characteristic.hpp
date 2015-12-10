@@ -38,52 +38,33 @@ class Characteristic
 {
 public:
     Characteristic() = default;
-    explicit Characteristic(const std::string& name) : mName(name) {}
-    explicit Characteristic(const std::string& name, const std::string& value) :
-        mName(name), mValue(value) {}
-    explicit Characteristic(const Characteristic& other) = default;
+    explicit Characteristic(const std::string &name) : mName(name) {}
+    explicit Characteristic(const std::string &name, const std::string &value)
+        : mName(name), mValue(value)
+    {
+    }
+    explicit Characteristic(const Characteristic &other) = default;
     virtual ~Characteristic() = default;
     Characteristic &operator=(const Characteristic &other) = default;
 
-    bool operator == (const Characteristic &other) const NOEXCEPT
+    bool operator==(const Characteristic &other) const NOEXCEPT
     {
         return mName == other.mName && mValue == other.mValue;
     }
 
-    bool operator != (const Characteristic &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Characteristic &other) const NOEXCEPT { return !(*this == other); }
 
-    void accept(Visitor &visitor)
-    {
-        acceptCommon(*this, visitor);
-    }
+    void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 
-    void accept(ConstVisitor &visitor) const
-    {
-        acceptCommon(*this, visitor);
-    }
+    void accept(ConstVisitor &visitor) const { acceptCommon(*this, visitor); }
 
-    std::string getName() const
-    {
-        return mName;
-    }
+    std::string getName() const { return mName; }
 
-    void setName(const std::string &name)
-    {
-        mName = name;
-    }
+    void setName(const std::string &name) { mName = name; }
 
-    std::string getValue() const
-    {
-        return mValue;
-    }
+    std::string getValue() const { return mValue; }
 
-    void setValue(const std::string &value)
-    {
-        mValue = value;
-    }
+    void setValue(const std::string &value) { mValue = value; }
 
 private:
     template <typename T, typename Visitor>
@@ -96,9 +77,6 @@ private:
     std::string mName;
     std::string mValue;
 };
-
 }
 }
 }
-
-

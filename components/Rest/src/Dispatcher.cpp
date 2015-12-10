@@ -40,12 +40,12 @@ static const size_t ResourceIdentifierSuffixLength = 1;
 
 /* Reg exp that identifies a resource identifier, for instance '${account_id}' */
 static const std::string ResourceIdentifierExp(ResourceIdentifierPrefix + SymbolExp +
-    ResourceIdentifierSuffix);
+                                               ResourceIdentifierSuffix);
 
 /* Reg exp that identifies a single path node of an URI, which can be a symbol or a
     * resource identifier */
-static const std::string SinglePathExp(std::string("(") + ResourceIdentifierExp + "|" +
-    SymbolExp + ")");
+static const std::string SinglePathExp(std::string("(") + ResourceIdentifierExp + "|" + SymbolExp +
+                                       ")");
 
 /* Reg exp that identifies an URI (with several path nodes separated by '/') */
 static const std::string UriExp(std::string("(/") + SinglePathExp + ")+");
@@ -53,9 +53,8 @@ static const std::string UriExp(std::string("(/") + SinglePathExp + ")+");
 static const std::regex ResourceIdentifierRegExp(ResourceIdentifierExp);
 static const std::regex UriRegExp(UriExp);
 
-
-Dispatcher::ResourceEntry::ResourceEntry(const std::string &uri,
-    std::shared_ptr<Resource> resource) : mResource(resource)
+Dispatcher::ResourceEntry::ResourceEntry(const std::string &uri, std::shared_ptr<Resource> resource)
+    : mResource(resource)
 {
     assert(mResource != nullptr);
 
@@ -66,8 +65,7 @@ Dispatcher::ResourceEntry::ResourceEntry(const std::string &uri,
     }
 
     /* Checking uri syntax */
-    if (!std::regex_match(uri, UriRegExp))
-    {
+    if (!std::regex_match(uri, UriRegExp)) {
         throw InvalidUriException("Wrong URI: " + uri + " Regexp used: " + UriExp);
     }
 
@@ -83,14 +81,14 @@ Dispatcher::ResourceEntry::ResourceEntry(const std::string &uri,
             /* contain the resource identifier name, i.e. 'account_id' */
             std::string resourceIdentifierName = resourceIdentifierExp.substr(
                 ResourceIdentifierPrefixLength,
-                resourceIdentifierExp.length() - (ResourceIdentifierPrefixLength +
-                ResourceIdentifierSuffixLength));
+                resourceIdentifierExp.length() -
+                    (ResourceIdentifierPrefixLength + ResourceIdentifierSuffixLength));
 
             /* checking that the resource identifer does not already exist' */
             if (std::find(mIndentifierNames.begin(), mIndentifierNames.end(),
-                resourceIdentifierName) != mIndentifierNames.end()) {
-                throw InvalidUriException("Wrong URI '" + uri + "' : The identifier '"
-                    + resourceIdentifierName + " is not unique.");
+                          resourceIdentifierName) != mIndentifierNames.end()) {
+                throw InvalidUriException("Wrong URI '" + uri + "' : The identifier '" +
+                                          resourceIdentifierName + " is not unique.");
             }
 
             /* Adding the resource identifier name */
@@ -107,8 +105,7 @@ Dispatcher::ResourceEntry::ResourceEntry(const std::string &uri,
     mUriRegExp = currentUri;
 }
 
-bool Dispatcher::ResourceEntry::matchUri(const std::string &uri, Identifiers &identifiers)
-    const
+bool Dispatcher::ResourceEntry::matchUri(const std::string &uri, Identifiers &identifiers) const
 {
     /* Using the reg exp to determine if the supplied URI matches the reference URI*/
     std::smatch match;
@@ -121,37 +118,37 @@ bool Dispatcher::ResourceEntry::matchUri(const std::string &uri, Identifiers &id
     /* @todo: replace assert by always_assert */
     assert(match.size() == (mIndentifierNames.size() + 1));
 
-    for (size_t i = 0; i < mIndentifierNames.size(); i++)
-    {
+    for (size_t i = 0; i < mIndentifierNames.size(); i++) {
         identifiers[mIndentifierNames[i]] = match.str(i + 1);
     }
     return true;
 }
 
-Dispatcher::Dispatcher() {}
+Dispatcher::Dispatcher()
+{
+}
 
-Dispatcher::~Dispatcher() {}
+Dispatcher::~Dispatcher()
+{
+}
 
 void Dispatcher::addResource(const std::string &uriWithIdentifers,
-    std::shared_ptr<Resource> resource)
+                             std::shared_ptr<Resource> resource)
 {
     mResourceEntryCollection.push_back(ResourceEntry(uriWithIdentifers, resource));
 }
 
-std::shared_ptr<Resource> Dispatcher::resolveResource(
-    const std::string &uri, Identifiers &identifiers) const
+std::shared_ptr<Resource> Dispatcher::resolveResource(const std::string &uri,
+                                                      Identifiers &identifiers) const
 {
     identifiers.clear();
 
-    for(const auto &resourceEntry : mResourceEntryCollection)
-    {
+    for (const auto &resourceEntry : mResourceEntryCollection) {
         if (resourceEntry.matchUri(uri, identifiers)) {
             return resourceEntry.getResource();
         }
     }
     return nullptr;
 }
-
 }
 }
-

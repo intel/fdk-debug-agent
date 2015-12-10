@@ -43,33 +43,31 @@ public:
     class Exception final : public std::logic_error
     {
     public:
-        explicit Exception(const std::string &what)
-        : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
     Topology() = default;
-    Topology(const Topology&) = default;
-    Topology& operator=(const Topology&) = default;
+    Topology(const Topology &) = default;
+    Topology &operator=(const Topology &) = default;
 
     /* Describe a link between two modules */
     struct Link
     {
         Link(const dsp_fw::CompoundModuleId &fromModuleInstanceId, uint32_t fromOutputId,
-            const dsp_fw::CompoundModuleId &toModuleInstanceId, uint32_t toInputId) :
-            mFromModuleInstanceId(fromModuleInstanceId), mFromOutputId(fromOutputId),
-            mToModuleInstanceId(toModuleInstanceId), mToInputId(toInputId)
-        {}
-        Link(const Link&) = default;
-        Link& operator=(const Link&) = default;
+             const dsp_fw::CompoundModuleId &toModuleInstanceId, uint32_t toInputId)
+            : mFromModuleInstanceId(fromModuleInstanceId), mFromOutputId(fromOutputId),
+              mToModuleInstanceId(toModuleInstanceId), mToInputId(toInputId)
+        {
+        }
+        Link(const Link &) = default;
+        Link &operator=(const Link &) = default;
 
         bool operator==(const Link &other) const
         {
-            return
-                mFromModuleInstanceId == other.mFromModuleInstanceId &&
-                mFromOutputId == other.mFromOutputId &&
-                mToModuleInstanceId == other.mToModuleInstanceId &&
-                mToInputId == other.mToInputId;
+            return mFromModuleInstanceId == other.mFromModuleInstanceId &&
+                   mFromOutputId == other.mFromOutputId &&
+                   mToModuleInstanceId == other.mToModuleInstanceId &&
+                   mToInputId == other.mToInputId;
         }
 
         dsp_fw::CompoundModuleId mFromModuleInstanceId;
@@ -95,10 +93,8 @@ public:
         }
 
         /* Using operator == for other members */
-        return moduleInstances == other.moduleInstances &&
-            pipelines == other.pipelines &&
-            schedulers == other.schedulers &&
-            links == other.links;
+        return moduleInstances == other.moduleInstances && pipelines == other.pipelines &&
+               schedulers == other.schedulers && links == other.links;
     }
 
     /** Erase topology's collections of pipes, modules, schedulers, links and gateways */
@@ -144,15 +140,13 @@ private:
 
     void computeIntraPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
     void computeModulesPairLink(const dsp_fw::CompoundModuleId &sourceModuleId,
-        const dsp_fw::CompoundModuleId &destinationModuleId,
-        InputList &unresolvedInputs,
-        OutputList &unresolvedOutputs);
+                                const dsp_fw::CompoundModuleId &destinationModuleId,
+                                InputList &unresolvedInputs, OutputList &unresolvedOutputs);
 
     void computeInterPipeLinks(InputList &unresolvedInputs, OutputList &unresolvedOutputs);
     void checkUnresolved(InputList &unresolvedInputs, OutputList &unresolvedOutputs) const;
     void addAllModuleOutputs(OutputList &list, const dsp_fw::CompoundModuleId &module) const;
     void addAllModuleInputs(InputList &list, const dsp_fw::CompoundModuleId &module) const;
 };
-
 }
 }

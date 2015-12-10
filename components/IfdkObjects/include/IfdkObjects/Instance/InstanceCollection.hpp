@@ -32,9 +32,6 @@ namespace instance
 {
 
 using InstanceCollection = GenericCollection<Instance>;
-
 }
 }
 }
-
-

@@ -29,30 +29,21 @@ namespace debug_agent
 namespace tlv
 {
 /**
- * Real implementation of a TlvWrapperInterface to explicitly ignore a tag in a dictionary, avoiding * an exception for unknown tag in the TLV list if this tag is found. A TlvVoidWrapper does not
+ * Real implementation of a TlvWrapperInterface to explicitly ignore a tag in a dictionary, avoiding
+ * * an exception for unknown tag in the TLV list if this tag is found. A TlvVoidWrapper does not
  * update any shadow variable and accepts any TLV length (including 0).
  * @see TlvWrapperInterface
  */
-class TlvVoidWrapper final: public TlvWrapperInterface
+class TlvVoidWrapper final : public TlvWrapperInterface
 {
 public:
-    TlvVoidWrapper()
-    {
-    }
+    TlvVoidWrapper() {}
 
-    virtual bool isValidSize(size_t binaryValueSize) const NOEXCEPT override
-    {
-        return true;
-    }
+    virtual bool isValidSize(size_t binaryValueSize) const NOEXCEPT override { return true; }
 
-    virtual void readFrom(const char *, size_t ) override
-    {
-    }
+    virtual void readFrom(const char *, size_t) override {}
 
-    virtual void invalidate() NOEXCEPT override
-    {
-    }
+    virtual void invalidate() NOEXCEPT override {}
 };
-
 }
 }

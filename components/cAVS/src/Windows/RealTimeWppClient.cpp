@@ -31,13 +31,11 @@ namespace windows
 
 RealTimeWppClient::RealTimeWppClient() : mStopRequest(false)
 {
-
 }
 
 void RealTimeWppClient::collectLogEntries(WppLogEntryListener &listener)
 {
-    try
-    {
+    try {
         /* If the stop() occurs before this locked block, the method returns */
         std::lock_guard<std::mutex> locker(mStopRequestMutex);
         if (mStopRequest) {
@@ -47,18 +45,13 @@ void RealTimeWppClient::collectLogEntries(WppLogEntryListener &listener)
 
         /* If the stop() occurs after this locked block, the session is already started
          * and therefore will be successfully stopped */
-    }
-    catch (WppController::Exception &e)
-    {
+    } catch (WppController::Exception &e) {
         throw Exception("Cannot start wpp controller: " + std::string(e.what()));
     }
 
-    try
-    {
+    try {
         WppConsumer::collectLogEntries(listener);
-    }
-    catch (WppConsumer::Exception &e)
-    {
+    } catch (WppConsumer::Exception &e) {
         mController.stop();
         throw Exception("Cannot collect entries with wpp consumer: " + std::string(e.what()));
     }
@@ -75,7 +68,6 @@ void RealTimeWppClient::stop()
         mController.stop();
     }
 }
-
 }
 }
 }

@@ -23,7 +23,7 @@
 #include "Main/Application.hpp"
 #include "Rest/ErrorHandler.hpp"
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     /* Installing the rest error handler in order to hide ConnectionAbortedException */
     debug_agent::rest::ErrorHandler handler;
@@ -31,4 +31,3 @@ int main(int argc, char* argv[])
     debug_agent::main::Application application;
     return application.run(argc, argv);
 }
-

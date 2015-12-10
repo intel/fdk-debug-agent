@@ -27,8 +27,8 @@
 
 using namespace debug_agent::cavs::windows;
 
-const GUID InvalidGUID =
-{ 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+const GUID InvalidGUID = {
+    0x00000000, 0x0000, 0x0000, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
 
 TEST_CASE("DeviceIdFinder: wrong guid")
 {
@@ -61,6 +61,6 @@ TEST_CASE("DeviceIdFinder: Valid guid")
     if (deviceIds.size() > 1) {
         /* checking that findOne throws an exception if more than one device is returned*/
         CHECK_THROWS_AS(DeviceIdFinder::findOne(GUID_DEVINTERFACE_VOLUME),
-            DeviceIdFinder::Exception);
+                        DeviceIdFinder::Exception);
     }
 }

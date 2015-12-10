@@ -40,12 +40,12 @@ class RefCollection
 {
 public:
     RefCollection() = default;
-    explicit RefCollection(const std::string& name) : mName(name) {}
-    explicit RefCollection(const RefCollection& other) = default;
+    explicit RefCollection(const std::string &name) : mName(name) {}
+    explicit RefCollection(const RefCollection &other) = default;
     virtual ~RefCollection() = default;
     RefCollection &operator=(const RefCollection &other) = default;
 
-    bool operator == (const RefCollection &other) const NOEXCEPT
+    bool operator==(const RefCollection &other) const NOEXCEPT
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -54,20 +54,11 @@ public:
         return equalsTo(other);
     }
 
-    bool operator != (const RefCollection &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const RefCollection &other) const NOEXCEPT { return !(*this == other); }
 
-    std::string getName() const
-    {
-        return mName;
-    }
+    std::string getName() const { return mName; }
 
-    void setName(const std::string &name)
-    {
-        mName = name;
-    }
+    void setName(const std::string &name) { mName = name; }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -95,9 +86,6 @@ private:
 
     std::string mName;
 };
-
 }
 }
 }
-
-

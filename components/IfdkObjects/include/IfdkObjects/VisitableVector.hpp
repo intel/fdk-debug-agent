@@ -43,10 +43,10 @@ public:
     using ElementVector = std::vector<ElementType>;
 
     VisitableVector() = default;
-    explicit VisitableVector(const VisitableVector& other) = default;
+    explicit VisitableVector(const VisitableVector &other) = default;
     VisitableVector &operator=(const VisitableVector &other) = default;
 
-    bool operator == (const VisitableVector &other) const NOEXCEPT
+    bool operator==(const VisitableVector &other) const NOEXCEPT
     {
         if (mElements.size() != other.mElements.size()) {
             return false;
@@ -61,37 +61,19 @@ public:
         return true;
     }
 
-    bool operator != (const VisitableVector &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const VisitableVector &other) const NOEXCEPT { return !(*this == other); }
 
     /* A visitable element should implement the accept() methods (const and non const) */
 
-    void accept(Visitor &visitor)
-    {
-        acceptCommon(*this, visitor);
-    }
+    void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 
-    void accept(ConstVisitor &visitor) const
-    {
-        acceptCommon(*this, visitor);
-    }
+    void accept(ConstVisitor &visitor) const { acceptCommon(*this, visitor); }
 
-    void add(const ElementType &element)
-    {
-        mElements.push_back(element);
-    }
+    void add(const ElementType &element) { mElements.push_back(element); }
 
-    void resize(std::size_t size)
-    {
-        mElements.resize(size);
-    }
+    void resize(std::size_t size) { mElements.resize(size); }
 
-    ElementVector &getElements()
-    {
-        return mElements;
-    }
+    ElementVector &getElements() { return mElements; }
 
 private:
     /* This template trick is used to factorize the accept() method for both const and non-const
@@ -110,8 +92,5 @@ private:
 
     ElementVector mElements;
 };
-
 }
 }
-
-

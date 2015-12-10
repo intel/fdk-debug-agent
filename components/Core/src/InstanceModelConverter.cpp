@@ -35,12 +35,9 @@ const std::string audioFormatUnknown = "Unknown";
 
 std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
 {
-    try
-    {
+    try {
         mSystem.getTopology(mTopology);
-    }
-    catch (cavs::System::Exception &e)
-    {
+    } catch (cavs::System::Exception &e) {
         throw Exception("Cannot get topology from fw: " + std::string(e.what()));
     }
 
@@ -58,11 +55,9 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
 
     /* Module instances*/
     uint32_t moduleId = 0;
-    for (auto it = mSystem.getModuleEntries().begin();
-         it != mSystem.getModuleEntries().end();
+    for (auto it = mSystem.getModuleEntries().begin(); it != mSystem.getModuleEntries().end();
          ++moduleId, ++it) {
-        addInstanceCollection(collectionMap, findModuleEntryName(moduleId),
-            createModule(moduleId));
+        addInstanceCollection(collectionMap, findModuleEntryName(moduleId), createModule(moduleId));
     }
 
     /* Gateways */
@@ -130,8 +125,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     for (auto &schedulersInfo : mTopology.schedulers) {
         for (auto &scheduler : schedulersInfo.scheduler_info) {
             for (auto &task : scheduler.task_info) {
-                taskCollection->add(
-                    InstanceRef(typeName_task, std::to_string(task.task_id)));
+                taskCollection->add(InstanceRef(typeName_task, std::to_string(task.task_id)));
             }
         }
     }
@@ -144,7 +138,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
         dsp_fw::ConnectorNodeId connector(gateway.id);
 
         gatewayCollection->add(ComponentRef(findGatewayTypeName(connector),
-            std::to_string(findGatewayInstanceId(connector))));
+                                            std::to_string(findGatewayInstanceId(connector))));
     }
     children.add(gatewayCollection);
 
@@ -162,16 +156,12 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
         if (module.input_gateway.val.dw != dsp_fw::ConnectorNodeId::kInvalidNodeId) {
             /* Connected to an input gateway */
 
-            Link l(
-                From(
-                    findGatewayTypeName(module.input_gateway),
-                    std::to_string(findGatewayInstanceId(module.input_gateway)),
-                    std::to_string(0) /* 0-index is dedicated to gateway */
-                ),
-                To(
-                    moduleName,
-                    std::to_string(module.id.instanceId),
-                    std::to_string(0)));  /* 0-index is dedicated to gateway */
+            Link l(From(findGatewayTypeName(module.input_gateway),
+                        std::to_string(findGatewayInstanceId(module.input_gateway)),
+                        std::to_string(0) /* 0-index is dedicated to gateway */
+                        ),
+                   To(moduleName, std::to_string(module.id.instanceId),
+                      std::to_string(0))); /* 0-index is dedicated to gateway */
 
             links.add(l);
         }
@@ -179,16 +169,12 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
         if (module.output_gateway.val.dw != dsp_fw::ConnectorNodeId::kInvalidNodeId) {
             /* Connected to an output gateway */
 
-            Link l(
-                From(
-                    moduleName,
-                    std::to_string(module.id.instanceId),
-                    std::to_string(0) /* 0-index is dedicated to gateway */
-                ),
-                To(
-                    findGatewayTypeName(module.output_gateway),
-                    std::to_string(findGatewayInstanceId(module.output_gateway)),
-                    std::to_string(0)));  /* 0-index is dedicated to gateway */
+            Link l(From(moduleName, std::to_string(module.id.instanceId),
+                        std::to_string(0) /* 0-index is dedicated to gateway */
+                        ),
+                   To(findGatewayTypeName(module.output_gateway),
+                      std::to_string(findGatewayInstanceId(module.output_gateway)),
+                      std::to_string(0))); /* 0-index is dedicated to gateway */
 
             links.add(l);
         }
@@ -212,16 +198,8 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
         auto fromName = findModuleEntryName(fromModuleId);
         auto toName = findModuleEntryName(toModuleId);
 
-        Link l(
-            From(
-                fromName,
-                std::to_string(fromInstanceId),
-                std::to_string(link.mFromOutputId)
-            ),
-            To(
-                toName,
-                std::to_string(toInstanceId),
-                std::to_string(link.mToInputId)));
+        Link l(From(fromName, std::to_string(fromInstanceId), std::to_string(link.mFromOutputId)),
+               To(toName, std::to_string(toInstanceId), std::to_string(link.mToInputId)));
 
         links.add(l);
     }
@@ -295,18 +273,17 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createTask()
                 taskModel->setInstanceId(std::to_string(task.task_id));
 
                 /* Parent : core */
-                taskModel->getParents().add(std::make_shared<InstanceRef>(typeName_core,
-                    std::to_string(scheduler.core_id)));
+                taskModel->getParents().add(std::make_shared<InstanceRef>(
+                    typeName_core, std::to_string(scheduler.core_id)));
 
                 /* Parent : pipe */
                 auto it = mTaskParents.find(task.task_id);
                 if (it == mTaskParents.end()) {
-                    throw Exception("Task with id=" + std::to_string(task.task_id) +
-                        " not found.");
+                    throw Exception("Task with id=" + std::to_string(task.task_id) + " not found.");
                 }
                 for (auto pipeId : it->second.pipeIds) {
-                    taskModel->getParents().add(std::make_shared<InstanceRef>(typeName_pipe,
-                        std::to_string(pipeId)));
+                    taskModel->getParents().add(
+                        std::make_shared<InstanceRef>(typeName_pipe, std::to_string(pipeId)));
                 }
 
                 /* Children */
@@ -375,8 +352,8 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
             auto entry = mModuleParents.find(module.id);
             if (entry == mModuleParents.end()) {
                 throw Exception("Module instance with type_id=" +
-                    std::to_string(module.id.moduleId) + " instance_id=" +
-                    std::to_string(module.id.instanceId) + " not found.");
+                                std::to_string(module.id.moduleId) + " instance_id=" +
+                                std::to_string(module.id.instanceId) + " not found.");
             }
 
             ModuleParents &parents = entry->second;
@@ -401,8 +378,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
             std::size_t pinId = 0;
             for (auto &pin : module.input_pins.pin_info) {
 
-                moduleModel->getInputs().add(Input(std::to_string(pinId),
-                    pin.format.toString()));
+                moduleModel->getInputs().add(Input(std::to_string(pinId), pin.format.toString()));
                 ++pinId;
             }
 
@@ -410,8 +386,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
             pinId = 0;
             for (auto &pin : module.output_pins.pin_info) {
 
-                moduleModel->getOutputs().add(Output(std::to_string(pinId),
-                    pin.format.toString()));
+                moduleModel->getOutputs().add(Output(std::to_string(pinId), pin.format.toString()));
                 ++pinId;
             }
 
@@ -421,7 +396,6 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t re
 
     return coll;
 }
-
 
 std::shared_ptr<BaseCollection> InstanceModelConverter::createGateway(
     const dsp_fw::ConnectorNodeId::Type &gatewayType)
@@ -444,8 +418,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createGateway(
             /* Inputs and outputs */
             auto it = mGatewayDirections.find(gateway.id);
             if (it != mGatewayDirections.end()) {
-                switch (it->second)
-                {
+                switch (it->second) {
                 case GatewayDirection::Input:
                     gatewayModel->getOutputs().add(Output("0", audioFormatUnknown));
                     break;
@@ -455,7 +428,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createGateway(
                     break;
 
                 default:
-                    abort(); //should not occur
+                    abort(); // should not occur
                 }
             }
 
@@ -472,7 +445,7 @@ std::shared_ptr<RefCollection> InstanceModelConverter::createModuleRef(
 
     for (auto &compoundId : compoundIdList) {
         coll->add(ComponentRef(findModuleEntryName(compoundId.moduleId),
-            std::to_string(compoundId.instanceId)));
+                               std::to_string(compoundId.instanceId)));
     }
     return coll;
 }
@@ -484,7 +457,7 @@ void InstanceModelConverter::initializeIntermediateStructures()
     mGatewayDirections.clear();
 
     /* Initializing module map entries */
-    for (auto &entry: mTopology.moduleInstances) {
+    for (auto &entry : mTopology.moduleInstances) {
         mModuleParents[entry.first] = ModuleParents();
     }
 
@@ -553,12 +526,11 @@ void InstanceModelConverter::initializeIntermediateStructures()
     }
 }
 
-void InstanceModelConverter::addInstanceCollection(InstanceModel::CollectionMap &map,
-    const std::string &typeName,
+void InstanceModelConverter::addInstanceCollection(
+    InstanceModel::CollectionMap &map, const std::string &typeName,
     std::shared_ptr<ifdk_objects::instance::BaseCollection> collection)
 {
     map[subsystemName + "." + typeName] = collection;
 }
-
 }
 }

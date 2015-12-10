@@ -36,5 +36,3 @@ using Categories = VisitablePtrVector<Ref, Visitor, ConstVisitor>;
 }
 }
 }
-
-

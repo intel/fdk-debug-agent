@@ -37,16 +37,16 @@ namespace windows
 namespace driver
 {
 
-#define IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET \
+#define IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET                                                         \
     CTL_CODE(FILE_DEVICE_UNKNOWN, 0x97B, METHOD_BUFFERED, (FILE_READ_ACCESS | FILE_WRITE_ACCESS))
 
-#define IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET \
+#define IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET                                                          \
     CTL_CODE(FILE_DEVICE_UNKNOWN, 0x97C, METHOD_OUT_DIRECT, (FILE_READ_ACCESS | FILE_WRITE_ACCESS))
 
-#define IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET \
+#define IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET                                                         \
     CTL_CODE(FILE_DEVICE_UNKNOWN, 0x97D, METHOD_BUFFERED, (FILE_READ_ACCESS | FILE_WRITE_ACCESS))
 
-#define IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET \
+#define IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET                                                          \
     CTL_CODE(FILE_DEVICE_UNKNOWN, 0x97E, METHOD_OUT_DIRECT, (FILE_READ_ACCESS | FILE_WRITE_ACCESS))
 
 /** By convention the base firmware module id is 0 */
@@ -92,8 +92,8 @@ enum class FW_LOG_LEVEL : ULONG
 
 enum class FW_LOG_OUTPUT : ULONG
 {
-    OUTPUT_SRAM = 0,//Log are sent by Firmware to Log Buffer using dedicated DMA
-    OUTPUT_PTI = 1 //Logs are sent by Firmware to PTI using Little Peak.
+    OUTPUT_SRAM = 0, // Log are sent by Firmware to Log Buffer using dedicated DMA
+    OUTPUT_PTI = 1   // Logs are sent by Firmware to PTI using Little Peak.
 };
 
 struct Intc_App_Cmd_Header
@@ -101,20 +101,20 @@ struct Intc_App_Cmd_Header
     ULONG FeatureID;
     ULONG ParameterID;
     ULONG Reserved;
-    BOOL  SetAsDefault;
+    BOOL SetAsDefault;
     ULONG DataSize;
 
-    Intc_App_Cmd_Header(ULONG featureID, ULONG parameterID, ULONG dataSize) :
-        FeatureID(featureID), ParameterID(parameterID), Reserved(0), SetAsDefault(FALSE),
-        DataSize(dataSize) {}
-
-    bool operator == (const Intc_App_Cmd_Header &other)
+    Intc_App_Cmd_Header(ULONG featureID, ULONG parameterID, ULONG dataSize)
+        : FeatureID(featureID), ParameterID(parameterID), Reserved(0), SetAsDefault(FALSE),
+          DataSize(dataSize)
     {
-        return FeatureID == other.FeatureID &&
-            ParameterID == other.ParameterID &&
-            Reserved == other.Reserved &&
-            SetAsDefault == other.SetAsDefault &&
-            DataSize == other.DataSize;
+    }
+
+    bool operator==(const Intc_App_Cmd_Header &other)
+    {
+        return FeatureID == other.FeatureID && ParameterID == other.ParameterID &&
+               Reserved == other.Reserved && SetAsDefault == other.SetAsDefault &&
+               DataSize == other.DataSize;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -142,45 +142,34 @@ struct Intc_App_Cmd_Body
 
     Intc_App_Cmd_Body() : Status(0xFFFFFFFF) {}
 
+    bool operator==(const Intc_App_Cmd_Body &other) { return Status == other.Status; }
 
-    bool operator == (const Intc_App_Cmd_Body &other)
-    {
-        return Status == other.Status;
-    }
+    void fromStream(util::ByteStreamReader &reader) { reader.read(Status); }
 
-    void fromStream(util::ByteStreamReader &reader)
-    {
-        reader.read(Status);
-    }
-
-    void toStream(util::ByteStreamWriter &writer) const
-    {
-        writer.write(Status);
-    }
+    void toStream(util::ByteStreamWriter &writer) const { writer.write(Status); }
 };
 
 struct IoctlFwModuleParam
 {
-    ULONG  fw_status;
+    ULONG fw_status;
     USHORT instance_id;
     USHORT module_id;
-    ULONG  module_parameter_id;
-    ULONG  module_parameter_data_size;
+    ULONG module_parameter_id;
+    ULONG module_parameter_data_size;
 
     IoctlFwModuleParam(USHORT moduleId, USHORT instanceId, ULONG moduleParameterId,
-        ULONG moduleParameterDataSize) : fw_status(0xFFFFFFFF),
-        instance_id(instanceId), module_id(moduleId), module_parameter_id(moduleParameterId),
-        module_parameter_data_size(moduleParameterDataSize)
+                       ULONG moduleParameterDataSize)
+        : fw_status(0xFFFFFFFF), instance_id(instanceId), module_id(moduleId),
+          module_parameter_id(moduleParameterId),
+          module_parameter_data_size(moduleParameterDataSize)
     {
     }
 
-    bool operator == (const IoctlFwModuleParam &other)
+    bool operator==(const IoctlFwModuleParam &other)
     {
-        return fw_status == other.fw_status &&
-            instance_id == other.instance_id &&
-            module_id == other.module_id &&
-            module_parameter_id == other.module_parameter_id &&
-            module_parameter_data_size == other.module_parameter_data_size;
+        return fw_status == other.fw_status && instance_id == other.instance_id &&
+               module_id == other.module_id && module_parameter_id == other.module_parameter_id &&
+               module_parameter_data_size == other.module_parameter_data_size;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -208,11 +197,9 @@ struct IoctlFwLogsState
     FW_LOG_LEVEL level;
     FW_LOG_OUTPUT output;
 
-    bool operator == (const IoctlFwLogsState &other)
+    bool operator==(const IoctlFwLogsState &other)
     {
-        return started == other.started &&
-            level == other.level &&
-            output == other.output;
+        return started == other.started && level == other.level && output == other.output;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -229,7 +216,6 @@ struct IoctlFwLogsState
         writer.write(output);
     }
 };
-
 }
 }
 }

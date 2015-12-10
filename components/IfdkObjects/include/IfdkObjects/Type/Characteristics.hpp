@@ -36,5 +36,3 @@ using Characteristics = VisitableVector<Characteristic, Visitor, ConstVisitor>;
 }
 }
 }
-
-

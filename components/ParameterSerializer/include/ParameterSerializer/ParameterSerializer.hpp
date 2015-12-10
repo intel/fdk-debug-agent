@@ -46,9 +46,7 @@ public:
     class Exception final : public std::logic_error
     {
     public:
-        explicit Exception(const std::string &what)
-        : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
     /**
@@ -76,8 +74,7 @@ public:
     static const util::EnumHelper<ParameterKind> &parameterKindHelper()
     {
         static util::EnumHelper<ParameterKind> helper({
-            { ParameterKind::Info, "info" },
-            { ParameterKind::Control, "control" },
+            {ParameterKind::Info, "info"}, {ParameterKind::Control, "control"},
         });
         return helper;
     }
@@ -90,10 +87,9 @@ public:
      * @return a map containing the childId and its corresponding name of children of the element
      * @throw ParameterSerializer::Exception
      */
-    std::map<uint32_t, std::string> getChildren(
-        const std::string &subsystemName,
-        const std::string &elementName,
-        ParameterKind parameterKind) const;
+    std::map<uint32_t, std::string> getChildren(const std::string &subsystemName,
+                                                const std::string &elementName,
+                                                ParameterKind parameterKind) const;
 
     /**
      * This method returns the the mapping of a parameter.
@@ -104,11 +100,8 @@ public:
      * @return a string containing the mapping of a parameter.
      * @throw ParameterSerializer::Exception
      */
-    std::string getMapping(
-        const std::string &subsystemName,
-        const std::string &elementName,
-        const std::string &parameterName,
-        const std::string &key) const;
+    std::string getMapping(const std::string &subsystemName, const std::string &elementName,
+                           const std::string &parameterName, const std::string &key) const;
 
     /**
      * This method serializes an XML string containing the settings of one parameter (child)
@@ -121,12 +114,9 @@ public:
      * @return a binary payload containing the parameter settings
      * @throw ParameterSerializer::Exception
      */
-    util::Buffer xmlToBinary(
-        const std::string &subsystemName,
-        const std::string &elementName,
-        ParameterKind parameterKind,
-        const std::string &parameterName,
-        const std::string parameterAsXml) const;
+    util::Buffer xmlToBinary(const std::string &subsystemName, const std::string &elementName,
+                             ParameterKind parameterKind, const std::string &parameterName,
+                             const std::string parameterAsXml) const;
 
     /**
      * This method serializes binary payload containing the settings of one parameter (child)
@@ -139,12 +129,9 @@ public:
      * @return a string contaning the parameter settings in XML format
      * @throw ParameterSerializer::Exception
      */
-    std::string binaryToXml(
-        const std::string &subsystemName,
-        const std::string &elementName,
-        ParameterKind parameterKind,
-        const std::string &parameterName,
-        const util::Buffer &parameterPayload) const;
+    std::string binaryToXml(const std::string &subsystemName, const std::string &elementName,
+                            ParameterKind parameterKind, const std::string &parameterName,
+                            const util::Buffer &parameterPayload) const;
 
     /**
      * This method returns the structure of a parameter
@@ -155,23 +142,19 @@ public:
      * @return a string contaning the parameter structure in XML format
      * @throw ParameterSerializer::Exception
      */
-    std::string getStructureXml(
-        const std::string &subsystemName,
-        const std::string &elementName,
-        ParameterKind parameterKind,
-        const std::string &parameterName) const;
+    std::string getStructureXml(const std::string &subsystemName, const std::string &elementName,
+                                ParameterKind parameterKind,
+                                const std::string &parameterName) const;
 
 private:
-    std::unique_ptr<ElementHandle> getElement(
-        const std::string &subsystemName,
-        const std::string &elementName,
-        ParameterKind parameterKind) const;
+    std::unique_ptr<ElementHandle> getElement(const std::string &subsystemName,
+                                              const std::string &elementName,
+                                              ParameterKind parameterKind) const;
 
-    std::unique_ptr<ElementHandle> getChildElementHandle(
-        const std::string &subsystemName,
-        const std::string &elementName,
-        ParameterKind parameterKind,
-        const std::string &parameterName) const;
+    std::unique_ptr<ElementHandle> getChildElementHandle(const std::string &subsystemName,
+                                                         const std::string &elementName,
+                                                         ParameterKind parameterKind,
+                                                         const std::string &parameterName) const;
 
     /**
      * Raise an exception if the Parameter Platform Connector is not correctly instantiated nor
@@ -184,6 +167,5 @@ private:
 
     std::unique_ptr<CParameterMgrPlatformConnector> mParameterMgrPlatformConnector;
 };
-
 }
 }

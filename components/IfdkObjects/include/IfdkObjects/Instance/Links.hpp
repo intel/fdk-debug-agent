@@ -34,9 +34,6 @@ namespace instance
 
 /** List of links */
 using Links = VisitableVector<Link, Visitor, ConstVisitor>;
-
 }
 }
 }
-
-

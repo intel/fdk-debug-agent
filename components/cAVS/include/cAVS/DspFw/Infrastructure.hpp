@@ -35,91 +35,91 @@ static const uint32_t IXC_STATUS_BITS = 24;
 
 enum class IxcStatus
 {
-    ADSP_IPC_SUCCESS = 0,                       ///< The operation was successful.
+    ADSP_IPC_SUCCESS = 0, ///< The operation was successful.
 
-    ADSP_IPC_ERROR_INVALID_PARAM = 1,           ///< Invalid parameter was passed.
-    ADSP_IPC_UNKNOWN_MESSAGE_TYPE = 2,          ///< Uknown message type was received.
+    ADSP_IPC_ERROR_INVALID_PARAM = 1,  ///< Invalid parameter was passed.
+    ADSP_IPC_UNKNOWN_MESSAGE_TYPE = 2, ///< Uknown message type was received.
 
-    ADSP_IPC_OUT_OF_MEMORY = 3,                 ///< No physical memory to satisfy the request.
+    ADSP_IPC_OUT_OF_MEMORY = 3, ///< No physical memory to satisfy the request.
 
-    ADSP_IPC_BUSY = 4,                          ///< The system or resource is busy.
-    ADSP_IPC_PENDING = 5,                       ///< The action was scheduled for processing.
-    ADSP_IPC_FAILURE = 6,                       ///< Critical error happened.
-    ADSP_IPC_INVALID_REQUEST = 7,               ///< Request can not be completed.
+    ADSP_IPC_BUSY = 4,            ///< The system or resource is busy.
+    ADSP_IPC_PENDING = 5,         ///< The action was scheduled for processing.
+    ADSP_IPC_FAILURE = 6,         ///< Critical error happened.
+    ADSP_IPC_INVALID_REQUEST = 7, ///< Request can not be completed.
 
-    ADSP_RSVD_8 = 8,                            ///< Formerly ADSP_STAGE_UNINITIALIZED.
+    ADSP_RSVD_8 = 8, ///< Formerly ADSP_STAGE_UNINITIALIZED.
 
-    ADSP_IPC_INVALID_RESOURCE_ID = 9,           ///< Required resource can not be found.
+    ADSP_IPC_INVALID_RESOURCE_ID = 9, ///< Required resource can not be found.
 
-    ADSP_RSVD_10 = 10,                          ///< Formerly ADSP_SOURCE_NOT_STARTED.
+    ADSP_RSVD_10 = 10, ///< Formerly ADSP_SOURCE_NOT_STARTED.
 
-    ASDP_IPC_OUT_OF_MIPS = 11,                  ///< No computation power to satisfy the request.
+    ASDP_IPC_OUT_OF_MIPS = 11, ///< No computation power to satisfy the request.
 
-    ADSP_IPC_INVALID_RESOURCE_STATE = 12,       ///< Required resource is in invalid state.
+    ADSP_IPC_INVALID_RESOURCE_STATE = 12, ///< Required resource is in invalid state.
 
-    ADSP_IPC_POWER_TRANSITION_FAILED = 13,      ///< Request to change power state failed.
+    ADSP_IPC_POWER_TRANSITION_FAILED = 13, ///< Request to change power state failed.
 
-    ADSP_IPC_INVALID_MANIFEST = 14,             ///< Manifest of loadable library seems to be
-                                                ///< invalid
+    ADSP_IPC_INVALID_MANIFEST = 14, ///< Manifest of loadable library seems to be
+                                    ///< invalid
 
     /* Load/unload library specific codes */
-    ADSP_IPC_IMR_TO_SMALL = 42,                 ///< IMR is to small to load library
+    ADSP_IPC_IMR_TO_SMALL = 42, ///< IMR is to small to load library
     ADSP_RSVD_43 = 43,
-    ADSP_IPC_CSE_VALIDATION_FAILED = 44,        ///< CSE didn't verified library
+    ADSP_IPC_CSE_VALIDATION_FAILED = 44, ///< CSE didn't verified library
 
-    ADSP_IPC_MOD_MGMT_ERROR = 100,              ///< Errors related to module management.
-    ADSP_IPC_MOD_LOAD_CL_FAILED = 101,          ///< Loading of a module segment failed.
-    ADSP_IPC_MOD_LOAD_INVALID_HASH = 102,       ///< Invalid content of module received, hash does
-                                                ///< not match.
+    ADSP_IPC_MOD_MGMT_ERROR = 100,        ///< Errors related to module management.
+    ADSP_IPC_MOD_LOAD_CL_FAILED = 101,    ///< Loading of a module segment failed.
+    ADSP_IPC_MOD_LOAD_INVALID_HASH = 102, ///< Invalid content of module received, hash does
+                                          ///< not match.
 
-    ADSP_IPC_MOD_UNLOAD_INST_EXIST = 103,       ///< Request to unload module when its instances
-                                                ///< are still present.
-    ADSP_IPC_MOD_NOT_INITIALIZED = 104,         ///< ModuleInstance was't initialized.
-    ADSP_IPC_MOD_STATE_NOT_SET = 105,           ///< ModuleInstance state wasn't set correctly.
+    ADSP_IPC_MOD_UNLOAD_INST_EXIST = 103, ///< Request to unload module when its instances
+                                          ///< are still present.
+    ADSP_IPC_MOD_NOT_INITIALIZED = 104,   ///< ModuleInstance was't initialized.
+    ADSP_IPC_MOD_STATE_NOT_SET = 105,     ///< ModuleInstance state wasn't set correctly.
 
-    ADSP_IPC_CONFIG_GET_ERROR = 106,            ///< ModuleInstance couldn't get config.
-    ADSP_IPC_CONFIG_SET_ERROR = 107,            ///< ModuleInstance couldn't set config.
-    ADSP_IPC_LARGE_CONFIG_GET_ERROR = 108,      ///< Failed to retrieve parameter from a module.
-    ADSP_IPC_LARGE_CONFIG_SET_ERROR = 109,      ///< Failed to apply parameter to a module.
+    ADSP_IPC_CONFIG_GET_ERROR = 106,       ///< ModuleInstance couldn't get config.
+    ADSP_IPC_CONFIG_SET_ERROR = 107,       ///< ModuleInstance couldn't set config.
+    ADSP_IPC_LARGE_CONFIG_GET_ERROR = 108, ///< Failed to retrieve parameter from a module.
+    ADSP_IPC_LARGE_CONFIG_SET_ERROR = 109, ///< Failed to apply parameter to a module.
 
-    ADSP_IPC_MOD_INVALID_ID  = 110,             ///< Passed Module ID is invalid (out of range).
-    ADSP_IPC_MOD_INST_INVALID_ID  = 111,        ///< Passed Instance ID is invalid (out of range
-                                                ///< or not exist).
-    ADSP_IPC_QUEUE_INVALID_ID = 112,            ///< Passed src queue ID is invalid (out of range).
-    ADSP_IPC_QUEUE_DST_INVALID_ID = 113,        ///< Passed dst queue ID is invalid (out of range).
-    ADSP_IPC_BIND_UNBIND_DST_SINK_UNSUPPORTED = 114,///< Bind/Unbind operation is not supported.
-    ADSP_IPC_MOD_UNLOAD_INST_EXISTS = 115,      ///< ModuleInstance is using resources that are
-                                                ///< requested to remove .
-    ADSP_IPC_CORE_INVALID_ID = 116,             ///< Passed code ID is invalid.
+    ADSP_IPC_MOD_INVALID_ID = 110,       ///< Passed Module ID is invalid (out of range).
+    ADSP_IPC_MOD_INST_INVALID_ID = 111,  ///< Passed Instance ID is invalid (out of range
+                                         ///< or not exist).
+    ADSP_IPC_QUEUE_INVALID_ID = 112,     ///< Passed src queue ID is invalid (out of range).
+    ADSP_IPC_QUEUE_DST_INVALID_ID = 113, ///< Passed dst queue ID is invalid (out of range).
+    ADSP_IPC_BIND_UNBIND_DST_SINK_UNSUPPORTED = 114, ///< Bind/Unbind operation is not supported.
+    ADSP_IPC_MOD_UNLOAD_INST_EXISTS = 115,           ///< ModuleInstance is using resources that are
+                                                     ///< requested to remove .
+    ADSP_IPC_CORE_INVALID_ID = 116,                  ///< Passed code ID is invalid.
 
-    ADSP_IPC_INVALID_CONFIG_PARAM_ID = 120,     ///< Invalid configuration parameter ID specified.
-    ADSP_IPC_INVALID_CONFIG_DATA_LEN = 121,     ///< Invalid length of configuration parameter
-                                                ///< specified.
-    ADSP_IPC_INVALID_CONFIG_DATA_STRUCT = 122,  ///< Invalid structure of configuration parameter
-                                                ///< specified.
+    ADSP_IPC_INVALID_CONFIG_PARAM_ID = 120,    ///< Invalid configuration parameter ID specified.
+    ADSP_IPC_INVALID_CONFIG_DATA_LEN = 121,    ///< Invalid length of configuration parameter
+                                               ///< specified.
+    ADSP_IPC_INVALID_CONFIG_DATA_STRUCT = 122, ///< Invalid structure of configuration parameter
+                                               ///< specified.
 
-    ADSP_IPC_GATEWAY_NOT_INITIALIZED = 140,     ///< Gateway initialization error.
-    ADSP_IPC_GATEWAY_NOT_EXIST = 141,           ///< Invalid gateway connector ID specified.
-    ADSP_IPC_GATEWAY_STATE_NOT_SET = 142,       ///< Failed to change state of the gateway.
+    ADSP_IPC_GATEWAY_NOT_INITIALIZED = 140, ///< Gateway initialization error.
+    ADSP_IPC_GATEWAY_NOT_EXIST = 141,       ///< Invalid gateway connector ID specified.
+    ADSP_IPC_GATEWAY_STATE_NOT_SET = 142,   ///< Failed to change state of the gateway.
 
-    ADSP_IPC_SCLK_ALREADY_RUNNING = 150,        ///< SCLK can be configured when no I2S instance
-                                                ///< is running.
-    ADSP_IPC_MCLK_ALREADY_RUNNING = 151,        ///< MCLK can be configured when no I2S instance
-                                                ///< is running.
-    ADSP_IPC_NO_RUNNING_SCLK = 152,             ///< SCLK can be stopped when at least 1 I2S
-                                                ///< instance is running.
-    ADSP_IPC_NO_RUNNING_MCLK = 153,             ///< MCLK can be stopped when at least 1 I2S
-                                                ///< instance is running.
+    ADSP_IPC_SCLK_ALREADY_RUNNING = 150, ///< SCLK can be configured when no I2S instance
+                                         ///< is running.
+    ADSP_IPC_MCLK_ALREADY_RUNNING = 151, ///< MCLK can be configured when no I2S instance
+                                         ///< is running.
+    ADSP_IPC_NO_RUNNING_SCLK = 152,      ///< SCLK can be stopped when at least 1 I2S
+                                         ///< instance is running.
+    ADSP_IPC_NO_RUNNING_MCLK = 153,      ///< MCLK can be stopped when at least 1 I2S
+                                         ///< instance is running.
 
-    ADSP_IPC_PIPELINE_NOT_INITIALIZED = 160,    ///< Pipeline initialization error.
-    ADSP_IPC_PIPELINE_NOT_EXIST = 161,          ///< Invalid pipeline ID specified.
-    ADSP_IPC_PIPELINE_SAVE_FAILED = 162,        ///< Pipeline save operation failed.
-    ADSP_IPC_PIPELINE_RESTORE_FAILED = 163,     ///< Pipeline restore operation failed.
-    ADSP_IPC_PIPELINE_STATE_NOT_SET = 164,      ///< Failed to change state of the pipeline.
-    ADSP_IPC_PIPELINE_ALREADY_EXISTS = 165,     ///< Pipeline with passed ID already exists in the
-                                                ///< system.
+    ADSP_IPC_PIPELINE_NOT_INITIALIZED = 160, ///< Pipeline initialization error.
+    ADSP_IPC_PIPELINE_NOT_EXIST = 161,       ///< Invalid pipeline ID specified.
+    ADSP_IPC_PIPELINE_SAVE_FAILED = 162,     ///< Pipeline save operation failed.
+    ADSP_IPC_PIPELINE_RESTORE_FAILED = 163,  ///< Pipeline restore operation failed.
+    ADSP_IPC_PIPELINE_STATE_NOT_SET = 164,   ///< Failed to change state of the pipeline.
+    ADSP_IPC_PIPELINE_ALREADY_EXISTS = 165,  ///< Pipeline with passed ID already exists in the
+                                             ///< system.
 
-    ADSP_IPC_MAX_STATUS = ((1<<IXC_STATUS_BITS)-1)
+    ADSP_IPC_MAX_STATUS = ((1 << IXC_STATUS_BITS) - 1)
 };
 
 enum class BaseFwParams
@@ -207,7 +207,6 @@ enum class BaseModuleParams
     */
     MOD_INST_ENABLE = 0x3000
 };
-
 }
 }
 }

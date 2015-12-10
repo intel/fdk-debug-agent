@@ -33,7 +33,7 @@ namespace debug_agent
 namespace cavs
 {
 
-class LogStreamer final: public system::IfdkStreamer
+class LogStreamer final : public system::IfdkStreamer
 {
 public:
     /**
@@ -84,8 +84,7 @@ private:
 
     /* Make this class non copyable */
     LogStreamer(const LogStreamer &) = delete;
-    LogStreamer & operator=(const LogStreamer &) = delete;
+    LogStreamer &operator=(const LogStreamer &) = delete;
 };
-
 }
 }

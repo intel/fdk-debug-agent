@@ -37,10 +37,11 @@ class InfoParameters : public Parameters
 {
 private:
     using base = Parameters;
+
 public:
     InfoParameters() = default;
-    explicit InfoParameters(const InfoParameters& other) = default;
-    InfoParameters& operator=(const InfoParameters& other) = default;
+    explicit InfoParameters(const InfoParameters &other) = default;
+    InfoParameters &operator=(const InfoParameters &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
     {
@@ -53,6 +54,7 @@ public:
         assert(isConcrete);
         acceptCommon(*this, visitor);
     }
+
 private:
     template <typename T, typename Visitor>
     static void acceptCommon(T &me, Visitor &visitor)
@@ -62,9 +64,6 @@ private:
         visitor.leave();
     }
 };
-
 }
 }
 }
-
-

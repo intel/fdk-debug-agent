@@ -51,7 +51,6 @@ private:
      */
     Parameters mDriverEmulationParameter;
 };
-
 }
 }
 }

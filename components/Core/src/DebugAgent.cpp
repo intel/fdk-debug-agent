@@ -41,25 +41,19 @@ namespace core
 
 std::shared_ptr<TypeModel> DebugAgent::createTypeModel()
 {
-    try
-    {
+    try {
         TypeModelConverter converter(mSystem);
         return converter.createModel();
-    }
-    catch (BaseModelConverter::Exception &e)
-    {
+    } catch (BaseModelConverter::Exception &e) {
         throw Exception("Can not create type model: " + std::string(e.what()));
     }
 }
 
 std::shared_ptr<ifdk_objects::instance::System> DebugAgent::createSystemInstance()
 {
-    try
-    {
+    try {
         return InstanceModelConverter::createSystem();
-    }
-    catch (BaseModelConverter::Exception &e)
-    {
+    } catch (BaseModelConverter::Exception &e) {
         throw Exception("Can not create system instance: " + std::string(e.what()));
     }
 }
@@ -78,88 +72,73 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
      */
 
     dispatcher->addResource("/type/cavs.fwlogs/control_parameters",
-        std::make_shared<LogServiceTypeControlParametersResource>());
+                            std::make_shared<LogServiceTypeControlParametersResource>());
     dispatcher->addResource("/instance/cavs.fwlogs/0/control_parameters",
-        std::make_shared<LogServiceInstanceControlParametersResource>(mSystem));
+                            std::make_shared<LogServiceInstanceControlParametersResource>(mSystem));
     dispatcher->addResource("/instance/cavs.fwlogs/0/streaming",
-        std::make_shared<LogServiceStreamResource>(mSystem));
+                            std::make_shared<LogServiceStreamResource>(mSystem));
 
     /* System */
-    dispatcher->addResource("/type",
-        std::make_shared<SystemTypeResource>(*mTypeModel));
+    dispatcher->addResource("/type", std::make_shared<SystemTypeResource>(*mTypeModel));
     dispatcher->addResource("/instance",
-        std::make_shared<SystemInstanceResource>(*mSystemInstance));
+                            std::make_shared<SystemInstanceResource>(*mSystemInstance));
 
     /* Other types*/
-    dispatcher->addResource("/type/${type_name}",
-        std::make_shared<TypeResource>(*mTypeModel));
+    dispatcher->addResource("/type/${type_name}", std::make_shared<TypeResource>(*mTypeModel));
     dispatcher->addResource("/instance/${type_name}",
-        std::make_shared<InstanceCollectionResource>(mInstanceModel));
+                            std::make_shared<InstanceCollectionResource>(mInstanceModel));
     dispatcher->addResource("/instance/${type_name}/${instance_id}",
-        std::make_shared<InstanceResource>(mInstanceModel));
+                            std::make_shared<InstanceResource>(mInstanceModel));
 
     /* Create one resource instance for each module type*/
-    uint16_t    moduleId = 0;
-    for (const cavs::dsp_fw::ModuleEntry &entry : mSystem.getModuleEntries())
-    {
-        std::string moduleName = StringHelper::getStringFromFixedSizeArray(
-            entry.name, sizeof(entry.name));
+    uint16_t moduleId = 0;
+    for (const cavs::dsp_fw::ModuleEntry &entry : mSystem.getModuleEntries()) {
+        std::string moduleName =
+            StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
 
         dispatcher->addResource(
             "/instance/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
-            std::make_shared<ControlParametersModuleInstanceResource>(
-            mSystem, mParameterSerializer, moduleName, moduleId));
+            std::make_shared<ControlParametersModuleInstanceResource>(mSystem, mParameterSerializer,
+                                                                      moduleName, moduleId));
 
         dispatcher->addResource(
             "/type/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
-            std::make_shared<ControlParametersModuleTypeResource>(
-            mSystem, mParameterSerializer, moduleName, moduleId));
+            std::make_shared<ControlParametersModuleTypeResource>(mSystem, mParameterSerializer,
+                                                                  moduleName, moduleId));
 
         moduleId++;
     }
 
     /* Refresh special case*/
     dispatcher->addResource("/instance/cavs/0/refreshed",
-        std::make_shared<RefreshSubsystemResource>(mSystem, mInstanceModel));
+                            std::make_shared<RefreshSubsystemResource>(mSystem, mInstanceModel));
 
     /* Debug resources */
     dispatcher->addResource("/internal/modules",
-        std::make_shared<ModuleListDebugResource>(mSystem));
-    dispatcher->addResource("/internal/topology",
-        std::make_shared<TopologyDebugResource>(mSystem));
-    dispatcher->addResource("/internal/model",
-        std::make_shared<ModelDumpDebugResource>(*mTypeModel, *mSystemInstance, mInstanceModel));
+                            std::make_shared<ModuleListDebugResource>(mSystem));
+    dispatcher->addResource("/internal/topology", std::make_shared<TopologyDebugResource>(mSystem));
+    dispatcher->addResource("/internal/model", std::make_shared<ModelDumpDebugResource>(
+                                                   *mTypeModel, *mSystemInstance, mInstanceModel));
 
     return dispatcher;
 }
 
-DebugAgent::DebugAgent(
-    const cavs::DriverFactory &driverFactory,
-    uint32_t port,
-    const std::string &pfwConfig,
-    bool isVerbose)
-try :
+DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port,
+                       const std::string &pfwConfig, bool isVerbose) try :
     /* Order is important! */
     mSystem(driverFactory),
     mTypeModel(createTypeModel()),
     mSystemInstance(createSystemInstance()),
     mInstanceModel(nullptr),
     mParameterSerializer(pfwConfig),
-    mRestServer(createDispatcher(), port, isVerbose)
-{
+    mRestServer(createDispatcher(), port, isVerbose) {
     assert(mTypeModel != nullptr);
     assert(mSystemInstance != nullptr);
-}
-catch (rest::Dispatcher::InvalidUriException &e)
-{
+} catch (rest::Dispatcher::InvalidUriException &e) {
     throw Exception("Invalid resource URI: " + std::string(e.what()));
-}
-catch (rest::Server::Exception &e)
-{
+} catch (rest::Server::Exception &e) {
     throw Exception("Rest server error : " + std::string(e.what()));
-}
-catch (cavs::System::Exception &e)
-{
+} catch (cavs::System::Exception &e) {
     throw Exception("System error: " + std::string(e.what()));
 }
 
@@ -168,9 +147,7 @@ DebugAgent::~DebugAgent()
     /* This call will unblock all threads that consume system events (log...) */
     mSystem.stop();
 
-   /* Then rest server destructor can terminate the http request threads gracefully */
+    /* Then rest server destructor can terminate the http request threads gracefully */
 }
-
-
 }
 }

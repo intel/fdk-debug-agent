@@ -36,11 +36,14 @@ class ComponentRef : public Ref
 {
 private:
     using base = Ref;
+
 public:
     ComponentRef() = default;
-    explicit ComponentRef(const std::string& typeName, const std::string& instanceId) :
-        base(typeName, instanceId) {}
-    explicit ComponentRef(const ComponentRef& other) = default;
+    explicit ComponentRef(const std::string &typeName, const std::string &instanceId)
+        : base(typeName, instanceId)
+    {
+    }
+    explicit ComponentRef(const ComponentRef &other) = default;
     ComponentRef &operator=(const ComponentRef &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -62,7 +65,7 @@ protected:
             return false;
         }
 
-        const ComponentRef *otherComp = dynamic_cast<const ComponentRef*>(&other);
+        const ComponentRef *otherComp = dynamic_cast<const ComponentRef *>(&other);
         if (otherComp == nullptr) {
             return false;
         }
@@ -82,5 +85,3 @@ private:
 }
 }
 }
-
-

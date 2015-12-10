@@ -41,13 +41,14 @@ namespace windows
 class Driver final : public cavs::Driver
 {
 public:
-    Driver(std::unique_ptr<Device> device,
-        std::unique_ptr<WppClientFactory> wppClientFactory) : mDevice(std::move(device)),
-        mWppClientFactory(std::move(wppClientFactory)),
-        mLogger(*mDevice, *mWppClientFactory), mModuleHandler(*mDevice) {}
+    Driver(std::unique_ptr<Device> device, std::unique_ptr<WppClientFactory> wppClientFactory)
+        : mDevice(std::move(device)), mWppClientFactory(std::move(wppClientFactory)),
+          mLogger(*mDevice, *mWppClientFactory), mModuleHandler(*mDevice)
+    {
+    }
 
     virtual cavs::Logger &getLogger() override { return mLogger; }
-    virtual ModuleHandler &getModuleHandler() override { return mModuleHandler;  }
+    virtual ModuleHandler &getModuleHandler() override { return mModuleHandler; }
 
 private:
     std::unique_ptr<Device> mDevice;
@@ -55,7 +56,6 @@ private:
     Logger mLogger;
     ModuleHandler mModuleHandler;
 };
-
 }
 }
 }

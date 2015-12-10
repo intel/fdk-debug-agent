@@ -26,11 +26,9 @@ namespace debug_agent
 namespace system
 {
 
-IfdkStreamer::IfdkStreamer(const std::string &systemType,
-                           const std::string &formatType,
-                           unsigned int majorVersion,
-                           unsigned int minorVersion) :
-    mIfdkHeader(systemType, formatType, majorVersion, minorVersion)
+IfdkStreamer::IfdkStreamer(const std::string &systemType, const std::string &formatType,
+                           unsigned int majorVersion, unsigned int minorVersion)
+    : mIfdkHeader(systemType, formatType, majorVersion, minorVersion)
 {
 }
 
@@ -56,6 +54,5 @@ void IfdkStreamer::addProperty(const std::string &key, const std::string &value)
 {
     mIfdkHeader.addProperty(key, value);
 }
-
 }
 }

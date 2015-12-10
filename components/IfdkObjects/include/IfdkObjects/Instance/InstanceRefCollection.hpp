@@ -34,9 +34,6 @@ namespace instance
 
 /** Named collection of instance references */
 using InstanceRefCollection = GenericRefCollection<InstanceRef>;
-
 }
 }
 }
-
-

@@ -41,28 +41,24 @@ TEST_CASE("Format type string", "[Constructor]")
     static const int ten = 10;
 
     /* IFDK:1234567890:12345678901[1.1] is 32 characters long */
-    CHECK_THROWS_AS_MSG(IfdkStreamHeader(long10charString, long11charString, one, one),
-        IfdkStreamHeader::Exception,
-        "Format type length exceeds 31 characters for 'IFDK:" +
-        long10charString + ":" + long11charString +
-        "[" + std::to_string(one) + "." +  std::to_string(one) +"]'");
+    CHECK_THROWS_AS_MSG(
+        IfdkStreamHeader(long10charString, long11charString, one, one), IfdkStreamHeader::Exception,
+        "Format type length exceeds 31 characters for 'IFDK:" + long10charString + ":" +
+            long11charString + "[" + std::to_string(one) + "." + std::to_string(one) + "]'");
 
     /* IFDK:1234567890:1234567890[1.10] is 32 characters long */
-    CHECK_THROWS_AS_MSG(IfdkStreamHeader(long10charString, long10charString, one, ten),
-        IfdkStreamHeader::Exception,
-        "Format type length exceeds 31 characters for 'IFDK:" +
-        long10charString + ":" + long10charString +
-        "[" + std::to_string(one) + "." +  std::to_string(ten) +"]'");
+    CHECK_THROWS_AS_MSG(
+        IfdkStreamHeader(long10charString, long10charString, one, ten), IfdkStreamHeader::Exception,
+        "Format type length exceeds 31 characters for 'IFDK:" + long10charString + ":" +
+            long10charString + "[" + std::to_string(one) + "." + std::to_string(ten) + "]'");
 
     /* Invalid System Type */
     CHECK_THROWS_AS_MSG(IfdkStreamHeader(empty, long10charString, 1, 1),
-        IfdkStreamHeader::Exception,
-        "Empty System Type string");
+                        IfdkStreamHeader::Exception, "Empty System Type string");
 
     /* Invalid File Type */
     CHECK_THROWS_AS_MSG(IfdkStreamHeader(long10charString, empty, 1, 1),
-        IfdkStreamHeader::Exception,
-        "Empty File Type string");
+                        IfdkStreamHeader::Exception, "Empty File Type string");
 
     /* IFDK:1234567890:1234567890[1.1] is 31 characters long */
     CHECK_NOTHROW(IfdkStreamHeader(long10charString, long10charString, 1, 1));
@@ -76,7 +72,7 @@ TEST_CASE("Properties", "[addProperty]")
 {
     static const std::string oneCharString("1");
     static const std::string equal("=");
-    static const std::string maxString("1234567890123456789012345678901"); // 31 chars long
+    static const std::string maxString("1234567890123456789012345678901");      // 31 chars long
     static const std::string tooLongString("12345678901234567890123456789012"); // 32 chars long
     static const std::string emptyString("");
     static const std::string systemType("TestSystem");
@@ -86,23 +82,23 @@ TEST_CASE("Properties", "[addProperty]")
 
     /* Too short key is rejected */
     CHECK_THROWS_AS_MSG(systemHeader.addProperty(emptyString, maxString),
-        IfdkStreamHeader::Exception,
-        "Empty property key or value for " + emptyString + equal + maxString);
+                        IfdkStreamHeader::Exception,
+                        "Empty property key or value for " + emptyString + equal + maxString);
 
     /* Too short value is rejected */
     CHECK_THROWS_AS_MSG(systemHeader.addProperty(maxString, emptyString),
-        IfdkStreamHeader::Exception,
-        "Empty property key or value for " + maxString + equal + emptyString);
+                        IfdkStreamHeader::Exception,
+                        "Empty property key or value for " + maxString + equal + emptyString);
 
     /* Too long key is rejected */
     CHECK_THROWS_AS_MSG(systemHeader.addProperty(tooLongString, maxString),
-        IfdkStreamHeader::Exception,
-        "Property length exceeds for " + tooLongString + equal + maxString);
+                        IfdkStreamHeader::Exception,
+                        "Property length exceeds for " + tooLongString + equal + maxString);
 
     /* Too long value is rejected */
     CHECK_THROWS_AS_MSG(systemHeader.addProperty(maxString, tooLongString),
-        IfdkStreamHeader::Exception,
-        "Property length exceeds for " + maxString + equal + tooLongString);
+                        IfdkStreamHeader::Exception,
+                        "Property length exceeds for " + maxString + equal + tooLongString);
 
     /* Maximum key length and minimum value is accepted */
     CHECK_NOTHROW(systemHeader.addProperty(maxString, oneCharString));
@@ -114,13 +110,13 @@ TEST_CASE("Properties", "[addProperty]")
 
     /* Duplication is rejected */
     CHECK_THROWS_AS_MSG(systemHeader.addProperty(oneCharString, maxString),
-        IfdkStreamHeader::Exception,
-        "Property already exists for key '" + oneCharString + "'");
+                        IfdkStreamHeader::Exception,
+                        "Property already exists for key '" + oneCharString + "'");
 
     /* Duplication is still rejected */
     CHECK_THROWS_AS_MSG(systemHeader.addProperty(oneCharString, maxString),
-        IfdkStreamHeader::Exception,
-        "Property already exists for key '" + oneCharString + "'");
+                        IfdkStreamHeader::Exception,
+                        "Property already exists for key '" + oneCharString + "'");
 }
 
 /**
@@ -139,10 +135,8 @@ TEST_CASE("Stream without property", "[streaming]")
      *    4 bytes long number of properties (which is 0) */
     static const std::size_t streamExpectedLength = 32 + 4;
     char expectedSystemHeaderStreamBytes[streamExpectedLength] = {
-        'I', 'F', 'D', 'K', ':', 'B', 'e', 's', 't', ' ', 'S', 'y', 's', 't', 'e', 'm',
-        ':', 'B', 'e', 's', 't', 'F', 'i', 'l', 'e', '[', '1', '.', '1', ']', 0, 0,
-        0, 0, 0, 0
-    };
+        'I', 'F', 'D', 'K', ':', 'B', 'e', 's', 't', ' ', 'S', 'y', 's', 't', 'e', 'm', ':', 'B',
+        'e', 's', 't', 'F', 'i', 'l', 'e', '[', '1', '.', '1', ']', 0,   0,   0,   0,   0,   0};
     std::string expectedSystemHeaderStream(expectedSystemHeaderStreamBytes, streamExpectedLength);
 
     CHECK(systemHeaderStream.str() == expectedSystemHeaderStream);
@@ -175,28 +169,27 @@ TEST_CASE("Stream with properties", "[streaming]")
      * 32x2x3 bytes for 3 properties */
     static const std::size_t streamExpectedLength = 32 + 4 + 32 * 2 * 3;
     char expectedSystemHeaderStreamBytes[streamExpectedLength] = {
-        'I', 'F', 'D', 'K', ':', 'B', 'e', 's', 't', ' ', 'S', 'y', 's', 't', 'e', 'm',
-        ':', 'B', 'e', 's', 't', 'F', 'i', 'l', 'e', '[', '1', '.', '1', ']',   0,   0,
-        3, 0, 0, 0, /* 0x0003 little endian */
+        'I', 'F', 'D', 'K', ':', 'B', 'e', 's', 't', ' ', 'S', 'y', 's', 't', 'e', 'm', ':', 'B',
+        'e', 's', 't', 'F', 'i', 'l', 'e', '[', '1', '.', '1', ']', 0, 0, 3, 0, 0,
+        0, /* 0x0003 little endian */
         /* Property 1 key */
-        'a', ' ', 'k', 'e', 'y',   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+        'a', ' ', 'k', 'e', 'y', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
         /* Property 1 value */
-        'h', 'e', 'l', 'l', 'o',   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+        'h', 'e', 'l', 'l', 'o', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
         /* Property 2 key */
-        'a', ' ', 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', ' ', 'k', 'e', 'y',   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+        'a', ' ', 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', ' ', 'k', 'e', 'y', 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         /* Property 2 value */
-        'b', 'o', 'n', 'j', 'o', 'u', 'r',   0,   0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+        'b', 'o', 'n', 'j', 'o', 'u', 'r', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0,
         /* Property 3 key */
-        'a', ' ', 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', ' ', 'k', 'e', 'y', ' ', 'o',
-        'f', ' ', '3', '1', ' ', 'c', 'h', 'a', 'r', 'a', 'c', 't', 'e', 'r', 's',   0,
+        'a', ' ', 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', ' ', 'k', 'e', 'y', ' ', 'o', 'f', ' ',
+        '3', '1', ' ', 'c', 'h', 'a', 'r', 'a', 'c', 't', 'e', 'r', 's', 0,
         /* Property 3 value */
-        'a', ' ', 'v', 'a', 'l', 'u', 'e', ' ', 'o', 'f', ' ', '3', '1', ' ', 'c', 'h',
-        'a', 'r', 'a', 'c', 't', 'e', 'r', 's', ' ', ' ', ' ', ' ', ' ', ' ', ' ',   0
-    };
+        'a', ' ', 'v', 'a', 'l', 'u', 'e', ' ', 'o', 'f', ' ', '3', '1', ' ', 'c', 'h', 'a', 'r',
+        'a', 'c', 't', 'e', 'r', 's', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 0};
     std::string expectedSystemHeaderStream(expectedSystemHeaderStreamBytes, streamExpectedLength);
 
     CHECK(systemHeaderStream.str() == expectedSystemHeaderStream);

@@ -34,9 +34,6 @@ namespace type
 
 /** Named collection of component references */
 using ComponentRefCollection = GenericRefCollection<ComponentRef>;
-
 }
 }
 }
-
-

@@ -34,9 +34,6 @@ namespace instance
 
 /** List of output connectors */
 using Outputs = VisitableVector<Output, Visitor, ConstVisitor>;
-
 }
 }
 }
-
-

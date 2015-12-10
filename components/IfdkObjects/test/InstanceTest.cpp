@@ -30,11 +30,11 @@ void populateChildren(Children &children)
 {
     std::shared_ptr<InstanceRefCollection> instanceColl =
         std::make_shared<InstanceRefCollection>("instances");
-    instanceColl->add(InstanceRef("instance1","0"));
+    instanceColl->add(InstanceRef("instance1", "0"));
 
     std::shared_ptr<ComponentRefCollection> compColl =
         std::make_shared<ComponentRefCollection>("components");
-    compColl->add(ComponentRef("comp1","1"));
+    compColl->add(ComponentRef("comp1", "1"));
 
     std::shared_ptr<ServiceRefCollection> servColl =
         std::make_shared<ServiceRefCollection>("services");
@@ -89,7 +89,7 @@ void populateLinks(Links &links)
 TEST_CASE("Instance serializer: InstanceRef")
 {
     /* Serialize */
-    InstanceRef instanceRef("type1","0");
+    InstanceRef instanceRef("type1", "0");
 
     InstanceSerializer serializer;
     instanceRef.accept(serializer);
@@ -108,7 +108,7 @@ TEST_CASE("Instance serializer: InstanceRef")
 TEST_CASE("Instance serializer: ComponentRef")
 {
     /* Serialize */
-    ComponentRef compRef("comp_type","1");
+    ComponentRef compRef("comp_type", "1");
 
     InstanceSerializer serializer;
     compRef.accept(serializer);
@@ -127,7 +127,7 @@ TEST_CASE("Instance serializer: ComponentRef")
 TEST_CASE("Instance serializer: ServiceRef")
 {
     /* Serialize */
-    ServiceRef serviceRef("serv_type","3");
+    ServiceRef serviceRef("serv_type", "3");
 
     InstanceSerializer serializer;
     serviceRef.accept(serializer);
@@ -146,7 +146,7 @@ TEST_CASE("Instance serializer: ServiceRef")
 TEST_CASE("Instance serializer: SubsystemRef")
 {
     /* Serialize */
-    SubsystemRef subsystemRef("subsystem_type","5");
+    SubsystemRef subsystemRef("subsystem_type", "5");
 
     InstanceSerializer serializer;
     subsystemRef.accept(serializer);
@@ -166,20 +166,18 @@ TEST_CASE("Instance serializer: instance ref collection")
 {
     /* Serialize */
     InstanceRefCollection instanceRef("my_instance_ref_coll");
-    instanceRef.add(InstanceRef("type1","0"));
-    instanceRef.add(InstanceRef("type2","2"));
+    instanceRef.add(InstanceRef("type1", "0"));
+    instanceRef.add(InstanceRef("type2", "2"));
 
     InstanceSerializer serializer;
     instanceRef.accept(serializer);
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<collection Name=\"my_instance_ref_coll\">\n"
-        "    <instance Id=\"0\" Type=\"type1\"/>\n"
-        "    <instance Id=\"2\" Type=\"type2\"/>\n"
-        "</collection>\n"
-        );
+    CHECK(xml == "<collection Name=\"my_instance_ref_coll\">\n"
+                 "    <instance Id=\"0\" Type=\"type1\"/>\n"
+                 "    <instance Id=\"2\" Type=\"type2\"/>\n"
+                 "</collection>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -201,12 +199,10 @@ TEST_CASE("Instance serializer: compo ref collection")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<component_collection Name=\"my_comp_ref_coll\">\n"
-        "    <component Id=\"3\" Type=\"type1\"/>\n"
-        "    <component Id=\"5\" Type=\"type2\"/>\n"
-        "</component_collection>\n"
-        );
+    CHECK(xml == "<component_collection Name=\"my_comp_ref_coll\">\n"
+                 "    <component Id=\"3\" Type=\"type1\"/>\n"
+                 "    <component Id=\"5\" Type=\"type2\"/>\n"
+                 "</component_collection>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -228,12 +224,10 @@ TEST_CASE("Instance serializer: service ref collection")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<service_collection Name=\"my_service_ref_coll\">\n"
-        "    <service Id=\"9\" Type=\"type1\"/>\n"
-        "    <service Id=\"2\" Type=\"type2\"/>\n"
-        "</service_collection>\n"
-        );
+    CHECK(xml == "<service_collection Name=\"my_service_ref_coll\">\n"
+                 "    <service Id=\"9\" Type=\"type1\"/>\n"
+                 "    <service Id=\"2\" Type=\"type2\"/>\n"
+                 "</service_collection>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -255,12 +249,10 @@ TEST_CASE("Instance serializer: subsystem ref collection")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<subsystem_collection Name=\"my_subsystem_ref_coll\">\n"
-        "    <subsystem Id=\"1\" Type=\"type1\"/>\n"
-        "    <subsystem Id=\"0\" Type=\"type2\"/>\n"
-        "</subsystem_collection>\n"
-        );
+    CHECK(xml == "<subsystem_collection Name=\"my_subsystem_ref_coll\">\n"
+                 "    <subsystem Id=\"1\" Type=\"type1\"/>\n"
+                 "    <subsystem Id=\"0\" Type=\"type2\"/>\n"
+                 "</subsystem_collection>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -321,19 +313,17 @@ TEST_CASE("Instance serializer: children")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<children>\n"
-        "    <collection Name=\"instances\">\n"
-        "        <instance Id=\"0\" Type=\"instance1\"/>\n"
-        "    </collection>\n"
-        "    <component_collection Name=\"components\">\n"
-        "        <component Id=\"1\" Type=\"comp1\"/>\n"
-        "    </component_collection>\n"
-        "    <service_collection Name=\"services\">\n"
-        "        <service Id=\"2\" Type=\"service1\"/>\n"
-        "    </service_collection>\n"
-        "</children>\n"
-        );
+    CHECK(xml == "<children>\n"
+                 "    <collection Name=\"instances\">\n"
+                 "        <instance Id=\"0\" Type=\"instance1\"/>\n"
+                 "    </collection>\n"
+                 "    <component_collection Name=\"components\">\n"
+                 "        <component Id=\"1\" Type=\"comp1\"/>\n"
+                 "    </component_collection>\n"
+                 "    <service_collection Name=\"services\">\n"
+                 "        <service Id=\"2\" Type=\"service1\"/>\n"
+                 "    </service_collection>\n"
+                 "</children>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -354,13 +344,11 @@ TEST_CASE("Instance serializer: parents")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<parents>\n"
-        "    <instance Id=\"1\" Type=\"instance_type\"/>\n"
-        "    <component Id=\"2\" Type=\"component_type\"/>\n"
-        "    <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
-        "</parents>\n"
-        );
+    CHECK(xml == "<parents>\n"
+                 "    <instance Id=\"1\" Type=\"instance_type\"/>\n"
+                 "    <component Id=\"2\" Type=\"component_type\"/>\n"
+                 "    <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
+                 "</parents>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -373,7 +361,7 @@ TEST_CASE("Instance serializer: parents")
 TEST_CASE("Instance serializer: Instance")
 {
     /* Serialize */
-    Instance instance("my_instance_type","1");
+    Instance instance("my_instance_type", "1");
     populateParents(instance.getParents());
     populateChildren(instance.getChildren());
 
@@ -381,28 +369,26 @@ TEST_CASE("Instance serializer: Instance")
     instance.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<instance Id=\"1\" Type=\"my_instance_type\">\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <parents>\n"
-        "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
-        "        <component Id=\"2\" Type=\"component_type\"/>\n"
-        "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
-        "    </parents>\n"
-        "    <children>\n"
-        "        <collection Name=\"instances\">\n"
-        "            <instance Id=\"0\" Type=\"instance1\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"components\">\n"
-        "            <component Id=\"1\" Type=\"comp1\"/>\n"
-        "        </component_collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service Id=\"2\" Type=\"service1\"/>\n"
-        "        </service_collection>\n"
-        "    </children>\n"
-        "</instance>\n"
-        );
+    CHECK(xml == "<instance Id=\"1\" Type=\"my_instance_type\">\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <parents>\n"
+                 "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
+                 "        <component Id=\"2\" Type=\"component_type\"/>\n"
+                 "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
+                 "    </parents>\n"
+                 "    <children>\n"
+                 "        <collection Name=\"instances\">\n"
+                 "            <instance Id=\"0\" Type=\"instance1\"/>\n"
+                 "        </collection>\n"
+                 "        <component_collection Name=\"components\">\n"
+                 "            <component Id=\"1\" Type=\"comp1\"/>\n"
+                 "        </component_collection>\n"
+                 "        <service_collection Name=\"services\">\n"
+                 "            <service Id=\"2\" Type=\"service1\"/>\n"
+                 "        </service_collection>\n"
+                 "    </children>\n"
+                 "</instance>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -423,22 +409,20 @@ TEST_CASE("Instance serializer: Instance collection")
     collection.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<collection>\n"
-        "    <instance Id=\"1\" Type=\"my_instance_type1\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents/>\n"
-        "        <children/>\n"
-        "    </instance>\n"
-        "    <instance Id=\"2\" Type=\"my_instance_type2\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents/>\n"
-        "        <children/>\n"
-        "    </instance>\n"
-        "</collection>\n"
-        );
+    CHECK(xml == "<collection>\n"
+                 "    <instance Id=\"1\" Type=\"my_instance_type1\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "    </instance>\n"
+                 "    <instance Id=\"2\" Type=\"my_instance_type2\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "    </instance>\n"
+                 "</collection>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -459,28 +443,26 @@ TEST_CASE("Instance serializer: Service")
     service.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<service Direction=\"Incoming\" Id=\"2\" Type=\"my_service_type\">\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <parents>\n"
-        "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
-        "        <component Id=\"2\" Type=\"component_type\"/>\n"
-        "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
-        "    </parents>\n"
-        "    <children>\n"
-        "        <collection Name=\"instances\">\n"
-        "            <instance Id=\"0\" Type=\"instance1\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"components\">\n"
-        "            <component Id=\"1\" Type=\"comp1\"/>\n"
-        "        </component_collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service Id=\"2\" Type=\"service1\"/>\n"
-        "        </service_collection>\n"
-        "    </children>\n"
-        "</service>\n"
-        );
+    CHECK(xml == "<service Direction=\"Incoming\" Id=\"2\" Type=\"my_service_type\">\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <parents>\n"
+                 "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
+                 "        <component Id=\"2\" Type=\"component_type\"/>\n"
+                 "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
+                 "    </parents>\n"
+                 "    <children>\n"
+                 "        <collection Name=\"instances\">\n"
+                 "            <instance Id=\"0\" Type=\"instance1\"/>\n"
+                 "        </collection>\n"
+                 "        <component_collection Name=\"components\">\n"
+                 "            <component Id=\"1\" Type=\"comp1\"/>\n"
+                 "        </component_collection>\n"
+                 "        <service_collection Name=\"services\">\n"
+                 "            <service Id=\"2\" Type=\"service1\"/>\n"
+                 "        </service_collection>\n"
+                 "    </children>\n"
+                 "</service>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -503,22 +485,20 @@ TEST_CASE("Instance serializer: Service collection")
     collection.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<service_collection>\n"
-        "    <service Direction=\"Incoming\" Id=\"1\" Type=\"my_service_type1\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents/>\n"
-        "        <children/>\n"
-        "    </service>\n"
-        "    <service Direction=\"Outgoing\" Id=\"2\" Type=\"my_service_type2\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents/>\n"
-        "        <children/>\n"
-        "    </service>\n"
-        "</service_collection>\n"
-        );
+    CHECK(xml == "<service_collection>\n"
+                 "    <service Direction=\"Incoming\" Id=\"1\" Type=\"my_service_type1\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "    </service>\n"
+                 "    <service Direction=\"Outgoing\" Id=\"2\" Type=\"my_service_type2\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "    </service>\n"
+                 "</service_collection>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -577,12 +557,10 @@ TEST_CASE("Instance serializer: Inputs")
     connectors.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<inputs>\n"
-        "    <input Format=\"format1\" Id=\"id1\"/>\n"
-        "    <input Format=\"format2\" Id=\"id2\"/>\n"
-        "</inputs>\n"
-        );
+    CHECK(xml == "<inputs>\n"
+                 "    <input Format=\"format1\" Id=\"id1\"/>\n"
+                 "    <input Format=\"format2\" Id=\"id2\"/>\n"
+                 "</inputs>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -602,13 +580,11 @@ TEST_CASE("Instance serializer: Outputs")
     connectors.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<outputs>\n"
-        "    <output Format=\"format1\" Id=\"id1\"/>\n"
-        "    <output Format=\"format2\" Id=\"id2\"/>\n"
-        "    <output Format=\"format3\" Id=\"id3\"/>\n"
-        "</outputs>\n"
-        );
+    CHECK(xml == "<outputs>\n"
+                 "    <output Format=\"format1\" Id=\"id1\"/>\n"
+                 "    <output Format=\"format2\" Id=\"id2\"/>\n"
+                 "    <output Format=\"format3\" Id=\"id3\"/>\n"
+                 "</outputs>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -674,11 +650,10 @@ TEST_CASE("Instance serializer: Link")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<link>\n"
-        "    <from Id=\"2\" OutputId=\"3\" Type=\"type1\"/>\n"
-        "    <to Id=\"4\" InputId=\"5\" Type=\"type2\"/>\n"
-        "</link>\n");
+    CHECK(xml == "<link>\n"
+                 "    <from Id=\"2\" OutputId=\"3\" Type=\"type1\"/>\n"
+                 "    <to Id=\"4\" InputId=\"5\" Type=\"type2\"/>\n"
+                 "</link>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -699,17 +674,16 @@ TEST_CASE("Instance serializer: Links")
 
     std::string xml = serializer.getXml();
 
-    CHECK(xml ==
-        "<links>\n"
-        "    <link>\n"
-        "        <from Id=\"2\" OutputId=\"3\" Type=\"type1\"/>\n"
-        "        <to Id=\"4\" InputId=\"5\" Type=\"type2\"/>\n"
-        "    </link>\n"
-        "    <link>\n"
-        "        <from Id=\"5\" OutputId=\"1\" Type=\"type3\"/>\n"
-        "        <to Id=\"6\" InputId=\"2\" Type=\"type4\"/>\n"
-        "    </link>\n"
-        "</links>\n");
+    CHECK(xml == "<links>\n"
+                 "    <link>\n"
+                 "        <from Id=\"2\" OutputId=\"3\" Type=\"type1\"/>\n"
+                 "        <to Id=\"4\" InputId=\"5\" Type=\"type2\"/>\n"
+                 "    </link>\n"
+                 "    <link>\n"
+                 "        <from Id=\"5\" OutputId=\"1\" Type=\"type3\"/>\n"
+                 "        <to Id=\"6\" InputId=\"2\" Type=\"type4\"/>\n"
+                 "    </link>\n"
+                 "</links>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -722,7 +696,7 @@ TEST_CASE("Instance serializer: Links")
 TEST_CASE("Instance serializer: Component")
 {
     /* Serialize */
-    Component compo("my_comp_type","2");
+    Component compo("my_comp_type", "2");
     populateParents(compo.getParents());
     populateChildren(compo.getChildren());
     populateInputs(compo.getInputs());
@@ -733,47 +707,45 @@ TEST_CASE("Instance serializer: Component")
     compo.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<component Id=\"2\" Type=\"my_comp_type\">\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <parents>\n"
-        "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
-        "        <component Id=\"2\" Type=\"component_type\"/>\n"
-        "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
-        "    </parents>\n"
-        "    <children>\n"
-        "        <collection Name=\"instances\">\n"
-        "            <instance Id=\"0\" Type=\"instance1\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"components\">\n"
-        "            <component Id=\"1\" Type=\"comp1\"/>\n"
-        "        </component_collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service Id=\"2\" Type=\"service1\"/>\n"
-        "        </service_collection>\n"
-        "    </children>\n"
-        "    <inputs>\n"
-        "        <input Format=\"format1\" Id=\"id1\"/>\n"
-        "        <input Format=\"format2\" Id=\"id2\"/>\n"
-        "    </inputs>\n"
-        "    <outputs>\n"
-        "        <output Format=\"format1\" Id=\"id1\"/>\n"
-        "        <output Format=\"format2\" Id=\"id2\"/>\n"
-        "        <output Format=\"format3\" Id=\"id3\"/>\n"
-        "    </outputs>\n"
-        "    <links>\n"
-        "        <link>\n"
-        "            <from Id=\"2\" OutputId=\"3\" Type=\"type1\"/>\n"
-        "            <to Id=\"4\" InputId=\"5\" Type=\"type2\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"5\" OutputId=\"1\" Type=\"type3\"/>\n"
-        "            <to Id=\"6\" InputId=\"2\" Type=\"type4\"/>\n"
-        "        </link>\n"
-        "    </links>\n"
-        "</component>\n"
-        );
+    CHECK(xml == "<component Id=\"2\" Type=\"my_comp_type\">\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <parents>\n"
+                 "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
+                 "        <component Id=\"2\" Type=\"component_type\"/>\n"
+                 "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
+                 "    </parents>\n"
+                 "    <children>\n"
+                 "        <collection Name=\"instances\">\n"
+                 "            <instance Id=\"0\" Type=\"instance1\"/>\n"
+                 "        </collection>\n"
+                 "        <component_collection Name=\"components\">\n"
+                 "            <component Id=\"1\" Type=\"comp1\"/>\n"
+                 "        </component_collection>\n"
+                 "        <service_collection Name=\"services\">\n"
+                 "            <service Id=\"2\" Type=\"service1\"/>\n"
+                 "        </service_collection>\n"
+                 "    </children>\n"
+                 "    <inputs>\n"
+                 "        <input Format=\"format1\" Id=\"id1\"/>\n"
+                 "        <input Format=\"format2\" Id=\"id2\"/>\n"
+                 "    </inputs>\n"
+                 "    <outputs>\n"
+                 "        <output Format=\"format1\" Id=\"id1\"/>\n"
+                 "        <output Format=\"format2\" Id=\"id2\"/>\n"
+                 "        <output Format=\"format3\" Id=\"id3\"/>\n"
+                 "    </outputs>\n"
+                 "    <links>\n"
+                 "        <link>\n"
+                 "            <from Id=\"2\" OutputId=\"3\" Type=\"type1\"/>\n"
+                 "            <to Id=\"4\" InputId=\"5\" Type=\"type2\"/>\n"
+                 "        </link>\n"
+                 "        <link>\n"
+                 "            <from Id=\"5\" OutputId=\"1\" Type=\"type3\"/>\n"
+                 "            <to Id=\"6\" InputId=\"2\" Type=\"type4\"/>\n"
+                 "        </link>\n"
+                 "    </links>\n"
+                 "</component>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -794,28 +766,26 @@ TEST_CASE("Instance serializer: ComponentCollection")
     collection.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<component_collection>\n"
-        "    <component Id=\"1\" Type=\"my_comp_type1\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents/>\n"
-        "        <children/>\n"
-        "        <inputs/>\n"
-        "        <outputs/>\n"
-        "        <links/>\n"
-        "    </component>\n"
-        "    <component Id=\"2\" Type=\"my_comp_type2\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents/>\n"
-        "        <children/>\n"
-        "        <inputs/>\n"
-        "        <outputs/>\n"
-        "        <links/>\n"
-        "    </component>\n"
-        "</component_collection>\n"
-        );
+    CHECK(xml == "<component_collection>\n"
+                 "    <component Id=\"1\" Type=\"my_comp_type1\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "        <inputs/>\n"
+                 "        <outputs/>\n"
+                 "        <links/>\n"
+                 "    </component>\n"
+                 "    <component Id=\"2\" Type=\"my_comp_type2\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "        <inputs/>\n"
+                 "        <outputs/>\n"
+                 "        <links/>\n"
+                 "    </component>\n"
+                 "</component_collection>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -839,47 +809,45 @@ TEST_CASE("Instance serializer: Subsystem")
     subsystem.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<subsystem Id=\"3\" Type=\"my_subsystem_type\">\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <parents>\n"
-        "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
-        "        <component Id=\"2\" Type=\"component_type\"/>\n"
-        "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
-        "    </parents>\n"
-        "    <children>\n"
-        "        <collection Name=\"instances\">\n"
-        "            <instance Id=\"0\" Type=\"instance1\"/>\n"
-        "        </collection>\n"
-        "        <component_collection Name=\"components\">\n"
-        "            <component Id=\"1\" Type=\"comp1\"/>\n"
-        "        </component_collection>\n"
-        "        <service_collection Name=\"services\">\n"
-        "            <service Id=\"2\" Type=\"service1\"/>\n"
-        "        </service_collection>\n"
-        "    </children>\n"
-        "    <inputs>\n"
-        "        <input Format=\"format1\" Id=\"id1\"/>\n"
-        "        <input Format=\"format2\" Id=\"id2\"/>\n"
-        "    </inputs>\n"
-        "    <outputs>\n"
-        "        <output Format=\"format1\" Id=\"id1\"/>\n"
-        "        <output Format=\"format2\" Id=\"id2\"/>\n"
-        "        <output Format=\"format3\" Id=\"id3\"/>\n"
-        "    </outputs>\n"
-        "    <links>\n"
-        "        <link>\n"
-        "            <from Id=\"2\" OutputId=\"3\" Type=\"type1\"/>\n"
-        "            <to Id=\"4\" InputId=\"5\" Type=\"type2\"/>\n"
-        "        </link>\n"
-        "        <link>\n"
-        "            <from Id=\"5\" OutputId=\"1\" Type=\"type3\"/>\n"
-        "            <to Id=\"6\" InputId=\"2\" Type=\"type4\"/>\n"
-        "        </link>\n"
-        "    </links>\n"
-        "</subsystem>\n"
-        );
+    CHECK(xml == "<subsystem Id=\"3\" Type=\"my_subsystem_type\">\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <parents>\n"
+                 "        <instance Id=\"1\" Type=\"instance_type\"/>\n"
+                 "        <component Id=\"2\" Type=\"component_type\"/>\n"
+                 "        <subsystem Id=\"3\" Type=\"subsystem_type\"/>\n"
+                 "    </parents>\n"
+                 "    <children>\n"
+                 "        <collection Name=\"instances\">\n"
+                 "            <instance Id=\"0\" Type=\"instance1\"/>\n"
+                 "        </collection>\n"
+                 "        <component_collection Name=\"components\">\n"
+                 "            <component Id=\"1\" Type=\"comp1\"/>\n"
+                 "        </component_collection>\n"
+                 "        <service_collection Name=\"services\">\n"
+                 "            <service Id=\"2\" Type=\"service1\"/>\n"
+                 "        </service_collection>\n"
+                 "    </children>\n"
+                 "    <inputs>\n"
+                 "        <input Format=\"format1\" Id=\"id1\"/>\n"
+                 "        <input Format=\"format2\" Id=\"id2\"/>\n"
+                 "    </inputs>\n"
+                 "    <outputs>\n"
+                 "        <output Format=\"format1\" Id=\"id1\"/>\n"
+                 "        <output Format=\"format2\" Id=\"id2\"/>\n"
+                 "        <output Format=\"format3\" Id=\"id3\"/>\n"
+                 "    </outputs>\n"
+                 "    <links>\n"
+                 "        <link>\n"
+                 "            <from Id=\"2\" OutputId=\"3\" Type=\"type1\"/>\n"
+                 "            <to Id=\"4\" InputId=\"5\" Type=\"type2\"/>\n"
+                 "        </link>\n"
+                 "        <link>\n"
+                 "            <from Id=\"5\" OutputId=\"1\" Type=\"type3\"/>\n"
+                 "            <to Id=\"6\" InputId=\"2\" Type=\"type4\"/>\n"
+                 "        </link>\n"
+                 "    </links>\n"
+                 "</subsystem>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -900,28 +868,26 @@ TEST_CASE("Instance serializer: SubsystemCollection")
     collection.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<subsystem_collection>\n"
-        "    <subsystem Id=\"1\" Type=\"subsystem_type1\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents/>\n"
-        "        <children/>\n"
-        "        <inputs/>\n"
-        "        <outputs/>\n"
-        "        <links/>\n"
-        "    </subsystem>\n"
-        "    <subsystem Id=\"2\" Type=\"subsystem_type2\">\n"
-        "        <info_parameters/>\n"
-        "        <control_parameters/>\n"
-        "        <parents/>\n"
-        "        <children/>\n"
-        "        <inputs/>\n"
-        "        <outputs/>\n"
-        "        <links/>\n"
-        "    </subsystem>\n"
-        "</subsystem_collection>\n"
-        );
+    CHECK(xml == "<subsystem_collection>\n"
+                 "    <subsystem Id=\"1\" Type=\"subsystem_type1\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "        <inputs/>\n"
+                 "        <outputs/>\n"
+                 "        <links/>\n"
+                 "    </subsystem>\n"
+                 "    <subsystem Id=\"2\" Type=\"subsystem_type2\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "        <inputs/>\n"
+                 "        <outputs/>\n"
+                 "        <links/>\n"
+                 "    </subsystem>\n"
+                 "</subsystem_collection>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -938,30 +904,28 @@ TEST_CASE("Instance serializer: System")
 
     std::shared_ptr<SubsystemRefCollection> coll =
         std::make_shared<SubsystemRefCollection>("subsystems");
-    coll->add(SubsystemRef("subsystem1","1"));
-    coll->add(SubsystemRef("subsystem2","2"));
+    coll->add(SubsystemRef("subsystem1", "1"));
+    coll->add(SubsystemRef("subsystem2", "2"));
     system.getChildren().add(coll);
 
     InstanceSerializer serializer;
     system.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml ==
-        "<system Id=\"4\" Type=\"my_system_type\">\n"
-        "    <info_parameters/>\n"
-        "    <control_parameters/>\n"
-        "    <parents/>\n"
-        "    <children>\n"
-        "        <subsystem_collection Name=\"subsystems\">\n"
-        "            <subsystem Id=\"1\" Type=\"subsystem1\"/>\n"
-        "            <subsystem Id=\"2\" Type=\"subsystem2\"/>\n"
-        "        </subsystem_collection>\n"
-        "    </children>\n"
-        "    <inputs/>\n"
-        "    <outputs/>\n"
-        "    <links/>\n"
-        "</system>\n"
-        );
+    CHECK(xml == "<system Id=\"4\" Type=\"my_system_type\">\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <parents/>\n"
+                 "    <children>\n"
+                 "        <subsystem_collection Name=\"subsystems\">\n"
+                 "            <subsystem Id=\"1\" Type=\"subsystem1\"/>\n"
+                 "            <subsystem Id=\"2\" Type=\"subsystem2\"/>\n"
+                 "        </subsystem_collection>\n"
+                 "    </children>\n"
+                 "    <inputs/>\n"
+                 "    <outputs/>\n"
+                 "    <links/>\n"
+                 "</system>\n");
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
@@ -970,6 +934,3 @@ TEST_CASE("Instance serializer: System")
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == system);
 }
-
-
-

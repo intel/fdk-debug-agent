@@ -33,7 +33,6 @@ namespace windows
 /** Name of a wpp session.
  * This name is used to know if a session is already running. */
 static const char wppSessionName[] = "AudioDspFwLog";
-
 }
 }
 }

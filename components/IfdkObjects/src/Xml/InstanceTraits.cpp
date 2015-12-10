@@ -107,5 +107,3 @@ const std::string InstanceTraits<ServiceCollection>::tag("service_collection");
 }
 }
 }
-
-

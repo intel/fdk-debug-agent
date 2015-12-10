@@ -35,13 +35,12 @@ namespace dsp_fw
 
 struct TaskProps
 {
-    uint32_t  task_id;
-    std::vector<CompoundModuleId>  module_instance_id;
+    uint32_t task_id;
+    std::vector<CompoundModuleId> module_instance_id;
 
-    bool operator ==(const TaskProps &other) const
+    bool operator==(const TaskProps &other) const
     {
-        return task_id == other.task_id &&
-            module_instance_id == other.module_instance_id;
+        return task_id == other.task_id && module_instance_id == other.module_instance_id;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -59,15 +58,14 @@ struct TaskProps
 
 struct SchedulerProps
 {
-    uint32_t   processing_domain;
-    uint32_t   core_id;
-    std::vector<TaskProps>  task_info;
+    uint32_t processing_domain;
+    uint32_t core_id;
+    std::vector<TaskProps> task_info;
 
-    bool operator ==(const SchedulerProps &other) const
+    bool operator==(const SchedulerProps &other) const
     {
-        return processing_domain == other.processing_domain &&
-            core_id == other.core_id &&
-            task_info == other.task_info;
+        return processing_domain == other.processing_domain && core_id == other.core_id &&
+               task_info == other.task_info;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -87,9 +85,9 @@ struct SchedulerProps
 
 struct SchedulersInfo
 {
-    std::vector<SchedulerProps>  scheduler_info;
+    std::vector<SchedulerProps> scheduler_info;
 
-    bool operator ==(const SchedulersInfo &other) const
+    bool operator==(const SchedulersInfo &other) const
     {
         return scheduler_info == other.scheduler_info;
     }
@@ -104,7 +102,6 @@ struct SchedulersInfo
         writer.writeVector<ArraySizeType>(scheduler_info);
     }
 };
-
 }
 }
 }

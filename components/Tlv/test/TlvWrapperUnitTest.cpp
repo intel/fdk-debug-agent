@@ -32,15 +32,14 @@ struct ATestValueType
 
     bool operator==(const ATestValueType &other)
     {
-        return anIntField == other.anIntField
-            && aCharField == other.aCharField
-            && aShortField == other.aShortField;
+        return anIntField == other.anIntField && aCharField == other.aCharField &&
+               aShortField == other.aShortField;
     }
 };
 
 TEST_CASE("TlvWrapper", "[WrapperRead]")
 {
-    ATestValueType testValue {};
+    ATestValueType testValue{};
     bool testValueIsValid = false;
     TlvWrapper<ATestValueType> tlvWrapper(testValue, testValueIsValid);
 
@@ -49,7 +48,7 @@ TEST_CASE("TlvWrapper", "[WrapperRead]")
     CHECK(tlvWrapper.isValidSize(sizeof(ATestValueType) + 1) == false);
     CHECK(tlvWrapper.isValidSize(sizeof(ATestValueType) - 1) == false);
 
-    ATestValueType valueToBeRead = { 1234, 56, 789};
+    ATestValueType valueToBeRead = {1234, 56, 789};
     const char *rawValue = reinterpret_cast<const char *>(&valueToBeRead);
 
     tlvWrapper.readFrom(rawValue, sizeof(ATestValueType));

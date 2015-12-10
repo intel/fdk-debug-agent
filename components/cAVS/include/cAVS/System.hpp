@@ -43,9 +43,7 @@ public:
     class Exception : public std::logic_error
     {
     public:
-        explicit Exception(const std::string& what)
-        : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
     /** Exclusive resource used to retrieve log data */
@@ -59,23 +57,19 @@ public:
          *
          * @throw System::Exception
          */
-        void doLogStream(std::ostream &os)
-        {
-            mSystem.doLogStreamInternal(os);
-        }
+        void doLogStream(std::ostream &os) { mSystem.doLogStreamInternal(os); }
 
     private:
         friend class System;
 
         /* Called by the System class only */
-        LogStreamResource(System &system) : mLocker(system.mLogStreamMutex, std::defer_lock),
-            mSystem(system) {}
+        LogStreamResource(System &system)
+            : mLocker(system.mLogStreamMutex, std::defer_lock), mSystem(system)
+        {
+        }
 
         /* Called by the System class only */
-        bool tryLock()
-        {
-            return mLocker.try_lock();
-        }
+        bool tryLock() { return mLocker.try_lock(); }
 
         std::unique_lock<std::mutex> mLocker;
         System &mSystem;
@@ -126,25 +120,22 @@ public:
 
     /** Set module parameter */
     void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        const util::Buffer &parameterPayload);
+                            const util::Buffer &parameterPayload);
 
     /** Get module parameter */
     void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        util::Buffer &parameterPayload);
+                            util::Buffer &parameterPayload);
 
     /** @return topology */
     void getTopology(Topology &topology);
 
     /** Stop internal threads and unblock consumer threads */
-    void stop() NOEXCEPT
-    {
-        mDriver->stop();
-    }
+    void stop() NOEXCEPT { mDriver->stop(); }
 
 private:
     /* Make this class non copyable */
     System(const System &) = delete;
-    System & operator=(const System &) = delete;
+    System &operator=(const System &) = delete;
 
     static std::unique_ptr<Driver> createDriver(const DriverFactory &driverFactory);
     void doLogStreamInternal(std::ostream &os);
@@ -169,8 +160,5 @@ private:
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;
 };
-
 }
 }
-
-

@@ -28,8 +28,7 @@ namespace rest
 
 Resource::ResponsePtr Resource::handleRequest(const Request &request)
 {
-    switch (request.getVerb())
-    {
+    switch (request.getVerb()) {
     case Request::Verb::Get:
         return handleGet(request);
     case Request::Verb::Put:
@@ -61,6 +60,5 @@ Resource::ResponsePtr Resource::handleDelete(const Request &request)
 {
     throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
-
 }
 }

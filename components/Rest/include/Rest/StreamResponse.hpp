@@ -36,7 +36,7 @@ namespace rest
  * A response is an HTTP status to be sent in the HTTP header and an HTTP body to be sent
  * subsequently. The HTTP body data are provided by a std::istream.
  */
-class StreamResponse final: public Response
+class StreamResponse final : public Response
 {
 public:
     using base = Response;
@@ -47,9 +47,8 @@ public:
      * @param[in] istream response body data to be sent
      * @throw Response::HttpError
      */
-    explicit StreamResponse(const std::string &contentType, std::unique_ptr<std::istream> istream):
-        base(contentType),
-        mIstream(std::move(istream))
+    explicit StreamResponse(const std::string &contentType, std::unique_ptr<std::istream> istream)
+        : base(contentType), mIstream(std::move(istream))
     {
         if (mContentType.empty()) {
 
@@ -65,21 +64,17 @@ public:
 
     virtual void sendHttpBody() override
     {
-        try
-        {
+        try {
             base::sendHttpBody();
             Poco::StreamCopier::copyStream(*mIstream, *mOut);
-        }
-        catch (std::exception &e)
-        {
-            throw HttpAbort(
-                std::string("HTTP abort due to exception: ") + typeid(e).name() + ": " + e.what());
+        } catch (std::exception &e) {
+            throw HttpAbort(std::string("HTTP abort due to exception: ") + typeid(e).name() + ": " +
+                            e.what());
         }
     }
 
 private:
     std::unique_ptr<std::istream> mIstream;
 };
-
 }
 }

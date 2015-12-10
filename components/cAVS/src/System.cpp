@@ -31,47 +31,34 @@ namespace debug_agent
 namespace cavs
 {
 
-System::System(const DriverFactory &driverFactory):
-    mDriver(std::move(createDriver(driverFactory))),
-    mModuleEntries(),
-    mFwConfig(),
-    mHwConfig()
+System::System(const DriverFactory &driverFactory)
+    : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig()
 {
     if (mDriver == nullptr) {
 
         throw Exception("Driver factory has failed");
     }
-    try
-    {
+    try {
         mDriver->getModuleHandler().getFwConfig(mFwConfig);
-    }
-    catch (ModuleHandler::Exception &e)
-    {
+    } catch (ModuleHandler::Exception &e) {
         /** @todo use logging */
         std::cout << "Unable to get FW config: " + std::string(e.what()) << std::endl;
     }
-    try
-    {
+    try {
         mDriver->getModuleHandler().getHwConfig(mHwConfig);
-    }
-    catch (ModuleHandler::Exception &e)
-    {
+    } catch (ModuleHandler::Exception &e) {
         /** @todo use logging */
         std::cout << "Unable to get HW config: " + std::string(e.what()) << std::endl;
     }
 
     if (mFwConfig.isModulesCountValid) {
-        try
-        {
+        try {
             mDriver->getModuleHandler().getModulesEntries(mFwConfig.modulesCount, mModuleEntries);
-        }
-        catch (ModuleHandler::Exception &e)
-        {
+        } catch (ModuleHandler::Exception &e) {
             /** @todo use logging */
             std::cout << "Unable to get module entries: " + std::string(e.what()) << std::endl;
         }
-    }
-    else {
+    } else {
         /** @todo use logging */
         std::cout << "Cannot get module entries: module count is invalid." << std::endl;
     }
@@ -79,36 +66,27 @@ System::System(const DriverFactory &driverFactory):
 
 std::unique_ptr<Driver> System::createDriver(const DriverFactory &driverFactory)
 {
-    try
-    {
+    try {
         return driverFactory.newDriver();
-    }
-    catch (DriverFactory::Exception e)
-    {
+    } catch (DriverFactory::Exception e) {
         throw Exception("Unable to create driver: " + std::string(e.what()));
     }
 }
 
 void System::setLogParameters(Logger::Parameters &parameters)
 {
-    try
-    {
+    try {
         mDriver->getLogger().setParameters(parameters);
-    }
-    catch (Logger::Exception &e)
-    {
+    } catch (Logger::Exception &e) {
         throw Exception("Unable to set log parameter: " + std::string(e.what()));
     }
 }
 
 Logger::Parameters System::getLogParameters()
 {
-    try
-    {
+    try {
         return mDriver->getLogger().getParameters();
-    }
-    catch (Logger::Exception &e)
-    {
+    } catch (Logger::Exception &e) {
         throw Exception("Unable to get log parameter: " + std::string(e.what()));
     }
 }
@@ -136,8 +114,7 @@ std::unique_ptr<System::LogStreamResource> System::tryToAcquireLogStreamResource
     std::unique_ptr<System::LogStreamResource> resource(new System::LogStreamResource(*this));
     if (resource->tryLock()) {
         return resource;
-    }
-    else {
+    } else {
         return nullptr;
     }
 }
@@ -150,17 +127,17 @@ void System::doLogStreamInternal(std::ostream &os)
 }
 
 void System::setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    const util::Buffer &parameterPayload)
+                                const util::Buffer &parameterPayload)
 {
     mDriver->getModuleHandler().setModuleParameter(moduleId, instanceId, parameterId,
-        parameterPayload);
+                                                   parameterPayload);
 }
 
 void System::getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    util::Buffer &parameterPayload)
+                                util::Buffer &parameterPayload)
 {
     mDriver->getModuleHandler().getModuleParameter(moduleId, instanceId, parameterId,
-        parameterPayload);
+                                                   parameterPayload);
 }
 
 void System::getTopology(Topology &topology)
@@ -175,12 +152,9 @@ void System::getTopology(Topology &topology)
         throw Exception("Gate count is invalid.");
     }
 
-    try
-    {
+    try {
         handler.getGatewaysInfo(mHwConfig.gatewayCount, topology.gateways);
-    }
-    catch (ModuleHandler::Exception &e)
-    {
+    } catch (ModuleHandler::Exception &e) {
         throw Exception("Can not retrieve gateways: " + std::string(e.what()));
     }
 
@@ -190,12 +164,9 @@ void System::getTopology(Topology &topology)
     }
 
     std::vector<uint32_t> pipelineIds;
-    try
-    {
+    try {
         handler.getPipelineIdList(mFwConfig.maxPplCount, pipelineIds);
-    }
-    catch (ModuleHandler::Exception &e)
-    {
+    } catch (ModuleHandler::Exception &e) {
         throw Exception("Can not retrieve pipeline ids: " + std::string(e.what()));
     }
 
@@ -210,20 +181,17 @@ void System::getTopology(Topology &topology)
             for (auto instanceId : props.module_instances) {
                 moduleInstanceIds.insert(instanceId);
             }
-        }
-        catch (ModuleHandler::Exception &e)
-        {
+        } catch (ModuleHandler::Exception &e) {
             throw Exception("Can not retrieve pipeline props of id " + std::to_string(pplId) +
-                " : " + std::string(e.what()));
+                            " : " + std::string(e.what()));
         }
     }
     /* According to the SwAS the pipe collection has to be ordered from
      * highest priority to lowest priority (highest priority is lowest value) */
-    std::sort(
-        topology.pipelines.begin(),
-        topology.pipelines.end(),
-        [](dsp_fw::PplProps pipeA, dsp_fw::PplProps pipeB)
-        { return pipeA.priority < pipeB.priority; });
+    std::sort(topology.pipelines.begin(), topology.pipelines.end(),
+              [](dsp_fw::PplProps pipeA, dsp_fw::PplProps pipeB) {
+                  return pipeA.priority < pipeB.priority;
+              });
 
     /* Retrieving scheduler props*/
     if (!mHwConfig.isDspCoreCountValid) {
@@ -231,8 +199,7 @@ void System::getTopology(Topology &topology)
     }
 
     for (uint32_t coreId = 0; coreId < mHwConfig.dspCoreCount; coreId++) {
-        try
-        {
+        try {
             dsp_fw::SchedulersInfo info;
             handler.getSchedulersInfo(coreId, info);
             topology.schedulers.push_back(info);
@@ -245,37 +212,27 @@ void System::getTopology(Topology &topology)
                     }
                 }
             }
-        }
-        catch (ModuleHandler::Exception &e)
-        {
+        } catch (ModuleHandler::Exception &e) {
             throw Exception("Can not retrieve scheduler props of core id: " +
-                std::to_string(coreId) + " : " + std::string(e.what()));
+                            std::to_string(coreId) + " : " + std::string(e.what()));
         }
     }
 
     /* Retrieving module instances*/
     for (auto &compoundId : moduleInstanceIds) {
-        try
-        {
+        try {
             dsp_fw::ModuleInstanceProps props;
-            handler.getModuleInstanceProps(compoundId.moduleId,
-                compoundId.instanceId, props);
+            handler.getModuleInstanceProps(compoundId.moduleId, compoundId.instanceId, props);
             topology.moduleInstances[props.id] = props;
-        }
-        catch (ModuleHandler::Exception &e)
-        {
+        } catch (ModuleHandler::Exception &e) {
             throw Exception("Can not retrieve module instance with id: (" +
-                std::to_string(compoundId.moduleId) + "," +
-                std::to_string(compoundId.instanceId) + ") : " +
-                std::string(e.what()));
+                            std::to_string(compoundId.moduleId) + "," +
+                            std::to_string(compoundId.instanceId) + ") : " + std::string(e.what()));
         }
     }
 
     /* Compute links */
     topology.computeLinks();
 }
-
 }
 }
-
-

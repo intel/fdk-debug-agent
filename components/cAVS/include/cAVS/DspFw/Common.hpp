@@ -44,16 +44,13 @@ struct CompoundModuleId
     uint16_t moduleId;
     uint16_t instanceId;
 
-    bool operator ==(const CompoundModuleId &other) const
+    bool operator==(const CompoundModuleId &other) const
     {
         return moduleId == other.moduleId && instanceId == other.instanceId;
     }
 
     /* Required because this class is used as key of std::map */
-    bool operator<(const CompoundModuleId& other) const
-    {
-        return toInt(*this) < toInt(other);
-    }
+    bool operator<(const CompoundModuleId &other) const { return toInt(*this) < toInt(other); }
 
     void fromStream(util::ByteStreamReader &reader)
     {
@@ -86,12 +83,11 @@ private:
     }
 };
 
-static std::ostream& operator<< (std::ostream& stream, const CompoundModuleId& id)
+static std::ostream &operator<<(std::ostream &stream, const CompoundModuleId &id)
 {
     stream << id.toString();
     return stream;
 }
-
 }
 }
 }

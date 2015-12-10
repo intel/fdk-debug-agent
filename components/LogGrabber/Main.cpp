@@ -47,18 +47,16 @@ protected:
         std::unique_ptr<WppClient> wppClient;
         if (params.empty()) {
             wppClient = std::move(std::make_unique<RealTimeWppClient>());
-        }
-        else if (params.size() == 1) {
+        } else if (params.size() == 1) {
             wppClient = std::move(std::make_unique<FileWppClient>(params[0]));
-        }
-        else {
+        } else {
             std::cout << "Usage: Loggraber [log input file]" << std::endl;
             return 1;
         }
 
         /* Starting a thread that will listen Ctrl+c in order to terminate the application */
-        std::thread userExitRequestThread(
-            &Application::waitForUserInterruption, this, std::ref(*wppClient));
+        std::thread userExitRequestThread(&Application::waitForUserInterruption, this,
+                                          std::ref(*wppClient));
 
         /* Note: if the user does Ctrl+c when the instruction pointer is here, WppClient::Stop()
          * will be called before WppClient::collectEntries(). But by contract this case is properly
@@ -67,20 +65,17 @@ protected:
          * @see WppClient::Stop()
          */
 
-        std::cout
-            << "LogGrabber" << std::endl
-            << "----------" << std::endl
-            << "Press Ctrl+C to stop." << std::endl << std::endl;
+        std::cout << "LogGrabber" << std::endl
+                  << "----------" << std::endl
+                  << "Press Ctrl+C to stop." << std::endl
+                  << std::endl;
 
         int result = 0;
 
-        try
-        {
+        try {
             LogEntryListener listener;
             wppClient->collectLogEntries(listener);
-        }
-        catch (WppClient::Exception &e)
-        {
+        } catch (WppClient::Exception &e) {
             std::cout << "WppClient exception: " << e.what() << std::endl;
             result = 1;
         }
@@ -102,12 +97,12 @@ private:
     class LogEntryListener : public WppLogEntryListener
     {
     public:
-        LogEntryListener()  {}
+        LogEntryListener() {}
 
         virtual void onLogEntry(uint32_t coreId, uint8_t *buffer, uint32_t size) override
         {
             std::cout << "Entry: coreId=" << coreId << " size=" << size
-                << " buffer=" << toHex(buffer, size, maxPrintedBufferSize) << std::endl;
+                      << " buffer=" << toHex(buffer, size, maxPrintedBufferSize) << std::endl;
         }
     };
 
@@ -125,8 +120,7 @@ private:
         ss << std::hex << std::setfill('0');
 
         uint32_t count = std::min(printedOnlySize, size);
-        for (int i = 0; i < count; ++i)
-        {
+        for (int i = 0; i < count; ++i) {
             ss << std::setw(2) << static_cast<uint32_t>(buf[i]);
         }
 
@@ -138,7 +132,7 @@ private:
     }
 };
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     Application application;
     return application.run(argc, argv);

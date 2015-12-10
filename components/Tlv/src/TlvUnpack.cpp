@@ -27,13 +27,10 @@ namespace debug_agent
 namespace tlv
 {
 
-TlvUnpack::TlvUnpack(const TlvResponseHandlerInterface &responseHandler,
-                     const char *tlvBuffer,
-                     std::size_t tlvBufferSize):
-    mResponseHandler(responseHandler),
-    mTlvBuffer(tlvBuffer),
-    mTlvBufferSize(tlvBufferSize),
-    mReadIndex(0)
+TlvUnpack::TlvUnpack(const TlvResponseHandlerInterface &responseHandler, const char *tlvBuffer,
+                     std::size_t tlvBufferSize)
+    : mResponseHandler(responseHandler), mTlvBuffer(tlvBuffer), mTlvBufferSize(tlvBufferSize),
+      mReadIndex(0)
 {
     if (mTlvBuffer == nullptr) {
 
@@ -74,15 +71,10 @@ bool TlvUnpack::readNext()
     // Read value
     if (mTlvBufferSize - mReadIndex >= length) {
 
-        try
-        {
+        try {
             tlvWrapper->readFrom(mTlvBuffer + mReadIndex, length);
-        }
-        catch (TlvWrapperInterface::Exception &e)
-        {
-            throw Exception("Error reading value for tag "
-                + std::to_string(tag)
-                + ": " + e.what());
+        } catch (TlvWrapperInterface::Exception &e) {
+            throw Exception("Error reading value for tag " + std::to_string(tag) + ": " + e.what());
         }
         mReadIndex += length;
     } else {
@@ -107,6 +99,5 @@ bool TlvUnpack::popUint32(uint32_t &value)
         return false;
     }
 }
-
 }
 }

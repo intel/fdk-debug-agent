@@ -47,8 +47,7 @@ const std::string BaseModelConverter::collectionName_gateway = "gateways";
 const std::string BaseModelConverter::collectionName_module = "modules";
 
 const std::vector<std::string> BaseModelConverter::staticTypeCollections = {
-    collectionName_pipe, collectionName_core, collectionName_task
-};
+    collectionName_pipe, collectionName_core, collectionName_task};
 
 const std::string BaseModelConverter::typeName_pipe = "pipe";
 const std::string BaseModelConverter::typeName_core = "core";
@@ -57,24 +56,21 @@ const std::string BaseModelConverter::typeDescription_pipe = "cAVS pipe type";
 const std::string BaseModelConverter::typeDescription_core = "cAVS core type";
 const std::string BaseModelConverter::typeDescription_task = "cAVS task type";
 
-const std::vector<std::string> BaseModelConverter::staticTypes = {
-    typeName_pipe, typeName_core, typeName_task
-};
+const std::vector<std::string> BaseModelConverter::staticTypes = {typeName_pipe, typeName_core,
+                                                                  typeName_task};
 
 const std::string BaseModelConverter::logServiceTypeName = "fwlogs";
 const std::string BaseModelConverter::logServiceId = "0";
 const std::string BaseModelConverter::logServiceDescription = "cAVS log service";
 
-const std::vector<std::string> BaseModelConverter::staticServiceTypes = {
-    logServiceTypeName
-};
+const std::vector<std::string> BaseModelConverter::staticServiceTypes = {logServiceTypeName};
 
 const dsp_fw::ModuleEntry &BaseModelConverter::findModuleEntry(uint32_t moduleId)
 {
     const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
     if (moduleId > entries.size()) {
         throw Exception("Wrong module id: " + std::to_string(moduleId) + " max: " +
-            std::to_string(entries.size() - 1));
+                        std::to_string(entries.size() - 1));
     }
     return entries[moduleId];
 }
@@ -87,11 +83,10 @@ std::string BaseModelConverter::findModuleEntryName(uint32_t moduleId)
      * "module-aec".
      */
     return "module-" +
-        util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
+           util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
 }
 
-std::string BaseModelConverter::findGatewayTypeName(
-    const dsp_fw::ConnectorNodeId &connectorId)
+std::string BaseModelConverter::findGatewayTypeName(const dsp_fw::ConnectorNodeId &connectorId)
 {
     /* Casting the type into the associated enum */
     auto connectorType = static_cast<dsp_fw::ConnectorNodeId::Type>(connectorId.val.f.dma_type);
@@ -99,18 +94,15 @@ std::string BaseModelConverter::findGatewayTypeName(
     /* Finding the gateway name */
     auto &helper = dsp_fw::ConnectorNodeId::getTypeEnumHelper();
     if (!helper.isValid(connectorType)) {
-        throw Exception(
-            "Unknown gateway type: " + std::to_string(connectorId.val.f.dma_type));
+        throw Exception("Unknown gateway type: " + std::to_string(connectorId.val.f.dma_type));
     }
 
     return helper.toString(connectorType);
 }
 
-uint32_t BaseModelConverter::findGatewayInstanceId(
-    const dsp_fw::ConnectorNodeId &connectorId)
+uint32_t BaseModelConverter::findGatewayInstanceId(const dsp_fw::ConnectorNodeId &connectorId)
 {
     return connectorId.val.f.v_index;
 }
-
 }
 }

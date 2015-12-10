@@ -84,10 +84,9 @@ const std::string LogStreamer::formatType = "fwlogs";
 const int LogStreamer::majorVersion = 1;
 const int LogStreamer::minorVersion = 0;
 
-LogStreamer::LogStreamer(Logger &logger, const std::vector<dsp_fw::ModuleEntry> &moduleEntries) :
-    base(systemType, formatType, majorVersion, minorVersion),
-    mLogger(logger),
-    mModuleEntries(moduleEntries)
+LogStreamer::LogStreamer(Logger &logger, const std::vector<dsp_fw::ModuleEntry> &moduleEntries)
+    : base(systemType, formatType, majorVersion, minorVersion), mLogger(logger),
+      mModuleEntries(moduleEntries)
 {
     /**
      * @todo add properties required by SwAS for IFDK:cavs:fwlog once the SwAS defines them,
@@ -118,8 +117,7 @@ bool LogStreamer::streamNextFormatData(std::ostream &os)
             return false;
         }
         os << *block;
-    }
-    catch (Logger::Exception &e) {
+    } catch (Logger::Exception &e) {
 
         throw Streamer::Exception(std::string("Fail to read log: ") + e.what());
     }
@@ -127,6 +125,5 @@ bool LogStreamer::streamNextFormatData(std::ostream &os)
     /* Log stream is intrinsically endless */
     return true;
 }
-
 }
 }

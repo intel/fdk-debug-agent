@@ -43,16 +43,12 @@ public:
     virtual ModuleHandler &getModuleHandler() = 0;
 
     /** Stop threads and unblock consumer threads, currently only logging is concerned. */
-    void stop() NOEXCEPT
-    {
-        getLogger().stop();
-    }
+    void stop() NOEXCEPT { getLogger().stop(); }
 
 private:
     /* Make this class non copyable */
     Driver(const Driver &) = delete;
-    Driver & operator=(const Driver &) = delete;
+    Driver &operator=(const Driver &) = delete;
 };
 };
-
 };

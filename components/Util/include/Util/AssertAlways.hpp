@@ -25,10 +25,10 @@
 #include <iostream>
 
 /** @todo consider log instead of std::cout */
-#define ASSERT_ALWAYS(cond)                                 \
-    {                                                       \
-        if (!(cond)) {                                      \
-            std::cout << "ASSERTION FAILED : " #cond;       \
-            abort();                                        \
-        }                                                   \
+#define ASSERT_ALWAYS(cond)                                                                        \
+    {                                                                                              \
+        if (!(cond)) {                                                                             \
+            std::cout << "ASSERTION FAILED : " #cond;                                              \
+            abort();                                                                               \
+        }                                                                                          \
     }

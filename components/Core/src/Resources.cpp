@@ -76,17 +76,16 @@ static const std::string ContentTypeIfdkFile("application/vnd.ifdk-file");
  *
  *  @returns a std::string corresponding to the value of an XML node
  */
-static const std::string getNodeValueFromXPath(const Poco::XML::Document* document,
-                                                const std::string& url) {
-    Poco::XML::Node* node = document->getNodeByPath(url);
+static const std::string getNodeValueFromXPath(const Poco::XML::Document *document,
+                                               const std::string &url)
+{
+    Poco::XML::Node *node = document->getNodeByPath(url);
     if (node) {
         return Poco::XML::fromXMLString(node->innerText());
-    }
-    else
-    {
-        throw Response::HttpError (
-            Response::ErrorStatus::BadRequest,
-            "Invalid parameters format: node for path \"" + url + "\" not found");
+    } else {
+        throw Response::HttpError(Response::ErrorStatus::BadRequest,
+                                  "Invalid parameters format: node for path \"" + url +
+                                      "\" not found");
     }
 }
 
@@ -109,8 +108,7 @@ Resource::ResponsePtr SystemInstanceResource::handleGet(const Request &request)
 Resource::ResponsePtr TypeResource::handleGet(const Request &request)
 {
     std::string typeName = request.getIdentifierValue("type_name");
-    std::shared_ptr<const type::Type> typePtr =
-        mTypeModel.getType(typeName);
+    std::shared_ptr<const type::Type> typePtr = mTypeModel.getType(typeName);
 
     if (typePtr == nullptr) {
         throw Response::HttpError(Response::ErrorStatus::BadRequest, "Unknown type: " + typeName);
@@ -132,7 +130,7 @@ Resource::ResponsePtr InstanceCollectionResource::handleGet(const Request &reque
         auto handle = guard->get();
         if (handle == nullptr) {
             throw Response::HttpError(Response::ErrorStatus::InternalError,
-                "Instance model is undefined.");
+                                      "Instance model is undefined.");
         }
         std::shared_ptr<const instance::BaseCollection> collection =
             handle->getCollection(typeName);
@@ -140,7 +138,7 @@ Resource::ResponsePtr InstanceCollectionResource::handleGet(const Request &reque
         /* check nullptr using get() to avoid any KW error */
         if (collection.get() == nullptr) {
             throw Response::HttpError(Response::ErrorStatus::BadRequest,
-                "Unknown type: " + typeName);
+                                      "Unknown type: " + typeName);
         }
 
         collection->accept(serializer);
@@ -160,7 +158,7 @@ Resource::ResponsePtr InstanceResource::handleGet(const Request &request)
         auto handle = guard->get();
         if (handle == nullptr) {
             throw Response::HttpError(Response::ErrorStatus::InternalError,
-                "Instance model is undefined.");
+                                      "Instance model is undefined.");
         }
         std::shared_ptr<const instance::Instance> instancePtr =
             handle->getInstance(typeName, instanceId);
@@ -168,7 +166,8 @@ Resource::ResponsePtr InstanceResource::handleGet(const Request &request)
         /* check nullptr using get() to avoid any KW error */
         if (instancePtr.get() == nullptr) {
             throw Response::HttpError(Response::ErrorStatus::BadRequest,
-                "Unknown instance: type=" + typeName + " instance_id=" + instanceId);
+                                      "Unknown instance: type=" + typeName + " instance_id=" +
+                                          instanceId);
         }
 
         instancePtr->accept(serializer);
@@ -177,24 +176,20 @@ Resource::ResponsePtr InstanceResource::handleGet(const Request &request)
     return std::make_unique<Response>(ContentTypeXml, serializer.getXml());
 }
 
-
 Resource::ResponsePtr RefreshSubsystemResource::handlePost(const Request &request)
 {
     std::shared_ptr<InstanceModel> instanceModel;
     auto guard = mInstanceModel.lock();
 
-    try
-    {
+    try {
         InstanceModelConverter converter(mSystem);
         instanceModel = converter.createModel();
-    }
-    catch (BaseModelConverter::Exception &e)
-    {
+    } catch (BaseModelConverter::Exception &e) {
         /* Topology retrieving has failed: invalidate the previous one */
         guard->reset();
 
         throw Response::HttpError(Response::ErrorStatus::InternalError,
-            "Cannot refresh instance model: " + std::string(e.what()));
+                                  "Cannot refresh instance model: " + std::string(e.what()));
     }
 
     /* Apply new topology */
@@ -207,30 +202,28 @@ Resource::ResponsePtr LogServiceInstanceControlParametersResource::handleGet(con
 {
     Logger::Parameters logParameters;
 
-    try
-    {
+    try {
         logParameters = mSystem.getLogParameters();
-    }
-    catch (System::Exception &e)
-    {
+    } catch (System::Exception &e) {
         throw Response::HttpError(Response::ErrorStatus::BadRequest,
-            std::string("Cannot get log parameters : ") + e.what());
+                                  std::string("Cannot get log parameters : ") + e.what());
     }
 
     auto xml = std::make_unique<std::stringstream>();
     *xml << "<control_parameters>\n"
-        "    <BooleanParameter Name=\"Started\">" <<
-        logParameters.mIsStarted << "</BooleanParameter>\n"
-        "    <ParameterBlock Name=\"Buffering\">\n"
-        "        <IntegerParameter Name=\"Size\">100</IntegerParameter>\n"
-        "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
-        "    </ParameterBlock>\n"
-        "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
-        "    <EnumParameter Name=\"Verbosity\">" <<
-        Logger::toString(logParameters.mLevel) << "</EnumParameter>\n"
-        "    <BooleanParameter Name=\"ViaPTI\">" <<
-        (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>\n"
-        "</control_parameters>\n";
+            "    <BooleanParameter Name=\"Started\">"
+         << logParameters.mIsStarted
+         << "</BooleanParameter>\n"
+            "    <ParameterBlock Name=\"Buffering\">\n"
+            "        <IntegerParameter Name=\"Size\">100</IntegerParameter>\n"
+            "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
+            "    </ParameterBlock>\n"
+            "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
+            "    <EnumParameter Name=\"Verbosity\">"
+         << Logger::toString(logParameters.mLevel) << "</EnumParameter>\n"
+                                                      "    <BooleanParameter Name=\"ViaPTI\">"
+         << (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>\n"
+                                                                      "</control_parameters>\n";
 
     return std::make_unique<StreamResponse>(ContentTypeXml, std::move(xml));
 }
@@ -248,43 +241,38 @@ Resource::ResponsePtr LogServiceInstanceControlParametersResource::handlePut(con
     static const std::string controlParametersUrl = "/control_parameters/";
 
     // Retrieve the Started BooleanParameter and its value
-    std::string startedNodeValue = getNodeValueFromXPath(document,
-        controlParametersUrl + "BooleanParameter[@Name='Started']");
+    std::string startedNodeValue =
+        getNodeValueFromXPath(document, controlParametersUrl + "BooleanParameter[@Name='Started']");
 
     // Retrieve the Verbosity EnumParameter and its value
-    std::string verbosityNodeValue = getNodeValueFromXPath(document,
-        controlParametersUrl + "EnumParameter[@Name='Verbosity']");
+    std::string verbosityNodeValue =
+        getNodeValueFromXPath(document, controlParametersUrl + "EnumParameter[@Name='Verbosity']");
 
     // Retrieve the ViaPTI BooleanParameter and its value
-    std::string viaPtiNodeValue = getNodeValueFromXPath(document,
-        controlParametersUrl + "BooleanParameter[@Name='ViaPTI']");
+    std::string viaPtiNodeValue =
+        getNodeValueFromXPath(document, controlParametersUrl + "BooleanParameter[@Name='ViaPTI']");
 
     // Parse each of the parameters found into their correct type
     Logger::Parameters logParameters;
     try {
-        logParameters.mIsStarted =
-            Poco::NumberParser::parseBool(startedNodeValue);
-        logParameters.mLevel =
-            Logger::levelFromString(verbosityNodeValue);
-        logParameters.mOutput =
-            Poco::NumberParser::parseBool(viaPtiNodeValue) ? Logger::Output::Pti :
-            Logger::Output::Sram;
-    }
-    catch (Logger::Exception &e) {
+        logParameters.mIsStarted = Poco::NumberParser::parseBool(startedNodeValue);
+        logParameters.mLevel = Logger::levelFromString(verbosityNodeValue);
+        logParameters.mOutput = Poco::NumberParser::parseBool(viaPtiNodeValue)
+                                    ? Logger::Output::Pti
+                                    : Logger::Output::Sram;
+    } catch (Logger::Exception &e) {
         throw Response::HttpError(Response::ErrorStatus::BadRequest,
-            std::string("Invalid value: ") + e.what());
-    }
-    catch (Poco::SyntaxException &e) {
+                                  std::string("Invalid value: ") + e.what());
+    } catch (Poco::SyntaxException &e) {
         throw Response::HttpError(Response::ErrorStatus::BadRequest,
-            std::string("Invalid Start/Stop request: ") + e.what());
+                                  std::string("Invalid Start/Stop request: ") + e.what());
     }
 
     try {
         mSystem.setLogParameters(logParameters);
-    }
-    catch (System::Exception &e) {
+    } catch (System::Exception &e) {
         throw Response::HttpError(Response::ErrorStatus::InternalError,
-            std::string("Fail to apply: ") + e.what());
+                                  std::string("Fail to apply: ") + e.what());
     }
 
     return std::make_unique<Response>();
@@ -293,26 +281,25 @@ Resource::ResponsePtr LogServiceInstanceControlParametersResource::handlePut(con
 Resource::ResponsePtr LogServiceTypeControlParametersResource::handleGet(const Request &request)
 {
     auto xml = std::make_unique<std::stringstream>();
-    *xml <<
-        "<control_parameters>\n"
-        "    <!-- service generic -->\n"
-        "    <BooleanParameter Name=\"Started\"/>\n"
-        "    <ParameterBlock Name=\"Buffering\">\n"
-        "        <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>\n"
-        "        <BooleanParameter Name=\"Circular\"/>\n"
-        "    </ParameterBlock>\n"
-        "    <BooleanParameter Name=\"PersistsState\"/>\n"
-        "    <!-- service specific -->\n"
-        "    <EnumParameter Size=\"8\" Name=\"Verbosity\">\n"
-        "        <ValuePair Numerical=\"2\" Literal=\"Critical\"/>\n"
-        "        <ValuePair Numerical=\"3\" Literal=\"High\"/>\n"
-        "        <ValuePair Numerical=\"4\" Literal=\"Medium\"/>\n"
-        "        <ValuePair Numerical=\"5\" Literal=\"Low\"/>\n"
-        "        <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>\n"
-        "    </EnumParameter>\n"
-        "    <BooleanParameter Name=\"ViaPTI\" "
-        "Description=\"Set to 1 if PTI interface is to be used\"/>\n"
-        "</control_parameters>\n";
+    *xml << "<control_parameters>\n"
+            "    <!-- service generic -->\n"
+            "    <BooleanParameter Name=\"Started\"/>\n"
+            "    <ParameterBlock Name=\"Buffering\">\n"
+            "        <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>\n"
+            "        <BooleanParameter Name=\"Circular\"/>\n"
+            "    </ParameterBlock>\n"
+            "    <BooleanParameter Name=\"PersistsState\"/>\n"
+            "    <!-- service specific -->\n"
+            "    <EnumParameter Size=\"8\" Name=\"Verbosity\">\n"
+            "        <ValuePair Numerical=\"2\" Literal=\"Critical\"/>\n"
+            "        <ValuePair Numerical=\"3\" Literal=\"High\"/>\n"
+            "        <ValuePair Numerical=\"4\" Literal=\"Medium\"/>\n"
+            "        <ValuePair Numerical=\"5\" Literal=\"Low\"/>\n"
+            "        <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>\n"
+            "    </EnumParameter>\n"
+            "    <BooleanParameter Name=\"ViaPTI\" "
+            "Description=\"Set to 1 if PTI interface is to be used\"/>\n"
+            "</control_parameters>\n";
 
     return std::make_unique<StreamResponse>(ContentTypeXml, std::move(xml));
 }
@@ -324,24 +311,20 @@ Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request
      * class shall be removed, and the Rest::CustomResponse shall be refactored to take the
      * doBody method as lambda and become final.
      */
-    class LogStreamResponse: public CustomResponse
+    class LogStreamResponse : public CustomResponse
     {
     public:
         LogStreamResponse(const std::string &contentType,
-            std::unique_ptr<System::LogStreamResource> logStreamResource):
-            CustomResponse(contentType),
-            mLogStreamResource(std::move(logStreamResource))
+                          std::unique_ptr<System::LogStreamResource> logStreamResource)
+            : CustomResponse(contentType), mLogStreamResource(std::move(logStreamResource))
         {
         }
 
         void doBodyResponse(std::ostream &out) override
         {
-            try
-            {
+            try {
                 mLogStreamResource->doLogStream(out);
-            }
-            catch (System::Exception &e)
-            {
+            } catch (System::Exception &e) {
                 throw Response::HttpAbort(std::string("cAVS Log stream error: ") + e.what());
             }
         }
@@ -354,7 +337,7 @@ Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request
     auto &&resource = mSystem.tryToAcquireLogStreamResource();
     if (resource == nullptr) {
         throw Response::HttpError(Response::ErrorStatus::Locked,
-            "Logging stream resource is already used.");
+                                  "Logging stream resource is already used.");
     }
 
     return std::make_unique<LogStreamResponse>(ContentTypeIfdkFile, std::move(resource));
@@ -367,6 +350,5 @@ Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request
      *       {logResource->doLogStream(out);});
      */
 }
-
 }
 }

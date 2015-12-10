@@ -90,9 +90,8 @@ std::string gatewayToString(const dsp_fw::ConnectorNodeId &connector)
         static_cast<dsp_fw::ConnectorNodeId::Type>(connector.val.f.dma_type);
 
     std::stringstream stream;
-    stream << "(" << dsp_fw::ConnectorNodeId::getTypeEnumHelper().toString(type)
-        << "(" << connector.val.f.dma_type << "), "
-        << connector.val.f.v_index << ")";
+    stream << "(" << dsp_fw::ConnectorNodeId::getTypeEnumHelper().toString(type) << "("
+           << connector.val.f.dma_type << "), " << connector.val.f.v_index << ")";
 
     return stream.str();
 }
@@ -110,20 +109,18 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
     html.paragraph("Module count: " + std::to_string(entries.size()));
 
     /* Module list column names */
-    std::vector<std::string> columns = {
-        "module_id",
-        "name",
-        "uuid",
-        "struct_id",
-        "type",
-        "hash",
-        "entry_point",
-        "cfg_offset",
-        "cfg_count",
-        "affinity_mask",
-        "intance_max_count",
-        "instance_stack_size"
-    };
+    std::vector<std::string> columns = {"module_id",
+                                        "name",
+                                        "uuid",
+                                        "struct_id",
+                                        "type",
+                                        "hash",
+                                        "entry_point",
+                                        "cfg_offset",
+                                        "cfg_count",
+                                        "affinity_mask",
+                                        "intance_max_count",
+                                        "instance_stack_size"};
 
     /* Adding segment column names */
     for (std::size_t i = 0; i < segmentCount; ++i) {
@@ -136,8 +133,7 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
     html.beginTable(columns);
 
     std::size_t moduleId = 0;
-    for (auto &entry : entries)
-    {
+    for (auto &entry : entries) {
         html.beginRow();
 
         html.cell(moduleId);
@@ -179,14 +175,11 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
 Resource::ResponsePtr TopologyDebugResource::handleGet(const Request &request)
 {
     Topology topology;
-    try
-    {
+    try {
         mSystem.getTopology(topology);
-    }
-    catch (cavs::System::Exception &e)
-    {
+    } catch (cavs::System::Exception &e) {
         throw Response::HttpError(Response::ErrorStatus::InternalError,
-            "Cannot get topology from fw: " + std::string(e.what()));
+                                  "Cannot get topology from fw: " + std::string(e.what()));
     }
 
     HtmlHelper html;
@@ -200,17 +193,13 @@ Resource::ResponsePtr TopologyDebugResource::handleGet(const Request &request)
 }
 
 void TopologyDebugResource::dumpGateways(HtmlHelper &html,
-    const std::vector<dsp_fw::GatewayProps> &gateways)
+                                         const std::vector<dsp_fw::GatewayProps> &gateways)
 {
     html.title("Gateways");
     html.paragraph("Gateway count: " + std::to_string(gateways.size()));
 
-    static const std::vector<std::string> gatewayColumns = {
-        "type index",
-        "type name",
-        "id",
-        "attrib"
-    };
+    static const std::vector<std::string> gatewayColumns = {"type index", "type name", "id",
+                                                            "attrib"};
 
     html.beginTable(gatewayColumns);
 
@@ -233,21 +222,15 @@ void TopologyDebugResource::dumpGateways(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpPipelines(HtmlHelper &html,
-    const std::vector<dsp_fw::PplProps> &pipelines)
+                                          const std::vector<dsp_fw::PplProps> &pipelines)
 {
     /* Pipes */
     html.title("Pipelines");
     html.paragraph("Pipeline count: " + std::to_string(pipelines.size()));
 
     static const std::vector<std::string> columns = {
-        "id",
-        "priority",
-        "total_memory_bytes",
-        "used_memory_bytes",
-        "context_pages",
-        "DP tasks",
-        "LL tasks",
-        "Module instances",
+        "id",       "priority", "total_memory_bytes", "used_memory_bytes", "context_pages",
+        "DP tasks", "LL tasks", "Module instances",
 
     };
 
@@ -271,17 +254,15 @@ void TopologyDebugResource::dumpPipelines(HtmlHelper &html,
     html.endTable();
 }
 
-void TopologyDebugResource::dumpAllSchedulers(HtmlHelper &html,
-    const std::vector<dsp_fw::SchedulersInfo> &allSchedulers)
+void TopologyDebugResource::dumpAllSchedulers(
+    HtmlHelper &html, const std::vector<dsp_fw::SchedulersInfo> &allSchedulers)
 {
     /* Pipes */
     html.title("Schedulers");
     html.paragraph("Core count: " + std::to_string(allSchedulers.size()));
 
     static const std::vector<std::string> columns = {
-        "core index",
-        "scheduler count",
-        "schedulers",
+        "core index", "scheduler count", "schedulers",
     };
 
     html.beginTable(columns);
@@ -305,13 +286,10 @@ void TopologyDebugResource::dumpAllSchedulers(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpCoreSchedulers(HtmlHelper &html,
-    const dsp_fw::SchedulersInfo &coreSchedulers)
+                                               const dsp_fw::SchedulersInfo &coreSchedulers)
 {
     static const std::vector<std::string> columns = {
-        "core_id",
-        "processing_domain",
-        "task count",
-        "tasks",
+        "core_id", "processing_domain", "task count", "tasks",
     };
 
     html.beginTable(columns);
@@ -333,12 +311,10 @@ void TopologyDebugResource::dumpCoreSchedulers(HtmlHelper &html,
     html.endTable();
 }
 
-void TopologyDebugResource::dumpTasks(HtmlHelper &html,
-    const std::vector<dsp_fw::TaskProps> &tasks)
+void TopologyDebugResource::dumpTasks(HtmlHelper &html, const std::vector<dsp_fw::TaskProps> &tasks)
 {
     static const std::vector<std::string> columns = {
-        "task_id",
-        "modules instances",
+        "task_id", "modules instances",
     };
 
     html.beginTable(columns);
@@ -356,7 +332,8 @@ void TopologyDebugResource::dumpTasks(HtmlHelper &html,
     html.endTable();
 }
 
-void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
+void TopologyDebugResource::dumpModuleInstances(
+    HtmlHelper &html,
     const std::map<dsp_fw::CompoundModuleId, dsp_fw::ModuleInstanceProps> &moduleInstances)
 {
     html.title("Module instances");
@@ -393,10 +370,9 @@ void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
         std::string moduleTypeName;
         if (module.id.moduleId < mSystem.getModuleEntries().size()) {
             const dsp_fw::ModuleEntry &entry = mSystem.getModuleEntries()[module.id.moduleId];
-            moduleTypeName = StringHelper::getStringFromFixedSizeArray(
-                entry.name, sizeof(entry.name));
-        }
-        else {
+            moduleTypeName =
+                StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
+        } else {
             moduleTypeName = "<wrong module id>";
         }
 
@@ -432,12 +408,10 @@ void TopologyDebugResource::dumpModuleInstances(HtmlHelper &html,
 }
 
 void TopologyDebugResource::dumpPins(HtmlHelper &html,
-    const std::vector<cavs::dsp_fw::PinProps> &pins)
+                                     const std::vector<cavs::dsp_fw::PinProps> &pins)
 {
     static const std::vector<std::string> columns = {
-        "phys_queue_id",
-        "stream_type",
-        "format",
+        "phys_queue_id", "stream_type", "format",
     };
 
     if (!pins.empty()) {
@@ -463,27 +437,22 @@ Resource::ResponsePtr ModelDumpDebugResource::handleGet(const Request &request)
     auto handle = guard->get();
     if (handle == nullptr) {
         throw Response::HttpError(Response::ErrorStatus::InternalError,
-            "Instance model is undefined.");
+                                  "Instance model is undefined.");
     }
 
     auto ss = std::make_unique<std::stringstream>();
 
-    try
-    {
+    try {
         FdkToolMockGenerator generator(*ss);
         generator.setTypeModel(mTypeModel);
         generator.setSystemInstance(mSystemInstance);
         generator.setInstanceModel(*handle);
-    }
-    catch (FdkToolMockGenerator::Exception &e)
-    {
+    } catch (FdkToolMockGenerator::Exception &e) {
         throw Response::HttpError(Response::ErrorStatus::InternalError,
-            std::string("Cannot create model archive: ") + e.what());
+                                  std::string("Cannot create model archive: ") + e.what());
     }
 
     return std::make_unique<StreamResponse>(ContentTypeZip, std::move(ss));
 }
-
-
 }
 }

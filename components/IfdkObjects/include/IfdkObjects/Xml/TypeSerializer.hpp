@@ -74,9 +74,6 @@ private:
     virtual void enter(const type::Outputs &instance) override;
     virtual void leave(bool isConcrete) override;
 };
-
 }
 }
 }
-
-

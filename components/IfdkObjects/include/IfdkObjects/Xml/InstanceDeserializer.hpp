@@ -33,17 +33,16 @@ namespace ifdk_objects
 namespace xml
 {
 
- /* XML Deserializer for the "Instance" data model.
-  *
-  * It implements the instance::Visitor interface.
-  */
+/* XML Deserializer for the "Instance" data model.
+ *
+ * It implements the instance::Visitor interface.
+ */
 class InstanceDeserializer final : public Deserializer<InstanceTraits>, public instance::Visitor
 {
 public:
     InstanceDeserializer(const std::string &xml) : Deserializer<InstanceTraits>(xml) {}
 
 private:
-
     /* References */
     virtual void enter(instance::Ref &instance, bool isConcrete) override;
     virtual void enter(instance::InstanceRef &instance) override;
@@ -104,8 +103,6 @@ private:
     template <class T>
     void collectionCommon(instance::GenericCollection<T> &collection);
 };
-
 }
 }
 }
-

@@ -230,9 +230,6 @@ void InstanceSerializer::leave(bool isConcrete)
         popElement();
     }
 }
-
 }
 }
 }
-
-

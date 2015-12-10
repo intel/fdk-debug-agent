@@ -31,7 +31,7 @@ void Streamer::doStream(std::ostream &os)
 {
     streamFirst(os);
 
-    while(os.good()) {
+    while (os.good()) {
 
         if (!streamNext(os)) {
             /* No more entries to proceed, returning */
@@ -43,12 +43,10 @@ void Streamer::doStream(std::ostream &os)
     }
 
     /* os.good() returns false */
-    throw Exception(
-        "Output stream error "
-        "(eof: " + std::to_string(os.eof()) +
-        " fail: " + std::to_string(os.fail()) +
-        " bad: " + std::to_string(os.bad()) +
-        ")");
+    throw Exception("Output stream error "
+                    "(eof: " +
+                    std::to_string(os.eof()) + " fail: " + std::to_string(os.fail()) + " bad: " +
+                    std::to_string(os.bad()) + ")");
 }
 
 void Streamer::streamFirst(std::ostream &)
@@ -61,6 +59,5 @@ std::ostream &operator<<(std::ostream &os, Streamer &s)
     s.doStream(os);
     return os;
 }
-
 }
 }

@@ -43,8 +43,7 @@ enum class StreamType : uint32_t
 static const util::EnumHelper<StreamType> &getStreamTypeHelper()
 {
     static const util::EnumHelper<StreamType> helper({
-        { StreamType::STREAM_TYPE_PCM, "PCM" },
-        { StreamType::STREAM_TYPE_MP3, "MP3" },
+        {StreamType::STREAM_TYPE_PCM, "PCM"}, {StreamType::STREAM_TYPE_MP3, "MP3"},
     });
 
     return helper;
@@ -62,10 +61,10 @@ enum class SamplingFrequency : uint32_t
     FS_32000HZ = 32000,
     FS_37800HZ = 37800, /** SRC only for 44100 */
     FS_44100HZ = 44100,
-    FS_48000HZ = 48000, /**< Default. */
-    FS_64000HZ = 64000, /** AAC, SRC only. */
-    FS_88200HZ = 88200, /** AAC, SRC only. */
-    FS_96000HZ = 96000, /** AAC, SRC only. */
+    FS_48000HZ = 48000,   /**< Default. */
+    FS_64000HZ = 64000,   /** AAC, SRC only. */
+    FS_88200HZ = 88200,   /** AAC, SRC only. */
+    FS_96000HZ = 96000,   /** AAC, SRC only. */
     FS_176400HZ = 176400, /** SRC only. */
     FS_192000HZ = 192000, /** SRC only. */
     FS_INVALID
@@ -84,11 +83,11 @@ enum class BitDepth : uint32_t
 static const util::EnumHelper<BitDepth> &getBitDepthHelper()
 {
     static const util::EnumHelper<BitDepth> helper({
-        { BitDepth::DEPTH_8BIT, "8" },
-        { BitDepth::DEPTH_16BIT, "16" },
-        { BitDepth::DEPTH_24BIT, "24" },
-        { BitDepth::DEPTH_32BIT, "32" },
-        { BitDepth::DEPTH_64BIT, "64" },
+        {BitDepth::DEPTH_8BIT, "8"},
+        {BitDepth::DEPTH_16BIT, "16"},
+        {BitDepth::DEPTH_24BIT, "24"},
+        {BitDepth::DEPTH_32BIT, "32"},
+        {BitDepth::DEPTH_64BIT, "64"},
     });
     return helper;
 };
@@ -96,14 +95,14 @@ static const util::EnumHelper<BitDepth> &getBitDepthHelper()
 enum class InterleavingStyle : uint32_t
 {
     CHANNELS_SAMPLES_INTERLEAVING = 0, /*!< [s1_ch1...s1_chN,...,sM_ch1...sM_chN] */
-    CHANNELS_BLOCKS_INTERLEAVING = 1, /*!< [s1_ch1...sM_ch1,...,s1_chN...sM_chN] */
+    CHANNELS_BLOCKS_INTERLEAVING = 1,  /*!< [s1_ch1...sM_ch1,...,s1_chN...sM_chN] */
 };
 
 static const util::EnumHelper<InterleavingStyle> &getInterleavingStyleHelper()
 {
     static const util::EnumHelper<InterleavingStyle> helper({
-        { InterleavingStyle::CHANNELS_SAMPLES_INTERLEAVING, "sample" },
-        { InterleavingStyle::CHANNELS_BLOCKS_INTERLEAVING, "block" },
+        {InterleavingStyle::CHANNELS_SAMPLES_INTERLEAVING, "sample"},
+        {InterleavingStyle::CHANNELS_BLOCKS_INTERLEAVING, "block"},
     });
 
     return helper;
@@ -113,61 +112,61 @@ using ChannelMap = uint32_t;
 
 enum class ChannelConfig : uint32_t
 {
-    CHANNEL_CONFIG_MONO = 0, /**< One channel only. */
-    CHANNEL_CONFIG_STEREO = 1, /**< L & R. */
-    CHANNEL_CONFIG_2_POINT_1 = 2, /**< L, R & LFE; PCM only. */
-    CHANNEL_CONFIG_3_POINT_0 = 3, /**< L, C & R; MP3 & AAC only. */
-    CHANNEL_CONFIG_3_POINT_1 = 4, /**< L, C, R & LFE; PCM only. */
-    CHANNEL_CONFIG_QUATRO = 5, /**< L, R, Ls & Rs; PCM only. */
-    CHANNEL_CONFIG_4_POINT_0 = 6, /**< L, C, R & Cs; MP3 & AAC only. */
-    CHANNEL_CONFIG_5_POINT_0 = 7, /**< L, C, R, Ls & Rs. */
-    CHANNEL_CONFIG_5_POINT_1 = 8, /**< L, C, R, Ls, Rs & LFE. */
-    CHANNEL_CONFIG_DUAL_MONO = 9, /**< One channel replicated in two. */
+    CHANNEL_CONFIG_MONO = 0,               /**< One channel only. */
+    CHANNEL_CONFIG_STEREO = 1,             /**< L & R. */
+    CHANNEL_CONFIG_2_POINT_1 = 2,          /**< L, R & LFE; PCM only. */
+    CHANNEL_CONFIG_3_POINT_0 = 3,          /**< L, C & R; MP3 & AAC only. */
+    CHANNEL_CONFIG_3_POINT_1 = 4,          /**< L, C, R & LFE; PCM only. */
+    CHANNEL_CONFIG_QUATRO = 5,             /**< L, R, Ls & Rs; PCM only. */
+    CHANNEL_CONFIG_4_POINT_0 = 6,          /**< L, C, R & Cs; MP3 & AAC only. */
+    CHANNEL_CONFIG_5_POINT_0 = 7,          /**< L, C, R, Ls & Rs. */
+    CHANNEL_CONFIG_5_POINT_1 = 8,          /**< L, C, R, Ls, Rs & LFE. */
+    CHANNEL_CONFIG_DUAL_MONO = 9,          /**< One channel replicated in two. */
     CHANNEL_CONFIG_I2S_DUAL_STEREO_0 = 10, /**< Stereo (L,R) in 4 slots, 1st stream:
                                             * [ L, R, -, - ] */
     CHANNEL_CONFIG_I2S_DUAL_STEREO_1 = 11, /**< Stereo (L,R) in 4 slots, 2nd stream:
                                             * [ -, -, L, R ] */
-    CHANNEL_CONFIG_7_POINT_1 = 12, /**< L, C, R, Ls, Rs & LFE., LS, RS */
+    CHANNEL_CONFIG_7_POINT_1 = 12,         /**< L, C, R, Ls, Rs & LFE., LS, RS */
     CHANNEL_CONFIG_INVALID
 };
 
 static const util::EnumHelper<ChannelConfig> &getChannelConfigHelper()
 {
     static const util::EnumHelper<ChannelConfig> helper({
-        { ChannelConfig::CHANNEL_CONFIG_MONO, "mono" },
-        { ChannelConfig::CHANNEL_CONFIG_STEREO, "stereo" },
-        { ChannelConfig::CHANNEL_CONFIG_2_POINT_1, "2.1" },
-        { ChannelConfig::CHANNEL_CONFIG_3_POINT_0, "3.0" },
-        { ChannelConfig::CHANNEL_CONFIG_3_POINT_1, "301" },
-        { ChannelConfig::CHANNEL_CONFIG_QUATRO, "quatro" },
-        { ChannelConfig::CHANNEL_CONFIG_4_POINT_0, "4.0" },
-        { ChannelConfig::CHANNEL_CONFIG_5_POINT_0, "5.0" },
-        { ChannelConfig::CHANNEL_CONFIG_5_POINT_1, "5.1" },
-        { ChannelConfig::CHANNEL_CONFIG_DUAL_MONO, "dual mono" },
-        { ChannelConfig::CHANNEL_CONFIG_I2S_DUAL_STEREO_0, "i2s dual stereo 0" },
-        { ChannelConfig::CHANNEL_CONFIG_I2S_DUAL_STEREO_1, "i2s dual stereo 1" },
-        { ChannelConfig::CHANNEL_CONFIG_7_POINT_1, "7.1" },
+        {ChannelConfig::CHANNEL_CONFIG_MONO, "mono"},
+        {ChannelConfig::CHANNEL_CONFIG_STEREO, "stereo"},
+        {ChannelConfig::CHANNEL_CONFIG_2_POINT_1, "2.1"},
+        {ChannelConfig::CHANNEL_CONFIG_3_POINT_0, "3.0"},
+        {ChannelConfig::CHANNEL_CONFIG_3_POINT_1, "301"},
+        {ChannelConfig::CHANNEL_CONFIG_QUATRO, "quatro"},
+        {ChannelConfig::CHANNEL_CONFIG_4_POINT_0, "4.0"},
+        {ChannelConfig::CHANNEL_CONFIG_5_POINT_0, "5.0"},
+        {ChannelConfig::CHANNEL_CONFIG_5_POINT_1, "5.1"},
+        {ChannelConfig::CHANNEL_CONFIG_DUAL_MONO, "dual mono"},
+        {ChannelConfig::CHANNEL_CONFIG_I2S_DUAL_STEREO_0, "i2s dual stereo 0"},
+        {ChannelConfig::CHANNEL_CONFIG_I2S_DUAL_STEREO_1, "i2s dual stereo 1"},
+        {ChannelConfig::CHANNEL_CONFIG_7_POINT_1, "7.1"},
     });
     return helper;
 };
 
 enum class SampleType : uint8_t
 {
-    MSB_INTEGER = 0, /*!< integer with Most Significant Byte first */
-    LSB_INTEGER = 1, /*!< integer with Least Significant Byte first */
-    SIGNED_INTEGER = 2, /*!< signed integer */
+    MSB_INTEGER = 0,      /*!< integer with Most Significant Byte first */
+    LSB_INTEGER = 1,      /*!< integer with Least Significant Byte first */
+    SIGNED_INTEGER = 2,   /*!< signed integer */
     UNSIGNED_INTEGER = 3, /*!< unsigned integer */
-    FLOAT = 4 /*!< unsigned integer */
+    FLOAT = 4             /*!< unsigned integer */
 };
 
 static const util::EnumHelper<SampleType> &getSampleTypeHelper()
 {
     static const util::EnumHelper<SampleType> helper({
-        { SampleType::MSB_INTEGER, "msb integer" },
-        { SampleType::LSB_INTEGER, "lsb integer" },
-        { SampleType::SIGNED_INTEGER, "signed integer" },
-        { SampleType::UNSIGNED_INTEGER, "unsigned integer" },
-        { SampleType::FLOAT, "float" },
+        {SampleType::MSB_INTEGER, "msb integer"},
+        {SampleType::LSB_INTEGER, "lsb integer"},
+        {SampleType::SIGNED_INTEGER, "signed integer"},
+        {SampleType::UNSIGNED_INTEGER, "unsigned integer"},
+        {SampleType::FLOAT, "float"},
     });
 
     return helper;
@@ -176,31 +175,27 @@ static const util::EnumHelper<SampleType> &getSampleTypeHelper()
 struct AudioDataFormatIpc
 {
     SamplingFrequency sampling_frequency; /*!< Sampling frequency in Hz */
-    BitDepth bit_depth; /*!< Bit depth of audio samples */
-    ChannelMap channel_map; /*!< channel ordering in audio stream */
-    ChannelConfig channel_config; /*!< Channel configuration. */
+    BitDepth bit_depth;                   /*!< Bit depth of audio samples */
+    ChannelMap channel_map;               /*!< channel ordering in audio stream */
+    ChannelConfig channel_config;         /*!< Channel configuration. */
     InterleavingStyle interleaving_style; /*!< The way the samples are interleaved */
-    uint8_t number_of_channels; /*!< Total number of channels. */
-    uint8_t valid_bit_depth; /*!< Valid bit depth in audio samples */
-    SampleType sample_type; /*!< sample type:
-                                *  0 - intMSB
-                                *  1 - intLSB
-                                *  2 - intSinged
-                                *  3 - intUnsigned
-                                *  4 - float  */
-    uint8_t reserved;  /*!< padding byte */
+    uint8_t number_of_channels;           /*!< Total number of channels. */
+    uint8_t valid_bit_depth;              /*!< Valid bit depth in audio samples */
+    SampleType sample_type;               /*!< sample type:
+                                              *  0 - intMSB
+                                              *  1 - intLSB
+                                              *  2 - intSinged
+                                              *  3 - intUnsigned
+                                              *  4 - float  */
+    uint8_t reserved;                     /*!< padding byte */
 
-    bool operator == (const AudioDataFormatIpc &other) const
+    bool operator==(const AudioDataFormatIpc &other) const
     {
-        return bit_depth == other.bit_depth &&
-            channel_config == other.channel_config &&
-            channel_map == other.channel_map &&
-            interleaving_style == other.interleaving_style &&
-            number_of_channels == other.number_of_channels &&
-            reserved == other.reserved &&
-            sample_type == other.sample_type &&
-            sampling_frequency == other.sampling_frequency &&
-            valid_bit_depth == other.valid_bit_depth;
+        return bit_depth == other.bit_depth && channel_config == other.channel_config &&
+               channel_map == other.channel_map && interleaving_style == other.interleaving_style &&
+               number_of_channels == other.number_of_channels && reserved == other.reserved &&
+               sample_type == other.sample_type && sampling_frequency == other.sampling_frequency &&
+               valid_bit_depth == other.valid_bit_depth;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -231,16 +226,15 @@ struct AudioDataFormatIpc
 
     std::string toString() const
     {
-        return "config=" + getChannelConfigHelper().toString(channel_config) +
-            "/bit_depth=" + getBitDepthHelper().toString(bit_depth) +
-            "/sample_type=" + getSampleTypeHelper().toString(sample_type) +
-            "/interleaving=" + getInterleavingStyleHelper().toString(interleaving_style) +
-            "/channel_count=" + std::to_string(number_of_channels) +
-            "/valid_bit_depth=" + std::to_string(valid_bit_depth);
+        return "config=" + getChannelConfigHelper().toString(channel_config) + "/bit_depth=" +
+               getBitDepthHelper().toString(bit_depth) + "/sample_type=" +
+               getSampleTypeHelper().toString(sample_type) + "/interleaving=" +
+               getInterleavingStyleHelper().toString(interleaving_style) + "/channel_count=" +
+               std::to_string(number_of_channels) + "/valid_bit_depth=" +
+               std::to_string(valid_bit_depth);
     }
 };
 static_assert(sizeof(AudioDataFormatIpc) == 24, "Wrong AudioDataFormatIpc size");
-
 }
 }
 }

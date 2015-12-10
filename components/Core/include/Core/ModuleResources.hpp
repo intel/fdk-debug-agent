@@ -36,16 +36,15 @@ class ModuleResource : public SystemResource
 {
 public:
     ModuleResource(cavs::System &system,
-        util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
-        const std::string moduleName,
-        const uint16_t moduleId) :
-        SystemResource(system),
-        mParameterSerializer(parameterSerializer),
-        mModuleName(moduleName),
-        mModuleId(moduleId) {}
+                   util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
+                   const std::string moduleName, const uint16_t moduleId)
+        : SystemResource(system), mParameterSerializer(parameterSerializer),
+          mModuleName(moduleName), mModuleId(moduleId)
+    {
+    }
 
 protected:
-    std::map<uint32_t, std::string>  getChildren(
+    std::map<uint32_t, std::string> getChildren(
         parameterSerializer::ParameterSerializer::ParameterKind parameterKind) const;
     uint16_t getInstanceId(const rest::Request &request) const;
     uint32_t getParamId(const std::string parameterName) const;
@@ -59,11 +58,14 @@ protected:
 class ControlParametersModuleInstanceResource : public ModuleResource
 {
 public:
-    ControlParametersModuleInstanceResource(cavs::System &system,
+    ControlParametersModuleInstanceResource(
+        cavs::System &system,
         util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
-        const std::string moduleName,
-        const uint16_t moduleId) :
-        ModuleResource(system, parameterSerializer, moduleName, moduleId) {}
+        const std::string moduleName, const uint16_t moduleId)
+        : ModuleResource(system, parameterSerializer, moduleName, moduleId)
+    {
+    }
+
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
     virtual ResponsePtr handlePut(const rest::Request &request) override;
@@ -73,14 +75,16 @@ protected:
 class ControlParametersModuleTypeResource : public ModuleResource
 {
 public:
-    ControlParametersModuleTypeResource(cavs::System &system,
+    ControlParametersModuleTypeResource(
+        cavs::System &system,
         util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
-        const std::string moduleName,
-        const uint16_t moduleId) :
-        ModuleResource(system, parameterSerializer, moduleName, moduleId) {}
+        const std::string moduleName, const uint16_t moduleId)
+        : ModuleResource(system, parameterSerializer, moduleName, moduleId)
+    {
+    }
+
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
 };
-
 }
 }

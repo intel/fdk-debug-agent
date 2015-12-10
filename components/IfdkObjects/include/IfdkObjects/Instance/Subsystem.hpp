@@ -42,11 +42,14 @@ class Subsystem : public Component
 {
 private:
     using base = Component;
+
 public:
     Subsystem() = default;
-    explicit Subsystem(const std::string& typeName, const std::string& instanceId) :
-        base(typeName, instanceId) {}
-    explicit Subsystem(const Subsystem& other) = default;
+    explicit Subsystem(const std::string &typeName, const std::string &instanceId)
+        : base(typeName, instanceId)
+    {
+    }
+    explicit Subsystem(const Subsystem &other) = default;
     Subsystem &operator=(const Subsystem &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -68,7 +71,7 @@ protected:
             return false;
         }
 
-        const Subsystem *otherComp = dynamic_cast<const Subsystem*>(&other);
+        const Subsystem *otherComp = dynamic_cast<const Subsystem *>(&other);
         if (otherComp == nullptr) {
             return false;
         }
@@ -90,5 +93,3 @@ private:
 }
 }
 }
-
-

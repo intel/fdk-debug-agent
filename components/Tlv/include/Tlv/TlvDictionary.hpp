@@ -35,17 +35,15 @@ namespace tlv
  * @see TlvDictionaryInterface
  */
 template <typename TagsEnumClass>
-class TlvDictionary final: public TlvDictionaryInterface
+class TlvDictionary final : public TlvDictionaryInterface
 {
 public:
-    using TlvMap = std::map<TagsEnumClass, std::unique_ptr<TlvWrapperInterface> >;
+    using TlvMap = std::map<TagsEnumClass, std::unique_ptr<TlvWrapperInterface>>;
 
     /**
      * @param[in] tlvMap the reference to the map which associates a TlvWrapepr to a TLV tag
      */
-    TlvDictionary(TlvMap &tlvMap): mTlvMap(tlvMap)
-    {
-    }
+    TlvDictionary(TlvMap &tlvMap) : mTlvMap(tlvMap) {}
 
     TlvWrapperInterface *getTlvWrapperForTag(unsigned int tag) const NOEXCEPT override
     {
@@ -76,6 +74,5 @@ public:
 private:
     TlvMap &mTlvMap;
 };
-
 }
 }

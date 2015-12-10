@@ -36,8 +36,8 @@ std::string Uuid::toString() const NOEXCEPT
     stream << std::setfill('0') << std::hex << std::uppercase;
 
     /* Part 1,2,3 */
-    stream << std::setw(8) << data1 << "-" << std::setw(4) << data2
-        << "-" << std::setw(4) << data3 << "-";
+    stream << std::setw(8) << data1 << "-" << std::setw(4) << data2 << "-" << std::setw(4) << data3
+           << "-";
 
     /* Part 4 */
     for (int i = 0; i < 2; ++i)
@@ -51,6 +51,5 @@ std::string Uuid::toString() const NOEXCEPT
 
     return stream.str();
 }
-
 }
 }

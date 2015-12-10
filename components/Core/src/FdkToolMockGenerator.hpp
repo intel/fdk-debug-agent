@@ -52,10 +52,7 @@ public:
 
     FdkToolMockGenerator(std::ostream &outputStream) : mCompress(outputStream, true) {}
 
-    ~FdkToolMockGenerator()
-    {
-        close();
-    }
+    ~FdkToolMockGenerator() { close(); }
 
     /** Write type model in archive */
     void setTypeModel(const TypeModel &typeModel)
@@ -66,20 +63,17 @@ public:
             for (auto it : typeModel.getTypeMap()) {
                 writeValue<ifdk_objects::xml::TypeSerializer>(*(it.second), "/type/" + it.first);
             }
-        }
-        catch (Poco::Zip::ZipException &e)
-        {
+        } catch (Poco::Zip::ZipException &e) {
             throw Exception("Zip error: " + std::string(e.what()));
         }
     }
 
     /** Write system instance in archive */
-    void setSystemInstance(const ifdk_objects::instance::System &system) {
+    void setSystemInstance(const ifdk_objects::instance::System &system)
+    {
         try {
             writeValue<ifdk_objects::xml::InstanceSerializer>(system, "/instance");
-        }
-        catch (Poco::Zip::ZipException &e)
-        {
+        } catch (Poco::Zip::ZipException &e) {
             throw Exception("Zip error: " + std::string(e.what()));
         }
     }
@@ -91,28 +85,23 @@ public:
             for (auto &entry : instanceModel.getCollectionMap()) {
                 const ifdk_objects::instance::BaseCollection &collection = *(entry.second);
 
-                writeValue<ifdk_objects::xml::InstanceSerializer>(collection, "/instance/" +
-                    entry.first);
+                writeValue<ifdk_objects::xml::InstanceSerializer>(collection,
+                                                                  "/instance/" + entry.first);
 
                 std::vector<std::shared_ptr<const ifdk_objects::instance::Instance>> instances;
                 collection.getInstances(instances);
 
                 for (auto &entry2 : instances) {
-                    writeValue<ifdk_objects::xml::InstanceSerializer>(*entry2, "/instance/" +
-                        entry.first + "/" + entry2->getInstanceId());
+                    writeValue<ifdk_objects::xml::InstanceSerializer>(
+                        *entry2, "/instance/" + entry.first + "/" + entry2->getInstanceId());
                 }
             }
-        }
-        catch (Poco::Zip::ZipException &e)
-        {
+        } catch (Poco::Zip::ZipException &e) {
             throw Exception("Zip error: " + std::string(e.what()));
         }
     }
 
-    void close()
-    {
-        mCompress.close();
-    }
+    void close() { mCompress.close(); }
 
 private:
     /** Write a file in the zip archive using the url as path */
@@ -134,6 +123,5 @@ private:
 
     Poco::Zip::Compress mCompress;
 };
-
 }
 }

@@ -64,13 +64,12 @@ public:
      * @throw Device::Exception if the io control has failed
      */
     virtual void ioControl(uint32_t ioControlCode, const util::Buffer *input,
-        util::Buffer *output) = 0;
+                           util::Buffer *output) = 0;
 
 private:
     Device(const Device &) = delete;
     Device &operator=(const Device &) = delete;
 };
-
 }
 }
 }

@@ -46,25 +46,22 @@ namespace debug_agent
 {
 namespace core
 {
-    static const std::string ContentTypeHtml("text/html");
-    static const std::string ContentTypeXml("text/xml");
-    static const std::string InstanceId("instanceId");
-    static const std::string ParamId("ParamId");
+static const std::string ContentTypeHtml("text/html");
+static const std::string ContentTypeXml("text/xml");
+static const std::string InstanceId("instanceId");
+static const std::string ParamId("ParamId");
 
 std::map<uint32_t, std::string> ModuleResource::getChildren(
     ParameterSerializer::ParameterKind parameterKind) const
 {
-    std::map<uint32_t, std::string>  children;
-    try
-    {
-        children = mParameterSerializer->getChildren(
-            BaseModelConverter::subsystemName, mModuleName, parameterKind);
-    }
-    catch (ParameterSerializer::Exception &e)
-    {
-        throw Response::HttpError(
-            Response::ErrorStatus::InternalError,
-            "Module resource does not manage to get children: " + std::string(e.what()));
+    std::map<uint32_t, std::string> children;
+    try {
+        children = mParameterSerializer->getChildren(BaseModelConverter::subsystemName, mModuleName,
+                                                     parameterKind);
+    } catch (ParameterSerializer::Exception &e) {
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                  "Module resource does not manage to get children: " +
+                                      std::string(e.what()));
     }
     return children;
 }
@@ -75,9 +72,8 @@ uint16_t ModuleResource::getInstanceId(const Request &request) const
     std::string instanceIdValue(request.getIdentifierValue(InstanceId));
     if (!convertTo(instanceIdValue, instanceId)) {
 
-        throw Response::HttpError(
-            Response::ErrorStatus::BadRequest,
-            "Invalid instance ID: " + instanceIdValue);
+        throw Response::HttpError(Response::ErrorStatus::BadRequest,
+                                  "Invalid instance ID: " + instanceIdValue);
     }
     return instanceId;
 }
@@ -86,88 +82,65 @@ uint32_t ModuleResource::getParamId(const std::string parameterName) const
 {
     uint32_t paramId;
     std::string paramIdAsString;
-    try
-    {
-        paramIdAsString = mParameterSerializer->getMapping(
-            BaseModelConverter::subsystemName, mModuleName, parameterName, ParamId);
-    }
-    catch (ParameterSerializer::Exception &e)
-    {
-        throw Response::HttpError(
-            Response::ErrorStatus::InternalError,
-            "Module resource does not manage to retrieve mapping: " + std::string(e.what()));
+    try {
+        paramIdAsString = mParameterSerializer->getMapping(BaseModelConverter::subsystemName,
+                                                           mModuleName, parameterName, ParamId);
+    } catch (ParameterSerializer::Exception &e) {
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                  "Module resource does not manage to retrieve mapping: " +
+                                      std::string(e.what()));
     }
 
     if (!convertTo(paramIdAsString, paramId)) {
 
-        throw Response::HttpError(
-            Response::ErrorStatus::InternalError,
-            "Invalid mapping \"ParamId\": " + paramIdAsString);
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                  "Invalid mapping \"ParamId\": " + paramIdAsString);
     }
 
     return paramId;
 }
 
-Resource::ResponsePtr ControlParametersModuleInstanceResource::handleGet(
-    const Request &request)
+Resource::ResponsePtr ControlParametersModuleInstanceResource::handleGet(const Request &request)
 {
     /* Checking that the identifiers has been fetched */
     uint16_t instanceId = getInstanceId(request);
 
     /* Loop through children to get Settings */
-    std::map<uint32_t, std::string>  children = getChildren(
-        ParameterSerializer::ParameterKind::Control);
+    std::map<uint32_t, std::string> children =
+        getChildren(ParameterSerializer::ParameterKind::Control);
 
     std::string controlParameters;
-    for (uint32_t childId = 0; childId < children.size(); childId++)
-    {
+    for (uint32_t childId = 0; childId < children.size(); childId++) {
         uint32_t paramId = getParamId(children[childId]);
 
         // Get binary from IOCTL
         util::Buffer parameterPayload;
-        try
-        {
+        try {
             mSystem.getModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
-        }
-        catch (ModuleHandler::Exception &e)
-        {
-            throw Response::HttpError(
-                Response::ErrorStatus::InternalError,
-                "Cannot get module parameter: " + std::string(e.what()));
+        } catch (ModuleHandler::Exception &e) {
+            throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                      "Cannot get module parameter: " + std::string(e.what()));
         }
 
         // Convert to XML
-        try
-        {
+        try {
             controlParameters += mParameterSerializer->binaryToXml(
-                BaseModelConverter::subsystemName,
-                mModuleName,
-                ParameterSerializer::ParameterKind::Control,
-                children[childId],
-                parameterPayload);
-        }
-        catch (ParameterSerializer::Exception &e)
-        {
-            throw Response::HttpError(
-                Response::ErrorStatus::InternalError,
-                "Binary to Xml conversion failed: " + std::string(e.what()));
+                BaseModelConverter::subsystemName, mModuleName,
+                ParameterSerializer::ParameterKind::Control, children[childId], parameterPayload);
+        } catch (ParameterSerializer::Exception &e) {
+            throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                      "Binary to Xml conversion failed: " + std::string(e.what()));
         }
     }
 
     auto out = std::make_unique<std::stringstream>();
-    *out << "<control_parameters Type=\"module-"
-        << mModuleName
-        << "\" Id=\""
-        << mModuleId
-        << "\">\n"
-        << controlParameters
-        << "</control_parameters>\n";
+    *out << "<control_parameters Type=\"module-" << mModuleName << "\" Id=\"" << mModuleId
+         << "\">\n" << controlParameters << "</control_parameters>\n";
 
     return std::make_unique<StreamResponse>(ContentTypeXml, std::move(out));
 }
 
-Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(
-    const Request &request)
+Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(const Request &request)
 {
     std::string error;
     Poco::XML::DOMParser parser;
@@ -178,19 +151,19 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(
     /* Checking that the identifiers has been fetched */
     uint16_t instanceId = getInstanceId(request);
 
-    std::map<uint32_t, std::string>  children = getChildren(
-        ParameterSerializer::ParameterKind::Control);
+    std::map<uint32_t, std::string> children =
+        getChildren(ParameterSerializer::ParameterKind::Control);
 
-    for (uint32_t childId = 0; childId < children.size(); childId++)
-    {
+    for (uint32_t childId = 0; childId < children.size(); childId++) {
         uint32_t paramId = getParamId(children[childId]);
 
         /* Create XML document from the XML node of each child. The usage of operator new is needed
          * here to comply with poco AutoPtr. */
         Poco::XML::AutoPtr<Poco::XML::Document> childDocument = new Poco::XML::Document;
         childDocument->appendChild(childDocument->importNode(
-            document->getNodeByPath(controlParametersUrl + "ParameterBlock[@Name='"
-            + children[childId] + "']"), true));
+            document->getNodeByPath(controlParametersUrl + "ParameterBlock[@Name='" +
+                                    children[childId] + "']"),
+            true));
         /* Serialize the document in a stream*/
         Poco::XML::DOMWriter writer;
         std::stringstream output;
@@ -199,77 +172,52 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(
         // Send XML string to PFW
         util::Buffer parameterPayload;
         // Convert XML to binary
-        try
-        {
+        try {
             parameterPayload = mParameterSerializer->xmlToBinary(
-                BaseModelConverter::subsystemName,
-                mModuleName,
-                ParameterSerializer::ParameterKind::Control,
-                children[childId],
-                output.str());
-        }
-        catch (ParameterSerializer::Exception &e)
-        {
-            throw Response::HttpError(
-                Response::ErrorStatus::InternalError,
-                "Xml to binary conversion failed: " + std::string(e.what()));
+                BaseModelConverter::subsystemName, mModuleName,
+                ParameterSerializer::ParameterKind::Control, children[childId], output.str());
+        } catch (ParameterSerializer::Exception &e) {
+            throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                      "Xml to binary conversion failed: " + std::string(e.what()));
         }
         // Send binary to IOCTL
-        try
-        {
+        try {
             mSystem.setModuleParameter(mModuleId, instanceId, paramId, parameterPayload);
-        }
-        catch (ModuleHandler::Exception &e)
-        {
-            throw Response::HttpError(
-                Response::ErrorStatus::InternalError,
-                "Cannot set module parameter: " + std::string(e.what()));
+        } catch (ModuleHandler::Exception &e) {
+            throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                      "Cannot set module parameter: " + std::string(e.what()));
         }
     }
 
     return std::make_unique<Response>();
 }
 
-Resource::ResponsePtr ControlParametersModuleTypeResource::handleGet(
-    const Request &request)
+Resource::ResponsePtr ControlParametersModuleTypeResource::handleGet(const Request &request)
 {
     /* Checking that the identifiers has been fetched */
     uint16_t instanceId = getInstanceId(request);
 
     /* Loop through children to get Settings */
-    std::map<uint32_t, std::string>  children = getChildren(
-        ParameterSerializer::ParameterKind::Control);
+    std::map<uint32_t, std::string> children =
+        getChildren(ParameterSerializer::ParameterKind::Control);
 
     std::string controlParameters;
-    for (uint32_t childId = 0; childId < children.size(); childId++)
-    {
-        try
-        {
+    for (uint32_t childId = 0; childId < children.size(); childId++) {
+        try {
             controlParameters += mParameterSerializer->getStructureXml(
-                BaseModelConverter::subsystemName,
-                mModuleName,
-                ParameterSerializer::ParameterKind::Control,
-                children[childId]);
-        }
-        catch (ParameterSerializer::Exception &e)
-        {
-            throw Response::HttpError(
-                Response::ErrorStatus::InternalError,
-                "Failed to get Xml structure: " + std::string(e.what()));
+                BaseModelConverter::subsystemName, mModuleName,
+                ParameterSerializer::ParameterKind::Control, children[childId]);
+        } catch (ParameterSerializer::Exception &e) {
+            throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                      "Failed to get Xml structure: " + std::string(e.what()));
         };
     }
 
     auto out = std::make_unique<std::stringstream>();
-    *out << "<control_parameters Type=\"module-"
-        << mModuleName
-        << "\" Id=\""
-        << mModuleId
-        << "\">\n"
-        << controlParameters
-        << "</control_parameters>\n";
+    *out << "<control_parameters Type=\"module-" << mModuleName << "\" Id=\"" << mModuleId
+         << "\">\n" << controlParameters << "</control_parameters>\n";
 
     return std::make_unique<StreamResponse>(ContentTypeXml, std::move(out));
 }
-
 }
 }

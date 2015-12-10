@@ -36,11 +36,14 @@ class InstanceRef : public Ref
 {
 private:
     using base = Ref;
+
 public:
     InstanceRef() = default;
-    explicit InstanceRef(const std::string& typeName, const std::string& instanceId) :
-        base(typeName, instanceId) {}
-    explicit InstanceRef(const InstanceRef& other) = default;
+    explicit InstanceRef(const std::string &typeName, const std::string &instanceId)
+        : base(typeName, instanceId)
+    {
+    }
+    explicit InstanceRef(const InstanceRef &other) = default;
     InstanceRef &operator=(const InstanceRef &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -62,7 +65,7 @@ protected:
             return false;
         }
 
-        const InstanceRef *otherComp = dynamic_cast<const InstanceRef*>(&other);
+        const InstanceRef *otherComp = dynamic_cast<const InstanceRef *>(&other);
         if (otherComp == nullptr) {
             return false;
         }
@@ -82,5 +85,3 @@ private:
 }
 }
 }
-
-

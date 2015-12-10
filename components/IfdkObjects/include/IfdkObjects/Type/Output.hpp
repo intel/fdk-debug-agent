@@ -37,11 +37,12 @@ class Output : public Connector
 {
 private:
     using base = Connector;
+
 public:
     Output() = default;
-    explicit Output(const std::string &id, const std::string& name) : Connector(id, name) {}
-    explicit Output(const Output& other) = default;
-    Output &operator=(const Output&) = default;
+    explicit Output(const std::string &id, const std::string &name) : Connector(id, name) {}
+    explicit Output(const Output &other) = default;
+    Output &operator=(const Output &) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
     {
@@ -54,6 +55,7 @@ public:
         assert(isConcrete);
         acceptCommon(*this, visitor);
     }
+
 private:
     template <typename T, typename Visitor>
     static void acceptCommon(T &me, Visitor &visitor)
@@ -66,9 +68,6 @@ private:
 
 using Inputs = VisitableVector<Input, Visitor, ConstVisitor>;
 using Outputs = VisitableVector<Output, Visitor, ConstVisitor>;
-
 }
 }
 }
-
-

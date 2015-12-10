@@ -44,26 +44,21 @@ namespace util
  */
 struct Uuid
 {
-    uint32_t data1; /* Native endianness, i.e. little endian on Intel platforms */
-    uint16_t data2; /* Native endianness */
-    uint16_t data3; /* Native endianness */
+    uint32_t data1;   /* Native endianness, i.e. little endian on Intel platforms */
+    uint16_t data2;   /* Native endianness */
+    uint16_t data3;   /* Native endianness */
     uint8_t data4[8]; /* Big endian */
 
     /* Convert to string */
     std::string toString() const NOEXCEPT;
 
-    bool operator == (Uuid &other) const
+    bool operator==(Uuid &other) const
     {
-        return data1 == other.data1 &&
-            data2 == other.data2 &&
-            data3 == other.data3 &&
-            std::memcmp(&data4, &other.data4, sizeof(data4)) == 0;
+        return data1 == other.data1 && data2 == other.data2 && data3 == other.data3 &&
+               std::memcmp(&data4, &other.data4, sizeof(data4)) == 0;
     }
 
-    bool operator != (Uuid &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(Uuid &other) const NOEXCEPT { return !(*this == other); }
 
     /** Convert from an other uuid type. It must have the same size. */
     template <typename UuidType>
@@ -71,7 +66,7 @@ struct Uuid
     {
         static_assert(sizeof(UuidType) == sizeof(Uuid), "Wrong uuid type size");
 
-        const Uuid *otherAsUuid = reinterpret_cast<const Uuid*>(&other);
+        const Uuid *otherAsUuid = reinterpret_cast<const Uuid *>(&other);
         *this = *otherAsUuid;
     }
 
@@ -81,10 +76,9 @@ struct Uuid
     {
         static_assert(sizeof(UuidType) == sizeof(Uuid), "Wrong uuid type size");
 
-        Uuid *otherAsUuid = reinterpret_cast<Uuid*>(&other);
+        Uuid *otherAsUuid = reinterpret_cast<Uuid *>(&other);
         *otherAsUuid = *this;
     }
 };
-
 }
 }

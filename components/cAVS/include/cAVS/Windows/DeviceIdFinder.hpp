@@ -55,7 +55,7 @@ public:
      * @throw DeviceIdFinder::Exception
      */
     static void findAll(const GUID &guid, std::set<std::string> &deviceIds,
-        const std::string &substring = "");
+                        const std::string &substring = "");
 
     /** Find one windows device identifier matching a GUID class and containing a given substring.
      * An exception is thrown if:
@@ -77,13 +77,12 @@ private:
 
     /** Get interface from a device */
     static void getInterfaces(const GUID &guid, HDEVINFO devList, SP_DEVINFO_DATA &device,
-        const std::string &substring, std::set<std::string> &deviceIds);
+                              const std::string &substring, std::set<std::string> &deviceIds);
 
     /** Get the name of an interface */
     static std::string getInterfaceName(HDEVINFO devList,
-        SP_INTERFACE_DEVICE_DATA &deviceInterface);
+                                        SP_INTERFACE_DEVICE_DATA &deviceInterface);
 };
-
 }
 }
 }

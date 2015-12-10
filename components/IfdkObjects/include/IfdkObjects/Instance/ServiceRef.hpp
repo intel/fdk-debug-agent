@@ -36,11 +36,14 @@ class ServiceRef : public Ref
 {
 private:
     using base = Ref;
+
 public:
     ServiceRef() = default;
-    explicit ServiceRef(const std::string& typeName, const std::string& instanceId) :
-        base(typeName, instanceId) {}
-    explicit ServiceRef(const ServiceRef& other) = default;
+    explicit ServiceRef(const std::string &typeName, const std::string &instanceId)
+        : base(typeName, instanceId)
+    {
+    }
+    explicit ServiceRef(const ServiceRef &other) = default;
     ServiceRef &operator=(const ServiceRef &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -62,7 +65,7 @@ protected:
             return false;
         }
 
-        const ServiceRef *otherServ = dynamic_cast<const ServiceRef*>(&other);
+        const ServiceRef *otherServ = dynamic_cast<const ServiceRef *>(&other);
         if (otherServ == nullptr) {
             return false;
         }
@@ -82,5 +85,3 @@ private:
 }
 }
 }
-
-

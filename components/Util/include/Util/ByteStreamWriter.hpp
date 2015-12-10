@@ -56,10 +56,10 @@ public:
      * @tparam T the type of the value to write, shall be an enum or an integral type
      */
     template <typename T>
-    typename std::enable_if<IsSimpleSerializableType<T>::value>::type
-    write(const T& value) {
+    typename std::enable_if<IsSimpleSerializableType<T>::value>::type write(const T &value)
+    {
         std::size_t elementSize = sizeof(T);
-        const uint8_t *valuePtr = reinterpret_cast<const uint8_t*>(&value);
+        const uint8_t *valuePtr = reinterpret_cast<const uint8_t *>(&value);
 
         /* Write the value as bytes*/
         mBuffer.insert(mBuffer.end(), valuePtr, valuePtr + elementSize);
@@ -72,10 +72,10 @@ public:
      * @tparam T the type of the value to write, shall implement the toStream() implicit interface.
      */
     template <typename T>
-    typename std::enable_if<IsCompoundSerializableType<T>::value>::type
-        write(const T& value) {
-            value.toStream(*this);
-        }
+    typename std::enable_if<IsCompoundSerializableType<T>::value>::type write(const T &value)
+    {
+        value.toStream(*this);
+    }
 
     /** Write an array of elements, the supplied type could be either simple or composite.
       * @param array the array to write
@@ -83,7 +83,8 @@ public:
       * @tparam T the element type
       */
     template <typename T>
-    void writeArray(const T *array, std::size_t count) {
+    void writeArray(const T *array, std::size_t count)
+    {
         for (std::size_t i = 0; i < count; ++i) {
             write(array[i]);
         }
@@ -105,7 +106,8 @@ public:
      * @tparam T the type of the vector elements
      */
     template <typename SizeType, typename T>
-    void writeVector(const std::vector<T> &vector) {
+    void writeVector(const std::vector<T> &vector)
+    {
 
         /* Checking that size can be encoded with the supplied type */
         assert(vector.size() <= std::numeric_limits<SizeType>::max());
@@ -121,14 +123,10 @@ public:
     }
 
     /** Return the produced buffer */
-    const util::Buffer &getBuffer() const
-    {
-        return mBuffer;
-    }
+    const util::Buffer &getBuffer() const { return mBuffer; }
 
 private:
     util::Buffer mBuffer;
 };
-
 }
 }

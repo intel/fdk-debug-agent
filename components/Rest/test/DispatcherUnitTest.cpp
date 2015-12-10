@@ -37,7 +37,6 @@ public:
     }
 };
 
-
 /* This method adds a resource into the dispatcher and checks that the URI is invalid. */
 void checkAddResourceWithWrongURI(const std::string uri)
 {
@@ -58,8 +57,7 @@ void checkAddResourceWithValidURI(Dispatcher &dispatcher, const std::string uri)
 void checkFindResourceFailure(Dispatcher &dispatcher, const std::string &uri)
 {
     Dispatcher::Identifiers identifiers;
-    std::shared_ptr<Resource> resource = dispatcher.resolveResource(
-        uri, identifiers);
+    std::shared_ptr<Resource> resource = dispatcher.resolveResource(uri, identifiers);
     REQUIRE(resource == nullptr);
 }
 
@@ -67,12 +65,12 @@ void checkFindResourceFailure(Dispatcher &dispatcher, const std::string &uri)
  * - the resource is found
  * - the obtained identifiers are the expected ones.
  */
-void checkFindResourceSuccess(Dispatcher &dispatcher, const std::string &uri,
+void checkFindResourceSuccess(
+    Dispatcher &dispatcher, const std::string &uri,
     const Dispatcher::Identifiers &expectedIdentifiers = Dispatcher::Identifiers())
 {
     Dispatcher::Identifiers identifiers;
-    std::shared_ptr<Resource> resource = dispatcher.resolveResource(
-        uri, identifiers);
+    std::shared_ptr<Resource> resource = dispatcher.resolveResource(uri, identifiers);
     REQUIRE(resource != nullptr);
     REQUIRE(expectedIdentifiers == identifiers);
 }
@@ -83,12 +81,12 @@ TEST_CASE("Wrong URIs", "[Dispatcher]")
     checkAddResourceWithWrongURI("");
     checkAddResourceWithWrongURI("t");
     checkAddResourceWithWrongURI("t/");
-    checkAddResourceWithWrongURI("/t/"); /* trailing slash is forbidden*/
-    checkAddResourceWithWrongURI("/c//t///a"); /* multiple slash is forbidden */
-    checkAddResourceWithWrongURI("/a#b/v~d"); /* unsupported characters*/
-    checkAddResourceWithWrongURI("/a/${id eer1}"); /* wrong identifier name*/
-    checkAddResourceWithWrongURI("/a/${id"); /* incomplete identifier*/
-    checkAddResourceWithWrongURI("/a/ty${my-id}/c"); /* identifier name is not between slashes */
+    checkAddResourceWithWrongURI("/t/");                /* trailing slash is forbidden*/
+    checkAddResourceWithWrongURI("/c//t///a");          /* multiple slash is forbidden */
+    checkAddResourceWithWrongURI("/a#b/v~d");           /* unsupported characters*/
+    checkAddResourceWithWrongURI("/a/${id eer1}");      /* wrong identifier name*/
+    checkAddResourceWithWrongURI("/a/${id");            /* incomplete identifier*/
+    checkAddResourceWithWrongURI("/a/ty${my-id}/c");    /* identifier name is not between slashes */
     checkAddResourceWithWrongURI("/a/${id1}/b/${id1}"); /* two identifiers with the same name*/
 }
 
@@ -98,7 +96,7 @@ TEST_CASE("Valid URIs", "[Dispatcher]")
     Dispatcher dispatcher;
 
     /* Trying the root URL '/' */
-    SECTION("root") {
+    SECTION ("root") {
         /* Adding the resource */
         checkAddResourceWithValidURI(dispatcher, "/");
 
@@ -109,7 +107,7 @@ TEST_CASE("Valid URIs", "[Dispatcher]")
         checkFindResourceFailure(dispatcher, "//");
     }
 
-    SECTION("simple path with special characters") {
+    SECTION ("simple path with special characters") {
         /* Adding the resource */
         checkAddResourceWithValidURI(dispatcher, "/b/c-d/o_p");
 
@@ -121,7 +119,7 @@ TEST_CASE("Valid URIs", "[Dispatcher]")
         checkFindResourceFailure(dispatcher, "/b/c-d");
     }
 
-    SECTION("Path with one identifier") {
+    SECTION ("Path with one identifier") {
         /* Adding the resource */
         checkAddResourceWithValidURI(dispatcher, "/ab/${id1}");
 
@@ -134,7 +132,7 @@ TEST_CASE("Valid URIs", "[Dispatcher]")
         checkFindResourceSuccess(dispatcher, "/ab/toto", identifiers);
     }
 
-    SECTION("Path with three identifiers") {
+    SECTION ("Path with three identifiers") {
 
         /* Adding the resource */
         checkAddResourceWithValidURI(dispatcher, "/ab/${id1}/cb/${id-p2}/${id3}");
@@ -147,7 +145,7 @@ TEST_CASE("Valid URIs", "[Dispatcher]")
         checkFindResourceSuccess(dispatcher, "/ab/toto/cb/titi8/uu", identifiers);
     }
 
-    SECTION("simple path with a point") {
+    SECTION ("simple path with a point") {
         /* Adding the resource */
         checkAddResourceWithValidURI(dispatcher, "/b/c.d/e.f");
 
@@ -159,4 +157,3 @@ TEST_CASE("Valid URIs", "[Dispatcher]")
         checkFindResourceFailure(dispatcher, "/b/c.d");
     }
 }
-

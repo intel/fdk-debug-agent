@@ -41,24 +41,24 @@ public:
     ModuleHandler(Device &device) : mDevice(device) {}
 
     virtual void getModulesEntries(uint32_t moduleCount,
-        std::vector<dsp_fw::ModuleEntry> &modulesEntries) override;
+                                   std::vector<dsp_fw::ModuleEntry> &modulesEntries) override;
     virtual void getFwConfig(dsp_fw::FwConfig &fwConfig) override;
     virtual void getHwConfig(dsp_fw::HwConfig &hwConfig) override;
     virtual void getPipelineIdList(uint32_t maxPplCount,
-        std::vector<uint32_t> &pipelinesIds) override;
+                                   std::vector<uint32_t> &pipelinesIds) override;
     virtual void getPipelineProps(uint32_t pipelineId, dsp_fw::PplProps &props) override;
     virtual void getSchedulersInfo(uint32_t coreId, dsp_fw::SchedulersInfo &schedulers) override;
     virtual void getGatewaysInfo(uint32_t gatewayCount,
-        std::vector<dsp_fw::GatewayProps> &gateways) override;
+                                 std::vector<dsp_fw::GatewayProps> &gateways) override;
     virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-        dsp_fw::ModuleInstanceProps &props) override;
+                                        dsp_fw::ModuleInstanceProps &props) override;
     virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        const util::Buffer &parameterPayload) override;
+                                    const util::Buffer &parameterPayload) override;
     virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        util::Buffer &parameterPayload) override;
+                                    util::Buffer &parameterPayload) override;
 
 private:
-    template<typename TlvResponseHandlerInterface>
+    template <typename TlvResponseHandlerInterface>
     void readTlvParameters(TlvResponseHandlerInterface &responseHandler,
                            dsp_fw::BaseFwParams parameterId);
 
@@ -79,18 +79,17 @@ private:
      * @param[in] suppliedOutputBuffer the input parameter payload
      * @param[in] returnedOutputBuffer the output parameter payload
      */
-    void bigCmdModuleAccessIoctl(bool isGet,uint16_t moduleId, uint16_t instanceId,
-        uint32_t moduleParamId, const util::Buffer &suppliedOutputBuffer,
-        util::Buffer &returnedOutputBuffer);
+    void bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint16_t instanceId,
+                                 uint32_t moduleParamId, const util::Buffer &suppliedOutputBuffer,
+                                 util::Buffer &returnedOutputBuffer);
 
     /** Template method that performs a big get and returns the result as supplied parameter
      * type.
      */
-    template<typename FirmwareParameterType>
-    void bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instanceId,
-        uint32_t moduleParamId, std::size_t fwParameterSize, FirmwareParameterType &result);
+    template <typename FirmwareParameterType>
+    void bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instanceId, uint32_t moduleParamId,
+                                 std::size_t fwParameterSize, FirmwareParameterType &result);
 };
-
 }
 }
 }

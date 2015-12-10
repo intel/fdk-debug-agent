@@ -48,12 +48,23 @@ public:
      * Firmware log output is PTI hardware bus or SRAM to be captured
      * by the driver.
      */
-    enum class Output {Sram, Pti};
+    enum class Output
+    {
+        Sram,
+        Pti
+    };
 
     /**
      * Log level
      */
-    enum class Level {Critical, High, Medium, Low, Verbose};
+    enum class Level
+    {
+        Critical,
+        High,
+        Medium,
+        Low,
+        Verbose
+    };
 
     /**
      * The parameters of a log
@@ -61,17 +72,17 @@ public:
     struct Parameters
     {
 
-        Parameters(bool isStarted, Level level, Output output) :
-            mIsStarted(isStarted), mLevel(level), mOutput(output) {}
-
-        Parameters() : mIsStarted(false), mLevel(Level::Verbose), mOutput(Output::Sram) {};
-
-        bool operator == (const Parameters& other) const
+        Parameters(bool isStarted, Level level, Output output)
+            : mIsStarted(isStarted), mLevel(level), mOutput(output)
         {
-            return
-                mIsStarted == other.mIsStarted &&
-                mLevel == other.mLevel &&
-                mOutput == other.mOutput;
+        }
+
+        Parameters() : mIsStarted(false), mLevel(Level::Verbose), mOutput(Output::Sram){};
+
+        bool operator==(const Parameters &other) const
+        {
+            return mIsStarted == other.mIsStarted && mLevel == other.mLevel &&
+                   mOutput == other.mOutput;
         }
 
         /**
@@ -147,8 +158,8 @@ public:
 
 private:
     /* Make this class non copyable */
-    Logger(const Logger&) = delete;
-    Logger & operator=(const Logger&) = delete;
+    Logger(const Logger &) = delete;
+    Logger &operator=(const Logger &) = delete;
 
     /** Level enum class string representation */
     static const std::string critical;
@@ -162,5 +173,4 @@ private:
     static const std::string pti;
 };
 };
-
 };

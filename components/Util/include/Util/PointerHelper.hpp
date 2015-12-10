@@ -36,10 +36,7 @@ class EnsurePtrDeletion
 {
 public:
     EnsurePtrDeletion(SmartPointerType &smartPtr) : mSmartPtr(smartPtr) {}
-    ~EnsurePtrDeletion()
-    {
-        mSmartPtr.reset();
-    }
+    ~EnsurePtrDeletion() { mSmartPtr.reset(); }
 private:
     SmartPointerType &mSmartPtr;
 };
@@ -47,7 +44,5 @@ private:
 /** Alias for unique pointer type */
 template <typename T>
 using EnsureUniquePtrDeletion = EnsurePtrDeletion<std::unique_ptr<T>>;
-
-
 }
 }

@@ -30,26 +30,20 @@ using namespace debug_agent::cavs::windows;
 class SafeHandle final
 {
 public:
-    SafeHandle(HANDLE handle): mHandle(handle)
-    {
-    }
+    SafeHandle(HANDLE handle) : mHandle(handle) {}
 
     ~SafeHandle()
     {
-        if (isValid())
-        {
+        if (isValid()) {
             CloseHandle(mHandle);
         }
     }
 
-    bool isValid()
-    {
-        return mHandle != INVALID_HANDLE_VALUE;
-    }
+    bool isValid() { return mHandle != INVALID_HANDLE_VALUE; }
 
 private:
-    SafeHandle(const SafeHandle&) = delete;
-    SafeHandle& operator=(const SafeHandle&) = delete;
+    SafeHandle(const SafeHandle &) = delete;
+    SafeHandle &operator=(const SafeHandle &) = delete;
     HANDLE mHandle;
 };
 
@@ -58,13 +52,8 @@ TEST_CASE("LastError")
     /** CreateFileA is the ansi version of the Windows CreateFile method. It has to be called
       * explicitly because "CreateFile" is a macro defined by windows.h,
       * which is then undefined by the POCO library. */
-    HANDLE handle = CreateFileA("c:\\Unexisting_file",
-        GENERIC_READ,
-        0,
-        NULL,
-        OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL);
+    HANDLE handle = CreateFileA("c:\\Unexisting_file", GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                                FILE_ATTRIBUTE_NORMAL, NULL);
 
     SafeHandle safeHandle(handle);
 
@@ -74,4 +63,3 @@ TEST_CASE("LastError")
     /* Checking last error string */
     CHECK(LastError::get() == "ERR 2: The system cannot find the file specified.");
 }
-

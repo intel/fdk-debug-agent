@@ -64,7 +64,7 @@ public:
 
     /** @return the firmware module entries */
     virtual void getModulesEntries(uint32_t moduleCount,
-        std::vector<dsp_fw::ModuleEntry> &modulesEntries) = 0;
+                                   std::vector<dsp_fw::ModuleEntry> &modulesEntries) = 0;
 
     /** @return the firmware configuration */
     virtual void getFwConfig(dsp_fw::FwConfig &fwConfig) = 0;
@@ -83,23 +83,23 @@ public:
 
     /** @return the gateways */
     virtual void getGatewaysInfo(uint32_t gatewayCount,
-        std::vector<dsp_fw::GatewayProps> &gateways) = 0;
+                                 std::vector<dsp_fw::GatewayProps> &gateways) = 0;
 
     /** @return the properties of one module instance */
     virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-        dsp_fw::ModuleInstanceProps &props) = 0;
+                                        dsp_fw::ModuleInstanceProps &props) = 0;
 
     /** set module parameter */
     virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        const util::Buffer &parameterPayload) = 0;
+                                    const util::Buffer &parameterPayload) = 0;
 
     /** @return module parameter */
     virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-        util::Buffer &parameterPayload) = 0;
+                                    util::Buffer &parameterPayload) = 0;
 
     /** @return extended parameter id that contains the targeted module part id */
     static uint32_t getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,
-        uint32_t parameterInstanceId)
+                                           uint32_t parameterInstanceId)
     {
         uint32_t parameterTypeIdAsInt = static_cast<uint32_t>(parameterTypeId);
         assert(parameterTypeIdAsInt < (1 << 8));
@@ -112,6 +112,5 @@ private:
     ModuleHandler(const ModuleHandler &) = delete;
     ModuleHandler &operator=(const ModuleHandler &) = delete;
 };
-
 }
 }

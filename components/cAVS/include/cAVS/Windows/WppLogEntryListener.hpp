@@ -39,7 +39,6 @@ public:
     /** Called when a log entry is available */
     virtual void onLogEntry(uint32_t coreId, uint8_t *buffer, uint32_t bufferSize) = 0;
 };
-
 }
 }
 }

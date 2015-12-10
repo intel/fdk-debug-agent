@@ -47,7 +47,6 @@ private:
     std::mutex mStopRequestMutex;
     WppController mController;
 };
-
 }
 }
 }

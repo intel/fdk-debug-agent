@@ -143,14 +143,14 @@ void InstanceDeserializer::enter(Children &chidren)
 {
     pushElement(chidren);
     fillPolymorphicVector<RefCollection, InstanceRefCollection, ComponentRefCollection,
-        ServiceRefCollection, SubsystemRefCollection>(chidren.getElements());
+                          ServiceRefCollection, SubsystemRefCollection>(chidren.getElements());
 }
 
 void InstanceDeserializer::enter(Parents &parents)
 {
     pushElement(parents);
-    fillPolymorphicVector<Ref, InstanceRef, ComponentRef, SubsystemRef,
-        ServiceRef>(parents.getElements());
+    fillPolymorphicVector<Ref, InstanceRef, ComponentRef, SubsystemRef, ServiceRef>(
+        parents.getElements());
 }
 
 void InstanceDeserializer::enter(Parameters &parameters, bool isConcrete)
@@ -263,9 +263,6 @@ void InstanceDeserializer::leave(bool isConcrete)
         popElement();
     }
 }
-
 }
 }
 }
-
-

@@ -49,13 +49,15 @@ class Instance
 {
 public:
     Instance() = default;
-    explicit Instance(const std::string& typeName, const std::string &instanceId) :
-        mTypeName(typeName), mInstanceId(instanceId) {}
-    explicit Instance(const Instance& other) = default;
+    explicit Instance(const std::string &typeName, const std::string &instanceId)
+        : mTypeName(typeName), mInstanceId(instanceId)
+    {
+    }
+    explicit Instance(const Instance &other) = default;
     virtual ~Instance() = default;
     Instance &operator=(const Instance &other) = default;
 
-    bool operator == (const Instance &other) const NOEXCEPT
+    bool operator==(const Instance &other) const NOEXCEPT
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -64,10 +66,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator != (const Instance &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Instance &other) const NOEXCEPT { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -79,56 +78,29 @@ public:
         acceptCommon(*this, visitor, isConcrete);
     }
 
-    std::string getTypeName() const
-    {
-        return mTypeName;
-    }
+    std::string getTypeName() const { return mTypeName; }
 
-    void setTypeName(const std::string &typeName)
-    {
-        mTypeName = typeName;
-    }
+    void setTypeName(const std::string &typeName) { mTypeName = typeName; }
 
-    std::string getInstanceId() const
-    {
-        return mInstanceId;
-    }
+    std::string getInstanceId() const { return mInstanceId; }
 
-    void setInstanceId(const std::string &instanceId)
-    {
-        mInstanceId = instanceId;
-    }
+    void setInstanceId(const std::string &instanceId) { mInstanceId = instanceId; }
 
-    InfoParameters &getInfoParameters()
-    {
-        return mInfoParameters;
-    }
+    InfoParameters &getInfoParameters() { return mInfoParameters; }
 
-    ControlParameters &getControlParameters()
-    {
-        return mControlParameters;
-    }
+    ControlParameters &getControlParameters() { return mControlParameters; }
 
-    Parents &getParents()
-    {
-        return mParents;
-    }
+    Parents &getParents() { return mParents; }
 
-    Children &getChildren()
-    {
-        return mChildren;
-    }
+    Children &getChildren() { return mChildren; }
 
 protected:
     virtual bool equalsTo(const Instance &other) const NOEXCEPT
     {
-        return
-            mTypeName == other.mTypeName &&
-            mInstanceId == other.mInstanceId &&
-            mInfoParameters == other.mInfoParameters &&
-            mControlParameters == other.mControlParameters &&
-            mParents == other.mParents &&
-            mChildren == other.mChildren;
+        return mTypeName == other.mTypeName && mInstanceId == other.mInstanceId &&
+               mInfoParameters == other.mInfoParameters &&
+               mControlParameters == other.mControlParameters && mParents == other.mParents &&
+               mChildren == other.mChildren;
     }
 
 private:
@@ -152,9 +124,6 @@ private:
     Parents mParents;
     Children mChildren;
 };
-
 }
 }
 }
-
-

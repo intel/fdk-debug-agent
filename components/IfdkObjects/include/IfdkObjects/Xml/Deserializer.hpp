@@ -78,7 +78,7 @@ namespace xml
  * }
  *
  */
-template<template<class> class Traits>
+template <template <class> class Traits>
 class Deserializer
 {
 public:
@@ -89,15 +89,12 @@ public:
     };
 
     /** Create a deserializer from a supplied xml string */
-    Deserializer(const std::string& xml)
+    Deserializer(const std::string &xml)
     {
         Poco::XML::DOMParser parser;
-        try
-        {
+        try {
             mDocument = parser.parseString(xml);
-        }
-        catch (Poco::Exception& e)
-        {
+        } catch (Poco::Exception &e) {
             throw Exception("Unable to parse xml string: " + std::string(e.what()));
         }
     }
@@ -109,7 +106,7 @@ protected:
      * The xml tag name is deduced from the type using traits.
      */
     template <class T>
-    void pushElement(T&)
+    void pushElement(T &)
     {
         /* Getting type tag name using traits */
         std::string name = Traits<T>::tag;
@@ -123,17 +120,16 @@ protected:
             if (documentChild->nodeType() != Poco::XML::Node::ELEMENT_NODE ||
                 documentChild->nodeName() != name) {
                 throw Exception("Wrong root element name: '" + documentChild->nodeName() +
-                    "' instead of '" + name + "'");
+                                "' instead of '" + name + "'");
             }
 
-            element = static_cast<Poco::XML::Element*>(documentChild);
-        }
-        else {
+            element = static_cast<Poco::XML::Element *>(documentChild);
+        } else {
             /* If the stack is not empty, find the first child with matching tag. */
             element = topElement().getChildElement(name);
             if (element == nullptr) {
                 throw Exception("Element '" + name + "' not found in parent '" +
-                    topElement().nodeName() + "'");
+                                topElement().nodeName() + "'");
             }
         }
 
@@ -164,7 +160,7 @@ protected:
         const Poco::XML::Element &element = topElement();
         if (!element.hasAttribute(attributeName)) {
             throw Exception("The required attribute '" + attributeName +
-                "' has not been found in element '" + element.nodeName() + "'");
+                            "' has not been found in element '" + element.nodeName() + "'");
         }
         return element.getAttribute(attributeName);
     }
@@ -175,13 +171,13 @@ protected:
         Poco::XML::Text *text = getFirstChild<Poco::XML::Text>(Poco::XML::Node::TEXT_NODE);
         if (text == nullptr) {
             throw Exception("The element '" + topElement().nodeName() +
-                "' does not contains text.");
+                            "' does not contains text.");
         }
         return text->getNodeValue();
     }
 
     /** Return the current DOM element, which is at the top of the stack */
-    Poco::XML::Element& topElement()
+    Poco::XML::Element &topElement()
     {
         assert(!mElementStack.empty());
         return *mElementStack.top();
@@ -193,7 +189,7 @@ protected:
     {
         std::size_t count = 0;
         for (Poco::XML::Node *node = topElement().firstChild(); node != nullptr;
-            node = node->nextSibling()) {
+             node = node->nextSibling()) {
             if (node->nodeType() == Poco::XML::Node::ELEMENT_NODE) {
                 count++;
             }
@@ -240,48 +236,46 @@ protected:
      * @tparam Base the base class of all intantiables types.
      * @tparam Derived type list of all intantiables types.
      */
-    template <class Base, class... Derived >
+    template <class Base, class... Derived>
     void fillPolymorphicVector(std::vector<std::shared_ptr<Base>> &vector)
     {
         /* Iterating on element children*/
         for (Poco::XML::Node *node = topElement().firstChild(); node != nullptr;
-            node = node->nextSibling()) {
+             node = node->nextSibling()) {
             if (node->nodeType() == Poco::XML::Node::ELEMENT_NODE) {
 
-                try
-                {
+                try {
                     /* Creating the instance that matches the tag */
-                    std::shared_ptr<Base> instance = DynamicFactory<Traits>::
-                        template createInstanceFromTag<Base, Derived...>(node->nodeName());
+                    std::shared_ptr<Base> instance =
+                        DynamicFactory<Traits>::template createInstanceFromTag<Base, Derived...>(
+                            node->nodeName());
                     if (instance == nullptr) {
                         throw Exception("Invalid type ref name: " + node->nodeName());
                     }
 
                     vector.push_back(instance);
-                }
-                catch (typename DynamicFactory<Traits>::Exception &e)
-                {
-                    throw Exception("Unable to instanciate class from tag '" +
-                        node->nodeName() + "' : " + std::string(e.what()));
+                } catch (typename DynamicFactory<Traits>::Exception &e) {
+                    throw Exception("Unable to instanciate class from tag '" + node->nodeName() +
+                                    "' : " + std::string(e.what()));
                 }
             }
         }
     }
 
 private:
-    using ElementStack = std::stack<Poco::XML::Element*>;
+    using ElementStack = std::stack<Poco::XML::Element *>;
 
-    Deserializer(const Deserializer&) = delete;
-    Deserializer& operator = (const Deserializer&) = delete;
+    Deserializer(const Deserializer &) = delete;
+    Deserializer &operator=(const Deserializer &) = delete;
 
     /** @return the first node child of a given type */
     template <class T>
     T *getFirstChild(int nodeType)
     {
         for (Poco::XML::Node *node = topElement().firstChild(); node != nullptr;
-            node = node->nextSibling()) {
+             node = node->nextSibling()) {
             if (node->nodeType() == nodeType) {
-                return static_cast<T*>(node);
+                return static_cast<T *>(node);
             }
         }
         return nullptr;
@@ -290,8 +284,6 @@ private:
     Poco::AutoPtr<Poco::XML::Document> mDocument;
     ElementStack mElementStack;
 };
-
 }
 }
 }
-

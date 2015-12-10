@@ -68,66 +68,65 @@ struct TypeTraits
 
 /* References */
 
-template<>
+template <>
 struct TypeTraits<type::Ref>
 {
     /* No tag because this class cannot be serializable */
     static const std::string attributeName;
 };
 
-template<>
+template <>
 struct TypeTraits<type::TypeRef>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::ComponentRef>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::ServiceRef>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::SubsystemRef>
 {
     static const std::string tag;
 };
 
-
 /* Named reference collections */
 
-template<>
+template <>
 struct TypeTraits<type::RefCollection>
 {
     /* No tag because this class cannot be serializable */
     static const std::string attributeName;
 };
 
-template<>
+template <>
 struct TypeTraits<type::TypeRefCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::ComponentRefCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::ServiceRefCollection>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::SubsystemRefCollection>
 {
     static const std::string tag;
@@ -135,14 +134,14 @@ struct TypeTraits<type::SubsystemRefCollection>
 
 /* Characteristics */
 
-template<>
+template <>
 struct TypeTraits<type::Characteristic>
 {
     static const std::string tag;
     static const std::string attributeName;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Characteristics>
 {
     static const std::string tag;
@@ -150,7 +149,7 @@ struct TypeTraits<type::Characteristics>
 
 /* Misc types */
 
-template<>
+template <>
 struct TypeTraits<type::Description>
 {
     static const std::string tag;
@@ -158,13 +157,13 @@ struct TypeTraits<type::Description>
 
 /* Misc collections */
 
-template<>
+template <>
 struct TypeTraits<type::Categories>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Children>
 {
     static const std::string tag;
@@ -172,19 +171,19 @@ struct TypeTraits<type::Children>
 
 /* Parameters */
 
-template<>
+template <>
 struct TypeTraits<type::Parameters>
 {
     /* No tag because this class cannot be serializable */
 };
 
-template<>
+template <>
 struct TypeTraits<type::InfoParameters>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::ControlParameters>
 {
     static const std::string tag;
@@ -192,7 +191,7 @@ struct TypeTraits<type::ControlParameters>
 
 /* Inputs / Outputs */
 
-template<>
+template <>
 struct TypeTraits<type::Connector>
 {
     /* No tag because this class cannot be serializable */
@@ -200,25 +199,25 @@ struct TypeTraits<type::Connector>
     static const std::string attributeName;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Input>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Output>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Inputs>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Outputs>
 {
     static const std::string tag;
@@ -226,39 +225,36 @@ struct TypeTraits<type::Outputs>
 
 /* Main type classes */
 
-template<>
+template <>
 struct TypeTraits<type::Type>
 {
     static const std::string tag;
     static const std::string attributeName;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Component>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Subsystem>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::System>
 {
     static const std::string tag;
 };
 
-template<>
+template <>
 struct TypeTraits<type::Service>
 {
     static const std::string tag;
 };
-
 }
 }
 }
-
-

@@ -39,12 +39,14 @@ namespace windows
 /**
  * Implements the cavs::Logger interface for Windows cAVS driver API.
  */
-class Logger final: public cavs::Logger
+class Logger final : public cavs::Logger
 {
 public:
-    Logger(Device &device, WppClientFactory &wppClientFactory) : mDevice(device),
-        mWppClientFactory(wppClientFactory),
-        mLogEntryQueue(queueMaxMemoryBytes, logBlockSize) {}
+    Logger(Device &device, WppClientFactory &wppClientFactory)
+        : mDevice(device), mWppClientFactory(wppClientFactory),
+          mLogEntryQueue(queueMaxMemoryBytes, logBlockSize)
+    {
+    }
 
     ~Logger()
     {
@@ -83,8 +85,8 @@ private:
         ~LogProducer();
 
     private:
-        LogProducer(const LogProducer&) = delete;
-        LogProducer& operator=(const LogProducer&) = delete;
+        LogProducer(const LogProducer &) = delete;
+        LogProducer &operator=(const LogProducer &) = delete;
 
         /** Method called by the log producer thread */
         void produceEntries();
@@ -119,7 +121,7 @@ private:
     static Output translateFromDriver(driver::FW_LOG_OUTPUT output);
 
     /** Translate log parameters to driver type */
-    static driver::IoctlFwLogsState translateToDriver(const Parameters& params);
+    static driver::IoctlFwLogsState translateToDriver(const Parameters &params);
 
     /** Translate log parameters from driver type */
     static Parameters translateFromDriver(const driver::IoctlFwLogsState &params);
@@ -128,14 +130,11 @@ private:
      * This method is used by the blocking queue in order to estimate the
      * memory size of all contained log blocks.
      */
-    static std::size_t logBlockSize(const LogBlock &block)
-    {
-        return block.getLogSize();
-    }
+    static std::size_t logBlockSize(const LogBlock &block) { return block.getLogSize(); }
 
     /** Set/Get log parameters using a Tiny(Get|Set) ioctl */
     void logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &inputFwParams,
-        driver::IoctlFwLogsState &outputFwParams);
+                           driver::IoctlFwLogsState &outputFwParams);
 
     void setLogParameterIoctl(const Parameters &parameters);
     void startLogLocked(const Parameters &parameters);
@@ -148,7 +147,6 @@ private:
     std::unique_ptr<LogProducer> mLogProducer;
     std::mutex mLogActivationContextMutex;
 };
-
 }
 }
 }

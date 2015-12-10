@@ -36,11 +36,14 @@ class SystemRef : public Ref
 {
 private:
     using base = Ref;
+
 public:
     SystemRef() = default;
-    explicit SystemRef(const std::string& typeName, const std::string& instanceId) :
-        base(typeName, instanceId) {}
-    explicit SystemRef(const SystemRef& other) = default;
+    explicit SystemRef(const std::string &typeName, const std::string &instanceId)
+        : base(typeName, instanceId)
+    {
+    }
+    explicit SystemRef(const SystemRef &other) = default;
     SystemRef &operator=(const SystemRef &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -62,7 +65,7 @@ protected:
             return false;
         }
 
-        const SystemRef *otherServ = dynamic_cast<const SystemRef*>(&other);
+        const SystemRef *otherServ = dynamic_cast<const SystemRef *>(&other);
         if (otherServ == nullptr) {
             return false;
         }
@@ -82,5 +85,3 @@ private:
 }
 }
 }
-
-

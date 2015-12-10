@@ -42,7 +42,7 @@ namespace dsp_fw
  * returned by the cAVS FW thanks to the Tlv::TlvDictionaryInterface exposed by the FwConfig
  * instance.
  */
-class FwConfig final: public tlv::TlvResponseHandlerInterface
+class FwConfig final : public tlv::TlvResponseHandlerInterface
 {
 public:
     FwVersion fwVersion;
@@ -97,48 +97,46 @@ public:
     uint32_t maxDpTasksCount;
     bool isMaxDpTasksCountValid;
 
-    FwConfig():
-        mFwConfigTlvMap(),
-        mFwConfigTlvDictionary(mFwConfigTlvMap)
+    FwConfig() : mFwConfigTlvMap(), mFwConfigTlvDictionary(mFwConfigTlvMap)
     {
         using Tags = FwConfigParams;
         using namespace tlv;
 
         mFwConfigTlvMap[Tags::FW_VERSION_FW_CFG] =
-            std::make_unique<TlvWrapper<FwVersion> >(fwVersion, isFwVersionValid);
+            std::make_unique<TlvWrapper<FwVersion>>(fwVersion, isFwVersionValid);
         mFwConfigTlvMap[Tags::MEMORY_RECLAIMED_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(memoryReclaimed, isMemoryReclaimedValid);
+            std::make_unique<TlvWrapper<uint32_t>>(memoryReclaimed, isMemoryReclaimedValid);
         mFwConfigTlvMap[Tags::SLOW_CLOCK_FREQ_HZ_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(slowClockFreqHz, isSlowClockFreqHzValid);
+            std::make_unique<TlvWrapper<uint32_t>>(slowClockFreqHz, isSlowClockFreqHzValid);
         mFwConfigTlvMap[Tags::FAST_CLOCK_FREQ_HZ_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(fastClockFreqHz, isFastClockFreqHzValid);
+            std::make_unique<TlvWrapper<uint32_t>>(fastClockFreqHz, isFastClockFreqHzValid);
         mFwConfigTlvMap[Tags::DMA_BUFFER_CONFIG_FW_CFG] =
-            std::make_unique<TlvVectorWrapper<DmaBufferConfig> >(dmaBufferConfig);
+            std::make_unique<TlvVectorWrapper<DmaBufferConfig>>(dmaBufferConfig);
         mFwConfigTlvMap[Tags::ALH_SUPPORT_LEVEL_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(alhSupportLevel, isAlhSupportLevelValid);
+            std::make_unique<TlvWrapper<uint32_t>>(alhSupportLevel, isAlhSupportLevelValid);
         mFwConfigTlvMap[Tags::IPC_DL_MAILBOX_BYTES_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(ipcDlMailboxBytes, isIpcDlMailboxBytesValid);
+            std::make_unique<TlvWrapper<uint32_t>>(ipcDlMailboxBytes, isIpcDlMailboxBytesValid);
         mFwConfigTlvMap[Tags::IPC_UL_MAILBOX_BYTES_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(ipcUlMailboxBytes, isIpcUlMailboxBytesValid);
+            std::make_unique<TlvWrapper<uint32_t>>(ipcUlMailboxBytes, isIpcUlMailboxBytesValid);
         mFwConfigTlvMap[Tags::TRACE_LOG_BYTES_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(traceLogBytes, isTraceLogBytesValid);
+            std::make_unique<TlvWrapper<uint32_t>>(traceLogBytes, isTraceLogBytesValid);
         mFwConfigTlvMap[Tags::MAX_PPL_CNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(maxPplCount, isMaxPplCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(maxPplCount, isMaxPplCountValid);
         mFwConfigTlvMap[Tags::MAX_ASTATE_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(maxAstateCount, isMaxAstateCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(maxAstateCount, isMaxAstateCountValid);
         mFwConfigTlvMap[Tags::MAX_MODULE_PIN_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(maxModulePinCount, isMaxModulePinCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(maxModulePinCount, isMaxModulePinCountValid);
         mFwConfigTlvMap[Tags::MODULES_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(modulesCount, isModulesCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(modulesCount, isModulesCountValid);
         mFwConfigTlvMap[Tags::MAX_MOD_INST_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(maxModInstCount, isMaxModInstCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(maxModInstCount, isMaxModInstCountValid);
         mFwConfigTlvMap[Tags::MAX_LL_TASKS_PER_PRI_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(maxLlTasksPerPriCount,
-            isMaxLlTasksPerPriCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(maxLlTasksPerPriCount,
+                                                   isMaxLlTasksPerPriCountValid);
         mFwConfigTlvMap[Tags::LL_PRI_COUNT] =
-            std::make_unique<TlvWrapper<uint32_t> >(llPriCount, isLlPriCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(llPriCount, isLlPriCountValid);
         mFwConfigTlvMap[Tags::MAX_DP_TASKS_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(maxDpTasksCount, isMaxDpTasksCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(maxDpTasksCount, isMaxDpTasksCountValid);
     }
 
     const tlv::TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override
@@ -150,7 +148,6 @@ private:
     tlv::TlvDictionary<FwConfigParams>::TlvMap mFwConfigTlvMap;
     tlv::TlvDictionary<FwConfigParams> mFwConfigTlvDictionary;
 };
-
 }
 }
 }

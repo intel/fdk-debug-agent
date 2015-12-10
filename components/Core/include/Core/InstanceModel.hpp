@@ -62,19 +62,13 @@ public:
         return collection->getInstance(instanceId);
     }
 
-    const CollectionMap &getCollectionMap() const
-    {
-        return mCollectionMap;
-    }
+    const CollectionMap &getCollectionMap() const { return mCollectionMap; }
 
 private:
-    InstanceModel(const InstanceModel&) = delete;
-    InstanceModel &operator=(const InstanceModel&) = delete;
+    InstanceModel(const InstanceModel &) = delete;
+    InstanceModel &operator=(const InstanceModel &) = delete;
 
     CollectionMap mCollectionMap;
 };
-
 }
 }
-
-

@@ -33,7 +33,7 @@ namespace core
 {
 
 void TypeModelConverter::addSubsystemSubType(TypeModel::TypeMap &map,
-    std::shared_ptr<ifdk_objects::type::Type> type)
+                                             std::shared_ptr<ifdk_objects::type::Type> type)
 {
     map[subsystemName + "." + type->getName()] = type;
 }
@@ -143,7 +143,6 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     return subsystem;
 }
 
-
 std::shared_ptr<Type> TypeModelConverter::createPipe()
 {
     auto pipe = std::make_shared<Type>();
@@ -251,155 +250,121 @@ void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
     // Add FW config
     const dsp_fw::FwConfig &fwConfig = mSystem.getFwConfig();
     if (fwConfig.isFwVersionValid) {
-        ch.add(Characteristic(
-            "Firmware version",
-            std::to_string(fwConfig.fwVersion.major) + "." +
-            std::to_string(fwConfig.fwVersion.minor) + "." +
-            std::to_string(fwConfig.fwVersion.hotfix) + "." +
-            std::to_string(fwConfig.fwVersion.build)));
+        ch.add(
+            Characteristic("Firmware version", std::to_string(fwConfig.fwVersion.major) + "." +
+                                                   std::to_string(fwConfig.fwVersion.minor) + "." +
+                                                   std::to_string(fwConfig.fwVersion.hotfix) + "." +
+                                                   std::to_string(fwConfig.fwVersion.build)));
     }
     if (fwConfig.isMemoryReclaimedValid) {
-        ch.add(Characteristic(
-            "Memory reclaimed",
-            std::to_string(fwConfig.memoryReclaimed)));
+        ch.add(Characteristic("Memory reclaimed", std::to_string(fwConfig.memoryReclaimed)));
     }
     if (fwConfig.isSlowClockFreqHzValid) {
-        ch.add(Characteristic(
-            "Slow clock frequency (Hz)",
-            std::to_string(fwConfig.slowClockFreqHz)));
+        ch.add(
+            Characteristic("Slow clock frequency (Hz)", std::to_string(fwConfig.slowClockFreqHz)));
     }
     if (fwConfig.isFastClockFreqHzValid) {
-        ch.add(Characteristic(
-            "Fast clock frequency (Hz)",
-            std::to_string(fwConfig.fastClockFreqHz)));
+        ch.add(
+            Characteristic("Fast clock frequency (Hz)", std::to_string(fwConfig.fastClockFreqHz)));
     }
     if (fwConfig.dmaBufferConfig.size() > 0) {
         size_t i = 0;
         for (auto dmaBufferConfig : fwConfig.dmaBufferConfig) {
-            ch.add(Characteristic(
-                "DMA buffer config #" + std::to_string(i) + " min size (bytes)",
-                std::to_string(dmaBufferConfig.min_size_bytes)));
-            ch.add(Characteristic(
-                "DMA buffer config #" + std::to_string(i) + " max size (bytes)",
-                std::to_string(dmaBufferConfig.max_size_bytes)));
+            ch.add(Characteristic("DMA buffer config #" + std::to_string(i) + " min size (bytes)",
+                                  std::to_string(dmaBufferConfig.min_size_bytes)));
+            ch.add(Characteristic("DMA buffer config #" + std::to_string(i) + " max size (bytes)",
+                                  std::to_string(dmaBufferConfig.max_size_bytes)));
             ++i;
         }
     }
     if (fwConfig.isAlhSupportLevelValid) {
-        ch.add(Characteristic(
-            "Audio Hub Link support level",
-            std::to_string(fwConfig.alhSupportLevel)));
+        ch.add(Characteristic("Audio Hub Link support level",
+                              std::to_string(fwConfig.alhSupportLevel)));
     }
     if (fwConfig.isIpcDlMailboxBytesValid) {
-        ch.add(Characteristic(
-            "IPC down link (host to FW) mailbox size (bytes)",
-            std::to_string(fwConfig.ipcDlMailboxBytes)));
+        ch.add(Characteristic("IPC down link (host to FW) mailbox size (bytes)",
+                              std::to_string(fwConfig.ipcDlMailboxBytes)));
     }
     if (fwConfig.isIpcUlMailboxBytesValid) {
-        ch.add(Characteristic(
-            "IPC up link (FW to host) mailbox size (bytes)",
-            std::to_string(fwConfig.ipcUlMailboxBytes)));
+        ch.add(Characteristic("IPC up link (FW to host) mailbox size (bytes)",
+                              std::to_string(fwConfig.ipcUlMailboxBytes)));
     }
     if (fwConfig.isTraceLogBytesValid) {
-        ch.add(Characteristic(
-            "Size of trace log buffer per single core (bytes)",
-            std::to_string(fwConfig.traceLogBytes)));
+        ch.add(Characteristic("Size of trace log buffer per single core (bytes)",
+                              std::to_string(fwConfig.traceLogBytes)));
     }
     if (fwConfig.isMaxPplCountValid) {
-        ch.add(Characteristic(
-            "Maximum number of pipelines instances",
-            std::to_string(fwConfig.maxPplCount)));
+        ch.add(Characteristic("Maximum number of pipelines instances",
+                              std::to_string(fwConfig.maxPplCount)));
     }
     if (fwConfig.isMaxAstateCountValid) {
-        ch.add(Characteristic(
-            "Maximum number of A-state table entries",
-            std::to_string(fwConfig.maxAstateCount)));
+        ch.add(Characteristic("Maximum number of A-state table entries",
+                              std::to_string(fwConfig.maxAstateCount)));
     }
     if (fwConfig.isMaxModulePinCountValid) {
-        ch.add(Characteristic(
-            "Maximum number of input or output pins per module",
-            std::to_string(fwConfig.maxModulePinCount)));
+        ch.add(Characteristic("Maximum number of input or output pins per module",
+                              std::to_string(fwConfig.maxModulePinCount)));
     }
     if (fwConfig.isModulesCountValid) {
-        ch.add(Characteristic(
-            "Current total number of module entries loaded into the DSP",
-            std::to_string(fwConfig.modulesCount)));
+        ch.add(Characteristic("Current total number of module entries loaded into the DSP",
+                              std::to_string(fwConfig.modulesCount)));
     }
     if (fwConfig.isMaxModInstCountValid) {
-        ch.add(Characteristic(
-            "Maximum module instance count",
-            std::to_string(fwConfig.maxModInstCount)));
+        ch.add(Characteristic("Maximum module instance count",
+                              std::to_string(fwConfig.maxModInstCount)));
     }
     if (fwConfig.isMaxLlTasksPerPriCountValid) {
-        ch.add(Characteristic(
-            "Maximum number of LL tasks per priority",
-            std::to_string(fwConfig.maxLlTasksPerPriCount)));
+        ch.add(Characteristic("Maximum number of LL tasks per priority",
+                              std::to_string(fwConfig.maxLlTasksPerPriCount)));
     }
     if (fwConfig.isLlPriCountValid) {
-        ch.add(Characteristic(
-            "Number of LL priorities",
-            std::to_string(fwConfig.llPriCount)));
+        ch.add(Characteristic("Number of LL priorities", std::to_string(fwConfig.llPriCount)));
     }
     if (fwConfig.isMaxDpTasksCountValid) {
-        ch.add(Characteristic(
-            "Maximum number of DP tasks per core",
-            std::to_string(fwConfig.maxDpTasksCount)));
+        ch.add(Characteristic("Maximum number of DP tasks per core",
+                              std::to_string(fwConfig.maxDpTasksCount)));
     }
 
     // Add HW config
     const dsp_fw::HwConfig &hwConfig = mSystem.getHwConfig();
     if (hwConfig.isCavsVersionValid) {
-        ch.add(Characteristic(
-            "cAVS Version",
-            std::to_string(hwConfig.cavsVersion)));
+        ch.add(Characteristic("cAVS Version", std::to_string(hwConfig.cavsVersion)));
     }
     if (hwConfig.isDspCoreCountValid) {
-        ch.add(Characteristic(
-            "Number of cores",
-            std::to_string(hwConfig.dspCoreCount)));
+        ch.add(Characteristic("Number of cores", std::to_string(hwConfig.dspCoreCount)));
     }
     if (hwConfig.isMemPageSizeValid) {
-        ch.add(Characteristic(
-            "Memory page size (bytes)",
-            std::to_string(hwConfig.memPageSize)));
+        ch.add(Characteristic("Memory page size (bytes)", std::to_string(hwConfig.memPageSize)));
     }
     if (hwConfig.isTotalPhysicalMemoryPageValid) {
-        ch.add(Characteristic(
-            "Total number of physical pages",
-            std::to_string(hwConfig.totalPhysicalMemoryPage)));
+        ch.add(Characteristic("Total number of physical pages",
+                              std::to_string(hwConfig.totalPhysicalMemoryPage)));
     }
     if (hwConfig.isI2sCapsValid) {
-        ch.add(Characteristic(
-            "I2S version",
-            std::to_string(hwConfig.i2sCaps.version)));
+        ch.add(Characteristic("I2S version", std::to_string(hwConfig.i2sCaps.version)));
         size_t i = 0;
         for (auto controllerBaseAddr : hwConfig.i2sCaps.controllerBaseAddr) {
 
-            ch.add(Characteristic(
-                "I2S controller #" + std::to_string(i++) + " base address",
-                std::to_string(controllerBaseAddr)));
+            ch.add(Characteristic("I2S controller #" + std::to_string(i++) + " base address",
+                                  std::to_string(controllerBaseAddr)));
         }
     }
     if (hwConfig.isGpdmaCapsValid) {
 
-            ch.add(Characteristic(
-                "LP GPDMA0 count" + std::to_string(hwConfig.gpdmaCaps.lp_gpdma0_count)));
-            ch.add(Characteristic(
-                "LP GPDMA1 count" + std::to_string(hwConfig.gpdmaCaps.lp_gpdma0_count)));
-            ch.add(Characteristic(
-                "HP GPDMA count" + std::to_string(hwConfig.gpdmaCaps.hp_gpdma_count)));
+        ch.add(
+            Characteristic("LP GPDMA0 count" + std::to_string(hwConfig.gpdmaCaps.lp_gpdma0_count)));
+        ch.add(
+            Characteristic("LP GPDMA1 count" + std::to_string(hwConfig.gpdmaCaps.lp_gpdma0_count)));
+        ch.add(
+            Characteristic("HP GPDMA count" + std::to_string(hwConfig.gpdmaCaps.hp_gpdma_count)));
     }
     if (hwConfig.isGatewayCountValid) {
-        ch.add(Characteristic(
-            "Total number of DMA gateways",
-            std::to_string(hwConfig.gatewayCount)));
+        ch.add(
+            Characteristic("Total number of DMA gateways", std::to_string(hwConfig.gatewayCount)));
     }
     if (hwConfig.isEbbCountValid) {
-        ch.add(Characteristic(
-            "Number of SRAM memory banks",
-            std::to_string(hwConfig.ebbCount)));
+        ch.add(Characteristic("Number of SRAM memory banks", std::to_string(hwConfig.ebbCount)));
     }
 }
-
 }
 }

@@ -51,8 +51,7 @@ private:
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createGateway(
         const cavs::dsp_fw::ConnectorNodeId::Type &gatewayType);
 
-    std::shared_ptr<ifdk_objects::instance::BaseCollection> createModule(
-        uint32_t moduleId);
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createModule(uint32_t moduleId);
 
     std::shared_ptr<ifdk_objects::instance::RefCollection> createModuleRef(
         const std::vector<cavs::dsp_fw::CompoundModuleId> &compoundIdList);
@@ -77,7 +76,8 @@ private:
     };
 
     /* Gateway direction */
-    enum class GatewayDirection {
+    enum class GatewayDirection
+    {
         Input,
         Output
     };
@@ -96,12 +96,9 @@ private:
     /** Add one instance collection in the supplied map. The key of the map is :
      *  <subsystem name>.<type name>
      */
-    static void addInstanceCollection(InstanceModel::CollectionMap &map,
-        const std::string &typeName,
+    static void addInstanceCollection(
+        InstanceModel::CollectionMap &map, const std::string &typeName,
         std::shared_ptr<ifdk_objects::instance::BaseCollection> collection);
 };
-
 }
 }
-
-

@@ -56,8 +56,7 @@ public:
 
     static std::string toString(Verb verb)
     {
-        switch (verb)
-        {
+        switch (verb) {
         case Verb::Get:
             return "GET";
         case Verb::Post:
@@ -92,18 +91,17 @@ private:
     friend class RestResourceRequestHandler;
 
     /* Constructor is called by the RestResourceRequestHandler class */
-    Request(Verb verb, std::istream &requestStream, const Identifiers &identifiers) :
-        mVerb(verb), mRequestStream(requestStream), mIdentifiers(identifiers) {}
+    Request(Verb verb, std::istream &requestStream, const Identifiers &identifiers)
+        : mVerb(verb), mRequestStream(requestStream), mIdentifiers(identifiers)
+    {
+    }
 
-    Request(const Request&) = delete;
+    Request(const Request &) = delete;
     Request &operator=(const Request &) = delete;
 
     Verb mVerb;
     std::istream &mRequestStream;
     Identifiers mIdentifiers;
 };
-
 }
 }
-
-

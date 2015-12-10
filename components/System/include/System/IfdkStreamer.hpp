@@ -46,10 +46,8 @@ protected:
      * @remarks not public since has to be constructed only from subclasses.
      * @throw IfdkStreamHeader::Exception
      */
-    IfdkStreamer(const std::string &systemType,
-                 const std::string &formatType,
-                 unsigned int majorVersion,
-                 unsigned int minorVersion);
+    IfdkStreamer(const std::string &systemType, const std::string &formatType,
+                 unsigned int majorVersion, unsigned int minorVersion);
 
     /**
      * Add a property to the stream.
@@ -73,7 +71,6 @@ protected:
     virtual bool streamNextFormatData(std::ostream &os) = 0;
 
 private:
-
     virtual void streamFirst(std::ostream &os) override final;
 
     virtual bool streamNext(std::ostream &os) override final;
@@ -91,8 +88,7 @@ private:
 
     /* Make this class non copyable */
     IfdkStreamer(const IfdkStreamer &) = delete;
-    IfdkStreamer & operator=(const IfdkStreamer &) = delete;
+    IfdkStreamer &operator=(const IfdkStreamer &) = delete;
 };
-
 }
 }

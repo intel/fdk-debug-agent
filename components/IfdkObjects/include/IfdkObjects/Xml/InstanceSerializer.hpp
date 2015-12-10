@@ -98,9 +98,6 @@ private:
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) override;
 };
-
 }
 }
 }
-
-

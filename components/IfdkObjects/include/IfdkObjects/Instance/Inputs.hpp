@@ -34,9 +34,6 @@ namespace instance
 
 /** List of input connectors */
 using Inputs = VisitableVector<Input, Visitor, ConstVisitor>;
-
 }
 }
 }
-
-

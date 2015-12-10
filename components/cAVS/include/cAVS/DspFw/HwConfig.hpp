@@ -44,7 +44,7 @@ namespace dsp_fw
  * instance.
  * @fixme this version ignores tag GPDMA_CAPS (5) since definition and FW types are not consistent
  */
-class HwConfig final: public tlv::TlvResponseHandlerInterface
+class HwConfig final : public tlv::TlvResponseHandlerInterface
 {
 public:
     /**
@@ -90,30 +90,27 @@ public:
     uint32_t ebbCount;
     bool isEbbCountValid;
 
-    HwConfig():
-        mHwConfigTlvMap(),
-        mHwConfigTlvDictionary(mHwConfigTlvMap)
+    HwConfig() : mHwConfigTlvMap(), mHwConfigTlvDictionary(mHwConfigTlvMap)
     {
         using Tags = HwConfigParams;
         using namespace tlv;
 
         mHwConfigTlvMap[Tags::cAVS_VER_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(cavsVersion, isCavsVersionValid);
+            std::make_unique<TlvWrapper<uint32_t>>(cavsVersion, isCavsVersionValid);
         mHwConfigTlvMap[Tags::DSP_CORES_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(dspCoreCount, isDspCoreCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(dspCoreCount, isDspCoreCountValid);
         mHwConfigTlvMap[Tags::MEM_PAGE_BYTES_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(memPageSize, isMemPageSizeValid);
-        mHwConfigTlvMap[Tags::TOTAL_PHYS_MEM_PAGES_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(totalPhysicalMemoryPage,
-            isTotalPhysicalMemoryPageValid);
+            std::make_unique<TlvWrapper<uint32_t>>(memPageSize, isMemPageSizeValid);
+        mHwConfigTlvMap[Tags::TOTAL_PHYS_MEM_PAGES_HW_CFG] = std::make_unique<TlvWrapper<uint32_t>>(
+            totalPhysicalMemoryPage, isTotalPhysicalMemoryPageValid);
         mHwConfigTlvMap[Tags::I2S_CAPS_HW_CFG] =
             std::make_unique<I2sCapsTlvWrapper>(i2sCaps, isI2sCapsValid);
         mHwConfigTlvMap[Tags::GPDMA_CAPS_HW_CFG] =
-            std::make_unique<TlvWrapper<GpdmaCapabilities> >(gpdmaCaps, isGpdmaCapsValid);
+            std::make_unique<TlvWrapper<GpdmaCapabilities>>(gpdmaCaps, isGpdmaCapsValid);
         mHwConfigTlvMap[Tags::GATEWAY_COUNT_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(gatewayCount, isGatewayCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(gatewayCount, isGatewayCountValid);
         mHwConfigTlvMap[Tags::EBB_COUNT_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t> >(ebbCount, isEbbCountValid);
+            std::make_unique<TlvWrapper<uint32_t>>(ebbCount, isEbbCountValid);
     }
 
     const tlv::TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override
@@ -126,16 +123,14 @@ public:
      * @see I2sCapabilities
      * @remarks this inner class should be private, but have it public allows to unit test it.
      */
-    class I2sCapsTlvWrapper final: public tlv::TlvWrapperInterface
+    class I2sCapsTlvWrapper final : public tlv::TlvWrapperInterface
     {
     public:
         /**
          * @param[in] value the reference to the shadow runtime variable I2sCaps
          * @param[in] valid the reference to the shadow runtime variable valid flag
          */
-        I2sCapsTlvWrapper(I2sCaps &value, bool &valid):
-            mValue(value),
-            mValid(valid)
+        I2sCapsTlvWrapper(I2sCaps &value, bool &valid) : mValue(value), mValid(valid)
         {
             invalidate();
         }
@@ -158,9 +153,9 @@ public:
         {
             if (!isValidSize(binaryValueSize)) {
 
-                throw Exception(std::string("Invalid binary size (")
-                    + std::to_string(binaryValueSize)
-                    + " bytes) for a TLV I2sCaps value");
+                throw Exception(std::string("Invalid binary size (") +
+                                std::to_string(binaryValueSize) +
+                                " bytes) for a TLV I2sCaps value");
             }
             // First uint32_t is version
             mValue.version = *(reinterpret_cast<const uint32_t *>(binarySource));
@@ -224,7 +219,6 @@ private:
     tlv::TlvDictionary<HwConfigParams>::TlvMap mHwConfigTlvMap;
     tlv::TlvDictionary<HwConfigParams> mHwConfigTlvDictionary;
 };
-
 }
 }
 }

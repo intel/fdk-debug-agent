@@ -38,63 +38,36 @@ class To
 public:
     To() = default;
     explicit To(const std::string &typeName, const std::string &instanceId,
-        const std::string& inputId) :
-        mTypeName(typeName), mInstanceId(instanceId), mInputId(inputId) {}
-    explicit To(const To& other) = default;
+                const std::string &inputId)
+        : mTypeName(typeName), mInstanceId(instanceId), mInputId(inputId)
+    {
+    }
+    explicit To(const To &other) = default;
     To &operator=(const To &other) = default;
 
-    bool operator == (const To &other) const NOEXCEPT
+    bool operator==(const To &other) const NOEXCEPT
     {
-        return
-            mTypeName == other.mTypeName &&
-            mInstanceId == other.mInstanceId &&
-            mInputId == other.mInputId;
+        return mTypeName == other.mTypeName && mInstanceId == other.mInstanceId &&
+               mInputId == other.mInputId;
     }
 
-    bool operator != (const To &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const To &other) const NOEXCEPT { return !(*this == other); }
 
-    virtual void accept(Visitor &visitor)
-    {
-        acceptCommon(*this, visitor);
-    }
+    virtual void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 
-    virtual void accept(ConstVisitor &visitor) const
-    {
-        acceptCommon(*this, visitor);
-    }
+    virtual void accept(ConstVisitor &visitor) const { acceptCommon(*this, visitor); }
 
-    std::string getTypeName() const
-    {
-        return mTypeName;
-    }
+    std::string getTypeName() const { return mTypeName; }
 
-    void setTypeName(const std::string &typeName)
-    {
-        mTypeName = typeName;
-    }
+    void setTypeName(const std::string &typeName) { mTypeName = typeName; }
 
-    std::string getInstanceId() const
-    {
-        return mInstanceId;
-    }
+    std::string getInstanceId() const { return mInstanceId; }
 
-    void setInstanceId(const std::string &instanceId)
-    {
-        mInstanceId = instanceId;
-    }
+    void setInstanceId(const std::string &instanceId) { mInstanceId = instanceId; }
 
-    std::string getInputId() const
-    {
-        return mInputId;
-    }
+    std::string getInputId() const { return mInputId; }
 
-    void setInputId(const std::string &inputId)
-    {
-        mInputId = inputId;
-    }
+    void setInputId(const std::string &inputId) { mInputId = inputId; }
 
 private:
     template <typename T, typename Visitor>
@@ -108,9 +81,6 @@ private:
     std::string mInstanceId;
     std::string mInputId;
 };
-
 }
 }
 }
-
-

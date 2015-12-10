@@ -35,16 +35,14 @@ namespace debug_agent
 namespace util
 {
 
- /* Read values from a binary stream */
+/* Read values from a binary stream */
 class ByteStreamReader
 {
 public:
     class Exception : public std::logic_error
     {
     public:
-        explicit Exception(const std::string& what)
-            : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
     /** @param vector: the input buffer */
@@ -58,13 +56,13 @@ public:
      * @tparam T the type of the value to read, shall be an enum or an integral type
      */
     template <typename T>
-    typename std::enable_if<IsSimpleSerializableType<T>::value>::type
-    read(T &value) {
+    typename std::enable_if<IsSimpleSerializableType<T>::value>::type read(T &value)
+    {
         std::size_t elementSize = sizeof(T);
         if (mIndex + elementSize > mBuffer.size()) {
             throw Exception("Read failed: end of stream reached");
         }
-        T *valuePtr = reinterpret_cast<T*>(&mBuffer[mIndex]);
+        T *valuePtr = reinterpret_cast<T *>(&mBuffer[mIndex]);
         value = *valuePtr;
         mIndex += elementSize;
     }
@@ -77,8 +75,8 @@ public:
      *           interface.
      */
     template <typename T>
-    typename std::enable_if<IsCompoundSerializableType<T>::value>::type
-    read(T &value) {
+    typename std::enable_if<IsCompoundSerializableType<T>::value>::type read(T &value)
+    {
         value.fromStream(*this);
     }
 
@@ -88,7 +86,8 @@ public:
      * @tparam T the element type
      */
     template <typename T>
-    void readArray(T *array, std::size_t count) {
+    void readArray(T *array, std::size_t count)
+    {
         for (std::size_t i = 0; i < count; ++i) {
             read(array[i]);
         }
@@ -105,7 +104,8 @@ public:
      * @throw ByteStreamReader::Exception if the end of stream is reached
      */
     template <typename SizeType, typename T>
-    void readVector(std::vector<T> &vector) {
+    void readVector(std::vector<T> &vector)
+    {
         SizeType size;
         /* Reading the size */
         read(size);
@@ -126,27 +126,17 @@ public:
     }
 
     /** @return true if stream is fully consumed, i.e. end of stream is reached */
-    bool isEOS() const
-    {
-        return mIndex == mBuffer.size();
-    }
+    bool isEOS() const { return mIndex == mBuffer.size(); }
 
     /** @return the underlying buffer */
-    const util::Buffer &getBuffer() const
-    {
-        return mBuffer;
-    }
+    const util::Buffer &getBuffer() const { return mBuffer; }
 
     /** @return the current stream pointer index */
-    std::size_t getPointerOffset()
-    {
-        return mIndex;
-    }
+    std::size_t getPointerOffset() { return mIndex; }
 
 private:
     std::size_t mIndex;
     util::Buffer mBuffer;
 };
-
 }
 }

@@ -67,7 +67,6 @@ void Logger::stop() NOEXCEPT
 {
     /* To do */
 }
-
 }
 }
 }

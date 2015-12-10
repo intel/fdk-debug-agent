@@ -41,14 +41,13 @@ namespace util
 class StringHelper final
 {
 public:
-
     /** This method returns a std::string from a byte buffer
      *
      *  @tparam ArrayElementType the array element type, its size must be one byte.
      *                          For instance : int8_t, uint8_t, char, unsigned char ...
      */
 
-    template<typename ArrayElementType>
+    template <typename ArrayElementType>
     static std::string getStringFromFixedSizeArray(ArrayElementType *buffer, std::size_t size)
     {
         static_assert(sizeof(ArrayElementType) == 1, "Size of ArrayElementType must be one");
@@ -67,9 +66,9 @@ public:
      *  @tparam ArrayElementType the array element type, its size must be one byte.
      *                          For instance : int8_t, uint8_t, char, unsigned char ...
      */
-    template<typename ArrayElementType>
+    template <typename ArrayElementType>
     static void setStringToFixedSizeArray(ArrayElementType *buffer, std::size_t size,
-        const std::string &str)
+                                          const std::string &str)
     {
         static_assert(sizeof(ArrayElementType) == 1, "Size of ArrayElementType must be one");
 
@@ -98,7 +97,7 @@ public:
         }
 
         std::size_t offset = beginIt - str.begin();
-        std::size_t endOffset = str.length() - ( endIt - str.rbegin());
+        std::size_t endOffset = str.length() - (endIt - str.rbegin());
         std::size_t length = 0;
         if (endOffset > offset) {
             length = endOffset - offset;
@@ -110,6 +109,5 @@ public:
 private:
     StringHelper();
 };
-
 }
 }

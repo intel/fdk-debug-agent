@@ -56,10 +56,7 @@ private:
      *  <subsystem name>.<type name>
      */
     static void addSubsystemSubType(TypeModel::TypeMap &map,
-        std::shared_ptr<ifdk_objects::type::Type> type);
+                                    std::shared_ptr<ifdk_objects::type::Type> type);
 };
-
 }
 }
-
-

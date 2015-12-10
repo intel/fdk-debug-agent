@@ -45,9 +45,10 @@ class GenericCollection : public BaseCollection
 {
 private:
     using base = BaseCollection;
+
 public:
     GenericCollection() = default;
-    explicit GenericCollection(const GenericCollection& other) = default;
+    explicit GenericCollection(const GenericCollection &other) = default;
     GenericCollection &operator=(const GenericCollection &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -62,7 +63,8 @@ public:
         acceptCommon(*this, visitor);
     }
 
-    virtual std::shared_ptr<const Instance> getInstance(const std::string &instanceId) const override
+    virtual std::shared_ptr<const Instance> getInstance(
+        const std::string &instanceId) const override
     {
         for (auto elementPtr : mElementPtrs) {
             if (elementPtr->getInstanceId() == instanceId) {
@@ -76,14 +78,11 @@ public:
     virtual void getInstances(std::vector<std::shared_ptr<const Instance>> &list) const override
     {
         for (auto elementPtr : mElementPtrs) {
-                list.push_back(elementPtr);
+            list.push_back(elementPtr);
         }
     }
 
-    void add(T *element)
-    {
-        add(std::shared_ptr<T>(element));
-    }
+    void add(T *element) { add(std::shared_ptr<T>(element)); }
 
     void add(std::shared_ptr<T> element)
     {
@@ -94,8 +93,7 @@ public:
 protected:
     virtual bool equalsTo(const BaseCollection &other) const NOEXCEPT override
     {
-        const GenericCollection<T> *otherColl =
-            dynamic_cast<const GenericCollection<T>*>(&other);
+        const GenericCollection<T> *otherColl = dynamic_cast<const GenericCollection<T> *>(&other);
         if (otherColl == nullptr) {
             return false;
         }
@@ -114,7 +112,7 @@ protected:
     }
 
 private:
-    using ElementPtrVector= std::vector<std::shared_ptr<T>>;
+    using ElementPtrVector = std::vector<std::shared_ptr<T>>;
 
     template <typename MyInstance, typename Visitor>
     static void acceptCommon(MyInstance &me, Visitor &visitor)
@@ -130,9 +128,6 @@ private:
 
     ElementPtrVector mElementPtrs;
 };
-
 }
 }
 }
-
-

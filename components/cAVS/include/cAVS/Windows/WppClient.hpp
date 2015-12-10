@@ -62,9 +62,8 @@ public:
 
 private:
     WppClient(const WppClient &) = delete;
-    WppClient &operator=(const WppClient&) = delete;
+    WppClient &operator=(const WppClient &) = delete;
 };
-
 }
 }
 }

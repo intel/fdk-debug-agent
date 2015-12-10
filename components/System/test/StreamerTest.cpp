@@ -36,14 +36,11 @@ using namespace debug_agent::system;
  * The StreamerTest also provides the expected stream to be compared with the one it will generate
  * through Streamer.
  */
-class StreamerTest: public Streamer
+class StreamerTest : public Streamer
 {
 public:
-    StreamerTest(size_t iterations):
-        mIterations(iterations),
-        mIteration(0),
-        mExpectedStream(),
-        mFirstCalled(false)
+    StreamerTest(size_t iterations)
+        : mIterations(iterations), mIteration(0), mExpectedStream(), mFirstCalled(false)
     {
         // Compute expected stream
         for (size_t i = 0; i < iterations; ++i) {
@@ -74,10 +71,7 @@ public:
         }
     }
 
-    const std::stringstream &getExpectedStream()
-    {
-        return mExpectedStream;
-    }
+    const std::stringstream &getExpectedStream() { return mExpectedStream; }
 
     const size_t mIterations;
     size_t mIteration;

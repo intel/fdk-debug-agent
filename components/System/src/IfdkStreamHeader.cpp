@@ -33,11 +33,9 @@ const size_t IfdkStreamHeader::propertyKeyMaxLength = 31;
 const size_t IfdkStreamHeader::propertyValueMaxLength = 31;
 const size_t IfdkStreamHeader::formatTypeMaxLength = 31;
 
-IfdkStreamHeader::IfdkStreamHeader(const std::string &systemType,
-                                   const std::string &fileType,
-                                   unsigned int majorVersion,
-                                   unsigned int minorVersion) :
-    mFormatType()
+IfdkStreamHeader::IfdkStreamHeader(const std::string &systemType, const std::string &fileType,
+                                   unsigned int majorVersion, unsigned int minorVersion)
+    : mFormatType()
 {
     if (systemType.length() == 0) {
 
@@ -55,9 +53,8 @@ IfdkStreamHeader::IfdkStreamHeader(const std::string &systemType,
     if (mFormatType.length() > formatTypeMaxLength) {
 
         throw Exception("Format type length exceeds " +
-            std::to_string(IfdkStreamHeader::formatTypeMaxLength)
-            + " characters for '"
-            + mFormatType + "'");
+                        std::to_string(IfdkStreamHeader::formatTypeMaxLength) +
+                        " characters for '" + mFormatType + "'");
     }
 }
 
@@ -68,8 +65,7 @@ void IfdkStreamHeader::addProperty(const std::string &key, const std::string &va
     if (key.length() > propertyKeyMaxLength || value.length() > propertyValueMaxLength) {
 
         throw Exception("Property length exceeds for " + key + equal + value);
-    }
-    else if (key.length() == 0 || value.length() == 0) {
+    } else if (key.length() == 0 || value.length() == 0) {
 
         throw Exception("Empty property key or value for " + key + equal + value);
     }
@@ -100,18 +96,17 @@ std::ostream &operator<<(std::ostream &os, const IfdkStreamHeader &header)
     /* Streams out each property */
     for (auto property : header.mProperties) {
 
-            /* padding key and value with '\0' up to <key|value>TypeMaxLength+1 bytes */
-            std::string copyPropertyKey(property.first);
-            copyPropertyKey.resize(header.propertyKeyMaxLength + 1, '\0');
-            std::string copyPropertyValue(property.second);
-            copyPropertyValue.resize(header.propertyValueMaxLength + 1, '\0');
+        /* padding key and value with '\0' up to <key|value>TypeMaxLength+1 bytes */
+        std::string copyPropertyKey(property.first);
+        copyPropertyKey.resize(header.propertyKeyMaxLength + 1, '\0');
+        std::string copyPropertyValue(property.second);
+        copyPropertyValue.resize(header.propertyValueMaxLength + 1, '\0');
 
-            os.write(copyPropertyKey.c_str(), copyPropertyKey.size());
-            os.write(copyPropertyValue.c_str(), copyPropertyValue.size());
+        os.write(copyPropertyKey.c_str(), copyPropertyKey.size());
+        os.write(copyPropertyValue.c_str(), copyPropertyValue.size());
     }
 
     return os;
 }
-
 }
 }

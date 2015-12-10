@@ -38,40 +38,25 @@ class Link
 {
 public:
     Link() = default;
-    explicit Link(const Link& other) = default;
+    explicit Link(const Link &other) = default;
     explicit Link(const From &from, const To &to) : mFrom(from), mTo(to) {}
 
     Link &operator=(const Link &other) = default;
 
-    bool operator == (const Link &other) const NOEXCEPT
+    bool operator==(const Link &other) const NOEXCEPT
     {
         return mFrom == other.mFrom && mTo == other.mTo;
     }
 
-    bool operator != (const Link &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Link &other) const NOEXCEPT { return !(*this == other); }
 
-    virtual void accept(Visitor &visitor)
-    {
-        acceptCommon(*this, visitor);
-    }
+    virtual void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 
-    virtual void accept(ConstVisitor &visitor) const
-    {
-        acceptCommon(*this, visitor);
-    }
+    virtual void accept(ConstVisitor &visitor) const { acceptCommon(*this, visitor); }
 
-    From &getFrom()
-    {
-        return mFrom;
-    }
+    From &getFrom() { return mFrom; }
 
-    To &getTo()
-    {
-        return mTo;
-    }
+    To &getTo() { return mTo; }
 
 private:
     template <typename T, typename Visitor>
@@ -88,9 +73,6 @@ private:
     From mFrom;
     To mTo;
 };
-
 }
 }
 }
-
-

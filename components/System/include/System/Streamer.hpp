@@ -38,12 +38,10 @@ public:
     class Exception final : public std::logic_error
     {
     public:
-        explicit Exception(const std::string &what)
-        : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
-    virtual ~Streamer() {};
+    virtual ~Streamer(){};
 
     /**
      * This operator allows to streams out the Streamer's stream to the ostream.
@@ -58,7 +56,7 @@ protected:
     /**
      * @remarks not public since has to be constructed only from subclasses.
      */
-    Streamer() {};
+    Streamer(){};
 
     /**
      * Request to stream out the first chunck of stream data.
@@ -90,8 +88,7 @@ private:
 
     /* Make this class non copyable */
     Streamer(const Streamer &) = delete;
-    Streamer & operator=(const Streamer &) = delete;
+    Streamer &operator=(const Streamer &) = delete;
 };
-
 }
 }

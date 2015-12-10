@@ -36,10 +36,11 @@ class TypeRef : public Ref
 {
 private:
     using base = Ref;
+
 public:
     TypeRef() = default;
-    explicit TypeRef(const std::string& name) : base(name) {}
-    explicit TypeRef(const TypeRef& other) = default;
+    explicit TypeRef(const std::string &name) : base(name) {}
+    explicit TypeRef(const TypeRef &other) = default;
     TypeRef &operator=(const TypeRef &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -61,7 +62,7 @@ protected:
             return false;
         }
 
-        const TypeRef *otherComp = dynamic_cast<const TypeRef*>(&other);
+        const TypeRef *otherComp = dynamic_cast<const TypeRef *>(&other);
         if (otherComp == nullptr) {
             return false;
         }
@@ -81,5 +82,3 @@ private:
 }
 }
 }
-
-

@@ -51,8 +51,7 @@ public:
 
     static std::string toString(ErrorStatus status)
     {
-        switch (status)
-        {
+        switch (status) {
         case ErrorStatus::NotFound:
             return "Resource not found";
         case ErrorStatus::BadRequest:
@@ -81,8 +80,10 @@ public:
          * @param[in] what The message to be carried on by the exception object which will be in
          * the body of the HTTP error response
          */
-        HttpError(ErrorStatus status, const std::string &userMessage = "") :
-            std::logic_error(getErrorMessage(status, userMessage).c_str()), mStatus(status) {}
+        HttpError(ErrorStatus status, const std::string &userMessage = "")
+            : std::logic_error(getErrorMessage(status, userMessage).c_str()), mStatus(status)
+        {
+        }
 
         ErrorStatus getStatus() { return mStatus; }
 
@@ -112,9 +113,7 @@ public:
         /**
          * @param[in] what The message to be carried on by the exception object
          */
-        explicit HttpAbort(const std::string &what)
-        : std::logic_error(what)
-        {}
+        explicit HttpAbort(const std::string &what) : std::logic_error(what) {}
     };
 
     /**
@@ -122,22 +121,13 @@ public:
      * @param[in] contentType MIME type corresponding to body type
      * @param[in] responseBody response body
      */
-    explicit Response(const std::string &contentType, const std::string &responseBody):
-        mContentType(contentType),
-        mOut(nullptr),
-        mContent(responseBody)
-    {
-    };
+    explicit Response(const std::string &contentType, const std::string &responseBody)
+        : mContentType(contentType), mOut(nullptr), mContent(responseBody){};
 
     /**
      * Construct a simple Response for HTTP status OK without any more data
      */
-    Response():
-        mContentType(),
-        mOut(nullptr),
-        mContent()
-    {
-    }
+    Response() : mContentType(), mOut(nullptr), mContent() {}
 
     virtual ~Response() {}
 
@@ -167,8 +157,7 @@ public:
     }
 
     static void sendHttpError(Poco::Net::HTTPResponse::HTTPStatus status,
-        const std::string &message,
-        Poco::Net::HTTPServerResponse &resp)
+                              const std::string &message, Poco::Net::HTTPServerResponse &resp)
     {
         /* @todo Use logging instead */
         std::cout << "Send HTTP error " << status << ": " << message << std::endl;
@@ -177,17 +166,12 @@ public:
         resp.setStatus(status);
         resp.setContentType("text/plain");
 
-        try
-        {
+        try {
             std::ostream &out = resp.send();
             out << message;
-        }
-        catch (std::exception &e)
-        {
+        } catch (std::exception &e) {
             /* @todo Use logging instead */
-            std::cout << "Failed to send HTTP error " << status << ": "
-                << e.what()
-                << std::endl;
+            std::cout << "Failed to send HTTP error " << status << ": " << e.what() << std::endl;
         }
     }
 
@@ -197,12 +181,8 @@ protected:
      * This constructor is provided for subclasses which will manage the body data by themselves.
      * @param[in] contentType MIME type corresponding to body type
      */
-    explicit Response(const std::string &contentType):
-        mContentType(contentType),
-        mOut(nullptr),
-        mContent()
-    {
-    };
+    explicit Response(const std::string &contentType)
+        : mContentType(contentType), mOut(nullptr), mContent(){};
 
 private:
     /**
@@ -214,17 +194,15 @@ private:
         httpMessage.setKeepAlive(true);
     }
 
-    Response(const Response&) = delete;
+    Response(const Response &) = delete;
     Response &operator=(const Response &) = delete;
 
 protected:
     std::string mContentType;
     std::ostream *mOut;
+
 private:
     std::string mContent;
 };
-
 }
 }
-
-

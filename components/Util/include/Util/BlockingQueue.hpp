@@ -52,7 +52,8 @@ namespace util
  * @tparam T the type handled by the std::unique_ptr
  */
 template <typename T>
-class BlockingQueue final {
+class BlockingQueue final
+{
 
 public:
     /*
@@ -61,15 +62,14 @@ public:
      *                                element.
      */
 
-    BlockingQueue(std::size_t maxByteSize, std::function<std::size_t(const T&)> elementSizeFunction)
+    BlockingQueue(std::size_t maxByteSize,
+                  std::function<std::size_t(const T &)> elementSizeFunction)
         : mMaxByteSize(maxByteSize), mElementSizeFunction(elementSizeFunction), mCurrentSize(0),
-        mClosed(false)
+          mClosed(false)
     {
     }
 
-    ~BlockingQueue()
-    {
-    }
+    ~BlockingQueue() {}
 
     /* Close the queue, i.e. :
      * - no more elements can be added.
@@ -128,8 +128,7 @@ public:
             return nullptr;
         }
 
-        if (mQueue.empty())
-        {
+        if (mQueue.empty()) {
             /* Queue is empty: waiting... */
             mCondVar.wait(locker);
 
@@ -173,10 +172,10 @@ public:
     }
 
 private:
-    using QueueType = std::queue< std::unique_ptr <T> >;
+    using QueueType = std::queue<std::unique_ptr<T>>;
 
-    BlockingQueue(const BlockingQueue&) = delete;
-    BlockingQueue& operator=(const BlockingQueue&) = delete;
+    BlockingQueue(const BlockingQueue &) = delete;
+    BlockingQueue &operator=(const BlockingQueue &) = delete;
 
     /** Add an element if possible
      *
@@ -222,7 +221,7 @@ private:
     }
 
     const std::size_t mMaxByteSize;
-    const std::function<std::size_t(const T&)> mElementSizeFunction;
+    const std::function<std::size_t(const T &)> mElementSizeFunction;
 
     std::mutex mMembersMutex;
     std::condition_variable mCondVar;
@@ -231,6 +230,5 @@ private:
     std::size_t mCurrentSize;
     bool mClosed;
 };
-
 }
 }

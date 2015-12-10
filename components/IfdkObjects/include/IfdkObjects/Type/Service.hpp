@@ -36,10 +36,11 @@ class Service : public Type
 {
 private:
     using base = Type;
+
 public:
     Service() = default;
-    explicit Service(const std::string& name) : base(name) {}
-    explicit Service(const Service& other) = default;
+    explicit Service(const std::string &name) : base(name) {}
+    explicit Service(const Service &other) = default;
     Service &operator=(const Service &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -61,7 +62,7 @@ protected:
             return false;
         }
 
-        const Service *otherComp = dynamic_cast<const Service*>(&other);
+        const Service *otherComp = dynamic_cast<const Service *>(&other);
         if (otherComp == nullptr) {
             return false;
         }
@@ -80,9 +81,6 @@ private:
         visitor.leave(true);
     }
 };
-
 }
 }
 }
-
-

@@ -30,10 +30,7 @@ enum class MyEnum
     val2
 };
 
-const std::map<MyEnum, std::string> myEnumNames = {
-    { MyEnum::val1, "val1" },
-    { MyEnum::val2, "val2" }
-};
+const std::map<MyEnum, std::string> myEnumNames = {{MyEnum::val1, "val1"}, {MyEnum::val2, "val2"}};
 
 TEST_CASE("EnumHelper: isValid")
 {
@@ -53,7 +50,7 @@ TEST_CASE("EnumHelper: toString")
      * typeid(EnumType).name(), which is implementation secific (windows and gcc toolchain doesn't
      * produce the same result) .*/
     CHECK(helper.toString(static_cast<MyEnum>(5)).find("Unknown value '5' of") !=
-        std::string::npos);
+          std::string::npos);
 }
 
 TEST_CASE("EnumHelper: fromString")

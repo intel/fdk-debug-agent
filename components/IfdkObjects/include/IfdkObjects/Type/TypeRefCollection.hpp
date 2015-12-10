@@ -34,9 +34,6 @@ namespace type
 
 /** Named collection of type references */
 using TypeRefCollection = GenericRefCollection<TypeRef>;
-
 }
 }
 }
-
-

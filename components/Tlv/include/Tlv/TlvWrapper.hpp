@@ -35,19 +35,14 @@ namespace tlv
  * @see TlvWrapperInterface
  */
 template <typename ValueType>
-class TlvWrapper final: public TlvWrapperInterface
+class TlvWrapper final : public TlvWrapperInterface
 {
 public:
     /**
      * @param[in] value the reference to the shadow runtime variable
      * @param[in] valid the reference to the shadow runtime variable valid flag
      */
-    TlvWrapper(ValueType &value, bool &valid):
-        mValue(value),
-        mValid(valid)
-    {
-        invalidate();
-    }
+    TlvWrapper(ValueType &value, bool &valid) : mValue(value), mValid(valid) { invalidate(); }
 
     virtual bool isValidSize(size_t binaryValueSize) const NOEXCEPT override
     {
@@ -58,24 +53,19 @@ public:
     {
         if (!isValidSize(binaryValueSize)) {
 
-            throw Exception(std::string("Invalid binary size (")
-                + std::to_string(binaryValueSize)
-                + " instead of " + std::to_string(sizeof(ValueType))
-                + " bytes) for TLV value read");
+            throw Exception(std::string("Invalid binary size (") + std::to_string(binaryValueSize) +
+                            " instead of " + std::to_string(sizeof(ValueType)) +
+                            " bytes) for TLV value read");
         }
         mValue = *(reinterpret_cast<const ValueType *>(binarySource));
         mValid = true;
     }
 
-    virtual void invalidate() NOEXCEPT override
-    {
-        mValid = false;
-    }
+    virtual void invalidate() NOEXCEPT override { mValid = false; }
 
 private:
     ValueType &mValue;
     bool &mValid;
 };
-
 }
 }

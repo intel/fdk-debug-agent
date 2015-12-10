@@ -42,14 +42,13 @@ namespace cavs
 namespace windows
 {
 
-Logger::LogProducer::LogProducer(BlockingQueue &queue, std::unique_ptr<WppClient> wppClient) :
-    mQueue(queue),
-    mWppClient(std::move(wppClient)),
+Logger::LogProducer::LogProducer(BlockingQueue &queue, std::unique_ptr<WppClient> wppClient)
+    : mQueue(queue), mWppClient(std::move(wppClient)),
 
-    /* Note: mProducerThread should be the last initialized member because it starts a thread
-     * that uses the previous members.
-     */
-     mProducerThread(&Logger::LogProducer::produceEntries, this)
+      /* Note: mProducerThread should be the last initialized member because it starts a thread
+       * that uses the previous members.
+       */
+      mProducerThread(&Logger::LogProducer::produceEntries, this)
 {
     assert(mWppClient != nullptr);
 }
@@ -64,9 +63,7 @@ void Logger::LogProducer::produceEntries()
 {
     try {
         mWppClient->collectLogEntries(*this);
-    }
-    catch (WppClient::Exception &e)
-    {
+    } catch (WppClient::Exception &e) {
         /* Swallowing the exception because currently the SwAS doesn't propose any way
          * to forward the error to the client (here the client may be disconnected)
          */
@@ -74,22 +71,19 @@ void Logger::LogProducer::produceEntries()
     }
 }
 
-void Logger::LogProducer::onLogEntry(uint32_t coreId, uint8_t *buffer,
-    uint32_t bufferSize)
+void Logger::LogProducer::onLogEntry(uint32_t coreId, uint8_t *buffer, uint32_t bufferSize)
 {
     std::unique_ptr<LogBlock> logBlock = std::make_unique<LogBlock>(coreId, bufferSize);
     std::copy(buffer, buffer + bufferSize, logBlock->getLogData().begin());
 
     if (!mQueue.add(std::move(logBlock))) {
-        std::cout << "Warning: dropping log entry: the queue is full or closed"
-                  << std::endl;
+        std::cout << "Warning: dropping log entry: the queue is full or closed" << std::endl;
     }
 }
 
 uint32_t Logger::getIoControlCodeFromType(IoCtlType type)
 {
-    switch (type)
-    {
+    switch (type) {
     case IoCtlType::Get:
         return IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET;
     case IoCtlType::Set:
@@ -100,8 +94,7 @@ uint32_t Logger::getIoControlCodeFromType(IoCtlType type)
 
 std::string Logger::getIoControlTypeName(IoCtlType type)
 {
-    switch (type)
-    {
+    switch (type) {
     case IoCtlType::Get:
         return "TinyGet";
     case IoCtlType::Set:
@@ -117,8 +110,7 @@ driver::IOCTL_LOG_STATE Logger::translateToDriver(bool isStarted)
 
 driver::FW_LOG_LEVEL Logger::translateToDriver(Level level)
 {
-    switch (level)
-    {
+    switch (level) {
     case Level::Verbose:
         return driver::FW_LOG_LEVEL::LOG_VERBOSE;
     case Level::Low:
@@ -135,8 +127,7 @@ driver::FW_LOG_LEVEL Logger::translateToDriver(Level level)
 
 driver::FW_LOG_OUTPUT Logger::translateToDriver(Output output)
 {
-    switch (output)
-    {
+    switch (output) {
     case Output::Pti:
         return driver::FW_LOG_OUTPUT::OUTPUT_PTI;
     case Output::Sram:
@@ -147,21 +138,19 @@ driver::FW_LOG_OUTPUT Logger::translateToDriver(Output output)
 
 bool Logger::translateFromDriver(driver::IOCTL_LOG_STATE state)
 {
-    switch (state)
-    {
+    switch (state) {
     case driver::IOCTL_LOG_STATE::STARTED:
         return true;
     case driver::IOCTL_LOG_STATE::STOPPED:
         return false;
     }
     throw Exception("Wrong driver log state value: " +
-        std::to_string(static_cast<uint32_t>(state)));
+                    std::to_string(static_cast<uint32_t>(state)));
 }
 
 Logger::Level Logger::translateFromDriver(driver::FW_LOG_LEVEL level)
 {
-    switch (level)
-    {
+    switch (level) {
     case driver::FW_LOG_LEVEL::LOG_VERBOSE:
         return Level::Verbose;
     case driver::FW_LOG_LEVEL::LOG_LOW:
@@ -174,29 +163,26 @@ Logger::Level Logger::translateFromDriver(driver::FW_LOG_LEVEL level)
         return Level::Critical;
     }
     throw Exception("Wrong driver log level value: " +
-        std::to_string(static_cast<uint32_t>(level)));
+                    std::to_string(static_cast<uint32_t>(level)));
 }
 
 Logger::Output Logger::translateFromDriver(driver::FW_LOG_OUTPUT output)
 {
-    switch (output)
-    {
+    switch (output) {
     case driver::FW_LOG_OUTPUT::OUTPUT_PTI:
         return Output::Pti;
     case driver::FW_LOG_OUTPUT::OUTPUT_SRAM:
         return Output::Sram;
     }
     throw Exception("Wrong driver log output value: " +
-        std::to_string(static_cast<uint32_t>(output)));
+                    std::to_string(static_cast<uint32_t>(output)));
 }
 
-driver::IoctlFwLogsState Logger::translateToDriver(const Parameters& params)
+driver::IoctlFwLogsState Logger::translateToDriver(const Parameters &params)
 {
-    driver::IoctlFwLogsState fwParams = {
-        translateToDriver(params.mIsStarted),
-        translateToDriver(params.mLevel),
-        translateToDriver(params.mOutput)
-    };
+    driver::IoctlFwLogsState fwParams = {translateToDriver(params.mIsStarted),
+                                         translateToDriver(params.mLevel),
+                                         translateToDriver(params.mOutput)};
     return fwParams;
 }
 
@@ -205,8 +191,7 @@ Logger::Parameters Logger::translateFromDriver(const driver::IoctlFwLogsState &f
     Parameters params = {
         translateFromDriver(static_cast<driver::IOCTL_LOG_STATE>(fwParams.started)),
         translateFromDriver(static_cast<driver::FW_LOG_LEVEL>(fwParams.level)),
-        translateFromDriver(static_cast<driver::FW_LOG_OUTPUT>(fwParams.output))
-    };
+        translateFromDriver(static_cast<driver::FW_LOG_OUTPUT>(fwParams.output))};
     return params;
 }
 
@@ -220,18 +205,15 @@ void Logger::setParameters(const Parameters &parameters)
 
         if (parameters.mIsStarted) {
             startLogLocked(parameters);
-        }
-        else {
+        } else {
             stopLogLocked(parameters);
         }
-    }
-    else {
+    } else {
         /* Start/Stop state has not changed */
 
         if (isLogProductionRunning) {
             throw Exception("Can not change log parameters while logging is activated.");
-        }
-        else {
+        } else {
             updateLogLocked(parameters);
         }
     }
@@ -242,15 +224,12 @@ void Logger::startLogLocked(const Parameters &parameters)
     assert(mLogProducer == nullptr);
 
     /* Starting the producer thread before enabling logs into the fw */
-    mLogProducer = std::move(std::make_unique<LogProducer>(mLogEntryQueue,
-        mWppClientFactory.createInstance()));
+    mLogProducer = std::move(
+        std::make_unique<LogProducer>(mLogEntryQueue, mWppClientFactory.createInstance()));
 
-    try
-    {
+    try {
         setLogParameterIoctl(parameters);
-    }
-    catch (Exception &)
-    {
+    } catch (Exception &) {
         /* Stopping the log producer thread in exception case */
         mLogProducer.reset();
         throw;
@@ -275,7 +254,6 @@ void Logger::updateLogLocked(const Parameters &parameters)
 
     setLogParameterIoctl(parameters);
 }
-
 
 void Logger::setLogParameterIoctl(const Parameters &parameters)
 {
@@ -310,7 +288,7 @@ Logger::Parameters Logger::getParameters()
 }
 
 void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &inputFwParams,
-    driver::IoctlFwLogsState &outputFwParams)
+                               driver::IoctlFwLogsState &outputFwParams)
 {
     /* Creating the body payload using the IoctlFwLogsState type */
     util::ByteStreamWriter bodyPayloadWriter;
@@ -318,21 +296,16 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
 
     /* Creating the TinySet/Get ioctl buffer */
     util::Buffer buffer;
-    IoctlHelpers::toTinyCmdBuffer(
-        static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
-        driver::logParametersCommandparameterId,
-        bodyPayloadWriter.getBuffer(),
-        buffer);
+    IoctlHelpers::toTinyCmdBuffer(static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
+                                  driver::logParametersCommandparameterId,
+                                  bodyPayloadWriter.getBuffer(), buffer);
 
     /* Performing ioctl */
     uint32_t ioControlCode = getIoControlCodeFromType(type);
 
-    try
-    {
+    try {
         mDevice.ioControl(ioControlCode, &buffer, &buffer);
-    }
-    catch (Device::Exception &e)
-    {
+    } catch (Device::Exception &e) {
         throw Exception(getIoControlTypeName(type) + " error: " + e.what());
     }
 
@@ -345,7 +318,7 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
 
         if (!NT_SUCCESS(driverStatus)) {
             throw Exception("Driver returns invalid status: " +
-                std::to_string(static_cast<uint32_t>(driverStatus)));
+                            std::to_string(static_cast<uint32_t>(driverStatus)));
         }
 
         /* Reading IoctlFwLogsState structure from body payload */
@@ -355,14 +328,12 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
         if (!reader.isEOS()) {
             /** @todo use logging or throw an exception */
             std::cout << "Log parameter ioctl buffer has not been fully consumed,"
-                << " IsGet=" << ((type == IoCtlType::Get) ? true : false)
-                << " pointer=" << reader.getPointerOffset()
-                << " size=" << reader.getBuffer().size()
-                << " remaining= " << (reader.getBuffer().size() - reader.getBuffer().size());
+                      << " IsGet=" << ((type == IoCtlType::Get) ? true : false)
+                      << " pointer=" << reader.getPointerOffset()
+                      << " size=" << reader.getBuffer().size()
+                      << " remaining= " << (reader.getBuffer().size() - reader.getBuffer().size());
         }
-    }
-    catch (util::ByteStreamReader::Exception &e)
-    {
+    } catch (util::ByteStreamReader::Exception &e) {
         throw Exception("Can not decode log parameter ioctl buffer: " + std::string(e.what()));
     }
 }
@@ -380,12 +351,9 @@ void Logger::stop()
 
         /* Using arbitrary level and output values, they are not relevant when stopping log... */
         Parameters parameter(false, Logger::Level::Verbose, Logger::Output::Sram);
-        try
-        {
+        try {
             stopLogLocked(parameter);
-        }
-        catch (Exception &e)
-        {
+        } catch (Exception &e) {
             std::cout << "Cannot stop log producer : " << e.what() << std::endl;
         }
     }
@@ -393,7 +361,6 @@ void Logger::stop()
     /* Unblocking log consumer threads */
     mLogEntryQueue.close();
 }
-
 }
 }
 }

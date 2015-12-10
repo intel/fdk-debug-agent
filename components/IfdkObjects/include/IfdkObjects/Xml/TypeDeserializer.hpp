@@ -33,17 +33,16 @@ namespace ifdk_objects
 namespace xml
 {
 
- /* XML Deserializer for the "Type" data model.
-  *
-  * It implements the type::Visitor interface.
-  */
+/* XML Deserializer for the "Type" data model.
+ *
+ * It implements the type::Visitor interface.
+ */
 class TypeDeserializer final : public Deserializer<TypeTraits>, public type::Visitor
 {
 public:
     TypeDeserializer(const std::string &xml) : Deserializer<TypeTraits>(xml) {}
 
 private:
-
     /* Visitor interface implementation */
     virtual void enter(type::Type &instance, bool isConcrete) override;
     virtual void enter(type::Component &instance, bool isConcrete) override;
@@ -79,8 +78,6 @@ private:
     template <class T>
     void collectionCommon(type::GenericRefCollection<T> &collection);
 };
-
 }
 }
 }
-

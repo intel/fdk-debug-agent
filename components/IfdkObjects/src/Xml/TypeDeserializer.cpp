@@ -64,8 +64,8 @@ void TypeDeserializer::enter(Service &instance)
 void TypeDeserializer::enter(Categories &categories)
 {
     pushElement(categories);
-    fillPolymorphicVector<Ref, TypeRef, ComponentRef, ServiceRef, SubsystemRef>
-        (categories.getElements());
+    fillPolymorphicVector<Ref, TypeRef, ComponentRef, ServiceRef, SubsystemRef>(
+        categories.getElements());
 }
 
 void TypeDeserializer::enter(Ref &ref, bool isConcrete)
@@ -134,7 +134,7 @@ void TypeDeserializer::enter(Children &chidren)
 {
     pushElement(chidren);
     fillPolymorphicVector<RefCollection, TypeRefCollection, ComponentRefCollection,
-        ServiceRefCollection, SubsystemRefCollection>(chidren.getElements());
+                          ServiceRefCollection, SubsystemRefCollection>(chidren.getElements());
 }
 
 void TypeDeserializer::enter(Characteristic &characteristic)
@@ -208,9 +208,6 @@ void TypeDeserializer::leave(bool isConcrete)
         popElement();
     }
 }
-
 }
 }
 }
-
-

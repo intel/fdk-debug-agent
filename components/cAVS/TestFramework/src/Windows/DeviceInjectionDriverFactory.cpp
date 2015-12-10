@@ -36,17 +36,15 @@ std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
         /* mInjectedDevice is null -> the cause is that newDriver() has already been called,
          * leading to transfert mInjectedDevice unique pointer content, setting it to null */
         throw Exception("The injected device has already been used. "
-            "Please call newDriver() once.");
+                        "Please call newDriver() once.");
     }
 
     assert(mInjectedWppClientFactory != nullptr);
 
     /* After this call mInjectedDevice will be null */
-    return std::make_unique<windows::Driver>(
-        std::move(mInjectedDevice),
-        std::move(mInjectedWppClientFactory));
+    return std::make_unique<windows::Driver>(std::move(mInjectedDevice),
+                                             std::move(mInjectedWppClientFactory));
 }
-
 }
 }
 }

@@ -31,6 +31,5 @@ namespace util
 
 /** Simple byte buffer type */
 using Buffer = std::vector<uint8_t>;
-
 }
 }

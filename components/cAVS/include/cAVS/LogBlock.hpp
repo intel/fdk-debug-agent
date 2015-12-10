@@ -42,9 +42,7 @@ public:
     class Exception final : public std::logic_error
     {
     public:
-        explicit Exception(const std::string &what)
-        : std::logic_error(what)
-        {}
+        explicit Exception(const std::string &what) : std::logic_error(what) {}
     };
 
     /**
@@ -57,50 +55,34 @@ public:
      * @param[in] length The buffer length to be preallocated for log data (0 if not specified)
      * @throw LogBlockBase::Exception
      */
-    LogBlockBase(unsigned int coreId, std::size_t length = 0) :
-        mCoreId(coreId),
-        mLogData(length)
+    LogBlockBase(unsigned int coreId, std::size_t length = 0) : mCoreId(coreId), mLogData(length)
     {
         if (mCoreId > maxCoreId) {
 
-            throw Exception("Invalid Core ID: "
-                + std::to_string(mCoreId)
-                + " should be in [0.."
-                + std::to_string(maxCoreId) + ']');
+            throw Exception("Invalid Core ID: " + std::to_string(mCoreId) + " should be in [0.." +
+                            std::to_string(maxCoreId) + ']');
         }
     }
 
     /**
      * @return log block data as const
      */
-    const LogData &getLogData() const NOEXCEPT
-    {
-        return mLogData;
-    }
+    const LogData &getLogData() const NOEXCEPT { return mLogData; }
 
     /**
      * @return log block data
      */
-    LogData &getLogData() NOEXCEPT
-    {
-        return mLogData;
-    }
+    LogData &getLogData() NOEXCEPT { return mLogData; }
 
     /**
      * @return log block Core ID
      */
-    unsigned int getCoreId() const NOEXCEPT
-    {
-        return mCoreId;
-    }
+    unsigned int getCoreId() const NOEXCEPT { return mCoreId; }
 
     /**
      * @return log block size in bytes
      */
-    std::size_t getLogSize() const NOEXCEPT
-    {
-        return mLogData.size();
-    }
+    std::size_t getLogSize() const NOEXCEPT { return mLogData.size(); }
 
     /**
      * Serialize the log block to an ostream
@@ -110,8 +92,8 @@ public:
      * @return ostream containing original ostream plus serialized log block
      * @throw LogBlockBase::Exception
      */
-    template <const size_t _maxSize> friend
-    std::ostream &operator<<(std::ostream &os, const LogBlockBase<_maxSize> &logBlock);
+    template <const size_t _maxSize>
+    friend std::ostream &operator<<(std::ostream &os, const LogBlockBase<_maxSize> &logBlock);
     /* The template parameter of this friend function cannot be called 'maxSize' since it would
      * shadow the class template parameter 'maxSize'. For that reason, it must be called with
      * another name. Here it is prefixed with '_' because it would be strange to name it differently
@@ -137,7 +119,7 @@ private:
 
     /* Make this class non copyable */
     LogBlockBase(const LogBlockBase &) = delete;
-    LogBlockBase & operator=(const LogBlockBase &) = delete;
+    LogBlockBase &operator=(const LogBlockBase &) = delete;
 };
 
 /**
@@ -167,6 +149,5 @@ std::ostream &operator<<(std::ostream &os, const LogBlockBase<maxSize> &logBlock
 
     return os;
 }
-
 }
 }

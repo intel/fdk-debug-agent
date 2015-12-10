@@ -86,43 +86,43 @@ private:
      */
     static const USHORT fwLogEventDescriptorId = 10;
 
-    /**
-     * Header that mirrors the parameters supplied by wpp for each log entry.
-     *
-     * Here is the driver log entry call:
-     *
-     * VOID
-     * OELogListener::DumpFwLogBuffer(
-     * _In_ UINT32 _Id,
-     * _In_ UINT32 _Consumed,
-     * _In_ UINT32 _WritePosition,
-     * _In_ UINT8* _Start)
-     * {
-     *     DoTraceMessage(
-     *         OE_FW, "core id: %08x size: %d position: %d %!HEXDUMP! ",
-     *         _Id,
-     *         _Consumed,
-     *         _WritePosition,
-     *         LOG_LENSTR(_Consumed, (PCHAR)_Start));
-     * }
-     *
-     * As you can see the supplied parameters to the DoTraceMessage function are:
-     * - the core id (uint32)
-     * - consumed, which is the buffer size (uint32)
-     * - write position, which is also the buffer size (uint32)
-     * - a buffer ("HEXDUMP" token), which is serialized by wpp in this way:
-     *    - the buffer size (uint16)
-     *    - the buffer content
-     */
+/**
+ * Header that mirrors the parameters supplied by wpp for each log entry.
+ *
+ * Here is the driver log entry call:
+ *
+ * VOID
+ * OELogListener::DumpFwLogBuffer(
+ * _In_ UINT32 _Id,
+ * _In_ UINT32 _Consumed,
+ * _In_ UINT32 _WritePosition,
+ * _In_ UINT8* _Start)
+ * {
+ *     DoTraceMessage(
+ *         OE_FW, "core id: %08x size: %d position: %d %!HEXDUMP! ",
+ *         _Id,
+ *         _Consumed,
+ *         _WritePosition,
+ *         LOG_LENSTR(_Consumed, (PCHAR)_Start));
+ * }
+ *
+ * As you can see the supplied parameters to the DoTraceMessage function are:
+ * - the core id (uint32)
+ * - consumed, which is the buffer size (uint32)
+ * - write position, which is also the buffer size (uint32)
+ * - a buffer ("HEXDUMP" token), which is serialized by wpp in this way:
+ *    - the buffer size (uint16)
+ *    - the buffer content
+ */
 #pragma pack(1)
     struct FwLogEntry
     {
-        uint32_t coreId; /* Supplied by the driver */
-        uint32_t size; /* Supplied by the driver */
-        uint32_t position; /* Supplied by the driver, currently is always equal to the member
-                            * "size" */
+        uint32_t coreId;        /* Supplied by the driver */
+        uint32_t size;          /* Supplied by the driver */
+        uint32_t position;      /* Supplied by the driver, currently is always equal to the member
+                                 * "size" */
         uint16_t wppBufferSize; /* Buffer size supplied by wpp */
-        uint8_t buffer[1]; /* Buffer content */
+        uint8_t buffer[1];      /* Buffer content */
     };
 #pragma pack()
 
@@ -132,20 +132,11 @@ private:
     public:
         SafeTraceHandler() : mHandle(INVALID_PROCESSTRACE_HANDLE) {}
 
-        ~SafeTraceHandler()
-        {
-            close();
-        }
+        ~SafeTraceHandler() { close(); }
 
-        TRACEHANDLE &get()
-        {
-            return mHandle;
-        }
+        TRACEHANDLE &get() { return mHandle; }
 
-        bool isValid()
-        {
-            return mHandle != INVALID_PROCESSTRACE_HANDLE;
-        }
+        bool isValid() { return mHandle != INVALID_PROCESSTRACE_HANDLE; }
 
         void close()
         {
@@ -159,8 +150,8 @@ private:
         }
 
     private:
-        SafeTraceHandler(const SafeTraceHandler&) = delete;
-        SafeTraceHandler& operator=(const SafeTraceHandler&) = delete;
+        SafeTraceHandler(const SafeTraceHandler &) = delete;
+        SafeTraceHandler &operator=(const SafeTraceHandler &) = delete;
 
         TRACEHANDLE mHandle;
     };
@@ -168,7 +159,6 @@ private:
     /** Callback called by wpp when an event is received */
     static VOID WINAPI ProcessWppEvent(PEVENT_RECORD pEvent);
 };
-
 }
 }
 }

@@ -34,15 +34,9 @@ namespace windows
 {
 
 void MockedDeviceCommands::addModuleParameterCommand(
-    Command command,
-    uint16_t moduleId,
-    uint16_t instanceId,
-    uint32_t parameterTypeId,
-    const util::Buffer &expectedParameterContent,
-    const util::Buffer &returnedParameterContent,
-    bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus)
+    Command command, uint16_t moduleId, uint16_t instanceId, uint32_t parameterTypeId,
+    const util::Buffer &expectedParameterContent, const util::Buffer &returnedParameterContent,
+    bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus)
 {
     /* Expected output buffer*/
     util::ByteStreamWriter expectedOutputWriter;
@@ -53,7 +47,7 @@ void MockedDeviceCommands::addModuleParameterCommand(
 
     /* Adding driver IoctlFwModuleParam structure */
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, parameterTypeId,
-        static_cast<uint32_t>(expectedParameterContent.size()));
+                                           static_cast<uint32_t>(expectedParameterContent.size()));
     expectedOutputWriter.write(moduleParam);
 
     /* Adding parameter content */
@@ -69,14 +63,12 @@ void MockedDeviceCommands::addModuleParameterCommand(
         static_cast<uint32_t>(expectedOutputWriter.getBuffer().size()));
     inputWriter.write(ioctlInput);
 
-    uint32_t ioctlCode = command == Command::Get ?
-        IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET;
+    uint32_t ioctlCode = command == Command::Get ? IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET
+                                                 : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET;
 
     if (!ioctlSuccess) {
-        mDevice.addFailedIoctlEntry(
-            ioctlCode,
-            &inputWriter.getBuffer(),
-            &expectedOutputWriter.getBuffer());
+        mDevice.addFailedIoctlEntry(ioctlCode, &inputWriter.getBuffer(),
+                                    &expectedOutputWriter.getBuffer());
         return;
     }
 
@@ -102,43 +94,30 @@ void MockedDeviceCommands::addModuleParameterCommand(
 
     /* Adding entry */
     mDevice.addSuccessfulIoctlEntry(ioctlCode, &inputWriter.getBuffer(),
-        &expectedOutputWriter.getBuffer(), &returnedOutputWriter.getBuffer());
+                                    &expectedOutputWriter.getBuffer(),
+                                    &returnedOutputWriter.getBuffer());
 }
 
 template <typename FirmwareParameterType>
 void MockedDeviceCommands::addGetModuleParameterCommand(
-    uint16_t moduleId,
-    uint16_t instanceId,
-    uint32_t parameterTypeId,
-    std::size_t expectedOutputBufferSize,
-    const FirmwareParameterType &parameter,
-    bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus)
+    uint16_t moduleId, uint16_t instanceId, uint32_t parameterTypeId,
+    std::size_t expectedOutputBufferSize, const FirmwareParameterType &parameter, bool ioctlSuccess,
+    NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus)
 {
     util::Buffer expectedOutput(expectedOutputBufferSize, 0xFF);
 
     util::ByteStreamWriter writer;
     writer.write(parameter);
 
-    addModuleParameterCommand(
-        Command::Get,
-        moduleId,
-        instanceId,
-        parameterTypeId,
-        expectedOutput,
-        writer.getBuffer(),
-        ioctlSuccess,
-        returnedDriverStatus,
-        returnedFirmwareStatus);
+    addModuleParameterCommand(Command::Get, moduleId, instanceId, parameterTypeId, expectedOutput,
+                              writer.getBuffer(), ioctlSuccess, returnedDriverStatus,
+                              returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addLogParameterCommand(
-    Command command,
-    const driver::IoctlFwLogsState &inputFwParams,
-    const driver::IoctlFwLogsState &outputFwParams,
-    bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus)
+void MockedDeviceCommands::addLogParameterCommand(Command command,
+                                                  const driver::IoctlFwLogsState &inputFwParams,
+                                                  const driver::IoctlFwLogsState &outputFwParams,
+                                                  bool ioctlSuccess, NTSTATUS returnedDriverStatus)
 {
     /* First creating expected body to know its serialized size */
     util::ByteStreamWriter expectedBodyWriter;
@@ -149,20 +128,19 @@ void MockedDeviceCommands::addLogParameterCommand(
 
     /* Creating header */
     driver::Intc_App_Cmd_Header header(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
-        driver::logParametersCommandparameterId,
-        bodySize);
+                                       driver::logParametersCommandparameterId, bodySize);
 
     /* Creating ioctl expected buffer containing header + body */
     util::ByteStreamWriter expectedWriter;
     expectedWriter.write(header);
     expectedWriter.writeRawBuffer(expectedBodyWriter.getBuffer());
 
-    uint32_t ioctlCode = command == Command::Get ?
-    IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
+    uint32_t ioctlCode = command == Command::Get ? IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET
+                                                 : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
 
     if (!ioctlSuccess) {
         mDevice.addFailedIoctlEntry(ioctlCode, &expectedWriter.getBuffer(),
-            &expectedWriter.getBuffer());
+                                    &expectedWriter.getBuffer());
         return;
     }
 
@@ -184,11 +162,10 @@ void MockedDeviceCommands::addLogParameterCommand(
 
     /* Adding entry */
     mDevice.addSuccessfulIoctlEntry(ioctlCode, &expectedWriter.getBuffer(),
-        &expectedWriter.getBuffer(), &returnedWriter.getBuffer());
+                                    &expectedWriter.getBuffer(), &returnedWriter.getBuffer());
 }
 
-void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess,
-                                                  NTSTATUS returnedDriverStatus,
+void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
                                                   dsp_fw::IxcStatus returnedFirmwareStatus,
                                                   const Buffer &tlvList,
                                                   dsp_fw::BaseFwParams parameterId)
@@ -197,44 +174,30 @@ void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess,
     util::Buffer returnedOutput;
     returnedOutput = tlvList;
 
-    addModuleParameterCommand(
-        Command::Get,
-        driver::baseFirwareModuleId,
-        driver::baseFirwareInstanceId,
-        static_cast<uint32_t>(parameterId),
-        expectedOutput,
-        returnedOutput,
-        ioctlSuccess,
-        returnedDriverStatus,
-        returnedFirmwareStatus);
+    addModuleParameterCommand(Command::Get, driver::baseFirwareModuleId,
+                              driver::baseFirwareInstanceId, static_cast<uint32_t>(parameterId),
+                              expectedOutput, returnedOutput, ioctlSuccess, returnedDriverStatus,
+                              returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess,
-                                                 NTSTATUS returnedDriverStatus,
+void MockedDeviceCommands::addGetFwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
                                                  dsp_fw::IxcStatus returnedFirmwareStatus,
                                                  const Buffer &fwConfigTlvList)
 {
-    addTlvParameterCommand(ioctlSuccess,
-                           returnedDriverStatus,
-                           returnedFirmwareStatus,
-                           fwConfigTlvList,
-                           dsp_fw::BaseFwParams::FW_CONFIG);
+    addTlvParameterCommand(ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus,
+                           fwConfigTlvList, dsp_fw::BaseFwParams::FW_CONFIG);
 }
 
-void MockedDeviceCommands::addGetHwConfigCommand(bool ioctlSuccess,
-                                                 NTSTATUS returnedDriverStatus,
+void MockedDeviceCommands::addGetHwConfigCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
                                                  dsp_fw::IxcStatus returnedFirmwareStatus,
                                                  const Buffer &hwConfigTlvList)
 {
-    addTlvParameterCommand(ioctlSuccess,
-                           returnedDriverStatus,
-                           returnedFirmwareStatus,
-                           hwConfigTlvList,
-                           dsp_fw::BaseFwParams::HW_CONFIG_GET);
+    addTlvParameterCommand(ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus,
+                           hwConfigTlvList, dsp_fw::BaseFwParams::HW_CONFIG_GET);
 }
 
-void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
+void MockedDeviceCommands::addGetModuleEntriesCommand(
+    bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
     uint32_t moduleCount, const std::vector<dsp_fw::ModuleEntry> &returnedEntries)
 {
     std::size_t moduleInfoSize = dsp_fw::ModulesInfo::getAllocationSize(moduleCount);
@@ -242,16 +205,15 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(bool ioctlSuccess,
     dsp_fw::ModulesInfo modulesInfo;
     modulesInfo.module_info = returnedEntries;
 
-    addGetModuleParameterCommand(driver::baseFirwareModuleId,
-        driver::baseFirwareInstanceId,
-        static_cast<uint32_t>(dsp_fw::BaseFwParams::MODULES_INFO_GET),
-        moduleInfoSize,
-        modulesInfo, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+    addGetModuleParameterCommand(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+                                 static_cast<uint32_t>(dsp_fw::BaseFwParams::MODULES_INFO_GET),
+                                 moduleInfoSize, modulesInfo, ioctlSuccess, returnedDriverStatus,
+                                 returnedFirmwareStatus);
 }
 
 /* log parameters methods */
 void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
-    const driver::IoctlFwLogsState &returnedState)
+                                                      const driver::IoctlFwLogsState &returnedState)
 {
     driver::IoctlFwLogsState expectedLogState = {
         static_cast<driver::IOCTL_LOG_STATE>(0xFFFFFFFF),
@@ -260,78 +222,67 @@ void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATU
     };
 
     addLogParameterCommand(Command::Get, expectedLogState, returnedState, ioctlSuccess,
-        returnedStatus);
+                           returnedStatus);
 }
 
 void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
-    const driver::IoctlFwLogsState &expectedState)
+                                                      const driver::IoctlFwLogsState &expectedState)
 {
     addLogParameterCommand(Command::Set, expectedState, expectedState, ioctlSuccess,
-        returnedStatus);
+                           returnedStatus);
 }
 
-void MockedDeviceCommands::addGetPipelineListCommand(
-    bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus,
-    uint32_t maxPplCount,
-    const std::vector<uint32_t> &pipelineIds)
+void MockedDeviceCommands::addGetPipelineListCommand(bool ioctlSuccess,
+                                                     NTSTATUS returnedDriverStatus,
+                                                     dsp_fw::IxcStatus returnedFirmwareStatus,
+                                                     uint32_t maxPplCount,
+                                                     const std::vector<uint32_t> &pipelineIds)
 {
     std::size_t parameterSize = dsp_fw::PipelinesListInfo::getAllocationSize(maxPplCount);
 
     dsp_fw::PipelinesListInfo pipelinesListInfo;
     pipelinesListInfo.ppl_id = pipelineIds;
 
-    addGetModuleParameterCommand(driver::baseFirwareModuleId,
-        driver::baseFirwareInstanceId,
-        static_cast<uint32_t>(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
-        parameterSize,
+    addGetModuleParameterCommand(
+        driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+        static_cast<uint32_t>(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET), parameterSize,
         pipelinesListInfo, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addGetPipelinePropsCommand(
-    bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus,
-    uint32_t pipelineId,
-    const dsp_fw::PplProps &props)
+void MockedDeviceCommands::addGetPipelinePropsCommand(bool ioctlSuccess,
+                                                      NTSTATUS returnedDriverStatus,
+                                                      dsp_fw::IxcStatus returnedFirmwareStatus,
+                                                      uint32_t pipelineId,
+                                                      const dsp_fw::PplProps &props)
 {
     /* Using extended parameter id to supply the pipeline id*/
-    uint32_t paramId = ModuleHandler::getExtendedParameterId(
-        dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
+    uint32_t paramId =
+        ModuleHandler::getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
 
-    addGetModuleParameterCommand(driver::baseFirwareModuleId,
-        driver::baseFirwareInstanceId,
-        paramId,
-        ModuleHandler::maxParameterPayloadSize,
-        props, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+    addGetModuleParameterCommand(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+                                 paramId, ModuleHandler::maxParameterPayloadSize, props,
+                                 ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addGetSchedulersInfoCommand(
-    bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus,
-    uint32_t coreId,
-    const dsp_fw::SchedulersInfo &info)
+void MockedDeviceCommands::addGetSchedulersInfoCommand(bool ioctlSuccess,
+                                                       NTSTATUS returnedDriverStatus,
+                                                       dsp_fw::IxcStatus returnedFirmwareStatus,
+                                                       uint32_t coreId,
+                                                       const dsp_fw::SchedulersInfo &info)
 {
     /* Using extended parameter id to supply the core id*/
-    uint32_t paramId = ModuleHandler::getExtendedParameterId(
-        dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET,
-        coreId);
+    uint32_t paramId =
+        ModuleHandler::getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
 
-    addGetModuleParameterCommand(driver::baseFirwareModuleId,
-        driver::baseFirwareInstanceId,
-        paramId,
-        ModuleHandler::maxParameterPayloadSize,
-        info, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+    addGetModuleParameterCommand(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+                                 paramId, ModuleHandler::maxParameterPayloadSize, info,
+                                 ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addGetGatewaysCommand(
-    bool ioctlSuccess,
-    NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus,
-    uint32_t gatewayCount,
-    const std::vector<dsp_fw::GatewayProps> &gateways)
+void MockedDeviceCommands::addGetGatewaysCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+                                                 dsp_fw::IxcStatus returnedFirmwareStatus,
+                                                 uint32_t gatewayCount,
+                                                 const std::vector<dsp_fw::GatewayProps> &gateways)
 {
     /* Calculating the memory space required */
     std::size_t parameterSize = dsp_fw::GatewaysInfo::getAllocationSize(gatewayCount);
@@ -339,56 +290,46 @@ void MockedDeviceCommands::addGetGatewaysCommand(
     dsp_fw::GatewaysInfo gatewaysInfo;
     gatewaysInfo.gateways = gateways;
 
-    addGetModuleParameterCommand(driver::baseFirwareModuleId,
-        driver::baseFirwareInstanceId,
-        static_cast<uint32_t>(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
-        parameterSize,
-        gatewaysInfo, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+    addGetModuleParameterCommand(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+                                 static_cast<uint32_t>(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
+                                 parameterSize, gatewaysInfo, ioctlSuccess, returnedDriverStatus,
+                                 returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addGetModuleInstancePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus,
-    uint16_t moduleId, uint16_t instanceId,
-    const dsp_fw::ModuleInstanceProps &props)
+void MockedDeviceCommands::addGetModuleInstancePropsCommand(
+    bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
+    uint16_t moduleId, uint16_t instanceId, const dsp_fw::ModuleInstanceProps &props)
 {
-    addGetModuleParameterCommand(
-        moduleId,
-        instanceId,
-        static_cast<uint32_t>(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
-        ModuleHandler::maxParameterPayloadSize,
-        props, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+    addGetModuleParameterCommand(moduleId, instanceId,
+                                 static_cast<uint32_t>(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
+                                 ModuleHandler::maxParameterPayloadSize, props, ioctlSuccess,
+                                 returnedDriverStatus, returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addSetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus,
-    uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    const util::Buffer &parameterPayload)
+void MockedDeviceCommands::addSetModuleParameterCommand(bool ioctlSuccess,
+                                                        NTSTATUS returnedDriverStatus,
+                                                        dsp_fw::IxcStatus returnedFirmwareStatus,
+                                                        uint16_t moduleId, uint16_t instanceId,
+                                                        uint32_t parameterId,
+                                                        const util::Buffer &parameterPayload)
 {
-    addModuleParameterCommand(
-        Command::Set,
-        moduleId,
-        instanceId,
-        parameterId,
-        parameterPayload,
-        parameterPayload,
-        ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+    addModuleParameterCommand(Command::Set, moduleId, instanceId, parameterId, parameterPayload,
+                              parameterPayload, ioctlSuccess, returnedDriverStatus,
+                              returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addGetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-    dsp_fw::IxcStatus returnedFirmwareStatus,
-    uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
-    const util::Buffer &parameterPayload)
+void MockedDeviceCommands::addGetModuleParameterCommand(bool ioctlSuccess,
+                                                        NTSTATUS returnedDriverStatus,
+                                                        dsp_fw::IxcStatus returnedFirmwareStatus,
+                                                        uint16_t moduleId, uint16_t instanceId,
+                                                        uint32_t parameterId,
+                                                        const util::Buffer &parameterPayload)
 {
-    addModuleParameterCommand(
-        Command::Get,
-        moduleId,
-        instanceId,
-        parameterId,
-        util::Buffer(ModuleHandler::maxParameterPayloadSize, 0xFF),
-        parameterPayload,
-        ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+    addModuleParameterCommand(Command::Get, moduleId, instanceId, parameterId,
+                              util::Buffer(ModuleHandler::maxParameterPayloadSize, 0xFF),
+                              parameterPayload, ioctlSuccess, returnedDriverStatus,
+                              returnedFirmwareStatus);
 }
-
 }
 }
 }

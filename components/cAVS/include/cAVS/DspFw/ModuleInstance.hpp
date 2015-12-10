@@ -54,10 +54,10 @@ struct ConnectorNodeId
     {
         kHdaHostOutputClass = 0,
         kHdaHostInputClass = 1,
-        kHdaHostInoutClass = 2,   // for future use
+        kHdaHostInoutClass = 2, // for future use
         kHdaLinkOutputClass = 8,
         kHdaLinkInputClass = 9,
-        kHdaLinkInoutClass = 10,  // for future use
+        kHdaLinkInoutClass = 10, // for future use
         kDmicLinkInputClass = 11,
         kI2sLinkOutputClass = 12,
         kI2sLinkInputClass = 13,
@@ -69,21 +69,20 @@ struct ConnectorNodeId
 
     static const util::EnumHelper<ConnectorNodeId::Type> &getTypeEnumHelper()
     {
-        static const util::EnumHelper<ConnectorNodeId::Type> helper({
-            { ConnectorNodeId::kHdaHostOutputClass, "hda-host-out-gateway" },
-            { ConnectorNodeId::kHdaHostInputClass, "hda-host-in-gateway" },
-            { ConnectorNodeId::kHdaHostInoutClass, "hda-host-inout-gateway" },
-            { ConnectorNodeId::kHdaLinkOutputClass, "hda-link-out-gateway" },
-            { ConnectorNodeId::kHdaLinkInputClass, "hda-link-in-gateway" },
-            { ConnectorNodeId::kHdaLinkInoutClass, "hda-link-inout-gateway" },
-            { ConnectorNodeId::kDmicLinkInputClass, "dmic-link-in-gateway" },
-            { ConnectorNodeId::kI2sLinkOutputClass, "i2s-link-out-gateway" },
-            { ConnectorNodeId::kI2sLinkInputClass, "i2s-link-in-gateway" },
-            { ConnectorNodeId::kSlimbusLinkOutputClass, "slimbus-link-out-gateway" },
-            { ConnectorNodeId::kSlimbusLinkInputClass, "slimbus-link-in-gateway" },
-            { ConnectorNodeId::kALHLinkOutputClass, "alh-link-out-gateway" },
-            { ConnectorNodeId::kALHLinkInputClass, "alh-link-in-gateway" }
-        });
+        static const util::EnumHelper<ConnectorNodeId::Type> helper(
+            {{ConnectorNodeId::kHdaHostOutputClass, "hda-host-out-gateway"},
+             {ConnectorNodeId::kHdaHostInputClass, "hda-host-in-gateway"},
+             {ConnectorNodeId::kHdaHostInoutClass, "hda-host-inout-gateway"},
+             {ConnectorNodeId::kHdaLinkOutputClass, "hda-link-out-gateway"},
+             {ConnectorNodeId::kHdaLinkInputClass, "hda-link-in-gateway"},
+             {ConnectorNodeId::kHdaLinkInoutClass, "hda-link-inout-gateway"},
+             {ConnectorNodeId::kDmicLinkInputClass, "dmic-link-in-gateway"},
+             {ConnectorNodeId::kI2sLinkOutputClass, "i2s-link-out-gateway"},
+             {ConnectorNodeId::kI2sLinkInputClass, "i2s-link-in-gateway"},
+             {ConnectorNodeId::kSlimbusLinkOutputClass, "slimbus-link-out-gateway"},
+             {ConnectorNodeId::kSlimbusLinkInputClass, "slimbus-link-in-gateway"},
+             {ConnectorNodeId::kALHLinkOutputClass, "alh-link-out-gateway"},
+             {ConnectorNodeId::kALHLinkInputClass, "alh-link-in-gateway"}});
 
         return helper;
     };
@@ -93,21 +92,12 @@ struct ConnectorNodeId
     * @param dma_type Type of DMA Connector.
     * @param v_index Virtual DMA Index.
     */
-    ConnectorNodeId(Type dma_type, uint8_t v_index)
-    {
-        Init(dma_type, v_index);
-    }
+    ConnectorNodeId(Type dma_type, uint8_t v_index) { Init(dma_type, v_index); }
 
-    explicit ConnectorNodeId(uint32_t node_id)
-    {
-        val.dw = node_id;
-    }
+    explicit ConnectorNodeId(uint32_t node_id) { val.dw = node_id; }
     static const uint32_t kInvalidNodeId = 0xffffffff;
 
-    ConnectorNodeId()
-    {
-        val.dw = kInvalidNodeId;
-    }
+    ConnectorNodeId() { val.dw = kInvalidNodeId; }
 
     void Init(Type dma_type, uint8_t v_index)
     {
@@ -118,37 +108,27 @@ struct ConnectorNodeId
 
     inline uint32_t GetBareNodeId() const { return val.dw; }
 
-    bool operator == (const ConnectorNodeId &other) const
-    {
-        return val.dw == other.val.dw;
-    }
+    bool operator==(const ConnectorNodeId &other) const { return val.dw == other.val.dw; }
 
-    void fromStream(util::ByteStreamReader &reader)
-    {
-        reader.read(val.dw);
-    }
+    void fromStream(util::ByteStreamReader &reader) { reader.read(val.dw); }
 
-    void toStream(util::ByteStreamWriter &writer) const
-    {
-        writer.write(val.dw);
-    }
+    void toStream(util::ByteStreamWriter &writer) const { writer.write(val.dw); }
 };
 static_assert(sizeof(ConnectorNodeId) == 4, "Wrong ConnectorNodeId size");
 
 /** This type does not exist in the fw yet */
 struct PinProps
 {
-    StreamType          stream_type;
-    AudioDataFormatIpc  format;
-    uint32_t            phys_queue_id;
+    StreamType stream_type;
+    AudioDataFormatIpc format;
+    uint32_t phys_queue_id;
 
     static const uint32_t invalidQueueId = 0xFFFFFFFF;
 
-    bool operator == (const PinProps &other) const
+    bool operator==(const PinProps &other) const
     {
-        return phys_queue_id == other.phys_queue_id &&
-            format == other.format &&
-            stream_type == other.stream_type;
+        return phys_queue_id == other.phys_queue_id && format == other.format &&
+               stream_type == other.stream_type;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -171,15 +151,9 @@ struct PinListInfo
 {
     std::vector<PinProps> pin_info;
 
-    bool operator == (const PinListInfo& other) const
-    {
-        return pin_info == other.pin_info;
-    }
+    bool operator==(const PinListInfo &other) const { return pin_info == other.pin_info; }
 
-    void fromStream(util::ByteStreamReader &reader)
-    {
-        reader.readVector<ArraySizeType>(pin_info);
-    }
+    void fromStream(util::ByteStreamReader &reader) { reader.readVector<ArraySizeType>(pin_info); }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
@@ -187,43 +161,33 @@ struct PinListInfo
     }
 };
 
-
 struct ModuleInstanceProps
 {
-    CompoundModuleId  id;
-    uint32_t          dp_queue_type;
-    uint32_t          queue_alignment;
-    uint32_t          cp_usage_mask;
-    uint32_t          stack_bytes;
-    uint32_t          bss_total_bytes;
-    uint32_t          bss_used_bytes;
-    uint32_t          ibs_bytes;
-    uint32_t          obs_bytes;
-    uint32_t          cpc;
-    uint32_t          cpc_peak;
-    PinListInfo       input_pins;
-    PinListInfo       output_pins;
-    ConnectorNodeId   input_gateway;
-    ConnectorNodeId   output_gateway;
+    CompoundModuleId id;
+    uint32_t dp_queue_type;
+    uint32_t queue_alignment;
+    uint32_t cp_usage_mask;
+    uint32_t stack_bytes;
+    uint32_t bss_total_bytes;
+    uint32_t bss_used_bytes;
+    uint32_t ibs_bytes;
+    uint32_t obs_bytes;
+    uint32_t cpc;
+    uint32_t cpc_peak;
+    PinListInfo input_pins;
+    PinListInfo output_pins;
+    ConnectorNodeId input_gateway;
+    ConnectorNodeId output_gateway;
 
-    bool operator == (const ModuleInstanceProps& other) const
+    bool operator==(const ModuleInstanceProps &other) const
     {
-        return
-            id == other.id &&
-            dp_queue_type == other.dp_queue_type &&
-            queue_alignment == other.queue_alignment &&
-            cp_usage_mask == other.cp_usage_mask &&
-            stack_bytes == other.stack_bytes &&
-            bss_total_bytes == other.bss_total_bytes &&
-            bss_used_bytes == other.bss_used_bytes &&
-            ibs_bytes == other.ibs_bytes &&
-            obs_bytes == other.obs_bytes &&
-            cpc == other.cpc &&
-            cpc_peak == other.cpc_peak &&
-            input_pins == other.input_pins &&
-            output_pins == other.output_pins &&
-            input_gateway == other.input_gateway &&
-            output_gateway == other.output_gateway;
+        return id == other.id && dp_queue_type == other.dp_queue_type &&
+               queue_alignment == other.queue_alignment && cp_usage_mask == other.cp_usage_mask &&
+               stack_bytes == other.stack_bytes && bss_total_bytes == other.bss_total_bytes &&
+               bss_used_bytes == other.bss_used_bytes && ibs_bytes == other.ibs_bytes &&
+               obs_bytes == other.obs_bytes && cpc == other.cpc && cpc_peak == other.cpc_peak &&
+               input_pins == other.input_pins && output_pins == other.output_pins &&
+               input_gateway == other.input_gateway && output_gateway == other.output_gateway;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -264,8 +228,6 @@ struct ModuleInstanceProps
         writer.write(output_gateway);
     }
 };
-
-
 }
 }
 }

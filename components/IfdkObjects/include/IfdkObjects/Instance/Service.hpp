@@ -38,9 +38,11 @@ class Service : public Instance
 {
 private:
     using base = Instance;
+
 public:
     /** Service direction */
-    enum class Direction {
+    enum class Direction
+    {
         Unknown,
         Outgoing,
         Incoming
@@ -50,18 +52,20 @@ public:
     static const util::EnumHelper<Direction> &directionHelper()
     {
         static util::EnumHelper<Direction> helper({
-            { Direction::Unknown, "Unknown" },
-            { Direction::Outgoing, "Outgoing" },
-            { Direction::Incoming, "Incoming" },
+            {Direction::Unknown, "Unknown"},
+            {Direction::Outgoing, "Outgoing"},
+            {Direction::Incoming, "Incoming"},
         });
         return helper;
     }
 
     Service() = default;
-    explicit Service(const std::string& typeName, const std::string& instanceId,
-        Direction direction) :
-        base(typeName, instanceId), mDirection(direction) {}
-    explicit Service(const Service& other) = default;
+    explicit Service(const std::string &typeName, const std::string &instanceId,
+                     Direction direction)
+        : base(typeName, instanceId), mDirection(direction)
+    {
+    }
+    explicit Service(const Service &other) = default;
     Service &operator=(const Service &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -76,15 +80,9 @@ public:
         acceptCommon(*this, visitor);
     }
 
-    Direction getDirection() const
-    {
-        return mDirection;
-    }
+    Direction getDirection() const { return mDirection; }
 
-    void setDirection(Direction dir)
-    {
-        mDirection = dir;
-    }
+    void setDirection(Direction dir) { mDirection = dir; }
 
 protected:
     virtual bool equalsTo(const Instance &other) const NOEXCEPT override
@@ -93,13 +91,12 @@ protected:
             return false;
         }
 
-        const Service *otherServ = dynamic_cast<const Service*>(&other);
+        const Service *otherServ = dynamic_cast<const Service *>(&other);
         if (otherServ == nullptr) {
             return false;
         }
 
-        return
-            mDirection == otherServ->mDirection;
+        return mDirection == otherServ->mDirection;
     }
 
 private:
@@ -115,9 +112,6 @@ private:
 
     Direction mDirection = Direction::Unknown;
 };
-
 }
 }
 }
-
-

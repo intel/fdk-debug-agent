@@ -56,10 +56,10 @@ public:
         Poco::ErrorHandler::set(mBaseErrorHandler);
     }
 
-    virtual void exception(const Poco::Exception& e) override
+    virtual void exception(const Poco::Exception &e) override
     {
         /* comparing the exception type */
-        if (dynamic_cast<const Poco::IOException*>(&e) != nullptr) {
+        if (dynamic_cast<const Poco::IOException *>(&e) != nullptr) {
 
             /* IOException occurs during client disconnection/server closing
             * It's a nominal case, so hiding it.
@@ -74,6 +74,5 @@ public:
 private:
     Poco::ErrorHandler *mBaseErrorHandler;
 };
-
 }
 }

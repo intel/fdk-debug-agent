@@ -34,9 +34,6 @@ namespace type
 
 /** Named collection of service references */
 using ServiceRefCollection = GenericRefCollection<ServiceRef>;
-
 }
 }
 }
-
-

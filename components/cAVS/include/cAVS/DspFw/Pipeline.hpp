@@ -41,18 +41,12 @@ struct PipelinesListInfo
 
     static std::size_t getAllocationSize(std::size_t count)
     {
-        return sizeof(ArraySizeType)+ count * sizeof(PipeLineIdType);
+        return sizeof(ArraySizeType) + count * sizeof(PipeLineIdType);
     }
 
-    bool operator == (const PipelinesListInfo& other) const
-    {
-        return ppl_id == other.ppl_id;
-    }
+    bool operator==(const PipelinesListInfo &other) const { return ppl_id == other.ppl_id; }
 
-    void fromStream(util::ByteStreamReader &reader)
-    {
-        reader.readVector<ArraySizeType>(ppl_id);
-    }
+    void fromStream(util::ByteStreamReader &reader) { reader.readVector<ArraySizeType>(ppl_id); }
 
     void toStream(util::ByteStreamWriter &writer) const
     {
@@ -62,27 +56,23 @@ struct PipelinesListInfo
 
 struct PplProps
 {
-    uint32_t        id;
-    uint32_t        priority;
-    uint32_t        state;
-    uint32_t        total_memory_bytes;
-    uint32_t        used_memory_bytes;
-    uint32_t        context_pages;
+    uint32_t id;
+    uint32_t priority;
+    uint32_t state;
+    uint32_t total_memory_bytes;
+    uint32_t used_memory_bytes;
+    uint32_t context_pages;
     std::vector<CompoundModuleId> module_instances;
     std::vector<uint32_t> ll_tasks;
     std::vector<uint32_t> dp_tasks;
 
-    bool operator ==(const PplProps &other) const
+    bool operator==(const PplProps &other) const
     {
-        return id == other.id &&
-            priority == other.priority &&
-            state == other.state &&
-            total_memory_bytes == other.total_memory_bytes &&
-            used_memory_bytes == other.used_memory_bytes &&
-            context_pages == other.context_pages &&
-            module_instances == other.module_instances &&
-            ll_tasks == other.ll_tasks &&
-            ll_tasks == other.ll_tasks;
+        return id == other.id && priority == other.priority && state == other.state &&
+               total_memory_bytes == other.total_memory_bytes &&
+               used_memory_bytes == other.used_memory_bytes &&
+               context_pages == other.context_pages && module_instances == other.module_instances &&
+               ll_tasks == other.ll_tasks && ll_tasks == other.ll_tasks;
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -111,7 +101,6 @@ struct PplProps
         writer.writeVector<ArraySizeType>(dp_tasks);
     }
 };
-
 }
 }
 }

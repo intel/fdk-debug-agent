@@ -27,18 +27,18 @@
  * Check:
  * - if a specific exception is thrown
  * - if the exception message matches the expected one */
-#define CHECK_THROWS_AS_MSG(expr, eType, msg) \
-    try {                                     \
-        { expr; }                             \
-        INFO("Exception should be thrown");   \
-        CHECK(false);                         \
-    }                                         \
-    catch (eType &e) {                        \
-        CHECK(std::string(e.what()) == msg);  \
-    }                                         \
-    catch (...) {                             \
-        INFO("Unexpected exception");         \
-        CHECK(false);                         \
+#define CHECK_THROWS_AS_MSG(expr, eType, msg)                                                      \
+    try {                                                                                          \
+        {                                                                                          \
+            expr;                                                                                  \
+        }                                                                                          \
+        INFO("Exception should be thrown");                                                        \
+        CHECK(false);                                                                              \
+    } catch (eType & e) {                                                                          \
+        CHECK(std::string(e.what()) == msg);                                                       \
+    } catch (...) {                                                                                \
+        INFO("Unexpected exception");                                                              \
+        CHECK(false);                                                                              \
     }
 
 /**
@@ -46,16 +46,16 @@
  * Check:
  * - if a specific exception is thrown
  * - if the exception message matches the expected one */
-#define REQUIRE_THROWS_AS_MSG(expr, eType, msg) \
-    try {                                       \
-        { expr; }                               \
-        INFO("Exception should be thrown");     \
-        REQUIRE(false);                         \
-    }                                           \
-    catch (eType &e) {                          \
-        REQUIRE(std::string(e.what()) == msg);  \
-    }                                           \
-    catch (...) {                               \
-        INFO("Unexpected exception");           \
-        REQUIRE(false);                         \
+#define REQUIRE_THROWS_AS_MSG(expr, eType, msg)                                                    \
+    try {                                                                                          \
+        {                                                                                          \
+            expr;                                                                                  \
+        }                                                                                          \
+        INFO("Exception should be thrown");                                                        \
+        REQUIRE(false);                                                                            \
+    } catch (eType & e) {                                                                          \
+        REQUIRE(std::string(e.what()) == msg);                                                     \
+    } catch (...) {                                                                                \
+        INFO("Unexpected exception");                                                              \
+        REQUIRE(false);                                                                            \
     }

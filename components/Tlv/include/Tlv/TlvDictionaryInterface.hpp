@@ -53,8 +53,7 @@ public:
      */
     virtual void invalidateAll() const NOEXCEPT = 0;
 
-    virtual ~TlvDictionaryInterface() {};
+    virtual ~TlvDictionaryInterface(){};
 };
-
 }
 }

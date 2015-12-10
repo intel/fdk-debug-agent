@@ -61,7 +61,6 @@ void TypeSerializer::enter(const Service &instance)
     pushElement(instance);
 }
 
-
 void TypeSerializer::enter(const Categories &instance)
 {
     pushElement(instance);
@@ -191,9 +190,6 @@ void TypeSerializer::leave(bool isConcrete)
         popElement();
     }
 }
-
 }
 }
 }
-
-

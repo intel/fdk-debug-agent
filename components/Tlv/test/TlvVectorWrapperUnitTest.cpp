@@ -32,9 +32,8 @@ struct ATestValueType
 
     bool operator==(const ATestValueType &other) const
     {
-        return anIntField == other.anIntField
-            && aCharField == other.aCharField
-            && aShortField == other.aShortField;
+        return anIntField == other.anIntField && aCharField == other.aCharField &&
+               aShortField == other.aShortField;
     }
 };
 
@@ -54,9 +53,7 @@ TEST_CASE("TlvVectorWrapper", "[VectorWrapperRead]")
     CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType) * 2 - 1) == false);
 
     std::vector<ATestValueType> valueToBeRead;
-    valueToBeRead = { { 1234, 56, 789},
-                      { 987, 65, 4321},
-                      { 5484, 47, 754} };
+    valueToBeRead = {{1234, 56, 789}, {987, 65, 4321}, {5484, 47, 754}};
     const char *rawValue = reinterpret_cast<const char *>(valueToBeRead.data());
 
     tlvVectorWrapper.readFrom(rawValue, sizeof(ATestValueType) * valueToBeRead.size());

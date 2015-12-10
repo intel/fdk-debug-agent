@@ -87,9 +87,6 @@ const std::string TypeTraits<Output>::tag("output");
 const std::string TypeTraits<Inputs>::tag("inputs");
 
 const std::string TypeTraits<Outputs>::tag("outputs");
-
 }
 }
 }
-
-

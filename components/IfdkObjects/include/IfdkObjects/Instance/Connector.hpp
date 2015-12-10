@@ -37,13 +37,14 @@ class Connector
 {
 public:
     Connector() = default;
-    explicit Connector(const std::string &id, const std::string& format) :
-        mId(id), mFormat(format) {}
-    explicit Connector(const Connector& other) = default;
+    explicit Connector(const std::string &id, const std::string &format) : mId(id), mFormat(format)
+    {
+    }
+    explicit Connector(const Connector &other) = default;
     virtual ~Connector() = default;
     Connector &operator=(const Connector &other) = default;
 
-    bool operator == (const Connector &other) const NOEXCEPT
+    bool operator==(const Connector &other) const NOEXCEPT
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -52,10 +53,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator != (const Connector &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Connector &other) const NOEXCEPT { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -67,25 +65,13 @@ public:
         acceptCommon(*this, visitor, isConcrete);
     }
 
-    std::string getId() const
-    {
-        return mId;
-    }
+    std::string getId() const { return mId; }
 
-    void setId(const std::string &id)
-    {
-        mId = id;
-    }
+    void setId(const std::string &id) { mId = id; }
 
-    std::string getFormat() const
-    {
-        return mFormat;
-    }
+    std::string getFormat() const { return mFormat; }
 
-    void setFormat(const std::string &format)
-    {
-        mFormat = format;
-    }
+    void setFormat(const std::string &format) { mFormat = format; }
 
 protected:
     bool equalsTo(const Connector &other) const NOEXCEPT
@@ -104,9 +90,6 @@ private:
     std::string mId;
     std::string mFormat;
 };
-
 }
 }
 }
-
-

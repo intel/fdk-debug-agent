@@ -40,10 +40,9 @@ public:
     virtual std::unique_ptr<WppClient> createInstance() const = 0;
 
 private:
-    WppClientFactory(const WppClientFactory&) = delete;
-    WppClientFactory& operator=(const WppClientFactory&) = delete;
+    WppClientFactory(const WppClientFactory &) = delete;
+    WppClientFactory &operator=(const WppClientFactory &) = delete;
 };
-
 }
 }
 }

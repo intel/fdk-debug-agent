@@ -41,8 +41,7 @@ public:
      */
     virtual const tlv::TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT = 0;
 
-    virtual ~TlvResponseHandlerInterface() {};
+    virtual ~TlvResponseHandlerInterface(){};
 };
-
 }
 }

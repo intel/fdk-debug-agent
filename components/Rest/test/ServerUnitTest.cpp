@@ -41,7 +41,7 @@ public:
 
         std::stringstream responseStream;
         responseStream << "Verb: " << Request::toString(request.getVerb()) << "\n"
-            << "Identifiers:";
+                       << "Identifiers:";
 
         std::string requestContent;
         Poco::StreamCopier::copyToString(request.getRequestStream(), requestContent);
@@ -65,24 +65,21 @@ TEST_CASE("Request test", "[Server]")
     std::unique_ptr<Dispatcher> dispatcher = std::make_unique<Dispatcher>();
     HttpClientSimulator client("localhost");
 
-    SECTION("Resource not found")
-    {
+    SECTION ("Resource not found") {
         /* Starting the server */
         Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                "/unknown", // uri
-                HttpClientSimulator::Verb::Get,  //verb
-                "",  // request content
-                HttpClientSimulator::Status::NotFound, //expected status
-                "text/plain", //expected content type
-                "Resource not found: /unknown") //expected response content
-            );
+        CHECK_NOTHROW(client.request("/unknown",                            // uri
+                                     HttpClientSimulator::Verb::Get,        // verb
+                                     "",                                    // request content
+                                     HttpClientSimulator::Status::NotFound, // expected status
+                                     "text/plain",                          // expected content type
+                                     "Resource not found: /unknown") // expected response content
+                      );
     }
 
-    SECTION("Resource without identifier") {
+    SECTION ("Resource without identifier") {
 
         /* Adding resource */
         dispatcher->addResource("/test/test2", std::make_shared<EchoResource>("text/html"));
@@ -91,47 +88,41 @@ TEST_CASE("Request test", "[Server]")
         Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
         /* Setting the expected response content */
-        std::string expectedResponseContent =
-            "Verb: DELETE\n"
-            "Identifiers:\n"
-            "Request content: Hello world!";
+        std::string expectedResponseContent = "Verb: DELETE\n"
+                                              "Identifiers:\n"
+                                              "Request content: Hello world!";
 
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                "/test/test2", // uri
-                HttpClientSimulator::Verb::Delete,  //verb
-                "Hello world!",  // request content
-                HttpClientSimulator::Status::Ok, //expected status
-                "text/html", //expected content type
-                expectedResponseContent) //expected response content
-            );
+        CHECK_NOTHROW(client.request("/test/test2",                     // uri
+                                     HttpClientSimulator::Verb::Delete, // verb
+                                     "Hello world!",                    // request content
+                                     HttpClientSimulator::Status::Ok,   // expected status
+                                     "text/html",                       // expected content type
+                                     expectedResponseContent)           // expected response content
+                      );
     }
 
-    SECTION("Resource with 2 identifiers") {
+    SECTION ("Resource with 2 identifiers") {
 
         /* Adding resource */
         dispatcher->addResource("/test/${i1}/titi/${i2}/lulu",
-            std::make_shared<EchoResource>("text/html"));
+                                std::make_shared<EchoResource>("text/html"));
 
         /* Starting the server */
         Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
         /* Setting the expected response content */
-        std::string expectedResponseContent =
-            "Verb: PUT\n"
-            "Identifiers: i1=val1 i2=val2\n"
-            "Request content: Two identifiers";
+        std::string expectedResponseContent = "Verb: PUT\n"
+                                              "Identifiers: i1=val1 i2=val2\n"
+                                              "Request content: Two identifiers";
 
         /* Performing the http request */
-        CHECK_NOTHROW(
-            client.request(
-                "/test/val1/titi/val2/lulu", // uri
-                HttpClientSimulator::Verb::Put,  //verb
-                "Two identifiers",  // request content
-                HttpClientSimulator::Status::Ok, //expected status
-                "text/html", //expected content type
-                expectedResponseContent) //expected response content
-            );
+        CHECK_NOTHROW(client.request("/test/val1/titi/val2/lulu",     // uri
+                                     HttpClientSimulator::Verb::Put,  // verb
+                                     "Two identifiers",               // request content
+                                     HttpClientSimulator::Status::Ok, // expected status
+                                     "text/html",                     // expected content type
+                                     expectedResponseContent)         // expected response content
+                      );
     }
 }

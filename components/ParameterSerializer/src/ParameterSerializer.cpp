@@ -35,8 +35,8 @@ namespace debug_agent
 namespace parameterSerializer
 {
 
-ParameterSerializer::ParameterSerializer(const std::string configurationFilePath) :
-    mParameterMgrPlatformConnector(nullptr)
+ParameterSerializer::ParameterSerializer(const std::string configurationFilePath)
+    : mParameterMgrPlatformConnector(nullptr)
 {
     auto parameterMgrPlatformConnector =
         std::make_unique<CParameterMgrPlatformConnector>(configurationFilePath);
@@ -52,12 +52,13 @@ ParameterSerializer::ParameterSerializer(const std::string configurationFilePath
     }
 }
 
-ParameterSerializer::~ParameterSerializer() {}
+ParameterSerializer::~ParameterSerializer()
+{
+}
 
-std::unique_ptr<ElementHandle> ParameterSerializer::getElement(
-    const std::string &subsystemName,
-    const std::string &moduleName,
-    ParameterKind parameterKind) const
+std::unique_ptr<ElementHandle> ParameterSerializer::getElement(const std::string &subsystemName,
+                                                               const std::string &moduleName,
+                                                               ParameterKind parameterKind) const
 {
     checkParameterMgrPlatformConnector();
 
@@ -66,45 +67,41 @@ std::unique_ptr<ElementHandle> ParameterSerializer::getElement(
     std::string rootElementName =
         mParameterMgrPlatformConnector->createElementHandle("/", error)->getName();
     if (rootElementName == "") {
-        throw Exception(
-            "No root element name found");
+        throw Exception("No root element name found");
     }
 
     // compute module control element path from URL
-    std::string moduleControlPath = std::string("/") + rootElementName
-        + "/" + subsystemName + "/categories/" + moduleName + "/"
-        + parameterKindHelper().toString(parameterKind) + "/";
+    std::string moduleControlPath = std::string("/") + rootElementName + "/" + subsystemName +
+                                    "/categories/" + moduleName + "/" +
+                                    parameterKindHelper().toString(parameterKind) + "/";
 
     std::unique_ptr<ElementHandle> moduleElementHandle(
         mParameterMgrPlatformConnector->createElementHandle(moduleControlPath, error));
 
     if (moduleElementHandle == nullptr) {
-        throw Exception(
-            "Invalid parameters format: node for path \"" + moduleControlPath + "\" not found");
+        throw Exception("Invalid parameters format: node for path \"" + moduleControlPath +
+                        "\" not found");
     }
 
     return moduleElementHandle;
 }
 
 std::unique_ptr<ElementHandle> ParameterSerializer::getChildElementHandle(
-    const std::string &subsystemName,
-    const std::string &elementName,
-    ParameterKind parameterKind,
+    const std::string &subsystemName, const std::string &elementName, ParameterKind parameterKind,
     const std::string &parameterName) const
 {
     checkParameterMgrPlatformConnector();
 
-    std::unique_ptr<ElementHandle> elementHandle = getElement(
-        subsystemName, elementName, parameterKind);
+    std::unique_ptr<ElementHandle> elementHandle =
+        getElement(subsystemName, elementName, parameterKind);
 
     std::string error;
     std::unique_ptr<ElementHandle> childElementHandle(
         mParameterMgrPlatformConnector->createElementHandle(
-        elementHandle->getPath() + "/" + parameterName, error));
+            elementHandle->getPath() + "/" + parameterName, error));
 
     if (childElementHandle == nullptr) {
-        throw Exception(
-            "Child " + parameterName + " not found for " + elementHandle->getPath());
+        throw Exception("Child " + parameterName + " not found for " + elementHandle->getPath());
     }
 
     return childElementHandle;
@@ -117,54 +114,48 @@ void ParameterSerializer::stripFirstLine(std::string &document)
     document.erase(0, endLinePos + 1);
 }
 
-std::map<uint32_t, std::string>  ParameterSerializer::getChildren(
-    const std::string &subsystemName,
-    const std::string &elementName,
-    ParameterKind parameterKind) const
+std::map<uint32_t, std::string> ParameterSerializer::getChildren(const std::string &subsystemName,
+                                                                 const std::string &elementName,
+                                                                 ParameterKind parameterKind) const
 {
     checkParameterMgrPlatformConnector();
 
-    std::unique_ptr<ElementHandle> elementHandle = getElement(
-        subsystemName, elementName, parameterKind);
+    std::unique_ptr<ElementHandle> elementHandle =
+        getElement(subsystemName, elementName, parameterKind);
 
     std::map<uint32_t, std::string> children;
     uint32_t childId = 0;
-    for (const auto &handle : elementHandle->getChildren())
-    {
+    for (const auto &handle : elementHandle->getChildren()) {
         children[childId] = handle.getName();
         childId++;
     }
     return children;
 }
 
-std::string ParameterSerializer::getMapping(
-    const std::string &subsystemName,
-    const std::string &elementName,
-    const std::string &parameterName,
-    const std::string &key) const
+std::string ParameterSerializer::getMapping(const std::string &subsystemName,
+                                            const std::string &elementName,
+                                            const std::string &parameterName,
+                                            const std::string &key) const
 {
     checkParameterMgrPlatformConnector();
 
     std::string paramId;
 
-    std::unique_ptr<ElementHandle> elementHandle = getChildElementHandle(
-        subsystemName, elementName, ParameterKind::Control, parameterName);
+    std::unique_ptr<ElementHandle> elementHandle =
+        getChildElementHandle(subsystemName, elementName, ParameterKind::Control, parameterName);
 
-    if (!elementHandle->getMappingData(key, paramId))
-    {
-        throw Exception(
-            "Mapping \"" + key + "\" not found for " + elementHandle->getPath());
+    if (!elementHandle->getMappingData(key, paramId)) {
+        throw Exception("Mapping \"" + key + "\" not found for " + elementHandle->getPath());
     }
 
     return paramId;
 }
 
-util::Buffer ParameterSerializer::xmlToBinary(
-    const std::string &subsystemName,
-    const std::string &elementName,
-    ParameterKind parameterKind,
-    const std::string &parameterName,
-    const std::string parameterAsXml) const
+util::Buffer ParameterSerializer::xmlToBinary(const std::string &subsystemName,
+                                              const std::string &elementName,
+                                              ParameterKind parameterKind,
+                                              const std::string &parameterName,
+                                              const std::string parameterAsXml) const
 {
     checkParameterMgrPlatformConnector();
 
@@ -174,25 +165,24 @@ util::Buffer ParameterSerializer::xmlToBinary(
     // Send XML string to PFW
     std::string error;
     if (!childElementHandle->setAsXML(parameterAsXml, error)) {
-        throw Exception(
-            "Not able to set XML stream for " + childElementHandle->getPath() + " : " + error);
+        throw Exception("Not able to set XML stream for " + childElementHandle->getPath() + " : " +
+                        error);
     }
 
     // Read binary back from PFW
     util::Buffer buffer;
     if (!childElementHandle->getAsBytes(buffer, error)) {
         throw Exception("Not able to get element as bytes for " + childElementHandle->getPath() +
-            " : " + error);
+                        " : " + error);
     }
     return buffer;
 }
 
-std::string ParameterSerializer::binaryToXml(
-    const std::string &subsystemName,
-    const std::string &elementName,
-    ParameterKind parameterKind,
-    const std::string &parameterName,
-    const util::Buffer &parameterPayload) const
+std::string ParameterSerializer::binaryToXml(const std::string &subsystemName,
+                                             const std::string &elementName,
+                                             ParameterKind parameterKind,
+                                             const std::string &parameterName,
+                                             const util::Buffer &parameterPayload) const
 {
     checkParameterMgrPlatformConnector();
 
@@ -201,26 +191,24 @@ std::string ParameterSerializer::binaryToXml(
 
     // Send binary to PFW
     std::string error;
-    if (!childElementHandle->setAsBytes(parameterPayload, error))
-    {
-        throw Exception(
-            "Not able to set payload for " + childElementHandle->getName() + " : " + error);
+    if (!childElementHandle->setAsBytes(parameterPayload, error)) {
+        throw Exception("Not able to set payload for " + childElementHandle->getName() + " : " +
+                        error);
     }
     std::string result;
     if (!childElementHandle->getAsXML(result, error)) {
         throw Exception("Not able to get element as xml for " + childElementHandle->getPath() +
-            " : " + error);
+                        " : " + error);
     }
     // Remove first line which is XML document header
     stripFirstLine(result);
     return result;
 }
 
-std::string ParameterSerializer::getStructureXml(
-    const std::string &subsystemName,
-    const std::string &elementName,
-    ParameterKind parameterKind,
-    const std::string &parameterName) const
+std::string ParameterSerializer::getStructureXml(const std::string &subsystemName,
+                                                 const std::string &elementName,
+                                                 ParameterKind parameterKind,
+                                                 const std::string &parameterName) const
 {
     checkParameterMgrPlatformConnector();
 
@@ -231,7 +219,7 @@ std::string ParameterSerializer::getStructureXml(
     std::string result;
     if (!childElementHandle->getStructureAsXML(result, error)) {
         throw Exception("Not able to get element as structure xml for " +
-            childElementHandle->getPath() + " : " + error);
+                        childElementHandle->getPath() + " : " + error);
     }
 
     // Remove first line which is XML document header
@@ -241,11 +229,9 @@ std::string ParameterSerializer::getStructureXml(
 
 void ParameterSerializer::checkParameterMgrPlatformConnector() const
 {
-    if (mParameterMgrPlatformConnector == nullptr)
-    {
+    if (mParameterMgrPlatformConnector == nullptr) {
         throw Exception("Platform connector not available");
     }
 }
-
 }
 }

@@ -34,9 +34,9 @@ namespace windows
 
 /* Io ctl entry constructor*/
 MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expectedInputBuffer,
-        const Buffer *expectedOutputBuffer, const Buffer *returnedOutputBuffer,
-        bool successsful) :
-        mIoControlCode(ioControlCode), mSuccesssful(successsful)
+                                     const Buffer *expectedOutputBuffer,
+                                     const Buffer *returnedOutputBuffer, bool successsful)
+    : mIoControlCode(ioControlCode), mSuccesssful(successsful)
 {
     if (expectedInputBuffer != nullptr) {
         mExpectedInputBuffer = std::make_shared<Buffer>(*expectedInputBuffer);
@@ -52,11 +52,10 @@ MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expec
 
         if ((expectedOutputBuffer != nullptr) != (returnedOutputBuffer != nullptr)) {
             throw Exception("Expected buffer and returned buffer have to be both null or "
-                "both not null");
+                            "both not null");
         }
 
-        if (expectedOutputBuffer != nullptr)
-        {
+        if (expectedOutputBuffer != nullptr) {
             /* Because of previous check it's sure that returnedOutputBuffer != nullptr */
             assert(returnedOutputBuffer != nullptr);
 
@@ -68,8 +67,7 @@ MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expec
             mExpectedOutputBuffer = std::make_shared<Buffer>(*expectedOutputBuffer);
             mReturnedOutputBuffer = std::make_shared<Buffer>(*returnedOutputBuffer);
         }
-    }
-    else {
+    } else {
         /* If the ioctl will fail, returnedOutputBuffer is not used because nothing is returned. */
 
         /** Guaranteed by the addFailedIoctlEntry method */
@@ -89,31 +87,23 @@ MockedDevice::~MockedDevice()
 }
 
 void MockedDevice::addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
-    const Buffer *expectedOutput, const Buffer *returnedOutput)
+                                           const Buffer *expectedOutput,
+                                           const Buffer *returnedOutput)
 {
     /* No need to lock members, this method is called by the main thread of the test,
      * when it fills the test vector. */
 
-    mEntries.push_back(IoCtlEntry(
-        ioControlCode,
-        expectedInput,
-        expectedOutput,
-        returnedOutput,
-        true));
+    mEntries.push_back(
+        IoCtlEntry(ioControlCode, expectedInput, expectedOutput, returnedOutput, true));
 }
 
 void MockedDevice::addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
-    const Buffer *expectedOutput)
+                                       const Buffer *expectedOutput)
 {
     /* No need to lock members, this method is called by the main thread of the test,
      * when it fills the test vector. */
 
-    mEntries.push_back(IoCtlEntry(
-        ioControlCode,
-        expectedInput,
-        expectedOutput,
-        nullptr,
-        false));
+    mEntries.push_back(IoCtlEntry(ioControlCode, expectedInput, expectedOutput, nullptr, false));
 }
 
 void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output)
@@ -139,7 +129,7 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
     /* Checking io control code */
     if (ioControlCode != entry.getIOControlCode()) {
         entryFailure("IoCtrl code: " + std::to_string(ioControlCode) + " expected : " +
-            std::to_string(entry.getIOControlCode()));
+                     std::to_string(entry.getIOControlCode()));
     }
 
     /* Checking input buffer content */
@@ -157,8 +147,7 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
     }
 
     /* Setting the returned output buffer if it exists */
-    if (entry.getReturnedOutputBuffer() != nullptr)
-    {
+    if (entry.getReturnedOutputBuffer() != nullptr) {
         /* Guaranteed because entry.getReturnedOutputBuffer() != null
          * => implies that entry.getExpectedOutputBuffer() != null
          * => implies that output == entry.getExpectedOutputBuffer()
@@ -172,43 +161,34 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
     }
 }
 
-void MockedDevice::compareBuffers(
-    const std::string &bufferName,
-    const Buffer *candidateBuffer,
-    const Buffer *expectedBuffer)
+void MockedDevice::compareBuffers(const std::string &bufferName, const Buffer *candidateBuffer,
+                                  const Buffer *expectedBuffer)
 {
     if (candidateBuffer != nullptr) {
         if (expectedBuffer != nullptr) {
 
             /* Checking size */
             if (candidateBuffer->size() != expectedBuffer->size()) {
-                entryFailure(bufferName+" candidate with size " +
-                    std::to_string(candidateBuffer->size()) +
-                    " differs from required size: " +
-                    std::to_string(expectedBuffer->size()));
+                entryFailure(
+                    bufferName + " candidate with size " + std::to_string(candidateBuffer->size()) +
+                    " differs from required size: " + std::to_string(expectedBuffer->size()));
             }
-
 
             /* Checking buffer content */
             if (*candidateBuffer != *expectedBuffer) {
                 entryFailure(bufferName + " content is not the expected one.");
             }
-        }
-        else
-        {
+        } else {
             /* Input buffer is not null and expected input buffer is null*/
             entryFailure(bufferName + " should be null.");
         }
-    }
-    else
-    {
+    } else {
         if (expectedBuffer != nullptr) {
             /* Input buffer is null and expected input buffer is not null*/
             entryFailure(bufferName + " should not be null.");
         }
     }
 }
-
 }
 }
 }

@@ -56,21 +56,11 @@ public:
      * @param[in] value The value used for buffer initialization
      * @param[in] size The size of the buffer, shall be >= sizeof(T).
      *                  By default size = sizeof(T) */
-    explicit TypedBuffer(const T &value) : Buffer(sizeof(T))
-    {
-        getContent() = value;
-    }
+    explicit TypedBuffer(const T &value) : Buffer(sizeof(T)) { getContent() = value; }
 
-    T &getContent()
-    {
-        return *reinterpret_cast<T *>(data());
-    }
+    T &getContent() { return *reinterpret_cast<T *>(data()); }
 
-    T* operator->()
-    {
-        return &getContent();
-    }
+    T *operator->() { return &getContent(); }
 };
-
 }
 }

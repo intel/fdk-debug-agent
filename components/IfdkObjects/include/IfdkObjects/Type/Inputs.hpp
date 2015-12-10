@@ -34,9 +34,6 @@ namespace type
 
 /** List of input connectors */
 using Inputs = VisitableVector<Input, Visitor, ConstVisitor>;
-
 }
 }
 }
-
-

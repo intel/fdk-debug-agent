@@ -92,11 +92,8 @@ protected:
     virtual ResponsePtr handleDelete(const Request &request);
 
 private:
-    Resource(const Resource&) = delete;
+    Resource(const Resource &) = delete;
     Resource &operator=(const Resource &) = delete;
 };
-
 }
 }
-
-

@@ -28,16 +28,14 @@
 
 using namespace debug_agent::system;
 
-class IfdkStreamerTest: public IfdkStreamer
+class IfdkStreamerTest : public IfdkStreamer
 {
     using base = IfdkStreamer;
-public:
 
-    IfdkStreamerTest(size_t iterations):
-        base(testSystem, testFormat, testVersionMajor, testVersionMinor),
-        mIterations(iterations),
-        mIteration(0),
-        mExpectedStream()
+public:
+    IfdkStreamerTest(size_t iterations)
+        : base(testSystem, testFormat, testVersionMajor, testVersionMinor), mIterations(iterations),
+          mIteration(0), mExpectedStream()
     {
         static const std::string propertyKey("TEST");
         static const std::string propertyValue("TRUE");
@@ -45,9 +43,7 @@ public:
         base::addProperty(propertyKey, propertyValue);
 
         // Compute expected stream: IFDK header, format specific header, then format specific data
-        IfdkStreamHeader ifdkStreamHeader(testSystem,
-                                          testFormat,
-                                          testVersionMajor,
+        IfdkStreamHeader ifdkStreamHeader(testSystem, testFormat, testVersionMajor,
                                           testVersionMinor);
         ifdkStreamHeader.addProperty(propertyKey, propertyValue);
 
@@ -60,10 +56,7 @@ public:
         }
     }
 
-    void streamFormatHeader(std::ostream &os) override
-    {
-        os << testFormatHeader;
-    }
+    void streamFormatHeader(std::ostream &os) override { os << testFormatHeader; }
 
     bool streamNextFormatData(std::ostream &os) override
     {
@@ -78,10 +71,7 @@ public:
         }
     }
 
-    const std::stringstream &getExpectedStream()
-    {
-        return mExpectedStream;
-    }
+    const std::stringstream &getExpectedStream() { return mExpectedStream; }
 
     const size_t mIterations;
     size_t mIteration;

@@ -57,7 +57,6 @@ namespace windows
 class IoctlHelpers
 {
 public:
-
     /** Generate header and body buffers to perform a BigSet/Get ioctl
      *
      * The BigSet/Get ioctl requires two distinct buffers, a header buffer and a body buffer.
@@ -69,15 +68,11 @@ public:
      * @param[out] headerBuffer the created header buffer that should be used with ioctl call
      * @param[out] bodyBuffer the created body buffer that should be used with ioctl call
      */
-    static void toBigCmdBuffers(ULONG featureID, ULONG parameterID,
-        const util::Buffer &bodyPayload,
-        util::Buffer &headerBuffer,
-        util::Buffer &bodyBuffer
-        )
+    static void toBigCmdBuffers(ULONG featureID, ULONG parameterID, const util::Buffer &bodyPayload,
+                                util::Buffer &headerBuffer, util::Buffer &bodyBuffer)
     {
         toBodyBuffer(bodyPayload, bodyBuffer);
-        toHeaderBuffer(featureID, parameterID, static_cast<ULONG>(bodyBuffer.size()),
-            headerBuffer);
+        toHeaderBuffer(featureID, parameterID, static_cast<ULONG>(bodyBuffer.size()), headerBuffer);
     }
 
     /** Parse a body buffer returned by the BigSet/Get ioctl
@@ -85,10 +80,8 @@ public:
      * @param[out] status the returned driver status
      * @param[out] bodyPayload a buffer that contains the body payload
      */
-    static void fromBigCmdBodyBuffer(const util::Buffer &bodyBuffer,
-        NTSTATUS &status,
-        util::Buffer &bodyPayload
-        )
+    static void fromBigCmdBodyBuffer(const util::Buffer &bodyBuffer, NTSTATUS &status,
+                                     util::Buffer &bodyPayload)
     {
         util::ByteStreamReader reader(bodyBuffer);
         fromBodyBuffer(reader, status, bodyPayload);
@@ -104,9 +97,8 @@ public:
      *                        of the couple (featureID, parameterID)
      * @param[out] buffer the created buffer that should be used with ioctl call
      */
-    static void toTinyCmdBuffer(ULONG featureID, ULONG parameterID,
-        const util::Buffer &bodyPayload,
-        util::Buffer &buffer)
+    static void toTinyCmdBuffer(ULONG featureID, ULONG parameterID, const util::Buffer &bodyPayload,
+                                util::Buffer &buffer)
     {
         util::Buffer headerBuffer;
         util::Buffer BodyBuffer;
@@ -123,9 +115,8 @@ public:
      * @param[out] status the returned driver status
      * @param[out] bodyPayload a buffer that contains the body payload
      */
-    static void fromTinyCmdBuffer(const util::Buffer &buffer,
-        NTSTATUS &status,
-        util::Buffer &bodyPayload)
+    static void fromTinyCmdBuffer(const util::Buffer &buffer, NTSTATUS &status,
+                                  util::Buffer &bodyPayload)
     {
         util::ByteStreamReader reader(buffer);
         fromHeaderBuffer(reader);
@@ -137,12 +128,9 @@ private:
 
     /** Serialize a header */
     static void toHeaderBuffer(ULONG featureID, ULONG parameterID, ULONG bodySize,
-        util::Buffer &headerBuffer)
+                               util::Buffer &headerBuffer)
     {
-        driver::Intc_App_Cmd_Header header(
-            featureID,
-            parameterID,
-            bodySize);
+        driver::Intc_App_Cmd_Header header(featureID, parameterID, bodySize);
 
         util::ByteStreamWriter writer;
         writer.write(header);
@@ -157,9 +145,7 @@ private:
     }
 
     /** Serialize a body */
-    static void toBodyBuffer(
-        const util::Buffer &bodyPayload,
-        util::Buffer &bodyBuffer)
+    static void toBodyBuffer(const util::Buffer &bodyPayload, util::Buffer &bodyBuffer)
     {
         driver::Intc_App_Cmd_Body body;
 
@@ -171,9 +157,8 @@ private:
     }
 
     /** Deserialize a body */
-    static void fromBodyBuffer(util::ByteStreamReader &reader,
-        NTSTATUS &status,
-        util::Buffer &bodyPayload)
+    static void fromBodyBuffer(util::ByteStreamReader &reader, NTSTATUS &status,
+                               util::Buffer &bodyPayload)
     {
         driver::Intc_App_Cmd_Body body;
         reader.read(body);
@@ -181,10 +166,10 @@ private:
 
         bodyPayload.clear();
         bodyPayload.insert(bodyPayload.begin(),
-            reader.getBuffer().begin() + reader.getPointerOffset(), reader.getBuffer().end());
+                           reader.getBuffer().begin() + reader.getPointerOffset(),
+                           reader.getBuffer().end());
     }
 };
-
 }
 }
 }

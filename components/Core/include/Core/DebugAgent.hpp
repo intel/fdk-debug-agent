@@ -49,8 +49,8 @@ public:
     };
 
 private:
-    DebugAgent(const DebugAgent&) = delete;
-    DebugAgent& operator=(const DebugAgent&) = delete;
+    DebugAgent(const DebugAgent &) = delete;
+    DebugAgent &operator=(const DebugAgent &) = delete;
 
     std::shared_ptr<TypeModel> createTypeModel();
     static std::shared_ptr<ifdk_objects::instance::System> createSystemInstance();
@@ -63,8 +63,5 @@ private:
     util::Locker<parameterSerializer::ParameterSerializer> mParameterSerializer;
     rest::Server mRestServer;
 };
-
 }
 }
-
-

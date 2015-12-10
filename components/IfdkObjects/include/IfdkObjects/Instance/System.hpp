@@ -38,11 +38,14 @@ class System : public Component
 {
 private:
     using base = Component;
+
 public:
     System() = default;
-    explicit System(const std::string& typeName, const std::string& instanceId) :
-        base(typeName, instanceId) {}
-    explicit System(const System& other) = default;
+    explicit System(const std::string &typeName, const std::string &instanceId)
+        : base(typeName, instanceId)
+    {
+    }
+    explicit System(const System &other) = default;
     System &operator=(const System &other) = default;
 
     virtual void accept(Visitor &visitor, bool isConcrete = true) override
@@ -64,7 +67,7 @@ protected:
             return false;
         }
 
-        const System *otherSys = dynamic_cast<const System*>(&other);
+        const System *otherSys = dynamic_cast<const System *>(&other);
         if (otherSys == nullptr) {
             return false;
         }
@@ -86,5 +89,3 @@ private:
 }
 }
 }
-
-

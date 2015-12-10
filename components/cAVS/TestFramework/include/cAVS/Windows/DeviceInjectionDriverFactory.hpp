@@ -40,9 +40,11 @@ class DeviceInjectionDriverFactory : public DriverFactory
 {
 public:
     DeviceInjectionDriverFactory(std::unique_ptr<Device> injectedDevice,
-        std::unique_ptr<WppClientFactory> injectedWppClientFactory) :
-        mInjectedDevice(std::move(injectedDevice)),
-        mInjectedWppClientFactory(std::move(injectedWppClientFactory)) {}
+                                 std::unique_ptr<WppClientFactory> injectedWppClientFactory)
+        : mInjectedDevice(std::move(injectedDevice)),
+          mInjectedWppClientFactory(std::move(injectedWppClientFactory))
+    {
+    }
 
     virtual std::unique_ptr<cavs::Driver> newDriver() const override;
 
@@ -56,7 +58,6 @@ private:
     /* Same point for this member */
     mutable std::unique_ptr<WppClientFactory> mInjectedWppClientFactory;
 };
-
 }
 }
 }

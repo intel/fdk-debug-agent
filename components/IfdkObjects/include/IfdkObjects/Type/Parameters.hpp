@@ -40,11 +40,11 @@ class Parameters
 {
 public:
     Parameters() = default;
-    explicit Parameters(const Parameters& other) = default;
+    explicit Parameters(const Parameters &other) = default;
     virtual ~Parameters() = default;
     Parameters &operator=(const Parameters &other) = default;
 
-    bool operator == (const Parameters &other) const NOEXCEPT
+    bool operator==(const Parameters &other) const NOEXCEPT
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -53,10 +53,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator != (const Parameters &other) const NOEXCEPT
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const Parameters &other) const NOEXCEPT { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -69,10 +66,7 @@ public:
     }
 
 protected:
-    virtual bool equalsTo(const Parameters &other) const NOEXCEPT
-    {
-        return true;
-    }
+    virtual bool equalsTo(const Parameters &other) const NOEXCEPT { return true; }
 
 private:
     template <typename T, typename Visitor>
@@ -82,9 +76,6 @@ private:
         visitor.leave(isConcrete);
     }
 };
-
 }
 }
 }
-
-

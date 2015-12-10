@@ -46,23 +46,20 @@ struct TestStruct
         writer.write(b);
     }
 
-    bool operator ==(const TestStruct &other) const
-    {
-        return a == other.a && b == other.b;
-    }
+    bool operator==(const TestStruct &other) const { return a == other.a && b == other.b; }
 };
 
 const Buffer expectedBuffer = {
-    1,              // 1 as uint8
-    2, 0, 0, 0,     // 2 as uint32
-    2, 0, 0, 0,     // array size
-    1, 0, 0, 0,     // #0 array element
-    2, 0, 0, 0,     // #0 array element
-    2, 0, 0, 0,     // array size
-    1, 0, 0, 0,     // #0 array element field a
-    2, 0, 0, 0,     // #0 array element field b
-    3, 0, 0, 0,     // #1 array element field a
-    4, 0, 0, 0,     // #1 array element field b
+    1,          // 1 as uint8
+    2, 0, 0, 0, // 2 as uint32
+    2, 0, 0, 0, // array size
+    1, 0, 0, 0, // #0 array element
+    2, 0, 0, 0, // #0 array element
+    2, 0, 0, 0, // array size
+    1, 0, 0, 0, // #0 array element field a
+    2, 0, 0, 0, // #0 array element field b
+    3, 0, 0, 0, // #1 array element field a
+    4, 0, 0, 0, // #1 array element field b
 };
 
 TEST_CASE("Byte stream writer")
@@ -101,11 +98,11 @@ TEST_CASE("Byte stream reader")
 
     std::vector<uint32_t> v;
     reader.readVector<uint32_t>(v);
-    CHECK(v == std::vector<uint32_t>({ 1, 2 }));
+    CHECK(v == std::vector<uint32_t>({1, 2}));
 
     std::vector<TestStruct> structs;
     reader.readVector<uint32_t>(structs);
-    CHECK(structs == std::vector<TestStruct>({ { 1, 2 }, { 3, 4 } }));
+    CHECK(structs == std::vector<TestStruct>({{1, 2}, {3, 4}}));
 }
 
 TEST_CASE("Byte stream reader : end of stream")

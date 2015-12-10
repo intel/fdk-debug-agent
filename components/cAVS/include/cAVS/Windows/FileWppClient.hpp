@@ -49,7 +49,6 @@ private:
     bool mStopRequest;
     std::mutex mStopRequestMutex;
 };
-
 }
 }
 }

@@ -31,8 +31,8 @@ namespace windows
 {
 
 /* GUID for audio dsp log control */
-static const GUID AudioDspLogControlGuid =
-{ 0xB3A109EC, 0x1CB3, 0x4947, { 0x95, 0xED, 0x43, 0x10, 0x33, 0xEE, 0xB1, 0xB4 } };
+static const GUID AudioDspLogControlGuid = {
+    0xB3A109EC, 0x1CB3, 0x4947, {0x95, 0xED, 0x43, 0x10, 0x33, 0xEE, 0xB1, 0xB4}};
 
 WppController::TraceProperties::TraceProperties()
 {
@@ -129,41 +129,37 @@ void WppController::start()
      * This mode can also eliminate the issue with circular logs appearing to drop events on
      * multiple processor computers.
      */
-     properties.LogFileMode = EVENT_TRACE_REAL_TIME_MODE | EVENT_TRACE_USE_LOCAL_SEQUENCE
-        | EVENT_TRACE_NO_PER_PROCESSOR_BUFFERING;
+    properties.LogFileMode = EVENT_TRACE_REAL_TIME_MODE | EVENT_TRACE_USE_LOCAL_SEQUENCE |
+                             EVENT_TRACE_NO_PER_PROCESSOR_BUFFERING;
 
-     /* LoggerNameOffset: Offset from the start of the structure's allocated memory to beginning
-      * of the null-terminated string that contains the session name.*/
-     properties.LoggerNameOffset = static_cast<ULONG>(
-         reinterpret_cast<uint8_t*>(&mTraceProperties.logFileName)
-         - reinterpret_cast<uint8_t*>(&mTraceProperties));
+    /* LoggerNameOffset: Offset from the start of the structure's allocated memory to beginning
+     * of the null-terminated string that contains the session name.*/
+    properties.LoggerNameOffset =
+        static_cast<ULONG>(reinterpret_cast<uint8_t *>(&mTraceProperties.logFileName) -
+                           reinterpret_cast<uint8_t *>(&mTraceProperties));
 
-     /* LogFileNameOffset: Offset from the start of the structure's allocated memory to beginning
-      * of the null-terminated string that contains the log file name.
-      *
-      * If you do not want to log events to a log file (for example, you specify
-      * EVENT_TRACE_REAL_TIME_MODE only), set LogFileNameOffset to 0.
-      */
+    /* LogFileNameOffset: Offset from the start of the structure's allocated memory to beginning
+     * of the null-terminated string that contains the log file name.
+     *
+     * If you do not want to log events to a log file (for example, you specify
+     * EVENT_TRACE_REAL_TIME_MODE only), set LogFileNameOffset to 0.
+     */
     properties.LogFileNameOffset = 0;
 
     /* Starting the session */
     ULONG status = StartTrace(&mHandle, wppSessionName, &properties);
-    if (status != ERROR_SUCCESS)
-    {
+    if (status != ERROR_SUCCESS) {
         mHandle = INVALID_PROCESSTRACE_HANDLE;
         throw Exception("Unable to start session: err=" + std::to_string(status));
     }
 
     /* Enabling the audio dsp log provider */
-    status = EnableTrace(
-        TRUE, /* Enable provider */
-        fwLogFlag, /* filter firmware logs */
-        TRACE_LEVEL_VERBOSE, /* retrieve all logs */
-        &AudioDspLogControlGuid,
-        mHandle);
+    status = EnableTrace(TRUE,                /* Enable provider */
+                         fwLogFlag,           /* filter firmware logs */
+                         TRACE_LEVEL_VERBOSE, /* retrieve all logs */
+                         &AudioDspLogControlGuid, mHandle);
 
-    if (ERROR_SUCCESS != status)
-    {
+    if (ERROR_SUCCESS != status) {
         stopLocked();
         throw Exception("Unable to enable log provider: err=" + std::to_string(status));
     }
@@ -179,8 +175,7 @@ void WppController::stopLocked()
     }
 
     ULONG status = StopTrace(mHandle, NULL, &mTraceProperties.properties);
-    if (status != ERROR_SUCCESS)
-    {
+    if (status != ERROR_SUCCESS) {
         /* Not throwing exception because nothing can be done here except logging... */
         std::cout << "Unable to stop session: err=" << status << std::endl;
     }
@@ -207,12 +202,10 @@ void WppController::cleanupOldSession()
         if (status != ERROR_SUCCESS) {
             throw Exception("Unable to stop existing session: err=" + std::to_string(status));
         }
-    }
-    else if (status != ERROR_WMI_INSTANCE_NOT_FOUND) {
+    } else if (status != ERROR_WMI_INSTANCE_NOT_FOUND) {
         throw Exception("Unable to query existing session: err=" + std::to_string(status));
     }
 }
-
 }
 }
 }

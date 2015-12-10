@@ -35,21 +35,17 @@ namespace rest
 
 void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
-    if (mResource == nullptr)
-    {
-        Response::sendHttpError(
-            HTTPResponse::HTTP_NOT_FOUND, "Resource not found: " + req.getURI(), resp);
+    if (mResource == nullptr) {
+        Response::sendHttpError(HTTPResponse::HTTP_NOT_FOUND, "Resource not found: " + req.getURI(),
+                                resp);
         return;
     }
 
     Request::Verb verb;
     try {
         verb = translateVerb(req.getMethod());
-    }
-    catch (UnknownVerbException &e)
-    {
-        Response::sendHttpError(
-            HTTPResponse::HTTPStatus::HTTP_METHOD_NOT_ALLOWED, e.what(), resp);
+    } catch (UnknownVerbException &e) {
+        Response::sendHttpError(HTTPResponse::HTTPStatus::HTTP_METHOD_NOT_ALLOWED, e.what(), resp);
         return;
     }
 
@@ -58,18 +54,14 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
 
     Resource::ResponsePtr response;
 
-    try
-    {
-        try
-        {
+    try {
+        try {
             response = mResource->handleRequest(request);
             if (response == nullptr) {
 
                 throw Response::HttpError(Response::ErrorStatus::InternalError, "Response is null");
             }
-        }
-        catch (Response::HttpError &e)
-        {
+        } catch (Response::HttpError &e) {
             /* Design is made to avoid this situation: always assert since HTTP header must have
              * not been sent already */
             ASSERT_ALWAYS(!resp.sent());
@@ -85,25 +77,19 @@ void RestResourceRequestHandler::handleRequest(HTTPServerRequest &req, HTTPServe
         // Send HTTP response header
         response->sendHttpHeader(resp);
 
-        try
-        {
+        try {
             // Send HTTP response body
             response->sendHttpBody();
-        }
-        catch (Response::HttpAbort &e)
-        {
+        } catch (Response::HttpAbort &e) {
             /* Design is made to avoid this situation: always assert since HTTP header must have
              * been sent already */
             ASSERT_ALWAYS(resp.sent());
 
             // we cannot do anything else that log the issue and abandon the client
             /** @todo Use logging instead */
-            std::cout << "Abort HTTP response on " << req.getURI() << ": "
-                << e.what() << std::endl;
+            std::cout << "Abort HTTP response on " << req.getURI() << ": " << e.what() << std::endl;
         }
-    }
-    catch (std::exception &e)
-    {
+    } catch (std::exception &e) {
         std::stringstream msg("Internal error: unexpected exception ");
         msg << typeid(e).name() << ": " << e.what();
 
@@ -128,25 +114,22 @@ Request::Verb RestResourceRequestHandler::translateVerb(const std::string &verbL
     throw UnknownVerbException("Unknown verb: " + verbLiteral);
 }
 
-HTTPRequestHandler* RequestHandlerFactory::createRequestHandler(const HTTPServerRequest &req)
+HTTPRequestHandler *RequestHandlerFactory::createRequestHandler(const HTTPServerRequest &req)
 {
     /* Resolving the resource */
     std::unique_ptr<Dispatcher::Identifiers> identifiers =
         std::make_unique<Dispatcher::Identifiers>();
-    std::shared_ptr<Resource> resource =
-        mDispatcher->resolveResource(req.getURI(), *identifiers);
+    std::shared_ptr<Resource> resource = mDispatcher->resolveResource(req.getURI(), *identifiers);
 
     /** @todo use log interface instead */
-    if (mVerbose){
-        std::cout << "RequestHandlerFactory::createRequestHandler "
-                  << req.getMethod() << " " << req.getURI() << std::endl;
+    if (mVerbose) {
+        std::cout << "RequestHandlerFactory::createRequestHandler " << req.getMethod() << " "
+                  << req.getURI() << std::endl;
     }
 
     /* Poco forces us to use operator new here: the HttpServer will take the ownership of this new
      * RestResourceRequestHandler. */
     return new RestResourceRequestHandler(resource, std::move(identifiers));
 }
-
 }
 }
-
