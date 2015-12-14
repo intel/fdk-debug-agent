@@ -124,13 +124,13 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 }
 
 DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port,
-                       const std::string &pfwConfig, bool isVerbose) try :
+                       const std::string &pfwConfig, bool isVerbose, bool validationRequested) try :
     /* Order is important! */
     mSystem(driverFactory),
     mTypeModel(createTypeModel()),
     mSystemInstance(createSystemInstance()),
     mInstanceModel(nullptr),
-    mParameterSerializer(pfwConfig),
+    mParameterSerializer(pfwConfig, validationRequested),
     mRestServer(createDispatcher(), port, isVerbose) {
     assert(mTypeModel != nullptr);
     assert(mSystemInstance != nullptr);

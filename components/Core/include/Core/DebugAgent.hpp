@@ -39,7 +39,8 @@ class DebugAgent final
 public:
     /** @throw DebugAgent::Exception */
     DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port,
-               const std::string &pfwConfig, bool serverIsVerbose = false);
+               const std::string &pfwConfig, bool serverIsVerbose = false,
+               bool validationRequested = false);
     ~DebugAgent();
 
     class Exception : public std::logic_error

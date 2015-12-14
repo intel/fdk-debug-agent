@@ -51,6 +51,7 @@ private:
     void handlePfwConfig(const std::string &name, const std::string &value);
     void handleLogControlOnly(const std::string &name, const std::string &value);
     void handleVerbose(const std::string &name, const std::string &value);
+    void handleValidation(const std::string &name, const std::string &value);
 
     struct Config
     {
@@ -59,9 +60,10 @@ private:
         std::string pfwConfig;
         bool logControlOnly;
         bool serverIsVerbose;
+        bool validationRequested;
         Config()
-            : helpRequested(false), serverPort(9090), logControlOnly(false),
-              serverIsVerbose(false){};
+            : helpRequested(false), serverPort(9090), logControlOnly(false), serverIsVerbose(false),
+              validationRequested(false){};
     };
 
     Config mConfig;

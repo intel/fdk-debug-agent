@@ -52,8 +52,10 @@ public:
     /**
      * Constructor
      * @param[in] configurationFilePath path to the XML configuration file of the pfw instance
+     * @param[in] validationRequested flag used to enable the validation of the XML configuration
+     *            files
      */
-    ParameterSerializer(const std::string configurationFilePath);
+    ParameterSerializer(const std::string configurationFilePath, bool validationRequested = false);
 
     /**
      * Destructor implementation shall not be inlined because of the use of unique_ptr on

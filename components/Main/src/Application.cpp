@@ -81,6 +81,11 @@ void Application::handleVerbose(const std::string &name, const std::string &valu
     mConfig.serverIsVerbose = true;
 }
 
+void Application::handleValidation(const std::string &name, const std::string &value)
+{
+    mConfig.validationRequested = true;
+}
+
 void Application::defineOptions(OptionSet &options)
 {
     options.addOption(Option("help", "h", "Display DebugAgent help.")
@@ -118,6 +123,12 @@ void Application::defineOptions(OptionSet &options)
             .required(false)
             .repeatable(false)
             .callback(OptionCallback<Application>(this, &Application::handleVerbose)));
+
+    options.addOption(
+        Option("validate", "x", "Validate XML files")
+            .required(false)
+            .repeatable(false)
+            .callback(OptionCallback<Application>(this, &Application::handleValidation)));
 }
 
 int Application::main(const std::vector<std::string> &)
@@ -129,7 +140,7 @@ int Application::main(const std::vector<std::string> &)
     try {
         SystemDriverFactory driverFactory(mConfig.logControlOnly);
         DebugAgent debugAgent(driverFactory, mConfig.serverPort, mConfig.pfwConfig,
-                              mConfig.serverIsVerbose);
+                              mConfig.serverIsVerbose, mConfig.validationRequested);
 
         std::cout << "DebugAgent started" << std::endl;
 

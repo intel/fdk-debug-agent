@@ -35,13 +35,24 @@ namespace debug_agent
 namespace parameterSerializer
 {
 
-ParameterSerializer::ParameterSerializer(const std::string configurationFilePath)
+ParameterSerializer::ParameterSerializer(const std::string configurationFilePath,
+                                         bool validationRequested)
     : mParameterMgrPlatformConnector(nullptr)
 {
     auto parameterMgrPlatformConnector =
         std::make_unique<CParameterMgrPlatformConnector>(configurationFilePath);
 
     std::string error;
+    if (validationRequested) {
+        if (!parameterMgrPlatformConnector->setValidateSchemasOnStart(true, error)) {
+
+            /** @todo Use log instead */
+            std::cout << "[Error] Failed to request schemas validation: " << error;
+
+            return;
+        }
+    }
+
     if (!parameterMgrPlatformConnector->start(error)) {
 
         /** @todo Use log instead */
