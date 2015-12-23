@@ -124,7 +124,35 @@ set(C_BINDINGS off CACHE BOOL "" FORCE)
 set(OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "")
 
+# will contains parameter-framework targets
+set(PFW_TARGETS CACHE INTERNAL "PFW_TARGETS")
+
+# this function adds a parameter-framework target if it is not imported
+function (add_pfw_target name)
+    get_target_property(isImported ${name} IMPORTED)
+    if (NOT ${isImported})
+        set(PFW_TARGETS ${PFW_TARGETS} ${name} CACHE INTERNAL "PFW_TARGETS")
+    endif()
+endfunction()
+
+# hooking add_library function to register parameter-framework libraries
+function (add_library name)
+  _add_library (${name} ${ARGN})
+  add_pfw_target(${name})
+endfunction ()
+
+# hooking add_executable function to register parameter-framework executables
+function (add_executable name)
+  _add_executable (${name} ${ARGN})
+  add_pfw_target(${name})
+endfunction ()
+
+# including pfw projects
 add_subdirectory("external/parameter-framework/project")
+
+# creating a custom target "all_pfw" that depends of all pfw targets
+add_custom_target(pfw_all)
+add_dependencies(pfw_all ${PFW_TARGETS})
 
 # Restore the previous value of BUILD_TESTING and CMAKE_CXX_FLAGS since we
 # overrode them for the Parameter Framework but don't want to mess up our own
