@@ -124,23 +124,13 @@ set(C_BINDINGS off CACHE BOOL "" FORCE)
 set(OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "")
 
-add_subdirectory("external/parameter-framework")
+add_subdirectory("external/parameter-framework/project")
 
 # Restore the previous value of BUILD_TESTING and CMAKE_CXX_FLAGS since we
 # overrode them for the Parameter Framework but don't want to mess up our own
 # cache.
 set(BUILD_TESTING "${OLD_BUILD_TESTING}" CACHE BOOL "" FORCE)
 set(CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}" CACHE STRING "" FORCE)
-
-#
-# Installation of shared libraries
-#
-
-if(WIN32)
-    set(LIBXML2_SHARED_LIB ${PROJECT_SOURCE_DIR}/external/libxml2/Win64/bin/libxml2.dll)
-else()
-    set(LIBXML2_SHARED_LIB ${PROJECT_SOURCE_DIR}/external/libxml2/Linux64/lib/libxml2.so)
-endif()
 
 # installing libxml2 shared library into bin/ directories
 install(FILES $<TARGET_FILE:libxml2::deployment> DESTINATION bin)
