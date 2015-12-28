@@ -106,7 +106,9 @@ public:
     template <typename SizeType, typename T>
     void readVector(std::vector<T> &vector)
     {
-        SizeType size;
+        /* Initializing size because otherwise klocwork believes that an uninitialized value is
+         * used, which is a false positive */
+        SizeType size = 0;
         /* Reading the size */
         read(size);
 
@@ -119,7 +121,9 @@ public:
 
         /* Reading each element */
         for (std::size_t i = 0; i < size; ++i) {
-            T element;
+            /* Initializing element with default values because otherwise klocwork believes that
+             * uninitialized values are used, which is a false positive */
+            T element{};
             read(element);
             vector.push_back(element);
         }

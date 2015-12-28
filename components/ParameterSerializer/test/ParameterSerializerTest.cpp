@@ -90,7 +90,7 @@ std::string fileContent(const std::string &name)
     std::string fileName = "data/FunctionalTests/http/" + name;
 
     std::ifstream file(fileName);
-    if (!file.is_open()) {
+    if (!file) { /* using operator () to check stream health */
         throw std::logic_error("Unknown file: " + fileName);
     }
 
