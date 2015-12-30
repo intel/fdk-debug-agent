@@ -194,9 +194,6 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(const R
 
 Resource::ResponsePtr ControlParametersModuleTypeResource::handleGet(const Request &request)
 {
-    /* Checking that the identifiers has been fetched */
-    uint16_t instanceId = getInstanceId(request);
-
     /* Loop through children to get Settings */
     std::map<uint32_t, std::string> children =
         getChildren(ParameterSerializer::ParameterKind::Control);

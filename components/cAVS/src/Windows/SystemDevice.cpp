@@ -83,12 +83,16 @@ void SystemDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
         throw Exception("IOControl failure: " + LastError::get());
     }
 
-    if (returnedSize > output->size()) {
-        throw Exception("IOControl response larger than buffer (" + std::to_string(returnedSize) +
-                        " while output buffer is " + std::to_string(output->size()) + ")");
-    }
+    if (output != nullptr) {
 
-    output->resize(returnedSize);
+        if (returnedSize > output->size()) {
+            throw Exception("IOControl response larger than buffer (" +
+                            std::to_string(returnedSize) + " while output buffer is " +
+                            std::to_string(output->size()) + ")");
+        }
+
+        output->resize(returnedSize);
+    }
 }
 }
 }

@@ -96,8 +96,8 @@ std::string fileContent(const std::string &name)
     std::string fileName = "data/FunctionalTests/http/" + name;
 
     std::ifstream file(fileName);
-    if (!file.is_open()) {
-        throw std::logic_error("Unknown file: " + fileName);
+    if (!file) { /* Using stream bool operator */
+        throw std::logic_error("Unable to open file: " + fileName);
     }
 
     std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
