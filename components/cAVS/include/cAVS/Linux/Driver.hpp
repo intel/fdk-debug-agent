@@ -30,7 +30,7 @@ namespace debug_agent
 {
 namespace cavs
 {
-namespace linuxx /* using 'linuxx' instead of 'linux' because 'linux' is an existing symbol */
+namespace linux
 {
 
 /**

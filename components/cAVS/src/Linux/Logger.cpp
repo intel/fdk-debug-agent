@@ -31,7 +31,7 @@ namespace debug_agent
 {
 namespace cavs
 {
-namespace linuxx
+namespace linux
 {
 
 void Logger::setParameters(const Parameters &parameters)
