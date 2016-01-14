@@ -26,7 +26,8 @@ set(TEST_SRCS
     BlockingQueueTest.cpp
     ByteStreamTest.cpp
     StringHelperTest.cpp
-    EnumHelperTest.cpp)
+    EnumHelperTest.cpp
+    StructureChangeTrackingTest.cpp)
 
 set(TEST_INCS)
 
