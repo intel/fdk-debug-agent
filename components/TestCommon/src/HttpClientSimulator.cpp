@@ -60,8 +60,10 @@ static HttpClientSimulator::Status translateStatus(HTTPResponse::HTTPStatus stat
         return HttpClientSimulator::Status::Locked;
     case HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR:
         return HttpClientSimulator::Status::InternalError;
+    default:
+        // There are around 40 different code in Poco, but only a few are expected
+        throw HttpClientSimulator::RequestFailureException(std::string("Invalid http status"));
     }
-    throw HttpClientSimulator::RequestFailureException(std::string("Invalid http status"));
 }
 
 /* Translate the HttpClientSimulator::Verb enum into Poco verb strings*/
