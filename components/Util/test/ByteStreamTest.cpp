@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -107,11 +107,14 @@ TEST_CASE("Byte stream reader")
 
 TEST_CASE("Byte stream reader : end of stream")
 {
-    Buffer v;
-    v.push_back(1); /* Adding only one byte */
+    Buffer v{1}; /* Adding only one byte */
 
     ByteStreamReader reader(v);
 
+    /* Checking end of stream exception */
     uint16_t myInt;
     CHECK_THROWS_AS(reader.read(myInt), ByteStreamReader::Exception);
+
+    /* Checking that subsequent calls to isEOS() returns true */
+    CHECK(reader.isEOS());
 }

@@ -1,7 +1,7 @@
 /*
  ********************************************************************************
  *                              INTEL CONFIDENTIAL
- *   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+ *   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
  *   The source code contained  or  described herein and all documents related to
  *   the source code ("Material") are owned by Intel Corporation or its suppliers
  *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -60,6 +60,9 @@ public:
     {
         std::size_t elementSize = sizeof(T);
         if (mIndex + elementSize > mBuffer.size()) {
+            /* Setting index to buffer size, in this way subsequent calls to isEOS() will return
+             * true */
+            mIndex = mBuffer.size();
             throw Exception("Read failed: end of stream reached");
         }
         T *valuePtr = reinterpret_cast<T *>(&mBuffer[mIndex]);
