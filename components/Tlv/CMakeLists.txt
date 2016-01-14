@@ -41,5 +41,8 @@ set_common_settings(Tlv)
 # exporting "include" directory
 target_include_directories(Tlv PUBLIC "include")
 
+# dependent library
+target_link_libraries(Tlv Util)
+
 # Adding test
 add_subdirectory("test")

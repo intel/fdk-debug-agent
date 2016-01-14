@@ -28,6 +28,7 @@
 #include "Tlv/TlvVectorWrapper.hpp"
 
 using namespace debug_agent::tlv;
+using namespace debug_agent::util;
 
 struct HelloValueType
 {
@@ -38,6 +39,12 @@ struct HelloValueType
     {
         return whoTalk == other.whoTalk && whoListen == other.whoListen;
     }
+
+    void fromStream(ByteStreamReader &reader)
+    {
+        reader.read(whoTalk);
+        reader.read(whoListen);
+    }
 };
 
 struct TheValueType
@@ -45,6 +52,8 @@ struct TheValueType
     int itMustBe42;
 
     bool operator==(const TheValueType &other) const { return itMustBe42 == other.itMustBe42; }
+
+    void fromStream(ByteStreamReader &reader) { reader.read(itMustBe42); }
 };
 
 struct WorldValueType
@@ -58,6 +67,14 @@ struct WorldValueType
     {
         return plankRandomGeneratorSeed == other.plankRandomGeneratorSeed &&
                universeId == other.universeId && galaxyId == other.galaxyId && planetId == planetId;
+    }
+
+    void fromStream(ByteStreamReader &reader)
+    {
+        reader.read(plankRandomGeneratorSeed);
+        reader.read(universeId);
+        reader.read(galaxyId);
+        reader.read(planetId);
     }
 };
 

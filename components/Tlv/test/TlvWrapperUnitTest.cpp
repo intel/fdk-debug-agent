@@ -20,9 +20,11 @@
 ********************************************************************************
 */
 #include "Tlv/TlvWrapper.hpp"
+#include "Util/Buffer.hpp"
 #include "catch.hpp"
 
 using namespace debug_agent::tlv;
+using namespace debug_agent::util;
 
 struct ATestValueType
 {
@@ -35,6 +37,13 @@ struct ATestValueType
         return anIntField == other.anIntField && aCharField == other.aCharField &&
                aShortField == other.aShortField;
     }
+
+    void fromStream(ByteStreamReader &reader)
+    {
+        reader.read(anIntField);
+        reader.read(aCharField);
+        reader.read(aShortField);
+    }
 };
 
 TEST_CASE("TlvWrapper", "[WrapperRead]")
@@ -44,14 +53,13 @@ TEST_CASE("TlvWrapper", "[WrapperRead]")
     TlvWrapper<ATestValueType> tlvWrapper(testValue, testValueIsValid);
 
     CHECK(testValueIsValid == false);
-    CHECK(tlvWrapper.isValidSize(sizeof(ATestValueType)) == true);
-    CHECK(tlvWrapper.isValidSize(sizeof(ATestValueType) + 1) == false);
-    CHECK(tlvWrapper.isValidSize(sizeof(ATestValueType) - 1) == false);
+
+    Buffer buffer{210, 4, 0, 0, 56, 21, 3};
 
     ATestValueType valueToBeRead = {1234, 56, 789};
     const char *rawValue = reinterpret_cast<const char *>(&valueToBeRead);
 
-    tlvWrapper.readFrom(rawValue, sizeof(ATestValueType));
+    tlvWrapper.readFrom(buffer);
     CHECK(testValue == valueToBeRead);
     CHECK(testValueIsValid == true);
 

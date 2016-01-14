@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Tlv/TlvWrapperInterface.hpp"
+#include "Util/ByteStreamReader.hpp"
 #include <algorithm>
 
 namespace debug_agent
@@ -44,21 +45,19 @@ public:
      */
     TlvWrapper(ValueType &value, bool &valid) : mValue(value), mValid(valid) { invalidate(); }
 
-    virtual bool isValidSize(size_t binaryValueSize) const NOEXCEPT override
+    void readFrom(const util::Buffer &binarySource) override
     {
-        return binaryValueSize == sizeof(ValueType);
-    }
+        try {
+            util::ByteStreamReader reader(binarySource);
+            reader.read(mValue);
 
-    virtual void readFrom(const char *binarySource, size_t binaryValueSize) override
-    {
-        if (!isValidSize(binaryValueSize)) {
-
-            throw Exception(std::string("Invalid binary size (") + std::to_string(binaryValueSize) +
-                            " instead of " + std::to_string(sizeof(ValueType)) +
-                            " bytes) for TLV value read");
+            if (!reader.isEOS()) {
+                throw Exception("The value buffer has not been fully consumed");
+            }
+            mValid = true;
+        } catch (util::ByteStreamReader::Exception &e) {
+            throw Exception("Can not read tlv value: " + std::string(e.what()));
         }
-        mValue = *(reinterpret_cast<const ValueType *>(binarySource));
-        mValid = true;
     }
 
     virtual void invalidate() NOEXCEPT override { mValid = false; }

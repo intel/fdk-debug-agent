@@ -156,12 +156,8 @@ void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandl
     bigCmdModuleAccessIoctl(true, driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
                             toParameterId(parameterId), suppliedBuffer, returnedBuffer);
 
-    /* Retrieving properties */
-    std::size_t tlvBufferSize = returnedBuffer.size();
-    const char *tlvBuffer = reinterpret_cast<const char *>(returnedBuffer.data());
-
     /* Now parse the TLV answer */
-    tlv::TlvUnpack unpack(responseHandler, tlvBuffer, tlvBufferSize);
+    tlv::TlvUnpack unpack(responseHandler, returnedBuffer);
 
     bool end = false;
     do {

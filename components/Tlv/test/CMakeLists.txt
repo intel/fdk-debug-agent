@@ -38,7 +38,5 @@ set_common_settings(TlvUnitTest)
 # external libraries
 link_catch(TlvUnitTest)
 
-# Binding with Tlv library
-target_link_libraries(TlvUnitTest Tlv)
-# Binding with test common
-target_link_libraries(TlvUnitTest TestCommon)
+# dependent libraries
+target_link_libraries(TlvUnitTest Tlv Util TestCommon)

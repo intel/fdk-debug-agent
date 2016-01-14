@@ -27,77 +27,60 @@ namespace debug_agent
 namespace tlv
 {
 
-TlvUnpack::TlvUnpack(const TlvResponseHandlerInterface &responseHandler, const char *tlvBuffer,
-                     std::size_t tlvBufferSize)
-    : mResponseHandler(responseHandler), mTlvBuffer(tlvBuffer), mTlvBufferSize(tlvBufferSize),
-      mReadIndex(0)
+TlvUnpack::TlvUnpack(const TlvResponseHandlerInterface &responseHandler, const util::Buffer &buffer)
+    : mResponseHandler(responseHandler), mBufferReader(buffer)
 {
-    if (mTlvBuffer == nullptr) {
-
-        throw Exception("Null pointer");
-    }
     mResponseHandler.getTlvDictionary().invalidateAll();
 }
 
 bool TlvUnpack::readNext()
 {
-    uint32_t tagFromBuffer;
-    uint32_t lengthFromBuffer;
-
-    if (mReadIndex >= mTlvBufferSize) {
-
+    if (mBufferReader.isEOS()) {
         return false;
     }
 
-    if (!popUint32(tagFromBuffer) || !popUint32(lengthFromBuffer)) {
+    util::Buffer valueBuffer;
+    uint32_t tagFromBuffer;
 
-        // Nothing more can be read from buffer
-        mReadIndex = mTlvBufferSize;
-        throw Exception("Incomplete TLV at end of buffer");
+    try {
+        uint32_t lengthFromBuffer;
+        mBufferReader.read(tagFromBuffer);
+        mBufferReader.read(lengthFromBuffer);
+
+        /* It is dangerous to resize the buffer to "lengthFromBuffer", because this size is
+         * provided by an external component, and if this size is huge this will lead to memory
+         * allocation failure.
+         *
+         * To avoid this allocation, reading one byte at time, in this way end of stream
+         * will be reached before memory saturation.
+         */
+        for (std::size_t i = 0; i < lengthFromBuffer; i++) {
+            uint8_t byte;
+            mBufferReader.read(byte);
+            valueBuffer.push_back(byte);
+        }
+    } catch (util::ByteStreamReader::Exception &e) {
+        throw Exception("Unable to read tlv: " + std::string(e.what()));
     }
-
-    unsigned int tag = static_cast<unsigned int>(tagFromBuffer);
-    std::size_t length = static_cast<std::size_t>(lengthFromBuffer);
 
     // Is Tag in the dictionary ?
-    TlvWrapperInterface *tlvWrapper = mResponseHandler.getTlvDictionary().getTlvWrapperForTag(tag);
-
+    TlvWrapperInterface *tlvWrapper =
+        mResponseHandler.getTlvDictionary().getTlvWrapperForTag(tagFromBuffer);
     if (tlvWrapper == nullptr) {
 
-        // Tag is unknown: ignore this value from buffer
-        mReadIndex += length;
-        throw Exception("Cannot parse unknown tag " + std::to_string(tag));
+        // Tag is unknown
+        throw Exception("Cannot parse unknown tag " + std::to_string(tagFromBuffer));
     }
+
     // Read value
-    if (mTlvBufferSize - mReadIndex >= length) {
-
-        try {
-            tlvWrapper->readFrom(mTlvBuffer + mReadIndex, length);
-        } catch (TlvWrapperInterface::Exception &e) {
-            throw Exception("Error reading value for tag " + std::to_string(tag) + ": " + e.what());
-        }
-        mReadIndex += length;
-    } else {
-
-        mReadIndex += length;
-        throw Exception("Incomplete value for tag " + std::to_string(tag));
+    try {
+        tlvWrapper->readFrom(valueBuffer);
+    } catch (TlvWrapperInterface::Exception &e) {
+        throw Exception("Error reading value for tag " + std::to_string(tagFromBuffer) + ": " +
+                        std::string(e.what()));
     }
 
     return true;
-}
-
-bool TlvUnpack::popUint32(uint32_t &value)
-{
-    if (mTlvBufferSize - mReadIndex >= sizeof(uint32_t)) {
-
-        value = *(reinterpret_cast<const uint32_t *>(mTlvBuffer + mReadIndex));
-
-        mReadIndex += sizeof(uint32_t);
-        return true;
-    } else {
-
-        return false;
-    }
 }
 }
 }

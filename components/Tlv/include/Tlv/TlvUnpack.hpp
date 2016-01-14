@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Tlv/TlvResponseHandlerInterface.hpp"
+#include "Util/ByteStreamReader.hpp"
 #include <inttypes.h>
 #include <string>
 #include <stdexcept>
@@ -52,8 +53,7 @@ public:
      * @param[in] tlvBufferSize The TLV list buffer size
      * @throw TlvUnpack::Exception
      */
-    TlvUnpack(const TlvResponseHandlerInterface &responseHandler, const char *tlvBuffer,
-              std::size_t tlvBufferSize);
+    TlvUnpack(const TlvResponseHandlerInterface &responseHandler, const util::Buffer &buffer);
 
     /**
      * Read the next value in the TLV buffer. This method should be called until it returns false.
@@ -66,13 +66,8 @@ public:
     bool readNext();
 
 private:
-    bool popUint32(uint32_t &value);
-
     const TlvResponseHandlerInterface &mResponseHandler;
-    const char *const mTlvBuffer;
-    const std::size_t mTlvBufferSize;
-
-    std::size_t mReadIndex;
+    util::ByteStreamReader mBufferReader;
 };
 }
 }

@@ -23,17 +23,14 @@
 #include "catch.hpp"
 
 using namespace debug_agent::tlv;
+using namespace debug_agent::util;
 
 TEST_CASE("TlvVoidWrapper", "[WrapperRead]")
 {
     TlvVoidWrapper tlvVoidWrapper;
 
-    /* Check the void wrapper accepts any size */
-    CHECK(tlvVoidWrapper.isValidSize(std::numeric_limits<size_t>::max()) == true);
-    CHECK(tlvVoidWrapper.isValidSize(std::numeric_limits<size_t>::min()) == true);
-    CHECK(tlvVoidWrapper.isValidSize(42) == true);
-
-    CHECK_NOTHROW(tlvVoidWrapper.readFrom(nullptr, 0));
+    /* Check the void wrapper accepts any buffer size, including empty ones */
+    CHECK_NOTHROW(tlvVoidWrapper.readFrom(Buffer()));
 
     CHECK_NOTHROW(tlvVoidWrapper.invalidate());
 }

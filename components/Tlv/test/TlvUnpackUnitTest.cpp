@@ -21,23 +21,20 @@
 */
 #include "TlvTestLanguage.hpp"
 #include "Tlv/TlvUnpack.hpp"
+#include "Util/Buffer.hpp"
 #include "TestCommon/TestHelpers.hpp"
 #include "catch.hpp"
+
+using namespace debug_agent::util;
 
 TEST_CASE("TlvUnpack", "[ReadBuffer]")
 {
     TlvTestLanguage testTlvLanguage;
 
-    SECTION ("Null pointer") {
-
-        CHECK_THROWS_AS_MSG(TlvUnpack unpacker(testTlvLanguage, nullptr, 0), TlvUnpack::Exception,
-                            "Null pointer");
-    }
-
     SECTION ("Read from empty buffer") {
 
-        char buffer[1];
-        TlvUnpack unpacker(testTlvLanguage, buffer, 0);
+        Buffer buffer;
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == false);
 
@@ -48,21 +45,17 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
 
     SECTION ("Read 1 TLV from buffer") {
 
-        // Construct a test TLV list buffer
         HelloValueType helloValue{0x1234, 0x5678};
-        uint32_t tag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t length = static_cast<uint32_t>(sizeof(HelloValueType));
 
-        const size_t tlvListBufferSize = sizeof(tag) + sizeof(length) + sizeof(HelloValueType);
-        char tlvListBuffer[tlvListBufferSize];
-
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[0]) = tag;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[sizeof(tag)]) = length;
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[sizeof(tag) + sizeof(length)]) =
-            helloValue;
+        // Construct a test TLV list buffer
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                        // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                        // HelloValueType size
+            0x34, 0x12, 0x00, 0x00, 0x78, 0x56, 0x00, 0x00 // HelloValueType value
+        };
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == true);
         CHECK(unpacker.readNext() == false);
@@ -75,26 +68,19 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
 
     SECTION ("Read from buffer including invalid tag") {
 
-        // Construct a test TLV list buffer
+        // Construct a test TLV list buffer with an invalid tag
+        Buffer buffer{
+            0xFF, 0xFF, 0xFF, 0xFF,                        // invalid tag
+            8,    0x00, 0x00, 0x00,                        // size
+            0x34, 0x12, 0x00, 0x00, 0x78, 0x56, 0x00, 0x00 // value
+        };
         HelloValueType helloValue{0x1234, 0x5678};
-        uint32_t tag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t length = static_cast<uint32_t>(sizeof(HelloValueType));
-
-        const size_t tlvListBufferSize = sizeof(tag) + sizeof(length) + sizeof(HelloValueType);
-        char tlvListBuffer[tlvListBufferSize];
-
-        // Let's change the HELLO tag by 0xFFFFFFFF for fun!
-        uint32_t badTag = 0xFFFFFFFF;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[0]) = badTag;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[sizeof(tag)]) = length;
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[sizeof(tag) + sizeof(length)]) =
-            helloValue;
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK_THROWS_AS_MSG(unpacker.readNext(), TlvUnpack::Exception,
-                            "Cannot parse unknown tag " + std::to_string(badTag));
+                            "Cannot parse unknown tag " + std::to_string(0xFFFFFFFF));
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == false);
@@ -104,33 +90,24 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
 
     SECTION ("Read 2 TLV from buffer") {
 
-        // Construct a test TLV list buffer
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                         // HelloValueType size
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
+
+            230,  182,  1,    0x00, // WorldValueType tag
+            21,   0x00, 0x00, 0x00, // WorldValueType size
+            0,                      // WorldValueType plankRandomGeneratorSeed
+            42,   0,    0,    0,    // WorldValueType universeId
+            0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, // WorldValueType galaxyId
+            0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11  // WorldValueType planetId
+        };
+
         HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-        WorldValueType worldValue{0, 42, 1268469841515, 687684186186};
-        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-        uint32_t wLength = static_cast<uint32_t>(sizeof(WorldValueType));
-
-        const size_t tlvListBufferSize = sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-                                         sizeof(wTag) + sizeof(wLength) + sizeof(WorldValueType);
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
-        index += sizeof(wTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wLength;
-        index += sizeof(wLength);
-        *reinterpret_cast<WorldValueType *>(&tlvListBuffer[index]) = worldValue;
+        WorldValueType worldValue{0, 42, 0x0102030405060708, 0x1112131415161718};
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == true);
         CHECK(unpacker.readNext() == true);
@@ -147,32 +124,19 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
 
         // Construct a test TLV list buffer
         HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
 
-        long badValue = 0;
-        uint32_t bTag = static_cast<uint32_t>(TlvTestLanguage::Tags::BadTag);
-        uint32_t bLength = static_cast<uint32_t>(sizeof(long));
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                         // HelloValueType size
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
 
-        const size_t tlvListBufferSize = sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-                                         sizeof(bTag) + sizeof(bLength) + sizeof(badValue);
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = bTag;
-        index += sizeof(bTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = bLength;
-        index += sizeof(bLength);
-        *reinterpret_cast<long *>(&tlvListBuffer[index]) = badValue;
+            0xEF, 0xBE, 0xAD, 0xBA,                        // TlvTestLanguage::Tags::BadTag
+            8,    0x00, 0x00, 0x00,                        // size
+            0x34, 0x12, 0x00, 0x00, 0x78, 0x56, 0x00, 0x00 // value
+        };
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == true);
         CHECK(unpacker.readNext() == true);
@@ -186,53 +150,34 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
 
     SECTION ("Read 3 TLV from buffer, including an array one") {
 
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                         // HelloValueType size
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
+
+            24,   0x00, 0x00, 0x00, // TheValueType tag
+            20,   0x00, 0x00, 0x00, // TheValueType size
+            1,    0,    0,    0,    // TheValueType value 1
+            2,    0,    0,    0,    // TheValueType value 2
+            3,    0,    0,    0,    // TheValueType value 3
+            4,    0,    0,    0,    // TheValueType value 4
+            5,    0,    0,    0,    // TheValueType value 5
+
+            230,  182,  1,    0x00, // WorldValueType tag
+            21,   0x00, 0x00, 0x00, // WorldValueType size
+            0,                      // WorldValueType plankRandomGeneratorSeed
+            42,   0,    0,    0,    // WorldValueType universeId
+            0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, // WorldValueType galaxyId
+            0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11  // WorldValueType planetId
+        };
+
         // Construct a test TLV list buffer
         HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-
-        const size_t nbThe = 5;
         std::vector<TheValueType> theValues{{1}, {2}, {3}, {4}, {5}};
-        uint32_t tTag = static_cast<uint32_t>(TlvTestLanguage::Tags::The);
-        uint32_t tLength = static_cast<uint32_t>(sizeof(TheValueType) * theValues.size());
-        REQUIRE(theValues.size() == nbThe);
-
-        WorldValueType worldValue{0, 42, 1268469841515, 687684186186};
-        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-        uint32_t wLength = static_cast<uint32_t>(sizeof(WorldValueType));
-
-        const size_t tlvListBufferSize = sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-                                         sizeof(tTag) + sizeof(tLength) +
-                                         sizeof(TheValueType) * nbThe + sizeof(wTag) +
-                                         sizeof(wLength) + sizeof(WorldValueType);
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = tTag;
-        index += sizeof(tTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = tLength;
-        index += sizeof(tLength);
-        for (auto &aTheValue : theValues) {
-
-            *reinterpret_cast<TheValueType *>(&tlvListBuffer[index]) = aTheValue;
-            index += sizeof(aTheValue);
-        }
-
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
-        index += sizeof(wTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wLength;
-        index += sizeof(wLength);
-        *reinterpret_cast<WorldValueType *>(&tlvListBuffer[index]) = worldValue;
+        WorldValueType worldValue{0, 42, 0x0102030405060708, 0x1112131415161718};
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == true);
         CHECK(unpacker.readNext() == true);
@@ -249,53 +194,30 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
 
     SECTION ("Read 3 TLV from buffer, including multiple 0 sizes") {
 
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                         // HelloValueType size
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
+
+            24,   0x00, 0x00, 0x00, // TheValueType tag
+            0x0,  0x00, 0x00, 0x00, // TheValueType size
+
+            230,  182,  1,    0x00, // WorldValueType tag
+            0x00, 0x00, 0x00, 0x00, // WorldValueType ize
+        };
+
         // Construct a test TLV list buffer
         HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-
-        uint32_t tTag = static_cast<uint32_t>(TlvTestLanguage::Tags::The);
-        uint32_t tLength = 0;
-
-        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-        uint32_t wLength = 0;
-
-        const size_t tlvListBufferSize = sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-                                         sizeof(tTag) + sizeof(tLength) + sizeof(wTag) +
-                                         sizeof(wLength);
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = tTag;
-        index += sizeof(tTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = tLength;
-        index += sizeof(tLength);
-
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
-        index += sizeof(wTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wLength;
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == true);
-        CHECK_THROWS_AS_MSG(unpacker.readNext(), TlvUnpack::Exception,
-                            "Error reading value for tag " + std::to_string(tTag) +
-                                ": Invalid binary size (" + std::to_string(tLength) +
-                                " instead of multiple of " + std::to_string(sizeof(TheValueType)) +
-                                " bytes) for TLV value read");
-        CHECK_THROWS_AS_MSG(unpacker.readNext(), TlvUnpack::Exception,
-                            "Error reading value for tag " + std::to_string(wTag) +
-                                ": Invalid binary size (" + std::to_string(wLength) +
-                                " instead of " + std::to_string(sizeof(WorldValueType)) +
-                                " bytes) for TLV value read");
+        CHECK(unpacker.readNext());
+        CHECK_THROWS_AS_MSG(
+            unpacker.readNext(), TlvUnpack::Exception,
+            "Error reading value for "
+            "tag 112358: Can not read tlv value: Read failed: end of stream reached");
 
         CHECK(unpacker.readNext() == false);
 
@@ -306,41 +228,29 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
     }
 
     SECTION ("Read from buffer including bad size as last element") {
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                         // HelloValueType size
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
+
+            230,  182,  1,    0x00, // WorldValueType tag
+            24,   0x00, 0x00, 0x00, // WorldValueType wrong size: size + 3
+            0,                      // WorldValueType plankRandomGeneratorSeed
+            42,   0,    0,    0,    // WorldValueType universeId
+            0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, // WorldValueType galaxyId
+            0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11  // WorldValueType planetId
+        };
 
         // Construct a test TLV list buffer
         HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-        WorldValueType worldValue{0, 42, 1268469841515, 687684186186};
-        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-        uint32_t wLength = static_cast<uint32_t>(sizeof(WorldValueType));
-
-        // Let's change the WOLRD tag length value for fun!
-        wLength += 3;
-
-        const size_t tlvListBufferSize = sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-                                         sizeof(wTag) + sizeof(wLength) + sizeof(WorldValueType);
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
-        index += sizeof(wTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wLength;
-        index += sizeof(wLength);
-        *reinterpret_cast<WorldValueType *>(&tlvListBuffer[index]) = worldValue;
+        WorldValueType worldValue{0, 42, 0x0102030405060708, 0x1112131415161718};
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == true);
         CHECK_THROWS_AS_MSG(unpacker.readNext(), TlvUnpack::Exception,
-                            "Incomplete value for tag " + std::to_string(wTag));
+                            "Unable to read tlv: Read failed: end of stream reached");
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
@@ -352,41 +262,25 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
     SECTION ("Read from buffer including bad size as middle element") {
 
         // Construct a test TLV list buffer
-        HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-        WorldValueType worldValue{0, 42, 1268469841515, 687684186186};
-        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-        uint32_t wLength = static_cast<uint32_t>(sizeof(WorldValueType));
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            11,   0x00, 0x00, 0x00,                         // HelloValueType wrong size : size + 3
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
 
-        // Let's change the HELLO tag length value for fun!
-        hLength += 3;
-
-        const size_t tlvListBufferSize = sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-                                         sizeof(wTag) + sizeof(wLength) + sizeof(WorldValueType);
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
-        index += sizeof(wTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wLength;
-        index += sizeof(wLength);
-        *reinterpret_cast<WorldValueType *>(&tlvListBuffer[index]) = worldValue;
+            230,  182,  1,    0x00, // WorldValueType tag
+            21,   0x00, 0x00, 0x00, // WorldValueType size
+            0,                      // WorldValueType plankRandomGeneratorSeed
+            42,   0,    0,    0,    // WorldValueType universeId
+            0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, // WorldValueType galaxyId
+            0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11  // WorldValueType planetId
+        };
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
-        CHECK_THROWS_AS_MSG(unpacker.readNext(), TlvUnpack::Exception,
-                            "Error reading value for tag " + std::to_string(hTag) +
-                                ": Invalid binary size (" + std::to_string(hLength) +
-                                " instead of " + std::to_string(sizeof(HelloValueType)) +
-                                " bytes) for TLV value read");
+        CHECK_THROWS_AS_MSG(
+            unpacker.readNext(), TlvUnpack::Exception,
+            "Error reading value for tag 54: The value buffer has not been fully consumed");
 
         // Obviously because of the invalid length, the next read will fail because of the random
         // tag value:
@@ -401,36 +295,24 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
     SECTION ("Read from buffer with last TLV incomplete: missing value part") {
 
         // Construct a test TLV list buffer
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                         // HelloValueType size
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
+
+            230,  182,  1,    0x00, // WorldValueType tag
+            21,   0x00, 0x00, 0x00, // WorldValueType size
+            // missing WorldValueType value
+        };
+
         HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-        WorldValueType worldValue{0, 42, 1268469841515, 687684186186};
-        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-        uint32_t wLength = static_cast<uint32_t>(sizeof(WorldValueType));
-
-        // Let's remove the WORLD tag value for fun!
-        const size_t tlvListBufferSize = sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) +
-                                         sizeof(wTag) +
-                                         sizeof(wLength) /*+ sizeof(WorldValueType)*/;
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
-        index += sizeof(wTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wLength;
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
-        CHECK(unpacker.readNext() == true);
+        CHECK(unpacker.readNext());
         CHECK_THROWS_AS_MSG(unpacker.readNext(), TlvUnpack::Exception,
-                            "Incomplete value for tag " + std::to_string(wTag));
+                            "Unable to read tlv: Read failed: end of stream reached");
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
@@ -440,33 +322,24 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
     }
 
     SECTION ("Read from buffer with last TLV incomplete: missing value and length") {
-
         // Construct a test TLV list buffer
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                         // HelloValueType size
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
+
+            230,  182,  1,    0x00, //  WorldValueTypetag
+            // missing WorldValueType length and value
+        };
+
         HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
-
-        // Let's remove the WORLD tag value and length for fun!
-        const size_t tlvListBufferSize =
-            sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) + sizeof(wTag);
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
 
         // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == true);
         CHECK_THROWS_AS_MSG(unpacker.readNext(), TlvUnpack::Exception,
-                            "Incomplete TLV at end of buffer");
+                            "Unable to read tlv: Read failed: end of stream reached");
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);
@@ -476,34 +349,22 @@ TEST_CASE("TlvUnpack", "[ReadBuffer]")
     }
 
     SECTION ("Read from buffer with last TLV incomplete: missing tag part and value and length") {
-
         // Construct a test TLV list buffer
+        Buffer buffer{
+            54,   0x00, 0x00, 0x00,                         // HelloValueType tag
+            8,    0x00, 0x00, 0x00,                         // HelloValueType size
+            0xAD, 0xDE, 0x00, 0x00, 0xEF, 0xBE, 0x00, 0x00, // HelloValueType value
+
+            230,  182 // incomplete tag
+        };
+
         HelloValueType helloValue{0xDEAD, 0xBEEF};
-        uint32_t hTag = static_cast<uint32_t>(TlvTestLanguage::Tags::Hello);
-        uint32_t hLength = static_cast<uint32_t>(sizeof(HelloValueType));
-        uint32_t wTag = static_cast<uint32_t>(TlvTestLanguage::Tags::World);
 
-        // Let's remove the WORLD tag value and length for fun!
-        const size_t tlvListBufferSize =
-            sizeof(hTag) + sizeof(hLength) + sizeof(HelloValueType) + sizeof(wTag);
-        char tlvListBuffer[tlvListBufferSize];
-
-        size_t index = 0;
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hTag;
-        index += sizeof(hTag);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = hLength;
-        index += sizeof(hLength);
-        *reinterpret_cast<HelloValueType *>(&tlvListBuffer[index]) = helloValue;
-        index += sizeof(helloValue);
-        *reinterpret_cast<uint32_t *>(&tlvListBuffer[index]) = wTag;
-
-        // Remove 2 bytes in buffer size: tag WORLD will be incomplete
-        // Now test the unpacker
-        TlvUnpack unpacker(testTlvLanguage, tlvListBuffer, tlvListBufferSize - 2);
+        TlvUnpack unpacker(testTlvLanguage, buffer);
 
         CHECK(unpacker.readNext() == true);
         CHECK_THROWS_AS_MSG(unpacker.readNext(), TlvUnpack::Exception,
-                            "Incomplete TLV at end of buffer");
+                            "Unable to read tlv: Read failed: end of stream reached");
         CHECK(unpacker.readNext() == false);
 
         CHECK(testTlvLanguage.isHelloValid == true);

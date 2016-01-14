@@ -20,6 +20,7 @@
 ********************************************************************************
 */
 #pragma once
+#include "Util/Buffer.hpp"
 #include <cstddef>
 #include <stdexcept>
 
@@ -50,20 +51,12 @@ public:
     };
 
     /**
-     * @param[in] binaryValueSize a binary size to be validated
-     * @return true if the binary value size is valid for the shadow variable
-     */
-    virtual bool isValidSize(size_t binaryValueSize) const NOEXCEPT = 0;
-
-    /**
      * Read the value from the binary source provided and reflect it to the shadow runtime variable.
      * The caller must ensure there are enough chars from binarySource to read the complete value.
-     * @param[in] binarySource the memory from which the value will be read
-     * @param[in] binaryValueSize the binary size of the value to be read
+     * @param[in] binarySource the memory buffer from which the value will be read
      * @throw TlvWrapperInterface::Exception
-     * @see isValidSize()
      */
-    virtual void readFrom(const char *binarySource, size_t binaryValueSize) = 0;
+    virtual void readFrom(const util::Buffer &binarySource) = 0;
 
     /**
      * Invalidate the shadow variable.

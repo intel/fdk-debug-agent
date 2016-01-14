@@ -39,9 +39,7 @@ class TlvVoidWrapper final : public TlvWrapperInterface
 public:
     TlvVoidWrapper() {}
 
-    virtual bool isValidSize(size_t binaryValueSize) const NOEXCEPT override { return true; }
-
-    virtual void readFrom(const char *, size_t) override {}
+    void readFrom(const util::Buffer &binarySource) override {}
 
     virtual void invalidate() NOEXCEPT override {}
 };

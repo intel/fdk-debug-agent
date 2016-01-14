@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Tlv/TlvWrapperInterface.hpp"
+#include "Util/ByteStreamReader.hpp"
 #include <algorithm>
 #include <vector>
 
@@ -46,23 +47,19 @@ public:
      */
     TlvVectorWrapper(std::vector<ValueType> &values) : mValues(values) { invalidate(); }
 
-    virtual bool isValidSize(size_t binaryValueSize) const NOEXCEPT override
+    void readFrom(const util::Buffer &binarySource) override
     {
-        return ((binaryValueSize % sizeof(ValueType)) == 0) && (binaryValueSize != 0);
-    }
-
-    virtual void readFrom(const char *binarySource, size_t binaryValueSize) override
-    {
-        if (!isValidSize(binaryValueSize)) {
-
-            throw Exception(std::string("Invalid binary size (") + std::to_string(binaryValueSize) +
-                            " instead of multiple of " + std::to_string(sizeof(ValueType)) +
-                            " bytes) for TLV value read");
+        mValues.clear();
+        try {
+            util::ByteStreamReader reader(binarySource);
+            while (!reader.isEOS()) {
+                ValueType value;
+                reader.read(value);
+                mValues.push_back(value);
+            }
+        } catch (util::ByteStreamReader::Exception &e) {
+            throw Exception("Can not read array element: " + std::string(e.what()));
         }
-        size_t nbElements = binaryValueSize / sizeof(ValueType);
-        const ValueType *firstElement = reinterpret_cast<const ValueType *>(binarySource);
-
-        mValues.assign(firstElement, firstElement + nbElements);
     }
 
     virtual void invalidate() NOEXCEPT override { mValues.clear(); }

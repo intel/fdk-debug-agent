@@ -23,6 +23,7 @@
 #include "catch.hpp"
 
 using namespace debug_agent::tlv;
+using namespace debug_agent::util;
 
 struct ATestValueType
 {
@@ -35,6 +36,13 @@ struct ATestValueType
         return anIntField == other.anIntField && aCharField == other.aCharField &&
                aShortField == other.aShortField;
     }
+
+    void fromStream(ByteStreamReader &reader)
+    {
+        reader.read(anIntField);
+        reader.read(aCharField);
+        reader.read(aShortField);
+    }
 };
 
 TEST_CASE("TlvVectorWrapper", "[VectorWrapperRead]")
@@ -44,19 +52,13 @@ TEST_CASE("TlvVectorWrapper", "[VectorWrapperRead]")
     TlvVectorWrapper<ATestValueType> tlvVectorWrapper(testValue);
 
     CHECK(testValue.size() == 0);
-    CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType)) == true);
-    CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType) + 1) == false);
-    CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType) - 1) == false);
 
-    CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType) * 2) == true);
-    CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType) * 2 + 1) == false);
-    CHECK(tlvVectorWrapper.isValidSize(sizeof(ATestValueType) * 2 - 1) == false);
+    Buffer buffer = {210, 4, 0, 0, 56, 21, 3, 219, 3, 0, 0, 65, 225, 16, 108, 21, 0, 0, 47, 242, 2};
 
     std::vector<ATestValueType> valueToBeRead;
     valueToBeRead = {{1234, 56, 789}, {987, 65, 4321}, {5484, 47, 754}};
-    const char *rawValue = reinterpret_cast<const char *>(valueToBeRead.data());
 
-    tlvVectorWrapper.readFrom(rawValue, sizeof(ATestValueType) * valueToBeRead.size());
+    tlvVectorWrapper.readFrom(buffer);
 
     CHECK(testValue == valueToBeRead);
 
