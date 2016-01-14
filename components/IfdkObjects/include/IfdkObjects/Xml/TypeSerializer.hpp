@@ -50,7 +50,7 @@ private:
     virtual void enter(const type::System &instance) override;
     virtual void enter(const type::Service &instance) override;
     virtual void enter(const type::Categories &instance) override;
-    virtual void enter(const type::Ref &instance, bool isConcrete);
+    virtual void enter(const type::Ref &instance, bool isConcrete) override;
     virtual void enter(const type::TypeRef &instance) override;
     virtual void enter(const type::ComponentRef &instance) override;
     virtual void enter(const type::ServiceRef &instance) override;
