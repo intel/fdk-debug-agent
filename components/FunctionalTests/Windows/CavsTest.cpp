@@ -155,7 +155,7 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
 {
     std::vector<dsp_fw::ModuleInstanceProps> moduleInstances;
     std::vector<dsp_fw::GatewayProps> gateways;
-    std::vector<uint32_t> pipelineIds;
+    std::vector<dsp_fw::PipeLineIdType> pipelineIds;
     std::vector<dsp_fw::PplProps> pipelines;
     std::vector<dsp_fw::SchedulersInfo> schedulers;
 
@@ -172,15 +172,17 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
                                        pipelineIds);
 
     for (auto &pipeline : pipelines) {
-        commands.addGetPipelinePropsCommand(
-            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, pipeline.id, pipeline);
+        commands.addGetPipelinePropsCommand(true, STATUS_SUCCESS,
+                                            dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                            dsp_fw::PipeLineIdType{pipeline.id}, pipeline);
     }
 
     /* Schedulers */
     uint32_t coreId = 0;
     for (auto &scheduler : schedulers) {
-        commands.addGetSchedulersInfoCommand(
-            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, coreId++, scheduler);
+        commands.addGetSchedulersInfoCommand(true, STATUS_SUCCESS,
+                                             dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                             dsp_fw::CoreId{coreId++}, scheduler);
     }
 
     /* Module instances */

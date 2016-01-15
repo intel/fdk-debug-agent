@@ -151,7 +151,7 @@ public:
      */
     void addGetPipelineListCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
                                    dsp_fw::IxcStatus returnedFirmwareStatus, uint32_t maxPplCount,
-                                   const std::vector<uint32_t> &pipelineIds);
+                                   const std::vector<dsp_fw::PipeLineIdType> &pipelineIds);
 
     /** Add a get pipeline props command.
      *
@@ -169,7 +169,8 @@ public:
      * @throw Device::Exception
      */
     void addGetPipelinePropsCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-                                    dsp_fw::IxcStatus returnedFirmwareStatus, uint32_t pipelineId,
+                                    dsp_fw::IxcStatus returnedFirmwareStatus,
+                                    dsp_fw::PipeLineIdType pipelineId,
                                     const dsp_fw::PplProps &pipelineProps);
 
     /** Add a get schedulers info command.
@@ -188,8 +189,8 @@ public:
      * @throw Device::Exception
      */
     void addGetSchedulersInfoCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
-                                     dsp_fw::IxcStatus returnedFirmwareStatus, uint32_t coreId,
-                                     const dsp_fw::SchedulersInfo &info);
+                                     dsp_fw::IxcStatus returnedFirmwareStatus,
+                                     dsp_fw::CoreId coreId, const dsp_fw::SchedulersInfo &info);
 
     /** Add a get gateways command.
      *

@@ -24,6 +24,7 @@
 
 #include <inttypes.h>
 #include "cAVS/DspFw/Common.hpp"
+#include "Util/WrappedRaw.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 
@@ -34,9 +35,17 @@ namespace cavs
 namespace dsp_fw
 {
 
+namespace detail
+{
+struct PipeLineIdTrait
+{
+    using RawType = uint32_t;
+};
+}
+using PipeLineIdType = util::WrappedRaw<detail::PipeLineIdTrait>;
+
 struct PipelinesListInfo
 {
-    using PipeLineIdType = uint32_t;
     std::vector<PipeLineIdType> ppl_id;
 
     static std::size_t getAllocationSize(std::size_t count)
@@ -56,7 +65,7 @@ struct PipelinesListInfo
 
 struct PplProps
 {
-    uint32_t id;
+    PipeLineIdType id;
     uint32_t priority;
     uint32_t state;
     uint32_t total_memory_bytes;

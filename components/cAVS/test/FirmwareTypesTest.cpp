@@ -74,12 +74,14 @@ TEST_CASE("FirmwareTypes : AudioDataFormatIpc")
 
 TEST_CASE("FirmwareTypes : PipelinesListInfo")
 {
-    testType(PipelinesListInfo{{1, 3}}, {2, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0});
+    using ID = PipeLineIdType;
+    testType(PipelinesListInfo{{ID{1}, ID{3}}}, {2, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0});
 }
 
 TEST_CASE("FirmwareTypes : PplProps")
 {
-    testType(PplProps{1, 2, 3, 4, 5, 6, {{1, 6}, {2, 7}, {3, 8}}, {4, 5}, {}},
+    using ID = PipeLineIdType;
+    testType(PplProps{ID{1}, 2, 3, 4, 5, 6, {{1, 6}, {2, 7}, {3, 8}}, {4, 5}, {}},
              {
                  1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, 6, 0, 0, 0,
 

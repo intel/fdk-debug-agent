@@ -65,13 +65,13 @@ private:
     /* Parents of tasks */
     struct TaskParents
     {
-        std::set<uint32_t> pipeIds;
+        std::set<cavs::dsp_fw::PipeLineIdType> pipeIds;
     };
 
     /* Parents of modules */
     struct ModuleParents
     {
-        std::set<uint32_t> pipeIds;
+        std::set<cavs::dsp_fw::PipeLineIdType> pipeIds;
         std::set<uint32_t> taskIds;
     };
 

@@ -54,11 +54,15 @@ private:
         {
         }
         virtual void getPipelineIdList(uint32_t maxPplCount,
-                                       std::vector<uint32_t> &pipelinesIds) override
+                                       std::vector<dsp_fw::PipeLineIdType> &pipelinesIds) override
         {
         }
-        virtual void getPipelineProps(uint32_t pipelineId, dsp_fw::PplProps &props) override {}
-        virtual void getSchedulersInfo(uint32_t coreId, dsp_fw::SchedulersInfo &schedulers) override
+        virtual void getPipelineProps(dsp_fw::PipeLineIdType pipelineId,
+                                      dsp_fw::PplProps &props) override
+        {
+        }
+        virtual void getSchedulersInfo(dsp_fw::CoreId coreId,
+                                       dsp_fw::SchedulersInfo &schedulers) override
         {
         }
         virtual void getGatewaysInfo(uint32_t gatewayCount,

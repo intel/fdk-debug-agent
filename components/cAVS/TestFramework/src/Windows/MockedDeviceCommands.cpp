@@ -232,11 +232,9 @@ void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATU
                            returnedStatus);
 }
 
-void MockedDeviceCommands::addGetPipelineListCommand(bool ioctlSuccess,
-                                                     NTSTATUS returnedDriverStatus,
-                                                     dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                     uint32_t maxPplCount,
-                                                     const std::vector<uint32_t> &pipelineIds)
+void MockedDeviceCommands::addGetPipelineListCommand(
+    bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
+    uint32_t maxPplCount, const std::vector<dsp_fw::PipeLineIdType> &pipelineIds)
 {
     std::size_t parameterSize = dsp_fw::PipelinesListInfo::getAllocationSize(maxPplCount);
 
@@ -252,7 +250,7 @@ void MockedDeviceCommands::addGetPipelineListCommand(bool ioctlSuccess,
 void MockedDeviceCommands::addGetPipelinePropsCommand(bool ioctlSuccess,
                                                       NTSTATUS returnedDriverStatus,
                                                       dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                      uint32_t pipelineId,
+                                                      dsp_fw::PipeLineIdType pipelineId,
                                                       const dsp_fw::PplProps &props)
 {
     /* Using extended parameter id to supply the pipeline id*/
@@ -267,7 +265,7 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(bool ioctlSuccess,
 void MockedDeviceCommands::addGetSchedulersInfoCommand(bool ioctlSuccess,
                                                        NTSTATUS returnedDriverStatus,
                                                        dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                       uint32_t coreId,
+                                                       dsp_fw::CoreId coreId,
                                                        const dsp_fw::SchedulersInfo &info)
 {
     /* Using extended parameter id to supply the core id*/

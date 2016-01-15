@@ -186,7 +186,8 @@ void ModuleHandler::getHwConfig(dsp_fw::HwConfig &hwConfig)
     readTlvParameters<dsp_fw::HwConfig>(hwConfig, dsp_fw::BaseFwParams::HW_CONFIG_GET);
 }
 
-void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t> &pipelinesIds)
+void ModuleHandler::getPipelineIdList(uint32_t maxPplCount,
+                                      std::vector<dsp_fw::PipeLineIdType> &pipelinesIds)
 {
     /* Calculating the memory space required */
     std::size_t parameterSize = dsp_fw::PipelinesListInfo::getAllocationSize(maxPplCount);
@@ -207,7 +208,7 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t
     pipelinesIds = pipelineListInfo.ppl_id;
 }
 
-void ModuleHandler::getPipelineProps(uint32_t pipelineId, dsp_fw::PplProps &props)
+void ModuleHandler::getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props)
 {
     /* Using extended parameter id to supply the pipeline id*/
     auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
@@ -217,7 +218,7 @@ void ModuleHandler::getPipelineProps(uint32_t pipelineId, dsp_fw::PplProps &prop
                             maxParameterPayloadSize, props);
 }
 
-void ModuleHandler::getSchedulersInfo(uint32_t coreId, dsp_fw::SchedulersInfo &schedulers)
+void ModuleHandler::getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers)
 {
     /* Using extended parameter id to supply the core id*/
     auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);

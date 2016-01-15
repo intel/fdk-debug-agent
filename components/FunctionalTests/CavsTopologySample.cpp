@@ -140,7 +140,7 @@ dsp_fw::SchedulersInfo newScheduler(const std::vector<dsp_fw::TaskProps> &tasks)
 }
 
 /** Helper function to create pipeline */
-dsp_fw::PplProps newPipeline(uint32_t id, uint32_t priority,
+dsp_fw::PplProps newPipeline(dsp_fw::PipeLineIdType id, uint32_t priority,
                              const std::vector<dsp_fw::CompoundModuleId> &instanceIds,
                              const std::vector<uint32_t> &taskIds)
 {
@@ -158,7 +158,7 @@ const size_t CavsTopologySample::gatewaysCount = 5;
 
 void CavsTopologySample::createInstanceFirmwareObjects(
     std::vector<dsp_fw::ModuleInstanceProps> &moduleInstances,
-    std::vector<dsp_fw::GatewayProps> &gateways, std::vector<uint32_t> &pipelineIds,
+    std::vector<dsp_fw::GatewayProps> &gateways, std::vector<dsp_fw::PipeLineIdType> &pipelineIds,
     std::vector<dsp_fw::PplProps> &pipelines, std::vector<dsp_fw::SchedulersInfo> &schedulers)
 {
     /* Filling module instances */
@@ -254,23 +254,24 @@ void CavsTopologySample::createInstanceFirmwareObjects(
      * the Debug Agent in this order: ID4;ID2;ID1;ID3 and the Debug Agent shall order them
      * in this order: ID1;ID2;ID3;ID4 according chosen priorities.
      */
-    pipelineIds = {4, 2, 1, 3};
-    pipelines = {newPipeline(4, 40,
+    using ID = dsp_fw::PipeLineIdType;
+    pipelineIds = {ID{4}, ID{2}, ID{1}, ID{3}};
+    pipelines = {newPipeline(ID{4}, 40,
                              {
                                  {module_gain, 1}, {module_ns, 2}, {module_mixout, 3},
                              },
                              {5, 6}),
-                 newPipeline(2, 20,
+                 newPipeline(ID{2}, 20,
                              {
                                  {module_gain, 4}, {module_aec, 5}, {module_ns, 6},
                              },
                              {3, 9}),
-                 newPipeline(1, 10,
+                 newPipeline(ID{1}, 10,
                              {
                                  {module_copier, 1}, {module_aec, 2}, {module_gain, 5},
                              },
                              {1, 2}),
-                 newPipeline(3, 30,
+                 newPipeline(ID{3}, 30,
                              {
                                  {module_mixin, 1}, {module_src, 0}, {module_gain, 9},
                              },

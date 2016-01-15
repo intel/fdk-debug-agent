@@ -234,7 +234,8 @@ TEST_CASE("Module handling: getting FW configs")
 TEST_CASE("Module handling: getting pipeline list")
 {
     static const uint32_t fwMaxPplCount = 10;
-    static const std::vector<uint32_t> fwPipelineIdList = {1, 2, 3};
+    using ID = dsp_fw::PipeLineIdType;
+    static const std::vector<ID> fwPipelineIdList = {ID{1}, ID{2}, ID{3}};
 
     MockedDevice device;
 
@@ -245,17 +246,17 @@ TEST_CASE("Module handling: getting pipeline list")
     /* Simulating an os error during getting pipeline list */
     commands.addGetPipelineListCommand(false, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
                                        fwMaxPplCount,
-                                       std::vector<uint32_t>()); /* unused parameter */
+                                       std::vector<dsp_fw::PipeLineIdType>()); // unused parameter
 
     /* Simulating a driver error during getting pipeline list  */
     commands.addGetPipelineListCommand(true, STATUS_FLOAT_DIVIDE_BY_ZERO,
                                        dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, fwMaxPplCount,
-                                       std::vector<uint32_t>()); /* unused parameter */
+                                       std::vector<dsp_fw::PipeLineIdType>()); // unused parameter
 
     /* Simulating a firmware error during getting pipeline list  */
     commands.addGetPipelineListCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_FAILURE,
                                        fwMaxPplCount,
-                                       std::vector<uint32_t>()); /* unused parameter */
+                                       std::vector<dsp_fw::PipeLineIdType>()); // unused parameter
 
     /* Successful get pipeline list command */
     commands.addGetPipelineListCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
@@ -268,7 +269,7 @@ TEST_CASE("Module handling: getting pipeline list")
     windows::ModuleHandler moduleHandler(device);
 
     /* Simulating an os error during getting pipeline list */
-    std::vector<uint32_t> pipelineIds;
+    std::vector<dsp_fw::PipeLineIdType> pipelineIds;
     static const uint32_t maxPipeline = 10;
     CHECK_THROWS_AS_MSG(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds),
                         debug_agent::cavs::ModuleHandler::Exception,
@@ -297,9 +298,10 @@ TEST_CASE("Module handling: getting pipeline list")
 
 TEST_CASE("Module handling: getting pipeline props")
 {
-    static const uint32_t pipelineId = 1;
-    static const dsp_fw::PplProps fwProps = {1,      2, 3, 4, 5, 6, {{1, 0}, {2, 0}, {3, 0}},
-                                             {4, 5}, {}};
+    using PlID = dsp_fw::PipeLineIdType;
+    static const PlID pipelineId{1};
+    static const dsp_fw::PplProps fwProps = {PlID{1}, 2, 3, 4, 5, 6, {{1, 0}, {2, 0}, {3, 0}},
+                                             {4, 5},  {}};
 
     MockedDevice device;
 
@@ -332,7 +334,7 @@ TEST_CASE("Module handling: getting pipeline props")
 
     /* Simulating an os error */
 
-    static const dsp_fw::PplProps emptyProps = {0, 0, 0, 0, 0, 0, {}, {}, {}};
+    static const dsp_fw::PplProps emptyProps = {PlID{0}, 0, 0, 0, 0, 0, {}, {}, {}};
     dsp_fw::PplProps props = emptyProps;
 
     CHECK_THROWS_AS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
@@ -362,7 +364,7 @@ TEST_CASE("Module handling: getting pipeline props")
 
 TEST_CASE("Module handling: getting schedulers info")
 {
-    static const uint32_t coreId = 1;
+    static const dsp_fw::CoreId coreId{1};
 
     static const dsp_fw::TaskProps task1 = {3, {{1, 0}, {2, 0}}};
     static const dsp_fw::TaskProps task2 = {4, {{8, 0}}};

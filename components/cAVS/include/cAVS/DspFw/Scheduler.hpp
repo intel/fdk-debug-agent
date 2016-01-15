@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/DspFw/Common.hpp"
+#include "Util/WrappedRaw.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 
@@ -32,6 +33,15 @@ namespace cavs
 {
 namespace dsp_fw
 {
+
+namespace detail
+{
+struct CoreIdTrait
+{
+    using RawType = uint32_t;
+};
+}
+using CoreId = util::WrappedRaw<detail::CoreIdTrait>;
 
 struct TaskProps
 {

@@ -74,13 +74,14 @@ public:
     virtual void getHwConfig(dsp_fw::HwConfig &hwConfig) = 0;
 
     /** @return the pipeline identifier list */
-    virtual void getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t> &pipelinesIds) = 0;
+    virtual void getPipelineIdList(uint32_t maxPplCount,
+                                   std::vector<dsp_fw::PipeLineIdType> &pipelinesIds) = 0;
 
     /** @return the properties of one pipeline */
-    virtual void getPipelineProps(uint32_t pipelineId, dsp_fw::PplProps &props) = 0;
+    virtual void getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props) = 0;
 
     /** @return the schedulers of one core */
-    virtual void getSchedulersInfo(uint32_t coreId, dsp_fw::SchedulersInfo &schedulers) = 0;
+    virtual void getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers) = 0;
 
     /** @return the gateways */
     virtual void getGatewaysInfo(uint32_t gatewayCount,
@@ -100,6 +101,27 @@ public:
                                     dsp_fw::ParameterId parameterId,
                                     util::Buffer &parameterPayload) = 0;
 
+    /** The base firmware has several module like components in it.
+     * To address them, the ParameterId is splited in a type and an instance part.
+     * @{
+     */
+
+    /** @return the parameter id addressing the requested core parameters. */
+    static dsp_fw::ParameterId getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,
+                                                      dsp_fw::CoreId coreId)
+    {
+        return getExtendedParameterId(parameterTypeId, coreId.getValue());
+    }
+
+    /** @return the parameter id addressing the requested pipeline parameters. */
+    static dsp_fw::ParameterId getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,
+                                                      dsp_fw::PipeLineIdType pipelineId)
+    {
+        return getExtendedParameterId(parameterTypeId, pipelineId.getValue());
+    }
+    /** @} */
+
+private:
     /** @return extended parameter id that contains the targeted module part id */
     static dsp_fw::ParameterId getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,
                                                       uint32_t parameterInstanceId)
@@ -111,7 +133,6 @@ public:
         return dsp_fw::ParameterId{(parameterTypeIdAsInt & 0xFF) | (parameterInstanceId << 8)};
     }
 
-private:
     ModuleHandler(const ModuleHandler &) = delete;
     ModuleHandler &operator=(const ModuleHandler &) = delete;
 };

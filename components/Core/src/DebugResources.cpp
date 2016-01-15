@@ -230,7 +230,7 @@ void TopologyDebugResource::dumpPipelines(HtmlHelper &html,
     for (auto &pipeline : pipelines) {
         html.beginRow();
 
-        html.cell(pipeline.id);
+        html.cell(pipeline.id.getValue());
         html.cell(pipeline.priority);
         html.cell(pipeline.total_memory_bytes);
         html.cell(pipeline.used_memory_bytes);

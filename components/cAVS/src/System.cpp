@@ -173,7 +173,7 @@ void System::getTopology(Topology &topology)
         throw Exception("Max pipeline count is invalid.");
     }
 
-    std::vector<uint32_t> pipelineIds;
+    std::vector<dsp_fw::PipeLineIdType> pipelineIds;
     try {
         handler.getPipelineIdList(mFwConfig.maxPplCount, pipelineIds);
     } catch (ModuleHandler::Exception &e) {
@@ -192,8 +192,8 @@ void System::getTopology(Topology &topology)
                 moduleInstanceIds.insert(instanceId);
             }
         } catch (ModuleHandler::Exception &e) {
-            throw Exception("Can not retrieve pipeline props of id " + std::to_string(pplId) +
-                            " : " + std::string(e.what()));
+            throw Exception("Can not retrieve pipeline props of id " +
+                            std::to_string(pplId.getValue()) + " : " + std::string(e.what()));
         }
     }
     /* According to the SwAS the pipe collection has to be ordered from
@@ -211,7 +211,7 @@ void System::getTopology(Topology &topology)
     for (uint32_t coreId = 0; coreId < mHwConfig.dspCoreCount; coreId++) {
         try {
             dsp_fw::SchedulersInfo info;
-            handler.getSchedulersInfo(coreId, info);
+            handler.getSchedulersInfo(dsp_fw::CoreId{coreId}, info);
             topology.schedulers.push_back(info);
 
             /* Collecting module instance ids*/

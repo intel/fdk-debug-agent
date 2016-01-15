@@ -38,7 +38,8 @@ class CavsTopologySample final
 public:
     static void createInstanceFirmwareObjects(
         std::vector<cavs::dsp_fw::ModuleInstanceProps> &moduleInstances,
-        std::vector<cavs::dsp_fw::GatewayProps> &gateways, std::vector<uint32_t> &pipelineIds,
+        std::vector<cavs::dsp_fw::GatewayProps> &gateways,
+        std::vector<cavs::dsp_fw::PipeLineIdType> &pipelineIds,
         std::vector<cavs::dsp_fw::PplProps> &pipelines,
         std::vector<cavs::dsp_fw::SchedulersInfo> &schedulers);
 

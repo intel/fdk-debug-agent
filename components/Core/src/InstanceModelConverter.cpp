@@ -103,7 +103,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     auto pipeCollection = std::make_shared<InstanceRefCollection>(collectionName_pipe);
 
     for (auto &pipeline : mTopology.pipelines) {
-        pipeCollection->add(InstanceRef(typeName_pipe, std::to_string(pipeline.id)));
+        pipeCollection->add(InstanceRef(typeName_pipe, std::to_string(pipeline.id.getValue())));
     }
     children.add(pipeCollection);
 
@@ -232,7 +232,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createPipe()
     for (auto &pplProps : mTopology.pipelines) {
         auto pipeline = std::make_shared<Instance>();
         pipeline->setTypeName(typeName_pipe);
-        pipeline->setInstanceId(std::to_string(pplProps.id));
+        pipeline->setInstanceId(std::to_string(pplProps.id.getValue()));
 
         /* Parents */
         pipeline->getParents().add(std::make_shared<SubsystemRef>(subsystemName, subsystemId));
@@ -282,8 +282,8 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createTask()
                     throw Exception("Task with id=" + std::to_string(task.task_id) + " not found.");
                 }
                 for (auto pipeId : it->second.pipeIds) {
-                    taskModel->getParents().add(
-                        std::make_shared<InstanceRef>(typeName_pipe, std::to_string(pipeId)));
+                    taskModel->getParents().add(std::make_shared<InstanceRef>(
+                        typeName_pipe, std::to_string(pipeId.getValue())));
                 }
 
                 /* Children */
@@ -364,8 +364,8 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint16_t re
 
             /* Parents: pipe*/
             for (auto pipeId : parents.pipeIds) {
-                moduleModel->getParents().add(
-                    std::make_shared<InstanceRef>(typeName_pipe, std::to_string(pipeId)));
+                moduleModel->getParents().add(std::make_shared<InstanceRef>(
+                    typeName_pipe, std::to_string(pipeId.getValue())));
             }
 
             /* Parents: tasks */

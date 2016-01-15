@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/DspFw/Common.hpp"
+#include "Util/WrappedRaw.hpp"
 #include <inttypes.h>
 
 namespace debug_agent
@@ -201,6 +202,20 @@ static inline ParameterId toParameterId(BaseFwParams param)
 {
     return ParameterId{static_cast<ParameterId::RawType>(param)};
 }
+
+namespace detail
+{
+struct ExtendedIdTrait
+{
+    using RawType = uint32_t;
+};
+} // namespace detail
+
+/** Represent the id of a base fw sub component.
+ * The base firmware has several module like components in it.
+ * To address them, the ParameterId is splited in a type and an instance part.
+ */
+using BaseFwInstanceId = util::WrappedRaw<detail::ExtendedIdTrait>;
 
 enum class BaseModuleParams
 {
