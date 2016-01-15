@@ -81,7 +81,7 @@ dsp_fw::PinListInfo newPinList(const std::vector<uint32_t> queueIds)
     for (auto queueId : queueIds) {
         dsp_fw::PinProps props{};
         props.format = audioFormat;
-        props.stream_type = dsp_fw::StreamType::STREAM_TYPE_PCM;
+        props.stream_type = dsp_fw::StreamType::ePcm;
         props.phys_queue_id = queueId;
 
         info.pin_info.push_back(props);
@@ -112,7 +112,7 @@ dsp_fw::ModuleInstanceProps newModuleInstance(
 dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 {
     dsp_fw::GatewayProps p{};
-    p.attribs = 0;
+    p.attribs.dw = 0;
     p.id = connectorId.val.dw;
     return p;
 }

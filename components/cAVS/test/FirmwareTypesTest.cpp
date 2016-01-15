@@ -146,18 +146,17 @@ TEST_CASE("FirmwareTypes : SchedulersInfo")
 
 TEST_CASE("FirmwareTypes : PinProps")
 {
-    testType(PinProps{StreamType::STREAM_TYPE_PCM, audioFormat, 2},
+    testType(PinProps{StreamType::ePcm, audioFormat, 2},
              {
-                 static_cast<uint8_t>(StreamType::STREAM_TYPE_PCM), 0, 0, 0, AUDIOFORMAT_MEMORY, 2,
-                 0, 0, 0,
+                 static_cast<uint8_t>(StreamType::ePcm), 0, 0, 0, AUDIOFORMAT_MEMORY, 2, 0, 0, 0,
              });
 }
 
 TEST_CASE("FirmwareTypes : PinListInfo")
 {
-    testType(PinListInfo{{{StreamType::STREAM_TYPE_PCM, audioFormat, 3}}},
-             {1, 0, 0, 0, static_cast<uint8_t>(StreamType::STREAM_TYPE_PCM), 0, 0, 0,
-              AUDIOFORMAT_MEMORY, 3, 0, 0, 0});
+    testType(PinListInfo{{{StreamType::ePcm, audioFormat, 3}}},
+             {1, 0, 0, 0, static_cast<uint8_t>(StreamType::ePcm), 0, 0, 0, AUDIOFORMAT_MEMORY, 3, 0,
+              0, 0});
 }
 
 TEST_CASE("FirmwareTypes : ModuleInstanceProps")

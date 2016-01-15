@@ -26,6 +26,7 @@
 #include "Util/WrappedRaw.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/StructureChangeTracking.hpp"
 
 namespace debug_agent
 {
@@ -42,6 +43,12 @@ struct CoreIdTrait
 };
 }
 using CoreId = util::WrappedRaw<detail::CoreIdTrait>;
+
+/* TaskProps */
+CHECK_SIZE(private_fw::TaskProps, 12);
+CHECK_MEMBER(private_fw::TaskProps, task_id, 0, uint32_t);
+CHECK_MEMBER(private_fw::TaskProps, module_instance_count, 4, uint32_t);
+CHECK_MEMBER(private_fw::TaskProps, module_instance_id, 8, uint32_t[1]);
 
 struct TaskProps
 {
@@ -65,6 +72,13 @@ struct TaskProps
         writer.writeVector<ArraySizeType>(module_instance_id);
     }
 };
+
+/* SchedulerProps */
+CHECK_SIZE(private_fw::SchedulerProps, 24);
+CHECK_MEMBER(private_fw::SchedulerProps, processing_domain, 0, uint32_t);
+CHECK_MEMBER(private_fw::SchedulerProps, core_id, 4, uint32_t);
+CHECK_MEMBER(private_fw::SchedulerProps, task_count, 8, uint32_t);
+CHECK_MEMBER(private_fw::SchedulerProps, task_info, 12, private_fw::TaskProps[1]);
 
 struct SchedulerProps
 {
@@ -92,6 +106,12 @@ struct SchedulerProps
         writer.writeVector<ArraySizeType>(task_info);
     }
 };
+
+/* SchedulersInfo */
+
+CHECK_SIZE(private_fw::SchedulersInfo, 28);
+CHECK_MEMBER(private_fw::SchedulersInfo, scheduler_count, 0, uint32_t);
+CHECK_MEMBER(private_fw::SchedulersInfo, scheduler_info, 4, private_fw::SchedulerProps[1]);
 
 struct SchedulersInfo
 {

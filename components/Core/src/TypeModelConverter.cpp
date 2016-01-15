@@ -348,12 +348,10 @@ void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
     }
     if (hwConfig.isGpdmaCapsValid) {
 
-        ch.add(
-            Characteristic("LP GPDMA0 count" + std::to_string(hwConfig.gpdmaCaps.lp_gpdma0_count)));
-        ch.add(
-            Characteristic("LP GPDMA1 count" + std::to_string(hwConfig.gpdmaCaps.lp_gpdma0_count)));
-        ch.add(
-            Characteristic("HP GPDMA count" + std::to_string(hwConfig.gpdmaCaps.hp_gpdma_count)));
+        ch.add(Characteristic("LP GPDMA count" +
+                              std::to_string(hwConfig.gpdmaCaps.lp_gateways.size())));
+        ch.add(Characteristic("HP GPDMA count" +
+                              std::to_string(hwConfig.gpdmaCaps.hp_gateways.size())));
     }
     if (hwConfig.isGatewayCountValid) {
         ch.add(

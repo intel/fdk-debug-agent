@@ -175,7 +175,7 @@ void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess, NTSTATUS re
     returnedOutput = tlvList;
 
     addModuleParameterCommand(Command::Get, driver::baseFirwareModuleId,
-                              driver::baseFirwareInstanceId, toParameterId(parameterId),
+                              driver::baseFirwareInstanceId, dsp_fw::toParameterId(parameterId),
                               expectedOutput, returnedOutput, ioctlSuccess, returnedDriverStatus,
                               returnedFirmwareStatus);
 }
@@ -206,7 +206,7 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(
     modulesInfo.module_info = returnedEntries;
 
     addGetModuleParameterCommand(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                                 toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET),
+                                 dsp_fw::toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET),
                                  moduleInfoSize, modulesInfo, ioctlSuccess, returnedDriverStatus,
                                  returnedFirmwareStatus);
 }
@@ -241,10 +241,10 @@ void MockedDeviceCommands::addGetPipelineListCommand(
     dsp_fw::PipelinesListInfo pipelinesListInfo;
     pipelinesListInfo.ppl_id = pipelineIds;
 
-    addGetModuleParameterCommand(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                                 toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
-                                 parameterSize, pipelinesListInfo, ioctlSuccess,
-                                 returnedDriverStatus, returnedFirmwareStatus);
+    addGetModuleParameterCommand(
+        driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+        dsp_fw::toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET), parameterSize,
+        pipelinesListInfo, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 
 void MockedDeviceCommands::addGetPipelinePropsCommand(bool ioctlSuccess,
@@ -289,7 +289,7 @@ void MockedDeviceCommands::addGetGatewaysCommand(bool ioctlSuccess, NTSTATUS ret
     gatewaysInfo.gateways = gateways;
 
     addGetModuleParameterCommand(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                                 toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
+                                 dsp_fw::toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
                                  parameterSize, gatewaysInfo, ioctlSuccess, returnedDriverStatus,
                                  returnedFirmwareStatus);
 }
@@ -299,7 +299,7 @@ void MockedDeviceCommands::addGetModuleInstancePropsCommand(
     uint16_t moduleId, uint16_t instanceId, const dsp_fw::ModuleInstanceProps &props)
 {
     addGetModuleParameterCommand(moduleId, instanceId,
-                                 toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
+                                 dsp_fw::toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
                                  ModuleHandler::maxParameterPayloadSize, props, ioctlSuccess,
                                  returnedDriverStatus, returnedFirmwareStatus);
 }

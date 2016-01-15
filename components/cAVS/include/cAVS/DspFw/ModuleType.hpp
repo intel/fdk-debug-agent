@@ -25,6 +25,7 @@
 #include "cAVS/DspFw/Common.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/StructureChangeTracking.hpp"
 
 namespace debug_agent
 {
@@ -32,6 +33,11 @@ namespace cavs
 {
 namespace dsp_fw
 {
+
+/* SegmentFlags */
+
+CHECK_SIZE(private_fw::SegmentFlags, 4);
+CHECK_MEMBER(private_fw::SegmentFlags, ul, 0, uint32_t);
 
 union SegmentFlags
 {
@@ -58,7 +64,13 @@ union SegmentFlags
 
     void toStream(util::ByteStreamWriter &writer) const { writer.write(ul); }
 };
-static_assert(sizeof(SegmentFlags) == 4, "Wrong SegmentFlags size");
+
+/* SegmentDesc */
+
+CHECK_SIZE(private_fw::SegmentDesc, 12);
+CHECK_MEMBER(private_fw::SegmentDesc, flags, 0, private_fw::SegmentFlags);
+CHECK_MEMBER(private_fw::SegmentDesc, v_base_addr, 4, uint32_t);
+CHECK_MEMBER(private_fw::SegmentDesc, file_offset, 8, uint32_t);
 
 struct SegmentDesc
 {
@@ -86,7 +98,10 @@ struct SegmentDesc
         writer.write(file_offset);
     }
 };
-static_assert(sizeof(SegmentDesc) == 12, "Wrong SegmentDesc size");
+
+/* ModuleType */
+CHECK_SIZE(private_fw::ModuleType, 4);
+CHECK_MEMBER(private_fw::ModuleType, ul, 0, uint32_t);
 
 union ModuleType
 {
@@ -107,7 +122,8 @@ union ModuleType
 
     void toStream(util::ByteStreamWriter &writer) const { writer.write(ul); }
 };
-static_assert(sizeof(ModuleType) == 4, "Wrong ModuleType size");
+
+/* ModuleEntry */
 
 struct ModuleEntry
 {
@@ -124,15 +140,13 @@ private:
     }
 
 public:
-    static const std::size_t SEGMENT_COUNT = 3;
-    static const std::size_t MAX_MODULE_NAME_LEN = 8;
-    static const std::size_t DEFAULT_HASH_SHA256_LEN = 32;
-    static const std::size_t UUID_LEN = 4;
+    static const std::size_t segmentCount = 3;
+    static const std::size_t uuidLen = 4;
 
     uint16_t module_id;
     uint16_t state_flags;
     uint8_t name[MAX_MODULE_NAME_LEN];
-    uint32_t uuid[UUID_LEN];
+    uint32_t uuid[uuidLen];
     ModuleType type; // ModuleType
     uint8_t hash[DEFAULT_HASH_SHA256_LEN];
     uint32_t entry_point;
@@ -141,20 +155,20 @@ public:
     uint32_t affinity_mask;       // bit-mask of cores allowed to exec module
     uint16_t instance_max_count;  // max number of instances
     uint16_t instance_stack_size; // size of stack that instance requires for its task
-                                  // (DP) [bytes]
-    SegmentDesc segments[SEGMENT_COUNT];
+    // (DP) [bytes]
+    SegmentDesc segments[segmentCount];
 
     bool operator==(const ModuleEntry &other) const
     {
         return module_id == other.module_id && state_flags == other.state_flags &&
                isArrayEqual(name, other.name, MAX_MODULE_NAME_LEN) &&
-               isArrayEqual(uuid, other.uuid, UUID_LEN) && type == other.type &&
+               isArrayEqual(uuid, other.uuid, uuidLen) && type == other.type &&
                isArrayEqual(hash, other.hash, DEFAULT_HASH_SHA256_LEN) &&
                entry_point == other.entry_point && cfg_offset == other.cfg_offset &&
                cfg_count == other.cfg_count && affinity_mask == other.affinity_mask &&
                instance_max_count == other.instance_max_count &&
                instance_stack_size == other.instance_stack_size &&
-               isArrayEqual(segments, other.segments, SEGMENT_COUNT);
+               isArrayEqual(segments, other.segments, segmentCount);
     }
 
     void fromStream(util::ByteStreamReader &reader)
@@ -162,7 +176,7 @@ public:
         reader.read(module_id);
         reader.read(state_flags);
         reader.readArray(name, MAX_MODULE_NAME_LEN);
-        reader.readArray(uuid, UUID_LEN);
+        reader.readArray(uuid, uuidLen);
         reader.read(type);
         reader.readArray(hash, DEFAULT_HASH_SHA256_LEN);
         reader.read(entry_point);
@@ -172,7 +186,7 @@ public:
         reader.read(instance_max_count);
         reader.read(instance_stack_size);
 
-        for (std::size_t i = 0; i < SEGMENT_COUNT; i++) {
+        for (std::size_t i = 0; i < segmentCount; i++) {
             reader.read(segments[i]);
         }
     }
@@ -182,7 +196,7 @@ public:
         writer.write(module_id);
         writer.write(state_flags);
         writer.writeArray(name, MAX_MODULE_NAME_LEN);
-        writer.writeArray(uuid, UUID_LEN);
+        writer.writeArray(uuid, uuidLen);
         writer.write(type);
         writer.writeArray(hash, DEFAULT_HASH_SHA256_LEN);
         writer.write(entry_point);
@@ -192,12 +206,32 @@ public:
         writer.write(instance_max_count);
         writer.write(instance_stack_size);
 
-        for (std::size_t i = 0; i < SEGMENT_COUNT; i++) {
+        for (std::size_t i = 0; i < segmentCount; i++) {
             writer.write(segments[i]);
         }
     }
 };
-static_assert(sizeof(ModuleEntry) == 116, "Wrong ModuleEntry size");
+
+CHECK_SIZE(private_fw::ModuleEntry, 116);
+CHECK_MEMBER(private_fw::ModuleEntry, struct_id, 0, uint32_t);
+CHECK_MEMBER(private_fw::ModuleEntry, name, 4, uint8_t[MAX_MODULE_NAME_LEN]);
+CHECK_MEMBER(private_fw::ModuleEntry, uuid, 12, uint32_t[ModuleEntry::uuidLen]);
+CHECK_MEMBER(private_fw::ModuleEntry, type, 28, private_fw::ModuleType);
+CHECK_MEMBER(private_fw::ModuleEntry, hash, 32, uint8_t[DEFAULT_HASH_SHA256_LEN]);
+CHECK_MEMBER(private_fw::ModuleEntry, entry_point, 64, uint32_t);
+CHECK_MEMBER(private_fw::ModuleEntry, cfg_offset, 68, uint16_t);
+CHECK_MEMBER(private_fw::ModuleEntry, cfg_count, 70, uint16_t);
+CHECK_MEMBER(private_fw::ModuleEntry, affinity_mask, 72, uint32_t);
+CHECK_MEMBER(private_fw::ModuleEntry, instance_max_count, 76, uint16_t);
+CHECK_MEMBER(private_fw::ModuleEntry, instance_stack_size, 78, uint16_t);
+CHECK_MEMBER(private_fw::ModuleEntry, segments, 80,
+             private_fw::SegmentDesc[ModuleEntry::segmentCount]);
+
+/* ModulesInfo */
+
+CHECK_SIZE(private_fw::ModulesInfo, 120);
+CHECK_MEMBER(private_fw::ModulesInfo, module_count, 0, uint32_t);
+CHECK_MEMBER(private_fw::ModulesInfo, module_info, 4, private_fw::ModuleEntry[1]);
 
 struct ModulesInfo
 {

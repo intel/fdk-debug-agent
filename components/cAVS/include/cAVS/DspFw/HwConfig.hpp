@@ -26,6 +26,7 @@
 #include "Tlv/TlvResponseHandlerInterface.hpp"
 #include "Tlv/TlvDictionary.hpp"
 #include "Tlv/TlvWrapper.hpp"
+#include "Util/StructureChangeTracking.hpp"
 #include <vector>
 #include <string>
 
@@ -48,24 +49,47 @@ namespace dsp_fw
 class HwConfig final : public tlv::TlvResponseHandlerInterface
 {
 public:
+    /* GpdmaCapabilities */
+
+    CHECK_SIZE(private_fw::GpdmaCapabilities, 16);
+    CHECK_MEMBER(private_fw::GpdmaCapabilities, lp_ctrl_count, 0, uint32_t);
+    CHECK_MEMBER(private_fw::GpdmaCapabilities, lp_ch_count, 4, uint32_t[1]);
+    CHECK_MEMBER(private_fw::GpdmaCapabilities, hp_ctrl_count, 8, uint32_t);
+    CHECK_MEMBER(private_fw::GpdmaCapabilities, hp_ch_count, 12, uint32_t[1]);
+
     struct GpdmaCapabilities
     {
-        uint32_t lp_gpdma0_count;
-        uint32_t lp_gpdma1_count;
-        uint32_t hp_gpdma_count;
+        std::vector<uint32_t> lp_gateways;
+        std::vector<uint32_t> hp_gateways;
+
+        bool operator==(const GpdmaCapabilities &other) const
+        {
+            return lp_gateways == other.lp_gateways && hp_gateways == other.hp_gateways;
+        }
 
         void fromStream(util::ByteStreamReader &reader)
         {
-            reader.read(lp_gpdma0_count);
-            reader.read(lp_gpdma1_count);
-            reader.read(hp_gpdma_count);
+            reader.readVector<ArraySizeType>(lp_gateways);
+            reader.readVector<ArraySizeType>(hp_gateways);
         }
     };
 
-    struct I2sCaps final
+    /* I2sCapabilities */
+
+    CHECK_SIZE(private_fw::I2sCapabilities, 12);
+    CHECK_MEMBER(private_fw::I2sCapabilities, version, 0, private_fw::I2sVersion);
+    CHECK_MEMBER(private_fw::I2sCapabilities, controller_count, 4, uint32_t);
+    CHECK_MEMBER(private_fw::I2sCapabilities, controller_base_addr, 8, uint32_t[1]);
+
+    struct I2sCapabilities final
     {
         uint32_t version;
         std::vector<uint32_t> controllerBaseAddr;
+
+        bool operator==(const I2sCapabilities &other) const
+        {
+            return version == other.version && controllerBaseAddr == other.controllerBaseAddr;
+        }
 
         void fromStream(util::ByteStreamReader &reader)
         {
@@ -88,7 +112,7 @@ public:
     uint32_t totalPhysicalMemoryPage;
     bool isTotalPhysicalMemoryPageValid;
 
-    I2sCaps i2sCaps;
+    I2sCapabilities i2sCaps;
     bool isI2sCapsValid;
 
     GpdmaCapabilities gpdmaCaps;
@@ -114,7 +138,7 @@ public:
         mHwConfigTlvMap[Tags::TOTAL_PHYS_MEM_PAGES_HW_CFG] = std::make_unique<TlvWrapper<uint32_t>>(
             totalPhysicalMemoryPage, isTotalPhysicalMemoryPageValid);
         mHwConfigTlvMap[Tags::I2S_CAPS_HW_CFG] =
-            std::make_unique<TlvWrapper<I2sCaps>>(i2sCaps, isI2sCapsValid);
+            std::make_unique<TlvWrapper<I2sCapabilities>>(i2sCaps, isI2sCapsValid);
         mHwConfigTlvMap[Tags::GPDMA_CAPS_HW_CFG] =
             std::make_unique<TlvWrapper<GpdmaCapabilities>>(gpdmaCaps, isGpdmaCapsValid);
         mHwConfigTlvMap[Tags::GATEWAY_COUNT_HW_CFG] =

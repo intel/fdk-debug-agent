@@ -52,7 +52,8 @@ set(FW_INCS
     include/cAVS/DspFw/Gateway.hpp
     include/cAVS/DspFw/Infrastructure.hpp
     include/cAVS/DspFw/ModuleType.hpp
-    include/cAVS/DspFw/Scheduler.hpp)
+    include/cAVS/DspFw/Scheduler.hpp
+    include/cAVS/DspFw/ExternalFirmwareHeaders.hpp)
 
 source_group("Header Files\\DspFw" FILES ${FW_INCS})
 set(LIB_INCS ${LIB_INCS} ${FW_INCS})
@@ -77,6 +78,13 @@ target_link_libraries(cAVS ${LIBRAIRIES})
 
 # exporting "include" directory
 target_include_directories(cAVS PUBLIC "include")
+
+# including and exporting cAVS fw headers
+target_include_directories(cAVS PUBLIC
+    "${PROJECT_SOURCE_DIR}/external/cAVS/cavs_fw_headers_for_sw/FW/src/common/include"
+    "${PROJECT_SOURCE_DIR}/external/cAVS/cavs_fw_headers_for_sw/FW/src/intel_adsp/include"
+
+)
 
 link_poco(cAVS)
 

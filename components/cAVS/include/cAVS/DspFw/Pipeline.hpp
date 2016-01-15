@@ -22,11 +22,11 @@
 
 #pragma once
 
-#include <inttypes.h>
 #include "cAVS/DspFw/Common.hpp"
 #include "Util/WrappedRaw.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/StructureChangeTracking.hpp"
 
 namespace debug_agent
 {
@@ -43,6 +43,12 @@ struct PipeLineIdTrait
 };
 }
 using PipeLineIdType = util::WrappedRaw<detail::PipeLineIdTrait>;
+
+/* PipelinesListInfo */
+
+CHECK_SIZE(private_fw::PipelinesListInfo, 8);
+CHECK_MEMBER(private_fw::PipelinesListInfo, ppl_count, 0, uint32_t);
+CHECK_MEMBER(private_fw::PipelinesListInfo, ppl_id, 4, uint32_t[1]);
 
 struct PipelinesListInfo
 {
@@ -63,6 +69,32 @@ struct PipelinesListInfo
     }
 };
 
+/* ModInstListInfo */
+CHECK_SIZE(private_fw::ModInstListInfo, 8);
+CHECK_MEMBER(private_fw::ModInstListInfo, module_instance_count, 0, uint32_t);
+CHECK_MEMBER(private_fw::ModInstListInfo, module_instance_id, 4, uint32_t[1]);
+
+using ModInstListInfo = std::vector<CompoundModuleId>;
+
+/* TaskListInfo */
+CHECK_SIZE(private_fw::TaskListInfo, 8);
+CHECK_MEMBER(private_fw::TaskListInfo, task_id_count, 0, uint32_t);
+CHECK_MEMBER(private_fw::TaskListInfo, task_id, 4, uint32_t[1]);
+
+using TaskListInfo = std::vector<uint32_t>;
+
+/* PplProps */
+CHECK_SIZE(private_fw::PplProps, 48);
+CHECK_MEMBER(private_fw::PplProps, id, 0, uint32_t);
+CHECK_MEMBER(private_fw::PplProps, priority, 4, uint32_t);
+CHECK_MEMBER(private_fw::PplProps, state, 8, uint32_t);
+CHECK_MEMBER(private_fw::PplProps, total_memory_bytes, 12, uint32_t);
+CHECK_MEMBER(private_fw::PplProps, used_memory_bytes, 16, uint32_t);
+CHECK_MEMBER(private_fw::PplProps, context_pages, 20, uint32_t);
+CHECK_MEMBER(private_fw::PplProps, module_instances, 24, private_fw::ModInstListInfo);
+CHECK_MEMBER(private_fw::PplProps, ll_tasks, 32, private_fw::TaskListInfo);
+CHECK_MEMBER(private_fw::PplProps, dp_tasks, 40, private_fw::TaskListInfo);
+
 struct PplProps
 {
     PipeLineIdType id;
@@ -71,9 +103,9 @@ struct PplProps
     uint32_t total_memory_bytes;
     uint32_t used_memory_bytes;
     uint32_t context_pages;
-    std::vector<CompoundModuleId> module_instances;
-    std::vector<uint32_t> ll_tasks;
-    std::vector<uint32_t> dp_tasks;
+    ModInstListInfo module_instances;
+    TaskListInfo ll_tasks;
+    TaskListInfo dp_tasks;
 
     bool operator==(const PplProps &other) const
     {

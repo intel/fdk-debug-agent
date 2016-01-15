@@ -47,7 +47,7 @@ static const std::string ContentTypeHtml("text/html");
 static const std::string ContentTypeZip("application/zip");
 
 /** Helper method to convert an hash array into string */
-std::string hashToString(const uint8_t hash[dsp_fw::ModuleEntry::DEFAULT_HASH_SHA256_LEN])
+std::string hashToString(const uint8_t hash[DEFAULT_HASH_SHA256_LEN])
 {
     std::stringstream stream;
 
@@ -55,7 +55,7 @@ std::string hashToString(const uint8_t hash[dsp_fw::ModuleEntry::DEFAULT_HASH_SH
     stream << std::setfill('0') << std::hex << std::uppercase;
 
     /* Each byte */
-    for (std::size_t i = 0; i < dsp_fw::ModuleEntry::DEFAULT_HASH_SHA256_LEN; i++) {
+    for (std::size_t i = 0; i < DEFAULT_HASH_SHA256_LEN; i++) {
         stream << std::setw(2) << static_cast<uint32_t>(hash[i]);
     }
 
@@ -204,7 +204,7 @@ void TopologyDebugResource::dumpGateways(HtmlHelper &html,
         html.cell(connector.val.f.dma_type);
         html.cell(dsp_fw::ConnectorNodeId::getTypeEnumHelper().toString(type));
         html.cell(connector.val.f.v_index);
-        html.cell(gateway.attribs);
+        html.cell(gateway.attribs.dw);
 
         html.endRow();
     }

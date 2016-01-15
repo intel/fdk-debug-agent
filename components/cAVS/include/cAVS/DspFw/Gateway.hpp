@@ -25,6 +25,7 @@
 #include "cAVS/DspFw/Common.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/StructureChangeTracking.hpp"
 
 namespace debug_agent
 {
@@ -32,6 +33,34 @@ namespace cavs
 {
 namespace dsp_fw
 {
+
+/** GatewayAttributes */
+
+CHECK_SIZE(private_fw::GatewayAttributes, 4);
+CHECK_MEMBER(private_fw::GatewayAttributes, dw, 0, uint32_t);
+
+union GatewayAttributes
+{
+    uint32_t dw;
+    struct
+    {
+        uint32_t lp_buffer_alloc : 1;
+        uint32_t _rsvd : 31;
+    } bits;
+
+    bool operator==(const GatewayAttributes &other) const { return dw == other.dw; }
+
+    bool operator!=(const GatewayAttributes &other) const { return !(*this == other); }
+
+    void fromStream(util::ByteStreamReader &reader) { reader.read(dw); }
+
+    void toStream(util::ByteStreamWriter &writer) const { writer.write(dw); }
+};
+
+/* GatewayProps */
+CHECK_SIZE(private_fw::GatewayProps, 8);
+CHECK_MEMBER(private_fw::GatewayProps, id, 0, uint32_t);
+CHECK_MEMBER(private_fw::GatewayProps, attribs, 4, private_fw::GatewayAttributes);
 
 struct GatewayProps
 {
@@ -42,7 +71,7 @@ struct GatewayProps
     /**
     * Gateway attributes (refer to GatewayAttributes).
     */
-    uint32_t attribs;
+    GatewayAttributes attribs;
 
     bool operator==(const GatewayProps &other) const
     {
@@ -61,7 +90,11 @@ struct GatewayProps
         writer.write(attribs);
     }
 };
-static_assert(sizeof(GatewayProps) == 8, "Wrong GatewayProps size");
+
+/* GatewaysInfo */
+CHECK_SIZE(private_fw::GatewaysInfo, 12);
+CHECK_MEMBER(private_fw::GatewaysInfo, gateway_count, 0, uint32_t);
+CHECK_MEMBER(private_fw::GatewaysInfo, gateways, 4, private_fw::GatewayProps[1]);
 
 struct GatewaysInfo
 {

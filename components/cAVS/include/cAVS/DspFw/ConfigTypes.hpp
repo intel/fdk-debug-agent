@@ -22,9 +22,10 @@
 
 #pragma once
 
-#include <inttypes.h>
+#include "cAVS/DspFw/ExternalFirmwareHeaders.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/StructureChangeTracking.hpp"
 
 namespace debug_agent
 {
@@ -32,6 +33,14 @@ namespace cavs
 {
 namespace dsp_fw
 {
+
+/* FwVersion */
+
+CHECK_SIZE(private_fw::FwVersion, 8);
+CHECK_MEMBER(private_fw::FwVersion, major, 0, uint16_t);
+CHECK_MEMBER(private_fw::FwVersion, minor, 2, uint16_t);
+CHECK_MEMBER(private_fw::FwVersion, hotfix, 4, uint16_t);
+CHECK_MEMBER(private_fw::FwVersion, build, 6, uint16_t);
 
 struct FwVersion
 {
@@ -62,7 +71,12 @@ struct FwVersion
         writer.write(build);
     }
 };
-static_assert(sizeof(FwVersion) == 8, "Wrong FwVersion size");
+
+/* DmaBufferConfig */
+
+CHECK_SIZE(private_fw::DmaBufferConfig, 8);
+CHECK_MEMBER(private_fw::DmaBufferConfig, min_size_bytes, 0, uint32_t);
+CHECK_MEMBER(private_fw::DmaBufferConfig, max_size_bytes, 4, uint32_t);
 
 struct DmaBufferConfig
 {
@@ -86,123 +100,12 @@ struct DmaBufferConfig
         writer.write(max_size_bytes);
     }
 };
-static_assert(sizeof(DmaBufferConfig) == 8, "Wrong DmaBufferConfig size");
 
-enum class FwConfigParams
-{
-    /**
-    * Firmware version
-    */
-    FW_VERSION_FW_CFG = 0,
-    /**
-    * Indicates whether legacy DMA memory is managed by FW.
-    */
-    MEMORY_RECLAIMED_FW_CFG = 1,
-    /**
-    * Frequency of oscillator clock.
-    */
-    SLOW_CLOCK_FREQ_HZ_FW_CFG = 2,
-    /**
-    * Frequency of PLL clock.
-    */
-    FAST_CLOCK_FREQ_HZ_FW_CFG = 3,
-    /**
-    * List of static and dynamic DMA buffer sizes.
-    * SW may configure minimum and maximum size for each buffer.
-    */
-    DMA_BUFFER_CONFIG_FW_CFG = 4,
-    /**
-    * Audio Hub Link support level.
-    * Note: Lower 16-bits may be used in future to indicate implementation revision if necessary.
-    */
-    ALH_SUPPORT_LEVEL_FW_CFG = 5,
-    /**
-    * Size of IPC downlink mailbox.
-    */
-    IPC_DL_MAILBOX_BYTES_FW_CFG = 6,
-    /**
-    * Size of IPC uplink mailbox.
-    */
-    IPC_UL_MAILBOX_BYTES_FW_CFG = 7,
-    /**
-    * Size of trace log buffer.
-    */
-    TRACE_LOG_BYTES_FW_CFG = 8,
-    /**
-    * Maximum number of pipelines that may be instantiated at the same time.
-    */
-    MAX_PPL_CNT_FW_CFG = 9,
-    /**
-    * Maximum number of A-state table entries that may be configured by the driver.
-    * Driver may also use this value to estimate the size of data retrieved as ASTATE_TABLE
-    * property.
-    */
-    MAX_ASTATE_COUNT_FW_CFG = 10,
-    /**
-    * Maximum number of input or output pins supported by a module.
-    */
-    MAX_MODULE_PIN_COUNT_FW_CFG = 11,
-    /**
-    * Current total number of modules loaded into the DSP.
-    */
-    MODULES_COUNT_FW_CFG = 12,
-    /**
-    * Maximum number of tasks supported by a single pipeline.
-    */
-    MAX_MOD_INST_COUNT_FW_CFG = 13,
-    /**
-    * Maximum number of LL tasks that may be allocated with
-    * the same priority (specified by a priority of the parent pipeline).
-    */
-    MAX_LL_TASKS_PER_PRI_COUNT_FW_CFG = 14,
-    /**
-    * Number of LL priorities.
-    */
-    LL_PRI_COUNT = 15,
-    /**
-    * Maximum number of DP tasks that may be allocated on a single core.
-    */
-    MAX_DP_TASKS_COUNT_FW_CFG = 16
-};
+/* Importing FwConfigParams enum */
+using FwConfigParams = private_fw::FwConfigParams;
 
-enum class HwConfigParams
-{
-    /**
-    * Version of cAVS implemented by FW (from ROMInfo).
-    */
-    cAVS_VER_HW_CFG = 0,
-    /**
-    * How many dsp cores are available in current audio subsystem.
-    */
-    DSP_CORES_HW_CFG = 1,
-    /**
-    * Size of a single memory page.
-    */
-    MEM_PAGE_BYTES_HW_CFG = 2,
-    /**
-    * Total number of physical pages available for allocation.
-    */
-    TOTAL_PHYS_MEM_PAGES_HW_CFG = 3,
-    /**
-    * SSP capabilities. Number of items in controller_base_addr array is specified by
-    * controller_count.
-    * Note: Lower 16 bits of I2sVersion may be used in future to indicate implementation revision
-    * if necessary.
-    */
-    I2S_CAPS_HW_CFG = 4,
-    /**
-    * GPDMA capabilities.
-    */
-    GPDMA_CAPS_HW_CFG = 5,
-    /**
-    * Total number of DMA gateways of all types.
-    */
-    GATEWAY_COUNT_HW_CFG = 6,
-    /**
-    * Number of SRAM memory banks manageable by DSP.
-    */
-    EBB_COUNT_HW_CFG = 7
-};
+/* Importing HwConfigParams enum */
+using HwConfigParams = private_fw::HwConfigParams;
 }
 }
 }

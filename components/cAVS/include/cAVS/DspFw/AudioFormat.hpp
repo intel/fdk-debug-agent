@@ -22,9 +22,11 @@
 
 #pragma once
 
+#include "cAVS/DspFw/ExternalFirmwareHeaders.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "Util/EnumHelper.hpp"
+#include "Util/StructureChangeTracking.hpp"
 #include <inttypes.h>
 
 namespace debug_agent
@@ -34,69 +36,27 @@ namespace cavs
 namespace dsp_fw
 {
 
-enum class StreamType : uint32_t
-{
-    STREAM_TYPE_PCM = 0,
-    STREAM_TYPE_MP3 = 1
-};
+/* Importing StreamType enum */
+using StreamType = private_fw::StreamType;
+static_assert(StreamType::eMaxStreamType == 3, "Wrong StreamType enum value count");
 
 static const util::EnumHelper<StreamType> &getStreamTypeHelper()
 {
     static const util::EnumHelper<StreamType> helper({
-        {StreamType::STREAM_TYPE_PCM, "PCM"}, {StreamType::STREAM_TYPE_MP3, "MP3"},
+        {StreamType::ePcm, "PCM"}, {StreamType::eMp3, "MP3"}, {StreamType::eAac, "AAC"},
     });
 
     return helper;
 };
 
-enum class SamplingFrequency : uint32_t
-{
-    FS_8000HZ = 8000,
-    FS_11025HZ = 11025,
-    FS_12000HZ = 12000, /** Mp3, AAC, SRC only. */
-    FS_16000HZ = 16000,
-    FS_18900HZ = 18900, /** SRC only for 44100 */
-    FS_22050HZ = 22050,
-    FS_24000HZ = 24000, /** Mp3, AAC, SRC only. */
-    FS_32000HZ = 32000,
-    FS_37800HZ = 37800, /** SRC only for 44100 */
-    FS_44100HZ = 44100,
-    FS_48000HZ = 48000,   /**< Default. */
-    FS_64000HZ = 64000,   /** AAC, SRC only. */
-    FS_88200HZ = 88200,   /** AAC, SRC only. */
-    FS_96000HZ = 96000,   /** AAC, SRC only. */
-    FS_176400HZ = 176400, /** SRC only. */
-    FS_192000HZ = 192000, /** SRC only. */
-    FS_INVALID
-};
+/* Importing SamplingFrequency enum */
+using SamplingFrequency = private_fw::intel_adsp::SamplingFrequency;
 
-enum class BitDepth : uint32_t
-{
-    DEPTH_8BIT = 8,
-    DEPTH_16BIT = 16,
-    DEPTH_24BIT = 24, /**< Default. */
-    DEPTH_32BIT = 32,
-    DEPTH_64BIT = 64,
-    DEPTH_INVALID
-};
+/* Importing BitDepth enum */
+using BitDepth = private_fw::intel_adsp::BitDepth;
 
-static const util::EnumHelper<BitDepth> &getBitDepthHelper()
-{
-    static const util::EnumHelper<BitDepth> helper({
-        {BitDepth::DEPTH_8BIT, "8"},
-        {BitDepth::DEPTH_16BIT, "16"},
-        {BitDepth::DEPTH_24BIT, "24"},
-        {BitDepth::DEPTH_32BIT, "32"},
-        {BitDepth::DEPTH_64BIT, "64"},
-    });
-    return helper;
-};
-
-enum class InterleavingStyle : uint32_t
-{
-    CHANNELS_SAMPLES_INTERLEAVING = 0, /*!< [s1_ch1...s1_chN,...,sM_ch1...sM_chN] */
-    CHANNELS_BLOCKS_INTERLEAVING = 1,  /*!< [s1_ch1...sM_ch1,...,s1_chN...sM_chN] */
-};
+/* Importing InterleavingStyle enum */
+using InterleavingStyle = private_fw::intel_adsp::InterleavingStyle;
 
 static const util::EnumHelper<InterleavingStyle> &getInterleavingStyleHelper()
 {
@@ -108,27 +68,12 @@ static const util::EnumHelper<InterleavingStyle> &getInterleavingStyleHelper()
     return helper;
 };
 
-using ChannelMap = uint32_t;
+/* Importing ChannelMap */
+using ChannelMap = private_fw::intel_adsp::ChannelMap;
 
-enum class ChannelConfig : uint32_t
-{
-    CHANNEL_CONFIG_MONO = 0,               /**< One channel only. */
-    CHANNEL_CONFIG_STEREO = 1,             /**< L & R. */
-    CHANNEL_CONFIG_2_POINT_1 = 2,          /**< L, R & LFE; PCM only. */
-    CHANNEL_CONFIG_3_POINT_0 = 3,          /**< L, C & R; MP3 & AAC only. */
-    CHANNEL_CONFIG_3_POINT_1 = 4,          /**< L, C, R & LFE; PCM only. */
-    CHANNEL_CONFIG_QUATRO = 5,             /**< L, R, Ls & Rs; PCM only. */
-    CHANNEL_CONFIG_4_POINT_0 = 6,          /**< L, C, R & Cs; MP3 & AAC only. */
-    CHANNEL_CONFIG_5_POINT_0 = 7,          /**< L, C, R, Ls & Rs. */
-    CHANNEL_CONFIG_5_POINT_1 = 8,          /**< L, C, R, Ls, Rs & LFE. */
-    CHANNEL_CONFIG_DUAL_MONO = 9,          /**< One channel replicated in two. */
-    CHANNEL_CONFIG_I2S_DUAL_STEREO_0 = 10, /**< Stereo (L,R) in 4 slots, 1st stream:
-                                            * [ L, R, -, - ] */
-    CHANNEL_CONFIG_I2S_DUAL_STEREO_1 = 11, /**< Stereo (L,R) in 4 slots, 2nd stream:
-                                            * [ -, -, L, R ] */
-    CHANNEL_CONFIG_7_POINT_1 = 12,         /**< L, C, R, Ls, Rs & LFE., LS, RS */
-    CHANNEL_CONFIG_INVALID
-};
+/* Importing ChannelConfig enum */
+using ChannelConfig = private_fw::intel_adsp::ChannelConfig;
+static_assert(ChannelConfig::CHANNEL_CONFIG_INVALID == 13, "Wrong ChannelConfig enum value count");
 
 static const util::EnumHelper<ChannelConfig> &getChannelConfigHelper()
 {
@@ -150,15 +95,8 @@ static const util::EnumHelper<ChannelConfig> &getChannelConfigHelper()
     return helper;
 };
 
-enum class SampleType : uint8_t
-{
-    MSB_INTEGER = 0,      /*!< integer with Most Significant Byte first */
-    LSB_INTEGER = 1,      /*!< integer with Least Significant Byte first */
-    SIGNED_INTEGER = 2,   /*!< signed integer */
-    UNSIGNED_INTEGER = 3, /*!< unsigned integer */
-    FLOAT = 4             /*!< unsigned integer */
-};
-
+/* Importing SampleType enum */
+using SampleType = private_fw::intel_adsp::SampleType;
 static const util::EnumHelper<SampleType> &getSampleTypeHelper()
 {
     static const util::EnumHelper<SampleType> helper({
@@ -172,6 +110,20 @@ static const util::EnumHelper<SampleType> &getSampleTypeHelper()
     return helper;
 };
 
+/* AudioDataFormatIpc */
+
+CHECK_SIZE(private_fw::dsp_fw::AudioDataFormatIpc, 24);
+CHECK_MEMBER(private_fw::dsp_fw::AudioDataFormatIpc, sampling_frequency, 0, SamplingFrequency);
+CHECK_MEMBER(private_fw::dsp_fw::AudioDataFormatIpc, bit_depth, 4, BitDepth);
+CHECK_MEMBER(private_fw::dsp_fw::AudioDataFormatIpc, channel_map, 8, ChannelMap);
+CHECK_MEMBER(private_fw::dsp_fw::AudioDataFormatIpc, channel_config, 12, ChannelConfig);
+CHECK_MEMBER(private_fw::dsp_fw::AudioDataFormatIpc, interleaving_style, 16, InterleavingStyle);
+/* The following members can not be checked because they are bitfields
+* - number_of_channels
+* - valid_bit_depth
+* - sample_type
+* - reserved
+*/
 struct AudioDataFormatIpc
 {
     SamplingFrequency sampling_frequency; /*!< Sampling frequency in Hz */
@@ -181,12 +133,12 @@ struct AudioDataFormatIpc
     InterleavingStyle interleaving_style; /*!< The way the samples are interleaved */
     uint8_t number_of_channels;           /*!< Total number of channels. */
     uint8_t valid_bit_depth;              /*!< Valid bit depth in audio samples */
-    SampleType sample_type;               /*!< sample type:
-                                              *  0 - intMSB
-                                              *  1 - intLSB
-                                              *  2 - intSinged
-                                              *  3 - intUnsigned
-                                              *  4 - float  */
+    SampleType sample_type : 8;           /*!< sample type:
+                                            *  0 - intMSB
+                                            *  1 - intLSB
+                                            *  2 - intSinged
+                                            *  3 - intUnsigned
+                                            *  4 - float  */
     uint8_t reserved;                     /*!< padding byte */
 
     bool operator==(const AudioDataFormatIpc &other) const
@@ -207,7 +159,12 @@ struct AudioDataFormatIpc
         reader.read(interleaving_style);
         reader.read(number_of_channels);
         reader.read(valid_bit_depth);
-        reader.read(sample_type);
+
+        /* sample_type is a enum:8 type */
+        uint8_t sample_type_as_byte;
+        reader.read(sample_type_as_byte);
+        sample_type = static_cast<SampleType>(sample_type_as_byte);
+
         reader.read(reserved);
     }
 
@@ -220,21 +177,23 @@ struct AudioDataFormatIpc
         writer.write(interleaving_style);
         writer.write(number_of_channels);
         writer.write(valid_bit_depth);
-        writer.write(sample_type);
+
+        /* sample_type_as_byte is a enum:8 type */
+        writer.write<uint8_t>(sample_type);
+
         writer.write(reserved);
     }
 
     std::string toString() const
     {
         return "config=" + getChannelConfigHelper().toString(channel_config) + "/bit_depth=" +
-               getBitDepthHelper().toString(bit_depth) + "/sample_type=" +
+               std::to_string(bit_depth) + "/sample_type=" +
                getSampleTypeHelper().toString(sample_type) + "/interleaving=" +
                getInterleavingStyleHelper().toString(interleaving_style) + "/channel_count=" +
                std::to_string(number_of_channels) + "/valid_bit_depth=" +
                std::to_string(valid_bit_depth);
     }
 };
-static_assert(sizeof(AudioDataFormatIpc) == 24, "Wrong AudioDataFormatIpc size");
 }
 }
 }

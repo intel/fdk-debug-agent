@@ -132,8 +132,8 @@ void ModuleHandler::getModulesEntries(uint32_t moduleCount,
 
     dsp_fw::ModulesInfo modulesInfo;
     bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                            toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET), moduleInfoSize,
-                            modulesInfo);
+                            dsp_fw::toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET),
+                            moduleInfoSize, modulesInfo);
 
     /** @todo use logging */
     std::cout << "Number of modules found in FW: " << modulesInfo.module_info.size() << std::endl;
@@ -154,7 +154,7 @@ void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandl
     util::Buffer suppliedBuffer(cavsTlvBufferSize, 0xFF);
     util::Buffer returnedBuffer;
     bigCmdModuleAccessIoctl(true, driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                            toParameterId(parameterId), suppliedBuffer, returnedBuffer);
+                            dsp_fw::toParameterId(parameterId), suppliedBuffer, returnedBuffer);
 
     /* Now parse the TLV answer */
     tlv::TlvUnpack unpack(responseHandler, returnedBuffer);
@@ -191,7 +191,7 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount,
     /* Performing ioctl*/
     dsp_fw::PipelinesListInfo pipelineListInfo;
     bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                            toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
+                            dsp_fw::toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
                             parameterSize, pipelineListInfo);
 
     /* Checking returned pipeline count */
@@ -233,8 +233,8 @@ void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
     /* Performing ioctl*/
     dsp_fw::GatewaysInfo gatewaysInfo;
     bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                            toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET), parameterSize,
-                            gatewaysInfo);
+                            dsp_fw::toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
+                            parameterSize, gatewaysInfo);
 
     /* Checking returned gateway count */
     if (gatewaysInfo.gateways.size() > gatewayCount) {
@@ -251,7 +251,7 @@ void ModuleHandler::getModuleInstanceProps(uint16_t moduleId, uint16_t instanceI
 {
     /* Performing ioctl */
     bigGetModuleAccessIoctl(moduleId, instanceId,
-                            toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
+                            dsp_fw::toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
                             maxParameterPayloadSize, props);
 }
 

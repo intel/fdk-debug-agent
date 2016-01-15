@@ -27,6 +27,7 @@
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "Util/EnumHelper.hpp"
+#include "Util/StructureChangeTracking.hpp"
 #include <inttypes.h>
 
 namespace debug_agent
@@ -36,7 +37,8 @@ namespace cavs
 namespace dsp_fw
 {
 
-/* This type exists in the fw header but is not easily includable, so copying it */
+/* Cannot track changes of this type because it is not in the public fw headers, only in private
+ * ones. */
 struct ConnectorNodeId
 {
     union
@@ -114,9 +116,14 @@ struct ConnectorNodeId
 
     void toStream(util::ByteStreamWriter &writer) const { writer.write(val.dw); }
 };
-static_assert(sizeof(ConnectorNodeId) == 4, "Wrong ConnectorNodeId size");
 
-/** This type does not exist in the fw yet */
+/* PinProps */
+
+CHECK_SIZE(private_fw::dsp_fw::PinProps, 32);
+CHECK_MEMBER(private_fw::dsp_fw::PinProps, stream_type, 0, StreamType);
+CHECK_MEMBER(private_fw::dsp_fw::PinProps, format, 4, private_fw::dsp_fw::AudioDataFormatIpc);
+CHECK_MEMBER(private_fw::dsp_fw::PinProps, phys_queue_id, 28, uint32_t);
+
 struct PinProps
 {
     StreamType stream_type;
@@ -145,7 +152,11 @@ struct PinProps
         writer.write(phys_queue_id);
     }
 };
-static_assert(sizeof(PinProps) == 32, "Wrong PinProps size");
+
+/* PinListInfo */
+CHECK_SIZE(private_fw::dsp_fw::PinListInfo, 36);
+CHECK_MEMBER(private_fw::dsp_fw::PinListInfo, pin_count, 0, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::PinListInfo, pin_info, 4, private_fw::dsp_fw::PinProps[1]);
 
 struct PinListInfo
 {
@@ -160,6 +171,26 @@ struct PinListInfo
         writer.writeVector<ArraySizeType>(pin_info);
     }
 };
+
+/* ModuleInstanceProps */
+CHECK_SIZE(private_fw::dsp_fw::ModuleInstanceProps, 124);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, id, 0, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, dp_queue_type, 4, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, queue_alignment, 8, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, cp_usage_mask, 12, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, stack_bytes, 16, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, bss_total_bytes, 20, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, bss_used_bytes, 24, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, ibs_bytes, 28, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, obs_bytes, 32, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, cpc, 36, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, cpc_peak, 40, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, input_queues, 44,
+             private_fw::dsp_fw::PinListInfo);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, output_queues, 80,
+             private_fw::dsp_fw::PinListInfo);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, input_gateway, 116, uint32_t);
+CHECK_MEMBER(private_fw::dsp_fw::ModuleInstanceProps, output_gateway, 120, uint32_t);
 
 struct ModuleInstanceProps
 {
