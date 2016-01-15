@@ -334,6 +334,9 @@ TEST_CASE("DebugAgent/cAVS: internal debug urls")
                                  htmlFile("internal_topology")));
 }
 
+/** Test a parameter id over 32 bit. */
+static const dsp_fw::ParameterId AecParameterId{1LL << 32};
+
 TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
           "(URL: /instance/cavs.module-aec/1/control_parameters)")
 {
@@ -353,9 +356,8 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
     /* Add command for get module parameter */
     uint16_t moduleId = 1;
     uint16_t InstanceId = 1;
-    dsp_fw::ParameterId ParamId{0};
     commands.addGetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                          moduleId, InstanceId, ParamId,
+                                          moduleId, InstanceId, AecParameterId,
                                           aecControlParameterPayload);
     commands.addGetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
                                           moduleId, InstanceId, dsp_fw::ParameterId{25},
@@ -456,9 +458,8 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
     /* Add command to set module parameter */
     uint16_t moduleId = 1;
     uint16_t InstanceId = 1;
-    dsp_fw::ParameterId ParamId{0};
     commands.addSetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                          moduleId, InstanceId, ParamId,
+                                          moduleId, InstanceId, AecParameterId,
                                           aecControlParameterPayload);
 
     commands.addSetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
