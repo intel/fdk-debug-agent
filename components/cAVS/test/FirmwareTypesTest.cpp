@@ -175,20 +175,28 @@ TEST_CASE("FirmwareTypes : ModuleInstanceProps")
                                                       9,
                                                       10,
                                                       11,
+
                                                       input_pins,
                                                       output_pins,
                                                       ConnectorNodeId(12),
                                                       ConnectorNodeId(13)};
 
-    testType(instanceProps, {9, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, 6, 0, 0, 0,
-                             7, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 10, 0, 0, 0, 11, 0, 0, 0,
+    static const Buffer buffer = {9,  0, 1, 0, 2,  0, 0, 0, 3,
+                                  0,  0, 0, 4, 0,  0, 0, 5, 0,
+                                  0,  0, 6, 0, 0,  0, 7, 0, 0,
+                                  0,  8, 0, 0, 0,  9, 0, 0, 0,
+                                  10, 0, 0, 0, 11, 0, 0, 0,
 
-                             1, 0, 0, 0, 1, 0, 0, 0, AUDIOFORMAT_MEMORY, 3, 0, 0, 0,
+                                  1,  0, 0, 0, 1,  0, 0, 0, AUDIOFORMAT_MEMORY,
+                                  3,  0, 0, 0,
 
-                             2, 0, 0, 0, 4, 0, 0, 0, AUDIOFORMAT_MEMORY, 5, 0, 0, 0, 6, 0, 0, 0,
-                             AUDIOFORMAT_MEMORY, 7, 0, 0, 0,
+                                  2,  0, 0, 0, 4,  0, 0, 0, AUDIOFORMAT_MEMORY,
+                                  5,  0, 0, 0, 6,  0, 0, 0, AUDIOFORMAT_MEMORY,
+                                  7,  0, 0, 0,
 
-                             12, 0, 0, 0, 13, 0, 0, 0});
+                                  12, 0, 0, 0, 13, 0, 0, 0};
+
+    testType(instanceProps, buffer);
 }
 
 /** GATEWAY */
