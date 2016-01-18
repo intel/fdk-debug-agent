@@ -86,6 +86,12 @@ target_include_directories(cAVS PUBLIC
 
 )
 
+if (WIN32)
+    # including and exporting OED driver headers
+    target_include_directories(cAVS PUBLIC
+        "${PROJECT_SOURCE_DIR}/external/cAVS/cavs_sw/SW/OEPrivIface")
+endif()
+
 link_poco(cAVS)
 
 #Adding test framework library, currently windows only

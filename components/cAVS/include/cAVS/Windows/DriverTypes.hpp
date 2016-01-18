@@ -22,11 +22,19 @@
 
 #pragma once
 
-#include "cAVS/DspFw/Common.hpp"
+/* Windows types must be included before driver headers */
 #include "cAVS/Windows/WindowsTypes.hpp"
 
+/* Including driver header in a private namespace */
+namespace private_driver
+{
+#include <IIntcPrivateIOCTL.h>
+}
+
+#include "cAVS/DspFw/Common.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/StructureChangeTracking.hpp"
 #include <inttypes.h>
 #include <utility>
 
@@ -38,18 +46,6 @@ namespace windows
 {
 namespace driver
 {
-
-#define IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET                                                         \
-    CTL_CODE(FILE_DEVICE_UNKNOWN, 0x97B, METHOD_BUFFERED, (FILE_READ_ACCESS | FILE_WRITE_ACCESS))
-
-#define IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET                                                          \
-    CTL_CODE(FILE_DEVICE_UNKNOWN, 0x97C, METHOD_OUT_DIRECT, (FILE_READ_ACCESS | FILE_WRITE_ACCESS))
-
-#define IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET                                                         \
-    CTL_CODE(FILE_DEVICE_UNKNOWN, 0x97D, METHOD_BUFFERED, (FILE_READ_ACCESS | FILE_WRITE_ACCESS))
-
-#define IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET                                                          \
-    CTL_CODE(FILE_DEVICE_UNKNOWN, 0x97E, METHOD_OUT_DIRECT, (FILE_READ_ACCESS | FILE_WRITE_ACCESS))
 
 /** By convention the base firmware module id is 0 */
 static const USHORT baseFirwareModuleId = 0;
@@ -63,40 +59,26 @@ static const uint32_t moduleParameterAccessCommandParameterId = 0;
 /** By convention the parameter id of the "LOG_PARAMETERS" feature is 0 */
 static const uint32_t logParametersCommandparameterId = 0;
 
-enum class IOCTL_FEATURE
-{
-    FEATURE_WOV = 0x10000,
-    FEATURE_AEC = 0x20000,
-    FEATURE_MICSELECTOR = 0x30000,
-    FEATURE_AWARENESS = 0x100000,
-    FEATURE_FW_LOGS = 0x200000,
-    FEATURE_PROBE_CAPTURE = 0x210000,
-    FEATURE_PROBE_INJECT = 0x220000,
-    FEATURE_TOPOLOGY_NOTIFICATION = 0x230000,
-    FEATURE_FW_MODULE_PARAM = 0x240000,
-    FEATURE_FW_WAKELOCK = 0x250000
-};
+/* Importing IOCTL_FEATURE enum */
+using IOCTL_FEATURE = private_driver::IOCTL_FEATURE;
 
-enum class IOCTL_LOG_STATE : ULONG
-{
-    STOPPED = 0,
-    STARTED = 1
-};
+/* Importing IOCTL_LOG_STATE enum */
+using IOCTL_LOG_STATE = private_driver::IOCTL_LOG_STATE;
 
-enum class FW_LOG_LEVEL : ULONG
-{
-    LOG_CRITICAL = 2,
-    LOG_HIGH = 3,
-    LOG_MEDIUM = 4,
-    LOG_LOW = 5,
-    LOG_VERBOSE = 6
-};
+/* Importing FW_LOG_LEVEL enum */
+using FW_LOG_LEVEL = private_driver::FW_LOG_LEVEL;
 
-enum class FW_LOG_OUTPUT : ULONG
-{
-    OUTPUT_SRAM = 0, // Log are sent by Firmware to Log Buffer using dedicated DMA
-    OUTPUT_PTI = 1   // Logs are sent by Firmware to PTI using Little Peak.
-};
+/* Importing FW_LOG_OUTPUT enum */
+using FW_LOG_OUTPUT = private_driver::FW_LOG_OUTPUT;
+
+/* Intc_App_Cmd_Header */
+
+CHECK_SIZE(private_driver::Intc_App_Cmd_Header, 20);
+CHECK_MEMBER(private_driver::Intc_App_Cmd_Header, FeatureID, 0, ULONG);
+CHECK_MEMBER(private_driver::Intc_App_Cmd_Header, ParameterID, 4, ULONG);
+CHECK_MEMBER(private_driver::Intc_App_Cmd_Header, Reserved, 8, ULONG);
+CHECK_MEMBER(private_driver::Intc_App_Cmd_Header, SetAsDefault, 12, BOOL);
+CHECK_MEMBER(private_driver::Intc_App_Cmd_Header, DataSize, 16, ULONG);
 
 struct Intc_App_Cmd_Header
 {
@@ -138,6 +120,13 @@ struct Intc_App_Cmd_Header
     }
 };
 
+/* Intc_App_Cmd_Body */
+
+CHECK_SIZE(private_driver::Intc_App_Cmd_Body, 12);
+CHECK_MEMBER(private_driver::Intc_App_Cmd_Body, Status, 0, NTSTATUS);
+CHECK_MEMBER(private_driver::Intc_App_Cmd_Body, Data, 4,
+             private_driver::Intc_App_Cmd_Body::_BodyData);
+
 struct Intc_App_Cmd_Body
 {
     NTSTATUS Status;
@@ -150,6 +139,16 @@ struct Intc_App_Cmd_Body
 
     void toStream(util::ByteStreamWriter &writer) const { writer.write(Status); }
 };
+
+/* IoctlFwModuleParam */
+
+CHECK_SIZE(private_driver::IoctlFwModuleParam, 20);
+CHECK_MEMBER(private_driver::IoctlFwModuleParam, fw_status, 0, ULONG);
+CHECK_MEMBER(private_driver::IoctlFwModuleParam, instance_id, 4, USHORT);
+CHECK_MEMBER(private_driver::IoctlFwModuleParam, module_id, 6, USHORT);
+CHECK_MEMBER(private_driver::IoctlFwModuleParam, module_parameter_id, 8, ULONG);
+CHECK_MEMBER(private_driver::IoctlFwModuleParam, module_parameter_data_size, 12, ULONG);
+CHECK_MEMBER(private_driver::IoctlFwModuleParam, module_parameter_data, 16, UCHAR[1]);
 
 struct IoctlFwModuleParam
 {
@@ -192,6 +191,13 @@ struct IoctlFwModuleParam
         writer.write(module_parameter_data_size);
     }
 };
+
+/* IoctlFwLogsState */
+
+CHECK_SIZE(private_driver::IoctlFwLogsState, 12);
+CHECK_MEMBER(private_driver::IoctlFwLogsState, started, 0, ULONG);
+CHECK_MEMBER(private_driver::IoctlFwLogsState, level, 4, ULONG);
+CHECK_MEMBER(private_driver::IoctlFwLogsState, output, 8, ULONG);
 
 struct IoctlFwLogsState
 {
