@@ -29,6 +29,7 @@
 #include "cAVS/DspFw/Pipeline.hpp"
 #include "cAVS/DspFw/Gateway.hpp"
 #include "cAVS/DspFw/Scheduler.hpp"
+#include "DspFw/Common.hpp"
 #include "cAVS/DspFw/Infrastructure.hpp"
 #include <stdexcept>
 #include <vector>
@@ -90,22 +91,24 @@ public:
                                         dsp_fw::ModuleInstanceProps &props) = 0;
 
     /** set module parameter */
-    virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                    dsp_fw::ParameterId parameterId,
                                     const util::Buffer &parameterPayload) = 0;
 
     /** @return module parameter */
-    virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                    dsp_fw::ParameterId parameterId,
                                     util::Buffer &parameterPayload) = 0;
 
     /** @return extended parameter id that contains the targeted module part id */
-    static uint32_t getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,
-                                           uint32_t parameterInstanceId)
+    static dsp_fw::ParameterId getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,
+                                                      uint32_t parameterInstanceId)
     {
         uint32_t parameterTypeIdAsInt = static_cast<uint32_t>(parameterTypeId);
         assert(parameterTypeIdAsInt < (1 << 8));
         assert(parameterInstanceId < (1 << 24));
 
-        return (parameterTypeIdAsInt & 0xFF) | (parameterInstanceId << 8);
+        return dsp_fw::ParameterId{(parameterTypeIdAsInt & 0xFF) | (parameterInstanceId << 8)};
     }
 
 private:

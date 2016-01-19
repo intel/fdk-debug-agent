@@ -52,9 +52,11 @@ public:
                                  std::vector<dsp_fw::GatewayProps> &gateways) override;
     virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
                                         dsp_fw::ModuleInstanceProps &props) override;
-    virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                    dsp_fw::ParameterId parameterId,
                                     const util::Buffer &parameterPayload) override;
-    virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                    dsp_fw::ParameterId parameterId,
                                     util::Buffer &parameterPayload) override;
 
 private:
@@ -80,15 +82,17 @@ private:
      * @param[in] returnedOutputBuffer the output parameter payload
      */
     void bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint16_t instanceId,
-                                 uint32_t moduleParamId, const util::Buffer &suppliedOutputBuffer,
+                                 dsp_fw::ParameterId moduleParamId,
+                                 const util::Buffer &suppliedOutputBuffer,
                                  util::Buffer &returnedOutputBuffer);
 
     /** Template method that performs a big get and returns the result as supplied parameter
      * type.
      */
     template <typename FirmwareParameterType>
-    void bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instanceId, uint32_t moduleParamId,
-                                 std::size_t fwParameterSize, FirmwareParameterType &result);
+    void bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instanceId,
+                                 dsp_fw::ParameterId moduleParamId, std::size_t fwParameterSize,
+                                 FirmwareParameterType &result);
 };
 }
 }

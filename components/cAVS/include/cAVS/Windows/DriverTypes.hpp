@@ -22,7 +22,9 @@
 
 #pragma once
 
+#include "cAVS/DspFw/Common.hpp"
 #include "cAVS/Windows/WindowsTypes.hpp"
+
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include <inttypes.h>
@@ -154,10 +156,10 @@ struct IoctlFwModuleParam
     ULONG fw_status;
     USHORT instance_id;
     USHORT module_id;
-    ULONG module_parameter_id;
+    dsp_fw::ParameterId module_parameter_id;
     ULONG module_parameter_data_size;
 
-    IoctlFwModuleParam(USHORT moduleId, USHORT instanceId, ULONG moduleParameterId,
+    IoctlFwModuleParam(USHORT moduleId, USHORT instanceId, dsp_fw::ParameterId moduleParameterId,
                        ULONG moduleParameterDataSize)
         : fw_status(0xFFFFFFFF), instance_id(instanceId), module_id(moduleId),
           module_parameter_id(moduleParameterId),

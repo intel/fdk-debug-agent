@@ -124,11 +124,11 @@ public:
     std::unique_ptr<LogStreamResource> tryToAcquireLogStreamResource();
 
     /** Set module parameter */
-    void setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    void setModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
                             const util::Buffer &parameterPayload);
 
     /** Get module parameter */
-    void getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+    void getModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
                             util::Buffer &parameterPayload);
 
     /** @return topology */

@@ -615,7 +615,7 @@ TEST_CASE("Module handling: getting module parameter")
 
     static const uint16_t moduleId = 1;
     static const uint16_t instanceId = 2;
-    static const uint32_t parameterId = 2;
+    static const dsp_fw::ParameterId parameterId{2};
 
     MockedDevice device;
 
@@ -685,7 +685,7 @@ TEST_CASE("Module handling: setting module parameter")
 
     static const uint16_t moduleId = 1;
     static const uint16_t instanceId = 2;
-    static const uint32_t parameterId = 2;
+    static const dsp_fw::ParameterId parameterId{2};
 
     MockedDevice device;
 

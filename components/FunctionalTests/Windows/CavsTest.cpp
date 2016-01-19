@@ -351,12 +351,13 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
     /* Add command for get module parameter */
     uint16_t moduleId = 1;
     uint16_t InstanceId = 1;
-    uint32_t ParamId = 0;
+    dsp_fw::ParameterId ParamId{0};
     commands.addGetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
                                           moduleId, InstanceId, ParamId,
                                           aecControlParameterPayload);
     commands.addGetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                          moduleId, InstanceId, 25, nsControlParameterPayload);
+                                          moduleId, InstanceId, dsp_fw::ParameterId{25},
+                                          nsControlParameterPayload);
     /* Now using the mocked device
     * --------------------------- */
 
@@ -453,13 +454,14 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
     /* Add command to set module parameter */
     uint16_t moduleId = 1;
     uint16_t InstanceId = 1;
-    uint32_t ParamId = 0;
+    dsp_fw::ParameterId ParamId{0};
     commands.addSetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
                                           moduleId, InstanceId, ParamId,
                                           aecControlParameterPayload);
 
     commands.addSetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                          moduleId, InstanceId, 25, nsControlParameterPayload);
+                                          moduleId, InstanceId, dsp_fw::ParameterId{25},
+                                          nsControlParameterPayload);
 
     /* Now using the mocked device
     * --------------------------- */

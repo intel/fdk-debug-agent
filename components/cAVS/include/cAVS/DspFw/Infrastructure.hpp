@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "cAVS/DspFw/Common.hpp"
 #include <inttypes.h>
 
 namespace debug_agent
@@ -196,6 +197,11 @@ enum class BaseFwParams
     POWER_STATE_INFO_GET = 15
 };
 
+static inline ParameterId toParameterId(BaseFwParams param)
+{
+    return ParameterId{static_cast<ParameterId::RawType>(param)};
+}
+
 enum class BaseModuleParams
 {
     /**
@@ -207,6 +213,11 @@ enum class BaseModuleParams
     */
     MOD_INST_ENABLE = 0x3000
 };
+
+static inline ParameterId toParameterId(BaseModuleParams param)
+{
+    return ParameterId{static_cast<ParameterId::RawType>(param)};
+}
 }
 }
 }

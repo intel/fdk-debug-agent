@@ -25,6 +25,7 @@
 #include "Core/Resources.hpp"
 #include "ParameterSerializer/ParameterSerializer.hpp"
 #include "Util/Locker.hpp"
+#include "cAVS/DspFw/Common.hpp"
 #include <memory>
 
 namespace debug_agent
@@ -47,7 +48,7 @@ protected:
     std::map<uint32_t, std::string> getChildren(
         parameterSerializer::ParameterSerializer::ParameterKind parameterKind) const;
     uint16_t getInstanceId(const rest::Request &request) const;
-    uint32_t getParamId(const std::string parameterName) const;
+    cavs::dsp_fw::ParameterId getParamId(const std::string parameterName) const;
 
     util::Locker<parameterSerializer::ParameterSerializer> &mParameterSerializer;
     const std::string mModuleName;

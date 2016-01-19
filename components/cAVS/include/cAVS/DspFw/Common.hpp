@@ -24,6 +24,7 @@
 
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/WrappedRaw.hpp"
 #include <inttypes.h>
 #include <iostream>
 #include <string>
@@ -37,6 +38,18 @@ namespace dsp_fw
 
 /* All firmware array sizes are stored on 32 bits unsigned integer*/
 using ArraySizeType = uint32_t;
+
+namespace detail
+{
+/** Unique trait to for parameterId. */
+struct ParameterIdTrait
+{
+    using RawType = uint32_t;
+};
+
+} // namespace detail
+
+using ParameterId = util::WrappedRaw<detail::ParameterIdTrait>;
 
 /* This compound module id contains a type id and an instance id */
 struct CompoundModuleId

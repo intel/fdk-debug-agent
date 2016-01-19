@@ -36,7 +36,7 @@ namespace windows
 {
 
 void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint16_t instanceId,
-                                            uint32_t moduleParamId,
+                                            dsp_fw::ParameterId moduleParamId,
                                             const util::Buffer &suppliedOutputBuffer,
                                             util::Buffer &returnedOutputBuffer)
 {
@@ -99,7 +99,8 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
 
 template <typename FirmwareParameterType>
 void ModuleHandler::bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instanceId,
-                                            uint32_t moduleParamId, std::size_t fwParameterSize,
+                                            dsp_fw::ParameterId moduleParamId,
+                                            std::size_t fwParameterSize,
                                             FirmwareParameterType &result)
 {
     util::Buffer suppliedBuffer(fwParameterSize, 0xFF);
@@ -131,8 +132,8 @@ void ModuleHandler::getModulesEntries(uint32_t moduleCount,
 
     dsp_fw::ModulesInfo modulesInfo;
     bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                            static_cast<uint32_t>(dsp_fw::BaseFwParams::MODULES_INFO_GET),
-                            moduleInfoSize, modulesInfo);
+                            toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET), moduleInfoSize,
+                            modulesInfo);
 
     /** @todo use logging */
     std::cout << "Number of modules found in FW: " << modulesInfo.module_info.size() << std::endl;
@@ -153,7 +154,7 @@ void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandl
     util::Buffer suppliedBuffer(cavsTlvBufferSize, 0xFF);
     util::Buffer returnedBuffer;
     bigCmdModuleAccessIoctl(true, driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                            static_cast<uint32_t>(parameterId), suppliedBuffer, returnedBuffer);
+                            toParameterId(parameterId), suppliedBuffer, returnedBuffer);
 
     /* Retrieving properties */
     std::size_t tlvBufferSize = returnedBuffer.size();
@@ -193,7 +194,7 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t
     /* Performing ioctl*/
     dsp_fw::PipelinesListInfo pipelineListInfo;
     bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                            static_cast<uint32_t>(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
+                            toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
                             parameterSize, pipelineListInfo);
 
     /* Checking returned pipeline count */
@@ -209,7 +210,7 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount, std::vector<uint32_t
 void ModuleHandler::getPipelineProps(uint32_t pipelineId, dsp_fw::PplProps &props)
 {
     /* Using extended parameter id to supply the pipeline id*/
-    uint32_t paramId = getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
+    auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
 
     /* Performing ioctl*/
     bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId, paramId,
@@ -219,7 +220,7 @@ void ModuleHandler::getPipelineProps(uint32_t pipelineId, dsp_fw::PplProps &prop
 void ModuleHandler::getSchedulersInfo(uint32_t coreId, dsp_fw::SchedulersInfo &schedulers)
 {
     /* Using extended parameter id to supply the core id*/
-    uint32_t paramId = getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
+    auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
 
     /* Performing ioctl*/
     bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId, paramId,
@@ -235,8 +236,8 @@ void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
     /* Performing ioctl*/
     dsp_fw::GatewaysInfo gatewaysInfo;
     bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
-                            static_cast<uint32_t>(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
-                            parameterSize, gatewaysInfo);
+                            toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET), parameterSize,
+                            gatewaysInfo);
 
     /* Checking returned gateway count */
     if (gatewaysInfo.gateways.size() > gatewayCount) {
@@ -253,11 +254,12 @@ void ModuleHandler::getModuleInstanceProps(uint16_t moduleId, uint16_t instanceI
 {
     /* Performing ioctl */
     bigGetModuleAccessIoctl(moduleId, instanceId,
-                            static_cast<uint32_t>(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
+                            toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
                             maxParameterPayloadSize, props);
 }
 
-void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                       dsp_fw::ParameterId parameterId,
                                        const util::Buffer &parameterPayload)
 {
     util::Buffer returnedBuffer;
@@ -267,7 +269,8 @@ void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId, u
                             returnedBuffer);
 }
 
-void ModuleHandler::getModuleParameter(uint16_t moduleId, uint16_t instanceId, uint32_t parameterId,
+void ModuleHandler::getModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                       dsp_fw::ParameterId parameterId,
                                        util::Buffer &parameterPayload)
 {
     util::Buffer suppliedBuffer(maxParameterPayloadSize, 0xFF);

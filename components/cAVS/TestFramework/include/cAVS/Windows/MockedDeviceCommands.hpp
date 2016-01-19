@@ -245,7 +245,7 @@ public:
     */
     void addSetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
                                       dsp_fw::IxcStatus returnedFirmwareStatus, uint16_t moduleId,
-                                      uint16_t instanceId, uint32_t parameterId,
+                                      uint16_t instanceId, dsp_fw::ParameterId parameterId,
                                       const util::Buffer &parameterPayload);
 
     /** Add a get module parameter command.
@@ -267,7 +267,7 @@ public:
     */
     void addGetModuleParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
                                       dsp_fw::IxcStatus returnedFirmwareStatus, uint16_t moduleId,
-                                      uint16_t instanceId, uint32_t parameterId,
+                                      uint16_t instanceId, dsp_fw::ParameterId parameterId,
                                       const util::Buffer &parameterPayload);
 
 private:
@@ -286,7 +286,7 @@ private:
 
     /** Common method to add "module access param" ioctl command */
     void addModuleParameterCommand(Command command, uint16_t moduleId, uint16_t instanceId,
-                                   uint32_t parameterTypeId,
+                                   dsp_fw::ParameterId parameterTypeId,
                                    const util::Buffer &expectedParameterContent,
                                    const util::Buffer &returnedParameterContent, bool ioctlSuccess,
                                    NTSTATUS returnedDriverStatus,
@@ -299,7 +299,7 @@ private:
      */
     template <typename FirmwareParameterType>
     void addGetModuleParameterCommand(uint16_t moduleId, uint16_t instanceId,
-                                      uint32_t parameterTypeId,
+                                      dsp_fw::ParameterId parameterTypeId,
                                       std::size_t expectedOutputBufferSize,
                                       const FirmwareParameterType &parameter, bool ioctlSuccess,
                                       NTSTATUS returnedDriverStatus,
