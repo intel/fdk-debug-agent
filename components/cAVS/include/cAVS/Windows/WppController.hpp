@@ -21,7 +21,7 @@
 */
 #pragma once
 
-#include "cAVS/Windows/WppCommon.hpp"
+#include "cAVS/Windows/WppTypes.hpp"
 #include "cAVS/Windows/WindowsTypes.hpp"
 #include <evntrace.h>
 #include <mutex>
@@ -75,27 +75,6 @@ private:
         SystemTime = 2,
         CPUCycleCount = 3
     };
-
-    /** Flag used to filter firmware logs
-     *
-     * Wpp use flags to specify the log source: (from SW\HDAudioOEDrv\HDAudioOEDrv\Log.h)
-     *
-     * #define WPP_CONTROL_GUIDS \
-     *     WPP_DEFINE_CONTROL_GUID(\
-     *     BusCtrlGuid, (b3a109ec, 1cb3, 4947, 95ed, 431033eeb1b4), \
-     *     \
-     *     WPP_DEFINE_BIT(TRACE_DRIVER)    \
-     *     WPP_DEFINE_BIT(TRACE_QUEUE)             \
-     *     WPP_DEFINE_BIT(OE_PIPENODE)             \
-     *     WPP_DEFINE_BIT(OE_PIPELINE)             \
-     *     WPP_DEFINE_BIT(OE_IFACE)                \
-     *     WPP_DEFINE_BIT(OE_FW)                   \
-     *     WPP_DEFINE_BIT(OE_HW)                   \
-     *     ...
-     *
-     * Therefore the firmware flag is 6th bit of the mask: 1 << 5
-     */
-    static const ULONG fwLogFlag = 1 << 5;
 
     /** Wpp requires a structure that contains an EVENT_TRACE_PROPERTIES instance followed by
      * the session name, then the log file name.

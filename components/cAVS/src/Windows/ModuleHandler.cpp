@@ -131,7 +131,7 @@ void ModuleHandler::getModulesEntries(uint32_t moduleCount,
     std::size_t moduleInfoSize = dsp_fw::ModulesInfo::getAllocationSize(moduleCount);
 
     dsp_fw::ModulesInfo modulesInfo;
-    bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
                             dsp_fw::toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET),
                             moduleInfoSize, modulesInfo);
 
@@ -153,7 +153,7 @@ void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandl
 {
     util::Buffer suppliedBuffer(cavsTlvBufferSize, 0xFF);
     util::Buffer returnedBuffer;
-    bigCmdModuleAccessIoctl(true, driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+    bigCmdModuleAccessIoctl(true, dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
                             dsp_fw::toParameterId(parameterId), suppliedBuffer, returnedBuffer);
 
     /* Now parse the TLV answer */
@@ -190,7 +190,7 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount,
 
     /* Performing ioctl*/
     dsp_fw::PipelinesListInfo pipelineListInfo;
-    bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
                             dsp_fw::toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
                             parameterSize, pipelineListInfo);
 
@@ -210,7 +210,7 @@ void ModuleHandler::getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::
     auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
 
     /* Performing ioctl*/
-    bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId, paramId,
+    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId, paramId,
                             maxParameterPayloadSize, props);
 }
 
@@ -220,7 +220,7 @@ void ModuleHandler::getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersI
     auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
 
     /* Performing ioctl*/
-    bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId, paramId,
+    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId, paramId,
                             maxParameterPayloadSize, schedulers);
 }
 
@@ -232,7 +232,7 @@ void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
 
     /* Performing ioctl*/
     dsp_fw::GatewaysInfo gatewaysInfo;
-    bigGetModuleAccessIoctl(driver::baseFirwareModuleId, driver::baseFirwareInstanceId,
+    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
                             dsp_fw::toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
                             parameterSize, gatewaysInfo);
 

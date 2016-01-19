@@ -45,7 +45,7 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/ModuleHandler.hpp
     include/cAVS/Windows/WindowsTypes.hpp
     include/cAVS/Windows/WppConsumer.hpp
-    include/cAVS/Windows/WppCommon.hpp
+    include/cAVS/Windows/WppTypes.hpp
     include/cAVS/Windows/WppController.hpp
     include/cAVS/Windows/WppLogEntryListener.hpp
     include/cAVS/Windows/WppClient.hpp

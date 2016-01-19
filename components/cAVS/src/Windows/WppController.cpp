@@ -30,9 +30,8 @@ namespace cavs
 namespace windows
 {
 
-/* GUID for audio dsp log control */
-static const GUID AudioDspLogControlGuid = {
-    0xB3A109EC, 0x1CB3, 0x4947, {0x95, 0xED, 0x43, 0x10, 0x33, 0xEE, 0xB1, 0xB4}};
+using namespace common_wpp_types;
+using namespace controller_wpp_types;
 
 WppController::TraceProperties::TraceProperties()
 {

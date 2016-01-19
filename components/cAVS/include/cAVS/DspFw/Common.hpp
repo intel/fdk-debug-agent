@@ -67,6 +67,12 @@ struct ParameterIdTrait
 
 using ParameterId = util::WrappedRaw<detail::ParameterIdTrait>;
 
+/** By convention the base firmware module id is 0 */
+static const uint16_t baseFirwareModuleId = 0;
+
+/** By convention the base firmware instance id is 0 */
+static const uint16_t baseFirwareInstanceId = 0;
+
 /* This compound module id contains a type id and an instance id */
 struct CompoundModuleId
 {

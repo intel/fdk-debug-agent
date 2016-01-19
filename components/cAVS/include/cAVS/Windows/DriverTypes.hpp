@@ -47,12 +47,6 @@ namespace windows
 namespace driver
 {
 
-/** By convention the base firmware module id is 0 */
-static const USHORT baseFirwareModuleId = 0;
-
-/** By convention the base firmware instance id is 0 */
-static const USHORT baseFirwareInstanceId = 0;
-
 /** By convention the parameter id of the "MODULE PARAMETER ACCESS" feature is 0 */
 static const uint32_t moduleParameterAccessCommandParameterId = 0;
 

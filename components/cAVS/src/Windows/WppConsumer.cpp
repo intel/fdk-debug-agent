@@ -29,9 +29,8 @@ namespace cavs
 namespace windows
 {
 
-/** GUID of the log provider */
-static const GUID AudioDspProviderGuid = {
-    0xDB264037, 0x6BA1, 0x4DC0, {0xAE, 0x16, 0x5C, 0x60, 0xAD, 0x47, 0x0E, 0xDD}};
+using namespace common_wpp_types;
+using namespace consumer_wpp_types;
 
 VOID WINAPI WppConsumer::ProcessWppEvent(PEVENT_RECORD pEvent)
 {
