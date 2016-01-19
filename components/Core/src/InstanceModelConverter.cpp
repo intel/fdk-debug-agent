@@ -54,7 +54,7 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
     addInstanceCollection(collectionMap, typeName_task, createTask());
 
     /* Module instances*/
-    uint32_t moduleId = 0;
+    uint16_t moduleId = 0;
     for (auto it = mSystem.getModuleEntries().begin(); it != mSystem.getModuleEntries().end();
          ++moduleId, ++it) {
         addInstanceCollection(collectionMap, findModuleEntryName(moduleId), createModule(moduleId));
@@ -334,7 +334,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createCore()
     return coll;
 }
 
-std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint32_t requestedModuleId)
+std::shared_ptr<BaseCollection> InstanceModelConverter::createModule(uint16_t requestedModuleId)
 {
     auto coll = std::make_shared<ComponentCollection>();
     for (auto &moduleInstanceEntry : mTopology.moduleInstances) {

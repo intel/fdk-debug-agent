@@ -51,7 +51,7 @@ private:
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createGateway(
         const cavs::dsp_fw::ConnectorNodeId::Type &gatewayType);
 
-    std::shared_ptr<ifdk_objects::instance::BaseCollection> createModule(uint32_t moduleId);
+    std::shared_ptr<ifdk_objects::instance::BaseCollection> createModule(uint16_t moduleId);
 
     std::shared_ptr<ifdk_objects::instance::RefCollection> createModuleRef(
         const std::vector<cavs::dsp_fw::CompoundModuleId> &compoundIdList);

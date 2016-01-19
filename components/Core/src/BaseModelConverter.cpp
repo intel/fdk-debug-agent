@@ -65,7 +65,7 @@ const std::string BaseModelConverter::logServiceDescription = "cAVS log service"
 
 const std::vector<std::string> BaseModelConverter::staticServiceTypes = {logServiceTypeName};
 
-const dsp_fw::ModuleEntry &BaseModelConverter::findModuleEntry(uint32_t moduleId)
+const dsp_fw::ModuleEntry &BaseModelConverter::findModuleEntry(uint16_t moduleId)
 {
     const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
     if (moduleId > entries.size()) {
@@ -75,7 +75,7 @@ const dsp_fw::ModuleEntry &BaseModelConverter::findModuleEntry(uint32_t moduleId
     return entries[moduleId];
 }
 
-std::string BaseModelConverter::findModuleEntryName(uint32_t moduleId)
+std::string BaseModelConverter::findModuleEntryName(uint16_t moduleId)
 {
     const dsp_fw::ModuleEntry &entry = findModuleEntry(moduleId);
 
