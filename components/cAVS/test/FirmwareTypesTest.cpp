@@ -235,6 +235,7 @@ TEST_CASE("FirmwareTypes : ModuleType")
 TEST_CASE("FirmwareTypes : ModuleEntry and ModulesInfo")
 {
     const ModuleEntry module{1,
+                             0,
                              {0, 1, 2, 3, 4, 5, 6, 7},
                              {1, 2, 3, 4},
                              {5},

@@ -109,18 +109,11 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
     html.paragraph("Module count: " + std::to_string(entries.size()));
 
     /* Module list column names */
-    std::vector<std::string> columns = {"module_id",
-                                        "name",
-                                        "uuid",
-                                        "struct_id",
-                                        "type",
-                                        "hash",
-                                        "entry_point",
-                                        "cfg_offset",
-                                        "cfg_count",
-                                        "affinity_mask",
-                                        "intance_max_count",
-                                        "instance_stack_size"};
+    std::vector<std::string> columns = {
+        "module_id",          "name",      "uuid",          "module_id",
+        "state_flags",        "type",      "hash",          "entry_point",
+        "cfg_offset",         "cfg_count", "affinity_mask", "intance_max_count",
+        "instance_stack_size"};
 
     /* Adding segment column names */
     for (std::size_t i = 0; i < segmentCount; ++i) {
@@ -146,7 +139,8 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
         uuid.fromOtherUuidType(entry.uuid);
         html.cell(uuid.toString());
 
-        html.cell(entry.struct_id);
+        html.cell(entry.module_id);
+        html.cell(entry.state_flags);
         html.cell(entry.type.ul);
         html.cell(hashToString(entry.hash));
         html.cell(entry.entry_point);

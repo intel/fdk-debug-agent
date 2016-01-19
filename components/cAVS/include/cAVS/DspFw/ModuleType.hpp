@@ -129,7 +129,8 @@ public:
     static const std::size_t DEFAULT_HASH_SHA256_LEN = 32;
     static const std::size_t UUID_LEN = 4;
 
-    uint32_t struct_id;
+    uint16_t module_id;
+    uint16_t state_flags;
     uint8_t name[MAX_MODULE_NAME_LEN];
     uint32_t uuid[UUID_LEN];
     ModuleType type; // ModuleType
@@ -145,7 +146,7 @@ public:
 
     bool operator==(const ModuleEntry &other) const
     {
-        return struct_id == other.struct_id &&
+        return module_id == other.module_id && state_flags == other.state_flags &&
                isArrayEqual(name, other.name, MAX_MODULE_NAME_LEN) &&
                isArrayEqual(uuid, other.uuid, UUID_LEN) && type == other.type &&
                isArrayEqual(hash, other.hash, DEFAULT_HASH_SHA256_LEN) &&
@@ -158,7 +159,8 @@ public:
 
     void fromStream(util::ByteStreamReader &reader)
     {
-        reader.read(struct_id);
+        reader.read(module_id);
+        reader.read(state_flags);
         reader.readArray(name, MAX_MODULE_NAME_LEN);
         reader.readArray(uuid, UUID_LEN);
         reader.read(type);
@@ -177,7 +179,8 @@ public:
 
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.write(struct_id);
+        writer.write(module_id);
+        writer.write(state_flags);
         writer.writeArray(name, MAX_MODULE_NAME_LEN);
         writer.writeArray(uuid, UUID_LEN);
         writer.write(type);
