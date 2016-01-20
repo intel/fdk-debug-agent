@@ -244,5 +244,41 @@ void System::getTopology(Topology &topology)
     /* Compute links */
     topology.computeLinks();
 }
+
+void System::setProberState(Prober::State state)
+{
+    try {
+        mDriver->getProber().setState(state);
+    } catch (Logger::Exception &e) {
+        throw Exception("Unable to set probe service state: " + std::string(e.what()));
+    }
+}
+
+Prober::State System::getProberState()
+{
+    try {
+        return mDriver->getProber().getState();
+    } catch (Logger::Exception &e) {
+        throw Exception("Unable to get probe service state: " + std::string(e.what()));
+    }
+}
+
+void System::setSessionProbes(const std::vector<Prober::ProbeConfig> probes)
+{
+    try {
+        mDriver->getProber().setSessionProbes(probes);
+    } catch (Logger::Exception &e) {
+        throw Exception("Unable to set session probes: " + std::string(e.what()));
+    }
+}
+
+std::vector<Prober::ProbeConfig> System::getSessionProbes()
+{
+    try {
+        return mDriver->getProber().getSessionProbes();
+    } catch (Logger::Exception &e) {
+        throw Exception("Unable to get session probes: " + std::string(e.what()));
+    }
+}
 }
 }

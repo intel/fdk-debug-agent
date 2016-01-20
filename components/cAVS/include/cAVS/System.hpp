@@ -24,6 +24,7 @@
 #include "cAVS/Driver.hpp"
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/Topology.hpp"
+#include "cAVS/Prober.hpp"
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -133,6 +134,34 @@ public:
 
     /** @return topology */
     void getTopology(Topology &topology);
+
+    /** Set the state of the probing service.
+     * State transitions must be respected (see SwAS)
+     * @throw System::Exception
+     */
+    void setProberState(Prober::State state);
+
+    /**
+     * Get the state of the probing service
+     * @throw System::Exception if an error occurs
+     */
+    Prober::State getProberState();
+
+    /** Set probes for the future session.
+     *
+     * Probe service state shall be 'Owned'.
+     *
+     * @throw System::Exception
+     */
+    void setSessionProbes(const std::vector<Prober::ProbeConfig> probes);
+
+    /** Get probes for the current/future session.
+     *
+     * Probe service state shall be in 'Owned, Allocated, Running'.
+     *
+     * @throw System::Exception
+     */
+    std::vector<Prober::ProbeConfig> getSessionProbes();
 
     /** Stop internal threads and unblock consumer threads */
     void stop() NOEXCEPT { mDriver->stop(); }
