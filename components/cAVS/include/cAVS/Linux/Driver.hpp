@@ -40,7 +40,8 @@ class Driver final : public cavs::Driver
 {
 public:
     cavs::Logger &getLogger() override { return mLogger; }
-    ModuleHandler &getModuleHandler() override { return mModuleHandler; }
+    cavs::ModuleHandler &getModuleHandler() override { return mModuleHandler; }
+    cavs::Prober &getProber() override { return mProber; }
 
 private:
     /* Will be replaced by the true implementation*/
@@ -83,8 +84,32 @@ private:
         }
     };
 
+    /* Will be replaced by the true implementation*/
+    class DummyProber : public Prober
+    {
+    public:
+        void setState(State state) override {}
+
+        State getState() override { return State::Idle; }
+
+        void setSessionProbes(const std::vector<ProbeConfig> probes) override {}
+
+        std::vector<ProbeConfig> getSessionProbes() override { return std::vector<ProbeConfig>(); }
+
+        std::unique_ptr<util::Buffer> dequeueExtractionBlock(uint32_t probeIndex) override
+        {
+            return nullptr;
+        }
+
+        bool enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer) override
+        {
+            return false;
+        }
+    };
+
     Logger mLogger;
     DummyModuleHandler mModuleHandler;
+    DummyProber mProber;
 };
 }
 }

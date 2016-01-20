@@ -21,37 +21,31 @@
 */
 #pragma once
 
-#include "cAVS/Logger.hpp"
-#include "cAVS/ModuleHandler.hpp"
 #include "cAVS/Prober.hpp"
+#include "cAVS/Windows/Device.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
+namespace windows
+{
 
-/**
- * Defines the cavs::Driver interface abstracting the Driver API (Linux/DebugFS or Windows/IOCTL).
- */
-class Driver
+class Prober : public cavs::Prober
 {
 public:
-    Driver() = default;
-    virtual ~Driver() = default;
+    Prober(Device &device) : mDevice(device) {}
 
-    virtual Logger &getLogger() = 0;
-
-    virtual ModuleHandler &getModuleHandler() = 0;
-
-    virtual Prober &getProber() = 0;
-
-    /** Stop threads and unblock consumer threads, currently only logging is concerned. */
-    void stop() NOEXCEPT { getLogger().stop(); }
+    void setState(State state) override;
+    State getState() override;
+    void setSessionProbes(const std::vector<ProbeConfig> probes) override;
+    std::vector<ProbeConfig> getSessionProbes() override;
+    std::unique_ptr<util::Buffer> dequeueExtractionBlock(uint32_t probeIndex) override;
+    bool enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer) override;
 
 private:
-    /* Make this class non copyable */
-    Driver(const Driver &) = delete;
-    Driver &operator=(const Driver &) = delete;
+    Device &mDevice;
 };
-};
-};
+}
+}
+}

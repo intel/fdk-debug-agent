@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -21,37 +21,48 @@
 */
 #pragma once
 
-#include "cAVS/Logger.hpp"
-#include "cAVS/ModuleHandler.hpp"
-#include "cAVS/Prober.hpp"
+#include "cAVS/Windows/Prober.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
-
-/**
- * Defines the cavs::Driver interface abstracting the Driver API (Linux/DebugFS or Windows/IOCTL).
- */
-class Driver
+namespace windows
 {
-public:
-    Driver() = default;
-    virtual ~Driver() = default;
 
-    virtual Logger &getLogger() = 0;
+void Prober::setState(State state)
+{
+    /* TO DO */
+}
 
-    virtual ModuleHandler &getModuleHandler() = 0;
+Prober::State Prober::getState()
+{
+    /* TO DO */
+    return State::Idle;
+}
 
-    virtual Prober &getProber() = 0;
+void Prober::setSessionProbes(const std::vector<ProbeConfig> probes)
+{
+    /* TO DO */
+}
 
-    /** Stop threads and unblock consumer threads, currently only logging is concerned. */
-    void stop() NOEXCEPT { getLogger().stop(); }
+std::vector<Prober::ProbeConfig> Prober::getSessionProbes()
+{
+    /* TO DO */
+    return std::vector<ProbeConfig>();
+}
 
-private:
-    /* Make this class non copyable */
-    Driver(const Driver &) = delete;
-    Driver &operator=(const Driver &) = delete;
-};
-};
-};
+std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(uint32_t probeIndex)
+{
+    /* TO DO */
+    return nullptr;
+}
+
+bool Prober::enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer)
+{
+    /* TO DO */
+    return false;
+}
+}
+}
+}
