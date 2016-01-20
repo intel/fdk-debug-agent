@@ -23,7 +23,8 @@
 #pragma once
 
 #include "Rest/Response.hpp"
-#include <Poco/MemoryStream.h>
+#include <Poco/StreamCopier.h>
+#include <memory>
 #include <istream>
 
 namespace debug_agent
