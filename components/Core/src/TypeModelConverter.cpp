@@ -51,8 +51,8 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
     addSubsystemSubType(typeMap, createCore());
 
     /* modules */
-    for (uint16_t moduleId = 0; moduleId < mSystem.getModuleEntries().size(); ++moduleId) {
-        addSubsystemSubType(typeMap, createModule(moduleId));
+    for (auto &module : mSystem.getModuleEntries()) {
+        addSubsystemSubType(typeMap, createModule(module.module_id));
     }
 
     /* gateways */
@@ -131,8 +131,8 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     /* Modules*/
     auto compColl = std::make_shared<ComponentRefCollection>(collectionName_module);
 
-    for (uint16_t i = 0; i < mSystem.getModuleEntries().size(); ++i) {
-        std::string moduleName = findModuleEntryName(i);
+    for (auto &module : mSystem.getModuleEntries()) {
+        std::string moduleName = findModuleEntryName(module.module_id);
 
         compColl->add(ComponentRef(moduleName));
 
@@ -153,8 +153,8 @@ std::shared_ptr<Type> TypeModelConverter::createPipe()
     /* Modules*/
     auto compColl = std::make_shared<ComponentRefCollection>(collectionName_module);
 
-    for (uint16_t i = 0; i < mSystem.getModuleEntries().size(); ++i) {
-        std::string moduleName = findModuleEntryName(i);
+    for (auto &module : mSystem.getModuleEntries()) {
+        std::string moduleName = findModuleEntryName(module.module_id);
 
         compColl->add(ComponentRef(moduleName));
     }
@@ -178,8 +178,8 @@ std::shared_ptr<Type> TypeModelConverter::createTask()
     /* Modules*/
     auto compColl = std::make_shared<ComponentRefCollection>(collectionName_module);
 
-    for (uint16_t i = 0; i < mSystem.getModuleEntries().size(); ++i) {
-        std::string moduleName = findModuleEntryName(i);
+    for (auto &module : mSystem.getModuleEntries()) {
+        std::string moduleName = findModuleEntryName(module.module_id);
 
         compColl->add(ComponentRef(moduleName));
     }
@@ -215,9 +215,6 @@ std::shared_ptr<Type> TypeModelConverter::createGateway(const std::string &name)
 
 std::shared_ptr<Type> TypeModelConverter::createModule(uint16_t id)
 {
-    /* Asserting because id is the result of iteration in [0..mSystem.getModuleEntries().size()[*/
-    assert(id < mSystem.getModuleEntries().size());
-
     auto module = std::make_shared<Component>();
     auto name = findModuleEntryName(id);
 

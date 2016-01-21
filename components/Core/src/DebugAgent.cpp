@@ -91,7 +91,6 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
                             std::make_shared<InstanceResource>(mInstanceModel));
 
     /* Create one resource instance for each module type*/
-    uint16_t moduleId = 0;
     for (const cavs::dsp_fw::ModuleEntry &entry : mSystem.getModuleEntries()) {
         std::string moduleName =
             StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
@@ -99,14 +98,12 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
         dispatcher->addResource(
             "/instance/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
             std::make_shared<ControlParametersModuleInstanceResource>(mSystem, mParameterSerializer,
-                                                                      moduleName, moduleId));
+                                                                      moduleName, entry.module_id));
 
         dispatcher->addResource(
             "/type/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
             std::make_shared<ControlParametersModuleTypeResource>(mSystem, mParameterSerializer,
-                                                                  moduleName, moduleId));
-
-        moduleId++;
+                                                                  moduleName, entry.module_id));
     }
 
     /* Refresh special case*/

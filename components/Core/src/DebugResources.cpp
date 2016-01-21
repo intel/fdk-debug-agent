@@ -125,11 +125,10 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
 
     html.beginTable(columns);
 
-    std::size_t moduleId = 0;
     for (auto &entry : entries) {
         html.beginRow();
 
-        html.cell(moduleId);
+        html.cell(entry.module_id);
 
         std::string name(
             util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name)));
@@ -157,8 +156,6 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
         }
 
         html.endRow();
-
-        moduleId++;
     }
 
     html.endTable();
@@ -361,14 +358,10 @@ void TopologyDebugResource::dumpModuleInstances(
 
         const dsp_fw::ModuleInstanceProps &module = entry.second;
 
-        std::string moduleTypeName;
-        if (module.id.moduleId < mSystem.getModuleEntries().size()) {
-            const dsp_fw::ModuleEntry &entry = mSystem.getModuleEntries()[module.id.moduleId];
-            moduleTypeName =
-                StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
-        } else {
-            moduleTypeName = "<wrong module id>";
-        }
+        const dsp_fw::ModuleEntry &moduleEntry = mSystem.findModuleEntry(module.id.moduleId);
+
+        std::string moduleTypeName =
+            StringHelper::getStringFromFixedSizeArray(moduleEntry.name, sizeof(moduleEntry.name));
 
         html.cell(module.id.toString());
         html.cell(module.id.moduleId);

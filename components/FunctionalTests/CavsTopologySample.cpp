@@ -290,6 +290,7 @@ void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> 
             /* filling four bytes with i value */
             intValue = (i << 24) | (i << 16) | (i << 8) | i;
         }
+        entry.module_id = i;
 
         modules.push_back(entry);
         ++i;

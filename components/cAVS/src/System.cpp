@@ -96,6 +96,15 @@ const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const NOEXCEP
     return mModuleEntries;
 }
 
+const dsp_fw::ModuleEntry &System::findModuleEntry(uint16_t moduleId) const
+{
+    for (auto &module : mModuleEntries) {
+        if (module.module_id == moduleId)
+            return module;
+    }
+    throw Exception("moduleId: " + std::to_string(moduleId) + " not found");
+}
+
 const dsp_fw::FwConfig &System::getFwConfig() const NOEXCEPT
 {
     return mFwConfig;
