@@ -1,5 +1,5 @@
 <service_collection>
-    <service Direction="Outgoing" Id="0" Type="fwlogs">
+    <service Id="0" Type="fwlogs">
         <info_parameters/>
         <control_parameters/>
         <parents>

@@ -60,15 +60,6 @@ void InstanceDeserializer::enter(System &instance)
 void InstanceDeserializer::enter(Service &instance)
 {
     pushElement(instance);
-
-    std::string directionName = getStringAttribute(InstanceTraits<Service>::attributeDirection);
-
-    Service::Direction direction;
-    if (!Service::directionHelper().fromString(directionName, direction)) {
-        throw Exception("Invalid service direction: " + directionName);
-    }
-
-    instance.setDirection(direction);
 }
 
 void InstanceDeserializer::enter(EndPoint &instance)

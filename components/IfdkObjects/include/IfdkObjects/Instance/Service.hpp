@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -40,29 +40,9 @@ private:
     using base = Instance;
 
 public:
-    /** Service direction */
-    enum class Direction
-    {
-        Unknown,
-        Outgoing,
-        Incoming
-    };
-
-    /** enum helper (string conversion, type validation) for Direction enum  */
-    static const util::EnumHelper<Direction> &directionHelper()
-    {
-        static util::EnumHelper<Direction> helper({
-            {Direction::Unknown, "Unknown"},
-            {Direction::Outgoing, "Outgoing"},
-            {Direction::Incoming, "Incoming"},
-        });
-        return helper;
-    }
-
     Service() = default;
-    explicit Service(const std::string &typeName, const std::string &instanceId,
-                     Direction direction)
-        : base(typeName, instanceId), mDirection(direction)
+    explicit Service(const std::string &typeName, const std::string &instanceId)
+        : base(typeName, instanceId)
     {
     }
     explicit Service(const Service &other) = default;
@@ -80,10 +60,6 @@ public:
         acceptCommon(*this, visitor);
     }
 
-    Direction getDirection() const { return mDirection; }
-
-    void setDirection(Direction dir) { mDirection = dir; }
-
 protected:
     virtual bool equalsTo(const Instance &other) const noexcept override
     {
@@ -96,7 +72,7 @@ protected:
             return false;
         }
 
-        return mDirection == otherServ->mDirection;
+        return true;
     }
 
 private:
@@ -109,8 +85,6 @@ private:
 
         visitor.leave(true);
     }
-
-    Direction mDirection = Direction::Unknown;
 };
 }
 }

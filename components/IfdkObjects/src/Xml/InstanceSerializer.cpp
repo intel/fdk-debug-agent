@@ -61,10 +61,7 @@ void InstanceSerializer::enter(const System &instance)
 
 void InstanceSerializer::enter(const Service &instance)
 {
-    std::string directionName = Service::directionHelper().toString(instance.getDirection());
-
     pushElement(instance);
-    setAttribute(InstanceTraits<Service>::attributeDirection, directionName);
 }
 
 void InstanceSerializer::enter(const EndPoint &instance)

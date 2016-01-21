@@ -429,7 +429,7 @@ TEST_CASE("Instance serializer: Instance collection")
 TEST_CASE("Instance serializer: Service")
 {
     /* Serialize */
-    Service service("my_service_type", "2", Service::Direction::Incoming);
+    Service service("my_service_type", "2");
     populateParents(service.getParents());
     populateChildren(service.getChildren());
 
@@ -437,7 +437,7 @@ TEST_CASE("Instance serializer: Service")
     service.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml == "<service Direction=\"Incoming\" Id=\"2\" Type=\"my_service_type\">\n"
+    CHECK(xml == "<service Id=\"2\" Type=\"my_service_type\">\n"
                  "    <info_parameters/>\n"
                  "    <control_parameters/>\n"
                  "    <parents>\n"
@@ -494,23 +494,21 @@ TEST_CASE("Instance serializer: Service collection")
 {
     /* Serialize */
     ServiceCollection collection;
-    collection.add(
-        std::make_shared<Service>("my_service_type1", "1", Service::Direction::Incoming));
-    collection.add(
-        std::make_shared<Service>("my_service_type2", "2", Service::Direction::Outgoing));
+    collection.add(std::make_shared<Service>("my_service_type1", "1"));
+    collection.add(std::make_shared<Service>("my_service_type2", "2"));
 
     InstanceSerializer serializer;
     collection.accept(serializer);
 
     std::string xml = serializer.getXml();
     CHECK(xml == "<service_collection>\n"
-                 "    <service Direction=\"Incoming\" Id=\"1\" Type=\"my_service_type1\">\n"
+                 "    <service Id=\"1\" Type=\"my_service_type1\">\n"
                  "        <info_parameters/>\n"
                  "        <control_parameters/>\n"
                  "        <parents/>\n"
                  "        <children/>\n"
                  "    </service>\n"
-                 "    <service Direction=\"Outgoing\" Id=\"2\" Type=\"my_service_type2\">\n"
+                 "    <service Id=\"2\" Type=\"my_service_type2\">\n"
                  "        <info_parameters/>\n"
                  "        <control_parameters/>\n"
                  "        <parents/>\n"

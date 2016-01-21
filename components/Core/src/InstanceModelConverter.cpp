@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -213,8 +213,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
 std::shared_ptr<BaseCollection> InstanceModelConverter::createLogService()
 {
     /* Log Service */
-    auto service =
-        std::make_shared<Service>(logServiceTypeName, logServiceId, Service::Direction::Outgoing);
+    auto service = std::make_shared<Service>(logServiceTypeName, logServiceId);
 
     /* Parents */
     service->getParents().add(std::make_shared<SubsystemRef>(subsystemName, subsystemId));
