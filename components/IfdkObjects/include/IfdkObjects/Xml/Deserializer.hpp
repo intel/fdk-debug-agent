@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -169,8 +169,8 @@ protected:
     {
         Poco::XML::Text *text = getFirstChild<Poco::XML::Text>(Poco::XML::Node::TEXT_NODE);
         if (text == nullptr) {
-            throw Exception("The element '" + topElement().nodeName() +
-                            "' does not contains text.");
+            /* No text node found: text is empty */
+            return "";
         }
         return text->getNodeValue();
     }
