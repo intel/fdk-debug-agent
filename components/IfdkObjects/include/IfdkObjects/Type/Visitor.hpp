@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -41,12 +41,14 @@ class Ref;
 class TypeRef;
 class ComponentRef;
 class ServiceRef;
+class EndPointRef;
 class SubsystemRef;
 class Type;
 class Component;
 class Subsystem;
 class System;
 class Service;
+class EndPoint;
 class RefCollection;
 class Characteristic;
 class Description;
@@ -69,6 +71,7 @@ class GenericRefCollection;
 using TypeRefCollection = GenericRefCollection<TypeRef>;
 using ComponentRefCollection = GenericRefCollection<ComponentRef>;
 using ServiceRefCollection = GenericRefCollection<ServiceRef>;
+using EndPointRefCollection = GenericRefCollection<EndPointRef>;
 using SubsystemRefCollection = GenericRefCollection<SubsystemRef>;
 
 /** Visitor that allows to walk into the "type" data model
@@ -138,6 +141,7 @@ public:
     virtual void enter(TypeRef &instance) = 0;
     virtual void enter(ComponentRef &instance) = 0;
     virtual void enter(ServiceRef &instance) = 0;
+    virtual void enter(EndPointRef &instance) = 0;
     virtual void enter(SubsystemRef &instance) = 0;
 
     /* Named reference collections */
@@ -145,6 +149,7 @@ public:
     virtual void enter(TypeRefCollection &instance) = 0;
     virtual void enter(ComponentRefCollection &instance) = 0;
     virtual void enter(ServiceRefCollection &instance) = 0;
+    virtual void enter(EndPointRefCollection &instance) = 0;
     virtual void enter(SubsystemRefCollection &instance) = 0;
 
     /* Characteristics */
@@ -176,6 +181,7 @@ public:
     virtual void enter(Subsystem &instance) = 0;
     virtual void enter(System &instance) = 0;
     virtual void enter(Service &instance) = 0;
+    virtual void enter(EndPoint &instance) = 0;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;
@@ -192,6 +198,7 @@ public:
     virtual void enter(const TypeRef &instance) = 0;
     virtual void enter(const ComponentRef &instance) = 0;
     virtual void enter(const ServiceRef &instance) = 0;
+    virtual void enter(const EndPointRef &instance) = 0;
     virtual void enter(const SubsystemRef &instance) = 0;
 
     /* Named reference collections */
@@ -199,6 +206,7 @@ public:
     virtual void enter(const TypeRefCollection &instance) = 0;
     virtual void enter(const ComponentRefCollection &instance) = 0;
     virtual void enter(const ServiceRefCollection &instance) = 0;
+    virtual void enter(const EndPointRefCollection &instance) = 0;
     virtual void enter(const SubsystemRefCollection &instance) = 0;
 
     /* Characteristics */
@@ -230,6 +238,7 @@ public:
     virtual void enter(const Subsystem &instance) = 0;
     virtual void enter(const System &instance) = 0;
     virtual void enter(const Service &instance) = 0;
+    virtual void enter(const EndPoint &instance) = 0;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) = 0;

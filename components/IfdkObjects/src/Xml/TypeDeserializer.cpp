@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -61,10 +61,24 @@ void TypeDeserializer::enter(Service &instance)
     pushElement(instance);
 }
 
+void TypeDeserializer::enter(EndPoint &instance)
+{
+    pushElement(instance);
+
+    std::string directionName = getStringAttribute(TypeTraits<EndPoint>::attributeDirection);
+
+    EndPoint::Direction direction;
+    if (!EndPoint::directionHelper().fromString(directionName, direction)) {
+        throw Exception("Invalid service direction: " + directionName);
+    }
+
+    instance.setDirection(direction);
+}
+
 void TypeDeserializer::enter(Categories &categories)
 {
     pushElement(categories);
-    fillPolymorphicVector<Ref, TypeRef, ComponentRef, ServiceRef, SubsystemRef>(
+    fillPolymorphicVector<Ref, TypeRef, ComponentRef, ServiceRef, EndPointRef, SubsystemRef>(
         categories.getElements());
 }
 
@@ -85,6 +99,11 @@ void TypeDeserializer::enter(ComponentRef &component)
 }
 
 void TypeDeserializer::enter(ServiceRef &service)
+{
+    pushElement(service);
+}
+
+void TypeDeserializer::enter(EndPointRef &service)
 {
     pushElement(service);
 }
@@ -124,6 +143,12 @@ void TypeDeserializer::enter(ServiceRefCollection &instance)
     collectionCommon(instance);
 }
 
+void TypeDeserializer::enter(EndPointRefCollection &instance)
+{
+    pushElement(instance);
+    collectionCommon(instance);
+}
+
 void TypeDeserializer::enter(SubsystemRefCollection &instance)
 {
     pushElement(instance);
@@ -134,7 +159,8 @@ void TypeDeserializer::enter(Children &chidren)
 {
     pushElement(chidren);
     fillPolymorphicVector<RefCollection, TypeRefCollection, ComponentRefCollection,
-                          ServiceRefCollection, SubsystemRefCollection>(chidren.getElements());
+                          ServiceRefCollection, EndPointRefCollection, SubsystemRefCollection>(
+        chidren.getElements());
 }
 
 void TypeDeserializer::enter(Characteristic &characteristic)

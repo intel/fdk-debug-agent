@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -36,10 +36,12 @@ SET(TYPE_INCS
     include/IfdkObjects/Type/Subsystem.hpp
     include/IfdkObjects/Type/System.hpp
     include/IfdkObjects/Type/Service.hpp
+    include/IfdkObjects/Type/EndPoint.hpp
     include/IfdkObjects/Type/Ref.hpp
     include/IfdkObjects/Type/TypeRef.hpp
     include/IfdkObjects/Type/ComponentRef.hpp
     include/IfdkObjects/Type/ServiceRef.hpp
+    include/IfdkObjects/Type/EndPointRef.hpp
     include/IfdkObjects/Type/SubsystemRef.hpp
     include/IfdkObjects/Type/RefCollection.hpp
     include/IfdkObjects/Type/GenericRefCollection.hpp
@@ -49,6 +51,7 @@ SET(TYPE_INCS
     include/IfdkObjects/Type/SubsystemRefCollection.hpp
     include/IfdkObjects/Type/ComponentRefCollection.hpp
     include/IfdkObjects/Type/ServiceRefCollection.hpp
+    include/IfdkObjects/Type/EndPointRefCollection.hpp
     include/IfdkObjects/Type/Characteristics.hpp
     include/IfdkObjects/Type/Characteristic.hpp
     include/IfdkObjects/Type/Description.hpp

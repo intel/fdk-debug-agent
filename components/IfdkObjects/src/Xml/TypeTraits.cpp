@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -39,6 +39,8 @@ const std::string TypeTraits<ComponentRef>::tag("component_type");
 
 const std::string TypeTraits<ServiceRef>::tag("service_type");
 
+const std::string TypeTraits<EndPointRef>::tag("endpoint_type");
+
 const std::string TypeTraits<SubsystemRef>::tag("subsystem_type");
 
 const std::string TypeTraits<Type>::tag("type");
@@ -52,6 +54,9 @@ const std::string TypeTraits<System>::tag("system_type");
 
 const std::string TypeTraits<Service>::tag("service_type");
 
+const std::string TypeTraits<EndPoint>::tag("endpoint_type");
+const std::string TypeTraits<EndPoint>::attributeDirection("Direction");
+
 const std::string TypeTraits<Categories>::tag("categories");
 
 const std::string TypeTraits<Children>::tag("children");
@@ -63,6 +68,8 @@ const std::string TypeTraits<TypeRefCollection>::tag("collection");
 const std::string TypeTraits<ComponentRefCollection>::tag("component_collection");
 
 const std::string TypeTraits<ServiceRefCollection>::tag("service_collection");
+
+const std::string TypeTraits<EndPointRefCollection>::tag("endpoint_collection");
 
 const std::string TypeTraits<SubsystemRefCollection>::tag("subsystem_collection");
 

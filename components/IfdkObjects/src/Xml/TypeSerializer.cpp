@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -61,6 +61,14 @@ void TypeSerializer::enter(const Service &instance)
     pushElement(instance);
 }
 
+void TypeSerializer::enter(const EndPoint &instance)
+{
+    pushElement(instance);
+
+    std::string directionName = EndPoint::directionHelper().toString(instance.getDirection());
+    setAttribute(TypeTraits<EndPoint>::attributeDirection, directionName);
+}
+
 void TypeSerializer::enter(const Categories &instance)
 {
     pushElement(instance);
@@ -87,6 +95,11 @@ void TypeSerializer::enter(const ServiceRef &serviceRef)
     pushElement(serviceRef);
 }
 
+void TypeSerializer::enter(const EndPointRef &serviceRef)
+{
+    pushElement(serviceRef);
+}
+
 void TypeSerializer::enter(const SubsystemRef &instance)
 {
     pushElement(instance);
@@ -109,6 +122,11 @@ void TypeSerializer::enter(const ComponentRefCollection &instance)
 }
 
 void TypeSerializer::enter(const ServiceRefCollection &instance)
+{
+    pushElement(instance);
+}
+
+void TypeSerializer::enter(const EndPointRefCollection &instance)
 {
     pushElement(instance);
 }

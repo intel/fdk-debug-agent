@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(const type::type::C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(const type::type::C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code (const type::type::"Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -49,15 +49,18 @@ private:
     virtual void enter(const type::Subsystem &instance) override;
     virtual void enter(const type::System &instance) override;
     virtual void enter(const type::Service &instance) override;
+    virtual void enter(const type::EndPoint &instance) override;
     virtual void enter(const type::Categories &instance) override;
     virtual void enter(const type::Ref &instance, bool isConcrete) override;
     virtual void enter(const type::TypeRef &instance) override;
     virtual void enter(const type::ComponentRef &instance) override;
     virtual void enter(const type::ServiceRef &instance) override;
+    virtual void enter(const type::EndPointRef &instance) override;
     virtual void enter(const type::SubsystemRef &instance) override;
     virtual void enter(const type::TypeRefCollection &instance) override;
     virtual void enter(const type::ComponentRefCollection &instance) override;
     virtual void enter(const type::ServiceRefCollection &instance) override;
+    virtual void enter(const type::EndPointRefCollection &instance) override;
     virtual void enter(const type::SubsystemRefCollection &instance) override;
     virtual void enter(const type::Children &instance) override;
     virtual void enter(const type::RefCollection &instance, bool isConcrete) override;

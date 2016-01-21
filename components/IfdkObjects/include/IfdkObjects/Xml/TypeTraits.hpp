@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -27,15 +27,18 @@
 #include "IfdkObjects/Type/Subsystem.hpp"
 #include "IfdkObjects/Type/System.hpp"
 #include "IfdkObjects/Type/Service.hpp"
+#include "IfdkObjects/Type/EndPoint.hpp"
 #include "IfdkObjects/Type/Categories.hpp"
 #include "IfdkObjects/Type/TypeRef.hpp"
 #include "IfdkObjects/Type/ComponentRef.hpp"
 #include "IfdkObjects/Type/ServiceRef.hpp"
+#include "IfdkObjects/Type/EndPointRef.hpp"
 #include "IfdkObjects/Type/SubsystemRef.hpp"
 #include "IfdkObjects/Type/Children.hpp"
 #include "IfdkObjects/Type/TypeRefCollection.hpp"
 #include "IfdkObjects/Type/ComponentRefCollection.hpp"
 #include "IfdkObjects/Type/ServiceRefCollection.hpp"
+#include "IfdkObjects/Type/EndPointRefCollection.hpp"
 #include "IfdkObjects/Type/SubsystemRefCollection.hpp"
 #include "IfdkObjects/Type/Characteristic.hpp"
 #include "IfdkObjects/Type/Characteristics.hpp"
@@ -94,6 +97,12 @@ struct TypeTraits<type::ServiceRef>
 };
 
 template <>
+struct TypeTraits<type::EndPointRef>
+{
+    static const std::string tag;
+};
+
+template <>
 struct TypeTraits<type::SubsystemRef>
 {
     static const std::string tag;
@@ -122,6 +131,12 @@ struct TypeTraits<type::ComponentRefCollection>
 
 template <>
 struct TypeTraits<type::ServiceRefCollection>
+{
+    static const std::string tag;
+};
+
+template <>
+struct TypeTraits<type::EndPointRefCollection>
 {
     static const std::string tag;
 };
@@ -254,6 +269,13 @@ template <>
 struct TypeTraits<type::Service>
 {
     static const std::string tag;
+};
+
+template <>
+struct TypeTraits<type::EndPoint>
+{
+    static const std::string tag;
+    static const std::string attributeDirection;
 };
 }
 }
