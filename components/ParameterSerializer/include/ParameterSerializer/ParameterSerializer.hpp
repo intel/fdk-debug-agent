@@ -96,13 +96,15 @@ public:
      * This method returns the the mapping of a parameter.
      * @param[in] subsystemName is the name of the subsystem (eg. cavs)
      * @param[in] elementName is the name of the element
+     * @param[in] parameterKind is the kind of subnode (eg. control or info)
      * @param[in] parameterName is the name of the parameter whoze mapping will be returned
      * @param[in] key is the key to retrieve corresponding mapping
      * @return a string containing the mapping of a parameter.
      * @throw ParameterSerializer::Exception
      */
     std::string getMapping(const std::string &subsystemName, const std::string &elementName,
-                           const std::string &parameterName, const std::string &key) const;
+                           ParameterKind parameterKind, const std::string &parameterName,
+                           const std::string &key) const;
 
     /**
      * This method serializes an XML string containing the settings of one parameter (child)

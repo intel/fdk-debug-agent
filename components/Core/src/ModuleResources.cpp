@@ -78,12 +78,13 @@ uint16_t ModuleResource::getInstanceId(const Request &request) const
     return instanceId;
 }
 
-dsp_fw::ParameterId ModuleResource::getParamId(const std::string parameterName) const
+dsp_fw::ParameterId ModuleResource::getParamId(ParameterSerializer::ParameterKind parameterKind,
+                                               const std::string parameterName) const
 {
     std::string paramIdAsString;
     try {
-        paramIdAsString = mParameterSerializer->getMapping(BaseModelConverter::subsystemName,
-                                                           mModuleName, parameterName, ParamId);
+        paramIdAsString = mParameterSerializer->getMapping(
+            BaseModelConverter::subsystemName, mModuleName, parameterKind, parameterName, ParamId);
     } catch (ParameterSerializer::Exception &e) {
         throw Response::HttpError(Response::ErrorStatus::InternalError,
                                   "Module resource does not manage to retrieve mapping: " +
@@ -111,7 +112,7 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handleGet(const R
 
     std::string controlParameters;
     for (uint32_t childId = 0; childId < children.size(); childId++) {
-        auto paramId = getParamId(children[childId]);
+        auto paramId = getParamId(ParameterSerializer::ParameterKind::Control, children[childId]);
 
         // Get binary from IOCTL
         util::Buffer parameterPayload;
@@ -155,7 +156,7 @@ Resource::ResponsePtr ControlParametersModuleInstanceResource::handlePut(const R
         getChildren(ParameterSerializer::ParameterKind::Control);
 
     for (uint32_t childId = 0; childId < children.size(); childId++) {
-        auto paramId = getParamId(children[childId]);
+        auto paramId = getParamId(ParameterSerializer::ParameterKind::Control, children[childId]);
 
         /* Create XML document from the XML node of each child. The usage of operator new is needed
          * here to comply with poco AutoPtr. */

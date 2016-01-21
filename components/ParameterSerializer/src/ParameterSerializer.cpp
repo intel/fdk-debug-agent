@@ -145,6 +145,7 @@ std::map<uint32_t, std::string> ParameterSerializer::getChildren(const std::stri
 
 std::string ParameterSerializer::getMapping(const std::string &subsystemName,
                                             const std::string &elementName,
+                                            ParameterKind parameterKind,
                                             const std::string &parameterName,
                                             const std::string &key) const
 {
@@ -153,7 +154,7 @@ std::string ParameterSerializer::getMapping(const std::string &subsystemName,
     std::string paramId;
 
     std::unique_ptr<ElementHandle> elementHandle =
-        getChildElementHandle(subsystemName, elementName, ParameterKind::Control, parameterName);
+        getChildElementHandle(subsystemName, elementName, parameterKind, parameterName);
 
     if (!elementHandle->getMappingData(key, paramId)) {
         throw Exception("Mapping \"" + key + "\" not found for " + elementHandle->getPath());

@@ -177,13 +177,17 @@ TEST_CASE("Test parameter serializer getMapping()")
 
     std::string mapping;
     // Check bad mapping key behavior
-    CHECK_THROWS_AS_MSG(
-        mapping = parameterSerializer.getMapping("cavs", "aec", children[1], "badMappingKey"),
-        ParameterSerializer::Exception, "Mapping \"badMappingKey\" not found for "
-                                        "/BXTN/cavs/categories/aec/control/NoiseReduction");
+    CHECK_THROWS_AS_MSG(mapping = parameterSerializer.getMapping(
+                            "cavs", "aec", ParameterSerializer::ParameterKind::Control, children[1],
+                            "badMappingKey"),
+                        ParameterSerializer::Exception,
+                        "Mapping \"badMappingKey\" not found for "
+                        "/BXTN/cavs/categories/aec/control/NoiseReduction");
 
     // Check bad subsystem name behavior
-    CHECK_NOTHROW(mapping = parameterSerializer.getMapping("cavs", "aec", children[1], "ParamId"));
+    CHECK_NOTHROW(
+        mapping = parameterSerializer.getMapping(
+            "cavs", "aec", ParameterSerializer::ParameterKind::Control, children[1], "ParamId"));
 
     CHECK(mapping == "25");
 

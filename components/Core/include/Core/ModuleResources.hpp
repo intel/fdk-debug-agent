@@ -48,7 +48,9 @@ protected:
     std::map<uint32_t, std::string> getChildren(
         parameter_serializer::ParameterSerializer::ParameterKind parameterKind) const;
     uint16_t getInstanceId(const rest::Request &request) const;
-    cavs::dsp_fw::ParameterId getParamId(const std::string parameterName) const;
+    cavs::dsp_fw::ParameterId getParamId(
+        parameter_serializer::ParameterSerializer::ParameterKind parameterKind,
+        const std::string parameterName) const;
 
     util::Locker<parameter_serializer::ParameterSerializer> &mParameterSerializer;
     const std::string mModuleName;
