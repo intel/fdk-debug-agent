@@ -1,0 +1,11 @@
+<service_type Name="probe">
+    <description>cAVS subsystem probe service</description>
+    <characteristics/>
+    <info_parameters/>
+    <control_parameters/>
+    <children>
+        <endpoint_collection Name="endpoints">
+            <endpoint_type Name="probe.endpoint"/>
+        </endpoint_collection>
+    </children>
+</service_type>

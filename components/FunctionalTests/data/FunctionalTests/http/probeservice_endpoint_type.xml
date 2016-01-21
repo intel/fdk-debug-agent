@@ -1,0 +1,7 @@
+<endpoint_type Direction="Bidirectional" Name="probe.endpoint">
+    <description>cAVS subsystem probe endpoint</description>
+    <characteristics/>
+    <info_parameters/>
+    <control_parameters/>
+    <children/>
+</endpoint_type>

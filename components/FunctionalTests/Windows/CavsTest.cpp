@@ -284,6 +284,14 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
         {"/type/cavs.fwlogs.endpoint", "logservice_endpoint_type"},
         {"/instance/cavs.fwlogs.endpoint", "logservice_endpoint_instance_collection"},
         {"/instance/cavs.fwlogs.endpoint/0", "logservice_endpoint_instance"},
+
+        {"/type/cavs.probe", "probeservice_type"},
+        {"/instance/cavs.probe", "probeservice_instance_collection"},
+        {"/instance/cavs.probe/0", "probeservice_instance"},
+
+        {"/type/cavs.probe.endpoint", "probeservice_endpoint_type"},
+        {"/instance/cavs.probe.endpoint", "probeservice_endpoint_instance_collection"},
+        {"/instance/cavs.probe.endpoint/0", "probeservice_endpoint_instance"},
     };
 
     checkUrlMap(client, urlMap);

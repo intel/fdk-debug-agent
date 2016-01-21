@@ -1,0 +1,66 @@
+ <endpoint_collection>
+    <endpoint Id="0" Type="probe.endpoint">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <service Id="0" Type="probe"/>
+        </parents>
+        <children/>
+    </endpoint>
+    <endpoint Id="1" Type="probe.endpoint">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <service Id="0" Type="probe"/>
+        </parents>
+        <children/>
+    </endpoint>
+    <endpoint Id="2" Type="probe.endpoint">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <service Id="0" Type="probe"/>
+        </parents>
+        <children/>
+    </endpoint>
+    <endpoint Id="3" Type="probe.endpoint">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <service Id="0" Type="probe"/>
+        </parents>
+        <children/>
+    </endpoint>
+    <endpoint Id="4" Type="probe.endpoint">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <service Id="0" Type="probe"/>
+        </parents>
+        <children/>
+    </endpoint>
+    <endpoint Id="5" Type="probe.endpoint">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <service Id="0" Type="probe"/>
+        </parents>
+        <children/>
+    </endpoint>
+    <endpoint Id="6" Type="probe.endpoint">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <service Id="0" Type="probe"/>
+        </parents>
+        <children/>
+    </endpoint>
+    <endpoint Id="7" Type="probe.endpoint">
+        <info_parameters/>
+        <control_parameters/>
+        <parents>
+            <service Id="0" Type="probe"/>
+        </parents>
+        <children/>
+    </endpoint>
+</endpoint_collection>
