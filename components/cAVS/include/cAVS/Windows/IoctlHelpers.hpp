@@ -23,6 +23,8 @@
 #pragma once
 
 #include "cAVS/Windows/DriverTypes.hpp"
+#include <tuple>
+#include <utility>
 
 namespace debug_agent
 {
@@ -65,26 +67,29 @@ public:
      * @param[in] parameterID the driver parameter id
      * @param[in] bodyPayload a buffer which is the body payload. Its content format depends
      *                        of the couple (featureID, parameterID)
-     * @param[out] headerBuffer the created header buffer that should be used with ioctl call
-     * @param[out] bodyBuffer the created body buffer that should be used with ioctl call
+     *
+     * @returns a pair of buffers to be used with the ioctl call: 1) the header and 2) the body
      */
-    static void toBigCmdBuffers(ULONG featureID, ULONG parameterID, const util::Buffer &bodyPayload,
-                                util::Buffer &headerBuffer, util::Buffer &bodyBuffer)
+    static std::pair<util::Buffer, util::Buffer> toBigCmdBuffers(ULONG featureID, ULONG parameterID,
+                                                                 const util::Buffer &bodyPayload)
     {
-        toBodyBuffer(bodyPayload, bodyBuffer);
-        toHeaderBuffer(featureID, parameterID, static_cast<ULONG>(bodyBuffer.size()), headerBuffer);
+        auto bodyBuffer = toBodyBuffer(bodyPayload);
+        auto headerBuffer =
+            toHeaderBuffer(featureID, parameterID, static_cast<ULONG>(bodyBuffer.size()));
+
+        return {headerBuffer, bodyBuffer};
     }
 
     /** Parse a body buffer returned by the BigSet/Get ioctl
+     *
      * @param[in] bodyBuffer the body buffer returned by the ioctl
-     * @param[out] status the returned driver status
-     * @param[out] bodyPayload a buffer that contains the body payload
+     *
+     * @returns a pair of: 1) the driver status and 2) a buffer with the body payload
      */
-    static void fromBigCmdBodyBuffer(const util::Buffer &bodyBuffer, NTSTATUS &status,
-                                     util::Buffer &bodyPayload)
+    static std::pair<NTSTATUS, util::Buffer> fromBigCmdBodyBuffer(const util::Buffer &bodyBuffer)
     {
         util::ByteStreamReader reader(bodyBuffer);
-        fromBodyBuffer(reader, status, bodyPayload);
+        return fromBodyBuffer(reader);
     }
 
     /** Generate one buffers to perform a TinySet/Get ioctl
@@ -95,46 +100,46 @@ public:
      * @param[in] parameterID the driver parameter id
      * @param[in] bodyPayload a buffer which is the body payload. Its content format depends
      *                        of the couple (featureID, parameterID)
-     * @param[out] buffer the created buffer that should be used with ioctl call
+     *
+     * @returns the created buffer that should be used with ioctl call
      */
-    static void toTinyCmdBuffer(ULONG featureID, ULONG parameterID, const util::Buffer &bodyPayload,
-                                util::Buffer &buffer)
+    static util::Buffer toTinyCmdBuffer(ULONG featureID, ULONG parameterID,
+                                        const util::Buffer &bodyPayload)
     {
         util::Buffer headerBuffer;
-        util::Buffer BodyBuffer;
-        toBigCmdBuffers(featureID, parameterID, bodyPayload, headerBuffer, BodyBuffer);
+        util::Buffer bodyBuffer;
+        std::tie(headerBuffer, bodyBuffer) = toBigCmdBuffers(featureID, parameterID, bodyPayload);
 
         util::ByteStreamWriter writer;
         writer.writeRawBuffer(headerBuffer);
-        writer.writeRawBuffer(BodyBuffer);
-        buffer = writer.getBuffer();
+        writer.writeRawBuffer(bodyBuffer);
+        return writer.getBuffer();
     }
 
     /** Parse a body buffer returned by the TinySet/Get ioctl
+     *
      * @param[in] buffer the buffer returned by the ioctl
-     * @param[out] status the returned driver status
-     * @param[out] bodyPayload a buffer that contains the body payload
+     *
+     * @returns a pair of: 1) the driver status and 2) a buffer with the body payload
      */
-    static void fromTinyCmdBuffer(const util::Buffer &buffer, NTSTATUS &status,
-                                  util::Buffer &bodyPayload)
+    static std::pair<NTSTATUS, util::Buffer> fromTinyCmdBuffer(const util::Buffer &buffer)
     {
         util::ByteStreamReader reader(buffer);
         fromHeaderBuffer(reader);
-        fromBodyBuffer(reader, status, bodyPayload);
+        return fromBodyBuffer(reader);
     }
 
 private:
     IoctlHelpers();
 
     /** Serialize a header */
-    static void toHeaderBuffer(ULONG featureID, ULONG parameterID, ULONG bodySize,
-                               util::Buffer &headerBuffer)
+    static util::Buffer toHeaderBuffer(ULONG featureID, ULONG parameterID, ULONG bodySize)
     {
         driver::Intc_App_Cmd_Header header(featureID, parameterID, bodySize);
 
         util::ByteStreamWriter writer;
         writer.write(header);
-        headerBuffer = writer.getBuffer();
+        return writer.getBuffer();
     }
 
     /** Deserialize a header */
@@ -145,7 +150,7 @@ private:
     }
 
     /** Serialize a body */
-    static void toBodyBuffer(const util::Buffer &bodyPayload, util::Buffer &bodyBuffer)
+    static util::Buffer toBodyBuffer(const util::Buffer &bodyPayload)
     {
         driver::Intc_App_Cmd_Body body;
 
@@ -153,21 +158,17 @@ private:
         writer.write(body);
         writer.writeRawBuffer(bodyPayload);
 
-        bodyBuffer = writer.getBuffer();
+        return writer.getBuffer();
     }
 
     /** Deserialize a body */
-    static void fromBodyBuffer(util::ByteStreamReader &reader, NTSTATUS &status,
-                               util::Buffer &bodyPayload)
+    static std::pair<NTSTATUS, util::Buffer> fromBodyBuffer(util::ByteStreamReader &reader)
     {
         driver::Intc_App_Cmd_Body body;
         reader.read(body);
-        status = body.Status;
 
-        bodyPayload.clear();
-        bodyPayload.insert(bodyPayload.begin(),
-                           reader.getBuffer().begin() + reader.getPointerOffset(),
-                           reader.getBuffer().end());
+        return {body.Status,
+                {reader.getBuffer().begin() + reader.getPointerOffset(), reader.getBuffer().end()}};
     }
 };
 }

@@ -51,10 +51,9 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
     /* Creating BigGet/Set ioctl buffers */
     util::Buffer headerBuffer;
     util::Buffer bodyBuffer;
-    IoctlHelpers::toBigCmdBuffers(
+    std::tie(headerBuffer, bodyBuffer) = IoctlHelpers::toBigCmdBuffers(
         static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_FW_MODULE_PARAM),
-        driver::moduleParameterAccessCommandParameterId, bodyPayloadWriter.getBuffer(),
-        headerBuffer, bodyBuffer);
+        driver::moduleParameterAccessCommandParameterId, bodyPayloadWriter.getBuffer());
 
     /* Performing the io ctl */
     try {
@@ -70,7 +69,7 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
         util::Buffer bodyPayloadBuffer;
 
         /* Parsing returned output buffer */
-        IoctlHelpers::fromBigCmdBodyBuffer(bodyBuffer, driverStatus, bodyPayloadBuffer);
+        std::tie(driverStatus, bodyPayloadBuffer) = IoctlHelpers::fromBigCmdBodyBuffer(bodyBuffer);
 
         /* Checking driver status */
         if (!NT_SUCCESS(driverStatus)) {
