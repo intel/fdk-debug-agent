@@ -60,9 +60,9 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
         addSubsystemSubType(typeMap, createGateway(entry.second));
     }
 
-    /* Log service */
-    addSubsystemSubType(typeMap, createLogService());
-    addSubsystemSubType(typeMap, createLogServiceEndPoint());
+    /* Services */
+    addSubsystemServiceTypes(typeMap, logServiceTypeName, EndPoint::Direction::Outgoing);
+    addSubsystemServiceTypes(typeMap, probeServiceTypeName, EndPoint::Direction::Bidirectional);
 
     return std::make_shared<TypeModel>(createSystem(), typeMap);
 }
@@ -235,25 +235,36 @@ std::shared_ptr<Type> TypeModelConverter::createModule(uint16_t id)
     return module;
 }
 
-std::shared_ptr<Type> TypeModelConverter::createLogService()
+std::shared_ptr<Type> TypeModelConverter::createService(const std::string &serviceTypeName)
 {
-    auto service = std::make_shared<Service>(logServiceTypeName);
-    service->getDescription().setValue(logServiceDescription);
+    auto service = std::make_shared<Service>(serviceTypeName);
+    service->getDescription().setValue(getServiceTypeDescription(serviceTypeName));
 
     // service children
     auto coll = std::make_shared<EndPointRefCollection>(collectionName_endpoint);
-    coll->add(EndPointRef(logServiceEndPointName));
+    coll->add(EndPointRef(getEndPointTypeName(serviceTypeName)));
     service->getChildren().add(coll);
 
     return service;
 }
 
-std::shared_ptr<Type> TypeModelConverter::createLogServiceEndPoint()
+std::shared_ptr<Type> TypeModelConverter::createEndPoint(const std::string &serviceTypeName,
+                                                         EndPoint::Direction direction)
 {
-    auto endpoint =
-        std::make_shared<EndPoint>(logServiceEndPointName, EndPoint::Direction::Outgoing);
-    endpoint->getDescription().setValue(subsystemDescription + " " + logServiceEndPointName);
+    std::string endPointTypeName = getEndPointTypeName(serviceTypeName);
+
+    auto endpoint = std::make_shared<EndPoint>(endPointTypeName, direction);
+    endpoint->getDescription().setValue(getEndPointTypeDescription(serviceTypeName));
+
     return endpoint;
+}
+
+void TypeModelConverter::addSubsystemServiceTypes(TypeModel::TypeMap &map,
+                                                  const std::string &serviceTypeName,
+                                                  EndPoint::Direction direction)
+{
+    addSubsystemSubType(map, createService(serviceTypeName));
+    addSubsystemSubType(map, createEndPoint(serviceTypeName, direction));
 }
 
 void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)

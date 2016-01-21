@@ -44,8 +44,6 @@ public:
 
 private:
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createSubsystem();
-    std::shared_ptr<ifdk_objects::instance::BaseCollection> createLogService();
-    std::shared_ptr<ifdk_objects::instance::BaseCollection> createLogServiceEndPoint();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createPipe();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createTask();
     std::shared_ptr<ifdk_objects::instance::BaseCollection> createCore();
@@ -100,6 +98,19 @@ private:
     static void addInstanceCollection(
         InstanceModel::CollectionMap &map, const std::string &typeName,
         std::shared_ptr<ifdk_objects::instance::BaseCollection> collection);
+
+    /** Add all instances required by a service */
+    static void addServiceInstanceCollection(InstanceModel::CollectionMap &map,
+                                             const std::string &serviceTypeName,
+                                             std::size_t endPointCount);
+
+    /** Common method to create service instance */
+    static std::shared_ptr<ifdk_objects::instance::BaseCollection> createService(
+        const std::string &serviceTypeName, std::size_t endPointCount);
+
+    /** Common method to create endpoint instance */
+    static std::shared_ptr<ifdk_objects::instance::BaseCollection> createEndPoint(
+        const std::string &serviceTypeName, std::size_t endPointCount);
 };
 }
 }

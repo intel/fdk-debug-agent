@@ -82,12 +82,18 @@ protected:
     /* List of static type names, i.e type names that are not retrieved dynamically  */
     static const std::vector<std::string> staticTypes;
 
+    /* Service instance identifier
+     * Currently it can exist only one instance of a service type, so serviceId="0"
+     */
+    static const std::string serviceId;
+
     /* cavs log service type */
     static const std::string logServiceTypeName;
-    static const std::string logServiceId;
-    static const std::string logServiceDescription;
-    static const std::string logServiceEndPointName;
-    static const std::string logServiceEndPointId;
+    static const std::size_t logServiceEndPointCount;
+
+    /* cavs probe */
+    static const std::string probeServiceTypeName;
+    static const std::size_t probeServiceEndPointCount;
 
     /* list of static services types */
     static const std::vector<std::string> staticServiceTypes;
@@ -103,6 +109,25 @@ protected:
 
     /** Find a gateway instance id using a connector id */
     static uint32_t findGatewayInstanceId(const cavs::dsp_fw::ConnectorNodeId &connectorId);
+
+    /** Return endpoint type from service type */
+    static std::string getEndPointTypeName(const std::string &serviceTypeName)
+    {
+        /* This convention is defined by the SwAS */
+        return serviceTypeName + ".endpoint";
+    }
+
+    static std::string getServiceTypeDescription(const std::string &serviceTypeName)
+    {
+        /* Ex: cAVS subsystem probe service */
+        return subsystemDescription + " " + serviceTypeName + " service";
+    }
+
+    static std::string getEndPointTypeDescription(const std::string &serviceTypeName)
+    {
+        /* Ex: cAVS subsystem probe endpoint */
+        return subsystemDescription + " " + serviceTypeName + " endpoint";
+    }
 
     cavs::System &mSystem;
 

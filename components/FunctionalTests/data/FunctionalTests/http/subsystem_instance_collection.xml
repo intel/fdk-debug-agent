@@ -47,6 +47,7 @@
             </component_collection>
             <service_collection Name="services">
                 <service Id="0" Type="fwlogs"/>
+                <service Id="0" Type="probe"/>
             </service_collection>
         </children>
         <inputs/>

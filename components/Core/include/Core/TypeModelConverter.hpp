@@ -47,8 +47,6 @@ private:
     std::shared_ptr<ifdk_objects::type::Type> createCore();
     std::shared_ptr<ifdk_objects::type::Type> createGateway(const std::string &name);
     std::shared_ptr<ifdk_objects::type::Type> createModule(uint16_t id);
-    std::shared_ptr<ifdk_objects::type::Type> createLogService();
-    std::shared_ptr<ifdk_objects::type::Type> createLogServiceEndPoint();
 
     /** Get system characteristics */
     void getSystemCharacteristics(ifdk_objects::type::Characteristics &characteristics);
@@ -58,6 +56,19 @@ private:
      */
     static void addSubsystemSubType(TypeModel::TypeMap &map,
                                     std::shared_ptr<ifdk_objects::type::Type> type);
+
+    /* Common method to create service type */
+    static std::shared_ptr<ifdk_objects::type::Type> createService(
+        const std::string &serviceTypeName);
+
+    /* Common method to create endpoint type */
+    static std::shared_ptr<ifdk_objects::type::Type> createEndPoint(
+        const std::string &serviceTypeName, ifdk_objects::type::EndPoint::Direction direction);
+
+    /* Add all types required by a service */
+    static void addSubsystemServiceTypes(TypeModel::TypeMap &map,
+                                         const std::string &serviceTypeName,
+                                         ifdk_objects::type::EndPoint::Direction direction);
 };
 }
 }

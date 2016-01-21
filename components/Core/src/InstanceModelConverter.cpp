@@ -65,9 +65,9 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
         addInstanceCollection(collectionMap, entry.second, createGateway(entry.first));
     }
 
-    /* Log service */
-    addInstanceCollection(collectionMap, logServiceTypeName, createLogService());
-    addInstanceCollection(collectionMap, logServiceEndPointName, createLogServiceEndPoint());
+    /* Services */
+    addServiceInstanceCollection(collectionMap, logServiceTypeName, logServiceEndPointCount);
+    addServiceInstanceCollection(collectionMap, probeServiceTypeName, probeServiceEndPointCount);
 
     return std::make_shared<InstanceModel>(collectionMap);
 }
@@ -185,7 +185,8 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     /* Services */
     auto serviceCollection = std::make_shared<ServiceRefCollection>(collectionName_service);
 
-    serviceCollection->add(ServiceRef(logServiceTypeName, logServiceId));
+    serviceCollection->add(ServiceRef(logServiceTypeName, serviceId));
+    serviceCollection->add(ServiceRef(probeServiceTypeName, serviceId));
     children.add(serviceCollection);
 
     /* Links between modules */
@@ -211,17 +212,22 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     return coll;
 }
 
-std::shared_ptr<BaseCollection> InstanceModelConverter::createLogService()
+std::shared_ptr<BaseCollection> InstanceModelConverter::createService(const std::string &typeName,
+                                                                      std::size_t endPointCount)
 {
-    /* Log Service */
-    auto service = std::make_shared<Service>(logServiceTypeName, logServiceId);
+    /* Service */
+    auto service = std::make_shared<Service>(typeName, serviceId);
 
     /* Parents */
     service->getParents().add(std::make_shared<SubsystemRef>(subsystemName, subsystemId));
 
     /* Children */
     auto endPointCollection = std::make_shared<EndPointRefCollection>(collectionName_endpoint);
-    endPointCollection->add(EndPointRef(logServiceEndPointName, logServiceEndPointId));
+    for (std::size_t endPointIndex = 0; endPointIndex < endPointCount; ++endPointIndex) {
+        endPointCollection->add(
+            EndPointRef(getEndPointTypeName(typeName), std::to_string(endPointIndex)));
+    }
+
     service->getChildren().add(endPointCollection);
 
     auto coll = std::make_shared<ServiceCollection>();
@@ -229,16 +235,21 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createLogService()
     return coll;
 }
 
-std::shared_ptr<BaseCollection> InstanceModelConverter::createLogServiceEndPoint()
+std::shared_ptr<BaseCollection> InstanceModelConverter::createEndPoint(
+    const std::string &serviceTypeName, std::size_t endPointCount)
 {
-    /* End point */
-    auto endpoint = std::make_shared<EndPoint>(logServiceEndPointName, logServiceEndPointId);
-
-    /* Parents */
-    endpoint->getParents().add(std::make_shared<ServiceRef>(logServiceTypeName, logServiceId));
-
+    std::string endPointTypeName = getEndPointTypeName(serviceTypeName);
     auto coll = std::make_shared<EndPointCollection>();
-    coll->add(endpoint);
+    for (std::size_t endPointIndex = 0; endPointIndex < endPointCount; ++endPointIndex) {
+
+        /* End point */
+        auto endpoint = std::make_shared<EndPoint>(endPointTypeName, std::to_string(endPointIndex));
+
+        /* Parents */
+        endpoint->getParents().add(std::make_shared<ServiceRef>(serviceTypeName, serviceId));
+
+        coll->add(endpoint);
+    }
     return coll;
 }
 
@@ -548,6 +559,15 @@ void InstanceModelConverter::addInstanceCollection(
     std::shared_ptr<ifdk_objects::instance::BaseCollection> collection)
 {
     map[subsystemName + "." + typeName] = collection;
+}
+
+void InstanceModelConverter::addServiceInstanceCollection(InstanceModel::CollectionMap &map,
+                                                          const std::string &serviceTypeName,
+                                                          std::size_t endPointCount)
+{
+    addInstanceCollection(map, serviceTypeName, createService(serviceTypeName, endPointCount));
+    addInstanceCollection(map, getEndPointTypeName(serviceTypeName),
+                          createEndPoint(serviceTypeName, endPointCount));
 }
 }
 }

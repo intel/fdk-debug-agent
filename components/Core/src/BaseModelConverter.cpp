@@ -60,11 +60,13 @@ const std::string BaseModelConverter::typeDescription_task = "cAVS task type";
 const std::vector<std::string> BaseModelConverter::staticTypes = {typeName_pipe, typeName_core,
                                                                   typeName_task};
 
+const std::string BaseModelConverter::serviceId = "0";
+
 const std::string BaseModelConverter::logServiceTypeName = "fwlogs";
-const std::string BaseModelConverter::logServiceId = "0";
-const std::string BaseModelConverter::logServiceDescription = "cAVS log service";
-const std::string BaseModelConverter::logServiceEndPointName = logServiceTypeName + ".endpoint";
-const std::string BaseModelConverter::logServiceEndPointId = "0";
+const std::size_t BaseModelConverter::logServiceEndPointCount = 1;
+
+const std::string BaseModelConverter::probeServiceTypeName = "probe";
+const std::size_t BaseModelConverter::probeServiceEndPointCount = 8;
 
 const std::vector<std::string> BaseModelConverter::staticServiceTypes = {logServiceTypeName};
 
