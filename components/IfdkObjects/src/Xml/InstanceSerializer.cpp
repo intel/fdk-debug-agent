@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -67,6 +67,11 @@ void InstanceSerializer::enter(const Service &instance)
     setAttribute(InstanceTraits<Service>::attributeDirection, directionName);
 }
 
+void InstanceSerializer::enter(const EndPoint &instance)
+{
+    pushElement(instance);
+}
+
 void InstanceSerializer::enter(const Ref &ref, bool isConcrete)
 {
     assert(!isConcrete);
@@ -85,6 +90,11 @@ void InstanceSerializer::enter(const ComponentRef &componentRef)
 }
 
 void InstanceSerializer::enter(const ServiceRef &serviceRef)
+{
+    pushElement(serviceRef);
+}
+
+void InstanceSerializer::enter(const EndPointRef &serviceRef)
 {
     pushElement(serviceRef);
 }
@@ -116,6 +126,11 @@ void InstanceSerializer::enter(const ComponentRefCollection &instance)
 }
 
 void InstanceSerializer::enter(const ServiceRefCollection &instance)
+{
+    pushElement(instance);
+}
+
+void InstanceSerializer::enter(const EndPointRefCollection &instance)
 {
     pushElement(instance);
 }
@@ -220,6 +235,11 @@ void InstanceSerializer::enter(const SubsystemCollection &instance)
 }
 
 void InstanceSerializer::enter(const ServiceCollection &instance)
+{
+    pushElement(instance);
+}
+
+void InstanceSerializer::enter(const EndPointCollection &instance)
 {
     pushElement(instance);
 }

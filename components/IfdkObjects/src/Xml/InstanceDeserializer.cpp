@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -71,6 +71,11 @@ void InstanceDeserializer::enter(Service &instance)
     instance.setDirection(direction);
 }
 
+void InstanceDeserializer::enter(EndPoint &instance)
+{
+    pushElement(instance);
+}
+
 void InstanceDeserializer::enter(Ref &ref, bool isConcrete)
 {
     assert(!isConcrete);
@@ -89,6 +94,11 @@ void InstanceDeserializer::enter(ComponentRef &component)
 }
 
 void InstanceDeserializer::enter(ServiceRef &service)
+{
+    pushElement(service);
+}
+
+void InstanceDeserializer::enter(EndPointRef &service)
 {
     pushElement(service);
 }
@@ -133,6 +143,12 @@ void InstanceDeserializer::enter(ServiceRefCollection &instance)
     refCollectionCommon(instance);
 }
 
+void InstanceDeserializer::enter(EndPointRefCollection &instance)
+{
+    pushElement(instance);
+    refCollectionCommon(instance);
+}
+
 void InstanceDeserializer::enter(SubsystemRefCollection &instance)
 {
     pushElement(instance);
@@ -143,13 +159,14 @@ void InstanceDeserializer::enter(Children &chidren)
 {
     pushElement(chidren);
     fillPolymorphicVector<RefCollection, InstanceRefCollection, ComponentRefCollection,
-                          ServiceRefCollection, SubsystemRefCollection>(chidren.getElements());
+                          ServiceRefCollection, EndPointRefCollection, SubsystemRefCollection>(
+        chidren.getElements());
 }
 
 void InstanceDeserializer::enter(Parents &parents)
 {
     pushElement(parents);
-    fillPolymorphicVector<Ref, InstanceRef, ComponentRef, SubsystemRef, ServiceRef>(
+    fillPolymorphicVector<Ref, InstanceRef, ComponentRef, SubsystemRef, ServiceRef, EndPointRef>(
         parents.getElements());
 }
 
@@ -252,6 +269,12 @@ void InstanceDeserializer::enter(SubsystemCollection &instance)
 }
 
 void InstanceDeserializer::enter(ServiceCollection &instance)
+{
+    pushElement(instance);
+    collectionCommon(instance);
+}
+
+void InstanceDeserializer::enter(EndPointCollection &instance)
 {
     pushElement(instance);
     collectionCommon(instance);

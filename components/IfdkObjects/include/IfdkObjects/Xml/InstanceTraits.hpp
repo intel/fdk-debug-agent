@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -27,16 +27,19 @@
 #include "IfdkObjects/Instance/Subsystem.hpp"
 #include "IfdkObjects/Instance/System.hpp"
 #include "IfdkObjects/Instance/Service.hpp"
+#include "IfdkObjects/Instance/EndPoint.hpp"
 #include "IfdkObjects/Instance/Parents.hpp"
 #include "IfdkObjects/Instance/InstanceRef.hpp"
 #include "IfdkObjects/Instance/ComponentRef.hpp"
 #include "IfdkObjects/Instance/ServiceRef.hpp"
+#include "IfdkObjects/Instance/EndPointRef.hpp"
 #include "IfdkObjects/Instance/SubsystemRef.hpp"
 #include "IfdkObjects/Instance/SystemRef.hpp"
 #include "IfdkObjects/Instance/Children.hpp"
 #include "IfdkObjects/Instance/InstanceRefCollection.hpp"
 #include "IfdkObjects/Instance/ComponentRefCollection.hpp"
 #include "IfdkObjects/Instance/ServiceRefCollection.hpp"
+#include "IfdkObjects/Instance/EndPointRefCollection.hpp"
 #include "IfdkObjects/Instance/SubsystemRefCollection.hpp"
 #include "IfdkObjects/Instance/Connector.hpp"
 #include "IfdkObjects/Instance/Input.hpp"
@@ -53,6 +56,8 @@
 #include "IfdkObjects/Instance/InstanceCollection.hpp"
 #include "IfdkObjects/Instance/ComponentCollection.hpp"
 #include "IfdkObjects/Instance/SubsystemCollection.hpp"
+#include "IfdkObjects/Instance/ServiceCollection.hpp"
+#include "IfdkObjects/Instance/EndPointCollection.hpp"
 
 #include <string>
 
@@ -100,6 +105,12 @@ struct InstanceTraits<instance::ServiceRef>
 };
 
 template <>
+struct InstanceTraits<instance::EndPointRef>
+{
+    static const std::string tag;
+};
+
+template <>
 struct InstanceTraits<instance::SubsystemRef>
 {
     static const std::string tag;
@@ -134,6 +145,12 @@ struct InstanceTraits<instance::ComponentRefCollection>
 
 template <>
 struct InstanceTraits<instance::ServiceRefCollection>
+{
+    static const std::string tag;
+};
+
+template <>
+struct InstanceTraits<instance::EndPointRefCollection>
 {
     static const std::string tag;
 };
@@ -279,6 +296,12 @@ struct InstanceTraits<instance::Service>
     static const std::string attributeDirection;
 };
 
+template <>
+struct InstanceTraits<instance::EndPoint>
+{
+    static const std::string tag;
+};
+
 /* Main instance collection */
 
 template <>
@@ -301,6 +324,12 @@ struct InstanceTraits<instance::SubsystemCollection>
 
 template <>
 struct InstanceTraits<instance::ServiceCollection>
+{
+    static const std::string tag;
+};
+
+template <>
+struct InstanceTraits<instance::EndPointCollection>
 {
     static const std::string tag;
 };

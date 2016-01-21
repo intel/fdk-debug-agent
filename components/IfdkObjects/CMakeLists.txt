@@ -71,16 +71,19 @@ SET(INSTANCE_INCS
     include/IfdkObjects/Instance/Subsystem.hpp
     include/IfdkObjects/Instance/System.hpp
     include/IfdkObjects/Instance/Service.hpp
+    include/IfdkObjects/Instance/EndPoint.hpp
     include/IfdkObjects/Instance/BaseCollection.hpp
     include/IfdkObjects/Instance/GenericCollection.hpp
     include/IfdkObjects/Instance/InstanceCollection.hpp
     include/IfdkObjects/Instance/ComponentCollection.hpp
     include/IfdkObjects/Instance/SubsystemCollection.hpp
     include/IfdkObjects/Instance/ServiceCollection.hpp
+    include/IfdkObjects/Instance/EndPointCollection.hpp
     include/IfdkObjects/Instance/Ref.hpp
     include/IfdkObjects/Instance/InstanceRef.hpp
     include/IfdkObjects/Instance/ComponentRef.hpp
     include/IfdkObjects/Instance/ServiceRef.hpp
+    include/IfdkObjects/Instance/EndPointRef.hpp
     include/IfdkObjects/Instance/SubsystemRef.hpp
     include/IfdkObjects/Instance/SystemRef.hpp
     include/IfdkObjects/Instance/RefCollection.hpp
@@ -90,6 +93,7 @@ SET(INSTANCE_INCS
     include/IfdkObjects/Instance/SubsystemRefCollection.hpp
     include/IfdkObjects/Instance/ComponentRefCollection.hpp
     include/IfdkObjects/Instance/ServiceRefCollection.hpp
+    include/IfdkObjects/Instance/EndPointRefCollection.hpp
     include/IfdkObjects/Instance/Connector.hpp
     include/IfdkObjects/Instance/Input.hpp
     include/IfdkObjects/Instance/Output.hpp

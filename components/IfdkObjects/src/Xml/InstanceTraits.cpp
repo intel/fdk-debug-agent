@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -40,6 +40,8 @@ const std::string InstanceTraits<ComponentRef>::tag("component");
 
 const std::string InstanceTraits<ServiceRef>::tag("service");
 
+const std::string InstanceTraits<EndPointRef>::tag("endpoint");
+
 const std::string InstanceTraits<SubsystemRef>::tag("subsystem");
 
 const std::string InstanceTraits<SystemRef>::tag("system");
@@ -57,6 +59,8 @@ const std::string InstanceTraits<System>::tag("system");
 const std::string InstanceTraits<Service>::tag("service");
 const std::string InstanceTraits<Service>::attributeDirection("Direction");
 
+const std::string InstanceTraits<EndPoint>::tag("endpoint");
+
 const std::string InstanceTraits<Parents>::tag("parents");
 
 const std::string InstanceTraits<Children>::tag("children");
@@ -68,6 +72,8 @@ const std::string InstanceTraits<InstanceRefCollection>::tag("collection");
 const std::string InstanceTraits<ComponentRefCollection>::tag("component_collection");
 
 const std::string InstanceTraits<ServiceRefCollection>::tag("service_collection");
+
+const std::string InstanceTraits<EndPointRefCollection>::tag("endpoint_collection");
 
 const std::string InstanceTraits<SubsystemRefCollection>::tag("subsystem_collection");
 
@@ -104,6 +110,7 @@ const std::string InstanceTraits<InstanceCollection>::tag("collection");
 const std::string InstanceTraits<ComponentCollection>::tag("component_collection");
 const std::string InstanceTraits<SubsystemCollection>::tag("subsystem_collection");
 const std::string InstanceTraits<ServiceCollection>::tag("service_collection");
+const std::string InstanceTraits<EndPointCollection>::tag("endpoint_collection");
 }
 }
 }

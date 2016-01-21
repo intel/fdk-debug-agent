@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(const type::type::C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(const type::type::C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code (const type::type::"Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -50,6 +50,7 @@ private:
     virtual void enter(const instance::InstanceRef &instance) override;
     virtual void enter(const instance::ComponentRef &instance) override;
     virtual void enter(const instance::ServiceRef &instance) override;
+    virtual void enter(const instance::EndPointRef &instance) override;
     virtual void enter(const instance::SubsystemRef &instance) override;
     virtual void enter(const instance::SystemRef &instance) override;
 
@@ -58,6 +59,7 @@ private:
     virtual void enter(const instance::InstanceRefCollection &instance) override;
     virtual void enter(const instance::ComponentRefCollection &instance) override;
     virtual void enter(const instance::ServiceRefCollection &instance) override;
+    virtual void enter(const instance::EndPointRefCollection &instance) override;
     virtual void enter(const instance::SubsystemRefCollection &instance) override;
 
     /* Parents and children */
@@ -88,12 +90,14 @@ private:
     virtual void enter(const instance::Subsystem &instance) override;
     virtual void enter(const instance::System &instance) override;
     virtual void enter(const instance::Service &instance) override;
+    virtual void enter(const instance::EndPoint &instance) override;
 
     /* Main instance collections */
     virtual void enter(const instance::InstanceCollection &instance) override;
     virtual void enter(const instance::ComponentCollection &instance) override;
     virtual void enter(const instance::SubsystemCollection &instance) override;
     virtual void enter(const instance::ServiceCollection &instance) override;
+    virtual void enter(const instance::EndPointCollection &instance) override;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) override;

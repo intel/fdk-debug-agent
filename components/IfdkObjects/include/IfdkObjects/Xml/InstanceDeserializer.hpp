@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -48,6 +48,7 @@ private:
     virtual void enter(instance::InstanceRef &instance) override;
     virtual void enter(instance::ComponentRef &instance) override;
     virtual void enter(instance::ServiceRef &instance) override;
+    virtual void enter(instance::EndPointRef &instance) override;
     virtual void enter(instance::SubsystemRef &instance) override;
     virtual void enter(instance::SystemRef &instance) override;
 
@@ -56,6 +57,7 @@ private:
     virtual void enter(instance::InstanceRefCollection &instance) override;
     virtual void enter(instance::ComponentRefCollection &instance) override;
     virtual void enter(instance::ServiceRefCollection &instance) override;
+    virtual void enter(instance::EndPointRefCollection &instance) override;
     virtual void enter(instance::SubsystemRefCollection &instance) override;
 
     /* Parents and children */
@@ -86,12 +88,14 @@ private:
     virtual void enter(instance::Subsystem &instance) override;
     virtual void enter(instance::System &instance) override;
     virtual void enter(instance::Service &instance) override;
+    virtual void enter(instance::EndPoint &instance) override;
 
     /* Main instance collections */
     virtual void enter(instance::InstanceCollection &instance) override;
     virtual void enter(instance::ComponentCollection &instance) override;
     virtual void enter(instance::SubsystemCollection &instance) override;
     virtual void enter(instance::ServiceCollection &instance) override;
+    virtual void enter(instance::EndPointCollection &instance) override;
 
     /* Common 'leave' method */
     virtual void leave(bool isConcrete = true) override;
