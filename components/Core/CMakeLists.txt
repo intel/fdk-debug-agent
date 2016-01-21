@@ -47,6 +47,7 @@ set(INCS
 # private headers
     src/FdkToolMockGenerator.hpp
     src/HtmlHelper.hpp
+    src/XmlHelper.hpp
 )
 
 add_library(Core STATIC ${SRCS} ${INCS})
