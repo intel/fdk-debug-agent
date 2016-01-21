@@ -49,6 +49,8 @@ public:
     virtual ~BaseModelConverter() {}
 
     static const std::string subsystemName;
+    static const std::string logServiceTypeName;
+    static const std::string probeServiceTypeName;
 
 protected:
     /* Defining model names as constants */
@@ -88,11 +90,9 @@ protected:
     static const std::string serviceId;
 
     /* cavs log service type */
-    static const std::string logServiceTypeName;
     static const std::size_t logServiceEndPointCount;
 
     /* cavs probe */
-    static const std::string probeServiceTypeName;
     static const std::size_t probeServiceEndPointCount;
 
     /* list of static services types */
