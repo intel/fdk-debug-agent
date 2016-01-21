@@ -27,7 +27,6 @@ set(SRCS
     src/BaseModelConverter.cpp
     src/InstanceModelConverter.cpp
     src/TypeModelConverter.cpp
-    src/ModuleResources.cpp
     src/DebugResources.cpp
     src/LogServiceParameterApplier.cpp
     src/ModuleParameterApplier.cpp)
@@ -40,7 +39,6 @@ set(INCS
     include/Core/TypeModelConverter.hpp
     include/Core/InstanceModel.hpp
     include/Core/TypeModel.hpp
-    include/Core/ModuleResources.hpp
     include/Core/DebugResources.hpp
     include/Core/ParameterKind.hpp
     include/Core/ParameterApplier.hpp

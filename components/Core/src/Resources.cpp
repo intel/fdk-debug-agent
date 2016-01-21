@@ -23,27 +23,10 @@
 #include "Core/InstanceModelConverter.hpp"
 #include "Rest/CustomResponse.hpp"
 #include "Rest/StreamResponse.hpp"
-#include "Util/Uuid.hpp"
-#include "Util/convert.hpp"
 #include "IfdkObjects/Xml/TypeDeserializer.hpp"
 #include "IfdkObjects/Xml/TypeSerializer.hpp"
 #include "IfdkObjects/Xml/InstanceDeserializer.hpp"
 #include "IfdkObjects/Xml/InstanceSerializer.hpp"
-#include "Util/StringHelper.hpp"
-#include <Poco/NumberParser.h>
-#include <Poco/StringTokenizer.h>
-#include <Poco/XML/XML.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/Node.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Text.h>
-#include <string>
-#include <chrono>
-#include <thread>
-#include <iomanip>
-#include <sstream>
 
 using namespace debug_agent::rest;
 using namespace debug_agent::cavs;
@@ -198,109 +181,59 @@ Resource::ResponsePtr RefreshSubsystemResource::handlePost(const Request &reques
     return std::make_unique<Response>();
 }
 
-Resource::ResponsePtr LogServiceInstanceControlParametersResource::handleGet(const Request &request)
+Resource::ResponsePtr ParameterStructureResource::handleGet(const Request &request)
 {
-    Logger::Parameters logParameters;
-
+    std::string typeName = request.getIdentifierValue("type_name");
+    std::string structure;
     try {
-        logParameters = mSystem.getLogParameters();
-    } catch (System::Exception &e) {
-        throw Response::HttpError(Response::ErrorStatus::BadRequest,
-                                  std::string("Cannot get log parameters : ") + e.what());
+        structure = mParamDispatcher.getParameterStructure(typeName, mKind);
+    } catch (ParameterDispatcher::UnsupportedException &e) {
+        throw Response::HttpError(Response::ErrorStatus::NotFound, e.what());
+    } catch (ParameterDispatcher::Exception &e) {
+        throw Response::HttpError(Response::ErrorStatus::InternalError, e.what());
     }
 
-    auto xml = std::make_unique<std::stringstream>();
-    *xml << "<control_parameters>\n"
-            "    <BooleanParameter Name=\"Started\">"
-         << logParameters.mIsStarted
-         << "</BooleanParameter>\n"
-            "    <ParameterBlock Name=\"Buffering\">\n"
-            "        <IntegerParameter Name=\"Size\">100</IntegerParameter>\n"
-            "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
-            "    </ParameterBlock>\n"
-            "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
-            "    <EnumParameter Name=\"Verbosity\">"
-         << Logger::levelHelper().toString(logParameters.mLevel)
-         << "</EnumParameter>\n"
-            "    <BooleanParameter Name=\"ViaPTI\">"
-         << (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>\n"
-                                                                      "</control_parameters>\n";
-
-    return std::make_unique<StreamResponse>(ContentTypeXml, std::move(xml));
+    return std::make_unique<Response>(ContentTypeXml, structure);
 }
 
-Resource::ResponsePtr LogServiceInstanceControlParametersResource::handlePut(const Request &request)
+Resource::ResponsePtr ParameterValueResource::handleGet(const Request &request)
 {
-    Poco::XML::DOMParser parser;
-    Poco::AutoPtr<Poco::XML::Document> document(
-        parser.parseString(request.getRequestContentAsString()));
+    std::string typeName = request.getIdentifierValue("type_name");
+    std::string instanceId = request.getIdentifierValue("instance_id");
 
-    if (!document) {
-        throw Response::HttpError(Response::ErrorStatus::BadRequest, "Invalid document");
+    std::string value;
+    try {
+        value = mParamDispatcher.getParameterValue(typeName, mKind, instanceId);
+    } catch (ParameterDispatcher::UnsupportedException &e) {
+        throw Response::HttpError(Response::ErrorStatus::NotFound, e.what());
+    } catch (ParameterDispatcher::Exception &e) {
+        throw Response::HttpError(Response::ErrorStatus::InternalError, e.what());
     }
 
-    static const std::string controlParametersUrl = "/control_parameters/";
+    return std::make_unique<Response>(ContentTypeXml, value);
+}
 
-    // Retrieve the Started BooleanParameter and its value
-    std::string startedNodeValue =
-        getNodeValueFromXPath(document, controlParametersUrl + "BooleanParameter[@Name='Started']");
-
-    // Retrieve the Verbosity EnumParameter and its value
-    std::string verbosityNodeValue =
-        getNodeValueFromXPath(document, controlParametersUrl + "EnumParameter[@Name='Verbosity']");
-
-    // Retrieve the ViaPTI BooleanParameter and its value
-    std::string viaPtiNodeValue =
-        getNodeValueFromXPath(document, controlParametersUrl + "BooleanParameter[@Name='ViaPTI']");
-
-    // Parse each of the parameters found into their correct type
-    Logger::Parameters logParameters;
-    try {
-        logParameters.mIsStarted = Poco::NumberParser::parseBool(startedNodeValue);
-        if (!Logger::levelHelper().fromString(verbosityNodeValue, logParameters.mLevel)) {
-            throw Response::HttpError(Response::ErrorStatus::BadRequest,
-                                      std::string("Invalid level value : ") + verbosityNodeValue);
-        }
-        logParameters.mOutput = Poco::NumberParser::parseBool(viaPtiNodeValue)
-                                    ? Logger::Output::Pti
-                                    : Logger::Output::Sram;
-    } catch (Poco::SyntaxException &e) {
-        throw Response::HttpError(Response::ErrorStatus::BadRequest,
-                                  std::string("Invalid Start/Stop request: ") + e.what());
+Resource::ResponsePtr ParameterValueResource::handlePut(const Request &request)
+{
+    /* Can set only control parameters */
+    if (mKind != ParameterKind::Control) {
+        throw Response::HttpError(Response::ErrorStatus::NotFound,
+                                  "Can set only control parameters");
     }
 
+    std::string typeName = request.getIdentifierValue("type_name");
+    std::string instanceId = request.getIdentifierValue("instance_id");
+
     try {
-        mSystem.setLogParameters(logParameters);
-    } catch (System::Exception &e) {
-        throw Response::HttpError(Response::ErrorStatus::InternalError,
-                                  std::string("Fail to apply: ") + e.what());
+        mParamDispatcher.setParameterValue(typeName, ParameterKind::Control, instanceId,
+                                           request.getRequestContentAsString());
+    } catch (ParameterDispatcher::UnsupportedException &e) {
+        throw Response::HttpError(Response::ErrorStatus::NotFound, e.what());
+    } catch (ParameterDispatcher::Exception &e) {
+        throw Response::HttpError(Response::ErrorStatus::InternalError, e.what());
     }
 
     return std::make_unique<Response>();
-}
-
-Resource::ResponsePtr LogServiceTypeControlParametersResource::handleGet(const Request &request)
-{
-    auto xml = std::make_unique<std::stringstream>();
-    *xml << "<control_parameters>\n"
-            "    <BooleanParameter Name=\"Started\"/>\n"
-            "    <ParameterBlock Name=\"Buffering\">\n"
-            "        <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>\n"
-            "        <BooleanParameter Name=\"Circular\"/>\n"
-            "    </ParameterBlock>\n"
-            "    <BooleanParameter Name=\"PersistsState\"/>\n"
-            "    <EnumParameter Size=\"8\" Name=\"Verbosity\">\n"
-            "        <ValuePair Numerical=\"2\" Literal=\"Critical\"/>\n"
-            "        <ValuePair Numerical=\"3\" Literal=\"High\"/>\n"
-            "        <ValuePair Numerical=\"4\" Literal=\"Medium\"/>\n"
-            "        <ValuePair Numerical=\"5\" Literal=\"Low\"/>\n"
-            "        <ValuePair Numerical=\"6\" Literal=\"Verbose\"/>\n"
-            "    </EnumParameter>\n"
-            "    <BooleanParameter Name=\"ViaPTI\" "
-            "Description=\"Set to 1 if PTI interface is to be used\"/>\n"
-            "</control_parameters>\n";
-
-    return std::make_unique<StreamResponse>(ContentTypeXml, std::move(xml));
 }
 
 Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request)

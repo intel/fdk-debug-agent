@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -24,6 +24,7 @@
 
 #include "Core/TypeModel.hpp"
 #include "Core/InstanceModel.hpp"
+#include "Core/ParameterDispatcher.hpp"
 #include "Rest/Resource.hpp"
 #include "cAVS/System.hpp"
 #include "Util/Locker.hpp"
@@ -124,23 +125,39 @@ private:
     ExclusiveInstanceModel &mInstanceModel;
 };
 
-/** This resource returns the Log Control Parameters for an Instance of a service (XML) */
-class LogServiceInstanceControlParametersResource : public SystemResource
+class ParameterStructureResource : public SystemResource
 {
 public:
-    LogServiceInstanceControlParametersResource(cavs::System &system) : SystemResource(system) {}
+    ParameterStructureResource(cavs::System &system, ParameterDispatcher &paramDispatcher,
+                               ParameterKind kind)
+        : SystemResource(system), mParamDispatcher(paramDispatcher), mKind(kind)
+    {
+    }
+
+protected:
+    virtual ResponsePtr handleGet(const rest::Request &request) override;
+
+private:
+    ParameterDispatcher &mParamDispatcher;
+    ParameterKind mKind;
+};
+
+class ParameterValueResource : public SystemResource
+{
+public:
+    ParameterValueResource(cavs::System &system, ParameterDispatcher &paramDispatcher,
+                           ParameterKind kind)
+        : SystemResource(system), mParamDispatcher(paramDispatcher), mKind(kind)
+    {
+    }
+
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
     virtual ResponsePtr handlePut(const rest::Request &request) override;
-};
 
-/** This resource returns the Log Control Parameters for a type of a service (XML) */
-class LogServiceTypeControlParametersResource : public rest::Resource
-{
-public:
-    LogServiceTypeControlParametersResource() {}
-protected:
-    virtual ResponsePtr handleGet(const rest::Request &request) override;
+private:
+    ParameterDispatcher &mParamDispatcher;
+    ParameterKind mKind;
 };
 
 /** This resource returns the Log Stream for a service Instance (XML) */

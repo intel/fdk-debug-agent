@@ -22,11 +22,13 @@
 
 #include "Core/TypeModel.hpp"
 #include "Core/InstanceModel.hpp"
+#include "Core/ParameterDispatcher.hpp"
 #include "cAVS/System.hpp"
 #include "Rest/Server.hpp"
 #include "Util/Locker.hpp"
 #include "ParameterSerializer/ParameterSerializer.hpp"
 #include <inttypes.h>
+#include <memory>
 
 namespace debug_agent
 {
@@ -55,12 +57,16 @@ private:
     std::shared_ptr<TypeModel> createTypeModel();
     static std::shared_ptr<ifdk_objects::instance::System> createSystemInstance();
     std::unique_ptr<rest::Dispatcher> createDispatcher();
+    static std::vector<std::shared_ptr<ParameterApplier>> createParamAppliers(
+        cavs::System &system,
+        util::Locker<parameter_serializer::ParameterSerializer> &paramSerializer);
 
     cavs::System mSystem;
     std::shared_ptr<TypeModel> mTypeModel;
     std::shared_ptr<ifdk_objects::instance::System> mSystemInstance;
     util::Locker<std::shared_ptr<InstanceModel>> mInstanceModel;
     util::Locker<parameter_serializer::ParameterSerializer> mParameterSerializer;
+    ParameterDispatcher mParamDispatcher;
     rest::Server mRestServer;
 };
 }

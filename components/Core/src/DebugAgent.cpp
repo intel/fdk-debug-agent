@@ -25,7 +25,8 @@
 #include "Core/DebugResources.hpp"
 #include "Core/TypeModelConverter.hpp"
 #include "Core/InstanceModelConverter.hpp"
-#include "Core/ModuleResources.hpp"
+#include "Core/ModuleParameterApplier.hpp"
+#include "Core/LogServiceParameterApplier.hpp"
 #include "cAVS/System.hpp"
 #include "Util/StringHelper.hpp"
 #include <memory>
@@ -66,15 +67,7 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     std::unique_ptr<rest::Dispatcher> dispatcher = std::make_unique<rest::Dispatcher>();
 
     /* Log service (hardcoded urls)
-     *
-     * Note: putting these hardcoded urls before the real ones because otherwise real urls
-     * will be invoked first, and will fail.
      */
-
-    dispatcher->addResource("/type/cavs.fwlogs/control_parameters",
-                            std::make_shared<LogServiceTypeControlParametersResource>());
-    dispatcher->addResource("/instance/cavs.fwlogs/0/control_parameters",
-                            std::make_shared<LogServiceInstanceControlParametersResource>(mSystem));
     dispatcher->addResource("/instance/cavs.fwlogs/0/streaming",
                             std::make_shared<LogServiceStreamResource>(mSystem));
 
@@ -90,20 +83,20 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     dispatcher->addResource("/instance/${type_name}/${instance_id}",
                             std::make_shared<InstanceResource>(mInstanceModel));
 
-    /* Create one resource instance for each module type*/
-    for (const cavs::dsp_fw::ModuleEntry &entry : mSystem.getModuleEntries()) {
-        std::string moduleName =
-            StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
+    /* Parameters */
+    dispatcher->addResource("/type/${type_name}/control_parameters",
+                            std::make_shared<ParameterStructureResource>(mSystem, mParamDispatcher,
+                                                                         ParameterKind::Control));
+    dispatcher->addResource("/instance/${type_name}/${instance_id}/control_parameters",
+                            std::make_shared<ParameterValueResource>(mSystem, mParamDispatcher,
+                                                                     ParameterKind::Control));
 
-        dispatcher->addResource(
-            "/instance/cavs.module-" + moduleName + "/${instanceId}/control_parameters",
-            std::make_shared<ControlParametersModuleInstanceResource>(mSystem, mParameterSerializer,
-                                                                      moduleName, entry.module_id));
-
-        dispatcher->addResource("/type/cavs.module-" + moduleName + "/control_parameters",
-                                std::make_shared<ControlParametersModuleTypeResource>(
-                                    mSystem, mParameterSerializer, moduleName, entry.module_id));
-    }
+    dispatcher->addResource("/type/${type_name}/info_parameters",
+                            std::make_shared<ParameterStructureResource>(mSystem, mParamDispatcher,
+                                                                         ParameterKind::Info));
+    dispatcher->addResource(
+        "/instance/${type_name}/${instance_id}/info_parameters",
+        std::make_shared<ParameterValueResource>(mSystem, mParamDispatcher, ParameterKind::Info));
 
     /* Refresh special case*/
     dispatcher->addResource("/instance/cavs/0/refreshed",
@@ -119,6 +112,15 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     return dispatcher;
 }
 
+std::vector<std::shared_ptr<ParameterApplier>> DebugAgent::createParamAppliers(
+    cavs::System &system, util::Locker<parameter_serializer::ParameterSerializer> &paramSerializer)
+{
+    return {
+        std::make_shared<ModuleParameterApplier>(system, paramSerializer),
+        std::make_shared<LogServiceParameterApplier>(system),
+    };
+}
+
 DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port,
                        const std::string &pfwConfig, bool isVerbose, bool validationRequested) try :
     /* Order is important! */
@@ -127,6 +129,7 @@ DebugAgent::DebugAgent(const cavs::DriverFactory &driverFactory, uint32_t port,
     mSystemInstance(createSystemInstance()),
     mInstanceModel(nullptr),
     mParameterSerializer(pfwConfig, validationRequested),
+    mParamDispatcher(createParamAppliers(mSystem, mParameterSerializer)),
     mRestServer(createDispatcher(), port, isVerbose) {
     assert(mTypeModel != nullptr);
     assert(mSystemInstance != nullptr);
