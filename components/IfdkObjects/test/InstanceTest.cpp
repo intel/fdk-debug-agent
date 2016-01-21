@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -86,80 +86,49 @@ void populateLinks(Links &links)
     link2.getTo().setInputId("2");
 }
 
-TEST_CASE("Instance serializer: InstanceRef")
+template <typename T>
+void testInstanceRef(const std::string &expectedXml)
 {
     /* Serialize */
-    InstanceRef instanceRef("type1", "0");
+    T instanceRef("my_type", "0");
 
     InstanceSerializer serializer;
     instanceRef.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml == "<instance Id=\"0\" Type=\"type1\"/>\n");
+    CHECK(xml == expectedXml);
 
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
-    InstanceRef deserializedInstance;
+    T deserializedInstance;
 
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == instanceRef);
 }
 
+TEST_CASE("Instance serializer: InstanceRef")
+{
+    testInstanceRef<InstanceRef>("<instance Id=\"0\" Type=\"my_type\"/>\n");
+}
+
 TEST_CASE("Instance serializer: ComponentRef")
 {
-    /* Serialize */
-    ComponentRef compRef("comp_type", "1");
-
-    InstanceSerializer serializer;
-    compRef.accept(serializer);
-
-    std::string xml = serializer.getXml();
-    CHECK(xml == "<component Id=\"1\" Type=\"comp_type\"/>\n");
-
-    /* Deserialize */
-    InstanceDeserializer deserializer(xml);
-    ComponentRef deserializedInstance;
-
-    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
-    CHECK(deserializedInstance == compRef);
+    testInstanceRef<ComponentRef>("<component Id=\"0\" Type=\"my_type\"/>\n");
 }
 
 TEST_CASE("Instance serializer: ServiceRef")
 {
-    /* Serialize */
-    ServiceRef serviceRef("serv_type", "3");
+    testInstanceRef<ServiceRef>("<service Id=\"0\" Type=\"my_type\"/>\n");
+}
 
-    InstanceSerializer serializer;
-    serviceRef.accept(serializer);
-
-    std::string xml = serializer.getXml();
-    CHECK(xml == "<service Id=\"3\" Type=\"serv_type\"/>\n");
-
-    /* Deserialize */
-    InstanceDeserializer deserializer(xml);
-    ServiceRef deserializedInstance;
-
-    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
-    CHECK(deserializedInstance == serviceRef);
+TEST_CASE("Instance serializer: EndPointRef")
+{
+    testInstanceRef<EndPointRef>("<endpoint Id=\"0\" Type=\"my_type\"/>\n");
 }
 
 TEST_CASE("Instance serializer: SubsystemRef")
 {
-    /* Serialize */
-    SubsystemRef subsystemRef("subsystem_type", "5");
-
-    InstanceSerializer serializer;
-    subsystemRef.accept(serializer);
-
-    std::string xml = serializer.getXml();
-    CHECK(xml == "<subsystem Id=\"5\" Type=\"subsystem_type\"/>\n");
-
-    /* Deserialize */
-    InstanceDeserializer deserializer(xml);
-    SubsystemRef deserializedInstance;
-
-    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
-    CHECK(deserializedInstance == subsystemRef);
+    testInstanceRef<SubsystemRef>("<subsystem Id=\"0\" Type=\"my_type\"/>\n");
 }
 
 TEST_CASE("Instance serializer: instance ref collection")
@@ -235,6 +204,31 @@ TEST_CASE("Instance serializer: service ref collection")
 
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == serviceRef);
+}
+
+TEST_CASE("Instance serializer: endpoint ref collection")
+{
+    /* Serialize */
+    EndPointRefCollection endpointRef("my_endpoint_ref_coll");
+    endpointRef.add(EndPointRef("type1", "9"));
+    endpointRef.add(EndPointRef("type2", "2"));
+
+    InstanceSerializer serializer;
+    endpointRef.accept(serializer);
+
+    std::string xml = serializer.getXml();
+
+    CHECK(xml == "<endpoint_collection Name=\"my_endpoint_ref_coll\">\n"
+                 "    <endpoint Id=\"9\" Type=\"type1\"/>\n"
+                 "    <endpoint Id=\"2\" Type=\"type2\"/>\n"
+                 "</endpoint_collection>\n");
+
+    /* Deserialize */
+    InstanceDeserializer deserializer(xml);
+    EndPointRefCollection deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == endpointRef);
 }
 
 TEST_CASE("Instance serializer: subsystem ref collection")
@@ -472,6 +466,30 @@ TEST_CASE("Instance serializer: Service")
     CHECK(deserializedInstance == service);
 }
 
+TEST_CASE("Instance serializer: EndPoint")
+{
+    /* Serialize */
+    EndPoint endPoint("my_endPoint_type", "2");
+
+    InstanceSerializer serializer;
+    endPoint.accept(serializer);
+
+    std::string xml = serializer.getXml();
+    CHECK(xml == "<endpoint Id=\"2\" Type=\"my_endPoint_type\">\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <parents/>\n"
+                 "    <children/>\n"
+                 "</endpoint>\n");
+
+    /* Deserialize */
+    InstanceDeserializer deserializer(xml);
+    EndPoint deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == endPoint);
+}
+
 TEST_CASE("Instance serializer: Service collection")
 {
     /* Serialize */
@@ -503,6 +521,40 @@ TEST_CASE("Instance serializer: Service collection")
     /* Deserialize */
     InstanceDeserializer deserializer(xml);
     ServiceCollection deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == collection);
+}
+
+TEST_CASE("Instance serializer: EndPointCollection collection")
+{
+    /* Serialize */
+    EndPointCollection collection;
+    collection.add(std::make_shared<EndPoint>("my_endPoint_type1", "1"));
+    collection.add(std::make_shared<EndPoint>("my_endPoint_type2", "2"));
+
+    InstanceSerializer serializer;
+    collection.accept(serializer);
+
+    std::string xml = serializer.getXml();
+    CHECK(xml == "<endpoint_collection>\n"
+                 "    <endpoint Id=\"1\" Type=\"my_endPoint_type1\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "    </endpoint>\n"
+                 "    <endpoint Id=\"2\" Type=\"my_endPoint_type2\">\n"
+                 "        <info_parameters/>\n"
+                 "        <control_parameters/>\n"
+                 "        <parents/>\n"
+                 "        <children/>\n"
+                 "    </endpoint>\n"
+                 "</endpoint_collection>\n");
+
+    /* Deserialize */
+    InstanceDeserializer deserializer(xml);
+    EndPointCollection deserializedInstance;
 
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == collection);
