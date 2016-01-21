@@ -68,6 +68,8 @@ const std::size_t BaseModelConverter::logServiceEndPointCount = 1;
 const std::string BaseModelConverter::probeServiceTypeName = "probe";
 const std::size_t BaseModelConverter::probeServiceEndPointCount = 8;
 
+const std::string BaseModelConverter::modulePrefix("module-");
+
 const std::vector<std::string> BaseModelConverter::staticServiceTypes = {logServiceTypeName};
 
 const dsp_fw::ModuleEntry &BaseModelConverter::findModuleEntry(uint16_t moduleId)
@@ -86,7 +88,7 @@ std::string BaseModelConverter::findModuleEntryName(uint16_t moduleId)
     /** According to the SwAS, module type name is "module-<module name>", for instance
      * "module-aec".
      */
-    return "module-" +
+    return modulePrefix +
            util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
 }
 

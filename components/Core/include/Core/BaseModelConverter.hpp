@@ -51,6 +51,7 @@ public:
     static const std::string subsystemName;
     static const std::string logServiceTypeName;
     static const std::string probeServiceTypeName;
+    static const std::string modulePrefix;
 
 protected:
     /* Defining model names as constants */
