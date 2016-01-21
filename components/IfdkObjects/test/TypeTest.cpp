@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -78,80 +78,49 @@ void populateCategories(Categories &categories)
     categories.add(std::make_shared<ServiceRef>("serv1"));
 }
 
-TEST_CASE("Type serializer: TypeRef")
+template <typename T>
+void testTypeRef(const std::string &expectedXml)
 {
     /* Serialize */
-    TypeRef typeRef("my_type_ref");
+    T typeRef("my_ref");
 
     TypeSerializer serializer;
     typeRef.accept(serializer);
 
     std::string xml = serializer.getXml();
-    CHECK(xml == "<type Name=\"my_type_ref\"/>\n");
+    CHECK(xml == expectedXml);
 
     /* Deserialize */
     TypeDeserializer deserializer(xml);
-    TypeRef deserializedInstance;
+    T deserializedInstance;
 
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == typeRef);
 }
 
+TEST_CASE("Type serializer: TypeRef")
+{
+    testTypeRef<TypeRef>("<type Name=\"my_ref\"/>\n");
+}
+
 TEST_CASE("Type serializer: ComponentRef")
 {
-    /* Serialize */
-    ComponentRef compRef("my_comp_ref");
-
-    TypeSerializer serializer;
-    compRef.accept(serializer);
-
-    std::string xml = serializer.getXml();
-    CHECK(xml == "<component_type Name=\"my_comp_ref\"/>\n");
-
-    /* Deserialize */
-    TypeDeserializer deserializer(xml);
-    ComponentRef deserializedInstance;
-
-    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
-    CHECK(deserializedInstance == compRef);
+    testTypeRef<ComponentRef>("<component_type Name=\"my_ref\"/>\n");
 }
 
 TEST_CASE("Type serializer: ServiceRef")
 {
-    /* Serialize */
-    ServiceRef serviceRef("my_service_ref");
+    testTypeRef<ServiceRef>("<service_type Name=\"my_ref\"/>\n");
+}
 
-    TypeSerializer serializer;
-    serviceRef.accept(serializer);
-
-    std::string xml = serializer.getXml();
-    CHECK(xml == "<service_type Name=\"my_service_ref\"/>\n");
-
-    /* Deserialize */
-    TypeDeserializer deserializer(xml);
-    ServiceRef deserializedInstance;
-
-    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
-    CHECK(deserializedInstance == serviceRef);
+TEST_CASE("Type serializer: EndPointRef")
+{
+    testTypeRef<EndPointRef>("<endpoint_type Name=\"my_ref\"/>\n");
 }
 
 TEST_CASE("Type serializer: SubsystemRef")
 {
-    /* Serialize */
-    SubsystemRef subsystemRef("my_subsystem_ref");
-
-    TypeSerializer serializer;
-    subsystemRef.accept(serializer);
-
-    std::string xml = serializer.getXml();
-    CHECK(xml == "<subsystem_type Name=\"my_subsystem_ref\"/>\n");
-
-    /* Deserialize */
-    TypeDeserializer deserializer(xml);
-    SubsystemRef deserializedInstance;
-
-    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
-    CHECK(deserializedInstance == subsystemRef);
+    testTypeRef<SubsystemRef>("<subsystem_type Name=\"my_ref\"/>\n");
 }
 
 TEST_CASE("Type serializer: Categories")
@@ -161,6 +130,7 @@ TEST_CASE("Type serializer: Categories")
     categories.add(std::make_shared<TypeRef>("type2"));
     categories.add(std::make_shared<ComponentRef>("comp2"));
     categories.add(std::make_shared<ServiceRef>("serv2"));
+    categories.add(std::make_shared<EndPointRef>("ep2"));
 
     TypeSerializer serializer;
     categories.accept(serializer);
@@ -170,6 +140,7 @@ TEST_CASE("Type serializer: Categories")
                  "    <type Name=\"type2\"/>\n"
                  "    <component_type Name=\"comp2\"/>\n"
                  "    <service_type Name=\"serv2\"/>\n"
+                 "    <endpoint_type Name=\"ep2\"/>\n"
                  "</categories>\n");
 
     /* Deserialize */
@@ -253,6 +224,31 @@ TEST_CASE("Type serializer: service ref collection")
 
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == serviceRef);
+}
+
+TEST_CASE("Type serializer: endpoint ref collection")
+{
+    /* Serialize */
+    EndPointRefCollection endPointRef("my_endPoint_ref_coll");
+    endPointRef.add(EndPointRef("endPoint1"));
+    endPointRef.add(EndPointRef("endPoint2"));
+
+    TypeSerializer serializer;
+    endPointRef.accept(serializer);
+
+    std::string xml = serializer.getXml();
+
+    CHECK(xml == "<endpoint_collection Name=\"my_endPoint_ref_coll\">\n"
+                 "    <endpoint_type Name=\"endPoint1\"/>\n"
+                 "    <endpoint_type Name=\"endPoint2\"/>\n"
+                 "</endpoint_collection>\n");
+
+    /* Deserialize */
+    TypeDeserializer deserializer(xml);
+    EndPointRefCollection deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == endPointRef);
 }
 
 TEST_CASE("Type serializer: subsystem ref collection")
@@ -498,6 +494,31 @@ TEST_CASE("Type serializer: Service")
 
     CHECK_NOTHROW(deserializedInstance.accept(deserializer));
     CHECK(deserializedInstance == service);
+}
+
+TEST_CASE("Type serializer: EndPoint")
+{
+    /* Serialize */
+    EndPoint endPoint("my_endPoint", EndPoint::Direction::Bidirectional);
+
+    TypeSerializer serializer;
+    endPoint.accept(serializer);
+
+    std::string xml = serializer.getXml();
+    CHECK(xml == "<endpoint_type Direction=\"Bidirectional\" Name=\"my_endPoint\">\n"
+                 "    <description/>\n"
+                 "    <characteristics/>\n"
+                 "    <info_parameters/>\n"
+                 "    <control_parameters/>\n"
+                 "    <children/>\n"
+                 "</endpoint_type>\n");
+
+    /* Deserialize */
+    TypeDeserializer deserializer(xml);
+    EndPoint deserializedInstance;
+
+    CHECK_NOTHROW(deserializedInstance.accept(deserializer));
+    CHECK(deserializedInstance == endPoint);
 }
 
 TEST_CASE("Type serializer: Input")
