@@ -67,6 +67,7 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
 
     /* Log service */
     addInstanceCollection(collectionMap, logServiceTypeName, createLogService());
+    addInstanceCollection(collectionMap, logServiceEndPointName, createLogServiceEndPoint());
 
     return std::make_shared<InstanceModel>(collectionMap);
 }
@@ -218,9 +219,26 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createLogService()
     /* Parents */
     service->getParents().add(std::make_shared<SubsystemRef>(subsystemName, subsystemId));
 
+    /* Children */
+    auto endPointCollection = std::make_shared<EndPointRefCollection>(collectionName_endpoint);
+    endPointCollection->add(EndPointRef(logServiceEndPointName, logServiceEndPointId));
+    service->getChildren().add(endPointCollection);
+
     auto coll = std::make_shared<ServiceCollection>();
     coll->add(service);
+    return coll;
+}
 
+std::shared_ptr<BaseCollection> InstanceModelConverter::createLogServiceEndPoint()
+{
+    /* End point */
+    auto endpoint = std::make_shared<EndPoint>(logServiceEndPointName, logServiceEndPointId);
+
+    /* Parents */
+    endpoint->getParents().add(std::make_shared<ServiceRef>(logServiceTypeName, logServiceId));
+
+    auto coll = std::make_shared<EndPointCollection>();
+    coll->add(endpoint);
     return coll;
 }
 

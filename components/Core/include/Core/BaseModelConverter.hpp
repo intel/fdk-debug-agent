@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -64,6 +64,7 @@ protected:
     static const std::string collectionName_task;
     static const std::string collectionName_subsystem;
     static const std::string collectionName_service;
+    static const std::string collectionName_endpoint;
     static const std::string collectionName_gateway;
     static const std::string collectionName_module;
 
@@ -85,6 +86,8 @@ protected:
     static const std::string logServiceTypeName;
     static const std::string logServiceId;
     static const std::string logServiceDescription;
+    static const std::string logServiceEndPointName;
+    static const std::string logServiceEndPointId;
 
     /* list of static services types */
     static const std::vector<std::string> staticServiceTypes;

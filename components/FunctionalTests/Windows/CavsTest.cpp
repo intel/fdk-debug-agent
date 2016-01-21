@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -280,6 +280,10 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
         {"/type/cavs.fwlogs", "logservice_type"},
         {"/instance/cavs.fwlogs", "logservice_instance_collection"},
         {"/instance/cavs.fwlogs/0", "logservice_instance"},
+
+        {"/type/cavs.fwlogs.endpoint", "logservice_endpoint_type"},
+        {"/instance/cavs.fwlogs.endpoint", "logservice_endpoint_instance_collection"},
+        {"/instance/cavs.fwlogs.endpoint/0", "logservice_endpoint_instance"},
     };
 
     checkUrlMap(client, urlMap);

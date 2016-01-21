@@ -3,5 +3,9 @@
     <characteristics/>
     <info_parameters/>
     <control_parameters/>
-    <children/>
+    <children>
+        <endpoint_collection Name="endpoints">
+            <endpoint_type Name="fwlogs.endpoint"/>
+        </endpoint_collection>
+    </children>
 </service_type>

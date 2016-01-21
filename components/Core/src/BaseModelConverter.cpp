@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -43,6 +43,7 @@ const std::string BaseModelConverter::collectionName_core = "cores";
 const std::string BaseModelConverter::collectionName_task = "tasks";
 const std::string BaseModelConverter::collectionName_subsystem = "subsystems";
 const std::string BaseModelConverter::collectionName_service = "services";
+const std::string BaseModelConverter::collectionName_endpoint = "endpoints";
 const std::string BaseModelConverter::collectionName_gateway = "gateways";
 const std::string BaseModelConverter::collectionName_module = "modules";
 
@@ -62,6 +63,8 @@ const std::vector<std::string> BaseModelConverter::staticTypes = {typeName_pipe,
 const std::string BaseModelConverter::logServiceTypeName = "fwlogs";
 const std::string BaseModelConverter::logServiceId = "0";
 const std::string BaseModelConverter::logServiceDescription = "cAVS log service";
+const std::string BaseModelConverter::logServiceEndPointName = logServiceTypeName + ".endpoint";
+const std::string BaseModelConverter::logServiceEndPointId = "0";
 
 const std::vector<std::string> BaseModelConverter::staticServiceTypes = {logServiceTypeName};
 

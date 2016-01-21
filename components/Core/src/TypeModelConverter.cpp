@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -62,6 +62,7 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
 
     /* Log service */
     addSubsystemSubType(typeMap, createLogService());
+    addSubsystemSubType(typeMap, createLogServiceEndPoint());
 
     return std::make_shared<TypeModel>(createSystem(), typeMap);
 }
@@ -239,7 +240,20 @@ std::shared_ptr<Type> TypeModelConverter::createLogService()
     auto service = std::make_shared<Service>(logServiceTypeName);
     service->getDescription().setValue(logServiceDescription);
 
+    // service children
+    auto coll = std::make_shared<EndPointRefCollection>(collectionName_endpoint);
+    coll->add(EndPointRef(logServiceEndPointName));
+    service->getChildren().add(coll);
+
     return service;
+}
+
+std::shared_ptr<Type> TypeModelConverter::createLogServiceEndPoint()
+{
+    auto endpoint =
+        std::make_shared<EndPoint>(logServiceEndPointName, EndPoint::Direction::Outgoing);
+    endpoint->getDescription().setValue(subsystemDescription + " " + logServiceEndPointName);
+    return endpoint;
 }
 
 void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)

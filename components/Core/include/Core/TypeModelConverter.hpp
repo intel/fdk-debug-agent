@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -48,6 +48,7 @@ private:
     std::shared_ptr<ifdk_objects::type::Type> createGateway(const std::string &name);
     std::shared_ptr<ifdk_objects::type::Type> createModule(uint16_t id);
     std::shared_ptr<ifdk_objects::type::Type> createLogService();
+    std::shared_ptr<ifdk_objects::type::Type> createLogServiceEndPoint();
 
     /** Get system characteristics */
     void getSystemCharacteristics(ifdk_objects::type::Characteristics &characteristics);
