@@ -225,7 +225,7 @@ std::shared_ptr<Type> TypeModelConverter::createModule(uint16_t id)
     Characteristics &ch = module->getCharacteristics();
     ch.add(Characteristic("ModuleId", std::to_string(id)));
 
-    const dsp_fw::ModuleEntry &entry = mSystem.getModuleEntries()[id];
+    const dsp_fw::ModuleEntry &entry = findModuleEntry(id);
     util::Uuid uuid;
     uuid.fromOtherUuidType(entry.uuid);
 
