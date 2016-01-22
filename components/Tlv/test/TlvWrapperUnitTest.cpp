@@ -57,7 +57,6 @@ TEST_CASE("TlvWrapper", "[WrapperRead]")
     Buffer buffer{210, 4, 0, 0, 56, 21, 3};
 
     ATestValueType valueToBeRead = {1234, 56, 789};
-    const char *rawValue = reinterpret_cast<const char *>(&valueToBeRead);
 
     tlvWrapper.readFrom(buffer);
     CHECK(testValue == valueToBeRead);
