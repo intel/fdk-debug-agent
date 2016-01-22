@@ -81,28 +81,6 @@ void Logger::LogProducer::onLogEntry(uint32_t coreId, uint8_t *buffer, uint32_t 
     }
 }
 
-uint32_t Logger::getIoControlCodeFromType(IoCtlType type)
-{
-    switch (type) {
-    case IoCtlType::Get:
-        return IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET;
-    case IoCtlType::Set:
-        return IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
-    }
-    throw Exception("Wrong ioctl type value: " + std::to_string(static_cast<uint32_t>(type)));
-}
-
-std::string Logger::getIoControlTypeName(IoCtlType type)
-{
-    switch (type) {
-    case IoCtlType::Get:
-        return "TinyGet";
-    case IoCtlType::Set:
-        return "TinySet";
-    }
-    throw Exception("Wrong ioctl type value: " + std::to_string(static_cast<uint32_t>(type)));
-}
-
 driver::IOCTL_LOG_STATE Logger::translateToDriver(bool isStarted)
 {
     return isStarted ? driver::IOCTL_LOG_STATE::STARTED : driver::IOCTL_LOG_STATE::STOPPED;
@@ -265,7 +243,7 @@ void Logger::setLogParameterIoctl(const Parameters &parameters)
     driver::IoctlFwLogsState outputParams;
 
     /* Performing the ioctl */
-    logParameterIoctl(IoCtlType::Set, inputFwParams, outputParams);
+    logParameterIoctl(Direction::Set, inputFwParams, outputParams);
 }
 
 Logger::Parameters Logger::getParameters()
@@ -280,14 +258,14 @@ Logger::Parameters Logger::getParameters()
     driver::IoctlFwLogsState outputFwParams;
 
     /* Performing the ioctl */
-    logParameterIoctl(IoCtlType::Get, inputFwParams, outputFwParams);
+    logParameterIoctl(Direction::Get, inputFwParams, outputFwParams);
 
     /* Returning the parameters
      * May throws Logger::Exception */
     return translateFromDriver(outputFwParams);
 }
 
-void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &inputFwParams,
+void Logger::logParameterIoctl(Direction direction, const driver::IoctlFwLogsState &inputFwParams,
                                driver::IoctlFwLogsState &outputFwParams)
 {
     /* Creating the body payload using the IoctlFwLogsState type */
@@ -300,13 +278,13 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
                                   driver::logParametersCommandparameterId,
                                   bodyPayloadWriter.getBuffer(), buffer);
 
+    driver::IoCtlType type =
+        direction == Direction::Set ? driver::IoCtlType::TinySet : driver::IoCtlType::TinyGet;
     /* Performing ioctl */
-    uint32_t ioControlCode = getIoControlCodeFromType(type);
-
     try {
-        mDevice.ioControl(ioControlCode, &buffer, &buffer);
+        mDevice.ioControl(type, &buffer, &buffer);
     } catch (Device::Exception &e) {
-        throw Exception(getIoControlTypeName(type) + " error: " + e.what());
+        throw Exception(to_string(type) + " error: " + e.what());
     }
 
     try {
@@ -328,7 +306,7 @@ void Logger::logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &i
         if (!reader.isEOS()) {
             /** @todo use logging or throw an exception */
             std::cout << "Log parameter ioctl buffer has not been fully consumed,"
-                      << " IsGet=" << ((type == IoCtlType::Get) ? true : false)
+                      << " IsGet=" << ((direction == Direction::Get) ? true : false)
                       << " pointer=" << reader.getPointerOffset()
                       << " size=" << reader.getBuffer().size()
                       << " remaining= " << (reader.getBuffer().size() - reader.getBuffer().size());

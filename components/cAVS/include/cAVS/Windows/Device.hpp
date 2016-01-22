@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "cAVS/Windows/DriverTypes.hpp"
 #include "Util/Buffer.hpp"
 #include <exception>
 #include <string>
@@ -53,7 +54,7 @@ public:
 
     /**
      * Perform an IO control
-     * @param[in] ioControlCode the IO control code
+     * @param[in] ioControlType the IO control type
      * @param[in] inputBuffer the input buffer. This parameter is optional, use nullptr if the
      *                        input buffer is not required.
      * @param[in,out] outputBuffer the output buffer (basically this buffer can be used as input
@@ -62,8 +63,20 @@ public:
      *                             according to the IO control response.
      * @throw Device::Exception if the io control has failed
      */
+    void ioControl(driver::IoCtlType ioControlType, const util::Buffer *input, util::Buffer *output)
+    {
+        ioControl(static_cast<uint32_t>(ioControlType), input, output);
+    }
+    /** Perform an IO control
+     *
+     * @see ioControl. This overload uses an direct integer value instead of an
+     * enum.
+     *
+     * @todo: Move Windows/Device out of cAVS, so that it won't have to implement
+     * this overload. Or templatize the Device class with an ioctl type?
+     */
     virtual void ioControl(uint32_t ioControlCode, const util::Buffer *input,
-                           util::Buffer *output) = 0;
+                   util::Buffer *output) = 0;
 
 private:
     Device(const Device &) = delete;

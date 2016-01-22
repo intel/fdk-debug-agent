@@ -66,7 +66,7 @@ private:
     /** Maximum size of the log entry queue */
     static const std::size_t queueMaxMemoryBytes = 10 * 1024 * 1024; /* 10 meg */
 
-    enum class IoCtlType
+    enum class Direction
     {
         Get,
         Set
@@ -99,9 +99,6 @@ private:
         std::thread mProducerThread;
     };
 
-    static uint32_t getIoControlCodeFromType(IoCtlType type);
-    static std::string getIoControlTypeName(IoCtlType type);
-
     /** Translate log state to driver type */
     static driver::IOCTL_LOG_STATE translateToDriver(bool isStarted);
 
@@ -133,7 +130,7 @@ private:
     static std::size_t logBlockSize(const LogBlock &block) { return block.getLogSize(); }
 
     /** Set/Get log parameters using a Tiny(Get|Set) ioctl */
-    void logParameterIoctl(IoCtlType type, const driver::IoctlFwLogsState &inputFwParams,
+    void logParameterIoctl(Direction type, const driver::IoctlFwLogsState &inputFwParams,
                            driver::IoctlFwLogsState &outputFwParams);
 
     void setLogParameterIoctl(const Parameters &parameters);

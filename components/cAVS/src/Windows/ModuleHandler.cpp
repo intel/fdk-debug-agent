@@ -58,8 +58,7 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
 
     /* Performing the io ctl */
     try {
-        mDevice.ioControl(isGet ? IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET
-                                : IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET,
+        mDevice.ioControl(isGet ? driver::IoCtlType::BigGet : driver::IoCtlType::BigSet,
                           &headerBuffer, &bodyBuffer);
     } catch (Device::Exception &e) {
         throw Exception("Device returns an exception: " + std::string(e.what()));

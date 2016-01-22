@@ -1,7 +1,7 @@
 /*
  ********************************************************************************
  *                              INTEL CONFIDENTIAL
- *   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+ *   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
  *   The source code contained  or  described herein and all documents related to
  *   the source code ("Material") are owned by Intel Corporation or its suppliers
  *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -37,6 +37,7 @@ namespace private_driver
 #include "Util/StructureChangeTracking.hpp"
 #include <inttypes.h>
 #include <utility>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -46,6 +47,25 @@ namespace windows
 {
 namespace driver
 {
+
+struct Exception : std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+
+/** IO control types supported by the cAVS driver
+ */
+enum class IoCtlType
+{
+    GetApiVersion = IOCTL_CMD_APP_TO_AUDIODSP_GET_APIVERSION,
+    IsSupported = IOCTL_CMD_APP_TO_AUDIODSP_ISSUPPORTED,
+    TinySet = IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET,
+    BigSet = IOCTL_CMD_APP_TO_AUDIODSP_BIG_SET,
+    TinyGet = IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET,
+    BigGet = IOCTL_CMD_APP_TO_AUDIODSP_BIG_GET,
+};
+
+std::string to_string(IoCtlType type);
 
 /** By convention the parameter id of the "MODULE PARAMETER ACCESS" feature is 0 */
 static const uint32_t moduleParameterAccessCommandParameterId = 0;
