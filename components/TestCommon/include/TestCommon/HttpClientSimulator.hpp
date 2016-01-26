@@ -40,7 +40,6 @@ class HttpClientSimulator final
 {
 public:
     static const uint32_t DefaultPort = 9096;
-    static const std::string AnyContent;
 
     /* Http verb */
     enum class Verb
@@ -66,10 +65,10 @@ public:
     static std::string toString(Status s);
 
     /* This exception is thrown when the server response is not the expected one. */
-    class RequestFailureException : public std::logic_error
+    class RequestFailureException : public std::runtime_error
     {
     public:
-        RequestFailureException(const std::string &msg) : std::logic_error(msg.c_str()) {}
+        RequestFailureException(const std::string &msg) : std::runtime_error(msg.c_str()) {}
     };
 
     /* This specialized exception is thrown when a network error occurs */
@@ -84,6 +83,67 @@ public:
     {
     }
 
+    /* Abstract expected http request content */
+    class Content
+    {
+    public:
+        virtual ~Content() {}
+        /** Check that the content passed as parameter is the expected one */
+        virtual void checkExpected(const std::string &content) const = 0;
+    };
+
+    /* Accepts any content */
+    class AnyContent : public Content
+    {
+    public:
+        void checkExpected(const std::string & /*content*/) const override {}
+    };
+
+    /* Checking the http request content from a string.
+     *
+     * If the check fails, an exception is thrown with a message that helps to locate the
+     * diff within the content.
+     */
+    class StringContent : public Content
+    {
+    public:
+        explicit StringContent(const std::string &expectedContent)
+            : mExpectedContent(expectedContent)
+        {
+        }
+
+        void checkExpected(const std::string &content) const override;
+
+    private:
+        const std::string mExpectedContent;
+
+        /** Returns a substring. If the substring exceeds the string length (i.e.
+        * index + length > str.length()) then the returned substring is truncated (i.e. returning
+        * chars from [index..str.length()] )
+        */
+        static std::string getSubStringSafe(const std::string &str, std::size_t index,
+                                            std::size_t length);
+
+        /** Returns the index of the first different char */
+        static std::size_t getStringDiffOffset(const std::string &str1, const std::string &str2);
+    };
+
+    /* Checking the http request content from a file.
+     *
+     * If the check fails, a file with the name <reference file name> + "_got" is created,
+     * that contains the "got" content. The user can make a diff between the two files.
+     */
+    class FileContent : public Content
+    {
+    public:
+        explicit FileContent(const std::string &referenceFile) : mReferenceFile(referenceFile) {}
+
+        void checkExpected(const std::string &content) const override;
+
+    private:
+        const std::string mReferenceFile;
+    };
+
     /* Perform an http request and checks the result. If the result is not the expected one,
      * the exception RequestFailureException is thrown
      *
@@ -92,26 +152,17 @@ public:
      * @param[in] requestContent the content of the request
      * @param[in] expectedStatus the expected http status returned by the server
      * @param[in] expectedContentType the expected response content type returned by the server
-     * @param[in] expectedResponseContent the expected response content returned by the server.
-     *                                    Use the AnyContent constant to accept any content.
+     * @param[in] expectedResponseContent the expected response content returned by the server. It
+     *                                    can be either an AnyContent, a StringContent or a
+     *                                    FileContent
      */
     void request(const std::string &uri, Verb verb, const std::string &requestContent,
                  Status expectedStatus, const std::string &expectedContentType,
-                 const std::string &expectedResponseContent);
+                 const Content &expectedResponseContent);
 
 private:
     HttpClientSimulator(const HttpClientSimulator &) = delete;
     HttpClientSimulator &operator=(const HttpClientSimulator &) = delete;
-
-    /** Returns a substring. If the substring exceeds the string length (i.e.
-     * index + length > str.length()) then the returned substring is truncated (i.e. returning
-     * chars from [index..str.length()] )
-     */
-    static std::string getSubStringSafe(const std::string &str, std::size_t index,
-                                        std::size_t length);
-
-    /** Returns the index of the first different char */
-    std::size_t getStringDiffOffset(const std::string &str1, const std::string &str2);
 
     const std::string mServer;
     const uint32_t mPort;

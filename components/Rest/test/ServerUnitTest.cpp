@@ -70,13 +70,15 @@ TEST_CASE("Request test", "[Server]")
         Server server(std::move(dispatcher), HttpClientSimulator::DefaultPort);
 
         /* Performing the http request */
-        CHECK_NOTHROW(client.request("/unknown",                            // uri
-                                     HttpClientSimulator::Verb::Get,        // verb
-                                     "",                                    // request content
-                                     HttpClientSimulator::Status::NotFound, // expected status
-                                     "text/plain",                          // expected content type
-                                     "Resource not found: /unknown") // expected response content
-                      );
+        CHECK_NOTHROW(
+            client.request("/unknown",                            // uri
+                           HttpClientSimulator::Verb::Get,        // verb
+                           "",                                    // request content
+                           HttpClientSimulator::Status::NotFound, // expected status
+                           "text/plain",                          // expected content type
+                           HttpClientSimulator::StringContent(
+                               "Resource not found: /unknown")) // expected response content
+            );
     }
 
     SECTION ("Resource without identifier") {
@@ -98,7 +100,8 @@ TEST_CASE("Request test", "[Server]")
                                      "Hello world!",                    // request content
                                      HttpClientSimulator::Status::Ok,   // expected status
                                      "text/html",                       // expected content type
-                                     expectedResponseContent)           // expected response content
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 
@@ -122,7 +125,8 @@ TEST_CASE("Request test", "[Server]")
                                      "Two identifiers",               // request content
                                      HttpClientSimulator::Status::Ok, // expected status
                                      "text/html",                     // expected content type
-                                     expectedResponseContent)         // expected response content
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 }

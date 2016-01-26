@@ -37,5 +37,7 @@ set_common_settings(TestCommon)
 # exporting the include directory
 target_include_directories(TestCommon PUBLIC "include")
 
+target_link_libraries(TestCommon Util)
+
 link_poco(TestCommon)
 

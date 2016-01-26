@@ -74,8 +74,9 @@ TEST_CASE("Request test on default Resource rejecting all verbs", "[Server]")
                                      HttpClientSimulator::Verb::Get,              // verb
                                      "You will fail!",                            // request content
                                      HttpClientSimulator::Status::VerbNotAllowed, // expected status
-                                     "text/plain",            // expected content type
-                                     expectedResponseContent) // expected response content
+                                     "text/plain", // expected content type
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 
@@ -86,8 +87,9 @@ TEST_CASE("Request test on default Resource rejecting all verbs", "[Server]")
                                      HttpClientSimulator::Verb::Post,             // verb
                                      "You will fail!",                            // request content
                                      HttpClientSimulator::Status::VerbNotAllowed, // expected status
-                                     "text/plain",            // expected content type
-                                     expectedResponseContent) // expected response content
+                                     "text/plain", // expected content type
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 
@@ -98,8 +100,9 @@ TEST_CASE("Request test on default Resource rejecting all verbs", "[Server]")
                                      HttpClientSimulator::Verb::Put,              // verb
                                      "You will fail!",                            // request content
                                      HttpClientSimulator::Status::VerbNotAllowed, // expected status
-                                     "text/plain",            // expected content type
-                                     expectedResponseContent) // expected response content
+                                     "text/plain", // expected content type
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 
@@ -110,8 +113,9 @@ TEST_CASE("Request test on default Resource rejecting all verbs", "[Server]")
                                      HttpClientSimulator::Verb::Delete,           // verb
                                      "You will fail!",                            // request content
                                      HttpClientSimulator::Status::VerbNotAllowed, // expected status
-                                     "text/plain",            // expected content type
-                                     expectedResponseContent) // expected response content
+                                     "text/plain", // expected content type
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 }
@@ -141,7 +145,8 @@ TEST_CASE("Default verb handler", "[Server]")
                                      "",                              // request content
                                      HttpClientSimulator::Status::Ok, // expected status
                                      "text/plain",                    // expected content type
-                                     expectedResponseContent)         // expected response content
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 
@@ -154,7 +159,8 @@ TEST_CASE("Default verb handler", "[Server]")
                                      "",                              // request content
                                      HttpClientSimulator::Status::Ok, // expected status
                                      "text/plain",                    // expected content type
-                                     expectedResponseContent)         // expected response content
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 
@@ -167,7 +173,8 @@ TEST_CASE("Default verb handler", "[Server]")
                                      "",                              // request content
                                      HttpClientSimulator::Status::Ok, // expected status
                                      "text/plain",                    // expected content type
-                                     expectedResponseContent)         // expected response content
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 
@@ -180,7 +187,8 @@ TEST_CASE("Default verb handler", "[Server]")
                                      "",                                // request content
                                      HttpClientSimulator::Status::Ok,   // expected status
                                      "text/plain",                      // expected content type
-                                     expectedResponseContent)           // expected response content
+                                     HttpClientSimulator::StringContent(
+                                         expectedResponseContent)) // expected response content
                       );
     }
 }

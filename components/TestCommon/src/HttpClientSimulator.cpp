@@ -21,6 +21,8 @@
 */
 
 #include "TestCommon/HttpClientSimulator.hpp"
+#include "Util/StringHelper.hpp"
+#include "Util/FileHelper.hpp"
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPClientSession.h>
@@ -28,6 +30,7 @@
 #include <Poco/StreamCopier.h>
 #include <cassert>
 #include <algorithm>
+#include <fstream>
 
 /** Unfortunately <Poco/Net/HTTPRequest.h> defines the "min" macro, which makes fail the
  * std::min function
@@ -43,8 +46,6 @@ namespace debug_agent
 {
 namespace test_common
 {
-
-const std::string HttpClientSimulator::AnyContent("<any_content>");
 
 /* Translate the Poco status into the HttpClientSimulator::Status enum*/
 static HttpClientSimulator::Status translateStatus(HTTPResponse::HTTPStatus status)
@@ -99,8 +100,11 @@ std::string HttpClientSimulator::toString(Status s)
     throw RequestFailureException(std::string("Invalid http status"));
 }
 
-std::string HttpClientSimulator::getSubStringSafe(const std::string &str, std::size_t index,
-                                                  std::size_t length)
+/* String content */
+
+std::string HttpClientSimulator::StringContent::getSubStringSafe(const std::string &str,
+                                                                 std::size_t index,
+                                                                 std::size_t length)
 {
     /* Changing the substring length if it exceeds the input string size */
     std::size_t safeLength;
@@ -113,8 +117,8 @@ std::string HttpClientSimulator::getSubStringSafe(const std::string &str, std::s
     return str.substr(index, safeLength);
 }
 
-std::size_t HttpClientSimulator::getStringDiffOffset(const std::string &str1,
-                                                     const std::string &str2)
+std::size_t HttpClientSimulator::StringContent::getStringDiffOffset(const std::string &str1,
+                                                                    const std::string &str2)
 {
     std::size_t minSize = std::min(str1.length(), str2.length());
 
@@ -125,10 +129,55 @@ std::size_t HttpClientSimulator::getStringDiffOffset(const std::string &str1,
     return minSize;
 }
 
+void HttpClientSimulator::StringContent::checkExpected(const std::string &content) const
+{
+    if (content != mExpectedContent) {
+        /* The substring that contains difference will not exceed 15 chars */
+        static const std::size_t diffLength = 15;
+
+        /* Getting the index of the first different char */
+        std::size_t diffIndex = getStringDiffOffset(content, mExpectedContent);
+
+        /* "Got" content substring that contains the difference */
+        std::string substringContent = getSubStringSafe(content, diffIndex, diffLength);
+
+        /* "Expected" content substring that contains the difference */
+        std::string substringExpectedContent =
+            getSubStringSafe(mExpectedContent, diffIndex, diffLength);
+
+        throw RequestFailureException("Wrong response content, got:\n" + content + "\nexpected: '" +
+                                      mExpectedContent + "' at index " + std::to_string(diffIndex) +
+                                      ": got substring: '" + substringContent +
+                                      "' expected substring: '" + substringExpectedContent + "'");
+    }
+}
+
+/* File content */
+
+void HttpClientSimulator::FileContent::checkExpected(const std::string &content) const
+{
+    try {
+        std::string expectedContent = util::file_helper::readAsString(mReferenceFile);
+
+        if (util::StringHelper::trim(content) != util::StringHelper::trim(expectedContent)) {
+            std::string gotFile(mReferenceFile + "_got");
+            util::file_helper::writeFromString(gotFile, content);
+
+            throw RequestFailureException("Wrong response content. See diff between:\n"
+                                          "ref: " +
+                                          mReferenceFile + "\ngot: " + gotFile);
+        }
+    } catch (util::file_helper::Exception &e) {
+        throw RequestFailureException("File I/O error: " + std::string(e.what()));
+    }
+}
+
+/* HttpClientSimulator */
+
 void HttpClientSimulator::request(const std::string &uri, Verb verb,
                                   const std::string &requestContent, Status expectedStatus,
                                   const std::string &expectedContentType,
-                                  const std::string &expectedResponseContent)
+                                  const Content &expectedResponseContent)
 {
     HTTPClientSession session(mServer, mPort);
 
@@ -167,27 +216,7 @@ void HttpClientSimulator::request(const std::string &uri, Verb verb,
                                       "' instead of '" + expectedContentType + "'");
     }
     /* Checking response content*/
-    if (expectedResponseContent != AnyContent && responseContent != expectedResponseContent) {
-
-        /* The substring that contains difference will not exceed 15 chars */
-        static const std::size_t diffLength = 15;
-
-        /* Getting the index of the first different char */
-        std::size_t diffIndex = getStringDiffOffset(responseContent, expectedResponseContent);
-
-        /* "Got" content substring that contains the difference */
-        std::string substringContent = getSubStringSafe(responseContent, diffIndex, diffLength);
-
-        /* "Expected" content substring that contains the difference */
-        std::string substringExpectedContent =
-            getSubStringSafe(expectedResponseContent, diffIndex, diffLength);
-
-        throw RequestFailureException("Wrong response content, got:\n" + responseContent +
-                                      "\nexpected: '" + expectedResponseContent + "' at index " +
-                                      std::to_string(diffIndex) + ": got substring: '" +
-                                      substringContent + "' expected substring: '" +
-                                      substringExpectedContent + "'");
-    }
+    expectedResponseContent.checkExpected(responseContent);
 }
 }
 }

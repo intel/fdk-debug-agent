@@ -24,6 +24,7 @@
 #include "Core/DebugAgent.hpp"
 #include "Util/Uuid.hpp"
 #include "Util/StringHelper.hpp"
+#include "Util/FileHelper.hpp"
 #include "TestCommon/HttpClientSimulator.hpp"
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Windows/DeviceInjectionDriverFactory.hpp"
@@ -90,33 +91,16 @@ static const util::Buffer nsControlParameterPayload = {
     0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-/** @return the file content as string */
-std::string fileContent(const std::string &name)
+const std::string dataPath = "data/FunctionalTests/http/";
+
+std::string xmlFileName(const std::string &name)
 {
-    std::string fileName = "data/FunctionalTests/http/" + name;
-
-    std::ifstream file(fileName);
-    if (!file) { /* Using stream bool operator */
-        throw std::logic_error("Unable to open file: " + fileName);
-    }
-
-    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-    if (file.bad()) {
-        throw std::logic_error("Error while reading file: " + fileName);
-    }
-
-    return StringHelper::trim(content) + "\n"; /* Poco xml library puts a '\n' on the last line. */
+    return dataPath + name + ".xml";
 }
 
-std::string xmlFile(const std::string &name)
+std::string htmlFileName(const std::string &name)
 {
-    return fileContent(name + ".xml");
-}
-
-std::string htmlFile(const std::string &name)
-{
-    return fileContent(name + ".html");
+    return dataPath + name + ".html";
 }
 
 const std::string &pfwConfigPath =
@@ -197,7 +181,7 @@ void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
 static void requestInstanceTopologyRefresh(HttpClientSimulator &client)
 {
     client.request("/instance/cavs/0/refreshed", HttpClientSimulator::Verb::Post, "",
-                   HttpClientSimulator::Status::Ok, "", "");
+                   HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent(""));
 }
 
 /* Check that urls contained in the supplied map match the expected xml result
@@ -211,14 +195,12 @@ static void checkUrlMap(HttpClientSimulator &client,
     for (auto it : urlMap) {
         try {
             client.request(it.first, HttpClientSimulator::Verb::Get, "",
-                           HttpClientSimulator::Status::Ok, "text/xml", xmlFile(it.second));
-        } catch (...) {
-            /* Proving some error information because catch doesn't display them. */
-            std::cout << "------------------------------------------------------------" << std::endl
-                      << "Error on url=" << it.first << " file=" << it.second << std::endl
-                      << "------------------------------------------------------------"
-                      << std::endl;
-            CHECK_NOTHROW(throw);
+                           HttpClientSimulator::Status::Ok, "text/xml",
+                           HttpClientSimulator::FileContent(xmlFileName(it.second)));
+        } catch (std::exception &e) {
+            std::stringstream stream;
+            stream << "Error on url=" << it.first << " file=" << it.second << std::endl << e.what();
+            FAIL(stream.str());
         }
     }
 }
@@ -325,13 +307,13 @@ TEST_CASE("DebugAgent/cAVS: internal debug urls")
     /* Creating the http client */
     HttpClientSimulator client("localhost");
 
-    CHECK_NOTHROW(client.request("/internal/modules", HttpClientSimulator::Verb::Get, "",
-                                 HttpClientSimulator::Status::Ok, "text/html",
-                                 htmlFile("internal_module_list")));
+    CHECK_NOTHROW(client.request(
+        "/internal/modules", HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok,
+        "text/html", HttpClientSimulator::FileContent(htmlFileName("internal_module_list"))));
 
-    CHECK_NOTHROW(client.request("/internal/topology", HttpClientSimulator::Verb::Get, "",
-                                 HttpClientSimulator::Status::Ok, "text/html",
-                                 htmlFile("internal_topology")));
+    CHECK_NOTHROW(client.request(
+        "/internal/topology", HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok,
+        "text/html", HttpClientSimulator::FileContent(htmlFileName("internal_topology"))));
 }
 
 /** Test a parameter id over 32 bit. */
@@ -381,7 +363,8 @@ TEST_CASE("DebugAgent/cAVS: GET module instance control parameters "
     /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
         "/instance/cavs.module-aec/1/control_parameters", HttpClientSimulator::Verb::Get, "",
-        HttpClientSimulator::Status::Ok, "text/xml", xmlFile("module_instance_control_params")));
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("module_instance_control_params"))));
 }
 
 TEST_CASE("DebugAgent/cAVS: A refresh error erases the previous topology ")
@@ -424,20 +407,22 @@ TEST_CASE("DebugAgent/cAVS: A refresh error erases the previous topology ")
     /* Access to an instance */
     CHECK_NOTHROW(client.request("/instance/cavs.module-aec/2", HttpClientSimulator::Verb::Get, "",
                                  HttpClientSimulator::Status::Ok, "text/xml",
-                                 xmlFile("module_instance")));
+                                 HttpClientSimulator::FileContent(xmlFileName("module_instance"))));
 
     /* Request an instance topology refresh which will fail since commands are not in device mock */
     CHECK_NOTHROW(client.request(
         "/instance/cavs/0/refreshed", HttpClientSimulator::Verb::Post, "",
         HttpClientSimulator::Status::InternalError, "text/plain",
-        "Internal error: Cannot refresh instance model: Cannot get topology from fw: "
-        "Can not retrieve gateways: Device returns an exception: OS says that io "
-        "control has failed."));
+        HttpClientSimulator::StringContent(
+            "Internal error: Cannot refresh instance model: Cannot get topology from fw: "
+            "Can not retrieve gateways: Device returns an exception: OS says that io "
+            "control has failed.")));
 
     /* Access to an instance must fail since last topology refresh has failed*/
-    CHECK_NOTHROW(client.request("/instance/cavs.module-aec/2", HttpClientSimulator::Verb::Get, "",
-                                 HttpClientSimulator::Status::InternalError, "text/plain",
-                                 "Internal error: Instance model is undefined."));
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.module-aec/2", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::InternalError, "text/plain",
+        HttpClientSimulator::StringContent("Internal error: Instance model is undefined.")));
 }
 
 TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
@@ -484,7 +469,8 @@ TEST_CASE("DebugAgent/cAVS: Set module instance control parameters "
 
     CHECK_NOTHROW(client.request(
         "/instance/cavs.module-aec/1/control_parameters", HttpClientSimulator::Verb::Put,
-        xmlFile("module_instance_control_params"), HttpClientSimulator::Status::Ok, "", ""));
+        file_helper::readAsString(xmlFileName("module_instance_control_params")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 }
 
 TEST_CASE("DebugAgent/cAVS: module type control parameters "
@@ -514,7 +500,8 @@ TEST_CASE("DebugAgent/cAVS: module type control parameters "
     /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
         "/type/cavs.module-aec/1/control_parameters", HttpClientSimulator::Verb::Get, "",
-        HttpClientSimulator::Status::Ok, "text/xml", xmlFile("module_type_control_params")));
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("module_type_control_params"))));
 }
 
 TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
@@ -581,17 +568,20 @@ TEST_CASE("DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
     /* 1: Getting log parameters*/
     CHECK_NOTHROW(client.request(
         "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Get, "",
-        HttpClientSimulator::Status::Ok, "text/xml", xmlFile("logservice_getparam_stopped")));
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("logservice_getparam_stopped"))));
 
     /* 2: Setting log parameters ("1;Verbose;SRAM") */
     CHECK_NOTHROW(client.request(
         "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Put,
-        xmlFile("logservice_setparam_start"), HttpClientSimulator::Status::Ok, "", ""));
+        file_helper::readAsString(xmlFileName("logservice_setparam_start")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 
     /* 3: Getting log parameters again */
     CHECK_NOTHROW(client.request(
         "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Get, "",
-        HttpClientSimulator::Status::Ok, "text/xml", xmlFile("logservice_getparam_started")));
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("logservice_getparam_started"))));
 }
 
 /** The following test is based on tempos, so it is not 100% safe. These tempos are
@@ -652,7 +642,8 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
     /* Starting log */
     CHECK_NOTHROW(client.request(
         "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Put,
-        xmlFile("logservice_setparam_start"), HttpClientSimulator::Status::Ok, "", ""));
+        file_helper::readAsString(xmlFileName("logservice_setparam_start")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 
     /* Trying to get log data in another thread after 250 ms. This should result on "resource
     * locked" http status */
@@ -662,7 +653,8 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
         HttpClientSimulator client2("localhost");
         client2.request("/instance/cavs.fwlogs/0/streaming", HttpClientSimulator::Verb::Get, "",
                         HttpClientSimulator::Status::Locked, "text/plain",
-                        "Resource is locked: Logging stream resource is already used.");
+                        HttpClientSimulator::StringContent(
+                            "Resource is locked: Logging stream resource is already used."));
     }));
 
     /* Terminating the debug agent after 500ms in another thread, the client should be consuming
@@ -679,7 +671,7 @@ TEST_CASE("DebugAgent/cAVS: debug agent shutdown while a client is consuming log
     try {
         client.request("/instance/cavs.fwlogs/0/streaming", HttpClientSimulator::Verb::Get, "",
                        HttpClientSimulator::Status::Ok, "application/vnd.ifdk-file",
-                       HttpClientSimulator::AnyContent);
+                       HttpClientSimulator::AnyContent());
     } catch (HttpClientSimulator::NetworkException &) {
         /* A network exception can occur here because the debug agent closes its sockets.
         * This is a normal case.
