@@ -24,7 +24,7 @@
 
 #include "cAVS/Windows/Device.hpp"
 #include <memory>
-#include <vector>
+#include <queue>
 #include <stdexcept>
 #include <mutex>
 
@@ -37,8 +37,8 @@ namespace windows
 
 /** This class is a mocked device implementation
  *
- * Before using it, the user has to fill the test vector.
- * Each entry of this test vector is a 5-tuple:
+ * Before using it, the user has to fill the test queue.
+ * Each entry of this test queue is a 5-tuple:
  * - the expected IO control code
  * - the expected input buffer
  * - the expected output buffer (because the output buffer can be used also as input buffer).
@@ -47,23 +47,18 @@ namespace windows
  *
  * These entries can be added using the addIoctlEntry method.
  *
- * Once the test vector is filled, the mocked device can be used as a real device.
+ * Once the test queue is filled, the mocked device can be used as a real device.
  */
 class MockedDevice final : public Device
 {
 public:
     MockedDevice() : mCurrentEntry(0), mFailed(false) {}
 
-    /** @throw Device::Exception if the mocking has failed.
-     *
-     * Indeed throwing in destructor ensures that the client code is notified of a mock failure.
-     *
-     * Another solution would consist in supplying a method "checkMockingSuccess()", but if the
-     * client forgets to call it, the failure will not be reported.
+    /** @returns true if all test entries were consumed
      */
-    virtual ~MockedDevice();
+    bool consumed() const;
 
-    /** Add a successful ioctl entry into the test vector.
+    /** Add a successful ioctl entry into the test queue.
      *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
      *  - if an output buffer is required, the 'expectedOutput' AND 'returnedOutput' arguments
      *    shall be specified. They must have the same size.
@@ -84,7 +79,7 @@ public:
                                  const util::Buffer *expectedOutput,
                                  const util::Buffer *returnedOutput);
 
-    /** Add a failed ioctl entry into the test vector.
+    /** Add a failed ioctl entry into the test queue.
     *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
     *  - if an output buffer is required, the 'expectedOutput' argument shall be specified.
     *
@@ -143,7 +138,7 @@ private:
         throw Exception("Mock failed: " + msg);
     }
 
-    /** Call this method in case of mock failure. The current test vector entry is printed. */
+    /** Call this method in case of mock failure. The current test queue entry is printed. */
     void entryFailure(const std::string &msg)
     {
         failure("IOCtl entry #" + std::to_string(mCurrentEntry) + ": " + msg);
@@ -160,10 +155,10 @@ private:
     void compareBuffers(const std::string &bufferName, const util::Buffer *candidateBuffer,
                         const util::Buffer *expectedBuffer);
 
-    using EntryCollection = std::vector<IoCtlEntry>;
+    using EntryCollection = std::queue<IoCtlEntry>;
 
     EntryCollection mEntries;
-    std::size_t mCurrentEntry;
+    int mCurrentEntry;
     bool mFailed;
     std::string mFailureMessage;
 

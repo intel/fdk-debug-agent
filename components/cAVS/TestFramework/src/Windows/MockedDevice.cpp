@@ -79,11 +79,9 @@ MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expec
     }
 }
 
-MockedDevice::~MockedDevice()
+bool MockedDevice::consumed() const
 {
-    if (!mFailed && mCurrentEntry != mEntries.size()) {
-        throw Exception("IoCtl test vector has not been fully consumed.");
-    }
+    return mEntries.empty();
 }
 
 void MockedDevice::addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
@@ -93,8 +91,7 @@ void MockedDevice::addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer 
     /* No need to lock members, this method is called by the main thread of the test,
      * when it fills the test vector. */
 
-    mEntries.push_back(
-        IoCtlEntry(ioControlCode, expectedInput, expectedOutput, returnedOutput, true));
+    mEntries.push(IoCtlEntry(ioControlCode, expectedInput, expectedOutput, returnedOutput, true));
 }
 
 void MockedDevice::addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
@@ -103,7 +100,7 @@ void MockedDevice::addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *exp
     /* No need to lock members, this method is called by the main thread of the test,
      * when it fills the test vector. */
 
-    mEntries.push_back(IoCtlEntry(ioControlCode, expectedInput, expectedOutput, nullptr, false));
+    mEntries.push(IoCtlEntry(ioControlCode, expectedInput, expectedOutput, nullptr, false));
 }
 
 void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output)
@@ -119,12 +116,14 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
     checkNonFailure();
 
     /* Checking that the test vector is not already consumed */
-    if (mCurrentEntry >= mEntries.size()) {
+    if (consumed()) {
         failure("IoCtl vector already consumed.");
     }
 
     /* Getting the current entry */
-    const IoCtlEntry &entry = mEntries[mCurrentEntry];
+    const IoCtlEntry entry = mEntries.front();
+    mEntries.pop();
+    mCurrentEntry++;
 
     /* Checking io control code */
     if (ioControlCode != entry.getIOControlCode()) {
@@ -137,9 +136,6 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
 
     /* Checking output buffer content */
     compareBuffers("Output buffer", output, entry.getExpectedOutputBuffer());
-
-    /* Incrementing entry index */
-    mCurrentEntry++;
 
     /* Simulate failure if the entry specifies it. */
     if (!entry.isSuccessful()) {
