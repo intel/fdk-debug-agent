@@ -24,6 +24,7 @@
 #include "cAVS/Topology.hpp"
 #include "Util/StringHelper.hpp"
 #include "Util/AssertAlways.hpp"
+#include "Util/EnumHelper.hpp"
 #include <algorithm>
 
 using namespace debug_agent::cavs;
@@ -45,17 +46,24 @@ const dsp_fw::AudioDataFormatIpc audioFormat = {
 
 enum Modules
 {
-    module_copier,
-    module_aec,
-    module_gain,
-    module_ns,
-    module_mixin,
-    module_src,
-    module_mixout
+    module_copier = 0,
+    module_aec = 1,
+    module_gain = 5,
+    module_ns = 9,
+    module_mixin = 1024,
+    module_src = 4012,
+    module_mixout = 4100
 };
 
-const std::vector<std::string> moduleNames = {"copier", "aec", "gain",  "ns",
-                                              "mixin",  "src", "mixout"};
+const util::EnumHelper<Modules> moduleHelper({
+    {Modules::module_copier, "copier"},
+    {Modules::module_aec, "aec"},
+    {Modules::module_gain, "gain"},
+    {Modules::module_ns, "ns"},
+    {Modules::module_mixin, "mixin"},
+    {Modules::module_src, "src"},
+    {Modules::module_mixout, "mixout"},
+});
 
 enum Queue
 {
@@ -75,7 +83,7 @@ dsp_fw::PinListInfo newEmptyPinList()
 }
 
 /** Helper function to create pin list */
-dsp_fw::PinListInfo newPinList(const std::vector<uint32_t> queueIds)
+dsp_fw::PinListInfo newPinList(const std::vector<Queue> queueIds)
 {
     dsp_fw::PinListInfo info{};
     for (auto queueId : queueIds) {
@@ -91,7 +99,7 @@ dsp_fw::PinListInfo newPinList(const std::vector<uint32_t> queueIds)
 
 /** Helper function to create module instance */
 dsp_fw::ModuleInstanceProps newModuleInstance(
-    uint32_t type, uint32_t instance, const dsp_fw::PinListInfo &inputs,
+    Modules type, uint32_t instance, const dsp_fw::PinListInfo &inputs,
     const dsp_fw::PinListInfo &outputs,
     const dsp_fw::ConnectorNodeId &inputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
@@ -152,7 +160,6 @@ dsp_fw::PplProps newPipeline(dsp_fw::PipeLineIdType id, uint32_t priority,
     return props;
 }
 
-const size_t CavsTopologySample::moduleCount = 7;
 const size_t CavsTopologySample::maxPplCount = 10;
 const size_t CavsTopologySample::gatewaysCount = 5;
 
@@ -282,19 +289,17 @@ void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> 
                                                Buffer &fwConfig, Buffer &hwConfig)
 {
     /* Filling module entries */
-    ASSERT_ALWAYS(moduleCount == moduleNames.size());
-    uint32_t i = 0;
-    for (auto &moduleName : moduleNames) {
+    for (auto &moduleEntry : moduleHelper.getEnumToStringMap()) {
         dsp_fw::ModuleEntry entry{};
-        StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleName);
+        StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleEntry.second);
+
         for (uint32_t &intValue : entry.uuid) {
-            /* filling four bytes with i value */
-            intValue = (i << 24) | (i << 16) | (i << 8) | i;
+            /* using module id as uuid parts */
+            intValue = moduleEntry.first;
         }
-        entry.module_id = i;
+        entry.module_id = moduleEntry.first;
 
         modules.push_back(entry);
-        ++i;
     }
 
     /* Filling firmware config */
@@ -313,14 +318,14 @@ void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> 
                 /* Length = 4 bytes */
                 0x04, 0x00, 0x00, 0x00,
                 /* Value */
-                static_cast<char>(moduleCount), 0x00, 0x00, 0x00,
+                static_cast<uint8_t>(moduleHelper.getEnumToStringMap().size()), 0x00, 0x00, 0x00,
 
                 /* Tag for MAX_PPL_COUNT : 9 */
                 9, 0x00, 0x00, 0x00,
                 /* Length = 4 bytes */
                 0x04, 0x00, 0x00, 0x00,
                 /* Value */
-                static_cast<char>(maxPplCount), 0x00, 0x00, 0x00};
+                static_cast<uint8_t>(maxPplCount), 0x00, 0x00, 0x00};
 
     /* Filling hardware config */
     hwConfig = {/* Tag for DSP_CORES: 0x00000001 */
@@ -335,6 +340,6 @@ void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> 
                 /* Length = 4 bytes */
                 0x4, 0x00, 0x00, 0x00,
                 /* Value */
-                static_cast<char>(gatewaysCount), 0x00, 0x00, 0x00};
+                static_cast<uint8_t>(gatewaysCount), 0x00, 0x00, 0x00};
 }
 }

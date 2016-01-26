@@ -46,7 +46,6 @@ public:
     static void createFirmwareObjects(std::vector<cavs::dsp_fw::ModuleEntry> &modules,
                                       util::Buffer &fwConfig, util::Buffer &hwConfig);
 
-    static const size_t moduleCount;
     static const size_t maxPplCount;
     static const size_t gatewaysCount;
 
