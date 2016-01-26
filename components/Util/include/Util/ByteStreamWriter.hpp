@@ -50,19 +50,30 @@ public:
 
     /** Write a "simple type" value.
      *
-     * "Simple types" are integral types and enum types, they can be serialized
+     * "Simple types" are integral types, they can be serialized
      * using a simple memory copy.
      *
-     * @tparam T the type of the value to write, shall be an enum or an integral type
+     * @tparam T the type of the value to write
      */
     template <typename T>
     typename std::enable_if<IsSimpleSerializableType<T>::value>::type write(const T &value)
     {
-        std::size_t elementSize = sizeof(T);
-        const uint8_t *valuePtr = reinterpret_cast<const uint8_t *>(&value);
+        writeUsingMemoryCopy(value);
+    }
 
-        /* Write the value as bytes*/
-        mBuffer.insert(mBuffer.end(), valuePtr, valuePtr + elementSize);
+    /** Write a "enum type" value.
+     *
+     * "Enum types" are serialized using the type EnumEncodingType
+     *
+     * @tparam T the type of the value to write
+     */
+    template <typename T>
+    typename std::enable_if<IsEnumSerializableType<T>::value>::type write(const T &value)
+    {
+        static_assert(sizeof(T) <= sizeof(EnumEncodingType), "Enum type size is too big");
+
+        EnumEncodingType encoding = static_cast<EnumEncodingType>(value);
+        writeUsingMemoryCopy(encoding);
     }
 
     /** Write a "compound type" value.
@@ -126,6 +137,16 @@ public:
     const util::Buffer &getBuffer() const { return mBuffer; }
 
 private:
+    template <typename T>
+    void writeUsingMemoryCopy(const T &value)
+    {
+        std::size_t elementSize = sizeof(T);
+        const uint8_t *valuePtr = reinterpret_cast<const uint8_t *>(&value);
+
+        /* Write the value as bytes*/
+        mBuffer.insert(mBuffer.end(), valuePtr, valuePtr + elementSize);
+    }
+
     util::Buffer mBuffer;
 };
 }

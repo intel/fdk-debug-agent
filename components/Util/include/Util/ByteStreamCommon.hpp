@@ -23,6 +23,7 @@
 #pragma once
 
 #include <type_traits>
+#include <cstdint>
 
 namespace debug_agent
 {
@@ -32,12 +33,24 @@ namespace util
 /** The "value" member of this structure is true if the supplied type should be serialized using a
  * simple memory copy.
  *
- * Currently "simple serializable" types are integral types and enum types.
+ * Currently "simple serializable" types are integral types.
  */
 template <typename T>
 struct IsSimpleSerializableType
 {
-    static const bool value = std::is_integral<T>::value || std::is_enum<T>::value;
+    static const bool value = std::is_integral<T>::value;
+};
+
+/** Enums are encoded on 32 bits */
+using EnumEncodingType = uint32_t;
+
+/** The "value" member of this structure is true if the supplied type is an enum and should be
+ * serialized using the type "EnumEncodingType"
+ */
+template <typename T>
+struct IsEnumSerializableType
+{
+    static const bool value = std::is_enum<T>::value;
 };
 
 /** The "value" member  of this structure is true if the supplied type is composite and should be
@@ -47,7 +60,8 @@ struct IsSimpleSerializableType
 template <typename T>
 struct IsCompoundSerializableType
 {
-    static const bool value = !IsSimpleSerializableType<T>::value;
+    static const bool value =
+        !IsSimpleSerializableType<T>::value && !IsEnumSerializableType<T>::value;
 };
 }
 }

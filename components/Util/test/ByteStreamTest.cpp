@@ -118,3 +118,50 @@ TEST_CASE("Byte stream reader : end of stream")
     /* Checking that subsequent calls to isEOS() returns true */
     CHECK(reader.isEOS());
 }
+
+TEST_CASE("Byte stream reader : enums")
+{
+    enum class Enum8 : uint8_t
+    {
+        val1,
+        val2
+    };
+    static_assert(sizeof(Enum8) == 1, "Wrong Enum8 size");
+
+    enum class Enum16 : uint16_t
+    {
+        val1,
+        val2
+    };
+    static_assert(sizeof(Enum16) == 2, "Wrong Enum16 size");
+
+    enum class Enum32 : uint32_t
+    {
+        val1,
+        val2,
+        val3
+    };
+    static_assert(sizeof(Enum32) == 4, "Wrong Enum32 size");
+
+    ByteStreamWriter writer;
+    writer.write(Enum8::val1);
+    writer.write(Enum16::val2);
+    writer.write(Enum32::val3);
+
+    /* Checking that all enum values are encoding using the type "EnumEncodingType" */
+    REQUIRE(writer.getBuffer().size() == 3 * sizeof(EnumEncodingType));
+
+    /* Reading */
+    Enum8 enum8Value;
+    Enum16 enum16Value;
+    Enum32 enum32Value;
+
+    ByteStreamReader reader(writer.getBuffer());
+    reader.read(enum8Value);
+    reader.read(enum16Value);
+    reader.read(enum32Value);
+
+    CHECK(enum8Value == Enum8::val1);
+    CHECK(enum16Value == Enum16::val2);
+    CHECK(enum32Value == Enum32::val3);
+}

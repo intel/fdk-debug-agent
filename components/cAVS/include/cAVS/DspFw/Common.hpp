@@ -38,20 +38,6 @@ namespace cavs
 namespace dsp_fw
 {
 
-/** Fw headers suppose that enum are stored on 32bits. Checking it to avoid
- * misalignment.
- *
- * This test assumes that the compiler uses the same size for all
- * enum types.
- */
-namespace check_enum_size
-{
-enum TestEnum
-{
-};
-CHECK_SIZE(TestEnum, 4);
-}
-
 /* All firmware array sizes are stored on 32 bits unsigned integer*/
 using ArraySizeType = uint32_t;
 

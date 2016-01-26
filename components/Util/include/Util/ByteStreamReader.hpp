@@ -50,24 +50,30 @@ public:
 
     /** Read a "simple type" value.
      *
-     * "Simple types" are integral types and enum types, they can be serialized
+     * "Simple types" are integral types, they can be serialized
      * using a simple memory copy.
      *
-     * @tparam T the type of the value to read, shall be an enum or an integral type
+     * @tparam T the type of the value to read
      */
     template <typename T>
     typename std::enable_if<IsSimpleSerializableType<T>::value>::type read(T &value)
     {
-        std::size_t elementSize = sizeof(T);
-        if (mIndex + elementSize > mBuffer.size()) {
-            /* Setting index to buffer size, in this way subsequent calls to isEOS() will return
-             * true */
-            mIndex = mBuffer.size();
-            throw Exception("Read failed: end of stream reached");
-        }
-        T *valuePtr = reinterpret_cast<T *>(&mBuffer[mIndex]);
-        value = *valuePtr;
-        mIndex += elementSize;
+        readUsingMemoryCopy(value);
+    }
+
+    /** Read a "enum type" value.
+     *
+     * "Enum types" are serialized using the type EnumEncodingType
+     *
+     * @tparam T the type of the value to read
+     */
+    template <typename T>
+    typename std::enable_if<IsEnumSerializableType<T>::value>::type read(T &value)
+    {
+        static_assert(sizeof(T) <= sizeof(EnumEncodingType), "Enum type size is too big");
+        EnumEncodingType encoded;
+        readUsingMemoryCopy(encoded);
+        value = static_cast<T>(encoded);
     }
 
     /** Read a "compound type" value.
@@ -142,6 +148,21 @@ public:
     std::size_t getPointerOffset() { return mIndex; }
 
 private:
+    template <typename T>
+    void readUsingMemoryCopy(T &value)
+    {
+        std::size_t elementSize = sizeof(T);
+        if (mIndex + elementSize > mBuffer.size()) {
+            /* Setting index to buffer size, in this way subsequent calls to isEOS() will return
+            * true */
+            mIndex = mBuffer.size();
+            throw Exception("Read failed: end of stream reached");
+        }
+        T *valuePtr = reinterpret_cast<T *>(&mBuffer[mIndex]);
+        value = *valuePtr;
+        mIndex += elementSize;
+    }
+
     std::size_t mIndex;
     util::Buffer mBuffer;
 };
