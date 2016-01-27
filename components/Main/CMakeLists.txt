@@ -19,14 +19,21 @@
 ################################################################################
 
 # cmake configuration file of the "Main" component
-# Main executable
 
 # Version
-set(MAJOR 0)
-set(MINOR 0)
-set(FIX 0)
-set(BUILD 0)
+set(DBGA_VERSION "0.0.0.0" CACHE STRING "Version of the DBGA build")
 
+set(REGEX "([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)")
+if(NOT DBGA_VERSION MATCHES "${REGEX}")
+    message(SEND_ERROR "Could not match DBGA_VERSION=`${DBGA_VERSION}' with: ${REGEX}")
+else()
+    set(DBGA_VERSION_WIN "${CMAKE_MATCH_1},${CMAKE_MATCH_2},${CMAKE_MATCH_3},${CMAKE_MATCH_4}")
+endif()
+
+set(DBGA_NAME "Firmware development kit debug agent")
+set(DBGA_DESCRIPTION "Tool for runtime voile debugging of CAVS dsp firwmare.")
+
+# Main executable
 set(SRCS
     src/Application.cpp
     src/Main.cpp)
@@ -41,6 +48,10 @@ endif (WIN32)
 
 add_executable(Main ${SRCS} ${INCS})
 set_common_settings(Main)
+
+target_compile_definitions(Main PRIVATE
+    WINRC_EXE
+    WINRC_FILENAME="$<TARGET_FILE_NAME:Main>")
 
 target_include_directories(Main PRIVATE "include")
 

@@ -18,17 +18,8 @@
 #
 ################################################################################
 
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Windows/Resource.rc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/src/Windows/Resource.rc
-    @ONLY)
+set(RESOURCE_FILE "${CMAKE_CURRENT_BINARY_DIR}/Resource.rc")
 
-set(WINDOWS_SRCS
-    ${CMAKE_CURRENT_BINARY_DIR}/src/Windows/Resource.rc)
+configure_file(src/Windows/Resource.rc.in ${RESOURCE_FILE} @ONLY)
 
-set(SRCS ${SRCS} ${WINDOWS_SRCS})
-
-set(WINDOWS_INCS
-    include/Main/Windows/resource.h)
-
-set(INCS ${INCS} ${WINDOWS_INCS})
+list(APPEND SRCS ${RESOURCE_FILE})
