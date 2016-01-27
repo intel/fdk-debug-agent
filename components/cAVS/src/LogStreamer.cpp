@@ -49,13 +49,10 @@ std::ostream &operator<<(std::ostream &os, const std::vector<dsp_fw::ModuleEntry
     static const uint16_t versionBuild = 0;
     static const uint16_t versionHotFix = 0;
 
-    uint32_t moduleId = 0;
     for (auto moduleEntry : moduleEntries) {
-        /* The Module ID must be streamed out as 32bits word little endian.
-         * The module ID is not part of the ModuleEntry struct: it corresponds to the index of the
-         * ModuleEntry in the ModuleEntry vector */
+        /* The Module ID must be streamed out as 32bits word little endian. */
+        uint32_t moduleId = moduleEntry.module_id;
         os.write(reinterpret_cast<char *>(&moduleId), sizeof(moduleId));
-        moduleId++;
 
         /* The module UUID must be streamed out in big endian, but is is already formatted in
          * big endian in the structure coming from the FW: we can stream out directly.

@@ -102,6 +102,7 @@ void initFakeModuleEntries(std::vector<dsp_fw::ModuleEntry> &moduleEntries, size
     for (size_t i = 0; i < nbEntries; ++i) {
 
         dsp_fw::ModuleEntry entry;
+        entry.module_id = static_cast<uint32_t>(i);
         /* Fill UUID with current entry value shifted by uuid word index to get a pattern like:
          * uuid[0] = 0x000000<i>
          * uuid[1] = 0x0000<i>00
