@@ -37,7 +37,8 @@ set(INCS
     include/Util/EnumHelper.hpp
     include/Util/Buffer.hpp
     include/Util/TypedBuffer.hpp
-    include/Util/StructureChangeTracking.hpp)
+    include/Util/StructureChangeTracking.hpp
+    include/Util/FileHelper.hpp)
 
 add_library(Util STATIC ${SRCS} ${INCS})
 set_common_settings(Util)

@@ -27,7 +27,8 @@ set(TEST_SRCS
     ByteStreamTest.cpp
     StringHelperTest.cpp
     EnumHelperTest.cpp
-    StructureChangeTrackingTest.cpp)
+    StructureChangeTrackingTest.cpp
+    FileHelperTest.cpp)
 
 set(TEST_INCS)
 
