@@ -47,8 +47,8 @@ public:
     {
     }
 
-    virtual cavs::Logger &getLogger() override { return mLogger; }
-    virtual ModuleHandler &getModuleHandler() override { return mModuleHandler; }
+    cavs::Logger &getLogger() override { return mLogger; }
+    ModuleHandler &getModuleHandler() override { return mModuleHandler; }
 
 private:
     std::unique_ptr<Device> mDevice;

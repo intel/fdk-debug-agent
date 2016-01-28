@@ -39,48 +39,46 @@ namespace linux
 class Driver final : public cavs::Driver
 {
 public:
-    virtual cavs::Logger &getLogger() override { return mLogger; }
-    virtual ModuleHandler &getModuleHandler() override { return mModuleHandler; }
+    cavs::Logger &getLogger() override { return mLogger; }
+    ModuleHandler &getModuleHandler() override { return mModuleHandler; }
 
 private:
     /* Will be replaced by the true implementation*/
     class DummyModuleHandler : public ModuleHandler
     {
     public:
-        virtual void getFwConfig(dsp_fw::FwConfig &fwConfig) override {}
-        virtual void getHwConfig(dsp_fw::HwConfig &hwConfig) override {}
-        virtual void getModulesEntries(uint32_t moduleCount,
-                                       std::vector<dsp_fw::ModuleEntry> &modulesEntries) override
+        void getFwConfig(dsp_fw::FwConfig &fwConfig) override {}
+        void getHwConfig(dsp_fw::HwConfig &hwConfig) override {}
+        void getModulesEntries(uint32_t moduleCount,
+                               std::vector<dsp_fw::ModuleEntry> &modulesEntries) override
         {
         }
-        virtual void getPipelineIdList(uint32_t maxPplCount,
-                                       std::vector<dsp_fw::PipeLineIdType> &pipelinesIds) override
+        void getPipelineIdList(uint32_t maxPplCount,
+                               std::vector<dsp_fw::PipeLineIdType> &pipelinesIds) override
         {
         }
-        virtual void getPipelineProps(dsp_fw::PipeLineIdType pipelineId,
-                                      dsp_fw::PplProps &props) override
+        void getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props) override
         {
         }
-        virtual void getSchedulersInfo(dsp_fw::CoreId coreId,
-                                       dsp_fw::SchedulersInfo &schedulers) override
+        void getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers) override
         {
         }
-        virtual void getGatewaysInfo(uint32_t gatewayCount,
-                                     std::vector<dsp_fw::GatewayProps> &gateways) override
+        void getGatewaysInfo(uint32_t gatewayCount,
+                             std::vector<dsp_fw::GatewayProps> &gateways) override
         {
         }
-        virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-                                            dsp_fw::ModuleInstanceProps &props) override
+        void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
+                                    dsp_fw::ModuleInstanceProps &props) override
         {
         }
-        virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                        dsp_fw::ParameterId parameterId,
-                                        const std::vector<uint8_t> &parameterPayload) override
+        void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                dsp_fw::ParameterId parameterId,
+                                const std::vector<uint8_t> &parameterPayload) override
         {
         }
-        virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                        dsp_fw::ParameterId parameterId,
-                                        std::vector<uint8_t> &parameterPayload) override
+        void getModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                dsp_fw::ParameterId parameterId,
+                                std::vector<uint8_t> &parameterPayload) override
         {
         }
     };

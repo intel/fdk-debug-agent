@@ -36,12 +36,12 @@ namespace linux
 class Logger final : public cavs::Logger
 {
 public:
-    virtual void setParameters(const Parameters &parameters) override;
+    void setParameters(const Parameters &parameters) override;
 
-    virtual Parameters getParameters() override;
+    Parameters getParameters() override;
 
-    virtual std::unique_ptr<LogBlock> readLogBlock() override;
-    virtual void stop() NOEXCEPT override;
+    std::unique_ptr<LogBlock> readLogBlock() override;
+    void stop() NOEXCEPT override;
 
 private:
     /**

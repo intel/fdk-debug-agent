@@ -40,26 +40,22 @@ class ModuleHandler : public cavs::ModuleHandler
 public:
     ModuleHandler(Device &device) : mDevice(device) {}
 
-    virtual void getModulesEntries(uint32_t moduleCount,
-                                   std::vector<dsp_fw::ModuleEntry> &modulesEntries) override;
-    virtual void getFwConfig(dsp_fw::FwConfig &fwConfig) override;
-    virtual void getHwConfig(dsp_fw::HwConfig &hwConfig) override;
-    virtual void getPipelineIdList(uint32_t maxPplCount,
-                                   std::vector<dsp_fw::PipeLineIdType> &pipelinesIds) override;
-    virtual void getPipelineProps(dsp_fw::PipeLineIdType pipelineId,
-                                  dsp_fw::PplProps &props) override;
-    virtual void getSchedulersInfo(dsp_fw::CoreId coreId,
-                                   dsp_fw::SchedulersInfo &schedulers) override;
-    virtual void getGatewaysInfo(uint32_t gatewayCount,
-                                 std::vector<dsp_fw::GatewayProps> &gateways) override;
-    virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-                                        dsp_fw::ModuleInstanceProps &props) override;
-    virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                    dsp_fw::ParameterId parameterId,
-                                    const util::Buffer &parameterPayload) override;
-    virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                    dsp_fw::ParameterId parameterId,
-                                    util::Buffer &parameterPayload) override;
+    void getModulesEntries(uint32_t moduleCount,
+                           std::vector<dsp_fw::ModuleEntry> &modulesEntries) override;
+    void getFwConfig(dsp_fw::FwConfig &fwConfig) override;
+    void getHwConfig(dsp_fw::HwConfig &hwConfig) override;
+    void getPipelineIdList(uint32_t maxPplCount,
+                           std::vector<dsp_fw::PipeLineIdType> &pipelinesIds) override;
+    void getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props) override;
+    void getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers) override;
+    void getGatewaysInfo(uint32_t gatewayCount,
+                         std::vector<dsp_fw::GatewayProps> &gateways) override;
+    void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
+                                dsp_fw::ModuleInstanceProps &props) override;
+    void setModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                            const util::Buffer &parameterPayload) override;
+    void getModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                            util::Buffer &parameterPayload) override;
 
 private:
     template <typename TlvResponseHandlerInterface>

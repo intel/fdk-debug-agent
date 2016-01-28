@@ -54,13 +54,13 @@ public:
         stop();
     }
 
-    virtual void setParameters(const Parameters &parameters) override;
+    void setParameters(const Parameters &parameters) override;
 
-    virtual Parameters getParameters() override;
+    Parameters getParameters() override;
 
-    virtual std::unique_ptr<LogBlock> readLogBlock() override;
+    std::unique_ptr<LogBlock> readLogBlock() override;
 
-    virtual void stop() NOEXCEPT override;
+    void stop() NOEXCEPT override;
 
 private:
     /** Maximum size of the log entry queue */
