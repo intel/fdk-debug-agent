@@ -54,7 +54,7 @@ public:
     virtual ~Type() = default;
     Type &operator=(const Type &other) = default;
 
-    bool operator==(const Type &other) const NOEXCEPT
+    bool operator==(const Type &other) const noexcept
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -63,7 +63,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator!=(const Type &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Type &other) const noexcept { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -86,7 +86,7 @@ public:
     Children &getChildren() { return mChildren; }
 
 protected:
-    virtual bool equalsTo(const Type &other) const NOEXCEPT
+    virtual bool equalsTo(const Type &other) const noexcept
     {
         return mName == other.mName && mDescription == other.mDescription &&
                mCharacteristics == other.mCharacteristics &&

@@ -28,7 +28,7 @@ namespace debug_agent
 namespace util
 {
 
-std::string Uuid::toString() const NOEXCEPT
+std::string Uuid::toString() const noexcept
 {
     std::stringstream stream;
 

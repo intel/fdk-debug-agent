@@ -41,7 +41,7 @@ public:
 
     void readFrom(const util::Buffer &binarySource) override {}
 
-    virtual void invalidate() NOEXCEPT override {}
+    virtual void invalidate() noexcept override {}
 };
 }
 }

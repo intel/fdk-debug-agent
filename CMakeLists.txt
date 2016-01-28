@@ -76,12 +76,6 @@ function (set_common_settings projectname)
     set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD 14)
     set_property(TARGET ${projectname} APPEND PROPERTY CXX_EXTENSIONS OFF)
     set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD_REQUIRED ON)
-if (WIN32)
-    # Windows does not support noexcept: fall back to throw()
-    set_property(TARGET ${projectname} APPEND PROPERTY COMPILE_DEFINITIONS "NOEXCEPT=throw()")
-else ()
-    set_property(TARGET ${projectname} APPEND PROPERTY COMPILE_DEFINITIONS NOEXCEPT=noexcept)
-endif ()
 endfunction()
 
 # We want to *include* this file before adding any test because it calls

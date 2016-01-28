@@ -45,7 +45,7 @@ public:
      */
     TlvDictionary(TlvMap &tlvMap) : mTlvMap(tlvMap) {}
 
-    TlvWrapperInterface *getTlvWrapperForTag(unsigned int tag) const NOEXCEPT override
+    TlvWrapperInterface *getTlvWrapperForTag(unsigned int tag) const noexcept override
     {
         TagsEnumClass enumTag = static_cast<TagsEnumClass>(tag);
 
@@ -60,7 +60,7 @@ public:
         }
     }
 
-    virtual void invalidateAll() const NOEXCEPT override
+    virtual void invalidateAll() const noexcept override
     {
         for (auto &dictionaryEntry : mTlvMap) {
 

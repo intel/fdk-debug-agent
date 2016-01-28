@@ -147,7 +147,7 @@ public:
             std::make_unique<TlvWrapper<uint32_t>>(ebbCount, isEbbCountValid);
     }
 
-    const tlv::TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override
+    const tlv::TlvDictionaryInterface &getTlvDictionary() const noexcept override
     {
         return mHwConfigTlvDictionary;
     }

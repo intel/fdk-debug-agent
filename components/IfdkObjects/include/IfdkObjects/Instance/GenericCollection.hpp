@@ -91,7 +91,7 @@ public:
     }
 
 protected:
-    virtual bool equalsTo(const BaseCollection &other) const NOEXCEPT override
+    virtual bool equalsTo(const BaseCollection &other) const noexcept override
     {
         const GenericCollection<T> *otherColl = dynamic_cast<const GenericCollection<T> *>(&other);
         if (otherColl == nullptr) {

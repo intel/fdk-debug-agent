@@ -42,7 +42,7 @@ public:
     virtual ~Ref() = default;
     Ref &operator=(const Ref &other) = default;
 
-    bool operator==(const Ref &other) const NOEXCEPT
+    bool operator==(const Ref &other) const noexcept
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -51,7 +51,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator!=(const Ref &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Ref &other) const noexcept { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -68,7 +68,7 @@ public:
     void setRefName(const std::string &refName) { mRefName = refName; }
 
 protected:
-    virtual bool equalsTo(const Ref &other) const NOEXCEPT { return mRefName == other.mRefName; }
+    virtual bool equalsTo(const Ref &other) const noexcept { return mRefName == other.mRefName; }
 
 private:
     template <typename T, typename Visitor>

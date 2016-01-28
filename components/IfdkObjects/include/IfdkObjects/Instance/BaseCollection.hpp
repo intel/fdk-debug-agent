@@ -63,7 +63,7 @@ public:
     /** @return all instances */
     virtual void getInstances(std::vector<std::shared_ptr<const Instance>> &list) const = 0;
 
-    bool operator==(const BaseCollection &other) const NOEXCEPT
+    bool operator==(const BaseCollection &other) const noexcept
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -73,7 +73,7 @@ public:
     }
 
 protected:
-    virtual bool equalsTo(const BaseCollection &other) const NOEXCEPT = 0;
+    virtual bool equalsTo(const BaseCollection &other) const noexcept = 0;
 };
 }
 }

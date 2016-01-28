@@ -41,7 +41,7 @@ public:
     Parameters getParameters() override;
 
     std::unique_ptr<LogBlock> readLogBlock() override;
-    void stop() NOEXCEPT override;
+    void stop() noexcept override;
 
 private:
     /**

@@ -39,7 +39,7 @@ public:
     /**
      * @return the TlvDictionaryInterface of the TLV handled by this response handler
      */
-    virtual const tlv::TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT = 0;
+    virtual const tlv::TlvDictionaryInterface &getTlvDictionary() const noexcept = 0;
 
     virtual ~TlvResponseHandlerInterface(){};
 };

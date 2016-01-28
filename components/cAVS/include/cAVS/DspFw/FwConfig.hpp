@@ -139,7 +139,7 @@ public:
             std::make_unique<TlvWrapper<uint32_t>>(maxDpTasksCount, isMaxDpTasksCountValid);
     }
 
-    const tlv::TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override
+    const tlv::TlvDictionaryInterface &getTlvDictionary() const noexcept override
     {
         return mFwConfigTlvDictionary;
     }

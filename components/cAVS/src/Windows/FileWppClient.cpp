@@ -52,7 +52,7 @@ void FileWppClient::collectLogEntries(WppLogEntryListener &listener)
     }
 }
 
-void FileWppClient::stop()
+void FileWppClient::stop() noexcept
 {
     std::lock_guard<std::mutex> locker(mStopRequestMutex);
     mStopRequest = true;

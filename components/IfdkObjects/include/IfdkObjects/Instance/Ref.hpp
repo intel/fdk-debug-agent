@@ -45,7 +45,7 @@ public:
     virtual ~Ref() = default;
     Ref &operator=(const Ref &other) = default;
 
-    bool operator==(const Ref &other) const NOEXCEPT
+    bool operator==(const Ref &other) const noexcept
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -54,7 +54,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator!=(const Ref &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Ref &other) const noexcept { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -75,7 +75,7 @@ public:
     void setInstanceId(const std::string &instanceId) { mInstanceId = instanceId; }
 
 protected:
-    virtual bool equalsTo(const Ref &other) const NOEXCEPT
+    virtual bool equalsTo(const Ref &other) const noexcept
     {
         return mTypeName == other.mTypeName && mInstanceId == other.mInstanceId;
     }

@@ -60,7 +60,7 @@ public:
 
     std::unique_ptr<LogBlock> readLogBlock() override;
 
-    void stop() NOEXCEPT override;
+    void stop() noexcept override;
 
 private:
     /** Maximum size of the log entry queue */

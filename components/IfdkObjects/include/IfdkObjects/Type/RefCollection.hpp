@@ -45,7 +45,7 @@ public:
     virtual ~RefCollection() = default;
     RefCollection &operator=(const RefCollection &other) = default;
 
-    bool operator==(const RefCollection &other) const NOEXCEPT
+    bool operator==(const RefCollection &other) const noexcept
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -54,7 +54,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator!=(const RefCollection &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const RefCollection &other) const noexcept { return !(*this == other); }
 
     std::string getName() const { return mName; }
 
@@ -71,7 +71,7 @@ public:
     }
 
 protected:
-    virtual bool equalsTo(const RefCollection &other) const NOEXCEPT
+    virtual bool equalsTo(const RefCollection &other) const noexcept
     {
         return mName == other.mName;
     }

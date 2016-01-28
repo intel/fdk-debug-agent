@@ -50,7 +50,7 @@ public:
     VisitablePtrVector &operator=(const VisitablePtrVector &other) = default;
 
     /** The == operator tests pointed value, not the pointer value */
-    bool operator==(const VisitablePtrVector &other) const NOEXCEPT
+    bool operator==(const VisitablePtrVector &other) const noexcept
     {
         if (mElementPtrs.size() != other.mElementPtrs.size()) {
             return false;
@@ -66,7 +66,7 @@ public:
         return true;
     }
 
-    bool operator!=(const VisitablePtrVector &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const VisitablePtrVector &other) const noexcept { return !(*this == other); }
 
     /* A visitable element should implement the accept() methods (const and non const) */
 

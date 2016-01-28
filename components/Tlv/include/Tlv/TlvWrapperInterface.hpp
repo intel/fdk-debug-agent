@@ -61,7 +61,7 @@ public:
     /**
      * Invalidate the shadow variable.
      */
-    virtual void invalidate() NOEXCEPT = 0;
+    virtual void invalidate() noexcept = 0;
 
     virtual ~TlvWrapperInterface() {}
 };

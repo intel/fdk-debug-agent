@@ -60,7 +60,7 @@ public:
         }
     }
 
-    virtual void invalidate() NOEXCEPT override { mValid = false; }
+    virtual void invalidate() noexcept override { mValid = false; }
 
 private:
     ValueType &mValue;

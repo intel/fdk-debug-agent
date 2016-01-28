@@ -124,7 +124,7 @@ public:
     /**
     * Stop internal threads and unblock consumer threads
     */
-    virtual void stop() NOEXCEPT = 0;
+    virtual void stop() noexcept = 0;
 
     /**
      * Return a human representation of an Output enum class value.

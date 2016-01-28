@@ -68,7 +68,7 @@ public:
     void resize(std::size_t size) { mElements.resize(size); }
 
 protected:
-    virtual bool equalsTo(const RefCollection &other) const NOEXCEPT override
+    virtual bool equalsTo(const RefCollection &other) const noexcept override
     {
         if (!base::equalsTo(other)) {
             return false;

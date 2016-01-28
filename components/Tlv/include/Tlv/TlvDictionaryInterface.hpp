@@ -44,14 +44,14 @@ public:
      * @param[in] tag the tag for which the caller wants the corresponding TlvWrapperInterface
      * @return nullptr or the pointer to the TlvWrapperInterface which correspond to the tag
      */
-    virtual TlvWrapperInterface *getTlvWrapperForTag(unsigned int tag) const NOEXCEPT = 0;
+    virtual TlvWrapperInterface *getTlvWrapperForTag(unsigned int tag) const noexcept = 0;
 
     /**
      * Invalidate the entire collection of TlvWrapperInterface
      * @see TlvWrapperInterface
      * @see TlvWrapper
      */
-    virtual void invalidateAll() const NOEXCEPT = 0;
+    virtual void invalidateAll() const noexcept = 0;
 
     virtual ~TlvDictionaryInterface(){};
 };

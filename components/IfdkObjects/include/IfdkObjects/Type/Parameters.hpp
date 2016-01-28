@@ -44,7 +44,7 @@ public:
     virtual ~Parameters() = default;
     Parameters &operator=(const Parameters &other) = default;
 
-    bool operator==(const Parameters &other) const NOEXCEPT
+    bool operator==(const Parameters &other) const noexcept
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -53,7 +53,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator!=(const Parameters &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Parameters &other) const noexcept { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -66,7 +66,7 @@ public:
     }
 
 protected:
-    virtual bool equalsTo(const Parameters &other) const NOEXCEPT { return true; }
+    virtual bool equalsTo(const Parameters &other) const noexcept { return true; }
 
 private:
     template <typename T, typename Visitor>

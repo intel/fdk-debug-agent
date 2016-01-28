@@ -46,7 +46,7 @@ public:
     virtual Prober &getProber() = 0;
 
     /** Stop threads and unblock consumer threads, currently only logging is concerned. */
-    void stop() NOEXCEPT { getLogger().stop(); }
+    void stop() noexcept { getLogger().stop(); }
 
 private:
     /* Make this class non copyable */

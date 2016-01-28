@@ -98,7 +98,7 @@ public:
     /**
      * Get module entries
      */
-    const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const NOEXCEPT;
+    const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const noexcept;
 
     /**
     * Find module entry
@@ -108,12 +108,12 @@ public:
     /**
      * Get firmware configuration
      */
-    const dsp_fw::FwConfig &getFwConfig() const NOEXCEPT;
+    const dsp_fw::FwConfig &getFwConfig() const noexcept;
 
     /**
      * Get hardware configuration
      */
-    const dsp_fw::HwConfig &getHwConfig() const NOEXCEPT;
+    const dsp_fw::HwConfig &getHwConfig() const noexcept;
 
     /**
      * Try to acquire the log stream resource
@@ -164,7 +164,7 @@ public:
     std::vector<Prober::ProbeConfig> getSessionProbes();
 
     /** Stop internal threads and unblock consumer threads */
-    void stop() NOEXCEPT { mDriver->stop(); }
+    void stop() noexcept { mDriver->stop(); }
 
 private:
     /* Make this class non copyable */

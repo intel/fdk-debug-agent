@@ -42,7 +42,7 @@ public:
 
     virtual void collectLogEntries(WppLogEntryListener &listener) override;
 
-    virtual void stop() NOEXCEPT override;
+    virtual void stop() noexcept override;
 
 private:
     std::string mFileName;

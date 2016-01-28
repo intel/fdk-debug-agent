@@ -67,22 +67,22 @@ public:
     /**
      * @return log block data as const
      */
-    const LogData &getLogData() const NOEXCEPT { return mLogData; }
+    const LogData &getLogData() const noexcept { return mLogData; }
 
     /**
      * @return log block data
      */
-    LogData &getLogData() NOEXCEPT { return mLogData; }
+    LogData &getLogData() noexcept { return mLogData; }
 
     /**
      * @return log block Core ID
      */
-    unsigned int getCoreId() const NOEXCEPT { return mCoreId; }
+    unsigned int getCoreId() const noexcept { return mCoreId; }
 
     /**
      * @return log block size in bytes
      */
-    std::size_t getLogSize() const NOEXCEPT { return mLogData.size(); }
+    std::size_t getLogSize() const noexcept { return mLogData.size(); }
 
     /**
      * Serialize the log block to an ostream

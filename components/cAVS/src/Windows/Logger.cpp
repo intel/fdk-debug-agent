@@ -343,7 +343,7 @@ std::unique_ptr<LogBlock> Logger::readLogBlock()
     return mLogEntryQueue.remove();
 }
 
-void Logger::stop()
+void Logger::stop() noexcept
 {
     /* Stopping log session if one is running */
     std::lock_guard<std::mutex> locker(mLogActivationContextMutex);

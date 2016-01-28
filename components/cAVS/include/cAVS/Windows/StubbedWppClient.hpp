@@ -49,7 +49,7 @@ public:
         mCondVar.wait(locker);
     }
 
-    virtual void stop() NOEXCEPT override
+    virtual void stop() noexcept override
     {
         std::unique_lock<std::mutex> locker(mMutex);
         if (!mStopped) {

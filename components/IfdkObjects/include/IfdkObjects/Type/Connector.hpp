@@ -42,7 +42,7 @@ public:
     virtual ~Connector() = default;
     Connector &operator=(const Connector &other) = default;
 
-    bool operator==(const Connector &other) const NOEXCEPT
+    bool operator==(const Connector &other) const noexcept
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -51,7 +51,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator!=(const Connector &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Connector &other) const noexcept { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -72,7 +72,7 @@ public:
     void setName(const std::string &name) { mName = name; }
 
 protected:
-    bool equalsTo(const Connector &other) const NOEXCEPT
+    bool equalsTo(const Connector &other) const noexcept
     {
         return mId == other.mId && mName == other.mName;
     }

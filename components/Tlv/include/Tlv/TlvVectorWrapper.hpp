@@ -62,7 +62,7 @@ public:
         }
     }
 
-    virtual void invalidate() NOEXCEPT override { mValues.clear(); }
+    virtual void invalidate() noexcept override { mValues.clear(); }
 
 private:
     std::vector<ValueType> &mValues;

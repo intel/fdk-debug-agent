@@ -43,9 +43,9 @@ public:
     virtual ~Description() = default;
     Description &operator=(const Description &other) = default;
 
-    bool operator==(const Description &other) const NOEXCEPT { return mValue == other.mValue; }
+    bool operator==(const Description &other) const noexcept { return mValue == other.mValue; }
 
-    bool operator!=(const Description &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Description &other) const noexcept { return !(*this == other); }
 
     void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 

@@ -111,7 +111,7 @@ public:
         mTestLanguageTlvMap[Tags::BadTag] = std::make_unique<TlvVoidWrapper>();
     }
 
-    const TlvDictionaryInterface &getTlvDictionary() const NOEXCEPT override
+    const TlvDictionaryInterface &getTlvDictionary() const noexcept override
     {
         return mLanguageDictionary;
     }

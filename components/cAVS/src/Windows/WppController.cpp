@@ -181,7 +181,7 @@ void WppController::stopLocked()
     mHandle = INVALID_PROCESSTRACE_HANDLE;
 }
 
-void WppController::stop()
+void WppController::stop() noexcept
 {
     std::lock_guard<std::mutex> locker(mHandleMutex);
 

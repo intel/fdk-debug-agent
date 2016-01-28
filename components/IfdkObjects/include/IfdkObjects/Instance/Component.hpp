@@ -71,7 +71,7 @@ public:
     Links &getLinks() { return mLinks; }
 
 protected:
-    virtual bool equalsTo(const Instance &other) const NOEXCEPT override
+    virtual bool equalsTo(const Instance &other) const noexcept override
     {
         if (!base::equalsTo(other)) {
             return false;

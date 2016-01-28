@@ -57,7 +57,7 @@ public:
     virtual ~Instance() = default;
     Instance &operator=(const Instance &other) = default;
 
-    bool operator==(const Instance &other) const NOEXCEPT
+    bool operator==(const Instance &other) const noexcept
     {
         if (typeid(*this) != typeid(other)) {
             return false;
@@ -66,7 +66,7 @@ public:
         return equalsTo(other);
     }
 
-    bool operator!=(const Instance &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Instance &other) const noexcept { return !(*this == other); }
 
     virtual void accept(Visitor &visitor, bool isConcrete = true)
     {
@@ -95,7 +95,7 @@ public:
     Children &getChildren() { return mChildren; }
 
 protected:
-    virtual bool equalsTo(const Instance &other) const NOEXCEPT
+    virtual bool equalsTo(const Instance &other) const noexcept
     {
         return mTypeName == other.mTypeName && mInstanceId == other.mInstanceId &&
                mInfoParameters == other.mInfoParameters &&

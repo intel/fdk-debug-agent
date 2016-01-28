@@ -91,7 +91,7 @@ Logger::Parameters System::getLogParameters()
     }
 }
 
-const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const NOEXCEPT
+const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const noexcept
 {
     return mModuleEntries;
 }
@@ -105,12 +105,12 @@ const dsp_fw::ModuleEntry &System::findModuleEntry(uint16_t moduleId) const
     throw Exception("moduleId: " + std::to_string(moduleId) + " not found");
 }
 
-const dsp_fw::FwConfig &System::getFwConfig() const NOEXCEPT
+const dsp_fw::FwConfig &System::getFwConfig() const noexcept
 {
     return mFwConfig;
 }
 
-const dsp_fw::HwConfig &System::getHwConfig() const NOEXCEPT
+const dsp_fw::HwConfig &System::getHwConfig() const noexcept
 {
     return mHwConfig;
 }

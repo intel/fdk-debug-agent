@@ -43,12 +43,12 @@ public:
 
     Link &operator=(const Link &other) = default;
 
-    bool operator==(const Link &other) const NOEXCEPT
+    bool operator==(const Link &other) const noexcept
     {
         return mFrom == other.mFrom && mTo == other.mTo;
     }
 
-    bool operator!=(const Link &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Link &other) const noexcept { return !(*this == other); }
 
     virtual void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 

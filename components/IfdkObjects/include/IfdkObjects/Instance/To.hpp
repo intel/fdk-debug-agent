@@ -45,13 +45,13 @@ public:
     explicit To(const To &other) = default;
     To &operator=(const To &other) = default;
 
-    bool operator==(const To &other) const NOEXCEPT
+    bool operator==(const To &other) const noexcept
     {
         return mTypeName == other.mTypeName && mInstanceId == other.mInstanceId &&
                mInputId == other.mInputId;
     }
 
-    bool operator!=(const To &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const To &other) const noexcept { return !(*this == other); }
 
     virtual void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 

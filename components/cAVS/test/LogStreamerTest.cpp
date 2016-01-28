@@ -78,7 +78,7 @@ public:
         }
     }
 
-    virtual void stop() NOEXCEPT override {}
+    virtual void stop() noexcept override {}
 
     static std::unique_ptr<LogBlock> generateLogBlock(size_t blockNumber)
     {

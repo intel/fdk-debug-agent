@@ -58,7 +58,7 @@ public:
      * - if this method is called during collectEntries(), collectEntries() ends.
      * - if this method is called after collectEntries(), it has no effect.
      */
-    virtual void stop() NOEXCEPT = 0;
+    virtual void stop() noexcept = 0;
 
 private:
     WppClient(const WppClient &) = delete;

@@ -47,12 +47,12 @@ public:
     virtual ~Characteristic() = default;
     Characteristic &operator=(const Characteristic &other) = default;
 
-    bool operator==(const Characteristic &other) const NOEXCEPT
+    bool operator==(const Characteristic &other) const noexcept
     {
         return mName == other.mName && mValue == other.mValue;
     }
 
-    bool operator!=(const Characteristic &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const Characteristic &other) const noexcept { return !(*this == other); }
 
     void accept(Visitor &visitor) { acceptCommon(*this, visitor); }
 

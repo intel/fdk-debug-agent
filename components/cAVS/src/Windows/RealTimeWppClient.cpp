@@ -59,7 +59,7 @@ void RealTimeWppClient::collectLogEntries(WppLogEntryListener &listener)
     mController.stop();
 }
 
-void RealTimeWppClient::stop()
+void RealTimeWppClient::stop() noexcept
 {
     std::lock_guard<std::mutex> locker(mStopRequestMutex);
     if (!mStopRequest) {

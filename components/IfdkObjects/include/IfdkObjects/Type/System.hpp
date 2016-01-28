@@ -58,7 +58,7 @@ public:
     }
 
 protected:
-    virtual bool equalsTo(const Type &other) const NOEXCEPT override
+    virtual bool equalsTo(const Type &other) const noexcept override
     {
         if (!base::equalsTo(other)) {
             return false;

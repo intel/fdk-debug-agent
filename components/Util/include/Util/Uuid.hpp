@@ -50,7 +50,7 @@ struct Uuid
     uint8_t data4[8]; /* Big endian */
 
     /* Convert to string */
-    std::string toString() const NOEXCEPT;
+    std::string toString() const noexcept;
 
     bool operator==(Uuid &other) const
     {
@@ -58,7 +58,7 @@ struct Uuid
                std::memcmp(&data4, &other.data4, sizeof(data4)) == 0;
     }
 
-    bool operator!=(Uuid &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(Uuid &other) const noexcept { return !(*this == other); }
 
     /** Convert from an other uuid type. It must have the same size. */
     template <typename UuidType>
@@ -72,7 +72,7 @@ struct Uuid
 
     /** Convert to an other uuid type. It must have the same size. */
     template <typename UuidType>
-    void toOtherUuidType(UuidType &other) const NOEXCEPT
+    void toOtherUuidType(UuidType &other) const noexcept
     {
         static_assert(sizeof(UuidType) == sizeof(Uuid), "Wrong uuid type size");
 

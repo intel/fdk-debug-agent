@@ -61,7 +61,7 @@ public:
      */
     void start();
 
-    void stop() NOEXCEPT;
+    void stop() noexcept;
 
 private:
     /* Values defined by

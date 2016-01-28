@@ -46,7 +46,7 @@ public:
     explicit VisitableVector(const VisitableVector &other) = default;
     VisitableVector &operator=(const VisitableVector &other) = default;
 
-    bool operator==(const VisitableVector &other) const NOEXCEPT
+    bool operator==(const VisitableVector &other) const noexcept
     {
         if (mElements.size() != other.mElements.size()) {
             return false;
@@ -61,7 +61,7 @@ public:
         return true;
     }
 
-    bool operator!=(const VisitableVector &other) const NOEXCEPT { return !(*this == other); }
+    bool operator!=(const VisitableVector &other) const noexcept { return !(*this == other); }
 
     /* A visitable element should implement the accept() methods (const and non const) */
 
