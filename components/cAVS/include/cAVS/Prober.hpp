@@ -51,10 +51,9 @@ namespace cavs
 class Prober
 {
 public:
-    class Exception : public std::runtime_error
+    struct Exception : std::runtime_error
     {
-    public:
-        Exception(const std::string &msg) : std::runtime_error(msg.c_str()) {}
+        using std::runtime_error::runtime_error;
     };
 
     /** State of the probing service */

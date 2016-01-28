@@ -82,10 +82,9 @@ template <template <class> class Traits>
 class Deserializer
 {
 public:
-    class Exception : public std::logic_error
+    struct Exception : std::logic_error
     {
-    public:
-        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
+        using std::logic_error::logic_error;
     };
 
     /** Create a deserializer from a supplied xml string */

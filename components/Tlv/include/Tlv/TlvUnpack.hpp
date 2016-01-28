@@ -38,10 +38,9 @@ namespace tlv
 class TlvUnpack final
 {
 public:
-    class Exception final : public std::logic_error
+    struct Exception final : std::logic_error
     {
-    public:
-        explicit Exception(const std::string &what) : std::logic_error(what) {}
+        using std::logic_error::logic_error;
     };
 
     /**

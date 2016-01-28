@@ -32,10 +32,9 @@ namespace util
 {
 namespace file_helper
 {
-class Exception : public std::runtime_error
+struct Exception : std::runtime_error
 {
-public:
-    explicit Exception(const std::string &what) : std::runtime_error(what) {}
+    using std::runtime_error::runtime_error;
 };
 
 /** Read file content as string */

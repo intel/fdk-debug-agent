@@ -42,10 +42,9 @@ namespace rest
 class Server
 {
 public:
-    class Exception : public std::logic_error
+    struct Exception : std::logic_error
     {
-    public:
-        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
+        using std::logic_error::logic_error;
     };
 
     /** @param[in] dispatcher The dispatcher that will be used by the server to resolve the

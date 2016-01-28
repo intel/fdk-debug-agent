@@ -54,10 +54,9 @@ public:
      */
     static const size_t maxParameterPayloadSize = 4 * 1024;
 
-    class Exception : public std::logic_error
+    struct Exception : std::logic_error
     {
-    public:
-        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
+        using std::logic_error::logic_error;
     };
 
     ModuleHandler() = default;

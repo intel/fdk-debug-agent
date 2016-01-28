@@ -36,10 +36,9 @@ namespace test_common
 class ThreadHelpers final
 {
 public:
-    class Exception : public std::logic_error
+    struct Exception : std::logic_error
     {
-    public:
-        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
+        using std::logic_error::logic_error;
     };
 
     /** Ensure that the supplied function ends before a given timemout.

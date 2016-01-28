@@ -39,10 +39,9 @@ namespace util
 class ByteStreamReader
 {
 public:
-    class Exception : public std::logic_error
+    struct Exception : std::logic_error
     {
-    public:
-        explicit Exception(const std::string &what) : std::logic_error(what) {}
+        using std::logic_error::logic_error;
     };
 
     /** @param vector: the input buffer */

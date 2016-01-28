@@ -42,10 +42,9 @@ namespace windows
 class Device
 {
 public:
-    class Exception : public std::logic_error
+    struct Exception : std::logic_error
     {
-    public:
-        Exception(const std::string &msg) : std::logic_error(msg.c_str()) {}
+        using std::logic_error::logic_error;
     };
 
     /** @throw Device::Exception if the device initialization has failed */
