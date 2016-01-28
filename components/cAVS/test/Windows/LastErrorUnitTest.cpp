@@ -54,6 +54,7 @@ TEST_CASE("LastError")
       * which is then undefined by the POCO library. */
     HANDLE handle = CreateFileA("c:\\Unexisting_file", GENERIC_READ, 0, NULL, OPEN_EXISTING,
                                 FILE_ATTRIBUTE_NORMAL, NULL);
+    auto error = LastError::get();
 
     SafeHandle safeHandle(handle);
 
@@ -61,5 +62,5 @@ TEST_CASE("LastError")
     REQUIRE(!safeHandle.isValid());
 
     /* Checking last error string */
-    CHECK(LastError::get() == "ERR 2: The system cannot find the file specified.");
+    CHECK(error == "ERR 2: The system cannot find the file specified.");
 }

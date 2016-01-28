@@ -32,10 +32,13 @@ namespace windows
 
 std::string LastError::get()
 {
-    std::string errorMessage;
-
-    /* Getting last error code */
+    /* Getting last error code
+     * Warning: do not put any code before the call to GetLastError(): we have observed that merely
+     * declaring a string resets the last error code.
+     */
     DWORD error = GetLastError();
+
+    std::string errorMessage;
     LPVOID msgBuf;
 
     /* Getting system error message. This function allocates a string, which shall be released
