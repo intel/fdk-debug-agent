@@ -200,7 +200,8 @@ static void checkUrlMap(HttpClientSimulator &client,
         } catch (std::exception &e) {
             std::stringstream stream;
             stream << "Error on url=" << it.first << " file=" << it.second << std::endl << e.what();
-            FAIL(stream.str());
+            INFO(stream.str());
+            CHECK(false);
         }
     }
 }
