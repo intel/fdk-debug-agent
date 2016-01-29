@@ -282,14 +282,12 @@ Resource::ResponsePtr LogServiceTypeControlParametersResource::handleGet(const R
 {
     auto xml = std::make_unique<std::stringstream>();
     *xml << "<control_parameters>\n"
-            "    <!-- service generic -->\n"
             "    <BooleanParameter Name=\"Started\"/>\n"
             "    <ParameterBlock Name=\"Buffering\">\n"
             "        <IntegerParameter Name=\"Size\" Size=\"16\" Unit=\"MegaBytes\"/>\n"
             "        <BooleanParameter Name=\"Circular\"/>\n"
             "    </ParameterBlock>\n"
             "    <BooleanParameter Name=\"PersistsState\"/>\n"
-            "    <!-- service specific -->\n"
             "    <EnumParameter Size=\"8\" Name=\"Verbosity\">\n"
             "        <ValuePair Numerical=\"2\" Literal=\"Critical\"/>\n"
             "        <ValuePair Numerical=\"3\" Literal=\"High\"/>\n"

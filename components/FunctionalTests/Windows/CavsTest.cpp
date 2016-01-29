@@ -471,8 +471,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: module type control parameters "
-                          "(URL: /type/cavs.module-aec/1/control_parameters)")
+TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(module, logs)")
 {
     /* Setting the test vector
     * ----------------------- */
@@ -481,6 +480,9 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: module type control parameters "
 
     /* Adding initial commands */
     addInitialCommands(commands);
+
+    /* Now using the mocked device
+    * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
@@ -492,11 +494,12 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: module type control parameters "
     /* Creating the http client */
     HttpClientSimulator client("localhost");
 
-    /* 1: Getting system information*/
-    CHECK_NOTHROW(client.request(
-        "/type/cavs.module-aec/1/control_parameters", HttpClientSimulator::Verb::Get, "",
-        HttpClientSimulator::Status::Ok, "text/xml",
-        HttpClientSimulator::FileContent(xmlFileName("module_type_control_params"))));
+    /* Checking structure answers */
+    std::map<std::string, std::string> systemUrlMap = {
+        {"/type/cavs.module-aec/1/control_parameters", "module_type_control_params"}, // module
+        {"/type/cavs.fwlogs/control_parameters", "logservice_control_parameter_structure"}, // logs
+    };
+    checkUrlMap(client, systemUrlMap);
 }
 
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
