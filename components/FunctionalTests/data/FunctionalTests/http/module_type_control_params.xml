@@ -1,5 +1,5 @@
 <control_parameters>
-<ParameterBlock xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ParameterBlock.xsd" Name="AcousticEchoCanceler">
+<ParameterBlock Name="AcousticEchoCanceler">
   <ParameterBlock Name="switch">
     <EnumParameter Size="16" Name="value" Description="Module switch">
       <ValuePair Literal="off" Numerical="0"/>
@@ -75,7 +75,7 @@
   <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_5_real" Description="Initial AEC coefficient of band 5 (real part). Class II parameter"/>
   <IntegerParameter Signed="false" Min="0" Max="65535" Size="16" ArrayLength="25" Name="sub_5_im" Description="Initial AEC coefficient of band 5 (imaginary part). Class II parameter"/>
 </ParameterBlock>
-<ParameterBlock xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ParameterBlock.xsd" Name="NoiseReduction">
+<ParameterBlock Name="NoiseReduction">
   <ParameterBlock Name="switch">
     <EnumParameter Size="16" Name="value" Description="Module switch">
       <ValuePair Literal="off" Numerical="0"/>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ComponentLibrary xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../Schemas/ComponentLibrary.xsd">
+<ComponentLibrary>
     <!-- Algorithms common definitions -->
     <ComponentType Name="SwitchParam">
         <EnumParameter Name="value" Size="16" Description="Module switch">
