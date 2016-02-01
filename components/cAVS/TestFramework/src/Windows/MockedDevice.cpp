@@ -79,6 +79,13 @@ MockedDevice::IoCtlEntry::IoCtlEntry(uint32_t ioControlCode, const Buffer *expec
     }
 }
 
+MockedDevice::~MockedDevice()
+{
+    if (!consumed()) {
+        mLeftoverCallback();
+    }
+}
+
 bool MockedDevice::consumed() const
 {
     return mEntries.empty();

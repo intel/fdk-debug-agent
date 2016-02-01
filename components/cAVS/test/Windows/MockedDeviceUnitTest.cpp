@@ -21,6 +21,7 @@
 */
 
 #include "cAVS/Windows/MockedDevice.hpp"
+#include "cAVS/Windows/MockedDeviceCatchHelper.hpp"
 #include "TestCommon/TestHelpers.hpp"
 #include "Util/Buffer.hpp"
 #include "Util/TypedBuffer.hpp"
@@ -61,12 +62,7 @@ bool operator==(const IoCtl_Output &v1, const IoCtl_Output &v2)
     return v1.p1 == v2.p1 && v1.p2 == v2.p2;
 }
 
-struct Fixture
-{
-    MockedDevice device;
-
-    ~Fixture() { CHECK(device.consumed()); }
-};
+using Fixture = MockedDeviceFixture;
 
 /* This test case uses the mocked device with expected input, i.e. the mocking is successful*/
 TEST_CASE_METHOD(Fixture, "MockedDevice: expected inputs")
@@ -210,7 +206,9 @@ TEST_CASE_METHOD(Fixture, "MockedDevice: unexpected inputs")
 
 TEST_CASE("MockedDevice: Test vector not fully consumed")
 {
-    MockedDevice device;
+    // Ignore the "leftover input" callback since we want to manually test that there are, in fact,
+    // leftover inputs.
+    MockedDevice device([] {});
     device.addSuccessfulIoctlEntry(IoCtl2, nullptr, nullptr, nullptr);
     device.addSuccessfulIoctlEntry(IoCtl1, nullptr, nullptr, nullptr);
 

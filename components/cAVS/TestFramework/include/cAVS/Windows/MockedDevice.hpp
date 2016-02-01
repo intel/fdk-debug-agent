@@ -27,6 +27,7 @@
 #include <queue>
 #include <stdexcept>
 #include <mutex>
+#include <functional>
 
 namespace debug_agent
 {
@@ -52,10 +53,21 @@ namespace windows
 class MockedDevice final : public Device
 {
 public:
-    MockedDevice() : mCurrentEntry(0), mFailed(false) {}
-
-    /** @returns true if all test entries were consumed
+    /** Constructor
+     *
+     * @param[in] leftoverCallback A void(void) function that will be called if there are leftover
+     *                             test inputs when destroyed.
      */
+    MockedDevice(std::function<void(void)> leftoverCallback)
+        : mCurrentEntry(0), mFailed(false), mLeftoverCallback(leftoverCallback)
+    {
+        if (!mLeftoverCallback) {
+            throw std::logic_error("MockedDevice: a destruction callback must be set.");
+        }
+    }
+    ~MockedDevice();
+
+    /** @returns whether all test inputs have been consumed */
     bool consumed() const;
 
     /** Add a successful ioctl entry into the test queue.
@@ -160,6 +172,7 @@ private:
     EntryCollection mEntries;
     int mCurrentEntry;
     bool mFailed;
+    std::function<void(void)> mLeftoverCallback;
     std::string mFailureMessage;
 
     /* A device supports concurent ioctl calls */

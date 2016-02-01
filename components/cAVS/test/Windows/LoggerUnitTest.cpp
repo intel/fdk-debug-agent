@@ -22,6 +22,7 @@
 
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
+#include "cAVS/Windows/MockedDeviceCatchHelper.hpp"
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/StubbedWppClientFactory.hpp"
 #include "cAVS/Windows/Logger.hpp"
@@ -31,10 +32,11 @@
 using namespace debug_agent::cavs;
 using namespace debug_agent::cavs::windows;
 
-TEST_CASE("Logging: setting and getting parameters")
+using Fixture = MockedDeviceFixture;
+
+TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
 {
     StubbedWppClientFactory wppClientFactory;
-    MockedDevice device;
 
     /* Setting the test vector
      * ----------------------- */

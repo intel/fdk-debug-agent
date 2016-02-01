@@ -47,7 +47,6 @@ class MockedDeviceCommands final
 {
 public:
     MockedDeviceCommands(MockedDevice &device) : mDevice(device) {}
-
     /** Add a get module entries command.
      *
      * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
