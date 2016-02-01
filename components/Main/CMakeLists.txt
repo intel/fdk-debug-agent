@@ -23,7 +23,7 @@
 # Version
 set(DBGA_VERSION "0.0.0.0" CACHE STRING "Version of the DBGA build")
 
-set(REGEX "([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)")
+set(REGEX "([0-9]+).([0-9]+).([0-9]+).([0-9]+)")
 if(NOT DBGA_VERSION MATCHES "${REGEX}")
     message(SEND_ERROR "Could not match DBGA_VERSION=`${DBGA_VERSION}' with: ${REGEX}")
 else()
