@@ -22,7 +22,8 @@
 
 project(DebugAgent)
 
-cmake_minimum_required(VERSION 3.0.0)
+# 3.3.0 is required to support Visual Studio 2015
+cmake_minimum_required(VERSION 3.3.0)
 
 # checking gcc version
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
