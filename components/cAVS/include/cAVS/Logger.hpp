@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -21,7 +21,8 @@
 */
 #pragma once
 
-#include <cAVS/LogBlock.hpp>
+#include "Util/EnumHelper.hpp"
+#include "cAVS/LogBlock.hpp"
 #include <stdexcept>
 #include <string>
 #include <memory>
@@ -53,6 +54,14 @@ public:
         Pti
     };
 
+    static const util::EnumHelper<Output> &outputHelper()
+    {
+        static const util::EnumHelper<Output> helper({
+            {Output::Sram, "SRAM"}, {Output::Pti, "PTI"},
+        });
+        return helper;
+    }
+
     /**
      * Log level
      */
@@ -64,6 +73,18 @@ public:
         Low,
         Verbose
     };
+
+    static const util::EnumHelper<Level> &levelHelper()
+    {
+        static const util::EnumHelper<Level> helper({
+            {Level::Critical, "Critical"},
+            {Level::High, "High"},
+            {Level::Medium, "Medium"},
+            {Level::Low, "Low"},
+            {Level::Verbose, "Verbose"},
+        });
+        return helper;
+    }
 
     /**
      * The parameters of a log
@@ -124,36 +145,6 @@ public:
     * Stop internal threads and unblock consumer threads
     */
     virtual void stop() noexcept = 0;
-
-    /**
-     * Return a human representation of an Output enum class value.
-     * @param[in] output The Output enum class value
-     * @return a string representing the value
-     */
-    static const std::string &toString(Output output);
-
-    /**
-     * Return a human representation of a Level enum class value.
-     * @param[in] level The Level enum class value
-     * @return a string representing the value
-     */
-    static const std::string &toString(Level level);
-
-    /**
-     * Return an Output enum class value corresponding to a string.
-     * @param[in] output The Output as string
-     * @return the corresponding enum class Output value
-     * @throw Logger::Exception
-     */
-    static Output outputFromString(const std::string &output);
-
-    /**
-     * Return an Level enum class value corresponding to a string.
-     * @param[in] level The Level as string
-     * @return the corresponding enum class Level value
-     * @throw Logger::Exception
-     */
-    static Level levelFromString(const std::string &level);
 
 private:
     /* Make this class non copyable */

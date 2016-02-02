@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -220,8 +220,9 @@ Resource::ResponsePtr LogServiceInstanceControlParametersResource::handleGet(con
             "    </ParameterBlock>\n"
             "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
             "    <EnumParameter Name=\"Verbosity\">"
-         << Logger::toString(logParameters.mLevel) << "</EnumParameter>\n"
-                                                      "    <BooleanParameter Name=\"ViaPTI\">"
+         << Logger::levelHelper().toString(logParameters.mLevel)
+         << "</EnumParameter>\n"
+            "    <BooleanParameter Name=\"ViaPTI\">"
          << (logParameters.mOutput == Logger::Output::Pti ? 1 : 0) << "</BooleanParameter>\n"
                                                                       "</control_parameters>\n";
 
@@ -256,13 +257,13 @@ Resource::ResponsePtr LogServiceInstanceControlParametersResource::handlePut(con
     Logger::Parameters logParameters;
     try {
         logParameters.mIsStarted = Poco::NumberParser::parseBool(startedNodeValue);
-        logParameters.mLevel = Logger::levelFromString(verbosityNodeValue);
+        if (!Logger::levelHelper().fromString(verbosityNodeValue, logParameters.mLevel)) {
+            throw Response::HttpError(Response::ErrorStatus::BadRequest,
+                                      std::string("Invalid level value : ") + verbosityNodeValue);
+        }
         logParameters.mOutput = Poco::NumberParser::parseBool(viaPtiNodeValue)
                                     ? Logger::Output::Pti
                                     : Logger::Output::Sram;
-    } catch (Logger::Exception &e) {
-        throw Response::HttpError(Response::ErrorStatus::BadRequest,
-                                  std::string("Invalid value: ") + e.what());
     } catch (Poco::SyntaxException &e) {
         throw Response::HttpError(Response::ErrorStatus::BadRequest,
                                   std::string("Invalid Start/Stop request: ") + e.what());
