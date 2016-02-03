@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -31,7 +31,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-using namespace debug_agent::parameterSerializer;
+using namespace debug_agent::parameter_serializer;
 using namespace debug_agent::util;
 
 static const std::string pfwConfFilePath =

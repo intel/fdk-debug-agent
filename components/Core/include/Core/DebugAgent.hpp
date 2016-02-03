@@ -60,7 +60,7 @@ private:
     std::shared_ptr<TypeModel> mTypeModel;
     std::shared_ptr<ifdk_objects::instance::System> mSystemInstance;
     util::Locker<std::shared_ptr<InstanceModel>> mInstanceModel;
-    util::Locker<parameterSerializer::ParameterSerializer> mParameterSerializer;
+    util::Locker<parameter_serializer::ParameterSerializer> mParameterSerializer;
     rest::Server mRestServer;
 };
 }

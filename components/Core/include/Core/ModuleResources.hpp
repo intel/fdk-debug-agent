@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -37,7 +37,7 @@ class ModuleResource : public SystemResource
 {
 public:
     ModuleResource(cavs::System &system,
-                   util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
+                   util::Locker<parameter_serializer::ParameterSerializer> &parameterSerializer,
                    const std::string moduleName, const uint16_t moduleId)
         : SystemResource(system), mParameterSerializer(parameterSerializer),
           mModuleName(moduleName), mModuleId(moduleId)
@@ -46,11 +46,11 @@ public:
 
 protected:
     std::map<uint32_t, std::string> getChildren(
-        parameterSerializer::ParameterSerializer::ParameterKind parameterKind) const;
+        parameter_serializer::ParameterSerializer::ParameterKind parameterKind) const;
     uint16_t getInstanceId(const rest::Request &request) const;
     cavs::dsp_fw::ParameterId getParamId(const std::string parameterName) const;
 
-    util::Locker<parameterSerializer::ParameterSerializer> &mParameterSerializer;
+    util::Locker<parameter_serializer::ParameterSerializer> &mParameterSerializer;
     const std::string mModuleName;
     const uint16_t mModuleId;
 };
@@ -61,7 +61,7 @@ class ControlParametersModuleInstanceResource : public ModuleResource
 public:
     ControlParametersModuleInstanceResource(
         cavs::System &system,
-        util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
+        util::Locker<parameter_serializer::ParameterSerializer> &parameterSerializer,
         const std::string moduleName, const uint16_t moduleId)
         : ModuleResource(system, parameterSerializer, moduleName, moduleId)
     {
@@ -78,7 +78,7 @@ class ControlParametersModuleTypeResource : public ModuleResource
 public:
     ControlParametersModuleTypeResource(
         cavs::System &system,
-        util::Locker<parameterSerializer::ParameterSerializer> &parameterSerializer,
+        util::Locker<parameter_serializer::ParameterSerializer> &parameterSerializer,
         const std::string moduleName, const uint16_t moduleId)
         : ModuleResource(system, parameterSerializer, moduleName, moduleId)
     {
