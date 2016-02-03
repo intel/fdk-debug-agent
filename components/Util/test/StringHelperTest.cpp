@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -69,4 +69,16 @@ TEST_CASE("StringHelper: trim")
     CHECK(StringHelper::trim("abc \n ") == "abc");
     CHECK(StringHelper::trim(" \n abc \n\r ") == "abc");
     CHECK(StringHelper::trim(" \n a b c \n ") == "a b c");
+}
+
+TEST_CASE("StringHelper: startsWith")
+{
+    CHECK(StringHelper::startWith("titi", ""));
+    CHECK(StringHelper::startWith("titi", "t"));
+    CHECK(StringHelper::startWith("titi", "ti"));
+    CHECK(StringHelper::startWith("titi", "tit"));
+    CHECK(StringHelper::startWith("titi", "titi"));
+
+    CHECK_FALSE(StringHelper::startWith("titi", "iti"));
+    CHECK_FALSE(StringHelper::startWith("titi", "titit"));
 }
