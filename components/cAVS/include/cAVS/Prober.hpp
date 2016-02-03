@@ -105,16 +105,14 @@ public:
     /** Configuration of one probe instance */
     struct ProbeConfig
     {
-        ProbePointId id;        /* The probe point id where the probe will be connected */
-        ProbePurpose direction; /* The probe direction (inject, extract, both) */
+        ProbePointId id;      /* The probe point id where the probe will be connected */
+        ProbePurpose purpose; /* The probe purpose (inject, extract, both) */
 
-        ProbeConfig(const ProbePointId &id, ProbePurpose direction) : id(id), direction(direction)
-        {
-        }
+        ProbeConfig(const ProbePointId &id, ProbePurpose purpose) : id(id), purpose(purpose) {}
 
         bool operator==(const ProbeConfig &other) const
         {
-            return id == other.id && direction == other.direction;
+            return id == other.id && purpose == other.purpose;
         }
     };
 
@@ -148,7 +146,7 @@ public:
 
     /** Get probes for the current/future session.
      *
-     * Probe service state shall be in 'Owned, Allocated, Running'.
+     * Probe service state shall be in 'Owned, Allocated, Active'.
      *
      * @throw Prober::Exception
      */
@@ -159,7 +157,7 @@ public:
      *
      * This method blocks until data is available (or probe is stopped)
      *
-     * Probe service state shall be in 'Running'.
+     * Probe service state shall be in 'Active'.
      *
      * @param[in] probeIndex the index of the probe to query
      * @return the next extraction block data, or nullptr if the probe has been stopped.
@@ -171,7 +169,7 @@ public:
     /**
      * Enqueue a block that will be injected to the probe.
      *
-     * Probe service state shall be in 'Running'.
+     * Probe service state shall be in 'Active'.
      *
      * @param[in] probeIndex the index of the probe to query
      * @param[out] buffer the block to inject
