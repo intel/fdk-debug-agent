@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Util/Buffer.hpp"
+#include "Util/EnumHelper.hpp"
 #include <inttypes.h>
 #include <stdexcept>
 #include <string>

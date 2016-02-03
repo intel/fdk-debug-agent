@@ -44,6 +44,30 @@ public:
     bool enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer) override;
 
 private:
+    template <driver::IoCtlType type, ULONG id, class T>
+    struct IoctlParameter
+    {
+        static constexpr driver::IoCtlType type{type};
+        static constexpr ULONG id{id};
+        using Data = T;
+    };
+
+    // 0 = get/setState
+    using GetState = IoctlParameter<driver::IoCtlType::TinyGet, 0, driver::ProbeState>;
+    using SetState = IoctlParameter<driver::IoCtlType::TinySet, 0, driver::ProbeState>;
+
+    /** Send a probes-related ioctl to the driver
+     *
+     * @tparam T A type describing the ioctl (id, direction, type of the data
+     *           to be sent - described by a Data member).
+     * @param[in,out] inout Reference to the data to be sent/received.
+     */
+    template <class T>
+    void ioctl(typename T::Data &inout);
+
+    static driver::ProbeState fromCavs(const State &fromCavs);
+    static State toCavs(const driver::ProbeState &fromDriver);
+
     Device &mDevice;
 };
 }

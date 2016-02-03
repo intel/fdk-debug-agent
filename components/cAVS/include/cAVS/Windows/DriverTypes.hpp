@@ -238,6 +238,15 @@ struct IoctlFwLogsState
         writer.write(output);
     }
 };
+
+/** State of the probing service */
+enum class ProbeState : uint32_t
+{
+    Idle,
+    Owned,     /// probe service is owned (required because it's a monoclient service)
+    Allocated, /// Buffers are allocated
+    Active     /// Probing is running
+};
 }
 }
 }
