@@ -76,7 +76,7 @@ public:
      * this overload. Or templatize the Device class with an ioctl type?
      */
     virtual void ioControl(uint32_t ioControlCode, const util::Buffer *input,
-                   util::Buffer *output) = 0;
+                           util::Buffer *output) = 0;
 
 private:
     Device(const Device &) = delete;
