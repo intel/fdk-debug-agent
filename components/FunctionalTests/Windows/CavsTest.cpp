@@ -504,7 +504,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
 
     /* Checking structure answers */
     std::map<std::string, std::string> systemUrlMap = {
-        {"/type/cavs.module-aec/1/control_parameters", "module_type_control_params"}, // module
+        {"/type/cavs.module-aec/control_parameters", "module_type_control_params"}, // module
         {"/type/cavs.fwlogs/control_parameters", "logservice_control_parameter_structure"}, // logs
     };
     checkUrlMap(client, systemUrlMap);
