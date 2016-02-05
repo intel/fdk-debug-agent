@@ -34,12 +34,12 @@ namespace util
 /** The "value" member of this structure is true if the supplied type should be serialized using a
  * simple memory copy.
  *
- * Currently "simple serializable" types are integral types.
+ * Currently "simple serializable" types are integral types and pointers.
  */
 template <typename T>
 struct IsSimpleSerializableType
 {
-    static const bool value = std::is_integral<T>::value;
+    static const bool value = std::is_integral<T>::value || std::is_pointer<T>::value;
 };
 
 /** Enums are encoded on 32 bits */
