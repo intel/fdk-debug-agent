@@ -23,6 +23,7 @@
 #pragma once
 
 #include <type_traits>
+#include <array>
 #include <cstdint>
 
 namespace debug_agent
@@ -53,6 +54,31 @@ struct IsEnumSerializableType
     static const bool value = std::is_enum<T>::value;
 };
 
+template <typename...>
+struct IsFixedArray : std::false_type
+{
+};
+
+template <typename T, std::size_t N>
+struct IsFixedArray<std::array<T, N>> : std::true_type
+{
+};
+
+template <typename T, std::size_t N>
+struct IsFixedArray<T[N]> : std::integral_constant<bool, N != 0>
+{
+};
+
+/** The "value" member of this structure is true if the supplied type is a
+ * C array (with a fixed size) or an std::array and should be serialized using iterative
+ * serialization.
+ */
+template <typename T>
+struct IsArraySerializableType
+{
+    static const bool value = IsFixedArray<T>::value;
+};
+
 /** The "value" member  of this structure is true if the supplied type is composite and should be
  * serialized using it implicit toStream() and fromStream() interface, because simple memory copy
  * doesn't work in this case.
@@ -60,8 +86,9 @@ struct IsEnumSerializableType
 template <typename T>
 struct IsCompoundSerializableType
 {
-    static const bool value =
-        !IsSimpleSerializableType<T>::value && !IsEnumSerializableType<T>::value;
+    static const bool value = !IsSimpleSerializableType<T>::value &&
+                              !IsEnumSerializableType<T>::value &&
+                              !IsArraySerializableType<T>::value;
 };
 }
 }

@@ -76,6 +76,21 @@ public:
         writeUsingMemoryCopy(encoding);
     }
 
+    /** Read an array value.
+     *
+     * C arrays and std::arrays are serialized by iteratively serializing each
+     * of their items.
+     *
+     * @tparam T the type of the value to read
+     */
+    template <typename T>
+    typename std::enable_if<IsArraySerializableType<T>::value>::type write(const T &value)
+    {
+        for (const auto &item : value) {
+            write(item);
+        }
+    }
+
     /** Write a "compound type" value.
      *
      * "Compound types" implement the toStream() method in order to serialize contained members.

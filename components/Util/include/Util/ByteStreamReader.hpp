@@ -75,6 +75,21 @@ public:
         value = static_cast<T>(encoded);
     }
 
+    /** Read an array value.
+     *
+     * C arrays and std::arrays are deserialized by iteratively deserializing
+     * each of their items.
+     *
+     * @tparam T the type of the value to read
+     */
+    template <typename T>
+    typename std::enable_if<IsArraySerializableType<T>::value>::type read(T &value)
+    {
+        for (auto &item : value) {
+            read(item);
+        }
+    }
+
     /** Read a "compound type" value.
      *
      * "Compound types" implement the fromStream() method in order to serialize contained members.

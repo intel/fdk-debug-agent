@@ -21,6 +21,8 @@
 */
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include <array>
+#include <type_traits>
 #include <catch.hpp>
 
 using namespace debug_agent::util;
@@ -164,4 +166,62 @@ TEST_CASE("Byte stream reader : enums")
     CHECK(enum8Value == Enum8::val1);
     CHECK(enum16Value == Enum16::val2);
     CHECK(enum32Value == Enum32::val3);
+}
+
+TEST_CASE("Byte Stream reader/writer: arrays")
+{
+    uint8_t simpleArray[5] = {1, 2, 3, 4, 5};
+    struct
+    {
+        uint32_t i;
+        int16_t j;
+        void toStream(ByteStreamWriter &writer) const
+        {
+            writer.write(i);
+            writer.write(j);
+        }
+        void fromStream(ByteStreamReader &reader)
+        {
+            reader.read(i);
+            reader.read(j);
+        }
+    } structArray[3] = {{0, 1}, {32, 16}, {0xabcdef01, 0x7fff}};
+    std::array<uint16_t, 2> stdArray = {0x1337, 0x4242};
+
+    // clang-format off
+    const Buffer expected = {
+        1, 2, 3, 4, 5, // simpleValue
+        0x00, 0x00, 0x00, 0x00, // 0 as uint32
+        0x01, 0x00, // 1 as int16
+        0x20, 0x00, 0x00, 0x00, // 32 as uint32
+        0x10, 0x00, // 16 as int16
+        0x01, 0xef, 0xcd, 0xad,
+        0xff, 0x7f,
+        0x37, 0x13, // std array's first slot
+        0x42, 0x42 // second slot
+    };
+    // clang-format on
+
+    ByteStreamWriter writer;
+    writer.write(simpleArray);
+    writer.write(structArray);
+    writer.write(stdArray);
+
+    ByteStreamReader reader(writer.getBuffer());
+
+    for (const auto expected : simpleArray) {
+        Buffer::value_type back;
+        reader.read(back);
+        CHECK(back == expected);
+    }
+    for (const auto expected : structArray) {
+        std::remove_const<decltype(expected)>::type back;
+        reader.read(back);
+        CHECK(back.i == expected.i);
+        CHECK(back.j == expected.j);
+    }
+
+    decltype(stdArray) back;
+    reader.read(back);
+    CHECK(back == stdArray);
 }
