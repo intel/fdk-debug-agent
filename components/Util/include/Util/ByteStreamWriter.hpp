@@ -103,19 +103,6 @@ public:
         value.toStream(*this);
     }
 
-    /** Write an array of elements, the supplied type could be either simple or composite.
-      * @param array the array to write
-      * @param count the array size
-      * @tparam T the element type
-      */
-    template <typename T>
-    void writeArray(const T *array, std::size_t count)
-    {
-        for (std::size_t i = 0; i < count; ++i) {
-            write(array[i]);
-        }
-    }
-
     /** Write a raw buffer. Its size is not written in the stream */
     void writeRawBuffer(const util::Buffer &buffer)
     {

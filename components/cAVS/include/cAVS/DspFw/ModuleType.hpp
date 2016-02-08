@@ -175,10 +175,10 @@ public:
     {
         reader.read(module_id);
         reader.read(state_flags);
-        reader.readArray(name, MAX_MODULE_NAME_LEN);
-        reader.readArray(uuid, uuidLen);
+        reader.read(name);
+        reader.read(uuid);
         reader.read(type);
-        reader.readArray(hash, DEFAULT_HASH_SHA256_LEN);
+        reader.read(hash);
         reader.read(entry_point);
         reader.read(cfg_offset);
         reader.read(cfg_count);
@@ -195,10 +195,10 @@ public:
     {
         writer.write(module_id);
         writer.write(state_flags);
-        writer.writeArray(name, MAX_MODULE_NAME_LEN);
-        writer.writeArray(uuid, uuidLen);
+        writer.write(name);
+        writer.write(uuid);
         writer.write(type);
-        writer.writeArray(hash, DEFAULT_HASH_SHA256_LEN);
+        writer.write(hash);
         writer.write(entry_point);
         writer.write(cfg_offset);
         writer.write(cfg_count);

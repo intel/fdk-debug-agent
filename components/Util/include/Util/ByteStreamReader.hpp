@@ -103,19 +103,6 @@ public:
         value.fromStream(*this);
     }
 
-    /** Read an array of elements, the supplied type could be either simple or composite.
-     * @param array the array that will receive elements
-     * @param count the element count to read
-     * @tparam T the element type
-     */
-    template <typename T>
-    void readArray(T *array, std::size_t count)
-    {
-        for (std::size_t i = 0; i < count; ++i) {
-            read(array[i]);
-        }
-    }
-
     /* Read a vector of type supplied as template parameter, the supplied type could be either
      * simple or composite.
      *
