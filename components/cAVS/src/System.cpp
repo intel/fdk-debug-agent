@@ -245,40 +245,31 @@ void System::getTopology(Topology &topology)
     topology.computeLinks();
 }
 
-void System::setProberState(Prober::State state)
+void System::setProberState(bool active)
 {
-    try {
-        mDriver->getProber().setState(state);
-    } catch (Logger::Exception &e) {
-        throw Exception("Unable to set probe service state: " + std::string(e.what()));
-    }
+    /* @todo */
+    throw Exception("not implemented");
 }
 
-Prober::State System::getProberState()
+/**
+* Get the state of the probing service
+*/
+bool System::isProberActive()
 {
-    try {
-        return mDriver->getProber().getState();
-    } catch (Logger::Exception &e) {
-        throw Exception("Unable to get probe service state: " + std::string(e.what()));
-    }
+    /* @todo */
+    throw Exception("not implemented");
 }
 
-void System::setSessionProbes(const std::vector<Prober::ProbeConfig> probes)
+void System::setProbeConfiguration(ProbeId id, const Prober::ProbeConfig &probes)
 {
-    try {
-        mDriver->getProber().setSessionProbes(probes);
-    } catch (Logger::Exception &e) {
-        throw Exception("Unable to set session probes: " + std::string(e.what()));
-    }
+    /* @todo */
+    throw Exception("not implemented");
 }
 
-std::vector<Prober::ProbeConfig> System::getSessionProbes()
+Prober::ProbeConfig System::getProbeConfiguration(ProbeId id)
 {
-    try {
-        return mDriver->getProber().getSessionProbes();
-    } catch (Logger::Exception &e) {
-        throw Exception("Unable to get session probes: " + std::string(e.what()));
-    }
+    /* @todo */
+    throw Exception("not implemented");
 }
 }
 }

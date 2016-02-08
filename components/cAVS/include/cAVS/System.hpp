@@ -25,6 +25,7 @@
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/Topology.hpp"
 #include "cAVS/Prober.hpp"
+#include "Util/WrappedRaw.hpp"
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -34,6 +35,16 @@ namespace debug_agent
 {
 namespace cavs
 {
+
+namespace detail
+{
+struct ProbeIdTrait
+{
+    using RawType = uint32_t;
+};
+}
+
+using ProbeId = util::WrappedRaw<detail::ProbeIdTrait>;
 
 /**
  * The cAVS System
@@ -135,32 +146,24 @@ public:
     void getTopology(Topology &topology);
 
     /** Set the state of the probing service.
-     * State transitions must be respected (see SwAS)
      * @throw System::Exception
      */
-    void setProberState(Prober::State state);
+    void setProberState(bool active);
 
     /**
      * Get the state of the probing service
-     * @throw System::Exception if an error occurs
      */
-    Prober::State getProberState();
+    bool isProberActive();
 
-    /** Set probes for the future session.
-     *
-     * Probe service state shall be 'Owned'.
-     *
+    /** Set probe configuration. This configuration will be used at next probe service start.
      * @throw System::Exception
      */
-    void setSessionProbes(const std::vector<Prober::ProbeConfig> probes);
+    void setProbeConfiguration(ProbeId probeId, const Prober::ProbeConfig &probeCfg);
 
-    /** Get probes for the current/future session.
-     *
-     * Probe service state shall be in 'Owned, Allocated, Running'.
-     *
-     * @throw System::Exception
-     */
-    std::vector<Prober::ProbeConfig> getSessionProbes();
+    /**
+    * @throw System::Exception
+    */
+    Prober::ProbeConfig getProbeConfiguration(ProbeId probeId);
 
     /** Stop internal threads and unblock consumer threads */
     void stop() noexcept { mDriver->stop(); }
