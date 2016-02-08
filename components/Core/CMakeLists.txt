@@ -29,7 +29,8 @@ set(SRCS
     src/TypeModelConverter.cpp
     src/DebugResources.cpp
     src/LogServiceParameterApplier.cpp
-    src/ModuleParameterApplier.cpp)
+    src/ModuleParameterApplier.cpp
+    src/ProbeServiceParameterApplier.cpp)
 
 set(INCS
     include/Core/DebugAgent.hpp
@@ -46,6 +47,7 @@ set(INCS
     include/Core/ServiceParameterApplier.hpp
     include/Core/LogServiceParameterApplier.hpp
     include/Core/ModuleParameterApplier.hpp
+    include/Core/ProbeServiceParameterApplier.hpp
 
 # private headers
     src/FdkToolMockGenerator.hpp

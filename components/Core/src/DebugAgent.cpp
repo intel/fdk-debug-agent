@@ -27,6 +27,7 @@
 #include "Core/InstanceModelConverter.hpp"
 #include "Core/ModuleParameterApplier.hpp"
 #include "Core/LogServiceParameterApplier.hpp"
+#include "Core/ProbeServiceParameterApplier.hpp"
 #include "cAVS/System.hpp"
 #include "Util/StringHelper.hpp"
 #include <memory>
@@ -118,6 +119,7 @@ std::vector<std::shared_ptr<ParameterApplier>> DebugAgent::createParamAppliers(
     return {
         std::make_shared<ModuleParameterApplier>(system, paramSerializer),
         std::make_shared<LogServiceParameterApplier>(system),
+        std::make_shared<ProbeServiceParameterApplier>(system),
     };
 }
 
