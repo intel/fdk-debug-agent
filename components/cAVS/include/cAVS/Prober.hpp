@@ -106,14 +106,19 @@ public:
     /** Configuration of one probe instance */
     struct ProbeConfig
     {
-        ProbePointId id;      /* The probe point id where the probe will be connected */
-        ProbePurpose purpose; /* The probe purpose (inject, extract, both) */
+        bool enabled;
+        ProbePointId probePoint; /* The probe point id where the probe will be connected */
+        ProbePurpose purpose;    /* The probe purpose (inject, extract, both) */
 
-        ProbeConfig(const ProbePointId &id, ProbePurpose purpose) : id(id), purpose(purpose) {}
+        ProbeConfig(bool enabled, const ProbePointId &probePoint, ProbePurpose purpose)
+            : enabled(enabled), probePoint(probePoint), purpose(purpose)
+        {
+        }
 
         bool operator==(const ProbeConfig &other) const
         {
-            return id == other.id && purpose == other.purpose;
+            return enabled == other.enabled && probePoint == other.probePoint &&
+                   purpose == other.purpose;
         }
     };
 
