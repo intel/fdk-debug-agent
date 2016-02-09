@@ -43,6 +43,7 @@ set(INCS
     include/Core/ParameterKind.hpp
     include/Core/ParameterApplier.hpp
     include/Core/ParameterDispatcher.hpp
+    include/Core/ServiceParameterApplier.hpp
     include/Core/LogServiceParameterApplier.hpp
     include/Core/ModuleParameterApplier.hpp
 

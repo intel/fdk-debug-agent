@@ -32,22 +32,14 @@ using namespace cavs;
 namespace core
 {
 
-/** Only one log service instance, so its id is "0" */
-const std::string LogServiceParameterApplier::mServiceInstanceId("0");
-
-std::set<std::string> LogServiceParameterApplier::getSupportedTypes() const
+LogServiceParameterApplier::LogServiceParameterApplier(cavs::System &system)
+    : Base(BaseModelConverter::subsystemName, BaseModelConverter::logServiceTypeName),
+      mSystem(system)
 {
-    return {BaseModelConverter::subsystemName + "." + BaseModelConverter::logServiceTypeName};
 }
 
-std::string LogServiceParameterApplier::getParameterStructure(const std::string &type,
-                                                              ParameterKind kind)
+std::string LogServiceParameterApplier::getServiceParameterStructure()
 {
-    if (kind != ParameterKind::Control) {
-        /** Log service does not support info parameters */
-        throw UnsupportedException();
-    }
-
     /** @todo: currently hardcoded, use libstructure later */
     return R"(<control_parameters>
     <BooleanParameter Name="Started"/>
@@ -68,14 +60,8 @@ std::string LogServiceParameterApplier::getParameterStructure(const std::string 
 )";
 }
 
-void LogServiceParameterApplier::setParameterValue(const std::string &type, ParameterKind kind,
-                                                   const std::string &instanceId,
-                                                   const std::string &parameterXML)
+void LogServiceParameterApplier::setServiceParameterValue(const std::string &parameterXML)
 {
-    if (kind != ParameterKind::Control || instanceId != mServiceInstanceId) {
-        throw UnsupportedException();
-    }
-
     static const std::string controlParametersUrl = "/control_parameters/";
     Logger::Parameters logParameters;
 
@@ -103,14 +89,8 @@ void LogServiceParameterApplier::setParameterValue(const std::string &type, Para
     }
 }
 
-std::string LogServiceParameterApplier::getParameterValue(const std::string &type,
-                                                          ParameterKind kind,
-                                                          const std::string &instanceId)
+std::string LogServiceParameterApplier::getServiceParameterValue()
 {
-    if (kind != ParameterKind::Control || instanceId != mServiceInstanceId) {
-        throw UnsupportedException();
-    }
-
     Logger::Parameters logParameters;
 
     try {

@@ -20,7 +20,7 @@
 ********************************************************************************
 */
 
-#include "Core/ParameterApplier.hpp"
+#include "Core/ServiceParameterApplier.hpp"
 #include "cAVS/System.hpp"
 
 namespace debug_agent
@@ -29,24 +29,20 @@ namespace core
 {
 
 /** Applies FDK parameters to the cAVS log system */
-class LogServiceParameterApplier : public ParameterApplier
+class LogServiceParameterApplier : public ServiceParameterApplier
 {
 public:
-    LogServiceParameterApplier(cavs::System &system) : mSystem(system) {}
+    LogServiceParameterApplier(cavs::System &system);
 
-    std::set<std::string> getSupportedTypes() const override;
+    std::string getServiceParameterStructure() override;
 
-    std::string getParameterStructure(const std::string &type, ParameterKind kind) override;
+    std::string getServiceParameterValue() override;
 
-    std::string getParameterValue(const std::string &type, ParameterKind kind,
-                                  const std::string &instanceId) override;
-
-    void setParameterValue(const std::string &type, ParameterKind kind,
-                           const std::string &instanceId,
-                           const std::string &parameterValue) override;
+    void setServiceParameterValue(const std::string &parameterValue) override;
 
 private:
-    static const std::string mServiceInstanceId;
+    using Base = ServiceParameterApplier;
+
     cavs::System &mSystem;
 };
 }
