@@ -247,6 +247,99 @@ enum class ProbeState : uint32_t
     Allocated, /// Buffers are allocated
     Active     /// Probing is running
 };
+
+// TODO: import from driver headers
+static constexpr uint32_t maxProbes{8};
+
+// TODO: import from driver headers
+enum class ProbeType : uint32_t
+{
+    Input = 0,
+    Output = 1,
+    Internal = 2
+};
+
+// TODO: import from driver headers
+enum class ProbePurpose : uint32_t
+{
+    Inject = 0,
+    Extract = 1,
+    InjectReextract = 2
+};
+
+// TODO: import from driver headers
+union ProbePointId
+{
+    static constexpr int moduleIdSize{16};
+    static constexpr int instanceIdSize{8};
+    static constexpr int typeSize{2};
+    static constexpr int indexSize{6};
+
+    struct
+    {
+        uint32_t moduleId : moduleIdSize;
+        uint32_t instanceId : instanceIdSize;
+        uint32_t type : typeSize;
+        uint32_t index : indexSize;
+    } fields;
+    uint32_t full;
+
+    bool operator==(const ProbePointId &other) { return full == other.full; }
+
+    void fromStream(util::ByteStreamReader &reader) { reader.read(full); }
+
+    void toStream(util::ByteStreamWriter &writer) const { writer.write(full); }
+};
+
+// TODO: import from driver headers
+struct ProbePointConnection
+{
+    bool enabled;
+    ProbePointId probePointId;
+    ProbePurpose purpose;
+    HANDLE injectionBufferCompletionEventHandle;
+
+    ProbePointConnection() = default;
+    ProbePointConnection(bool enabled, ProbePointId probePointId, ProbePurpose purpose,
+                         HANDLE handle)
+        : enabled(enabled), probePointId(probePointId), purpose(purpose),
+          injectionBufferCompletionEventHandle(handle)
+    {
+    }
+
+    void fromStream(util::ByteStreamReader &reader)
+    {
+        reader.read(enabled);
+        reader.read(probePointId);
+        reader.read(purpose);
+        reader.read(injectionBufferCompletionEventHandle);
+    }
+    void toStream(util::ByteStreamWriter &writer) const
+    {
+        writer.write(enabled);
+        writer.write(probePointId);
+        writer.write(purpose);
+        writer.write(injectionBufferCompletionEventHandle);
+    }
+};
+
+// TODO: import from driver headers
+struct ProbePointConfiguration
+{
+    HANDLE extractionBufferCompletionEventHandle;
+    ProbePointConnection probePointConnection[maxProbes];
+
+    void fromStream(util::ByteStreamReader &reader)
+    {
+        reader.read(extractionBufferCompletionEventHandle);
+        reader.read(probePointConnection);
+    }
+    void toStream(util::ByteStreamWriter &writer) const
+    {
+        writer.write(extractionBufferCompletionEventHandle);
+        writer.write(probePointConnection);
+    }
+};
 }
 }
 }

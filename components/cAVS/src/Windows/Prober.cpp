@@ -24,6 +24,8 @@
 #include "cAVS/Windows/Prober.hpp"
 #include "cAVS/Windows/IoctlHelpers.hpp"
 #include <string>
+#include <map>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -32,39 +34,95 @@ namespace cavs
 namespace windows
 {
 
-Prober::State Prober::toCavs(const driver::ProbeState &fromDriver)
+static const std::map<Prober::ProbePurpose, driver::ProbePurpose> purposeConversion = {
+    {Prober::ProbePurpose::Inject, driver::ProbePurpose::Inject},
+    {Prober::ProbePurpose::Extract, driver::ProbePurpose::Extract},
+    {Prober::ProbePurpose::InjectReextract, driver::ProbePurpose::InjectReextract}};
+
+static const std::map<Prober::State, driver::ProbeState> stateConversion = {
+    {Prober::State::Idle, driver::ProbeState::Idle},
+    {Prober::State::Owned, driver::ProbeState::Owned},
+    {Prober::State::Allocated, driver::ProbeState::Allocated},
+    {Prober::State::Active, driver::ProbeState::Active}};
+
+void Prober::throwIfIllegal(const ProbePointId &candidate)
 {
-    switch (fromDriver) {
-    case driver::ProbeState::Idle:
-        return State::Idle;
-    case driver::ProbeState::Owned:
-        return State::Owned;
-    case driver::ProbeState::Allocated:
-        return State::Allocated;
-    case driver::ProbeState::Active:
-        return State::Active;
+    auto type = static_cast<uint32_t>(candidate.type);
+
+    if (candidate.moduleTypeId >= 1 << driver::ProbePointId::moduleIdSize) {
+        throw Exception("Module id too large (" + std::to_string(candidate.moduleTypeId) + ").");
     }
-    throw Exception("Wrong state value.");
+
+    if (candidate.moduleInstanceId >= 1 << driver::ProbePointId::instanceIdSize) {
+        throw Exception("Instance id too large (" + std::to_string(candidate.moduleInstanceId) +
+                        ").");
+    }
+
+    if (type >= 1 << driver::ProbePointId::typeSize) {
+        throw Exception("Type too large (" + std::to_string(type) + ").");
+    }
+
+    if (candidate.pinIndex >= 1 << driver::ProbePointId::indexSize) {
+        throw Exception("Pin index too large (" + std::to_string(candidate.pinIndex) + ").");
+    }
 }
 
-driver::ProbeState Prober::fromCavs(const State &toDriver)
+driver::ProbeState Prober::toWindows(const State &from)
 {
-    switch (toDriver) {
-    case State::Idle:
-        return driver::ProbeState::Idle;
-    case State::Owned:
-        return driver::ProbeState::Owned;
-    case State::Allocated:
-        return driver::ProbeState::Allocated;
-    case State::Active:
-        return driver::ProbeState::Active;
+    try {
+        return stateConversion.at(from);
+    } catch (std::out_of_range &) {
+        throw Exception("Wrong state value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
     }
-    throw Exception("Wrong state value.");
+}
+
+Prober::State Prober::fromWindows(const driver::ProbeState &from)
+{
+    for (auto &candidate : stateConversion) {
+        if (candidate.second == from) {
+            return candidate.first;
+        }
+    }
+    throw Exception("Wrong state value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
+}
+
+driver::ProbePointId Prober::toWindows(const Prober::ProbePointId &from)
+{
+    throwIfIllegal(from);
+
+    return {from.moduleTypeId, from.moduleInstanceId, static_cast<uint32_t>(from.type),
+            from.pinIndex};
+}
+
+Prober::ProbePointId Prober::fromWindows(const driver::ProbePointId &from)
+{
+    const auto &fields = from.fields;
+    return {fields.moduleId, fields.instanceId, static_cast<ProbeType>(fields.type), fields.index};
+}
+
+driver::ProbePurpose Prober::toWindows(const ProbePurpose &from)
+{
+    try {
+        return purposeConversion.at(from);
+    } catch (std::out_of_range &) {
+        throw Exception("Wrong purpose value (" + std::to_string(static_cast<uint32_t>(from)) +
+                        ").");
+    }
+}
+
+Prober::ProbePurpose Prober::fromWindows(const driver::ProbePurpose &from)
+{
+    for (auto &candidate : purposeConversion) {
+        if (candidate.second == from) {
+            return candidate.first;
+        }
+    }
+    throw Exception("Wrong purpose value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
 }
 
 void Prober::setState(State state)
 {
-    auto tmp = fromCavs(state);
+    auto tmp = toWindows(state);
     ioctl<SetState>(tmp);
 }
 
@@ -74,18 +132,44 @@ Prober::State Prober::getState()
     driver::ProbeState state{static_cast<driver::ProbeState>(-1)};
     ioctl<GetState>(state);
 
-    return toCavs(state);
+    return fromWindows(state);
 }
 
-void Prober::setSessionProbes(const std::vector<ProbeConfig> probes)
+void Prober::setSessionProbes(const SessionProbes probes)
 {
-    /* TO DO */
+    if (probes.size() != driver::maxProbes) {
+        throw Exception("Expected to receive " + std::to_string(driver::maxProbes) +
+                        " probe configurations to set. (Actually received " +
+                        std::to_string(probes.size()));
+    }
+
+    // Translate the high-level data into driver-specific structures
+    std::vector<driver::ProbePointConnection> connections;
+    for (const auto &probe : probes) {
+        driver::ProbePointId probePointId = toWindows(probe.probePoint);
+        connections.emplace_back(probe.enabled, probePointId, toWindows(probe.purpose),
+                                 /* TODO */ nullptr);
+    }
+
+    driver::ProbePointConfiguration toDriver;
+    // TODO: create the extraction event handler
+    toDriver.extractionBufferCompletionEventHandle = nullptr;
+    std::copy_n(connections.data(), driver::maxProbes, toDriver.probePointConnection);
+
+    ioctl<SetProbePointConfiguration>(toDriver);
 }
 
-std::vector<Prober::ProbeConfig> Prober::getSessionProbes()
+Prober::SessionProbes Prober::getSessionProbes()
 {
-    /* TO DO */
-    return std::vector<ProbeConfig>();
+    driver::ProbePointConfiguration from;
+    ioctl<GetProbePointConfiguration>(from);
+
+    SessionProbes result;
+    for (const auto &connection : from.probePointConnection) {
+        result.emplace_back(connection.enabled, fromWindows(connection.probePointId),
+                            fromWindows(connection.purpose));
+    }
+    return result;
 }
 
 std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(uint32_t probeIndex)

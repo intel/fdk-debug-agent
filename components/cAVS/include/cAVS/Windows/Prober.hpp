@@ -23,6 +23,8 @@
 
 #include "cAVS/Prober.hpp"
 #include "cAVS/Windows/Device.hpp"
+#include "Util/ByteStreamReader.hpp"
+#include "Util/ByteStreamWriter.hpp"
 
 namespace debug_agent
 {
@@ -38,8 +40,8 @@ public:
 
     void setState(State state) override;
     State getState() override;
-    void setSessionProbes(const std::vector<ProbeConfig> probes) override;
-    std::vector<ProbeConfig> getSessionProbes() override;
+    void setSessionProbes(const SessionProbes probes) override;
+    SessionProbes getSessionProbes() override;
     std::unique_ptr<util::Buffer> dequeueExtractionBlock(uint32_t probeIndex) override;
     bool enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer) override;
 
@@ -55,6 +57,11 @@ private:
     // 0 = get/setState
     using GetState = IoctlParameter<driver::IoCtlType::TinyGet, 0, driver::ProbeState>;
     using SetState = IoctlParameter<driver::IoCtlType::TinySet, 0, driver::ProbeState>;
+    // 1 = get/setProbePointConfiguration
+    using GetProbePointConfiguration =
+        IoctlParameter<driver::IoCtlType::TinyGet, 1, driver::ProbePointConfiguration>;
+    using SetProbePointConfiguration =
+        IoctlParameter<driver::IoCtlType::TinySet, 1, driver::ProbePointConfiguration>;
 
     /** Send a probes-related ioctl to the driver
      *
@@ -65,8 +72,18 @@ private:
     template <class T>
     void ioctl(typename T::Data &inout);
 
-    static driver::ProbeState fromCavs(const State &fromCavs);
-    static State toCavs(const driver::ProbeState &fromDriver);
+    static void throwIfIllegal(const ProbePointId &candidate);
+
+    /** Convert values from OS-agnostic cAVS to cAVS Windows driver and vice-versa
+     */
+    /** @{ */
+    static driver::ProbeState toWindows(const State &from);
+    static State fromWindows(const driver::ProbeState &from);
+    static driver::ProbePointId toWindows(const ProbePointId &from);
+    static ProbePointId fromWindows(const driver::ProbePointId &from);
+    static driver::ProbePurpose toWindows(const ProbePurpose &from);
+    static ProbePurpose fromWindows(const driver::ProbePurpose &from);
+    /** @} */
 
     Device &mDevice;
 };

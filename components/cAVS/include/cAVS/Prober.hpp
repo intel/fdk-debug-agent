@@ -88,6 +88,7 @@ public:
         ProbeType type;
         uint32_t pinIndex;
 
+        ProbePointId() = default;
         ProbePointId(uint32_t moduleTypeId, uint32_t moduleInstanceId, ProbeType type,
                      uint32_t pinIndex)
             : moduleTypeId(moduleTypeId), moduleInstanceId(moduleInstanceId), type(type),
@@ -110,6 +111,7 @@ public:
         ProbePointId probePoint; /* The probe point id where the probe will be connected */
         ProbePurpose purpose;    /* The probe purpose (inject, extract, both) */
 
+        ProbeConfig() = default;
         ProbeConfig(bool enabled, const ProbePointId &probePoint, ProbePurpose purpose)
             : enabled(enabled), probePoint(probePoint), purpose(purpose)
         {
@@ -121,6 +123,9 @@ public:
                    purpose == other.purpose;
         }
     };
+
+    /** Maps endpoint IDs to probe configurations */
+    using SessionProbes = std::vector<ProbeConfig>;
 
     Prober() = default;
 
@@ -148,7 +153,7 @@ public:
      *
      * @throw Prober::Exception
      */
-    virtual void setSessionProbes(const std::vector<ProbeConfig> probes) = 0;
+    virtual void setSessionProbes(const SessionProbes probes) = 0;
 
     /** Get probes for the current/future session.
      *
@@ -156,7 +161,7 @@ public:
      *
      * @throw Prober::Exception
      */
-    virtual std::vector<ProbeConfig> getSessionProbes() = 0;
+    virtual SessionProbes getSessionProbes() = 0;
 
     /**
      * Return the next extraction block data
