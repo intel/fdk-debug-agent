@@ -32,14 +32,6 @@
 #include <algorithm>
 #include <fstream>
 
-/** Unfortunately <Poco/Net/HTTPRequest.h> defines the "min" macro, which makes fail the
- * std::min function
- * So undefining it.
- */
-#ifdef min
-#undef min
-#endif
-
 using namespace Poco::Net;
 
 namespace debug_agent

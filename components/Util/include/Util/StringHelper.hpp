@@ -26,13 +26,6 @@
 #include <cassert>
 #include <cctype>
 
-/* The visual studio toolchain define the "min" macro, which makes fail the call to
-* std::min(). So undefining it.
-*/
-#ifdef min
-#undef min
-#endif
-
 namespace debug_agent
 {
 namespace util

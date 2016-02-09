@@ -31,10 +31,6 @@
 #include <cassert>
 #include <iostream>
 
-/** Unfortunetely windows.h define "min" as macro, making fail the call std::min()
- * So undefining it */
-#undef min
-
 namespace debug_agent
 {
 namespace cavs

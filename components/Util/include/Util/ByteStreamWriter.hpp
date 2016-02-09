@@ -30,13 +30,6 @@
 #include <inttypes.h>
 #include <type_traits>
 
-/* The visual studio toolchain define the "max" macro, which makes fail the call to
- * std::numeric_limits<SizeType>::max(). So undefining it.
- */
-#ifdef max
-#undef max
-#endif
-
 namespace debug_agent
 {
 namespace util
