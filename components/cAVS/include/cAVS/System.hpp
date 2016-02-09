@@ -111,9 +111,14 @@ public:
     const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const noexcept;
 
     /**
-    * Find module entry
+    * Find module entry by its id
     */
     const dsp_fw::ModuleEntry &findModuleEntry(uint16_t moduleId) const;
+
+    /**
+    * Find module entry by its name
+    */
+    const dsp_fw::ModuleEntry &findModuleEntry(const std::string &name) const;
 
     /**
      * Get firmware configuration

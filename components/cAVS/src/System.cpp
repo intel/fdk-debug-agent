@@ -22,6 +22,7 @@
 #include "cAVS/System.hpp"
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/LogStreamer.hpp"
+#include "Util/StringHelper.hpp"
 #include <algorithm>
 #include <utility>
 #include <set>
@@ -102,7 +103,16 @@ const dsp_fw::ModuleEntry &System::findModuleEntry(uint16_t moduleId) const
         if (module.module_id == moduleId)
             return module;
     }
-    throw Exception("moduleId: " + std::to_string(moduleId) + " not found");
+    throw Exception("module with id '" + std::to_string(moduleId) + "' not found");
+}
+
+const dsp_fw::ModuleEntry &System::findModuleEntry(const std::string &name) const
+{
+    for (auto &module : mModuleEntries) {
+        if (module.getName() == name)
+            return module;
+    }
+    throw Exception("module with name  '" + name + "' not found");
 }
 
 const dsp_fw::FwConfig &System::getFwConfig() const noexcept
