@@ -50,7 +50,9 @@ public:
 
     static const std::string subsystemName;
     static const std::string logServiceTypeName;
+    static const std::size_t logServiceEndPointCount;
     static const std::string probeServiceTypeName;
+    static const std::size_t probeServiceEndPointCount;
     static const std::string modulePrefix;
 
 protected:
@@ -89,12 +91,6 @@ protected:
      * Currently it can exist only one instance of a service type, so serviceId="0"
      */
     static const std::string serviceId;
-
-    /* cavs log service type */
-    static const std::size_t logServiceEndPointCount;
-
-    /* cavs probe */
-    static const std::size_t probeServiceEndPointCount;
 
     /* list of static services types */
     static const std::vector<std::string> staticServiceTypes;

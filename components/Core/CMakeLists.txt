@@ -30,7 +30,8 @@ set(SRCS
     src/DebugResources.cpp
     src/LogServiceParameterApplier.cpp
     src/ModuleParameterApplier.cpp
-    src/ProbeServiceParameterApplier.cpp)
+    src/ProbeServiceParameterApplier.cpp
+    src/ProbeEndPointParameterApplier.cpp)
 
 set(INCS
     include/Core/DebugAgent.hpp
@@ -49,6 +50,7 @@ set(INCS
     include/Core/ModuleParameterApplier.hpp
     include/Core/ProbeServiceParameterApplier.hpp
     include/Core/EndPointParameterApplier.hpp
+    include/Core/ProbeEndPointParameterApplier.hpp
 
 # private headers
     src/FdkToolMockGenerator.hpp
