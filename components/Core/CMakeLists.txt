@@ -48,6 +48,7 @@ set(INCS
     include/Core/LogServiceParameterApplier.hpp
     include/Core/ModuleParameterApplier.hpp
     include/Core/ProbeServiceParameterApplier.hpp
+    include/Core/EndPointParameterApplier.hpp
 
 # private headers
     src/FdkToolMockGenerator.hpp
