@@ -56,7 +56,7 @@ public:
      * @tparam T the type of the value to write
      */
     template <typename T>
-    typename std::enable_if<IsSimpleSerializableType<T>::value>::type write(const T &value)
+    typename std::enable_if_t<IsSimpleSerializableType<T>::value> write(const T &value)
     {
         writeUsingMemoryCopy(value);
     }
@@ -68,7 +68,7 @@ public:
      * @tparam T the type of the value to write
      */
     template <typename T>
-    typename std::enable_if<IsEnumSerializableType<T>::value>::type write(const T &value)
+    typename std::enable_if_t<IsEnumSerializableType<T>::value> write(const T &value)
     {
         static_assert(sizeof(T) <= sizeof(EnumEncodingType), "Enum type size is too big");
 
@@ -84,7 +84,7 @@ public:
      * @tparam T the type of the value to read
      */
     template <typename T>
-    typename std::enable_if<IsArraySerializableType<T>::value>::type write(const T &value)
+    typename std::enable_if_t<IsArraySerializableType<T>::value> write(const T &value)
     {
         for (const auto &item : value) {
             write(item);
@@ -98,7 +98,7 @@ public:
      * @tparam T the type of the value to write, shall implement the toStream() implicit interface.
      */
     template <typename T>
-    typename std::enable_if<IsCompoundSerializableType<T>::value>::type write(const T &value)
+    typename std::enable_if_t<IsCompoundSerializableType<T>::value> write(const T &value)
     {
         value.toStream(*this);
     }

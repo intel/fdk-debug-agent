@@ -55,7 +55,7 @@ public:
      * @tparam T the type of the value to read
      */
     template <typename T>
-    typename std::enable_if<IsSimpleSerializableType<T>::value>::type read(T &value)
+    typename std::enable_if_t<IsSimpleSerializableType<T>::value> read(T &value)
     {
         readUsingMemoryCopy(value);
     }
@@ -67,7 +67,7 @@ public:
      * @tparam T the type of the value to read
      */
     template <typename T>
-    typename std::enable_if<IsEnumSerializableType<T>::value>::type read(T &value)
+    typename std::enable_if_t<IsEnumSerializableType<T>::value> read(T &value)
     {
         static_assert(sizeof(T) <= sizeof(EnumEncodingType), "Enum type size is too big");
         EnumEncodingType encoded;
@@ -83,7 +83,7 @@ public:
      * @tparam T the type of the value to read
      */
     template <typename T>
-    typename std::enable_if<IsArraySerializableType<T>::value>::type read(T &value)
+    typename std::enable_if_t<IsArraySerializableType<T>::value> read(T &value)
     {
         for (auto &item : value) {
             read(item);
@@ -98,7 +98,7 @@ public:
      *           interface.
      */
     template <typename T>
-    typename std::enable_if<IsCompoundSerializableType<T>::value>::type read(T &value)
+    typename std::enable_if_t<IsCompoundSerializableType<T>::value> read(T &value)
     {
         value.fromStream(*this);
     }
