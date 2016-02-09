@@ -66,6 +66,17 @@ public:
         Active     /// Probing is running
     };
 
+    static const util::EnumHelper<State> &stateHelper()
+    {
+        static const util::EnumHelper<State> helper({
+            {State::Idle, "Idle"},
+            {State::Owned, "Owned"},
+            {State::Allocated, "Allocated"},
+            {State::Active, "Active"},
+        });
+        return helper;
+    }
+
     enum class ProbeType
     {
         Input,
@@ -73,12 +84,32 @@ public:
         Internal
     };
 
+    static const util::EnumHelper<ProbeType> &probeTypeHelper()
+    {
+        static const util::EnumHelper<ProbeType> helper({
+            {ProbeType::Input, "Input"},
+            {ProbeType::Output, "Output"},
+            {ProbeType::Internal, "Internal"},
+        });
+        return helper;
+    }
+
     enum class ProbePurpose
     {
         Inject,
         Extract,
         InjectReextract
     };
+
+    static const util::EnumHelper<ProbePurpose> &probePurposeHelper()
+    {
+        static const util::EnumHelper<ProbePurpose> helper({
+            {ProbePurpose::Inject, "Inject"},
+            {ProbePurpose::Extract, "Extract"},
+            {ProbePurpose::InjectReextract, "InjectReextract"},
+        });
+        return helper;
+    }
 
     /** Identify a probe point into the topology */
     struct ProbePointId
