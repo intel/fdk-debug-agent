@@ -88,8 +88,7 @@ std::string BaseModelConverter::findModuleEntryName(uint16_t moduleId)
     /** According to the SwAS, module type name is "module-<module name>", for instance
      * "module-aec".
      */
-    return modulePrefix +
-           util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name));
+    return modulePrefix + entry.getName();
 }
 
 std::string BaseModelConverter::findGatewayTypeName(const dsp_fw::ConnectorNodeId &connectorId)

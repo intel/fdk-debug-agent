@@ -26,6 +26,7 @@
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "Util/StructureChangeTracking.hpp"
+#include "Util/StringHelper.hpp"
 
 namespace debug_agent
 {
@@ -209,6 +210,11 @@ public:
         for (std::size_t i = 0; i < segmentCount; i++) {
             writer.write(segments[i]);
         }
+    }
+
+    std::string getName() const
+    {
+        return util::StringHelper::getStringFromFixedSizeArray(name, sizeof(name));
     }
 };
 

@@ -129,10 +129,7 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
         html.beginRow();
 
         html.cell(entry.module_id);
-
-        std::string name(
-            util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name)));
-        html.cell(name);
+        html.cell(entry.getName());
 
         util::Uuid uuid;
         uuid.fromOtherUuidType(entry.uuid);
@@ -360,12 +357,9 @@ void TopologyDebugResource::dumpModuleInstances(
 
         const dsp_fw::ModuleEntry &moduleEntry = mSystem.findModuleEntry(module.id.moduleId);
 
-        std::string moduleTypeName =
-            StringHelper::getStringFromFixedSizeArray(moduleEntry.name, sizeof(moduleEntry.name));
-
         html.cell(module.id.toString());
         html.cell(module.id.moduleId);
-        html.cell(moduleTypeName);
+        html.cell(moduleEntry.getName());
         html.cell(module.id.instanceId);
         html.cell(module.dp_queue_type);
         html.cell(module.queue_alignment);

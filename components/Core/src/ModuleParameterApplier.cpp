@@ -48,8 +48,7 @@ ModuleParameterApplier::ModuleParameterApplier(
     /* Building (fdk module name, cavs module name) map */
     for (auto &module : mSystem.getModuleEntries()) {
 
-        std::string cavsModuleName =
-            util::StringHelper::getStringFromFixedSizeArray(module.name, sizeof(module.name));
+        std::string cavsModuleName = module.getName();
 
         std::string fdkModuleName = BaseModelConverter::subsystemName + "." +
                                     BaseModelConverter::modulePrefix + cavsModuleName;
@@ -280,8 +279,7 @@ uint16_t ModuleParameterApplier::getModuleTypeId(const std::string &cavsModuleTy
 {
     const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
     for (auto &entry : entries) {
-        if (cavsModuleType ==
-            util::StringHelper::getStringFromFixedSizeArray(entry.name, sizeof(entry.name))) {
+        if (cavsModuleType == entry.getName()) {
             return entry.module_id;
         }
     }
