@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <utility>
 #include <set>
+#include <map>
 
 namespace debug_agent
 {
@@ -33,7 +34,8 @@ namespace cavs
 {
 
 System::System(const DriverFactory &driverFactory)
-    : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig()
+    : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
+      mProbeService(mDriver->getProber())
 {
     if (mDriver == nullptr) {
 
@@ -257,8 +259,11 @@ void System::getTopology(Topology &topology)
 
 void System::setProberState(bool active)
 {
-    /* @todo */
-    throw Exception("not implemented");
+    try {
+        mProbeService.setState(active);
+    } catch (ProbeService::Exception &e) {
+        throw Exception("Cannot set probe service state: " + std::string(e.what()));
+    }
 }
 
 /**
@@ -266,20 +271,29 @@ void System::setProberState(bool active)
 */
 bool System::isProberActive()
 {
-    /* @todo */
-    throw Exception("not implemented");
+    try {
+        return mProbeService.isActive();
+    } catch (ProbeService::Exception &e) {
+        throw Exception("Cannot get probe service state: " + std::string(e.what()));
+    }
 }
 
-void System::setProbeConfiguration(ProbeId id, const Prober::ProbeConfig &probes)
+void System::setProbeConfiguration(ProbeId id, const Prober::ProbeConfig &probe)
 {
-    /* @todo */
-    throw Exception("not implemented");
+    try {
+        return mProbeService.setProbeConfig(id, probe);
+    } catch (ProbeService::Exception &e) {
+        throw Exception("Cannot set probe sconfig: " + std::string(e.what()));
+    }
 }
 
 Prober::ProbeConfig System::getProbeConfiguration(ProbeId id)
 {
-    /* @todo */
-    throw Exception("not implemented");
+    try {
+        return mProbeService.getProbeConfig(id);
+    } catch (ProbeService::Exception &e) {
+        throw Exception("Cannot get probe config: " + std::string(e.what()));
+    }
 }
 }
 }

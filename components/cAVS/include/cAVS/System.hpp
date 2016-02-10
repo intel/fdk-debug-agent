@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -25,6 +25,7 @@
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/Topology.hpp"
 #include "cAVS/Prober.hpp"
+#include "cAVS/ProbeService.hpp"
 #include "Util/WrappedRaw.hpp"
 #include <memory>
 #include <stdexcept>
@@ -35,16 +36,6 @@ namespace debug_agent
 {
 namespace cavs
 {
-
-namespace detail
-{
-struct ProbeIdTrait
-{
-    using RawType = uint32_t;
-};
-}
-
-using ProbeId = util::WrappedRaw<detail::ProbeIdTrait>;
 
 /**
  * The cAVS System
@@ -200,6 +191,8 @@ private:
 
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;
+
+    ProbeService mProbeService;
 };
 }
 }
