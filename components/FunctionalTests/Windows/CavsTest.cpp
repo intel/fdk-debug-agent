@@ -31,6 +31,7 @@
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/StubbedWppClientFactory.hpp"
+#include "cAVS/Windows/EventHandle.hpp"
 #include "catch.hpp"
 #include <chrono>
 #include <thread>
@@ -231,7 +232,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::EventHandle());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -314,7 +316,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::EventHandle());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -361,7 +364,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::EventHandle());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -402,7 +406,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: A refresh error erases the previous 
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::EventHandle());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -462,7 +467,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::EventHandle());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -494,7 +500,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::EventHandle());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -560,7 +567,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::EventHandle());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -618,7 +626,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::move(std::make_unique<windows::StubbedWppClientFactory>()));
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::EventHandle());
 
     /* Creating and starting the debug agent in another thread. It can be stopped using
     * a condition variable*/

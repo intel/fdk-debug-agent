@@ -26,6 +26,7 @@
 #include "cAVS/Windows/IoCtlDescription.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "cAVS/Windows/EventHandle.hpp"
 
 namespace debug_agent
 {
@@ -37,7 +38,10 @@ namespace windows
 class Prober : public cavs::Prober
 {
 public:
-    Prober(Device &device) : mDevice(device) {}
+    Prober(Device &device, const EventHandle &probeEvent)
+        : mDevice(device), mProbeEventHandle(probeEvent)
+    {
+    }
 
     void setState(State state) override;
     State getState() override;
@@ -83,6 +87,7 @@ private:
     /** @} */
 
     Device &mDevice;
+    const EventHandle &mProbeEventHandle;
 };
 }
 }

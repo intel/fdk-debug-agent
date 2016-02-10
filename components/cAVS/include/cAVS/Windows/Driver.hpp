@@ -22,6 +22,7 @@
 #pragma once
 
 #include "cAVS/Driver.hpp"
+#include "cAVS/Windows/EventHandle.hpp"
 #include "cAVS/Windows/Logger.hpp"
 #include "cAVS/Windows/ModuleHandler.hpp"
 #include "cAVS/Windows/Prober.hpp"
@@ -42,9 +43,11 @@ namespace windows
 class Driver final : public cavs::Driver
 {
 public:
-    Driver(std::unique_ptr<Device> device, std::unique_ptr<WppClientFactory> wppClientFactory)
+    Driver(std::unique_ptr<Device> device, std::unique_ptr<WppClientFactory> wppClientFactory,
+           EventHandle &probeEvent)
         : mDevice(std::move(device)), mWppClientFactory(std::move(wppClientFactory)),
-          mLogger(*mDevice, *mWppClientFactory), mModuleHandler(*mDevice), mProber(*mDevice)
+          mProbeEvent(std::move(probeEvent)), mLogger(*mDevice, *mWppClientFactory),
+          mModuleHandler(*mDevice), mProber(*mDevice, mProbeEvent)
     {
     }
 
@@ -55,6 +58,7 @@ public:
 private:
     std::unique_ptr<Device> mDevice;
     std::unique_ptr<WppClientFactory> mWppClientFactory;
+    EventHandle mProbeEvent;
     Logger mLogger;
     ModuleHandler mModuleHandler;
     Prober mProber;

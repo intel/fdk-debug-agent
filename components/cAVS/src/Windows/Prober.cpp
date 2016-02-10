@@ -153,8 +153,7 @@ void Prober::setSessionProbes(const SessionProbes probes)
     }
 
     driver::ProbePointConfiguration toDriver;
-    // TODO: create the extraction event handler
-    toDriver.extractionBufferCompletionEventHandle = nullptr;
+    toDriver.extractionBufferCompletionEventHandle = mProbeEventHandle.get();
     std::copy_n(connections.data(), driver::maxProbes, toDriver.probePointConnection);
 
     ioctl<SetProbePointConfiguration>(toDriver);

@@ -24,6 +24,7 @@
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "cAVS/Windows/MockedDeviceCatchHelper.hpp"
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
+#include "cAVS/Windows/EventHandle.hpp"
 #include "cAVS/Windows/Prober.hpp"
 #include <catch.hpp>
 
@@ -36,6 +37,7 @@ using Me = windows::Prober;
 
 TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
 {
+    EventHandle probeEvent;
     MockedDeviceCommands commands(device);
 
     // Check that all states are correctly converted
@@ -45,7 +47,7 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, state);
     }
 
-    Me prober(device);
+    Me prober(device, probeEvent);
 
     for (auto state :
          {Me::State::Idle, Me::State::Owned, Me::State::Allocated, Me::State::Active}) {
@@ -57,10 +59,11 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
 }
 TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
 {
+    EventHandle probeEvent;
     MockedDeviceCommands commands(device);
 
     driver::ProbePointConfiguration sampleDriverConfig = {
-        nullptr,
+        probeEvent.get(),
         {{true, {0, 0, 0, 0}, driver::ProbePurpose::Inject, nullptr},
          {true, {4, 3, 2, 1}, driver::ProbePurpose::Extract, nullptr},
          {true, {0xffff, 0xff, 2, 0x3f}, driver::ProbePurpose::InjectReextract, nullptr},
@@ -82,7 +85,7 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
     commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, sampleDriverConfig);
     commands.addGetProbeConfigurationCommand(true, STATUS_SUCCESS, sampleDriverConfig);
 
-    Me prober(device);
+    Me prober(device, probeEvent);
 
     CHECK_NOTHROW(prober.setSessionProbes(sampleCavsConfig));
     CHECK_NOTHROW(prober.getSessionProbes() == sampleCavsConfig);

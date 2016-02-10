@@ -22,6 +22,7 @@
 
 #include "cAVS/Windows/DeviceInjectionDriverFactory.hpp"
 #include "cAVS/Windows/Driver.hpp"
+#include "Util/AssertAlways.hpp"
 
 namespace debug_agent
 {
@@ -39,11 +40,13 @@ std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
                         "Please call newDriver() once.");
     }
 
-    assert(mInjectedWppClientFactory != nullptr);
+    ASSERT_ALWAYS(mInjectedWppClientFactory != nullptr);
+    ASSERT_ALWAYS(mInjectedProbeEventHandle.get() != nullptr);
 
     /* After this call mInjectedDevice will be null */
     return std::make_unique<windows::Driver>(std::move(mInjectedDevice),
-                                             std::move(mInjectedWppClientFactory));
+                                             std::move(mInjectedWppClientFactory),
+                                             mInjectedProbeEventHandle);
 }
 }
 }

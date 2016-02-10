@@ -21,6 +21,7 @@
 */
 #include "cAVS/SystemDriverFactory.hpp"
 #include "cAVS/Windows/Driver.hpp"
+#include "cAVS/Windows/LastError.hpp"
 #include "cAVS/Windows/SystemDevice.hpp"
 #include "cAVS/Windows/DeviceIdFinder.hpp"
 #include "cAVS/Windows/RealTimeWppClientFactory.hpp"
@@ -63,8 +64,16 @@ std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
         wppClientFactory = std::make_unique<windows::RealTimeWppClientFactory>();
     }
 
-    /* Creating Driver interface */
-    return std::make_unique<windows::Driver>(std::move(device), std::move(wppClientFactory));
+    try {
+        /* Creating Probe Event handle*/
+        windows::EventHandle probeEventHandle;
+
+        /* Creating Driver interface */
+        return std::make_unique<windows::Driver>(std::move(device), std::move(wppClientFactory),
+                                                 probeEventHandle);
+    } catch (windows::EventHandle::Exception &e) {
+        throw Exception("Cannot create probe event handle : " + std::string(e.what()));
+    }
 }
 }
 }
