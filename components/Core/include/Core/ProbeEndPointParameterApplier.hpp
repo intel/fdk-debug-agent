@@ -44,6 +44,10 @@ private:
     static std::string getCavsModuleNameFromFdk(const std::string &fdkModuleType);
     static std::string getFdkModuleNameFromCavs(const std::string &cavsModuleType);
 
+    /** Set unused Prober::ProbeConfig structure members to a valid value for lowest layers
+     * when the "enabled" member is false */
+    static void setUnusedMembers(cavs::Prober::ProbeConfig &config);
+
     using Base = EndPointParameterApplier;
     cavs::System &mSystem;
 };
