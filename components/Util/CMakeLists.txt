@@ -37,6 +37,7 @@ set(INCS
     include/Util/StringHelper.hpp
     include/Util/StructureChangeTracking.hpp
     include/Util/TypedBuffer.hpp
+    include/Util/Cxx17Backports.hpp
     include/Util/Uuid.hpp
     include/Util/WrappedRaw.hpp
     include/Util/convert.hpp
