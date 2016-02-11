@@ -21,6 +21,7 @@
 */
 #pragma once
 
+#include "cAVS/Linux/Device.hpp"
 #include <cAVS/Logger.hpp>
 
 namespace debug_agent
@@ -36,6 +37,8 @@ namespace linux
 class Logger final : public cavs::Logger
 {
 public:
+    Logger(Device &device) : mDevice(device) {}
+
     void setParameters(const Parameters &parameters) override;
 
     Parameters getParameters() override;
@@ -50,6 +53,8 @@ private:
      * @todo remove it!
      */
     Parameters mDriverEmulationParameter;
+
+    Device &mDevice;
 };
 }
 }

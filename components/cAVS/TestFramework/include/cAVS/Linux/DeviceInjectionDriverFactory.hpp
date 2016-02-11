@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -19,24 +19,39 @@
 *
 ********************************************************************************
 */
-#include <cAVS/SystemDriverFactory.hpp>
-#include <cAVS/Linux/Driver.hpp>
-#include <cAVS/Linux/SystemDevice.hpp>
+
+#pragma once
+
+#include "cAVS/Linux/Device.hpp"
+#include "cAVS/DriverFactory.hpp"
+#include <memory>
 
 namespace debug_agent
 {
 namespace cavs
 {
-
-std::unique_ptr<Driver> SystemDriverFactory::newDriver() const
+namespace linux
 {
-    std::unique_ptr<linux::Device> device;
-    try {
-        device = std::make_unique<linux::SystemDevice>();
-    } catch (linux::Device::Exception &e) {
-        throw Exception("Cannot create device: " + std::string(e.what()));
+
+/** This driver factory injects a device and a wpp client factory into the created
+ * driver instance */
+class DeviceInjectionDriverFactory : public DriverFactory
+{
+public:
+    DeviceInjectionDriverFactory(std::unique_ptr<Device> injectedDevice)
+        : mInjectedDevice(std::move(injectedDevice))
+    {
     }
-    return std::make_unique<linux::Driver>(std::move(device));
+
+    std::unique_ptr<cavs::Driver> newDriver() const override;
+
+private:
+    /** newDriver() is a const method because the factory doesn't suppose to be changed when
+     * an instance is created.
+     * But in the DeviceInjectionDriverFactory case, the following unique pointer will loose its
+     * content when newDriver() is called, so declaring it mutable */
+    mutable std::unique_ptr<Device> mInjectedDevice;
+};
 }
 }
 }

@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -22,6 +22,7 @@
 #pragma once
 
 #include "cAVS/Driver.hpp"
+#include "cAVS/Linux/Device.hpp"
 #include "cAVS/DspFw/FwConfig.hpp"
 #include "cAVS/DspFw/HwConfig.hpp"
 #include "cAVS/Linux/Logger.hpp"
@@ -39,6 +40,8 @@ namespace linux
 class Driver final : public cavs::Driver
 {
 public:
+    Driver(std::unique_ptr<Device> device) : mDevice(std::move(device)), mLogger(*mDevice) {}
+
     cavs::Logger &getLogger() override { return mLogger; }
     cavs::ModuleHandler &getModuleHandler() override { return mModuleHandler; }
     cavs::Prober &getProber() override { return mProber; }
@@ -87,6 +90,7 @@ private:
     Logger mLogger;
     DummyModuleHandler mModuleHandler;
     DummyProber mProber;
+    std::unique_ptr<Device> mDevice;
 };
 }
 }

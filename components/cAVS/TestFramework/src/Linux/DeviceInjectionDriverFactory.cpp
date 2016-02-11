@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -19,24 +19,28 @@
 *
 ********************************************************************************
 */
-#include <cAVS/SystemDriverFactory.hpp>
-#include <cAVS/Linux/Driver.hpp>
-#include <cAVS/Linux/SystemDevice.hpp>
+
+#include "cAVS/Linux/DeviceInjectionDriverFactory.hpp"
+#include "cAVS/Linux/Driver.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
-
-std::unique_ptr<Driver> SystemDriverFactory::newDriver() const
+namespace linux
 {
-    std::unique_ptr<linux::Device> device;
-    try {
-        device = std::make_unique<linux::SystemDevice>();
-    } catch (linux::Device::Exception &e) {
-        throw Exception("Cannot create device: " + std::string(e.what()));
+
+std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
+{
+    if (mInjectedDevice == nullptr) {
+        /* mInjectedDevice is null -> the cause is that newDriver() has already been called,
+         * leading to transfert mInjectedDevice unique pointer content, setting it to null */
+        throw Exception("The injected device has already been used. "
+                        "Please call newDriver() once.");
     }
-    return std::make_unique<linux::Driver>(std::move(device));
+    /* After this call mInjectedDevice will be null */
+    return std::make_unique<linux::Driver>(std::move(mInjectedDevice));
+}
 }
 }
 }
