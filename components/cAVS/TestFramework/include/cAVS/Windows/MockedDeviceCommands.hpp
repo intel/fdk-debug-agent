@@ -366,16 +366,16 @@ private:
                                       NTSTATUS returnedDriverStatus,
                                       dsp_fw::IxcStatus returnedFirmwareStatus);
 
-    template <typename DriverStructure>
+    template <driver::IOCTL_FEATURE feature, typename DriverStructure>
     void addTinyGetCommand(const DriverStructure &returnedDriverStruct, bool ioctlSuccess,
                            NTSTATUS returnedDriverStatus);
 
-    template <typename DriverStructure>
+    template <driver::IOCTL_FEATURE feature, typename DriverStructure>
     void addTinySetCommand(const DriverStructure &inputDriverStruct, bool ioctlSuccess,
                            NTSTATUS returnedDriverStatus);
 
     /* Performs a TinyGet/Set command with a supplied driver type passed as template parameter */
-    template <typename DriverStructure>
+    template <driver::IOCTL_FEATURE feature, typename DriverStructure>
     void addTinyCommand(Command command, const DriverStructure &inputDriverStr,
                         const DriverStructure &outputDriverStr, bool ioctlSuccess,
                         NTSTATUS returnedDriverStatus);

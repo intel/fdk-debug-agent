@@ -114,7 +114,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
                               returnedFirmwareStatus);
 }
 
-template <typename DriverStructure>
+template <driver::IOCTL_FEATURE feature, typename DriverStructure>
 void MockedDeviceCommands::addTinyCommand(Command command, const DriverStructure &inputDriverStruct,
                                           const DriverStructure &outputDriverStruct,
                                           bool ioctlSuccess, NTSTATUS returnedDriverStatus)
@@ -127,7 +127,7 @@ void MockedDeviceCommands::addTinyCommand(Command command, const DriverStructure
     ULONG bodySize = static_cast<ULONG>(expectedBodyWriter.getBuffer().size());
 
     /* Creating header */
-    driver::Intc_App_Cmd_Header header(static_cast<ULONG>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
+    driver::Intc_App_Cmd_Header header(static_cast<ULONG>(feature),
                                        driver::logParametersCommandparameterId, bodySize);
 
     /* Creating ioctl expected buffer containing header + body */
@@ -165,7 +165,7 @@ void MockedDeviceCommands::addTinyCommand(Command command, const DriverStructure
                                     &expectedWriter.getBuffer(), &returnedWriter.getBuffer());
 }
 
-template <typename DriverStructure>
+template <driver::IOCTL_FEATURE feature, typename DriverStructure>
 void MockedDeviceCommands::addTinyGetCommand(const DriverStructure &returnedDriverStruct,
                                              bool ioctlSuccess, NTSTATUS returnedDriverStatus)
 {
@@ -174,18 +174,18 @@ void MockedDeviceCommands::addTinyGetCommand(const DriverStructure &returnedDriv
     /* By convention unset memory areas passed through ioctl are filled with 0xFF */
     memset(&inputDriverStruct, 0xFF, sizeof(DriverStructure));
 
-    addTinyCommand(Command::Get, inputDriverStruct, returnedDriverStruct, ioctlSuccess,
-                   returnedDriverStatus);
+    addTinyCommand<feature>(Command::Get, inputDriverStruct, returnedDriverStruct, ioctlSuccess,
+                            returnedDriverStatus);
 }
 
-template <typename DriverStructure>
+template <driver::IOCTL_FEATURE feature, typename DriverStructure>
 void MockedDeviceCommands::addTinySetCommand(const DriverStructure &inputDriverStruct,
                                              bool ioctlSuccess, NTSTATUS returnedDriverStatus)
 {
     DriverStructure returnedDriverStructure(inputDriverStruct);
 
-    addTinyCommand(Command::Set, inputDriverStruct, returnedDriverStructure, ioctlSuccess,
-                   returnedDriverStatus);
+    addTinyCommand<feature>(Command::Set, inputDriverStruct, returnedDriverStructure, ioctlSuccess,
+                            returnedDriverStatus);
 }
 
 void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
@@ -238,39 +238,45 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(
 void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                       const driver::IoctlFwLogsState &returnedState)
 {
-    addTinyGetCommand(returnedState, ioctlSuccess, returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_LOGS>(returnedState, ioctlSuccess,
+                                                              returnedStatus);
 }
 
 void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                       const driver::IoctlFwLogsState &expectedState)
 {
-    addTinySetCommand(expectedState, ioctlSuccess, returnedStatus);
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_FW_LOGS>(expectedState, ioctlSuccess,
+                                                              returnedStatus);
 }
 
 void MockedDeviceCommands::addGetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                    driver::ProbeState returnedState)
 {
-    addTinyGetCommand(returnedState, ioctlSuccess, returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE>(returnedState, ioctlSuccess,
+                                                                    returnedStatus);
 }
 
 void MockedDeviceCommands::addSetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                    driver::ProbeState expectedState)
 {
-    addTinySetCommand(expectedState, ioctlSuccess, returnedStatus);
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE>(expectedState, ioctlSuccess,
+                                                                    returnedStatus);
 }
 
 void MockedDeviceCommands::addGetProbeConfigurationCommand(
     bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::ProbePointConfiguration &returnedConfiguration)
 {
-    addTinyGetCommand(returnedConfiguration, ioctlSuccess, returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE>(returnedConfiguration,
+                                                                    ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetProbeConfigurationCommand(
     bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::ProbePointConfiguration &expectedConfiguration)
 {
-    addTinySetCommand(expectedConfiguration, ioctlSuccess, returnedStatus);
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE>(expectedConfiguration,
+                                                                    ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addGetPipelineListCommand(
