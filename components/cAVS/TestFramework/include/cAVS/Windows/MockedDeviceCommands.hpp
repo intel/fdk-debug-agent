@@ -32,6 +32,7 @@
 #include "cAVS/DspFw/Infrastructure.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
+#include "cAVS/Windows/IoCtlDescription.hpp"
 #include "Util/Buffer.hpp"
 #include <vector>
 
@@ -366,18 +367,19 @@ private:
                                       NTSTATUS returnedDriverStatus,
                                       dsp_fw::IxcStatus returnedFirmwareStatus);
 
-    template <driver::IOCTL_FEATURE feature, typename DriverStructure>
+    template <driver::IOCTL_FEATURE feature, uint32_t parameter, typename DriverStructure>
     void addTinyGetCommand(const DriverStructure &returnedDriverStruct, bool ioctlSuccess,
                            NTSTATUS returnedDriverStatus);
 
-    template <driver::IOCTL_FEATURE feature, typename DriverStructure>
+    template <driver::IOCTL_FEATURE feature, uint32_t parameter, typename DriverStructure>
     void addTinySetCommand(const DriverStructure &inputDriverStruct, bool ioctlSuccess,
                            NTSTATUS returnedDriverStatus);
 
-    /* Performs a TinyGet/Set command with a supplied driver type passed as template parameter */
-    template <driver::IOCTL_FEATURE feature, typename DriverStructure>
-    void addTinyCommand(Command command, const DriverStructure &inputDriverStr,
-                        const DriverStructure &outputDriverStr, bool ioctlSuccess,
+    /* Performs a TinyGet/Set command with a supplied ioctl description passed as template parameter
+     */
+    template <class IoCtlDescription>
+    void addTinyCommand(typename const IoCtlDescription::Data &inputDriverStr,
+                        typename const IoCtlDescription::Data &outputDriverStr, bool ioctlSuccess,
                         NTSTATUS returnedDriverStatus);
 
     MockedDevice &mDevice;

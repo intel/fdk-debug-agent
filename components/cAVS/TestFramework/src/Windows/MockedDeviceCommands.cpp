@@ -114,11 +114,15 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
                               returnedFirmwareStatus);
 }
 
-template <driver::IOCTL_FEATURE feature, typename DriverStructure>
-void MockedDeviceCommands::addTinyCommand(Command command, const DriverStructure &inputDriverStruct,
-                                          const DriverStructure &outputDriverStruct,
+template <class IoCtlDescription>
+void MockedDeviceCommands::addTinyCommand(typename const IoCtlDescription::Data &inputDriverStruct,
+                                          typename const IoCtlDescription::Data &outputDriverStruct,
                                           bool ioctlSuccess, NTSTATUS returnedDriverStatus)
 {
+    static_assert(IoCtlDescription::type == driver::IoCtlType::TinyGet ||
+                      IoCtlDescription::type == driver::IoCtlType::TinySet,
+                  "For now, MockedDeviceCommands only supports Tiny ioctls");
+
     /* First creating expected body to know its serialized size */
     util::ByteStreamWriter expectedBodyWriter;
     driver::Intc_App_Cmd_Body body;
@@ -127,16 +131,16 @@ void MockedDeviceCommands::addTinyCommand(Command command, const DriverStructure
     ULONG bodySize = static_cast<ULONG>(expectedBodyWriter.getBuffer().size());
 
     /* Creating header */
-    driver::Intc_App_Cmd_Header header(static_cast<ULONG>(feature),
-                                       driver::logParametersCommandparameterId, bodySize);
+    driver::Intc_App_Cmd_Header header(IoCtlDescription::feature, IoCtlDescription::id, bodySize);
 
     /* Creating ioctl expected buffer containing header + body */
     util::ByteStreamWriter expectedWriter;
     expectedWriter.write(header);
     expectedWriter.writeRawBuffer(expectedBodyWriter.getBuffer());
 
-    uint32_t ioctlCode = command == Command::Get ? IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET
-                                                 : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
+    uint32_t ioctlCode = IoCtlDescription::type == driver::IoCtlType::TinyGet
+                             ? IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET
+                             : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
 
     if (!ioctlSuccess) {
         mDevice.addFailedIoctlEntry(ioctlCode, &expectedWriter.getBuffer(),
@@ -165,7 +169,7 @@ void MockedDeviceCommands::addTinyCommand(Command command, const DriverStructure
                                     &expectedWriter.getBuffer(), &returnedWriter.getBuffer());
 }
 
-template <driver::IOCTL_FEATURE feature, typename DriverStructure>
+template <driver::IOCTL_FEATURE feature, uint32_t parameter, typename DriverStructure>
 void MockedDeviceCommands::addTinyGetCommand(const DriverStructure &returnedDriverStruct,
                                              bool ioctlSuccess, NTSTATUS returnedDriverStatus)
 {
@@ -174,18 +178,19 @@ void MockedDeviceCommands::addTinyGetCommand(const DriverStructure &returnedDriv
     /* By convention unset memory areas passed through ioctl are filled with 0xFF */
     memset(&inputDriverStruct, 0xFF, sizeof(DriverStructure));
 
-    addTinyCommand<feature>(Command::Get, inputDriverStruct, returnedDriverStruct, ioctlSuccess,
-                            returnedDriverStatus);
+    using T = IoCtlDescription<driver::IoCtlType::TinyGet, feature, parameter, DriverStructure>;
+    addTinyCommand<T>(inputDriverStruct, returnedDriverStruct, ioctlSuccess, returnedDriverStatus);
 }
 
-template <driver::IOCTL_FEATURE feature, typename DriverStructure>
+template <driver::IOCTL_FEATURE feature, uint32_t parameter, typename DriverStructure>
 void MockedDeviceCommands::addTinySetCommand(const DriverStructure &inputDriverStruct,
                                              bool ioctlSuccess, NTSTATUS returnedDriverStatus)
 {
     DriverStructure returnedDriverStructure(inputDriverStruct);
 
-    addTinyCommand<feature>(Command::Set, inputDriverStruct, returnedDriverStructure, ioctlSuccess,
-                            returnedDriverStatus);
+    using T = IoCtlDescription<driver::IoCtlType::TinySet, feature, parameter, DriverStructure>;
+    addTinyCommand<T>(inputDriverStruct, returnedDriverStructure, ioctlSuccess,
+                      returnedDriverStatus);
 }
 
 void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
@@ -238,45 +243,49 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(
 void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                       const driver::IoctlFwLogsState &returnedState)
 {
-    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_LOGS>(returnedState, ioctlSuccess,
-                                                              returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_LOGS,
+                      driver::logParametersCommandparameterId, driver::IoctlFwLogsState>(
+        returnedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                       const driver::IoctlFwLogsState &expectedState)
 {
-    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_FW_LOGS>(expectedState, ioctlSuccess,
-                                                              returnedStatus);
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_FW_LOGS,
+                      driver::logParametersCommandparameterId, driver::IoctlFwLogsState>(
+        expectedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addGetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                    driver::ProbeState returnedState)
 {
-    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE>(returnedState, ioctlSuccess,
-                                                                    returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE, 0, driver::ProbeState>(
+        returnedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                    driver::ProbeState expectedState)
 {
-    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE>(expectedState, ioctlSuccess,
-                                                                    returnedStatus);
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE, 0, driver::ProbeState>(
+        expectedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addGetProbeConfigurationCommand(
     bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::ProbePointConfiguration &returnedConfiguration)
 {
-    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE>(returnedConfiguration,
-                                                                    ioctlSuccess, returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE, 1,
+                      driver::ProbePointConfiguration>(returnedConfiguration, ioctlSuccess,
+                                                       returnedStatus);
 }
 
 void MockedDeviceCommands::addSetProbeConfigurationCommand(
     bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::ProbePointConfiguration &expectedConfiguration)
 {
-    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE>(expectedConfiguration,
-                                                                    ioctlSuccess, returnedStatus);
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE, 1,
+                      driver::ProbePointConfiguration>(expectedConfiguration, ioctlSuccess,
+                                                       returnedStatus);
 }
 
 void MockedDeviceCommands::addGetPipelineListCommand(

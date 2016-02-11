@@ -58,7 +58,8 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/WppClientFactory.hpp
     include/cAVS/Windows/RealTimeWppClientFactory.hpp
     include/cAVS/Windows/StubbedWppClientFactory.hpp
-    include/cAVS/Windows/IoctlHelpers.hpp)
+    include/cAVS/Windows/IoctlHelpers.hpp
+    include/cAVS/Windows/IoCtlDescription.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
