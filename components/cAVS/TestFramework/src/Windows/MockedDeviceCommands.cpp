@@ -165,6 +165,29 @@ void MockedDeviceCommands::addTinyCommand(Command command, const DriverStructure
                                     &expectedWriter.getBuffer(), &returnedWriter.getBuffer());
 }
 
+template <typename DriverStructure>
+void MockedDeviceCommands::addTinyGetCommand(const DriverStructure &returnedDriverStruct,
+                                             bool ioctlSuccess, NTSTATUS returnedDriverStatus)
+{
+    DriverStructure inputDriverStruct;
+
+    /* By convention unset memory areas passed through ioctl are filled with 0xFF */
+    memset(&inputDriverStruct, 0xFF, sizeof(DriverStructure));
+
+    addTinyCommand(Command::Get, inputDriverStruct, returnedDriverStruct, ioctlSuccess,
+                   returnedDriverStatus);
+}
+
+template <typename DriverStructure>
+void MockedDeviceCommands::addTinySetCommand(const DriverStructure &inputDriverStruct,
+                                             bool ioctlSuccess, NTSTATUS returnedDriverStatus)
+{
+    DriverStructure returnedDriverStructure(inputDriverStruct);
+
+    addTinyCommand(Command::Set, inputDriverStruct, returnedDriverStructure, ioctlSuccess,
+                   returnedDriverStatus);
+}
+
 void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
                                                   dsp_fw::IxcStatus returnedFirmwareStatus,
                                                   const Buffer &tlvList,
@@ -215,54 +238,39 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(
 void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                       const driver::IoctlFwLogsState &returnedState)
 {
-    driver::IoctlFwLogsState expectedLogState = {
-        static_cast<driver::IOCTL_LOG_STATE>(0xFFFFFFFF),
-        static_cast<driver::FW_LOG_LEVEL>(0xFFFFFFFF),
-        static_cast<driver::FW_LOG_OUTPUT>(0xFFFFFFFF),
-    };
-
-    addTinyCommand(Command::Get, expectedLogState, returnedState, ioctlSuccess, returnedStatus);
+    addTinyGetCommand(returnedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                       const driver::IoctlFwLogsState &expectedState)
 {
-    addTinyCommand(Command::Set, expectedState, expectedState, ioctlSuccess, returnedStatus);
+    addTinySetCommand(expectedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addGetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                    driver::ProbeState returnedState)
 {
-    /* By convention unset memory areas passed through ioctl are filled with 0xFF */
-    driver::ProbeState expectedState = static_cast<driver::ProbeState>(0xFFFFFFFF);
-    addTinyCommand(Command::Get, expectedState, returnedState, ioctlSuccess, returnedStatus);
+    addTinyGetCommand(returnedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                    driver::ProbeState expectedState)
 {
-    addTinyCommand(Command::Set, expectedState, expectedState, ioctlSuccess, returnedStatus);
+    addTinySetCommand(expectedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addGetProbeConfigurationCommand(
     bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::ProbePointConfiguration &returnedConfiguration)
 {
-    driver::ProbePointConfiguration expectedConfiguration;
-
-    /* By convention unset memory areas passed through ioctl are filled with 0xFF */
-    memset(&expectedConfiguration, 0xFF, sizeof(expectedConfiguration));
-
-    addTinyCommand(Command::Get, expectedConfiguration, returnedConfiguration, ioctlSuccess,
-                   returnedStatus);
+    addTinyGetCommand(returnedConfiguration, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetProbeConfigurationCommand(
     bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::ProbePointConfiguration &expectedConfiguration)
 {
-    addTinyCommand(Command::Set, expectedConfiguration, expectedConfiguration, ioctlSuccess,
-                   returnedStatus);
+    addTinySetCommand(expectedConfiguration, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addGetPipelineListCommand(
