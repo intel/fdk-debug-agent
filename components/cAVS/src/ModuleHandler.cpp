@@ -27,6 +27,10 @@ namespace debug_agent
 {
 namespace cavs
 {
+/** In order to invoque this constant in std::min that requires reference, need
+ * WA to force the compiler giving an address.
+ */
+const size_t ModuleHandler::maxParameterPayloadSize;
 
 template <typename FirmwareParameterType>
 void ModuleHandler::getFwParameterValue(uint16_t moduleId, uint16_t instanceId,
@@ -45,7 +49,8 @@ void ModuleHandler::getFwParameterValue(uint16_t moduleId, uint16_t instanceId,
             std::cout << "Fw parameter buffer has not been fully consumed,"
                       << " pointer=" << reader.getPointerOffset()
                       << " size=" << reader.getBuffer().size()
-                      << " remaining= " << (reader.getBuffer().size() - reader.getPointerOffset());
+                      << " remaining= " << (reader.getBuffer().size() - reader.getPointerOffset())
+                      << std::endl;
         }
     } catch (util::ByteStreamReader::Exception &e) {
         throw Exception("Can not decode fw parameter: " + std::string(e.what()));

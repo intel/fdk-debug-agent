@@ -25,6 +25,7 @@
 #include "cAVS/Linux/Device.hpp"
 #include "cAVS/DspFw/FwConfig.hpp"
 #include "cAVS/DspFw/HwConfig.hpp"
+#include "cAVS/Linux/ModuleHandler.hpp"
 #include "cAVS/Linux/Logger.hpp"
 
 namespace debug_agent
@@ -40,28 +41,16 @@ namespace linux
 class Driver final : public cavs::Driver
 {
 public:
-    Driver(std::unique_ptr<Device> device) : mDevice(std::move(device)), mLogger(*mDevice) {}
+    Driver(std::unique_ptr<Device> device)
+        : mDevice(std::move(device)), mLogger(*mDevice), mModuleHandler(*mDevice)
+    {
+    }
 
     cavs::Logger &getLogger() override { return mLogger; }
     cavs::ModuleHandler &getModuleHandler() override { return mModuleHandler; }
     cavs::Prober &getProber() override { return mProber; }
 
 private:
-    /* Will be replaced by the true implementation*/
-    class DummyModuleHandler : public ModuleHandler
-    {
-    private:
-        util::Buffer configGet(uint16_t moduleId, uint16_t instanceId,
-                               dsp_fw::ParameterId parameterId, size_t parameterSize) override
-        {
-        }
-
-        void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                       const util::Buffer &parameterPayload) override
-        {
-        }
-    };
-
     /* Will be replaced by the true implementation*/
     class DummyProber : public Prober
     {
@@ -88,9 +77,9 @@ private:
     };
 
     Logger mLogger;
-    DummyModuleHandler mModuleHandler;
     DummyProber mProber;
     std::unique_ptr<Device> mDevice;
+    ModuleHandler mModuleHandler;
 };
 }
 }

@@ -22,7 +22,8 @@
 
 set(LINUX_TEST_SRCS
     Linux/SystemDeviceUnitTest.cpp
-    Linux/MockedDeviceUnitTest.cpp)
+    Linux/MockedDeviceUnitTest.cpp
+    Linux/ModuleHandlerUnitTest.cpp)
 
 set(TEST_SRCS ${TEST_SRCS} ${LINUX_TEST_SRCS})
 
