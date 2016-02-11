@@ -133,6 +133,67 @@ public:
     void addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                     const driver::IoctlFwLogsState &expectedState);
 
+    /** Add a get probe state command
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedStatus the returned driver status
+     * @param[in] returnedState the probe state returned by the ioctl
+     *
+     * Note: returnedState is unused if
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedStatus) returns false
+     *
+     * @throw Device::Exception
+     */
+    void addGetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                 driver::ProbeState returnedState);
+
+    /** Add a set probe state command.
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedStatus the returned driver status
+     * @param[in] expectedState the expected probe state passed as input buffer to the ioctl
+     *
+     * Note: the expectedState parameter is alwayse used,
+     * even if NT_SUCCESS(returnedStatus) returns false or if ioctlSuccess is false
+     *
+     * @throw Device::Exception
+     */
+    void addSetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                 driver::ProbeState expectedState);
+
+    /** Add a get probe configuration command
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedStatus the returned driver status
+     * @param[in] returnedConfiguration the probe configuration returned by the ioctl
+     *
+     * Note: returnedConfiguration is unused if
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedStatus) returns false
+     *
+     * @throw Device::Exception
+     */
+    void addGetProbeConfigurationCommand(
+        bool ioctlSuccess, NTSTATUS returnedStatus,
+        const driver::ProbePointConfiguration &returnedConfiguration);
+
+    /** Add a set probe configuration command.
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedStatus the returned driver status
+     * @param[in] expectedConfiguration the expected probe configuration passed as
+     *                                  input buffer to the ioctl
+     *
+     * Note: the expectedConfiguration parameter is alwayse used,
+     * even if NT_SUCCESS(returnedStatus) returns false or if ioctlSuccess is false
+     *
+     * @throw Device::Exception
+     */
+    void addSetProbeConfigurationCommand(
+        bool ioctlSuccess, NTSTATUS returnedStatus,
+        const driver::ProbePointConfiguration &expectedConfiguration);
+
     /** Add a get pipeline list command.
      *
      * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
@@ -305,10 +366,11 @@ private:
                                       NTSTATUS returnedDriverStatus,
                                       dsp_fw::IxcStatus returnedFirmwareStatus);
 
-    /** Common method to add log get/set parameters */
-    void addLogParameterCommand(Command command, const driver::IoctlFwLogsState &inputFwParams,
-                                const driver::IoctlFwLogsState &outputFwParams, bool ioctlSuccess,
-                                NTSTATUS returnedDriverStatus);
+    /* Performs a TinyGet/Set command with a supplied driver type passed as template parameter */
+    template <typename DriverStructure>
+    void addTinyCommand(Command command, const DriverStructure &inputDriverStr,
+                        const DriverStructure &outputFwParams, bool ioctlSuccess,
+                        NTSTATUS returnedDriverStatus);
 
     MockedDevice &mDevice;
 };

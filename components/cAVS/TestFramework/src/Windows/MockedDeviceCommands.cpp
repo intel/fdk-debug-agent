@@ -114,16 +114,16 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
                               returnedFirmwareStatus);
 }
 
-void MockedDeviceCommands::addLogParameterCommand(Command command,
-                                                  const driver::IoctlFwLogsState &inputFwParams,
-                                                  const driver::IoctlFwLogsState &outputFwParams,
-                                                  bool ioctlSuccess, NTSTATUS returnedDriverStatus)
+template <typename DriverStructure>
+void MockedDeviceCommands::addTinyCommand(Command command, const DriverStructure &inputDriverStruct,
+                                          const DriverStructure &outputDriverStruct,
+                                          bool ioctlSuccess, NTSTATUS returnedDriverStatus)
 {
     /* First creating expected body to know its serialized size */
     util::ByteStreamWriter expectedBodyWriter;
     driver::Intc_App_Cmd_Body body;
     expectedBodyWriter.write(body);
-    expectedBodyWriter.write(inputFwParams);
+    expectedBodyWriter.write(inputDriverStruct);
     ULONG bodySize = static_cast<ULONG>(expectedBodyWriter.getBuffer().size());
 
     /* Creating header */
@@ -157,7 +157,7 @@ void MockedDeviceCommands::addLogParameterCommand(Command command,
     if (NT_SUCCESS(returnedDriverStatus)) {
 
         /* IoctlFwLogsState structure*/
-        returnedWriter.write(outputFwParams);
+        returnedWriter.write(outputDriverStruct);
     }
 
     /* Adding entry */
@@ -221,15 +221,48 @@ void MockedDeviceCommands::addGetLogParametersCommand(bool ioctlSuccess, NTSTATU
         static_cast<driver::FW_LOG_OUTPUT>(0xFFFFFFFF),
     };
 
-    addLogParameterCommand(Command::Get, expectedLogState, returnedState, ioctlSuccess,
-                           returnedStatus);
+    addTinyCommand(Command::Get, expectedLogState, returnedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                       const driver::IoctlFwLogsState &expectedState)
 {
-    addLogParameterCommand(Command::Set, expectedState, expectedState, ioctlSuccess,
-                           returnedStatus);
+    addTinyCommand(Command::Set, expectedState, expectedState, ioctlSuccess, returnedStatus);
+}
+
+void MockedDeviceCommands::addGetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                                   driver::ProbeState returnedState)
+{
+    /* By convention unset memory areas passed through ioctl are filled with 0xFF */
+    driver::ProbeState expectedState = static_cast<driver::ProbeState>(0xFFFFFFFF);
+    addTinyCommand(Command::Get, expectedState, returnedState, ioctlSuccess, returnedStatus);
+}
+
+void MockedDeviceCommands::addSetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                                   driver::ProbeState expectedState)
+{
+    addTinyCommand(Command::Set, expectedState, expectedState, ioctlSuccess, returnedStatus);
+}
+
+void MockedDeviceCommands::addGetProbeConfigurationCommand(
+    bool ioctlSuccess, NTSTATUS returnedStatus,
+    const driver::ProbePointConfiguration &returnedConfiguration)
+{
+    driver::ProbePointConfiguration expectedConfiguration;
+
+    /* By convention unset memory areas passed through ioctl are filled with 0xFF */
+    memset(&expectedConfiguration, 0xFF, sizeof(expectedConfiguration));
+
+    addTinyCommand(Command::Get, expectedConfiguration, returnedConfiguration, ioctlSuccess,
+                   returnedStatus);
+}
+
+void MockedDeviceCommands::addSetProbeConfigurationCommand(
+    bool ioctlSuccess, NTSTATUS returnedStatus,
+    const driver::ProbePointConfiguration &expectedConfiguration)
+{
+    addTinyCommand(Command::Set, expectedConfiguration, expectedConfiguration, ioctlSuccess,
+                   returnedStatus);
 }
 
 void MockedDeviceCommands::addGetPipelineListCommand(
