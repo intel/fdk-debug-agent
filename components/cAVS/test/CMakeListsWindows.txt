@@ -27,6 +27,7 @@ set(WINDOWS_TEST_SRCS
     Windows/LastErrorUnitTest.cpp
     Windows/ModuleHandlerUnitTest.cpp
     Windows/LoggerUnitTest.cpp
+    Windows/ProberUnitTest.cpp
     Windows/WppUnitTest.cpp)
 
 set(TEST_SRCS ${TEST_SRCS} ${WINDOWS_TEST_SRCS})
