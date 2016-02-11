@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -18,14 +18,12 @@
 #
 ################################################################################
 
-set(LINUX_LIB_SRCS
-    src/Linux/MockedDevice.cpp)
+# Source files
 
-set(LIB_SRCS ${LIB_SRCS} ${LINUX_LIB_SRCS})
+set(LINUX_TEST_SRCS
+    Linux/MockedDeviceUnitTest.cpp)
 
-set(LINUX_LIB_INCS
-    include/cAVS/Linux/MockedDevice.hpp)
+set(TEST_SRCS ${TEST_SRCS} ${LINUX_TEST_SRCS})
 
-set(LIB_INCS ${LIB_INCS} ${LINUX_LIB_INCS})
+source_group("Source Files\\Linux" FILES ${LINUX_TEST_SRCS})
 
-source_group("Header Files\\Linux" FILES ${LINUX_LIB_INCS})

@@ -35,7 +35,7 @@ set(DATA_DIRECTORIES)
 if (WIN32)
     include("CMakeListsWindows.txt")
 elseif (UNIX)
-    #currently there are no linux specific test
+    include("CMakeListsLinux.txt")
 else ()
     error("No cAVS implementation for this platform")
 endif ()
