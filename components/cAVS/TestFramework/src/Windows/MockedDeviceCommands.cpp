@@ -1,7 +1,7 @@
 /*
  ********************************************************************************
  *                              INTEL CONFIDENTIAL
- *   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+ *   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
  *   The source code contained  or  described herein and all documents related to
  *   the source code ("Material") are owned by Intel Corporation or its suppliers
  *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -202,8 +202,8 @@ void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess, NTSTATUS re
     util::Buffer returnedOutput;
     returnedOutput = tlvList;
 
-    addModuleParameterCommand(Command::Get, dsp_fw::baseFirwareModuleId,
-                              dsp_fw::baseFirwareInstanceId, dsp_fw::toParameterId(parameterId),
+    addModuleParameterCommand(Command::Get, dsp_fw::baseFirmwareModuleId,
+                              dsp_fw::baseFirmwareInstanceId, dsp_fw::toParameterId(parameterId),
                               expectedOutput, returnedOutput, ioctlSuccess, returnedDriverStatus,
                               returnedFirmwareStatus);
 }
@@ -233,7 +233,7 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(
     dsp_fw::ModulesInfo modulesInfo;
     modulesInfo.module_info = returnedEntries;
 
-    addGetModuleParameterCommand(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+    addGetModuleParameterCommand(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
                                  dsp_fw::toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET),
                                  moduleInfoSize, modulesInfo, ioctlSuccess, returnedDriverStatus,
                                  returnedFirmwareStatus);
@@ -298,7 +298,7 @@ void MockedDeviceCommands::addGetPipelineListCommand(
     pipelinesListInfo.ppl_id = pipelineIds;
 
     addGetModuleParameterCommand(
-        dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+        dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
         dsp_fw::toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET), parameterSize,
         pipelinesListInfo, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
@@ -313,7 +313,7 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(bool ioctlSuccess,
     auto paramId =
         ModuleHandler::getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
 
-    addGetModuleParameterCommand(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+    addGetModuleParameterCommand(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
                                  paramId, ModuleHandler::maxParameterPayloadSize, props,
                                  ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
@@ -328,7 +328,7 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(bool ioctlSuccess,
     auto paramId =
         ModuleHandler::getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
 
-    addGetModuleParameterCommand(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+    addGetModuleParameterCommand(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
                                  paramId, ModuleHandler::maxParameterPayloadSize, info,
                                  ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
@@ -344,7 +344,7 @@ void MockedDeviceCommands::addGetGatewaysCommand(bool ioctlSuccess, NTSTATUS ret
     dsp_fw::GatewaysInfo gatewaysInfo;
     gatewaysInfo.gateways = gateways;
 
-    addGetModuleParameterCommand(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+    addGetModuleParameterCommand(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
                                  dsp_fw::toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
                                  parameterSize, gatewaysInfo, ioctlSuccess, returnedDriverStatus,
                                  returnedFirmwareStatus);

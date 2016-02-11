@@ -1,7 +1,7 @@
 /*
  ********************************************************************************
  *                              INTEL CONFIDENTIAL
- *   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+ *   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
  *   The source code contained  or  described herein and all documents related to
  *   the source code ("Material") are owned by Intel Corporation or its suppliers
  *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -54,10 +54,10 @@ struct ParameterIdTrait
 using ParameterId = util::WrappedRaw<detail::ParameterIdTrait>;
 
 /** By convention the base firmware module id is 0 */
-static const uint16_t baseFirwareModuleId = 0;
+static const uint16_t baseFirmwareModuleId = 0;
 
 /** By convention the base firmware instance id is 0 */
-static const uint16_t baseFirwareInstanceId = 0;
+static const uint16_t baseFirmwareInstanceId = 0;
 
 /* This compound module id contains a type id and an instance id */
 struct CompoundModuleId

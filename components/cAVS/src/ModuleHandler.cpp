@@ -58,7 +58,7 @@ void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandl
 {
     /** According to the SwAS, setting initial buffer size to cavsTlvBufferSize.
      * Using 0xFF for test purpose (mark unused memory) */
-    util::Buffer buffer = configGet(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+    util::Buffer buffer = configGet(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
                                     dsp_fw::toParameterId(parameterId), cavsTlvBufferSize);
 
     /* Now parse the TLV answer */
@@ -83,7 +83,7 @@ void ModuleHandler::getModulesEntries(uint32_t moduleCount,
     std::size_t moduleInfoSize = dsp_fw::ModulesInfo::getAllocationSize(moduleCount);
 
     dsp_fw::ModulesInfo modulesInfo;
-    getFwParameterValue(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+    getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
                         dsp_fw::toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET),
                         moduleInfoSize, modulesInfo);
 
@@ -117,7 +117,7 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount,
 
     /* Query FW through driver */
     dsp_fw::PipelinesListInfo pipelineListInfo;
-    getFwParameterValue(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+    getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
                         dsp_fw::toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
                         parameterSize, pipelineListInfo);
 
@@ -137,7 +137,7 @@ void ModuleHandler::getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::
     auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
 
     /* Query FW through driver */
-    getFwParameterValue(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId, paramId,
+    getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId, paramId,
                         maxParameterPayloadSize, props);
 }
 
@@ -147,7 +147,7 @@ void ModuleHandler::getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersI
     auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
 
     /* Query FW through driver */
-    getFwParameterValue(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId, paramId,
+    getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId, paramId,
                         maxParameterPayloadSize, schedulers);
 }
 
@@ -159,7 +159,7 @@ void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
 
     /* Query FW through driver */
     dsp_fw::GatewaysInfo gatewaysInfo;
-    getFwParameterValue(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
+    getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
                         dsp_fw::toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
                         parameterSize, gatewaysInfo);
 
