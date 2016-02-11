@@ -694,3 +694,147 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
      * was already getting it has obtained the expected server response */
     CHECK_NOTHROW(delayedGetLogStreamFuture.get());
 }
+
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control")
+{
+    static const std::size_t probeCount = 8;
+    static const std::size_t enabledProbeIndex = 1;
+    static_assert(enabledProbeIndex < probeCount, "wrong probe index");
+
+    /* Setting the test vector
+     * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+    windows::EventHandle probeEventHandle;
+
+    /* Adding initial commands */
+    addInitialCommands(commands);
+
+    // 1 : Getting probe service parameters, checking that it is stopped
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+
+    // 2 : Getting probe endpoint parameters, checking that they are deactivated
+    // -> involves no ioctl
+
+    // 3 : Configuring probe #1 to be enabled
+    // -> involves no ioctl
+
+    // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one
+    //     that has been enabled
+    // -> involves no ioctl
+
+    // 5 : Starting service
+
+    // getting current state : idle
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+
+    // going to Owned
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+
+    // setting probe configuration (probe #1 is enabled)
+    windows::driver::ProbePointConfiguration expectedDriverConfig = {
+        probeEventHandle.get(),
+        {{false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {true, {1, 2, 1, 0}, windows::driver::ProbePurpose::Extract, nullptr}, // Enabled
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr}}};
+    commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, expectedDriverConfig);
+
+    // going to Allocated
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Allocated);
+
+    // going to Active
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+
+    // 6 : Getting probe service parameters, checking that it is started
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+
+    // 7 : Stopping service
+
+    // getting current state : Active
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+
+    // going to Allocated, Owned and Idle
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Allocated);
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+
+    // 8: Getting probe service parameters, checking that it is stopped
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+
+    /* Now using the mocked device
+     * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(), probeEventHandle);
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    // 1 : Getting probe service parameters, checking that it is stopped
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_stopped"))));
+
+    // 2 : Getting probe endpoint parameters, checking that they are deactivated
+    for (std::size_t probeIndex = 0; probeIndex < probeCount; ++probeIndex) {
+        CHECK_NOTHROW(client.request(
+            "/instance/cavs.probe.endpoint/" + std::to_string(probeIndex) + "/control_parameters",
+            HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok, "text/xml",
+            HttpClientSimulator::FileContent(xmlFileName("probeservice_endpoint_param_disabled"))));
+    }
+
+    // 3 : Configuring probe #1 to be enabled
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe.endpoint/" + std::to_string(enabledProbeIndex) +
+            "/control_parameters",
+        HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_endpoint_param_enabled")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one that
+    //     has been enabled
+    for (std::size_t probeIndex = 0; probeIndex < probeCount; ++probeIndex) {
+        std::string expectedFile = (probeIndex == enabledProbeIndex)
+                                       ? "probeservice_endpoint_param_enabled"
+                                       : "probeservice_endpoint_param_disabled";
+
+        CHECK_NOTHROW(client.request(
+            "/instance/cavs.probe.endpoint/" + std::to_string(probeIndex) + "/control_parameters",
+            HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok, "text/xml",
+            HttpClientSimulator::FileContent(xmlFileName(expectedFile))));
+    }
+
+    // 5 : Starting service
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_param_started")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 6 : Getting probe service parameters, checking that it is started
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_started"))));
+
+    // 7 : Stopping service
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_param_stopped")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 8: Getting probe service parameters, checking that it is stopped
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_stopped"))));
+}

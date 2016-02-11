@@ -1,0 +1,10 @@
+<control_parameters>
+    <ParameterBlock Name="ProbePointConnection">
+        <BooleanParameter Name="Active">0</BooleanParameter>
+        <EnumParameter Name="Purpose">Inject</EnumParameter>
+        <StringParameter Name="ComponentType">_Invalid_</StringParameter>
+        <IntegerParameter Name="InstanceId">0</IntegerParameter>
+        <EnumParameter Name="Type">Input</EnumParameter>
+        <IntegerParameter Name="Index">0</IntegerParameter>
+    </ParameterBlock>
+</control_parameters>

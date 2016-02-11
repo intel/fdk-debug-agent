@@ -1,0 +1,10 @@
+<control_parameters>
+    <ParameterBlock Name="ProbePointConnection">
+        <BooleanParameter Name="Active">1</BooleanParameter>
+        <EnumParameter Name="Purpose">Extract</EnumParameter>
+        <StringParameter Name="ComponentType">module-aec</StringParameter>
+        <IntegerParameter Name="InstanceId">2</IntegerParameter>
+        <EnumParameter Name="Type">Output</EnumParameter>
+        <IntegerParameter Name="Index">0</IntegerParameter>
+    </ParameterBlock>
+</control_parameters>

@@ -1,0 +1,5 @@
+<control_parameters>
+    <ParameterBlock Name="State">
+        <BooleanParameter Name="Started">1</BooleanParameter>
+    </ParameterBlock>
+</control_parameters>
