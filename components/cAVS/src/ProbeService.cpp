@@ -20,7 +20,7 @@
 ********************************************************************************
 */
 #include "cAVS/ProbeService.hpp"
-#include <util/AssertAlways.hpp>
+#include <Util/AssertAlways.hpp>
 #include <iostream>
 
 namespace debug_agent
