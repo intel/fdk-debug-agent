@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -18,39 +18,9 @@
 #
 ################################################################################
 
-# cmake configuration file of functional tests
+set(LINUX_TEST_SRCS
+    Linux/CavsTest.cpp)
 
-set(TEST_SRCS
-    Main.cpp
-    CavsTopologySample.cpp)
+set(TEST_SRCS ${TEST_SRCS} ${LINUX_TEST_SRCS})
 
-set(TEST_INCS
-    CavsTopologySample.hpp)
-
-# Target specific source and header files
-if (WIN32)
-    include("CMakeListsWindows.txt")
-elseif (UNIX)
-    include("CMakeListsLinux.txt")
-else ()
-    error("No cAVS implementation for this platform")
-endif ()
-
-add_dbga_executable(FunctionalTests ${TEST_SRCS} ${TEST_INCS})
-add_catch_test(FunctionalTests ${CMAKE_CURRENT_LIST_DIR})
-add_test_dependencies(FunctionalTests
-    ParameterFramework::parameter
-    ParameterFramework::remote-processor
-    ParameterFramework::libxml2)
-
-set_common_settings(FunctionalTests)
-
-# include private headers in the same directory as sources
-target_include_directories(FunctionalTests PRIVATE ".")
-
-# external libraries
-link_catch(FunctionalTests)
-
-# dependent libraries
-target_link_libraries(FunctionalTests Core TestCommon cAVSTestFramework)
-link_poco(FunctionalTests)
+source_group("Source Files\\Linux" FILES ${LINUX_TEST_SRCS})
