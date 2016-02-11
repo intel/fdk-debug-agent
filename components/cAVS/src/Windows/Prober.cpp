@@ -197,9 +197,8 @@ void Prober::ioctl(typename T::Data &inout)
     bodyPayloadWriter.write(inout);
 
     /* Creating the TinySet/Get ioctl buffer */
-    util::Buffer buffer = IoctlHelpers::toTinyCmdBuffer(
-        static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE), T::id,
-        bodyPayloadWriter.getBuffer());
+    util::Buffer buffer =
+        IoctlHelpers::toTinyCmdBuffer(T::feature, T::id, bodyPayloadWriter.getBuffer());
 
     try {
         mDevice.ioControl(T::type, &buffer, &buffer);

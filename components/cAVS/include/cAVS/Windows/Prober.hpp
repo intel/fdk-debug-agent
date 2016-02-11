@@ -23,6 +23,7 @@
 
 #include "cAVS/Prober.hpp"
 #include "cAVS/Windows/Device.hpp"
+#include "cAVS/Windows/IoCtlDescription.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 
@@ -46,22 +47,18 @@ public:
     bool enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer) override;
 
 private:
-    template <driver::IoCtlType type, ULONG id, class T>
-    struct IoctlParameter
-    {
-        static constexpr driver::IoCtlType type{type};
-        static constexpr ULONG id{id};
-        using Data = T;
-    };
+    static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE;
 
     // 0 = get/setState
-    using GetState = IoctlParameter<driver::IoCtlType::TinyGet, 0, driver::ProbeState>;
-    using SetState = IoctlParameter<driver::IoCtlType::TinySet, 0, driver::ProbeState>;
+    using GetState =
+        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature, 0, driver::ProbeState>;
+    using SetState =
+        IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature, 0, driver::ProbeState>;
     // 1 = get/setProbePointConfiguration
-    using GetProbePointConfiguration =
-        IoctlParameter<driver::IoCtlType::TinyGet, 1, driver::ProbePointConfiguration>;
-    using SetProbePointConfiguration =
-        IoctlParameter<driver::IoCtlType::TinySet, 1, driver::ProbePointConfiguration>;
+    using GetProbePointConfiguration = IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
+                                                        1, driver::ProbePointConfiguration>;
+    using SetProbePointConfiguration = IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature,
+                                                        1, driver::ProbePointConfiguration>;
 
     /** Send a probes-related ioctl to the driver
      *
