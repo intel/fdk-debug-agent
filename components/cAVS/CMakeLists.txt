@@ -82,11 +82,12 @@ target_link_libraries(cAVS ${LIBRAIRIES})
 # exporting "include" directory
 target_include_directories(cAVS PUBLIC "include")
 
+find_path(CAVS_FW_HEADERS_INCLUDE_DIRECTORIES FW/src/common/include/stream_type.h)
+
 # including and exporting cAVS fw headers
 target_include_directories(cAVS PUBLIC
-    "${PROJECT_SOURCE_DIR}/external/cAVS/cavs_fw_headers_for_sw/FW/src/common/include"
-    "${PROJECT_SOURCE_DIR}/external/cAVS/cavs_fw_headers_for_sw/FW/src/intel_adsp/include"
-
+    "${CAVS_FW_HEADERS_INCLUDE_DIRECTORIES}/FW/src/common/include"
+    "${CAVS_FW_HEADERS_INCLUDE_DIRECTORIES}/FW/src/intel_adsp/include"
 )
 
 if (WIN32)
