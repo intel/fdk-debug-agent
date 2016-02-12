@@ -107,12 +107,12 @@ private:
     /** Go to a target state using supplied transitions
      * @throw ProbeService::Exception
      */
-    void goToState(Prober::State targetState, const Transitions &transitions);
+    void goToState(Prober::State targetState, const Transitions &transitions, bool starting);
 
     /** Process state-specific logic (for instance, the 'Owned' state requires probe configuration
      * @throw ProbeService::Exception
      */
-    void processState(Prober::State state);
+    void processState(Prober::State state, bool starting);
 
     /**
      * @throw ProbeService::Exception

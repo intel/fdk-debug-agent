@@ -85,12 +85,12 @@ bool ProbeService::isActive()
 
 void ProbeService::start()
 {
-    goToState(Prober::State::Active, mStartTransitions);
+    goToState(Prober::State::Active, mStartTransitions, true);
 }
 
 void ProbeService::stop()
 {
-    goToState(Prober::State::Idle, mStopTransitions);
+    goToState(Prober::State::Idle, mStopTransitions, false);
 }
 
 void ProbeService::stopNoThrow() noexcept
@@ -126,10 +126,11 @@ Prober::ProbeConfig ProbeService::getProbeConfig(ProbeId probeId) const
     return mProbeConfigs[probeId.getValue()];
 }
 
-void ProbeService::goToState(Prober::State targetState, const Transitions &transitions)
+void ProbeService::goToState(Prober::State targetState, const Transitions &transitions,
+                             bool starting)
 {
     Prober::State currentState = checkAndGetStateFromDriver();
-    processState(currentState);
+    processState(currentState, starting);
 
     while (currentState != targetState) {
         auto it = transitions.find(currentState);
@@ -140,13 +141,13 @@ void ProbeService::goToState(Prober::State targetState, const Transitions &trans
         currentState = it->second;
 
         setStateToDriver(currentState);
-        processState(currentState);
+        processState(currentState, starting);
     }
 }
 
-void ProbeService::processState(Prober::State state)
+void ProbeService::processState(Prober::State state, bool starting)
 {
-    if (state == Prober::State::Owned) {
+    if (starting && state == Prober::State::Owned) {
         /* State is "Owned" : applying cached configuration to the driver */
         try {
             std::lock_guard<std::mutex> guard(mProbeConfigMutex);
