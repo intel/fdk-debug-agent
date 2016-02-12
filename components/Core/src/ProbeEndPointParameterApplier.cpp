@@ -96,7 +96,7 @@ void ProbeEndPointParameterApplier::setEndPointParameterValue(const std::size_t 
 
         /* Fetching values only if probe is enabled*/
         if (config.enabled) {
-            Prober::ProbePurpose purpose = xml.getValueFromXPathAsEnum<Prober::ProbePurpose>(
+            config.purpose = xml.getValueFromXPathAsEnum<Prober::ProbePurpose>(
                 connectionBlockUrl + "EnumParameter[@Name='Purpose']",
                 Prober::probePurposeHelper());
 
