@@ -175,13 +175,13 @@ std::string ProbeEndPointParameterApplier::getEndPointParameterValue(
            << "        <EnumParameter Name=\"Purpose\">"
            << Prober::probePurposeHelper().toString(config.purpose) << "</EnumParameter>\n"
            << "        <StringParameter Name=\"ComponentType\">" << fdkModuleTypeName
-           << "</StringParameter\n>"
+           << "</StringParameter>\n"
            << "        <IntegerParameter Name=\"InstanceId\">" << config.probePoint.moduleInstanceId
            << "</IntegerParameter>\n"
            << "        <EnumParameter Name=\"Type\">"
            << Prober::probeTypeHelper().toString(config.probePoint.type) << "</EnumParameter>\n"
            << "        <IntegerParameter Name=\"Index\">" << config.probePoint.pinIndex
-           << "</IntegerParameter\n>"
+           << "</IntegerParameter>\n"
            << "    </ParameterBlock>\n"
            << "</control_parameters>\n";
     return stream.str();
