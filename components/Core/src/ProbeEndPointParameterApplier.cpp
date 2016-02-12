@@ -85,7 +85,8 @@ void ProbeEndPointParameterApplier::setEndPointParameterValue(const std::size_t 
 
     Prober::ProbeConfig config;
 
-    static const std::string connectionBlockUrl = "/control_parameters/ProbePointConnection/";
+    static const std::string connectionBlockUrl =
+        "/control_parameters/ParameterBlock[@Name='ProbePointConnection']/";
 
     try {
         /** @todo: use libstructure instead of XmlHelper class to fetch values */

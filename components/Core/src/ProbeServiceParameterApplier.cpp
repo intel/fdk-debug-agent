@@ -50,7 +50,7 @@ std::string ProbeServiceParameterApplier::getServiceParameterStructure()
 
 void ProbeServiceParameterApplier::setServiceParameterValue(const std::string &parameterXML)
 {
-    static const std::string stateBlockUrl = "/control_parameters/State/";
+    static const std::string stateBlockUrl = "/control_parameters/ParameterBlock[@Name='State']/";
     bool active;
 
     try {
