@@ -117,24 +117,39 @@ void setModuleEntry(dsp_fw::ModuleEntry &entry, const std::string &name, const U
     uuid.toOtherUuidType(entry.uuid);
 }
 
-void addInitialCommands(windows::MockedDeviceCommands &commands)
+/** Handle DebugAgent initial and final ioctl commands */
+class DBGACommandScope
 {
-    /* Constructing cavs model */
-    /* ----------------------- */
-    std::vector<dsp_fw::ModuleEntry> modules;
-    Buffer fwConfig;
-    Buffer hwConfig;
+public:
+    DBGACommandScope(windows::MockedDeviceCommands &commands) : mCommands(commands)
+    {
+        /* Constructing cavs model */
+        /* ----------------------- */
+        std::vector<dsp_fw::ModuleEntry> modules;
+        Buffer fwConfig;
+        Buffer hwConfig;
 
-    CavsTopologySample::createFirmwareObjects(modules, fwConfig, hwConfig);
+        CavsTopologySample::createFirmwareObjects(modules, fwConfig, hwConfig);
 
-    /* Adding initial commands */
-    commands.addGetFwConfigCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                   fwConfig);
-    commands.addGetHwConfigCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                   hwConfig);
-    commands.addGetModuleEntriesCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                        static_cast<uint32_t>(modules.size()), modules);
-}
+        /* Adding initial commands */
+        mCommands.addGetFwConfigCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                        fwConfig);
+        mCommands.addGetHwConfigCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                        hwConfig);
+        mCommands.addGetModuleEntriesCommand(true, STATUS_SUCCESS,
+                                             dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                             static_cast<uint32_t>(modules.size()), modules);
+    }
+
+    ~DBGACommandScope()
+    {
+        // When the probe service is destroyed, it checks if the driver service state is Idle
+        mCommands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+    }
+
+private:
+    windows::MockedDeviceCommands &mCommands;
+};
 
 void addInstanceTopologyCommands(windows::MockedDeviceCommands &commands)
 {
@@ -218,17 +233,17 @@ struct Fixture
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
 {
     /* Setting the test vector
-    * ----------------------- */
+     * ----------------------- */
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    windows::MockedDeviceCommands commands(*device);
-
-    /* Adding initial commands */
-    addInitialCommands(commands);
-    /* Adding topology command */
-    addInstanceTopologyCommands(commands);
+        /* Adding topology command */
+        addInstanceTopologyCommands(commands);
+    }
 
     /* Now using the mocked device
-    * --------------------------- */
+     * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
@@ -302,17 +317,17 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
 {
     /* Setting the test vector
-    * ----------------------- */
+     * ----------------------- */
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    windows::MockedDeviceCommands commands(*device);
-
-    /* Adding initial commands */
-    addInitialCommands(commands);
-    /* Adding topology command */
-    addInstanceTopologyCommands(commands);
+        /* Adding topology command */
+        addInstanceTopologyCommands(commands);
+    }
 
     /* Now using the mocked device
-    * --------------------------- */
+     * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
@@ -341,26 +356,27 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
                           "(URL: /instance/cavs.module-aec/1/control_parameters)")
 {
     /* Setting the test vector
-    * ----------------------- */
+     * ----------------------- */
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    windows::MockedDeviceCommands commands(*device);
+        /* Adding topology command */
+        addInstanceTopologyCommands(commands);
 
-    /* Adding initial commands */
-    addInitialCommands(commands);
-    /* Adding topology command */
-    addInstanceTopologyCommands(commands);
+        /* Add command for get module parameter */
+        uint16_t moduleId = 1;
+        uint16_t InstanceId = 1;
+        commands.addGetModuleParameterCommand(
+            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, InstanceId,
+            AecParameterId, aecControlParameterPayload);
+        commands.addGetModuleParameterCommand(
+            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, InstanceId,
+            dsp_fw::ParameterId{25}, nsControlParameterPayload);
+    }
 
-    /* Add command for get module parameter */
-    uint16_t moduleId = 1;
-    uint16_t InstanceId = 1;
-    commands.addGetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                          moduleId, InstanceId, AecParameterId,
-                                          aecControlParameterPayload);
-    commands.addGetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                          moduleId, InstanceId, dsp_fw::ParameterId{25},
-                                          nsControlParameterPayload);
     /* Now using the mocked device
-    * --------------------------- */
+     * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
@@ -386,23 +402,23 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: A refresh error erases the previous topology ")
 {
     /* Setting the test vector
-    * ----------------------- */
+     * ----------------------- */
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    windows::MockedDeviceCommands commands(*device);
+        /* Adding topology command */
+        addInstanceTopologyCommands(commands);
 
-    /* Adding initial commands */
-    addInitialCommands(commands);
-    /* Adding topology command */
-    addInstanceTopologyCommands(commands);
-
-    /* Add a bad gateway command */
-    std::vector<dsp_fw::GatewayProps> emptyList;
-    commands.addGetGatewaysCommand(false, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                   static_cast<uint32_t>(CavsTopologySample::gatewaysCount),
-                                   emptyList);
+        /* Add a bad gateway command */
+        std::vector<dsp_fw::GatewayProps> emptyList;
+        commands.addGetGatewaysCommand(false, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                       static_cast<uint32_t>(CavsTopologySample::gatewaysCount),
+                                       emptyList);
+    }
 
     /* Now using the mocked device
-    * --------------------------- */
+     * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
@@ -443,27 +459,27 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
                           "(URL: /instance/cavs.module-aec/1/control_parameters)")
 {
     /* Setting the test vector
-    * ----------------------- */
+     * ----------------------- */
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    windows::MockedDeviceCommands commands(*device);
+        /* Adding topology command */
+        addInstanceTopologyCommands(commands);
 
-    /* Adding initial commands */
-    addInitialCommands(commands);
-    /* Adding topology command */
-    addInstanceTopologyCommands(commands);
-    /* Add command to set module parameter */
-    uint16_t moduleId = 1;
-    uint16_t InstanceId = 1;
-    commands.addSetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                          moduleId, InstanceId, AecParameterId,
-                                          aecControlParameterPayload);
+        uint16_t moduleId = 1;
+        uint16_t InstanceId = 1;
+        commands.addSetModuleParameterCommand(
+            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, InstanceId,
+            AecParameterId, aecControlParameterPayload);
 
-    commands.addSetModuleParameterCommand(true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                          moduleId, InstanceId, dsp_fw::ParameterId{25},
-                                          nsControlParameterPayload);
+        commands.addSetModuleParameterCommand(
+            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, InstanceId,
+            dsp_fw::ParameterId{25}, nsControlParameterPayload);
+    }
 
     /* Now using the mocked device
-    * --------------------------- */
+     * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
@@ -488,15 +504,14 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
 TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(module, logs)")
 {
     /* Setting the test vector
-    * ----------------------- */
-
-    windows::MockedDeviceCommands commands(*device);
-
-    /* Adding initial commands */
-    addInitialCommands(commands);
+     * ----------------------- */
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+    }
 
     /* Now using the mocked device
-    * --------------------------- */
+     * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
@@ -522,45 +537,45 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
     /* Setting the test vector
     * ----------------------- */
 
-    windows::MockedDeviceCommands commands(*device);
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    /* Adding initial commands */
-    addInitialCommands(commands);
+        /* 1: Get log parameter, will return
+        * - isStarted : false
+        * - level: critical
+        * - output: pti
+        */
 
-    /* 1: Get log parameter, will return
-    * - isStarted : false
-    * - level: critical
-    * - output: pti
-    */
+        windows::driver::IoctlFwLogsState initialLogParams = {
+            windows::driver::IOCTL_LOG_STATE::STOPPED, windows::driver::FW_LOG_LEVEL::LOG_CRITICAL,
+            windows::driver::FW_LOG_OUTPUT::OUTPUT_PTI};
+        commands.addGetLogParametersCommand(true, STATUS_SUCCESS, initialLogParams);
 
-    windows::driver::IoctlFwLogsState initialLogParams = {
-        windows::driver::IOCTL_LOG_STATE::STOPPED, windows::driver::FW_LOG_LEVEL::LOG_CRITICAL,
-        windows::driver::FW_LOG_OUTPUT::OUTPUT_PTI};
-    commands.addGetLogParametersCommand(true, STATUS_SUCCESS, initialLogParams);
+        /* 2: Set log parameter to
+        * - isStarted : true
+        * - level: verbose
+        * - output: sram
+        */
+        windows::driver::IoctlFwLogsState setLogParams = {
+            windows::driver::IOCTL_LOG_STATE::STARTED, windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
+            windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
+        commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
 
-    /* 2: Set log parameter to
-    * - isStarted : true
-    * - level: verbose
-    * - output: sram
-    */
-    windows::driver::IoctlFwLogsState setLogParams = {windows::driver::IOCTL_LOG_STATE::STARTED,
-                                                      windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
-                                                      windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
-    commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
+        /* 3: Get log parameter , will return
+        * - isStarted : true
+        * - level: verbose
+        * - output: sram
+        */
+        commands.addGetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
 
-    /* 3: Get log parameter , will return
-    * - isStarted : true
-    * - level: verbose
-    * - output: sram
-    */
-    commands.addGetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
-
-    /** Adding a successful set log parameters command, this is called by the System class
-    * destructor to stop log */
-    setLogParams = {windows::driver::IOCTL_LOG_STATE::STOPPED,
-                    windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
-                    windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
-    commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
+        /** Adding a successful set log parameters command, this is called by the System class
+        * destructor to stop log */
+        setLogParams = {windows::driver::IOCTL_LOG_STATE::STOPPED,
+                        windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
+                        windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
+        commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
+    }
 
     /* Now using the mocked device
     * --------------------------- */
@@ -604,22 +619,22 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
     /* Setting the test vector
     * ----------------------- */
 
-    windows::MockedDeviceCommands commands(*device);
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    /* Adding initial commands */
-    addInitialCommands(commands);
+        /* 1: start log command */
+        windows::driver::IoctlFwLogsState setLogParams = {
+            windows::driver::IOCTL_LOG_STATE::STARTED, windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
+            windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
+        commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
 
-    /* 1: start log command */
-    windows::driver::IoctlFwLogsState setLogParams = {windows::driver::IOCTL_LOG_STATE::STARTED,
-                                                      windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
-                                                      windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
-    commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
-
-    /* 2: Stop log command, will be called by the debug agent termination */
-    setLogParams.started = windows::driver::IOCTL_LOG_STATE::STOPPED;
-    setLogParams.level = windows::driver::FW_LOG_LEVEL::LOG_VERBOSE;
-    setLogParams.output = windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM;
-    commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
+        /* 2: Stop log command, will be called by the debug agent termination */
+        setLogParams.started = windows::driver::IOCTL_LOG_STATE::STOPPED;
+        setLogParams.level = windows::driver::FW_LOG_LEVEL::LOG_VERBOSE;
+        setLogParams.output = windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM;
+        commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
+    }
 
     /* Now using the mocked device
     * --------------------------- */
@@ -704,67 +719,69 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     /* Setting the test vector
      * ----------------------- */
 
-    windows::MockedDeviceCommands commands(*device);
     windows::EventHandle probeEventHandle;
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    /* Adding initial commands */
-    addInitialCommands(commands);
+        // 1 : Getting probe service parameters, checking that it is stopped
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
 
-    // 1 : Getting probe service parameters, checking that it is stopped
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        // 2 : Getting probe endpoint parameters, checking that they are deactivated
+        // -> involves no ioctl
 
-    // 2 : Getting probe endpoint parameters, checking that they are deactivated
-    // -> involves no ioctl
+        // 3 : Configuring probe #1 to be enabled
+        // -> involves no ioctl
 
-    // 3 : Configuring probe #1 to be enabled
-    // -> involves no ioctl
+        // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one
+        //     that has been enabled
+        // -> involves no ioctl
 
-    // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one
-    //     that has been enabled
-    // -> involves no ioctl
+        // 5 : Starting service
 
-    // 5 : Starting service
+        // getting current state : idle
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
 
-    // getting current state : idle
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        // going to Owned
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
 
-    // going to Owned
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+        // setting probe configuration (probe #1 is enabled)
+        windows::driver::ProbePointConfiguration expectedDriverConfig = {
+            probeEventHandle.get(),
+            {{false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {true, {1, 2, 1, 0}, windows::driver::ProbePurpose::Extract, nullptr}, // Enabled
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr}}};
+        commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, expectedDriverConfig);
 
-    // setting probe configuration (probe #1 is enabled)
-    windows::driver::ProbePointConfiguration expectedDriverConfig = {
-        probeEventHandle.get(),
-        {{false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {true, {1, 2, 1, 0}, windows::driver::ProbePurpose::Extract, nullptr}, // Enabled
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr}}};
-    commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, expectedDriverConfig);
+        // going to Allocated
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::Allocated);
 
-    // going to Allocated
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Allocated);
+        // going to Active
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
 
-    // going to Active
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+        // 6 : Getting probe service parameters, checking that it is started
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
 
-    // 6 : Getting probe service parameters, checking that it is started
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+        // 7 : Stopping service
 
-    // 7 : Stopping service
+        // getting current state : Active
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
 
-    // getting current state : Active
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+        // going to Allocated, Owned and Idle
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::Allocated);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
 
-    // going to Allocated, Owned and Idle
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Allocated);
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
-
-    // 8: Getting probe service parameters, checking that it is stopped
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        // 8: Getting probe service parameters, checking that it is stopped
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+    }
 
     /* Now using the mocked device
      * --------------------------- */
@@ -846,41 +863,42 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
     /* Setting the test vector
     * ----------------------- */
 
-    windows::MockedDeviceCommands commands(*device);
     windows::EventHandle probeEventHandle;
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
 
-    /* Adding initial commands */
-    addInitialCommands(commands);
+        // 1 : Getting probe service state, with an inconsistent driver state (Owned)
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
 
-    // 1 : Getting probe service state, with an inconsistent driver state (Owned)
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+        // 2 : If service starting fails, it should come back to "Idle" state
 
-    // 2 : If service starting fails, it should come back to "Idle" state
+        // going to Owned state and setting configuration
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+        windows::driver::ProbePointConfiguration expectedDriverConfig = {
+            probeEventHandle.get(),
+            {{false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr}}};
+        commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, expectedDriverConfig);
 
-    // going to Owned state and setting configuration
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
-    windows::driver::ProbePointConfiguration expectedDriverConfig = {
-        probeEventHandle.get(),
-        {{false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr}}};
-    commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, expectedDriverConfig);
+        // going to Allocated, but the it fails!
+        commands.addSetProbeStateCommand(false, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::Allocated);
 
-    // going to Allocated, but the it fails!
-    commands.addSetProbeStateCommand(false, STATUS_SUCCESS, windows::driver::ProbeState::Allocated);
+        // coming back to idle : firstly getting current state (Owned), then going to Idle state
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
 
-    // coming back to idle : firstly getting current state (Owned), then going to Idle state
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
-
-    // 3 : getting state: should be Idle
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        // 3 : getting state: should be Idle
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+    }
 
     /* Now using the mocked device
     * --------------------------- */
