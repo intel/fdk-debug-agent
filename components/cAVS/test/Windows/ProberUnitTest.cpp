@@ -39,6 +39,7 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
 {
     EventHandle probeEvent;
     MockedDeviceCommands commands(device);
+    Me prober(device, probeEvent);
 
     // Check that all states are correctly converted
     for (auto state : {driver::ProbeState::Idle, driver::ProbeState::Owned,
@@ -46,8 +47,6 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS, state);
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, state);
     }
-
-    Me prober(device, probeEvent);
 
     for (auto state :
          {Me::State::Idle, Me::State::Owned, Me::State::Allocated, Me::State::Active}) {
@@ -61,6 +60,7 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
 {
     EventHandle probeEvent;
     MockedDeviceCommands commands(device);
+    Me prober(device, probeEvent);
 
     driver::ProbePointConfiguration sampleDriverConfig = {
         probeEvent.get(),
@@ -82,12 +82,10 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
         {true, {0, 0, Me::ProbeType::Input, 0}, Me::ProbePurpose::Extract},
         {true, {0, 0, Me::ProbeType::Input, 0}, Me::ProbePurpose::Extract}};
 
+    // Check nominal cases
     commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, sampleDriverConfig);
-    commands.addGetProbeConfigurationCommand(true, STATUS_SUCCESS, sampleDriverConfig);
-
-    Me prober(device, probeEvent);
-
     CHECK_NOTHROW(prober.setSessionProbes(sampleCavsConfig));
+    commands.addGetProbeConfigurationCommand(true, STATUS_SUCCESS, sampleDriverConfig);
     CHECK_NOTHROW(prober.getSessionProbes() == sampleCavsConfig);
 
     // TODO: error cases
