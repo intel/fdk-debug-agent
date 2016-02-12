@@ -133,7 +133,7 @@ public:
         } catch (ParameterApplier::UnsupportedException &) {
             throw UnsupportedException("command not supported: getValue", type, kind, instanceId);
         } catch (ParameterApplier::Exception &e) {
-            throw Exception("cannot get parameter value" + std::string(e.what()), type, kind,
+            throw Exception("cannot get parameter value: " + std::string(e.what()), type, kind,
                             instanceId);
         }
     }
@@ -148,7 +148,7 @@ public:
         } catch (ParameterApplier::UnsupportedException &) {
             throw UnsupportedException("command not supported: setValue", type, kind, instanceId);
         } catch (ParameterApplier::Exception &e) {
-            throw Exception("cannot set control parameter value" + std::string(e.what()), type,
+            throw Exception("cannot set control parameter value: " + std::string(e.what()), type,
                             kind, instanceId, value);
         }
     }

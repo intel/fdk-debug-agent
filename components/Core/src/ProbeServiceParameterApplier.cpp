@@ -77,7 +77,7 @@ std::string ProbeServiceParameterApplier::getServiceParameterValue()
     try {
         active = mSystem.isProberActive();
     } catch (System::Exception &e) {
-        throw Exception(std::string("Cannot get probe service state : ") + e.what());
+        throw Exception(std::string("Cannot get probe service state: ") + e.what());
     }
 
     /** @todo: use libstructure to generate xml file */
