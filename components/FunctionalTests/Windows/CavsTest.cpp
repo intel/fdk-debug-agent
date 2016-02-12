@@ -695,7 +695,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
     CHECK_NOTHROW(delayedGetLogStreamFuture.get());
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases")
 {
     static const std::size_t probeCount = 8;
     static const std::size_t enabledProbeIndex = 1;
@@ -833,6 +833,95 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control")
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 
     // 8: Getting probe service parameters, checking that it is stopped
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_stopped"))));
+}
+
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases")
+{
+    static const std::size_t probeCount = 8;
+
+    /* Setting the test vector
+    * ----------------------- */
+
+    windows::MockedDeviceCommands commands(*device);
+    windows::EventHandle probeEventHandle;
+
+    /* Adding initial commands */
+    addInitialCommands(commands);
+
+    // 1 : Getting probe service state, with an inconsistent driver state (Owned)
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+
+    // 2 : If service starting fails, it should come back to "Idle" state
+
+    // going to Owned state and setting configuration
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+    windows::driver::ProbePointConfiguration expectedDriverConfig = {
+        probeEventHandle.get(),
+        {{false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
+         {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr}}};
+    commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, expectedDriverConfig);
+
+    // going to Allocated, but the it fails!
+    commands.addSetProbeStateCommand(false, STATUS_SUCCESS, windows::driver::ProbeState::Allocated);
+
+    // coming back to idle : firstly getting current state (Owned), then going to Idle state
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+
+    // 3 : getting state: should be Idle
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(), probeEventHandle);
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    // 1 : Getting probe service state, with an inconsistent driver state (Owned)
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::InternalError, "text/plain",
+        HttpClientSimulator::StringContent(
+            "Internal error: ParameterDispatcher: cannot get "
+            "parameter value: Cannot get probe service state: Cannot get probe service state: "
+            "Unexpected driver probe service state: Owned "
+            "(type=cavs.probe kind=Control instance=0)")));
+
+    // 2 : If service starting fails, it should come back to "Idle" state
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_param_started")),
+        HttpClientSimulator::Status::InternalError, "text/plain",
+        HttpClientSimulator::StringContent(
+            "Internal error: ParameterDispatcher: cannot set "
+            "control parameter value: Unable to set probe service state: Cannot set probe service "
+            "state: Unable to set state to driver: TinySet error: OS says that io control has "
+            "failed. (type=cavs.probe kind=Control instance=0\nvalue:\n"
+            "<control_parameters>\n"
+            "    <ParameterBlock Name=\"State\">\n"
+            "        <BooleanParameter Name=\"Started\">1</BooleanParameter>\n"
+            "    </ParameterBlock>\n"
+            "</control_parameters>\n)")));
+
+    // 3 : getting state: should be Idle
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
         HttpClientSimulator::Status::Ok, "text/xml",
