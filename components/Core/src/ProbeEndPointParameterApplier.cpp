@@ -128,7 +128,7 @@ std::string ProbeEndPointParameterApplier::getEndPointParameterValue(
 
     Prober::ProbeConfig config;
     try {
-        mSystem.setProbeConfiguration(probeId, config);
+        config = mSystem.getProbeConfiguration(probeId);
     } catch (System::Exception &e) {
         throw Exception("Unable to get probe configuration: " + std::string(e.what()));
     }
