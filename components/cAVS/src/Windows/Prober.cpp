@@ -24,6 +24,7 @@
 #include "cAVS/Windows/Prober.hpp"
 #include "cAVS/Windows/IoctlHelpers.hpp"
 #include <string>
+#include <cstring>
 #include <map>
 #include <stdexcept>
 
@@ -162,6 +163,7 @@ void Prober::setSessionProbes(const SessionProbes probes)
 Prober::SessionProbes Prober::getSessionProbes()
 {
     driver::ProbePointConfiguration from;
+    memset(&from, 0xFF, sizeof(from));
     ioctl<GetProbePointConfiguration>(from);
 
     SessionProbes result;
