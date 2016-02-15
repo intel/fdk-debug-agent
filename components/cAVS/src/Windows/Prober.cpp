@@ -205,6 +205,14 @@ driver::RingBuffersDescription Prober::getRingBuffers()
     return from;
 }
 
+size_t Prober::getExtractionRingBufferLinearPosition()
+{
+    uint64_t from;
+    memset(&from, 0xFF, sizeof(from));
+    ioctl<GetExtractionRingBufferPosition>(from);
+    return size_t{from};
+}
+
 template <class T>
 void Prober::ioctl(typename T::Data &inout)
 {

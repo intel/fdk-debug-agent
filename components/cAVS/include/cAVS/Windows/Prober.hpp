@@ -68,6 +68,7 @@ public:
     bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) override;
 
     driver::RingBuffersDescription getRingBuffers();
+    size_t getExtractionRingBufferLinearPosition();
 
 private:
     static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE;
@@ -84,7 +85,8 @@ private:
                                                         1, driver::ProbePointConfiguration>;
     using GetRingBuffersDescription = IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature, 2,
                                                        driver::RingBuffersDescription>;
-
+    using GetExtractionRingBufferPosition =
+        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature, 3, uint64_t>;
     /** Send a probes-related ioctl to the driver
      *
      * @tparam T A type describing the ioctl (id, direction, type of the data
