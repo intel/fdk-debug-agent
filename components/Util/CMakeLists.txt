@@ -35,6 +35,7 @@ set(INCS
     include/Util/FileHelper.hpp
     include/Util/Locker.hpp
     include/Util/PointerHelper.hpp
+    include/Util/RingBufferReader.hpp
     include/Util/StringHelper.hpp
     include/Util/StructureChangeTracking.hpp
     include/Util/TypedBuffer.hpp
