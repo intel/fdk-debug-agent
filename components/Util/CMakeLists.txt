@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -24,21 +24,22 @@ set(SRCS
     src/Uuid.cpp)
 
 set(INCS
-    include/Util/Locker.hpp
-    include/Util/Uuid.hpp
+    include/Util/AssertAlways.hpp
     include/Util/BlockingQueue.hpp
-    include/Util/PointerHelper.hpp
+    include/Util/Buffer.hpp
     include/Util/ByteStreamCommon.hpp
     include/Util/ByteStreamReader.hpp
     include/Util/ByteStreamWriter.hpp
-    include/Util/StringHelper.hpp
-    include/Util/AssertAlways.hpp
-    include/Util/convert.hpp
     include/Util/EnumHelper.hpp
-    include/Util/Buffer.hpp
-    include/Util/TypedBuffer.hpp
+    include/Util/FileHelper.hpp
+    include/Util/Locker.hpp
+    include/Util/PointerHelper.hpp
+    include/Util/StringHelper.hpp
     include/Util/StructureChangeTracking.hpp
-    include/Util/FileHelper.hpp)
+    include/Util/TypedBuffer.hpp
+    include/Util/Uuid.hpp
+    include/Util/convert.hpp
+)
 
 add_library(Util STATIC ${SRCS} ${INCS})
 set_common_settings(Util)
