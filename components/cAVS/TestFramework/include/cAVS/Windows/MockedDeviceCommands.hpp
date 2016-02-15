@@ -195,6 +195,19 @@ public:
         bool ioctlSuccess, NTSTATUS returnedStatus,
         const driver::ProbePointConfiguration &expectedConfiguration);
 
+    /** Add a get ring buffers command
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedStatus the returned driver status
+     * @param[in] returnedBuffers the buffers description returned by the ioctl
+     *
+     * @note: returnedBuffers is unused if
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedStatus) returns false
+     */
+    void addGetRingBuffers(bool ioctlSuccess, NTSTATUS returnedStatus,
+                           const driver::RingBuffersDescription &returnedBuffers);
+
     /** Add a get pipeline list command.
      *
      * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)

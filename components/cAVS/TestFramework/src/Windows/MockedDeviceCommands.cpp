@@ -288,6 +288,14 @@ void MockedDeviceCommands::addSetProbeConfigurationCommand(
                                                        returnedStatus);
 }
 
+void MockedDeviceCommands::addGetRingBuffers(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                             const driver::RingBuffersDescription &returnedBuffers)
+{
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE, 2,
+                      driver::RingBuffersDescription>(returnedBuffers, ioctlSuccess,
+                                                      returnedStatus);
+}
+
 void MockedDeviceCommands::addGetPipelineListCommand(
     bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
     uint32_t maxPplCount, const std::vector<dsp_fw::PipeLineIdType> &pipelineIds)

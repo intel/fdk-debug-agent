@@ -340,6 +340,42 @@ struct ProbePointConfiguration
         writer.write(probePointConnection);
     }
 };
+
+// TODO: import from driver headers
+struct RingBufferDescription
+{
+    volatile uint8_t *startAdress;
+    size_t size;
+
+    void fromStream(util::ByteStreamReader &reader)
+    {
+        reader.read(startAdress);
+        reader.read(size);
+    }
+    void toStream(util::ByteStreamWriter &writer) const
+    {
+        writer.write(startAdress);
+        writer.write(size);
+    }
+};
+
+// TODO: import from driver headers
+struct RingBuffersDescription
+{
+    RingBufferDescription extractionRBDescription;
+    std::array<RingBufferDescription, 8> injectionRBDescriptions;
+
+    void fromStream(util::ByteStreamReader &reader)
+    {
+        reader.read(extractionRBDescription);
+        reader.read(injectionRBDescriptions);
+    }
+    void toStream(util::ByteStreamWriter &writer) const
+    {
+        writer.write(extractionRBDescription);
+        writer.write(injectionRBDescriptions);
+    }
+};
 }
 }
 }

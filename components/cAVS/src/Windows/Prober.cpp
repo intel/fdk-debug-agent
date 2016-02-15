@@ -193,6 +193,18 @@ bool Prober::enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffe
     return false;
 }
 
+driver::RingBuffersDescription Prober::getRingBuffers()
+{
+    using RingBuffer = driver::RingBufferDescription;
+    using RingBuffers = driver::RingBuffersDescription;
+
+    driver::RingBuffersDescription from;
+    memset(&from, 0xFF, sizeof(from));
+    ioctl<GetRingBuffersDescription>(from);
+
+    return from;
+}
+
 template <class T>
 void Prober::ioctl(typename T::Data &inout)
 {

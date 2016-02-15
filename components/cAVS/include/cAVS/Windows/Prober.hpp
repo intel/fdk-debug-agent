@@ -27,6 +27,8 @@
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
+#include "cAVS/Windows/DriverTypes.hpp"
+
 #include <array>
 
 namespace debug_agent
@@ -65,6 +67,8 @@ public:
     std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override;
     bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) override;
 
+    driver::RingBuffersDescription getRingBuffers();
+
 private:
     static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE;
 
@@ -78,6 +82,8 @@ private:
                                                         1, driver::ProbePointConfiguration>;
     using SetProbePointConfiguration = IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature,
                                                         1, driver::ProbePointConfiguration>;
+    using GetRingBuffersDescription = IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature, 2,
+                                                       driver::RingBuffersDescription>;
 
     /** Send a probes-related ioctl to the driver
      *
