@@ -31,6 +31,7 @@ set(INCS
     include/Util/ByteStreamReader.hpp
     include/Util/ByteStreamWriter.hpp
     include/Util/EnumHelper.hpp
+    include/Util/Exception.hpp
     include/Util/FileHelper.hpp
     include/Util/Locker.hpp
     include/Util/PointerHelper.hpp
