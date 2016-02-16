@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -97,6 +97,9 @@ public:
     uint32_t maxDpTasksCount;
     bool isMaxDpTasksCountValid;
 
+    uint32_t maxLibsCount;
+    bool isMaxLibsCountValid;
+
     FwConfig() : mFwConfigTlvMap(), mFwConfigTlvDictionary(mFwConfigTlvMap)
     {
         using Tags = FwConfigParams;
@@ -137,6 +140,8 @@ public:
             std::make_unique<TlvWrapper<uint32_t>>(llPriCount, isLlPriCountValid);
         mFwConfigTlvMap[Tags::MAX_DP_TASKS_COUNT_FW_CFG] =
             std::make_unique<TlvWrapper<uint32_t>>(maxDpTasksCount, isMaxDpTasksCountValid);
+        mFwConfigTlvMap[Tags::MAX_LIBS_COUNT_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(maxLibsCount, isMaxLibsCountValid);
     }
 
     const tlv::TlvDictionaryInterface &getTlvDictionary() const noexcept override
