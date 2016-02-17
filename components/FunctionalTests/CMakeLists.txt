@@ -36,7 +36,7 @@ else ()
     error("No cAVS implementation for this platform")
 endif ()
 
-add_executable(FunctionalTests ${TEST_SRCS} ${TEST_INCS})
+add_dbga_executable(FunctionalTests ${TEST_SRCS} ${TEST_INCS})
 add_catch_test(FunctionalTests ${CMAKE_CURRENT_LIST_DIR})
 add_test_dependencies(FunctionalTests
     ParameterFramework::parameter

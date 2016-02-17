@@ -40,7 +40,7 @@ else ()
     error("No cAVS implementation for this platform")
 endif ()
 
-add_executable(CavsUnitTest ${TEST_SRCS} ${TEST_INCS})
+add_dbga_executable(CavsUnitTest ${TEST_SRCS} ${TEST_INCS})
 add_catch_test(CavsUnitTest ${CMAKE_CURRENT_LIST_DIR}/Windows)
 set_common_settings(CavsUnitTest)
 

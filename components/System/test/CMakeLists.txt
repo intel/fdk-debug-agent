@@ -28,7 +28,7 @@ set(TEST_SRCS
 
 set(TEST_INCS)
 
-add_executable(SystemTest ${TEST_SRCS} ${TEST_INCS})
+add_dbga_executable(SystemTest ${TEST_SRCS} ${TEST_INCS})
 add_catch_test(SystemTest ${CMAKE_CURRENT_LIST_DIR})
 set_common_settings(SystemTest)
 

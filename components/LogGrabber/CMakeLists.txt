@@ -22,7 +22,7 @@
 
 set(EXE_SRCS Main.cpp)
 
-add_executable(LogGrabber ${EXE_SRCS})
+add_dbga_executable(LogGrabber ${EXE_SRCS})
 set_common_settings(LogGrabber)
 
 # dependent libraries

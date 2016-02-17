@@ -32,7 +32,7 @@ set(TEST_SRCS
 
 set(TEST_INCS)
 
-add_executable(UtilTest ${TEST_SRCS} ${TEST_INCS})
+add_dbga_executable(UtilTest ${TEST_SRCS} ${TEST_INCS})
 set_common_settings(UtilTest)
 add_catch_test(UtilTest ${CMAKE_CURRENT_LIST_DIR})
 

@@ -22,6 +22,9 @@
 
 project(DebugAgent)
 
+# debug binary file postfix
+set(CMAKE_DEBUG_POSTFIX "_d")
+
 cmake_minimum_required(VERSION 3.2.0)
 # 3.3.0 is required to support Visual Studio 2015
 if((CMAKE_GENERATOR MATCHES "Visual Studio .*")
@@ -89,6 +92,14 @@ function (set_common_settings projectname)
     set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD 14)
     set_property(TARGET ${projectname} APPEND PROPERTY CXX_EXTENSIONS OFF)
     set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD_REQUIRED ON)
+endfunction()
+
+# Unfortunately CMAKE_DEBUG_POSTFIX is not used by executable projects, only
+# shared library projects. So defining a custom add_executable function
+# that appends the postfix.
+function (add_dbga_executable projectname)
+    add_executable(${projectname} ${ARGN})
+    set_target_properties(${projectname} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 endfunction()
 
 # We want to *include* this file before adding any test because it calls

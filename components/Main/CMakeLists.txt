@@ -46,7 +46,7 @@ if (WIN32)
     include("CMakeListsWindows.txt")
 endif (WIN32)
 
-add_executable(Main ${SRCS} ${INCS})
+add_dbga_executable(Main ${SRCS} ${INCS})
 set_common_settings(Main)
 
 target_compile_definitions(Main PRIVATE
