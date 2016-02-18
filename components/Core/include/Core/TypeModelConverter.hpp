@@ -59,7 +59,7 @@ private:
 
     /* Common method to create service type */
     static std::shared_ptr<ifdk_objects::type::Type> createService(
-        const std::string &serviceTypeName);
+        const std::string &serviceTypeName, std::size_t endPointCount);
 
     /* Common method to create endpoint type */
     static std::shared_ptr<ifdk_objects::type::Type> createEndPoint(
@@ -68,7 +68,8 @@ private:
     /* Add all types required by a service */
     static void addSubsystemServiceTypes(TypeModel::TypeMap &map,
                                          const std::string &serviceTypeName,
-                                         ifdk_objects::type::EndPoint::Direction direction);
+                                         ifdk_objects::type::EndPoint::Direction direction,
+                                         std::size_t endPointCount);
 };
 }
 }

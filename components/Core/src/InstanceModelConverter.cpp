@@ -222,13 +222,15 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createService(const std:
     service->getParents().add(std::make_shared<SubsystemRef>(subsystemName, subsystemId));
 
     /* Children */
-    auto endPointCollection = std::make_shared<EndPointRefCollection>(collectionName_endpoint);
-    for (std::size_t endPointIndex = 0; endPointIndex < endPointCount; ++endPointIndex) {
-        endPointCollection->add(
-            EndPointRef(getEndPointTypeName(typeName), std::to_string(endPointIndex)));
-    }
+    if (endPointCount > 0) {
+        auto endPointCollection = std::make_shared<EndPointRefCollection>(collectionName_endpoint);
+        for (std::size_t endPointIndex = 0; endPointIndex < endPointCount; ++endPointIndex) {
+            endPointCollection->add(
+                EndPointRef(getEndPointTypeName(typeName), std::to_string(endPointIndex)));
+        }
 
-    service->getChildren().add(endPointCollection);
+        service->getChildren().add(endPointCollection);
+    }
 
     auto coll = std::make_shared<ServiceCollection>();
     coll->add(service);
@@ -566,8 +568,11 @@ void InstanceModelConverter::addServiceInstanceCollection(InstanceModel::Collect
                                                           std::size_t endPointCount)
 {
     addInstanceCollection(map, serviceTypeName, createService(serviceTypeName, endPointCount));
-    addInstanceCollection(map, getEndPointTypeName(serviceTypeName),
-                          createEndPoint(serviceTypeName, endPointCount));
+
+    if (endPointCount > 0) {
+        addInstanceCollection(map, getEndPointTypeName(serviceTypeName),
+                              createEndPoint(serviceTypeName, endPointCount));
+    }
 }
 }
 }

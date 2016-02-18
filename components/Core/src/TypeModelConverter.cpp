@@ -61,8 +61,12 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
     }
 
     /* Services */
-    addSubsystemServiceTypes(typeMap, logServiceTypeName, EndPoint::Direction::Outgoing);
-    addSubsystemServiceTypes(typeMap, probeServiceTypeName, EndPoint::Direction::Bidirectional);
+
+    /* Currently the log service does not have endpoint*/
+    addSubsystemServiceTypes(typeMap, logServiceTypeName, EndPoint::Direction::Outgoing,
+                             logServiceEndPointCount);
+    addSubsystemServiceTypes(typeMap, probeServiceTypeName, EndPoint::Direction::Bidirectional,
+                             probeServiceEndPointCount);
 
     return std::make_shared<TypeModel>(createSystem(), typeMap);
 }
@@ -235,15 +239,18 @@ std::shared_ptr<Type> TypeModelConverter::createModule(uint16_t id)
     return module;
 }
 
-std::shared_ptr<Type> TypeModelConverter::createService(const std::string &serviceTypeName)
+std::shared_ptr<Type> TypeModelConverter::createService(const std::string &serviceTypeName,
+                                                        std::size_t endPointCount)
 {
     auto service = std::make_shared<Service>(serviceTypeName);
     service->getDescription().setValue(getServiceTypeDescription(serviceTypeName));
 
     // service children
-    auto coll = std::make_shared<EndPointRefCollection>(collectionName_endpoint);
-    coll->add(EndPointRef(getEndPointTypeName(serviceTypeName)));
-    service->getChildren().add(coll);
+    if (endPointCount > 0) {
+        auto coll = std::make_shared<EndPointRefCollection>(collectionName_endpoint);
+        coll->add(EndPointRef(getEndPointTypeName(serviceTypeName)));
+        service->getChildren().add(coll);
+    }
 
     return service;
 }
@@ -261,10 +268,15 @@ std::shared_ptr<Type> TypeModelConverter::createEndPoint(const std::string &serv
 
 void TypeModelConverter::addSubsystemServiceTypes(TypeModel::TypeMap &map,
                                                   const std::string &serviceTypeName,
-                                                  EndPoint::Direction direction)
+                                                  EndPoint::Direction direction,
+                                                  std::size_t endPointCount)
 {
-    addSubsystemSubType(map, createService(serviceTypeName));
-    addSubsystemSubType(map, createEndPoint(serviceTypeName, direction));
+    addSubsystemSubType(map, createService(serviceTypeName, endPointCount));
+
+    /* Adding endpoint type only if there is at least one endpoint */
+    if (endPointCount > 0) {
+        addSubsystemSubType(map, createEndPoint(serviceTypeName, direction));
+    }
 }
 
 void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
