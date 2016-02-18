@@ -23,9 +23,11 @@
 
 #include "cAVS/Windows/Prober.hpp"
 #include "cAVS/Windows/IoctlHelpers.hpp"
+
 #include <string>
 #include <cstring>
 #include <map>
+#include <algorithm>
 #include <stdexcept>
 
 namespace debug_agent
