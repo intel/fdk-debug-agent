@@ -22,6 +22,9 @@
 
 project(DebugAgent)
 
+# option to prevent from compiling functional test
+option(EXCLUDE_TEST_IN_ALL_TARGET "Prevent Functional Test compilation" OFF)
+
 # debug binary file postfix
 set(CMAKE_DEBUG_POSTFIX "_d")
 
@@ -129,7 +132,10 @@ add_subdirectory("components/cAVS")
 add_subdirectory("components/ParameterSerializer")
 add_subdirectory("components/Core")
 add_subdirectory("components/Main")
-add_subdirectory("components/FunctionalTests")
+
+if (NOT ${EXCLUDE_TEST_IN_ALL_TARGET})
+    add_subdirectory("components/FunctionalTests")
+endif (NOT ${EXCLUDE_TEST_IN_ALL_TARGET})
 
 # Windows only components
 if (WIN32)
