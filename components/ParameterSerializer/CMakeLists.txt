@@ -35,7 +35,7 @@ set_common_settings(ParameterSerializer)
 target_include_directories(ParameterSerializer PUBLIC "include")
 
 # other dependencies
-target_link_libraries(ParameterSerializer Util parameter)
+target_link_libraries(ParameterSerializer Util ParameterFramework::parameter)
 
 # Adding test
 add_subdirectory("test")

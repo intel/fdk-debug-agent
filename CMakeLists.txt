@@ -39,6 +39,9 @@ endif()
 # Provinding poco library
 find_package(Poco REQUIRED COMPONENTS Foundation Net Util Zip)
 
+# Providing parameter framework
+find_package(ParameterFramework REQUIRED)
+
 if (NOT ${Poco_FOUND})
     message( FATAL_ERROR "Poco not found : ${Poco_NOT_FOUND_MESSAGE}" )
 endif(NOT ${Poco_FOUND})
@@ -92,9 +95,6 @@ endfunction()
 # "include(CTest)"
 include("ctest/CMakeLists.txt")
 
-# Adding imported external libraries
-add_subdirectory("external/cmake")
-
 # Adding components in the right order (less dependent first)
 add_subdirectory("components/Util")
 add_subdirectory("components/IfdkObjects")
@@ -113,59 +113,12 @@ if (WIN32)
     add_subdirectory("components/LogGrabber")
 endif()
 
-#
-# Add the Parameter Framework project
-#
-
-# Don't test the Parameter Framework in the context of the Debug Agent
-set(OLD_BUILD_TESTING ${BUILD_TESTING})
-set(BUILD_TESTING off CACHE BOOL "" FORCE)
-
-# No need for the bindings
-set(PYTHON_BINDINGS off CACHE BOOL "" FORCE)
-set(C_BINDINGS off CACHE BOOL "" FORCE)
-
-# Backup and reset cmake flags
-set(OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS "")
-
-# will contains parameter-framework targets
-set(PFW_TARGETS CACHE INTERNAL "PFW_TARGETS")
-
-# this function adds a parameter-framework target if it is not imported
-function (add_pfw_target name)
-    get_target_property(isImported ${name} IMPORTED)
-    if (NOT ${isImported})
-        set(PFW_TARGETS ${PFW_TARGETS} ${name} CACHE INTERNAL "PFW_TARGETS")
-    endif()
-endfunction()
-
-# hooking add_library function to register parameter-framework libraries
-function (add_library name)
-  _add_library (${name} ${ARGN})
-  add_pfw_target(${name})
-endfunction ()
-
-# hooking add_executable function to register parameter-framework executables
-function (add_executable name)
-  _add_executable (${name} ${ARGN})
-  add_pfw_target(${name})
-endfunction ()
-
-# including pfw projects
-add_subdirectory("external/parameter-framework/project")
-
-# creating a custom target "all_pfw" that depends of all pfw targets
-add_custom_target(pfw_all)
-add_dependencies(pfw_all ${PFW_TARGETS})
-
-# Restore the previous value of BUILD_TESTING and CMAKE_CXX_FLAGS since we
-# overrode them for the Parameter Framework but don't want to mess up our own
-# cache.
-set(BUILD_TESTING "${OLD_BUILD_TESTING}" CACHE BOOL "" FORCE)
-set(CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}" CACHE STRING "" FORCE)
-
-# installing libxml2 shared library into bin/ directories
-install(FILES $<TARGET_FILE:libxml2::deployment> DESTINATION bin)
+# installing PFW shared libraries and dependencies
+# note: install(TARGETS... ) cannot be used with imported target
+set (PFW_SHAREDLIBS
+    $<TARGET_FILE:ParameterFramework::parameter>
+    $<TARGET_FILE:ParameterFramework::remote-processor>
+    $<TARGET_FILE:ParameterFramework::libxml2>)
+install(FILES ${PFW_SHAREDLIBS} DESTINATION bin)
 
 

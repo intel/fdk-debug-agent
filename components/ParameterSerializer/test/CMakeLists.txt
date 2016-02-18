@@ -28,7 +28,11 @@ set(TEST_INCS)
 
 add_executable(ParameterSerializerTest ${TEST_SRCS} ${TEST_INCS})
 add_catch_test(ParameterSerializerTest "${PROJECT_SOURCE_DIR}/components/FunctionalTests")
-add_test_dependencies(ParameterSerializerTest parameter libxml2::deployment)
+
+add_test_dependencies(ParameterSerializerTest
+    ParameterFramework::parameter
+    ParameterFramework::remote-processor
+    ParameterFramework::libxml2)
 set_common_settings(ParameterSerializerTest)
 
 # external libraries

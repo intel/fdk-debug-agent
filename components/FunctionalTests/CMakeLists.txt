@@ -38,7 +38,11 @@ endif ()
 
 add_executable(FunctionalTests ${TEST_SRCS} ${TEST_INCS})
 add_catch_test(FunctionalTests ${CMAKE_CURRENT_LIST_DIR})
-add_test_dependencies(FunctionalTests parameter libxml2::deployment)
+add_test_dependencies(FunctionalTests
+    ParameterFramework::parameter
+    ParameterFramework::remote-processor
+    ParameterFramework::libxml2)
+
 set_common_settings(FunctionalTests)
 
 # include private headers in the same directory as sources
