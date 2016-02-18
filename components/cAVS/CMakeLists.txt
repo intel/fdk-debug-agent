@@ -56,7 +56,8 @@ set(FW_INCS
     include/cAVS/DspFw/Infrastructure.hpp
     include/cAVS/DspFw/ModuleType.hpp
     include/cAVS/DspFw/Scheduler.hpp
-    include/cAVS/DspFw/ExternalFirmwareHeaders.hpp)
+    include/cAVS/DspFw/ExternalFirmwareHeaders.hpp
+    include/cAVS/DspFw/Probe.hpp)
 
 source_group("Header Files\\DspFw" FILES ${FW_INCS})
 set(LIB_INCS ${LIB_INCS} ${FW_INCS})
