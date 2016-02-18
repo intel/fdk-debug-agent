@@ -46,7 +46,7 @@
 		</ComponentType>
 		<ComponentType Name="tmodule-aec" Extends="tModuleInfo">
 			<ParameterBlock Name="control">
-				<Component Name="AcousticEchoCanceler" Type="AcousticEchoCanceler" Mapping="ParamId:0x100000000"/>
+				<Component Name="AcousticEchoCanceler" Type="AcousticEchoCanceler" Mapping="ParamId:0"/>
 				<Component Name="NoiseReduction" Type="NoiseReduction" Mapping="ParamId:25"/>
 			</ParameterBlock>
 		</ComponentType>

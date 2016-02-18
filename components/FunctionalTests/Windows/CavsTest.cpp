@@ -349,8 +349,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
         "text/html", HttpClientSimulator::FileContent(htmlFileName("internal_topology"))));
 }
 
-/** Test a parameter id over 32 bit. */
-static const dsp_fw::ParameterId AecParameterId{1LL << 32};
+static const dsp_fw::ParameterId AecParameterId{0};
 
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control parameters "
                           "(URL: /instance/cavs.module-aec/1/control_parameters)")

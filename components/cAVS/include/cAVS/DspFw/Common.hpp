@@ -46,7 +46,7 @@ namespace detail
 /** Unique trait to for parameterId. */
 struct ParameterIdTrait
 {
-    using RawType = uint64_t;
+    using RawType = uint32_t;
 };
 
 } // namespace detail
