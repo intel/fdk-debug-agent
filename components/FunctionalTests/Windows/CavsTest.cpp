@@ -298,10 +298,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
         {"/instance/cavs.fwlogs", "logservice_instance_collection"},
         {"/instance/cavs.fwlogs/0", "logservice_instance"},
 
-        {"/type/cavs.fwlogs.endpoint", "logservice_endpoint_type"},
-        {"/instance/cavs.fwlogs.endpoint", "logservice_endpoint_instance_collection"},
-        {"/instance/cavs.fwlogs.endpoint/0", "logservice_endpoint_instance"},
-
         {"/type/cavs.probe", "probeservice_type"},
         {"/instance/cavs.probe", "probeservice_instance_collection"},
         {"/instance/cavs.probe/0", "probeservice_instance"},

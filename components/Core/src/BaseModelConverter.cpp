@@ -63,7 +63,7 @@ const std::vector<std::string> BaseModelConverter::staticTypes = {typeName_pipe,
 const std::string BaseModelConverter::serviceId = "0";
 
 const std::string BaseModelConverter::logServiceTypeName = "fwlogs";
-const std::size_t BaseModelConverter::logServiceEndPointCount = 1;
+const std::size_t BaseModelConverter::logServiceEndPointCount = 0;
 
 const std::string BaseModelConverter::probeServiceTypeName = "probe";
 const std::size_t BaseModelConverter::probeServiceEndPointCount = 8;

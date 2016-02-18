@@ -5,10 +5,6 @@
         <parents>
             <subsystem Id="0" Type="cavs"/>
         </parents>
-        <children>
-            <endpoint_collection Name="endpoints">
-                <endpoint Id="0" Type="fwlogs.endpoint"/>
-            </endpoint_collection>
-        </children>
+        <children/>
     </service>
 </service_collection>

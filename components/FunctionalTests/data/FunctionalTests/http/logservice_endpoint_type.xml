@@ -1,7 +1,0 @@
-<endpoint_type Direction="Outgoing" Name="fwlogs.endpoint">
-    <description>cAVS subsystem fwlogs endpoint</description>
-    <characteristics/>
-    <info_parameters/>
-    <control_parameters/>
-    <children/>
-</endpoint_type>
