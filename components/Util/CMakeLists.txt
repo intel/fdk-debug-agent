@@ -38,6 +38,7 @@ set(INCS
     include/Util/StructureChangeTracking.hpp
     include/Util/TypedBuffer.hpp
     include/Util/Uuid.hpp
+    include/Util/WrappedRaw.hpp
     include/Util/convert.hpp
 )
 
