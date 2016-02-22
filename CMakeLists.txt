@@ -42,8 +42,10 @@ endif()
 # Provinding poco library
 find_package(Poco REQUIRED COMPONENTS Foundation Net Util Zip)
 
-# Providing parameter framework
-find_package(ParameterFramework REQUIRED)
+# Providing parameter framework ?
+if (NOT IGNORE_PFW_CMAKE_FILE)
+    find_package(ParameterFramework REQUIRED)
+endif (NOT IGNORE_PFW_CMAKE_FILE)
 
 if (NOT ${Poco_FOUND})
     message( FATAL_ERROR "Poco not found : ${Poco_NOT_FOUND_MESSAGE}" )

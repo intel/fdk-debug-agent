@@ -35,7 +35,14 @@ set_common_settings(ParameterSerializer)
 target_include_directories(ParameterSerializer PUBLIC "include")
 
 # other dependencies
-target_link_libraries(ParameterSerializer Util ParameterFramework::parameter)
+if (IGNORE_PFW_CMAKE_FILE)
+    target_link_libraries(ParameterSerializer Util parameter)
+    find_path(PARAMETER_INCLUDE_DIR /parameter/client/ParameterMgrPlatformConnector.h)
+    target_include_directories(ParameterSerializer PUBLIC
+        "${PARAMETER_INCLUDE_DIR}/parameter/client")
+else ()
+    target_link_libraries(ParameterSerializer Util ParameterFramework::parameter)
+endif (IGNORE_PFW_CMAKE_FILE)
 
 # Adding test
 add_subdirectory("test")
