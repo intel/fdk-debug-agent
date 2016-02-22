@@ -1,7 +1,7 @@
 /*
  ********************************************************************************
  *                              INTEL CONFIDENTIAL
- *   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+ *   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
  *   The source code contained  or  described herein and all documents related to
  *   the source code ("Material") are owned by Intel Corporation or its suppliers
  *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -196,10 +196,10 @@ void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId,
 
 void ModuleHandler::getModuleParameter(uint16_t moduleId, uint16_t instanceId,
                                        dsp_fw::ParameterId parameterId,
-                                       util::Buffer &parameterPayload)
+                                       util::Buffer &parameterPayload, size_t parameterSize)
 {
     /* Query FW through driver */
-    parameterPayload = configGet(moduleId, instanceId, parameterId, maxParameterPayloadSize);
+    parameterPayload = configGet(moduleId, instanceId, parameterId, parameterSize);
 }
 }
 }
