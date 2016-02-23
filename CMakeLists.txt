@@ -137,4 +137,7 @@ if (WIN32)
     install(FILES ${PFW_SHAREDLIBS} DESTINATION bin)
 endif()
 
+# CPack
+add_subdirectory(cpack)
+
 
