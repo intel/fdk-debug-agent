@@ -124,12 +124,14 @@ if (WIN32)
     add_subdirectory("components/LogGrabber")
 endif()
 
-# installing PFW shared libraries and dependencies
-# note: install(TARGETS... ) cannot be used with imported target
-set (PFW_SHAREDLIBS
-    $<TARGET_FILE:ParameterFramework::parameter>
-    $<TARGET_FILE:ParameterFramework::remote-processor>
-    $<TARGET_FILE:ParameterFramework::libxml2>)
-install(FILES ${PFW_SHAREDLIBS} DESTINATION bin)
+# installing PFW shared libraries and dependencies on windows only
+if (WIN32)
+    # note: install(TARGETS... ) cannot be used with imported target
+    set (PFW_SHAREDLIBS
+        $<TARGET_FILE:ParameterFramework::parameter>
+        $<TARGET_FILE:ParameterFramework::remote-processor>
+        $<TARGET_FILE:ParameterFramework::libxml2>)
+    install(FILES ${PFW_SHAREDLIBS} DESTINATION bin)
+endif()
 
 
