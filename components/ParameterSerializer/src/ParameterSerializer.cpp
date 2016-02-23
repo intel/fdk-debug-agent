@@ -53,6 +53,9 @@ ParameterSerializer::ParameterSerializer(const std::string configurationFilePath
         }
     }
 
+    // Prevent the Parameter Framework from spawning its remote interface
+    parameterMgrPlatformConnector->setForceNoRemoteInterface(true);
+
     if (!parameterMgrPlatformConnector->start(error)) {
 
         /** @todo Use log instead */
