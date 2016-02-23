@@ -18,6 +18,9 @@
 #
 ################################################################################
 
+set(DBGA_VERSION_WIN
+        "${DBGA_VERSION_MAJOR},${DBGA_VERSION_MINOR},${DBGA_VERSION_PATCH},${DBGA_VERSION_TWEAK}")
+
 set(RESOURCE_FILE "${CMAKE_CURRENT_BINARY_DIR}/Resource.rc")
 
 configure_file(src/Windows/Resource.rc.in ${RESOURCE_FILE} @ONLY)

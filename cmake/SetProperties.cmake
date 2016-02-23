@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -18,38 +18,18 @@
 #
 ################################################################################
 
-# cmake configuration file of the "Main" component
+set(DBGA_VERSION "0.0.0.0" CACHE STRING "Version of the DBGA build")
 
-# Main executable
-set(SRCS
-    src/Application.cpp
-    src/Main.cpp)
+set(REGEX "([0-9]+).([0-9]+).([0-9]+).([0-9]+)")
 
-set(INCS
-    include/Main/Application.hpp)
+if(NOT DBGA_VERSION MATCHES "${REGEX}")
+    message(SEND_ERROR "Could not match DBGA_VERSION=`${DBGA_VERSION}' with: ${REGEX}")
+else()
+    set(DBGA_VERSION_MAJOR ${CMAKE_MATCH_1})
+    set(DBGA_VERSION_MINOR ${CMAKE_MATCH_2})
+    set(DBGA_VERSION_PATCH ${CMAKE_MATCH_3})
+    set(DBGA_VERSION_TWEAK ${CMAKE_MATCH_4})
+endif()
 
-if (WIN32)
-    # use to handle versioning
-    include("CMakeListsWindows.txt")
-endif (WIN32)
-
-add_dbga_executable(Main ${SRCS} ${INCS})
-set_common_settings(Main)
-
-target_compile_definitions(Main PRIVATE
-    WINRC_EXE
-    WINRC_FILENAME="$<TARGET_FILE_NAME:Main>")
-
-target_include_directories(Main PRIVATE "include")
-
-# Setting executable name to DebugAgent
-set_target_properties(Main PROPERTIES OUTPUT_NAME "DebugAgent")
-
-# Binding with Poco
-link_poco(Main)
-
-# Needed components
-target_link_libraries(Main Core)
-
-# Installation step
-install(TARGETS Main RUNTIME DESTINATION bin)
+set(DBGA_NAME "Firmware development kit debug agent")
+set(DBGA_DESCRIPTION "Tool for runtime debugging of CAVS dsp firmware.")

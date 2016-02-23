@@ -102,6 +102,9 @@ function (add_dbga_executable projectname)
     set_target_properties(${projectname} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 endfunction()
 
+# set global DBGA properties (version, name, description...)
+include("cmake/SetProperties.cmake")
+
 # We want to *include* this file before adding any test because it calls
 # "include(CTest)"
 include("ctest/CMakeLists.txt")
