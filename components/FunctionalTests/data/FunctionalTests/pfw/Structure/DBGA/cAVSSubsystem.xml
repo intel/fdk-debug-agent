@@ -5,70 +5,20 @@
 		<xi:include href="intel/AcousticEchoCanceler_V1_6.xml"/>
 		<xi:include href="intel/NoiseReduction_V1_1.xml"/>
 		
-		<ComponentType Name="tPipe">
-			<ParameterBlock Name="info">
-				<!-- Parameters -->
-				<ParameterBlock Name="PipelineProps" Mapping="ParamId:0">
-					<IntegerParameter Size="32" Name="id"/>
-					<IntegerParameter Size="32" Name="priority"/>
-					<IntegerParameter Size="32" Name="state"/>
-					<IntegerParameter Size="32" Name="total_memory_bytes"/>
-					<IntegerParameter Size="32" Name="used_memory_bytes"/>
-					<IntegerParameter Size="32" Name="context_pages"/>
-				</ParameterBlock>
-			</ParameterBlock>
-			<ParameterBlock Name="control">
-				<EnumParameter Size="8" Name="State" Mapping="ParamId:1">
-					<ValuePair Numerical="2" Literal="RESET"/>
-					<ValuePair Numerical="3" Literal="PAUSED"/>
-					<ValuePair Numerical="4" Literal="RUNNING"/>
-					<ValuePair Numerical="5" Literal="END_OF_STREAM"/>
-				</EnumParameter>
-			</ParameterBlock>
-		</ComponentType>
-		<ComponentType Name="tTask">
-			<ParameterBlock Name="info">
-				<EnumParameter Size="8" Name="TaskType" Mapping="ParamId:0">
-					<ValuePair Numerical="0" Literal="LL"/>
-					<ValuePair Numerical="1" Literal="DP"/>
-				</EnumParameter>
-			</ParameterBlock>
-		</ComponentType>
-		<ComponentType Name="tModuleInfo">
-			<ParameterBlock Name="info">
-				<ParameterBlock Name="ModuleInstanceProps" Mapping="ParamId:0xFE">
-					<IntegerParameter Size="32" Name="id"/>
-					<IntegerParameter Size="32" Name="dp_queue_type"/>
-					<!-- + other parameter types extracted from FW (see chapter ModuleInstanceProps Structure
-                    from SPT Audio DSP FW interface document) -->
-				</ParameterBlock>
-			</ParameterBlock>
-		</ComponentType>
-		<ComponentType Name="tmodule-aec" Extends="tModuleInfo">
+		<ComponentType Name="tmodule-aec">
 			<ParameterBlock Name="control">
 				<Component Name="AcousticEchoCanceler" Type="AcousticEchoCanceler" Mapping="ParamId:0"/>
 				<Component Name="NoiseReduction" Type="NoiseReduction" Mapping="ParamId:25"/>
 			</ParameterBlock>
 		</ComponentType>
-		<ComponentType Name="tmodule-nr" Extends="tModuleInfo">
+		<ComponentType Name="tmodule-nr">
 			<ParameterBlock Name="control">
 				<Component Name="NoiseReduction" Type="NoiseReduction" Mapping="ParamId:0"/>
 			</ParameterBlock>
 		</ComponentType>
 	</ComponentLibrary>
 	<InstanceDefinition>
-		<ParameterBlock Name="info">
-			<ParameterBlock Name="FreePages" ArrayLength="2" Mapping="ParamId:0">
-				<EnumParameter Size="8" Name="mem_type">
-					<ValuePair Numerical="0" Literal="HP_MEM"/>
-					<ValuePair Numerical="1" Literal="LP_MEM"/>
-				</EnumParameter>
-				<IntegerParameter Size="32" Name="pages"/>
-			</ParameterBlock>
-		</ParameterBlock>
 		<ParameterBlock Name="categories">
-			<Component Name="pipe" Type="tPipe"/>
-			<Component Name="task" Type="tTask"/>
 			<Component Name="aec" Type="tmodule-aec"/>
 			<Component Name="ns" Type="tmodule-nr"/>
 		</ParameterBlock>
