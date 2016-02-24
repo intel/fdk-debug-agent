@@ -161,6 +161,10 @@ if (WIN32)
     # Installing a batch file that opens the cavs xml directory
     install(FILES resources/scripts/Windows/OpenCAVSFolder.bat DESTINATION bin)
     create_shortcut(bin/OpenCAVSFolder.bat "CAVS config")
+
+    # Installing HOWTO file and creating shortcut
+    install(FILES "resources/docs/HOWTO.txt" DESTINATION ".")
+    create_shortcut(HOWTO.txt "DBGA How to")
 endif()
 
 # CPack
