@@ -28,6 +28,3 @@ set_common_settings(LogGrabber)
 # dependent libraries
 target_link_libraries(LogGrabber cAVS)
 link_poco(LogGrabber)
-
-# Installing into the "utils" directory
-install(TARGETS LogGrabber RUNTIME DESTINATION utils)

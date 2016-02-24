@@ -54,5 +54,3 @@ link_catch(FunctionalTests)
 # dependent libraries
 target_link_libraries(FunctionalTests Core TestCommon cAVSTestFramework)
 link_poco(FunctionalTests)
-
-install(DIRECTORY "data" DESTINATION tests)
