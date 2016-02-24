@@ -94,6 +94,12 @@ function (set_common_settings projectname)
     set_property(TARGET ${projectname} APPEND PROPERTY CXX_STANDARD_REQUIRED ON)
 endfunction()
 
+# this function creates desktop shortcut and start menu entry
+function(create_shortcut FILE_TARGET NAME)
+    set_property(INSTALL ${FILE_TARGET} PROPERTY CPACK_DESKTOP_SHORTCUTS ${NAME})
+    set_property(INSTALL ${FILE_TARGET} PROPERTY CPACK_START_MENU_SHORTCUTS ${NAME})
+endfunction()
+
 # Unfortunately CMAKE_DEBUG_POSTFIX is not used by executable projects, only
 # shared library projects. So defining a custom add_executable function
 # that appends the postfix.
@@ -127,8 +133,9 @@ if (WIN32)
     add_subdirectory("components/LogGrabber")
 endif()
 
-# installing PFW shared libraries and dependencies on windows only
+# Windows specific installation
 if (WIN32)
+    # installing PFW shared libraries and dependencies
     # note: install(TARGETS... ) cannot be used with imported target
     set (PFW_SHAREDLIBS
         $<TARGET_FILE:ParameterFramework::parameter>
@@ -138,6 +145,15 @@ if (WIN32)
 
     #installing Root PFW configuration files
     install(DIRECTORY resources/parameter-framework DESTINATION .)
+
+    # installing batch files to run the DBGA with specific command-line parameters
+    install(FILES
+        "resources/scripts/Windows/DebugAgent_d.bat"
+        DESTINATION bin CONFIGURATIONS Debug RENAME DebugAgent.bat)
+    install(FILES
+        "resources/scripts/Windows/DebugAgent.bat"
+        DESTINATION bin CONFIGURATIONS Release)
+    create_shortcut(bin/DebugAgent.bat "Debug Agent")
 endif()
 
 # CPack
