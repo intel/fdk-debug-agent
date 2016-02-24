@@ -135,6 +135,9 @@ if (WIN32)
         $<TARGET_FILE:ParameterFramework::remote-processor>
         $<TARGET_FILE:ParameterFramework::libxml2>)
     install(FILES ${PFW_SHAREDLIBS} DESTINATION bin)
+
+    #installing Root PFW configuration files
+    install(DIRECTORY resources/parameter-framework DESTINATION .)
 endif()
 
 # CPack

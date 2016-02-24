@@ -26,7 +26,6 @@ set(RESOURCE_FILE "${CMAKE_CURRENT_BINARY_DIR}/Resource.rc")
 configure_file(src/Windows/Resource.rc.in ${RESOURCE_FILE} @ONLY)
 
 list(APPEND SRCS ${RESOURCE_FILE})
-install(DIRECTORY data DESTINATION .)
 
 # Install the manifest alongside the executable.
 # CMake 3.4 knows how to link manifests with executables
