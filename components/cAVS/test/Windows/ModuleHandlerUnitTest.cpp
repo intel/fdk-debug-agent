@@ -484,7 +484,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
 
     /*Successful get pipeline list command */
     CHECK_NOTHROW(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways));
-    CHECK(fwGateways.size() == gateways.size());
+    REQUIRE(fwGateways.size() == gateways.size());
     CHECK(std::equal(fwGateways.begin(), fwGateways.end(), gateways.begin(), isSameGateway));
 }
 
