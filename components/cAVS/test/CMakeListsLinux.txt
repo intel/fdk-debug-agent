@@ -21,6 +21,7 @@
 # Source files
 
 set(LINUX_TEST_SRCS
+    Linux/SystemDeviceUnitTest.cpp
     Linux/MockedDeviceUnitTest.cpp)
 
 set(TEST_SRCS ${TEST_SRCS} ${LINUX_TEST_SRCS})

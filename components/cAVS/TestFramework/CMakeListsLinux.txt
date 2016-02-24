@@ -23,6 +23,8 @@ set(LINUX_LIB_SRCS
 
 set(LIB_SRCS ${LIB_SRCS} ${LINUX_LIB_SRCS})
 
+source_group("Source Files\\Linux" FILES ${LINUX_LIB_SRCS})
+
 set(LINUX_LIB_INCS
     include/cAVS/Linux/MockedDevice.hpp)
 

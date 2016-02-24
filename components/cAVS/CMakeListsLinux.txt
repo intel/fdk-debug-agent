@@ -20,11 +20,13 @@
 
 set(LIB_SRCS
     ${LIB_SRCS}
+    src/Linux/SystemDevice.cpp
     src/Linux/SystemDriverFactory.cpp
     src/Linux/Logger.cpp)
 
 set(LIB_INCS
     ${LIB_INCS}
+    include/cAVS/Linux/SystemDevice.hpp
     include/cAVS/Linux/Device.hpp
     include/cAVS/Linux/Driver.hpp
     include/cAVS/Linux/Logger.hpp)
