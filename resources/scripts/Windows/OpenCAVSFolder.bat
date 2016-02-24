@@ -1,0 +1,1 @@
+EXPLORER ..\parameter-framework\cavs
