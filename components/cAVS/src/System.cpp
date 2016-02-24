@@ -40,6 +40,26 @@ void System::LogStreamResource::doWriting(std::ostream &os)
     os << logStreamer;
 }
 
+// System::ProbeStreamResource class
+void System::ProbeExtractionStreamResource::doWriting(std::ostream &os)
+{
+    try {
+        while (true) {
+            std::unique_ptr<util::Buffer> block = mProber.dequeueExtractionBlock(mProbeIndex);
+            if (block == nullptr) {
+                // Extraction is finished
+                return;
+            }
+            os.write(reinterpret_cast<const char *>(block->data()), block->size());
+            if (os.fail()) {
+                throw Exception("Unable to write probe data to output stream");
+            }
+        }
+    } catch (Prober::Exception &e) {
+        throw Exception("Cannot extract block: " + std::string(e.what()));
+    }
+}
+
 // System class
 System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
@@ -149,6 +169,22 @@ std::unique_ptr<System::OutputStreamResource> System::tryToAcquireLogStreamResou
 {
     return tryToAcquireResource(std::make_unique<System::LogStreamResource>(
         mLogStreamMutex, mDriver->getLogger(), mModuleEntries));
+}
+
+void System::checkProbeIndex(ProbeId probeIndex)
+{
+    if (probeIndex.getValue() >= ProbeService::mProbeCount) {
+        throw Exception("Wrong probe index: " + std::to_string(probeIndex.getValue()));
+    }
+}
+
+std::unique_ptr<System::OutputStreamResource> System::tryToAcquireProbeExtractionStreamResource(
+    ProbeId probeIndex)
+{
+    checkProbeIndex(probeIndex);
+
+    return tryToAcquireResource(std::make_unique<System::ProbeExtractionStreamResource>(
+        mProbeExtractionMutexes[probeIndex.getValue()], mDriver->getProber(), probeIndex));
 }
 
 void System::setModuleParameter(uint16_t moduleId, uint16_t instanceId,

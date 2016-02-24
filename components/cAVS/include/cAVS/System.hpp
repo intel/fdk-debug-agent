@@ -31,6 +31,7 @@
 #include <stdexcept>
 #include <vector>
 #include <mutex>
+#include <array>
 
 namespace debug_agent
 {
@@ -133,6 +134,16 @@ public:
      */
     std::unique_ptr<OutputStreamResource> tryToAcquireLogStreamResource();
 
+    /**
+     * Try to acquire probe extraction stream resource
+     *
+     * The resource will be locked until the returned OutputStreamResource instance is released.
+     *
+     * @return a OutputStreamResource instance if the locking is successful, otherwise nullptr.
+     */
+    std::unique_ptr<OutputStreamResource> tryToAcquireProbeExtractionStreamResource(
+        ProbeId probeIndex);
+
     /** Set module parameter */
     void setModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
                             const util::Buffer &parameterPayload);
@@ -184,6 +195,21 @@ private:
         Logger &mLogger;
         const std::vector<dsp_fw::ModuleEntry> &mModuleEntries;
     };
+    /** Exclusive resource used to retrieve probe extraction data */
+    class ProbeExtractionStreamResource : public OutputStreamResource
+    {
+    public:
+        ProbeExtractionStreamResource(std::mutex &resourceMutex, Prober &prober, ProbeId probeIndex)
+            : OutputStreamResource(resourceMutex), mProber(prober), mProbeIndex(probeIndex)
+        {
+        }
+
+        void doWriting(std::ostream &os) override;
+
+    private:
+        Prober &mProber;
+        ProbeId mProbeIndex;
+    };
 
     /* Make this class non copyable */
     System(const System &) = delete;
@@ -196,6 +222,7 @@ private:
     std::unique_ptr<T> tryToAcquireResource(std::unique_ptr<T> resource);
 
     static std::unique_ptr<Driver> createDriver(const DriverFactory &driverFactory);
+    static void checkProbeIndex(ProbeId probeIndex);
 
     std::unique_ptr<Driver> mDriver;
 
@@ -216,6 +243,9 @@ private:
 
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;
+
+    /** Mutexes that guarantee probe stream exclusive usage */
+    std::array<std::mutex, ProbeService::mProbeCount> mProbeExtractionMutexes;
 
     ProbeService mProbeService;
 };

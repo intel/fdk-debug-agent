@@ -45,6 +45,8 @@ namespace cavs
 class ProbeService
 {
 public:
+    static const std::size_t mProbeCount = 8;
+
     struct Exception : std::runtime_error
     {
         using std::runtime_error::runtime_error;
@@ -118,8 +120,6 @@ private:
 
     /** State machine transitions leading to "Idle" state from any other state */
     static const Transitions mStopTransitions;
-
-    static const std::size_t mProbeCount = 8;
 
     std::vector<Prober::ProbeConfig> mProbeConfigs;
     Prober &mProber;
