@@ -43,6 +43,11 @@ set(CPACK_WIX_UPGRADE_GUID "49A98B9B-BB0B-44BE-8ECE-3584E9EE83D7")
 
 if (WIN32)
     # On windows, pack compiler provided libraries (MSVC redistributable) with the project
+    # Note: by setting CMAKE_INSTALL_DEBUG_LIBRARIES to TRUE, both release and debug runtime
+    # libraries are installed. In this way debug and release installer work.
+    # @todo: find a way to install only release runtime libraries within release installer
+    # (and same thing for debug).
+    set (CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
     include(InstallRequiredSystemLibraries)
 endif()
 
