@@ -60,6 +60,45 @@ void System::ProbeExtractionStreamResource::doWriting(std::ostream &os)
     }
 }
 
+void System::ProbeInjectionStreamResource::doReading(std::istream &is)
+{
+    static const std::size_t bufferSize = 4096;
+
+    util::Buffer buffer;
+
+    try {
+        while (true) {
+            std::streamsize read = 0;
+            buffer.resize(bufferSize);
+
+            // Reading first byte to block until something is available
+            is.read(reinterpret_cast<char *>(buffer.data()), 1);
+            if (is.good()) {
+                ++read;
+
+                // Then reading other available bytes, in the limit of buffer size
+                read += is.readsome(reinterpret_cast<char *>(buffer.data() + 1), buffer.size() - 1);
+            }
+
+            if (read > 0) {
+                // resizing and sending the buffer
+                buffer.resize(read);
+                mProber.enqueueInjectionBlock(mProbeIndex, buffer);
+            }
+
+            if (is.eof()) {
+                /* End of stream : returning */
+                return;
+            }
+            if (is.fail()) {
+                throw Exception("Unable to read probe data from input stream");
+            }
+        }
+    } catch (Prober::Exception &e) {
+        throw Exception("Cannot inject block: " + std::string(e.what()));
+    }
+}
+
 // System class
 System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
@@ -185,6 +224,15 @@ std::unique_ptr<System::OutputStreamResource> System::tryToAcquireProbeExtractio
 
     return tryToAcquireResource(std::make_unique<System::ProbeExtractionStreamResource>(
         mProbeExtractionMutexes[probeIndex.getValue()], mDriver->getProber(), probeIndex));
+}
+
+std::unique_ptr<System::InputStreamResource> System::tryToAcquireProbeInjectionStreamResource(
+    ProbeId probeIndex)
+{
+    checkProbeIndex(probeIndex);
+
+    return tryToAcquireResource(std::make_unique<System::ProbeInjectionStreamResource>(
+        mProbeInjectionMutexes[probeIndex.getValue()], mDriver->getProber(), probeIndex));
 }
 
 void System::setModuleParameter(uint16_t moduleId, uint16_t instanceId,

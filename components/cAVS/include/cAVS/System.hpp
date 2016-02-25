@@ -81,6 +81,18 @@ public:
         virtual void doWriting(std::ostream &os) = 0;
     };
 
+    class InputStreamResource : public StreamResource
+    {
+    public:
+        using StreamResource::StreamResource;
+
+        /**
+        * Perform reading from the supplied input stream.
+        * It blocks inputstream is empty or failed
+        */
+        virtual void doReading(std::istream &is) = 0;
+    };
+
     /**
      * @throw System::Exception
      */
@@ -142,6 +154,16 @@ public:
      * @return a OutputStreamResource instance if the locking is successful, otherwise nullptr.
      */
     std::unique_ptr<OutputStreamResource> tryToAcquireProbeExtractionStreamResource(
+        ProbeId probeIndex);
+
+    /**
+     * Try to acquire probe injection stream resource
+     *
+     * The resource will be locked until the returned InputStreamResource instance is released.
+     *
+     * @return a InputStreamResource instance if the locking is successful, otherwise nullptr.
+     */
+    std::unique_ptr<InputStreamResource> tryToAcquireProbeInjectionStreamResource(
         ProbeId probeIndex);
 
     /** Set module parameter */
@@ -211,6 +233,22 @@ private:
         ProbeId mProbeIndex;
     };
 
+    /** Exclusive resource used to inject data to probe */
+    class ProbeInjectionStreamResource : public InputStreamResource
+    {
+    public:
+        ProbeInjectionStreamResource(std::mutex &resourceMutex, Prober &prober, ProbeId probeIndex)
+            : InputStreamResource(resourceMutex), mProber(prober), mProbeIndex(probeIndex)
+        {
+        }
+
+        void doReading(std::istream &os) override;
+
+    private:
+        Prober &mProber;
+        ProbeId mProbeIndex;
+    };
+
     /* Make this class non copyable */
     System(const System &) = delete;
     System &operator=(const System &) = delete;
@@ -246,6 +284,7 @@ private:
 
     /** Mutexes that guarantee probe stream exclusive usage */
     std::array<std::mutex, ProbeService::mProbeCount> mProbeExtractionMutexes;
+    std::array<std::mutex, ProbeService::mProbeCount> mProbeInjectionMutexes;
 
     ProbeService mProbeService;
 };
