@@ -247,7 +247,7 @@ Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request
     {
     public:
         LogStreamResponse(const std::string &contentType,
-                          std::unique_ptr<System::LogStreamResource> logStreamResource)
+                          std::unique_ptr<System::OutputStreamResource> logStreamResource)
             : CustomResponse(contentType), mLogStreamResource(std::move(logStreamResource))
         {
         }
@@ -255,14 +255,14 @@ Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request
         void doBodyResponse(std::ostream &out) override
         {
             try {
-                mLogStreamResource->doLogStream(out);
+                mLogStreamResource->doWriting(out);
             } catch (System::Exception &e) {
                 throw Response::HttpAbort(std::string("cAVS Log stream error: ") + e.what());
             }
         }
 
     private:
-        std::unique_ptr<System::LogStreamResource> mLogStreamResource;
+        std::unique_ptr<System::OutputStreamResource> mLogStreamResource;
     };
 
     /** Acquiring the log stream resource */

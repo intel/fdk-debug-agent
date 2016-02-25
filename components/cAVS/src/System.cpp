@@ -33,6 +33,14 @@ namespace debug_agent
 namespace cavs
 {
 
+// System::LogStreamResource class
+void System::LogStreamResource::doWriting(std::ostream &os)
+{
+    LogStreamer logStreamer(mLogger, mModuleEntries);
+    os << logStreamer;
+}
+
+// System class
 System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
       mProbeService(mDriver->getProber())
@@ -127,12 +135,9 @@ const dsp_fw::HwConfig &System::getHwConfig() const noexcept
     return mHwConfig;
 }
 
-std::unique_ptr<System::LogStreamResource> System::tryToAcquireLogStreamResource()
+template <typename T>
+std::unique_ptr<T> System::tryToAcquireResource(std::unique_ptr<T> resource)
 {
-    /* Cannot use std::make_unique here since System::LogStreamResource constructor
-     * is private and only System is friend.
-     */
-    std::unique_ptr<System::LogStreamResource> resource(new System::LogStreamResource(*this));
     if (resource->tryLock()) {
         return resource;
     } else {
@@ -140,11 +145,10 @@ std::unique_ptr<System::LogStreamResource> System::tryToAcquireLogStreamResource
     }
 }
 
-void System::doLogStreamInternal(std::ostream &os)
+std::unique_ptr<System::OutputStreamResource> System::tryToAcquireLogStreamResource()
 {
-    LogStreamer logStreamer(mDriver->getLogger(), mModuleEntries);
-
-    os << logStreamer;
+    return tryToAcquireResource(std::make_unique<System::LogStreamResource>(
+        mLogStreamMutex, mDriver->getLogger(), mModuleEntries));
 }
 
 void System::setModuleParameter(uint16_t moduleId, uint16_t instanceId,
