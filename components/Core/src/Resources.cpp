@@ -236,35 +236,31 @@ Resource::ResponsePtr ParameterValueResource::handlePut(const Request &request)
     return std::make_unique<Response>();
 }
 
+/** Http response that streams from a Prober::OutputStreamResource */
+class StreamResponse : public CustomResponse
+{
+public:
+    StreamResponse(const std::string &contentType,
+                   std::unique_ptr<System::OutputStreamResource> streamResource)
+        : CustomResponse(contentType), mStreamResource(std::move(streamResource))
+    {
+    }
+
+    void doBodyResponse(std::ostream &out) override
+    {
+        try {
+            mStreamResource->doWriting(out);
+        } catch (System::Exception &e) {
+            throw Response::HttpAbort(std::string("cAVS Log stream error: ") + e.what());
+        }
+    }
+
+private:
+    std::unique_ptr<System::OutputStreamResource> mStreamResource;
+};
+
 Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request)
 {
-    /**
-     * @todo Once C++14 is fully supported by compilers used for Debug Agent, this LogStreamResponse
-     * class shall be removed, and the Rest::CustomResponse shall be refactored to take the
-     * doBody method as lambda and become final.
-     */
-    class LogStreamResponse : public CustomResponse
-    {
-    public:
-        LogStreamResponse(const std::string &contentType,
-                          std::unique_ptr<System::OutputStreamResource> logStreamResource)
-            : CustomResponse(contentType), mLogStreamResource(std::move(logStreamResource))
-        {
-        }
-
-        void doBodyResponse(std::ostream &out) override
-        {
-            try {
-                mLogStreamResource->doWriting(out);
-            } catch (System::Exception &e) {
-                throw Response::HttpAbort(std::string("cAVS Log stream error: ") + e.what());
-            }
-        }
-
-    private:
-        std::unique_ptr<System::OutputStreamResource> mLogStreamResource;
-    };
-
     /** Acquiring the log stream resource */
     auto &&resource = mSystem.tryToAcquireLogStreamResource();
     if (resource == nullptr) {
@@ -272,15 +268,7 @@ Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request
                                   "Logging stream resource is already used.");
     }
 
-    return std::make_unique<LogStreamResponse>(ContentTypeIfdkFile, std::move(resource));
-    /**
-     * @remarks Using C++14 lambda generalized capture, the return would be changed for:
-     * @code
-     * return std::make_unique<CustomResponse>(
-     *   ContentTypeIfdkFile,
-     *   [logResource = std::move(resource)](std::ostream out)
-     *       {logResource->doLogStream(out);});
-     */
+    return std::make_unique<StreamResponse>(ContentTypeIfdkFile, std::move(resource));
 }
 }
 }
