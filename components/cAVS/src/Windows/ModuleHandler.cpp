@@ -35,10 +35,10 @@ namespace cavs
 namespace windows
 {
 
-void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint16_t instanceId,
-                                            dsp_fw::ParameterId moduleParamId,
-                                            const util::Buffer &suppliedOutputBuffer,
-                                            util::Buffer &returnedOutputBuffer)
+util::Buffer ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId,
+                                                    uint16_t instanceId,
+                                                    dsp_fw::ParameterId moduleParamId,
+                                                    const util::Buffer &suppliedOutputBuffer)
 {
     /* Creating the body payload using the IoctlFwModuleParam type */
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, moduleParamId,
@@ -87,192 +87,28 @@ void ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint1
                             std::to_string(static_cast<uint32_t>(moduleParam.fw_status)));
         }
 
-        returnedOutputBuffer.resize(reader.getBuffer().size() - reader.getPointerOffset());
-        std::copy(reader.getBuffer().begin() + reader.getPointerOffset(), reader.getBuffer().end(),
-                  returnedOutputBuffer.begin());
+        // return the rest (i.e. the "real" payload) of the reader buffer
+        return {begin(reader.getBuffer()) + reader.getPointerOffset(), end(reader.getBuffer())};
     } catch (util::ByteStreamReader::Exception &e) {
         throw Exception("Can not decode returned ioctl output buffer: " + std::string(e.what()));
     }
 }
 
-template <typename FirmwareParameterType>
-void ModuleHandler::bigGetModuleAccessIoctl(uint16_t moduleId, uint16_t instanceId,
-                                            dsp_fw::ParameterId moduleParamId,
-                                            std::size_t fwParameterSize,
-                                            FirmwareParameterType &result)
+/** set module parameter */
+util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
+                                      dsp_fw::ParameterId parameterId, size_t parameterSize)
 {
-    util::Buffer suppliedBuffer(fwParameterSize, 0xFF);
-    util::Buffer returnedBuffer;
-    bigCmdModuleAccessIoctl(true, moduleId, instanceId, moduleParamId, suppliedBuffer,
-                            returnedBuffer);
-
-    util::ByteStreamReader reader(returnedBuffer);
-    try {
-        /* Reading parameter */
-        reader.read(result);
-
-        if (!reader.isEOS()) {
-            /** @todo use logging or throw an exception */
-            std::cout << "Fw parameter buffer has not been fully consumed,"
-                      << " pointer=" << reader.getPointerOffset()
-                      << " size=" << reader.getBuffer().size()
-                      << " remaining= " << (reader.getBuffer().size() - reader.getBuffer().size());
-        }
-    } catch (util::ByteStreamReader::Exception &e) {
-        throw Exception("Can not decode fw parameter: " + std::string(e.what()));
-    }
+    const util::Buffer suppliedParameterPayload(parameterSize, 0xff);
+    return bigCmdModuleAccessIoctl(true, moduleId, instanceId, parameterId,
+                                   suppliedParameterPayload);
 }
 
-void ModuleHandler::getModulesEntries(uint32_t moduleCount,
-                                      std::vector<dsp_fw::ModuleEntry> &modulesEntries)
+/** @return module parameter */
+void ModuleHandler::configSet(uint16_t moduleId, uint16_t instanceId,
+                              dsp_fw::ParameterId parameterId,
+                              const util::Buffer &suppliedParameterPayload)
 {
-    std::size_t moduleInfoSize = dsp_fw::ModulesInfo::getAllocationSize(moduleCount);
-
-    dsp_fw::ModulesInfo modulesInfo;
-    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
-                            dsp_fw::toParameterId(dsp_fw::BaseFwParams::MODULES_INFO_GET),
-                            moduleInfoSize, modulesInfo);
-
-    /** @todo use logging */
-    std::cout << "Number of modules found in FW: " << modulesInfo.module_info.size() << std::endl;
-
-    if (modulesInfo.module_info.size() != moduleCount) {
-        throw Exception("Firmware has returned an invalid module count: " +
-                        std::to_string(modulesInfo.module_info.size()) + " instead of " +
-                        std::to_string(moduleCount));
-    }
-
-    modulesEntries = modulesInfo.module_info;
-}
-
-template <typename TlvResponseHandlerInterface>
-void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandler,
-                                      dsp_fw::BaseFwParams parameterId)
-{
-    util::Buffer suppliedBuffer(cavsTlvBufferSize, 0xFF);
-    util::Buffer returnedBuffer;
-    bigCmdModuleAccessIoctl(true, dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
-                            dsp_fw::toParameterId(parameterId), suppliedBuffer, returnedBuffer);
-
-    /* Now parse the TLV answer */
-    tlv::TlvUnpack unpack(responseHandler, returnedBuffer);
-
-    bool end = false;
-    do {
-
-        try {
-            end = !unpack.readNext();
-        } catch (tlv::TlvUnpack::Exception &e) {
-            /* @todo use log instead ! */
-            std::cout << "Error while parsing TLV for base FW parameter "
-                      << static_cast<uint32_t>(parameterId) << ": " << e.what() << std::endl;
-        }
-    } while (!end);
-}
-
-void ModuleHandler::getFwConfig(dsp_fw::FwConfig &fwConfig)
-{
-    readTlvParameters<dsp_fw::FwConfig>(fwConfig, dsp_fw::BaseFwParams::FW_CONFIG);
-}
-
-void ModuleHandler::getHwConfig(dsp_fw::HwConfig &hwConfig)
-{
-    readTlvParameters<dsp_fw::HwConfig>(hwConfig, dsp_fw::BaseFwParams::HW_CONFIG_GET);
-}
-
-void ModuleHandler::getPipelineIdList(uint32_t maxPplCount,
-                                      std::vector<dsp_fw::PipeLineIdType> &pipelinesIds)
-{
-    /* Calculating the memory space required */
-    std::size_t parameterSize = dsp_fw::PipelinesListInfo::getAllocationSize(maxPplCount);
-
-    /* Performing ioctl*/
-    dsp_fw::PipelinesListInfo pipelineListInfo;
-    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
-                            dsp_fw::toParameterId(dsp_fw::BaseFwParams::PIPELINE_LIST_INFO_GET),
-                            parameterSize, pipelineListInfo);
-
-    /* Checking returned pipeline count */
-    if (pipelineListInfo.ppl_id.size() > maxPplCount) {
-        throw Exception("Firmware has returned an invalid pipeline count: " +
-                        std::to_string(pipelineListInfo.ppl_id.size()) + " max is: " +
-                        std::to_string(maxPplCount));
-    }
-
-    pipelinesIds = pipelineListInfo.ppl_id;
-}
-
-void ModuleHandler::getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props)
-{
-    /* Using extended parameter id to supply the pipeline id*/
-    auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
-
-    /* Performing ioctl*/
-    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId, paramId,
-                            maxParameterPayloadSize, props);
-}
-
-void ModuleHandler::getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers)
-{
-    /* Using extended parameter id to supply the core id*/
-    auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
-
-    /* Performing ioctl*/
-    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId, paramId,
-                            maxParameterPayloadSize, schedulers);
-}
-
-void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
-                                    std::vector<dsp_fw::GatewayProps> &gateways)
-{
-    /* Calculating the memory space required */
-    std::size_t parameterSize = dsp_fw::GatewaysInfo::getAllocationSize(gatewayCount);
-
-    /* Performing ioctl*/
-    dsp_fw::GatewaysInfo gatewaysInfo;
-    bigGetModuleAccessIoctl(dsp_fw::baseFirwareModuleId, dsp_fw::baseFirwareInstanceId,
-                            dsp_fw::toParameterId(dsp_fw::BaseFwParams::GATEWAYS_INFO_GET),
-                            parameterSize, gatewaysInfo);
-
-    /* Checking returned gateway count */
-    if (gatewaysInfo.gateways.size() > gatewayCount) {
-        throw Exception("Firmware has returned an invalid gateway count: " +
-                        std::to_string(gatewaysInfo.gateways.size()) + " max is: " +
-                        std::to_string(gatewayCount));
-    }
-
-    gateways = gatewaysInfo.gateways;
-}
-
-void ModuleHandler::getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-                                           dsp_fw::ModuleInstanceProps &props)
-{
-    /* Performing ioctl */
-    bigGetModuleAccessIoctl(moduleId, instanceId,
-                            dsp_fw::toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
-                            maxParameterPayloadSize, props);
-}
-
-void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                       dsp_fw::ParameterId parameterId,
-                                       const util::Buffer &parameterPayload)
-{
-    util::Buffer returnedBuffer;
-
-    /* Performing ioctl */
-    bigCmdModuleAccessIoctl(false, moduleId, instanceId, parameterId, parameterPayload,
-                            returnedBuffer);
-}
-
-void ModuleHandler::getModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                       dsp_fw::ParameterId parameterId,
-                                       util::Buffer &parameterPayload)
-{
-    util::Buffer suppliedBuffer(maxParameterPayloadSize, 0xFF);
-
-    /* Performing ioctl */
-    bigCmdModuleAccessIoctl(true, moduleId, instanceId, parameterId, suppliedBuffer,
-                            parameterPayload);
+    bigCmdModuleAccessIoctl(false, moduleId, instanceId, parameterId, suppliedParameterPayload);
 }
 }
 }

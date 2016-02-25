@@ -23,6 +23,7 @@
 
 # Common source files
 set(LIB_SRCS
+    src/ModuleHandler.cpp
     src/LogStreamer.cpp
     src/System.cpp
     src/Topology.cpp

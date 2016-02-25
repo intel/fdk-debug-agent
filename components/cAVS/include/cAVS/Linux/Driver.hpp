@@ -47,39 +47,14 @@ private:
     /* Will be replaced by the true implementation*/
     class DummyModuleHandler : public ModuleHandler
     {
-    public:
-        void getFwConfig(dsp_fw::FwConfig &fwConfig) override {}
-        void getHwConfig(dsp_fw::HwConfig &hwConfig) override {}
-        void getModulesEntries(uint32_t moduleCount,
-                               std::vector<dsp_fw::ModuleEntry> &modulesEntries) override
+    private:
+        util::Buffer configGet(uint16_t moduleId, uint16_t instanceId,
+                               dsp_fw::ParameterId parameterId, size_t parameterSize) override
         {
         }
-        void getPipelineIdList(uint32_t maxPplCount,
-                               std::vector<dsp_fw::PipeLineIdType> &pipelinesIds) override
-        {
-        }
-        void getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props) override
-        {
-        }
-        void getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers) override
-        {
-        }
-        void getGatewaysInfo(uint32_t gatewayCount,
-                             std::vector<dsp_fw::GatewayProps> &gateways) override
-        {
-        }
-        void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-                                    dsp_fw::ModuleInstanceProps &props) override
-        {
-        }
-        void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                dsp_fw::ParameterId parameterId,
-                                const std::vector<uint8_t> &parameterPayload) override
-        {
-        }
-        void getModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                dsp_fw::ParameterId parameterId,
-                                std::vector<uint8_t> &parameterPayload) override
+
+        void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                       const util::Buffer &parameterPayload) override
         {
         }
     };

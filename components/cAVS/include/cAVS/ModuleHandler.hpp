@@ -39,7 +39,7 @@ namespace debug_agent
 namespace cavs
 {
 
-/** This abstract class exposes firmware module */
+/** This abstract class exposes the FW module API */
 class ModuleHandler
 {
 public:
@@ -63,42 +63,37 @@ public:
     virtual ~ModuleHandler() {}
 
     /** @return the firmware module entries */
-    virtual void getModulesEntries(uint32_t moduleCount,
-                                   std::vector<dsp_fw::ModuleEntry> &modulesEntries) = 0;
+    void getModulesEntries(uint32_t moduleCount, std::vector<dsp_fw::ModuleEntry> &modulesEntries);
 
     /** @return the firmware configuration */
-    virtual void getFwConfig(dsp_fw::FwConfig &fwConfig) = 0;
+    void getFwConfig(dsp_fw::FwConfig &fwConfig);
 
     /** @return the hardware configuration */
-    virtual void getHwConfig(dsp_fw::HwConfig &hwConfig) = 0;
+    void getHwConfig(dsp_fw::HwConfig &hwConfig);
 
     /** @return the pipeline identifier list */
-    virtual void getPipelineIdList(uint32_t maxPplCount,
-                                   std::vector<dsp_fw::PipeLineIdType> &pipelinesIds) = 0;
+    void getPipelineIdList(uint32_t maxPplCount, std::vector<dsp_fw::PipeLineIdType> &pipelinesIds);
 
     /** @return the properties of one pipeline */
-    virtual void getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props) = 0;
+    void getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props);
 
     /** @return the schedulers of one core */
-    virtual void getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers) = 0;
+    void getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers);
 
     /** @return the gateways */
-    virtual void getGatewaysInfo(uint32_t gatewayCount,
-                                 std::vector<dsp_fw::GatewayProps> &gateways) = 0;
+    void getGatewaysInfo(uint32_t gatewayCount, std::vector<dsp_fw::GatewayProps> &gateways);
 
     /** @return the properties of one module instance */
-    virtual void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-                                        dsp_fw::ModuleInstanceProps &props) = 0;
+    void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
+                                dsp_fw::ModuleInstanceProps &props);
 
     /** set module parameter */
-    virtual void setModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                    dsp_fw::ParameterId parameterId,
-                                    const util::Buffer &parameterPayload) = 0;
+    void setModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                            const util::Buffer &parameterPayload);
 
     /** @return module parameter */
-    virtual void getModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                    dsp_fw::ParameterId parameterId,
-                                    util::Buffer &parameterPayload) = 0;
+    void getModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                            util::Buffer &parameterPayload);
 
     /** The base firmware has several module like components in it.
      * To address them, the ParameterId is splited in a type and an instance part.
@@ -121,6 +116,48 @@ public:
     /** @} */
 
 private:
+    /** Perform a "config get" command
+     *
+     * This method should be implemented using driver specificities
+     *
+     * @param[in] moduleId the module type id
+     * @param[in] instanceId the module instance id
+     * @param[in] parameterId the parameter id
+     * @param[in] parameterSize the parameter's size
+     *
+     * @returns the parameter payload.
+     * @throw ModuleHandler::Exception
+     */
+    virtual util::Buffer configGet(uint16_t moduleId, uint16_t instanceId,
+                                   dsp_fw::ParameterId parameterId, size_t parameterSize) = 0;
+
+    /** Perform a "config set" command
+     *
+     * This method should be implemented using driver specificities
+     *
+     * @param[in] moduleId the module type id
+     * @param[in] instanceId the module instance id
+     * @param[in] parameterId the parameter id
+     * @param[in] parameterPayload the parameter payload to set as value
+     *
+     * @throw ModuleHandler::Exception
+     */
+    virtual void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                           const util::Buffer &parameterPayload) = 0;
+
+    /** Get module parameter value as a template type
+     * @tparam FirmwareParameterType The type of the retrieved parameter value
+     */
+    template <typename FirmwareParameterType>
+    void getFwParameterValue(uint16_t moduleId, uint16_t instanceId,
+                             dsp_fw::ParameterId moduleParamId, std::size_t fwParameterSize,
+                             FirmwareParameterType &result);
+
+    /** Get a tlv list from a module parameter value */
+    template <typename TlvResponseHandlerInterface>
+    void readTlvParameters(TlvResponseHandlerInterface &responseHandler,
+                           dsp_fw::BaseFwParams parameterId);
+
     /** @return extended parameter id that contains the targeted module part id */
     static dsp_fw::ParameterId getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,
                                                       uint32_t parameterInstanceId)
