@@ -27,3 +27,13 @@ configure_file(src/Windows/Resource.rc.in ${RESOURCE_FILE} @ONLY)
 
 list(APPEND SRCS ${RESOURCE_FILE})
 install(DIRECTORY data DESTINATION .)
+
+# Install the manifest alongside the executable.
+# CMake 3.4 knows how to link manifests with executables
+# (https://cmake.org/cmake/help/v3.4/release/3.4.html#other) but we only
+# require 3.3.
+# This manifest makes the DebugAgent automatically aks for admin rights, which
+# is necessary for accessing logs through WPP.
+install(FILES DebugAgent.exe.manifest CONFIGURATIONS Release DESTINATION bin)
+install(FILES DebugAgent.exe.manifest CONFIGURATIONS Debug DESTINATION bin
+        RENAME "DebugAgent${CMAKE_DEBUG_POSTFIX}.exe.manifest")
