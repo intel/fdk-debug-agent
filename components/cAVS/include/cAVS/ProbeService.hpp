@@ -22,7 +22,6 @@
 #pragma once
 
 #include "cAVS/Prober.hpp"
-#include "Util/WrappedRaw.hpp"
 #include <vector>
 #include <mutex>
 #include <map>
@@ -31,16 +30,6 @@ namespace debug_agent
 {
 namespace cavs
 {
-
-namespace detail
-{
-struct ProbeIdTrait
-{
-    using RawType = uint32_t;
-};
-}
-
-using ProbeId = util::WrappedRaw<detail::ProbeIdTrait>;
 
 /** This class pilots the driver probe service
  *

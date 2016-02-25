@@ -23,6 +23,7 @@
 
 #include "Util/Buffer.hpp"
 #include "Util/EnumHelper.hpp"
+#include "Util/WrappedRaw.hpp"
 #include <inttypes.h>
 #include <stdexcept>
 #include <string>
@@ -33,6 +34,16 @@ namespace debug_agent
 {
 namespace cavs
 {
+
+namespace detail
+{
+struct ProbeIdTrait
+{
+    using RawType = uint32_t;
+};
+}
+
+using ProbeId = util::WrappedRaw<detail::ProbeIdTrait>;
 
 /**
  * This interface intends to abstract probing OS-specificities
@@ -206,7 +217,7 @@ public:
      *
      * @throw Prober::Exception
      */
-    virtual std::unique_ptr<util::Buffer> dequeueExtractionBlock(uint32_t probeIndex) = 0;
+    virtual std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) = 0;
 
     /**
      * Enqueue a block that will be injected to the probe.
@@ -219,7 +230,7 @@ public:
      *
      * @throw Prober::Exception
      */
-    virtual bool enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer) = 0;
+    virtual bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) = 0;
 };
 }
 }

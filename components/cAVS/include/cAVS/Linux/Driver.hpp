@@ -71,12 +71,12 @@ private:
 
         std::vector<ProbeConfig> getSessionProbes() override { return std::vector<ProbeConfig>(); }
 
-        std::unique_ptr<util::Buffer> dequeueExtractionBlock(uint32_t probeIndex) override
+        std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override
         {
             return nullptr;
         }
 
-        bool enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer) override
+        bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) override
         {
             return false;
         }

@@ -47,8 +47,8 @@ public:
     State getState() override;
     void setSessionProbes(const SessionProbes probes) override;
     SessionProbes getSessionProbes() override;
-    std::unique_ptr<util::Buffer> dequeueExtractionBlock(uint32_t probeIndex) override;
-    bool enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer) override;
+    std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override;
+    bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) override;
 
 private:
     static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE;

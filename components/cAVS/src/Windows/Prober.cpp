@@ -173,13 +173,13 @@ Prober::SessionProbes Prober::getSessionProbes()
     return result;
 }
 
-std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(uint32_t probeIndex)
+std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(ProbeId probeIndex)
 {
     /* TO DO */
     return nullptr;
 }
 
-bool Prober::enqueueInjectionBlock(uint32_t probeIndex, const util::Buffer &buffer)
+bool Prober::enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer)
 {
     /* TO DO */
     return false;
