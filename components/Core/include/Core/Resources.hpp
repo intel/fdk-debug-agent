@@ -168,5 +168,18 @@ public:
 protected:
     virtual ResponsePtr handleGet(const rest::Request &request) override;
 };
+
+/** This resource extracts and injects probe data */
+class ProbeStreamResource : public SystemResource
+{
+public:
+    ProbeStreamResource(cavs::System &system) : SystemResource(system) {}
+
+private:
+    static cavs::ProbeId getProbeId(const rest::Request &request);
+
+    ResponsePtr handleGet(const rest::Request &request) override;
+    ResponsePtr handlePost(const rest::Request &request) override;
+};
 }
 }

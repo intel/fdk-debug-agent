@@ -27,6 +27,7 @@
 #include "IfdkObjects/Xml/TypeSerializer.hpp"
 #include "IfdkObjects/Xml/InstanceDeserializer.hpp"
 #include "IfdkObjects/Xml/InstanceSerializer.hpp"
+#include "Util/convert.hpp"
 
 using namespace debug_agent::rest;
 using namespace debug_agent::cavs;
@@ -269,6 +270,53 @@ Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request
     }
 
     return std::make_unique<StreamResponse>(ContentTypeIfdkFile, std::move(resource));
+}
+
+ProbeId ProbeStreamResource::getProbeId(const Request &request)
+{
+    std::string instanceId = request.getIdentifierValue("instance_id");
+    ProbeId::RawType probeIndex;
+    if (!convertTo(instanceId, probeIndex)) {
+        throw Response::HttpError(Response::ErrorStatus::BadRequest,
+                                  "The probe index '" + instanceId + "' is invalid");
+    }
+    return ProbeId(probeIndex);
+}
+
+Resource::ResponsePtr ProbeStreamResource::handleGet(const Request &request)
+{
+    ProbeId probeId = getProbeId(request);
+
+    auto &&resource = mSystem.tryToAcquireProbeExtractionStreamResource(probeId);
+    if (resource == nullptr) {
+        throw Response::HttpError(Response::ErrorStatus::Locked,
+                                  "Probe extraction resource #" +
+                                      std::to_string(probeId.getValue()) + " is already used.");
+    }
+
+    return std::make_unique<StreamResponse>(ContentTypeIfdkFile, std::move(resource));
+}
+
+Resource::ResponsePtr ProbeStreamResource::handlePost(const Request &request)
+{
+    ProbeId probeId = getProbeId(request);
+
+    auto &&resource = mSystem.tryToAcquireProbeInjectionStreamResource(probeId);
+    if (resource == nullptr) {
+        throw Response::HttpError(Response::ErrorStatus::Locked,
+                                  "Probe injection resource #" +
+                                      std::to_string(probeId.getValue()) + " is already used.");
+    }
+
+    try {
+        resource->doReading(request.getRequestStream());
+    } catch (System::Exception &e) {
+        throw Response::HttpError(Response::ErrorStatus::InternalError,
+                                  "Probe #" + std::to_string(probeId.getValue()) + " has failed: " +
+                                      std::string(e.what()));
+    }
+
+    return std::make_unique<Response>();
 }
 }
 }
