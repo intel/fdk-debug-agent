@@ -109,6 +109,9 @@ private:
     static ProbePurpose fromWindows(const driver::ProbePurpose &from);
     /** @} */
 
+    void startStreaming();
+    void stopStreaming();
+
     Device &mDevice;
     const EventHandles &mEventHandles;
 };

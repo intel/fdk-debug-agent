@@ -123,6 +123,17 @@ Prober::ProbePurpose Prober::fromWindows(const driver::ProbePurpose &from)
 
 void Prober::setState(State state)
 {
+    switch (state) {
+    case State::Active:
+        startStreaming();
+        break;
+    // If not active, stop streaming
+    case State::Idle:
+    case State::Owned:
+    case State::Allocated:
+        stopStreaming();
+    }
+
     auto tmp = toWindows(state);
     ioctl<SetState>(tmp);
 }
@@ -260,6 +271,15 @@ void Prober::ioctl(typename T::Data &inout)
     } catch (util::ByteStreamReader::Exception &e) {
         throw Exception("Cannot decode probe parameter ioctl buffer: " + std::string(e.what()));
     }
+}
+
+void Prober::startStreaming()
+{
+    auto ringBuffers = getRingBuffers();
+}
+
+void Prober::stopStreaming()
+{
 }
 }
 }

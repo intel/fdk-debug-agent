@@ -41,18 +41,28 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
     MockedDeviceCommands commands(device);
     Me prober(device, probeEvents);
 
-    // Check that all states are correctly converted
-    for (auto state : {driver::ProbeState::Idle, driver::ProbeState::Owned,
-                       driver::ProbeState::Allocated, driver::ProbeState::Active}) {
+    // Check that all states are correctly converted (special case for `Active`
+    // because of a side-effect.
+    for (auto state :
+         {driver::ProbeState::Idle, driver::ProbeState::Owned, driver::ProbeState::Allocated}) {
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS, state);
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, state);
     }
 
-    for (auto state :
-         {Me::State::Idle, Me::State::Owned, Me::State::Allocated, Me::State::Active}) {
+    for (auto state : {Me::State::Idle, Me::State::Owned, Me::State::Allocated}) {
         CHECK_NOTHROW(prober.setState(state));
         CHECK(prober.getState() == state);
     }
+
+    // Setting the state to `Active` triggers an ioctl to retrieve the ring
+    // buffers descriptions.
+    windows::driver::RingBuffersDescription rb = {{nullptr, 0}, {}};
+    commands.addGetRingBuffers(true, STATUS_SUCCESS, rb);
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, driver::ProbeState::Active);
+    CHECK_NOTHROW(prober.setState(Me::State::Active));
+
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, driver::ProbeState::Active);
+    CHECK(prober.getState() == Me::State::Active);
 
     // Have the prober throw on an illegal state (arguments passed to
     // addSetProbeStateCommand are irrelevant)

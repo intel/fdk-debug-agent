@@ -760,6 +760,10 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::Allocated);
 
+        // going to Get ring buffers
+        windows::driver::RingBuffersDescription rb = {{nullptr, 0}, {}};
+        commands.addGetRingBuffers(true, STATUS_SUCCESS, rb);
+
         // going to Active
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
 
