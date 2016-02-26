@@ -37,30 +37,31 @@ set(LIB_SRCS ${LIB_SRCS} ${WINDOWS_LIB_SRCS})
 source_group("Source Files\\Windows" FILES ${WINDOWS_LIB_SRCS})
 
 set(WINDOWS_LIB_INCS
-    include/cAVS/Windows/Driver.hpp
-    include/cAVS/Windows/Logger.hpp
-    include/cAVS/Windows/Prober.hpp
     include/cAVS/Windows/Device.hpp
-    include/cAVS/Windows/SystemDevice.hpp
-    include/cAVS/Windows/LastError.hpp
     include/cAVS/Windows/DeviceIdFinder.hpp
+    include/cAVS/Windows/Driver.hpp
     include/cAVS/Windows/DriverTypes.hpp
+    include/cAVS/Windows/EventHandle.hpp
+    include/cAVS/Windows/FileWppClient.hpp
+    include/cAVS/Windows/IoCtlDescription.hpp
+    include/cAVS/Windows/IoctlHelpers.hpp
+    include/cAVS/Windows/LastError.hpp
+    include/cAVS/Windows/Logger.hpp
     include/cAVS/Windows/ModuleHandler.hpp
+    include/cAVS/Windows/Prober.hpp
+    include/cAVS/Windows/RealTimeWppClientFactory.hpp
+    include/cAVS/Windows/RealTimeWppClient.hpp
+    include/cAVS/Windows/StubbedWppClientFactory.hpp
+    include/cAVS/Windows/StubbedWppClient.hpp
+    include/cAVS/Windows/SystemDevice.hpp
     include/cAVS/Windows/WindowsTypes.hpp
+    include/cAVS/Windows/WppClientFactory.hpp
+    include/cAVS/Windows/WppClient.hpp
     include/cAVS/Windows/WppConsumer.hpp
-    include/cAVS/Windows/WppTypes.hpp
     include/cAVS/Windows/WppController.hpp
     include/cAVS/Windows/WppLogEntryListener.hpp
-    include/cAVS/Windows/WppClient.hpp
-    include/cAVS/Windows/RealTimeWppClient.hpp
-    include/cAVS/Windows/FileWppClient.hpp
-    include/cAVS/Windows/StubbedWppClient.hpp
-    include/cAVS/Windows/WppClientFactory.hpp
-    include/cAVS/Windows/RealTimeWppClientFactory.hpp
-    include/cAVS/Windows/StubbedWppClientFactory.hpp
-    include/cAVS/Windows/IoctlHelpers.hpp
-    include/cAVS/Windows/IoCtlDescription.hpp
-    include/cAVS/Windows/EventHandle.hpp)
+    include/cAVS/Windows/WppTypes.hpp
+)
 
 set(LIB_INCS ${LIB_INCS} ${WINDOWS_LIB_INCS})
 
