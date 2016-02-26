@@ -62,6 +62,11 @@ if (WIN32)
     # warning as error. todo: activate all warnings.
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
 
+    # Force include iso646.h to support alternative operator form (and, or, not...)
+    # Such support is require by the standard and can be enabled with /Za
+    # but doing so breaks compilation of windows headers...
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FIiso646.h")
+
     # cmake handles incorrectly static library symbol database, so disabling the involved warning.
     # treating also warnings as errors
     set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /WX" )
