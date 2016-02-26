@@ -171,7 +171,7 @@ driver::ProbePointConfiguration Prober::toWindows(const cavs::Prober::SessionPro
 
     driver::ProbePointConfiguration toDriver;
     toDriver.extractionBufferCompletionEventHandle = eventHandles.extractionHandle.get();
-    std::copy_n(connections.data(), driver::maxProbes, toDriver.probePointConnection);
+    std::copy_n(connections.begin(), driver::maxProbes, toDriver.probePointConnection);
     return toDriver;
 }
 
