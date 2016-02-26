@@ -48,6 +48,7 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/LastError.hpp
     include/cAVS/Windows/Logger.hpp
     include/cAVS/Windows/ModuleHandler.hpp
+    include/cAVS/Windows/Probe/ExtractionInputStream.hpp
     include/cAVS/Windows/Prober.hpp
     include/cAVS/Windows/RealTimeWppClientFactory.hpp
     include/cAVS/Windows/RealTimeWppClient.hpp

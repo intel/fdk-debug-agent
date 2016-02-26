@@ -45,6 +45,7 @@ public:
     virtual ~InputStream() = default;
 
     /**
+     * This method blocks until all the required bytes are read.
      * @return the read byte count. If it is less than byteCount, end of
      *         stream is reached.
      * @throw InputStream::Exception */
