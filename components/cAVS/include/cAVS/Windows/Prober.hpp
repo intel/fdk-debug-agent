@@ -100,7 +100,7 @@ public:
     size_t getExtractionRingBufferLinearPosition();
 
 private:
-    static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE;
+    static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_FW_PROBE;
     static constexpr std::size_t mQueueSize = 5 * 1024 * 1024;
 
     using PacketQueue = util::BlockingQueue<util::Buffer>;

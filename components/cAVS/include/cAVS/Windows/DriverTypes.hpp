@@ -77,13 +77,16 @@ static const uint32_t logParametersCommandparameterId = 0;
 using IOCTL_FEATURE = private_driver::IOCTL_FEATURE;
 
 /* Importing IOCTL_LOG_STATE enum */
-using IOCTL_LOG_STATE = private_driver::IOCTL_LOG_STATE;
+using IOCTL_LOG_STATE =
+    private_driver::IntcIoctlFeatures::FwLogsFeature::LogStatusParam::StartedValueType;
 
 /* Importing FW_LOG_LEVEL enum */
-using FW_LOG_LEVEL = private_driver::FW_LOG_LEVEL;
+using FW_LOG_LEVEL =
+    private_driver::IntcIoctlFeatures::FwLogsFeature::LogStatusParam::LevelValueType;
 
 /* Importing FW_LOG_OUTPUT enum */
-using FW_LOG_OUTPUT = private_driver::FW_LOG_OUTPUT;
+using FW_LOG_OUTPUT =
+    private_driver::IntcIoctlFeatures::FwLogsFeature::LogStatusParam::OutputValueType;
 
 /* Intc_App_Cmd_Header */
 
@@ -155,14 +158,15 @@ struct Intc_App_Cmd_Body
 };
 
 /* IoctlFwModuleParam */
-
-CHECK_SIZE(private_driver::IoctlFwModuleParam, 20);
-CHECK_MEMBER(private_driver::IoctlFwModuleParam, fw_status, 0, ULONG);
-CHECK_MEMBER(private_driver::IoctlFwModuleParam, instance_id, 4, USHORT);
-CHECK_MEMBER(private_driver::IoctlFwModuleParam, module_id, 6, USHORT);
-CHECK_MEMBER(private_driver::IoctlFwModuleParam, module_parameter_id, 8, ULONG);
-CHECK_MEMBER(private_driver::IoctlFwModuleParam, module_parameter_data_size, 12, ULONG);
-CHECK_MEMBER(private_driver::IoctlFwModuleParam, module_parameter_data, 16, UCHAR[1]);
+using private_IoctlFwModuleAccessParam =
+    private_driver::IntcIoctlFeatures::FwModuleParamFeature::FwModuleParamAccessParam::BufferStruct;
+CHECK_SIZE(private_IoctlFwModuleAccessParam, 17); // last byte is the dynamic payload artefact
+CHECK_MEMBER(private_IoctlFwModuleAccessParam, fw_status, 0, UINT32);
+CHECK_MEMBER(private_IoctlFwModuleAccessParam, instance_id, 4, UINT16);
+CHECK_MEMBER(private_IoctlFwModuleAccessParam, module_id, 6, UINT16);
+CHECK_MEMBER(private_IoctlFwModuleAccessParam, module_parameter_id, 8, UINT32);
+CHECK_MEMBER(private_IoctlFwModuleAccessParam, module_parameter_data_size, 12, UINT32);
+CHECK_MEMBER(private_IoctlFwModuleAccessParam, module_parameter_data, 16, UINT8[1]);
 
 struct IoctlFwModuleParam
 {
@@ -208,10 +212,12 @@ struct IoctlFwModuleParam
 
 /* IoctlFwLogsState */
 
-CHECK_SIZE(private_driver::IoctlFwLogsState, 12);
-CHECK_MEMBER(private_driver::IoctlFwLogsState, started, 0, ULONG);
-CHECK_MEMBER(private_driver::IoctlFwLogsState, level, 4, ULONG);
-CHECK_MEMBER(private_driver::IoctlFwLogsState, output, 8, ULONG);
+using private_IoctlFwLogsState =
+    private_driver::IntcIoctlFeatures::FwLogsFeature::LogStatusParam::BufferStruct;
+CHECK_SIZE(private_IoctlFwLogsState, 12);
+CHECK_MEMBER(private_IoctlFwLogsState, started, 0, IOCTL_LOG_STATE);
+CHECK_MEMBER(private_IoctlFwLogsState, level, 4, FW_LOG_LEVEL);
+CHECK_MEMBER(private_IoctlFwLogsState, output, 8, FW_LOG_OUTPUT);
 
 struct IoctlFwLogsState
 {
