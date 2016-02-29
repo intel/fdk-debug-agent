@@ -50,3 +50,32 @@ create_shortcut(bin/OpenCAVSFolder.bat "CAVS config")
 # Installing HOWTO file and creating shortcut
 install(FILES "resources/docs/HOWTO.txt" DESTINATION ".")
 create_shortcut(HOWTO.txt "DBGA How to")
+
+# including windows runtime libraries
+#
+# Note 1: there are two ways to deploy visual studio runtime libraries:
+# - "application local" way: libraries are deployed by the application installer
+# - "vcredist package" way: libraries are deployed by a microsoft dedicated installer
+#
+# Currently the DBGA uses the "application local" way to simplify user installation
+# (only one installer is needed), but it is not a good solution anymore since visual studio 2015,
+# because this release requires approx. 50 runtime libraries!
+# @todo: use the "vcredist package" way instead of "application local" way.
+#
+# Note 2: the "application local" way can be achieved using the cmake module
+# "InstallRequiredSystemLibraries", but it has been chosen to not use it because:
+# - currently it doesn't handle properly new visual studio "universal" runtime libraries
+#   (see https://blogs.msdn.microsoft.com/vcblog/2015/03/03/introducing-the-universal-crt/)
+# - this module is not suitable to select runtime library configuration (debug/release)
+#   according to the installer configuration
+# - this module retrieves runtime libraries from the builder host, which may have been modified.
+#   It is safer to retrieve them from the source control.
+
+set(MSVC_DIR "${PROJECT_SOURCE_DIR}/external/msvc_2015")
+file(GLOB COMMON_DLL "${MSVC_DIR}/common/*.dll")
+file(GLOB RELEASE_DLL "${MSVC_DIR}/release/*.dll")
+file(GLOB DEBUG_DLL "${MSVC_DIR}/debug/*.dll")
+
+install(FILES ${COMMON_DLL} DESTINATION bin)
+install(FILES ${RELEASE_DLL} DESTINATION bin CONFIGURATIONS Release)
+install(FILES ${DEBUG_DLL} DESTINATION bin CONFIGURATIONS Debug)

@@ -41,16 +41,6 @@ set(CPACK_WIX_PRODUCT_GUID "6E4C7E7F-23FC-4CA8-AC62-E149D5710269")
 # existing installations that use the same GUID.
 set(CPACK_WIX_UPGRADE_GUID "49A98B9B-BB0B-44BE-8ECE-3584E9EE83D7")
 
-if (WIN32)
-    # On windows, pack compiler provided libraries (MSVC redistributable) with the project
-    # Note: by setting CMAKE_INSTALL_DEBUG_LIBRARIES to TRUE, both release and debug runtime
-    # libraries are installed. In this way debug and release installer work.
-    # @todo: find a way to install only release runtime libraries within release installer
-    # (and same thing for debug).
-    set (CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
-    include(InstallRequiredSystemLibraries)
-endif()
-
 # Use dpkg-shlibdeps (debian generator only) to generate better package dependency list.
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
