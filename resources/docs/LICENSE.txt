@@ -1,3 +1,0 @@
-Debug Agent, part of Intel Firmware Development Kit, is licensed under the ...
-
-todo
