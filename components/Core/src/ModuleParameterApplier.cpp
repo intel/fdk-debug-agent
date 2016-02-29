@@ -95,8 +95,8 @@ std::string ModuleParameterApplier::getParameterStructure(const std::string &typ
 
     /* Producing final xml... */
     std::stringstream out;
-    out << "<" << getParameterKindTag(parameterKind) << ">\n" << parameters << "</"
-        << getParameterKindTag(parameterKind) << ">\n";
+    auto &&tag = getParameterKindTag(parameterKind);
+    out << "<" << tag << ">\n" << parameters << "</" << tag << ">\n";
 
     return out.str();
 }
@@ -188,8 +188,8 @@ std::string ModuleParameterApplier::getParameterValue(const std::string &type,
     *
     * @todo use libstructure instead */
     std::stringstream out;
-    out << "<" << getParameterKindTag(parameterKind) << ">\n" << parameters << "</"
-        << getParameterKindTag(parameterKind) << ">\n";
+    auto &&tag = getParameterKindTag(parameterKind);
+    out << "<" << tag << ">\n" << parameters << "</" << tag << ">\n";
 
     return out.str();
 }
