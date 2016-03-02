@@ -1,2 +1,2 @@
-DebugAgent.exe --pfwConfig="../parameter-framework/root/ParameterFrameworkConfiguration.xml"
+DebugAgent.exe -v --pfwConfig="../parameter-framework/root/ParameterFrameworkConfiguration.xml"
 pause

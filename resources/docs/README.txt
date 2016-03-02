@@ -37,14 +37,14 @@ ON HOST: You have to copy all content (files and dirs) from the following direct
 
 ON TARGET: Into the following directory:
 <DBGA install path>/parameter-framework/cavs/
-Note: this directory can be opened easily using the the desktop shortcut "cAVS config"
+Note: this directory can be opened easily using the the desktop shortcut "Open DBGA config"
 
 This manual provisioning will disappear in a future FDK release.
 
 3. How to use it
 ----------------
 
-Click on the desktop shortcut "Debug Agent" and check that no error occurs in the opened console
+Click on the desktop shortcut "Run Debug Agent" and check that no error occurs in the opened console
 window.
 Press Ctr+C to stop it.
 
