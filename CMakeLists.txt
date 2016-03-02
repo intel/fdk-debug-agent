@@ -150,6 +150,8 @@ if (WIN32)
     include(cmake/WindowsInstall.cmake)
 endif()
 
+add_subdirectory(doxygen)
+
 # CPack
 add_subdirectory(cpack)
 
