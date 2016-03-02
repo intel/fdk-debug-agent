@@ -31,7 +31,6 @@
 #include <stdexcept>
 #include <vector>
 #include <mutex>
-#include <array>
 
 namespace debug_agent
 {
@@ -260,7 +259,7 @@ private:
     std::unique_ptr<T> tryToAcquireResource(std::unique_ptr<T> resource);
 
     static std::unique_ptr<Driver> createDriver(const DriverFactory &driverFactory);
-    static void checkProbeIndex(ProbeId probeIndex);
+    void checkProbeIndex(ProbeId probeIndex) const;
 
     std::unique_ptr<Driver> mDriver;
 
@@ -283,8 +282,8 @@ private:
     std::mutex mLogStreamMutex;
 
     /** Mutexes that guarantee probe stream exclusive usage */
-    std::array<std::mutex, ProbeService::mProbeCount> mProbeExtractionMutexes;
-    std::array<std::mutex, ProbeService::mProbeCount> mProbeInjectionMutexes;
+    std::vector<std::mutex> mProbeExtractionMutexes;
+    std::vector<std::mutex> mProbeInjectionMutexes;
 
     ProbeService mProbeService;
 };

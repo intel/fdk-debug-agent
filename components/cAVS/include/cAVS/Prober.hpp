@@ -173,6 +173,9 @@ public:
 
     virtual ~Prober() = default;
 
+    /** @return max supported probe count */
+    virtual std::size_t getMaxProbeCount() const = 0;
+
     /** Set the state of the probing service.
      *
      * The state machine specified in the SwAS must be respected.

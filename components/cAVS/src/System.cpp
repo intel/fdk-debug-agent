@@ -102,6 +102,8 @@ void System::ProbeInjectionStreamResource::doReading(std::istream &is)
 // System class
 System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
+      mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
+      mProbeInjectionMutexes(mDriver->getProber().getMaxProbeCount()),
       mProbeService(mDriver->getProber())
 {
     try {
@@ -210,9 +212,9 @@ std::unique_ptr<System::OutputStreamResource> System::tryToAcquireLogStreamResou
         mLogStreamMutex, mDriver->getLogger(), mModuleEntries));
 }
 
-void System::checkProbeIndex(ProbeId probeIndex)
+void System::checkProbeIndex(ProbeId probeIndex) const
 {
-    if (probeIndex.getValue() >= ProbeService::mProbeCount) {
+    if (probeIndex.getValue() >= mDriver->getProber().getMaxProbeCount()) {
         throw Exception("Wrong probe index: " + std::to_string(probeIndex.getValue()));
     }
 }

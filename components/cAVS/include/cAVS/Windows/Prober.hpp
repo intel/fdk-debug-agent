@@ -57,6 +57,7 @@ public:
     {
     }
 
+    std::size_t getMaxProbeCount() const override { return driver::maxProbes; }
     void setState(State state) override;
     State getState() override;
     void setSessionProbes(const SessionProbes probes) override;

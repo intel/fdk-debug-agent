@@ -103,9 +103,9 @@ void ProbeService::stopNoThrow() noexcept
     }
 }
 
-void ProbeService::checkProbeId(ProbeId probeId)
+void ProbeService::checkProbeId(ProbeId probeId) const
 {
-    if (probeId.getValue() >= mProbeCount) {
+    if (probeId.getValue() >= mProber.getMaxProbeCount()) {
         throw Exception("Invalid probe index: " + std::to_string(probeId.getValue()));
     }
 }

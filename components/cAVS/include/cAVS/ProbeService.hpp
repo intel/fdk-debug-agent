@@ -45,14 +45,12 @@ namespace cavs
 class ProbeService
 {
 public:
-    static const std::size_t mProbeCount = 8;
-
     struct Exception : std::runtime_error
     {
         using std::runtime_error::runtime_error;
     };
 
-    ProbeService(Prober &prober) : mProbeConfigs(mProbeCount), mProber(prober) {}
+    ProbeService(Prober &prober) : mProbeConfigs(prober.getMaxProbeCount()), mProber(prober) {}
     ~ProbeService();
 
     /** Set service state
@@ -81,7 +79,8 @@ private:
 
     using Transitions = std::map<Prober::State, Prober::State>;
 
-    static void checkProbeId(ProbeId id);
+    /* Check if probe id is in valid range */
+    void checkProbeId(ProbeId id) const;
 
     /**
     * @throw ProbeService::Exception

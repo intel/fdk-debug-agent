@@ -63,6 +63,8 @@ private:
     class DummyProber : public Prober
     {
     public:
+        std::size_t getMaxProbeCount() const override { return 0; }
+
         void setState(State state) override {}
 
         State getState() override { return State::Idle; }
