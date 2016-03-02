@@ -27,6 +27,7 @@
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
+#include <array>
 
 namespace debug_agent
 {
@@ -38,8 +39,21 @@ namespace windows
 class Prober : public cavs::Prober
 {
 public:
-    Prober(Device &device, const EventHandle &probeEvent)
-        : mDevice(device), mProbeEventHandle(probeEvent)
+    using EventArray = std::array<EventHandle, driver::maxProbes>;
+
+    struct EventHandles
+    {
+        EventHandle extractionHandle;
+        EventArray injectionHandles;
+    };
+
+    /** Create a driver probe config from os-agnostic config and event handles */
+    static driver::ProbePointConfiguration toWindows(
+        const cavs::Prober::SessionProbes &probes,
+        const windows::Prober::EventHandles &eventHandles);
+
+    Prober(Device &device, const EventHandles &eventHandles)
+        : mDevice(device), mEventHandles(eventHandles)
     {
     }
 
@@ -87,7 +101,7 @@ private:
     /** @} */
 
     Device &mDevice;
-    const EventHandle &mProbeEventHandle;
+    const EventHandles &mEventHandles;
 };
 }
 }

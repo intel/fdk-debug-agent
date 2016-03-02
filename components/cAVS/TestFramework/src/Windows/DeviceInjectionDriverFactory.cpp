@@ -31,6 +31,20 @@ namespace cavs
 namespace windows
 {
 
+/** Check that all event handles (injection/extraction) are valid */
+bool checkProbeEventHandles(const Prober::EventHandles &handles)
+{
+    if (handles.extractionHandle.get() == nullptr) {
+        return false;
+    }
+    for (auto &handle : handles.injectionHandles) {
+        if (handle.get() == nullptr) {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
 {
     if (mInjectedDevice == nullptr) {
@@ -41,12 +55,12 @@ std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
     }
 
     ASSERT_ALWAYS(mInjectedWppClientFactory != nullptr);
-    ASSERT_ALWAYS(mInjectedProbeEventHandle.get() != nullptr);
+    ASSERT_ALWAYS(checkProbeEventHandles(mInjectedProbeEventHandles));
 
     /* After this call mInjectedDevice will be null */
     return std::make_unique<windows::Driver>(std::move(mInjectedDevice),
                                              std::move(mInjectedWppClientFactory),
-                                             mInjectedProbeEventHandle);
+                                             mInjectedProbeEventHandles);
 }
 }
 }

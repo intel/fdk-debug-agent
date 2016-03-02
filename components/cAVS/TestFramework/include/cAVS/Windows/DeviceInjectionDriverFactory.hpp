@@ -25,6 +25,7 @@
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/WppClientFactory.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
+#include "cAVS/Windows/Prober.hpp"
 #include "cAVS/DriverFactory.hpp"
 #include <memory>
 
@@ -42,10 +43,10 @@ class DeviceInjectionDriverFactory : public DriverFactory
 public:
     DeviceInjectionDriverFactory(std::unique_ptr<Device> injectedDevice,
                                  std::unique_ptr<WppClientFactory> injectedWppClientFactory,
-                                 EventHandle &probeEventHandle)
+                                 Prober::EventHandles &probeEventHandles)
         : mInjectedDevice(std::move(injectedDevice)),
           mInjectedWppClientFactory(std::move(injectedWppClientFactory)),
-          mInjectedProbeEventHandle(std::move(probeEventHandle))
+          mInjectedProbeEventHandles(std::move(probeEventHandles))
     {
     }
 
@@ -62,7 +63,7 @@ private:
     mutable std::unique_ptr<WppClientFactory> mInjectedWppClientFactory;
 
     /* Same point for this member */
-    mutable EventHandle mInjectedProbeEventHandle;
+    mutable Prober::EventHandles mInjectedProbeEventHandles;
 };
 }
 }

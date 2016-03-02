@@ -37,9 +37,9 @@ using Me = windows::Prober;
 
 TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
 {
-    EventHandle probeEvent;
+    windows::Prober::EventHandles probeEvents;
     MockedDeviceCommands commands(device);
-    Me prober(device, probeEvent);
+    Me prober(device, probeEvents);
 
     // Check that all states are correctly converted
     for (auto state : {driver::ProbeState::Idle, driver::ProbeState::Owned,
@@ -73,20 +73,10 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
 }
 TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
 {
-    EventHandle probeEvent;
+    windows::Prober::EventHandles probeEvents;
     MockedDeviceCommands commands(device);
-    Me prober(device, probeEvent);
+    Me prober(device, probeEvents);
 
-    driver::ProbePointConfiguration sampleDriverConfig = {
-        probeEvent.get(),
-        {{true, {0, 0, 0, 0}, driver::ProbePurpose::Inject, nullptr},
-         {true, {4, 3, 2, 1}, driver::ProbePurpose::Extract, nullptr},
-         {true, {0xffff, 0xff, 2, 0x3f}, driver::ProbePurpose::InjectReextract, nullptr},
-         {false, {0, 0, 0, 0}, driver::ProbePurpose::Inject, nullptr},
-         {true, {0, 0, 1, 0}, driver::ProbePurpose::Extract, nullptr},
-         {false, {16, 8, 2, 4}, driver::ProbePurpose::Extract, nullptr},
-         {true, {0, 0, 0, 0}, driver::ProbePurpose::Extract, nullptr},
-         {true, {0, 0, 0, 0}, driver::ProbePurpose::Extract, nullptr}}};
     Me::SessionProbes sampleCavsConfig = {
         {true, {0, 0, Me::ProbeType::Input, 0}, Me::ProbePurpose::Inject},
         {true, {4, 3, Me::ProbeType::Internal, 1}, Me::ProbePurpose::Extract},
@@ -96,6 +86,9 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
         {false, {16, 8, Me::ProbeType::Internal, 4}, Me::ProbePurpose::Extract},
         {true, {0, 0, Me::ProbeType::Input, 0}, Me::ProbePurpose::Extract},
         {true, {0, 0, Me::ProbeType::Input, 0}, Me::ProbePurpose::Extract}};
+
+    driver::ProbePointConfiguration sampleDriverConfig =
+        Me::toWindows(sampleCavsConfig, probeEvents);
 
     // Check nominal cases
     commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, sampleDriverConfig);

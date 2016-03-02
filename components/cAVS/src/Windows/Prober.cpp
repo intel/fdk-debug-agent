@@ -136,7 +136,8 @@ Prober::State Prober::getState()
     return fromWindows(state);
 }
 
-void Prober::setSessionProbes(const SessionProbes probes)
+driver::ProbePointConfiguration Prober::toWindows(const cavs::Prober::SessionProbes &probes,
+                                                  const windows::Prober::EventHandles &eventHandles)
 {
     if (probes.size() != driver::maxProbes) {
         throw Exception("Expected to receive " + std::to_string(driver::maxProbes) +
@@ -146,17 +147,24 @@ void Prober::setSessionProbes(const SessionProbes probes)
 
     // Translate the high-level data into driver-specific structures
     std::vector<driver::ProbePointConnection> connections;
+    std::size_t probeIndex = 0;
     for (const auto &probe : probes) {
         driver::ProbePointId probePointId = toWindows(probe.probePoint);
         connections.emplace_back(probe.enabled, probePointId, toWindows(probe.purpose),
-                                 /* TODO */ nullptr);
+                                 eventHandles.injectionHandles[probeIndex].get());
+
+        ++probeIndex;
     }
 
     driver::ProbePointConfiguration toDriver;
-    toDriver.extractionBufferCompletionEventHandle = mProbeEventHandle.get();
+    toDriver.extractionBufferCompletionEventHandle = eventHandles.extractionHandle.get();
     std::copy_n(connections.data(), driver::maxProbes, toDriver.probePointConnection);
+    return toDriver;
+}
 
-    ioctl<SetProbePointConfiguration>(toDriver);
+void Prober::setSessionProbes(const SessionProbes probes)
+{
+    ioctl<SetProbePointConfiguration>(toWindows(probes, mEventHandles));
 }
 
 Prober::SessionProbes Prober::getSessionProbes()

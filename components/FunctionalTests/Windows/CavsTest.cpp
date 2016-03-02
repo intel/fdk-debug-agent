@@ -248,7 +248,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::EventHandle());
+        windows::Prober::EventHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -328,7 +328,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::EventHandle());
+        windows::Prober::EventHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -376,7 +376,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::EventHandle());
+        windows::Prober::EventHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -418,7 +418,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: A refresh error erases the previous 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::EventHandle());
+        windows::Prober::EventHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -479,7 +479,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::EventHandle());
+        windows::Prober::EventHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -511,7 +511,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::EventHandle());
+        windows::Prober::EventHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -578,7 +578,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::EventHandle());
+        windows::Prober::EventHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -637,7 +637,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::EventHandle());
+        windows::Prober::EventHandles());
 
     /* Creating and starting the debug agent in another thread. It can be stopped using
     * a condition variable*/
@@ -714,7 +714,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     /* Setting the test vector
      * ----------------------- */
 
-    windows::EventHandle probeEventHandle;
+    windows::Prober::EventHandles probeEventHandles;
     {
         windows::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
@@ -740,18 +740,21 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         // going to Owned
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
 
+        using Type = Prober::ProbeType;
+        using Purpose = Prober::ProbePurpose;
         // setting probe configuration (probe #1 is enabled)
-        windows::driver::ProbePointConfiguration expectedDriverConfig = {
-            probeEventHandle.get(),
-            {{false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {true, {1, 2, 1, 0}, windows::driver::ProbePurpose::Extract, nullptr}, // Enabled
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr}}};
-        commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, expectedDriverConfig);
+        cavs::Prober::SessionProbes probes = {
+            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+            {true, {1, 2, Type::Output, 0}, Purpose::Extract}, // Enabled
+            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+            {false, {0, 0, Type::Input, 0}, Purpose::Inject}};
+
+        commands.addSetProbeConfigurationCommand(
+            true, STATUS_SUCCESS, windows::Prober::toWindows(probes, probeEventHandles));
 
         // going to Allocated
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
@@ -783,7 +786,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(), probeEventHandle);
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(), probeEventHandles);
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -858,7 +861,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
     /* Setting the test vector
     * ----------------------- */
 
-    windows::EventHandle probeEventHandle;
+    windows::Prober::EventHandles probeEventHandles;
     {
         windows::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
@@ -871,17 +874,20 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
         // going to Owned state and setting configuration
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
-        windows::driver::ProbePointConfiguration expectedDriverConfig = {
-            probeEventHandle.get(),
-            {{false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr},
-             {false, {0, 0, 0, 0}, windows::driver::ProbePurpose::Inject, nullptr}}};
-        commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, expectedDriverConfig);
+
+        using Type = Prober::ProbeType;
+        using Purpose = Prober::ProbePurpose;
+        cavs::Prober::SessionProbes probes = {{false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject}};
+
+        commands.addSetProbeConfigurationCommand(
+            true, STATUS_SUCCESS, windows::Prober::toWindows(probes, probeEventHandles));
 
         // going to Allocated, but the it fails!
         commands.addSetProbeStateCommand(false, STATUS_SUCCESS,
@@ -900,7 +906,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(), probeEventHandle);
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(), probeEventHandles);
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);

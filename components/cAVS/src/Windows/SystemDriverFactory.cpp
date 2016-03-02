@@ -65,12 +65,12 @@ std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
     }
 
     try {
-        /* Creating Probe Event handle*/
-        windows::EventHandle probeEventHandle;
+        /* Creating Probe Event handles*/
+        windows::Prober::EventHandles eventHandles;
 
         /* Creating Driver interface */
         return std::make_unique<windows::Driver>(std::move(device), std::move(wppClientFactory),
-                                                 probeEventHandle);
+                                                 eventHandles);
     } catch (windows::EventHandle::Exception &e) {
         throw Exception("Cannot create probe event handle : " + std::string(e.what()));
     }
