@@ -104,10 +104,6 @@ System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
       mProbeService(mDriver->getProber())
 {
-    if (mDriver == nullptr) {
-
-        throw Exception("Driver factory has failed");
-    }
     try {
         mDriver->getModuleHandler().getFwConfig(mFwConfig);
     } catch (ModuleHandler::Exception &e) {
@@ -137,7 +133,11 @@ System::System(const DriverFactory &driverFactory)
 std::unique_ptr<Driver> System::createDriver(const DriverFactory &driverFactory)
 {
     try {
-        return driverFactory.newDriver();
+        auto driver = driverFactory.newDriver();
+        if (driver == nullptr) {
+            throw Exception("Driver factory has failed");
+        }
+        return driver;
     } catch (DriverFactory::Exception e) {
         throw Exception("Unable to create driver: " + std::string(e.what()));
     }
