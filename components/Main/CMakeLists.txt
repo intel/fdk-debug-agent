@@ -37,9 +37,9 @@ add_dbga_executable(Main ${SRCS} ${INCS})
 set_common_settings(Main)
 
 if (WIN32)
-    # We are providing an external manifest; override the default options (this
-    # triggers a harmless warning).
-    set_target_properties(Main PROPERTIES LINK_FLAGS "/manifest:no")
+    # executable will ask administrator privileges
+    set_target_properties(Main PROPERTIES LINK_FLAGS
+        "/level='requireAdministrator' /uiAccess='false'")
 endif (WIN32)
 
 target_compile_definitions(Main PRIVATE
