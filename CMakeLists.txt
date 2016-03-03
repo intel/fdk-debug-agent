@@ -55,7 +55,8 @@ if (WIN32)
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
 
     # cmake handles incorrectly static library symbol database, so disabling the involved warning.
-    set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099" )
+    # treating also warnings as errors
+    set( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /WX" )
 
     # windows header define the min/max macros, which conflicts with std::min/max
     # the NOMINMAX allows to not define them
