@@ -38,13 +38,15 @@ namespace dsp_fw
 {
 
 /**
- * The class HwConfig defines all parameters that can be provided as TLV response for the
+ * Defines all parameters that can be provided as TLV response for the
  * Hardware Config request to the cAVS FW.
+ *
  * For each HW Config parameter, a boolean valid flag indicates if the value is valid or not.
  * A Tlv::TlvUnpack instance can be used to updates a HwConfig instance from a binary TLV list
  * returned by the cAVS FW thanks to the Tlv::TlvDictionaryInterface exposed by the HwConfig
  * instance.
- * @fixme this version ignores tag GPDMA_CAPS (5) since definition and FW types are not consistent
+ *
+ * @todo this version ignores tag GPDMA_CAPS (5) since definition and FW types are not consistent
  */
 class HwConfig final : public tlv::TlvResponseHandlerInterface
 {

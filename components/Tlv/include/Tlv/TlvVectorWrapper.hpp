@@ -42,8 +42,7 @@ class TlvVectorWrapper final : public TlvWrapperInterface
 {
 public:
     /**
-     * @param[in] value the reference to the shadow runtime variable
-     * @param[in] valid the reference to the shadow runtime variable valid flag
+     * @param[in] values the reference to the shadow runtime variable
      */
     TlvVectorWrapper(std::vector<ValueType> &values) : mValues(values) { invalidate(); }
 

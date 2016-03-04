@@ -55,9 +55,9 @@ public:
     /**
      * Perform an IO control
      * @param[in] ioControlType the IO control type
-     * @param[in] inputBuffer the input buffer. This parameter is optional, use nullptr if the
+     * @param[in] input the input buffer. This parameter is optional, use nullptr if the
      *                        input buffer is not required.
-     * @param[in,out] outputBuffer the output buffer (basically this buffer can be used as input
+     * @param[in,out] output the output buffer (basically this buffer can be used as input
      *                             buffer too). This parameter is optional, use nullptr if the
      *                             output buffer is not required. The output Buffer is resized
      *                             according to the IO control response.

@@ -89,12 +89,15 @@ using SubsystemRefCollection = GenericRefCollection<SubsystemRef>;
  *    - another characteristic "b"
  *
  * - the matching visitor call sequence will be:
+ *
+ * @code
  * 1. enter(Characteristics& list)  (the type "Characteristics" is a list of characteristics)
  * 2.   enter(Characteristic &characteristic) (the "a" instance)
  * 3.   leave()
  * 4.   enter(Characteristic &characteristic) (the "b" instance)
  * 5.   leave()
  * 6. leave()
+ * @endcode
  *
  * Note: some enter() methods provides the "isConcrete" parameter. This parameter is used to know
  * if a class is visited as parent class or as concrete class.
@@ -105,6 +108,7 @@ using SubsystemRefCollection = GenericRefCollection<SubsystemRef>;
  *
  * For instance consider this model:
  *
+ * @code
  * class A
  * {
  *    memberA;
@@ -114,22 +118,33 @@ using SubsystemRefCollection = GenericRefCollection<SubsystemRef>;
  * {
  *    memberB;
  * }
+ * @endcode
  *
  * If you visit an "A" instance, the visitor call sequence will be:
+ *
+ * @code
  * 1. enter(A &a, isConcrete = true) -> create the <A> xml tag, set the "memberA" attribute
  * 2. leave(isConcrete = true)
+ * @endcode
  *
  * the resulting xml is:
+ * @code
  * <A memberA="a"/>
+ * @endcode
  *
  * If you visit a "B" instance, the visitor call sequence will be:
+ *
+ * @code
  * 1. enter(B &b, isConcrete = true) -> create the <B> xml tag, set the "memberB" attribute
  * 2.   enter(A &a, isConcrete = false) -> set the "memberA" attribute
  * 3.   leave(isConcrete = false)
  * 4. leave(isConcrete = true)
+ * @endcode
  *
  * the resulting xml is:
+ * @code
  * <B memberB="b" memberA="a"/>
+ * @endcode
  */
 class Visitor
 {

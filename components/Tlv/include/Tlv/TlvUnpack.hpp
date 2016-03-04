@@ -47,9 +47,9 @@ public:
      * Create a TlvUnpack used to read TLV from a TLV list in a binary buffer. The TLV dictionary
      * of the TlvResponseHandlerInterface is reset: each of its TLV wrapper valid flag is cleared
      * unless exception is raised.
+     *
      * @param[in] responseHandler The TlvResponseHandlerInterface which describe the handled TLV
-     * @param[in] tlvBuffer The TLV list buffer
-     * @param[in] tlvBufferSize The TLV list buffer size
+     * @param[in] buffer The TLV list buffer
      * @throw TlvUnpack::Exception
      */
     TlvUnpack(const TlvResponseHandlerInterface &responseHandler, const util::Buffer &buffer);

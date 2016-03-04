@@ -48,6 +48,7 @@ namespace xml
  * supplied as template parameter.
  *
  * For instance consider this model:
+ * @code
  * class A
  * {
  *    attributeA
@@ -57,9 +58,11 @@ namespace xml
  * {
  *    attributeB
  * }
+ * @endcode
  *
  * Here an example of matching traits:
  *
+ * @code
  * template <class T>
  * struct Traits
  * {
@@ -76,7 +79,7 @@ namespace xml
  * {
  *    std::string tag = "B";
  * }
- *
+ * @endcode
  */
 template <template <class> class Traits>
 class Deserializer
@@ -200,13 +203,16 @@ protected:
      *
      * For instance consider this xml, that uses a polymorphic list:
      *
+     * @code
      * <parameters>
      *    <int_parameter name="p1">1</int_parameter>
      *    <float_parameter name="p1">1.2</float_parameter>
      * </parameters>
+     * @endcode
      *
      * The matching data model is:
      *
+     * @code
      * class Parameter
      * {
      *     std::string name;
@@ -221,13 +227,17 @@ protected:
      * {
      *     float floatValue;
      * }
+     * @endcode
      *
      * using Parameters = std::vector<std::shared_ptr<Parameter>>;
      *
      * Now if you invoke this code with the previous XML content:
      *
+     * @code
      *   Parameters parameters;
      *   fillPolymorphicVector<Parameter, IntParameter, FloatParameter>(parameters);
+     * @endcode
+     *
      *
      * Then the parameter list will be filled with an IntParameter instance and with a
      * FloatParameter instance.

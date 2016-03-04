@@ -33,7 +33,8 @@ namespace cavs
 
 /**
  * Implement the cAVS log block as defined by the SwAS.
- * @tparam[in] maxSize maximum size of log data in block
+ *
+ * @tparam maxSize maximum size of log data in block
  */
 template <const size_t maxSize>
 class LogBlockBase final
@@ -85,7 +86,8 @@ public:
 
     /**
      * Serialize the log block to an ostream
-     * @tparam[in] _maxSize maximum size of log data in block
+     *
+     * @tparam _maxSize maximum size of log data in block
      * @param[in] os the ostream
      * @param[in] logBlock the log block to be serialized
      * @return ostream containing original ostream plus serialized log block

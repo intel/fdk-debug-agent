@@ -39,12 +39,15 @@
 /** Included for ioctl type definition */
 #include <winioctl.h>
 
-/** Defining manually the "STATUS_SUCCESS" value of NTSTATUS type because this value is
+/* Defining manually the "STATUS_SUCCESS" value of NTSTATUS type because this value is
  * defined in ntstatus.h, which is a driver space header. Therefore including both
  * windows.h (or Poco/Foundation.h) and ntstatus.h leads to conflict (macro redefinition).
  */
 #define STATUS_SUCCESS static_cast<NTSTATUS>(0)
 
-/** For the same reasons, defining also manually the NT_SUCCESS macro that checks if a NTSTATUS
- * is successful (by convention successful values are >= 0 ) */
+// For the same reasons, defining also manually the NT_SUCCESS macro that
+/** @def NT_SUCCESS(Status) Checks if a NTSTATUS is successful.
+ *
+ * By convention successful values are >= 0
+ */
 #define NT_SUCCESS(Status) (static_cast<NTSTATUS>(Status) >= 0)

@@ -62,6 +62,7 @@ namespace xml
 {
 
 /** Traits of the "Type" data model describing XML tags and attributes */
+/** @{ */
 
 /** base Traits class*/
 template <class T>
@@ -277,6 +278,7 @@ struct TypeTraits<type::EndPoint>
     static const std::string tag;
     static const std::string attributeDirection;
 };
+/** @} */
 }
 }
 }

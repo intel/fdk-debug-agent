@@ -40,12 +40,15 @@ namespace xml
  * The tag name is associated to class using traits.
  *
  * For instance Consider this class hierarchy:
+ * @code
  * class A;
  * class B: public A;
  * class C: public A;
+ * @endcode
  *
  * Matching traits are:
  *
+ * @code
  * template <class T>
  * struct Traits
  * {
@@ -62,10 +65,13 @@ namespace xml
  * {
  *    std::string tag = "C";
  * }
+ * @endcode
  *
  * Then this code :
  *
+ * @code
  * A *instance = DynamicFactory<Traits>::createInstanceFromTag<A, B, C>("B");
+ * @endcode
  *
  * the "instance" local variable will contain a B class instance.
  *

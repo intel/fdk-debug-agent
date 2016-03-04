@@ -77,8 +77,8 @@ public:
     public:
         /**
          * @param[in] status The HTTP error status to be sent in the HTTP response header
-         * @param[in] what The message to be carried on by the exception object which will be in
-         * the body of the HTTP error response
+         * @param[in] userMessage The message to be carried on by the exception object which will
+         * be in the body of the HTTP error response
          */
         HttpError(ErrorStatus status, const std::string &userMessage = "")
             : std::logic_error(getErrorMessage(status, userMessage).c_str()), mStatus(status)

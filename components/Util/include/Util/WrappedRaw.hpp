@@ -42,9 +42,11 @@ namespace util
  * @tparam Trait A unique class that so that `WrappedRaw<Trait>` will be a
  *               different type unique to this wrapping.
  *               `Trait::RawType` must be the type to wrapp.
- *@code // Example: Strong type frequency to differentiate them at compile type from period
- *      struct StrongFrequencyTrait { using RawType = uint32_t; };
-        using StrongFrequency = WrappedRaw<StrongFrequencyTrait>;
+ * @code
+ * // Example: Strong type frequency to differentiate them at compile type from period
+ * struct StrongFrequencyTrait { using RawType = uint32_t; };
+ * using StrongFrequency = WrappedRaw<StrongFrequencyTrait>;
+ * @endcode
  */
 template <class Trait>
 class WrappedRaw final
