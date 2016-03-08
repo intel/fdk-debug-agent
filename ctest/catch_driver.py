@@ -24,11 +24,11 @@ import subprocess
 import sys
 import os
 
-def main(test_executable, reporter, output_dir):
-    args = []
+def main(args, reporter, output_dir):
+    test_args = args[1:]
 
     if reporter:
-        args += ["-r", reporter]
+        test_args += ["-r", reporter]
 
     if output_dir:
         if not os.path.exists(output_dir):
@@ -39,12 +39,12 @@ def main(test_executable, reporter, output_dir):
         output_path = os.path.join(output_dir, "testLog{}.txt".format(exe_basename))
         output_arg = ["-o", output_path]
 
-        args += output_arg
+        test_args += output_arg
 
-    status = subprocess.call([test_executable] + args)
+    status = subprocess.call(test_args)
     sys.exit(status)
 
 if __name__ == '__main__':
-    main(sys.argv[1],
+    main(sys.argv,
          os.environ.get('CATCH_REPORTER', None),
          os.environ.get('CATCH_OUTPUT_DIR', None))

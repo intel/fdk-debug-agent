@@ -25,6 +25,9 @@ project(DebugAgent)
 # option to prevent from compiling functional test
 option(EXCLUDE_TEST_IN_ALL_TARGET "Prevent Functional Test compilation" OFF)
 
+#option to enable tests that require admin rights
+option(ENABLE_ADMIN_TESTS "Enable tests that require admin rights" ON)
+
 # debug binary file postfix
 set(CMAKE_DEBUG_POSTFIX "_d")
 

@@ -37,9 +37,13 @@ include(CTest)
 # reporter and/or output file
 set(catch_driver "${CMAKE_CURRENT_LIST_DIR}/catch_driver.py")
 function(add_catch_test executable working_dir)
+    set(COMMAND python "${catch_driver}" "$<TARGET_FILE:${executable}>")
+    if (NOT ENABLE_ADMIN_TESTS)
+        set(COMMAND ${COMMAND} "exclude:[admin_rights]")
+    endif()
     add_test(
         NAME ${executable}
-        COMMAND python "${catch_driver}" "$<TARGET_FILE:${executable}>"
+        COMMAND ${COMMAND}
         WORKING_DIRECTORY ${working_dir})
 endfunction()
 
