@@ -67,7 +67,7 @@ TEST_CASE("RealTimeWppClient: stopping before collecting")
     ThreadHelpers::ensureNonBlocking([&]() { client.collectLogEntries(listener); });
 }
 
-TEST_CASE("RealTimeWppClient: stopping while collecting")
+TEST_CASE("RealTimeWppClient: stopping while collecting", "[admin_rights]")
 {
     RealTimeWppClient client;
 
@@ -109,7 +109,7 @@ TEST_CASE("FileWppClient: stop before collection")
     CHECK(listener.getEntryCount() == 0);
 }
 
-TEST_CASE("FileWppClient: counting entries")
+TEST_CASE("FileWppClient: counting entries", "[admin_rights]")
 {
     FileWppClient client(LogFileName);
 
