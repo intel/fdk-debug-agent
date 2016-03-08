@@ -24,6 +24,7 @@
 #include "cAVS/Windows/FileWppClient.hpp"
 #include "TestCommon/ThreadHelpers.hpp"
 #include <catch.hpp>
+#include <future>
 
 using namespace debug_agent::cavs::windows;
 using namespace debug_agent::test_common;
@@ -70,9 +71,9 @@ TEST_CASE("RealTimeWppClient: stopping while collecting")
 {
     RealTimeWppClient client;
 
-    /** Starting a thread that will stop the client after 200 ms, while collectLogEntries()
+    /** Will stop the client after 200 ms, while collectLogEntries()
      * is running */
-    std::thread th([&]() {
+    std::future<void> future = std::async(std::launch::async, [&]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         client.stop();
     });
@@ -82,7 +83,7 @@ TEST_CASE("RealTimeWppClient: stopping while collecting")
     CounterListener listener;
     ThreadHelpers::ensureNonBlocking([&]() { client.collectLogEntries(listener); });
 
-    th.join();
+    future.get();
 }
 
 TEST_CASE("FileWppClient: log file not found.")
