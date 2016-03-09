@@ -66,13 +66,14 @@ private:
      * - fdk module type name example: "cavs.module-aec"
      * - cavs module type name example: "aec"
      */
-    std::string fdkModuleTypeToCavs(const std::string &fdkModuleType);
+    std::string fdkModuleTypeToCavs(const std::string &fdkModuleType) const;
 
     /** Translate a FDK parameter kind into a ParameterSerializer parameter kind */
     static parameter_serializer::ParameterSerializer::ParameterKind translate(ParameterKind kind);
 
-    /** Find module type id from its name */
-    uint16_t getModuleTypeId(const std::string &moduleTypeName);
+    /** Find module id and uuid from its fdk name */
+    std::pair<uint16_t /*moduleTypeId*/, std::string /*moduleTypeUuid*/> getModuleInfo(
+        const std::string &fdkModuleTypeName) const;
 
     /** Find a parameter id from its name */
     cavs::dsp_fw::ParameterId getParamIdFromName(const std::string moduleTypeName,

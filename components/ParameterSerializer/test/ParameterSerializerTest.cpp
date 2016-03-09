@@ -84,6 +84,8 @@ static const Buffer nsControlParameterPayload = {
     0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
+static const std::string aecUuid("00000001-0001-0000-0100-000001000000");
+
 /** @return the file content as string */
 std::string fileContent(const std::string &name)
 {
@@ -145,11 +147,11 @@ TEST_CASE("Test parameter serializer getChildren()")
 
     // Check bad subsystem name behavior
     CHECK_THROWS_AS_MSG(
-        children = parameterSerializer.getChildren("badSubsystem", "aec",
+        children = parameterSerializer.getChildren("badSubsystem", aecUuid,
                                                    ParameterSerializer::ParameterKind::Control),
         ParameterSerializer::Exception,
-        "Invalid parameters format: node for path \"/BXTN/badSubsystem/categories/aec/control/\" "
-        "not found");
+        "Invalid parameters format: node for path \"/BXTN/badSubsystem/categories/" + aecUuid +
+            "/control/\" not found");
 
     // Check bad module name behavior
     CHECK_THROWS_AS_MSG(
@@ -160,7 +162,7 @@ TEST_CASE("Test parameter serializer getChildren()")
         "not found");
 
     CHECK_NOTHROW(children = parameterSerializer.getChildren(
-                      "cavs", "aec", ParameterSerializer::ParameterKind::Control));
+                      "cavs", aecUuid, ParameterSerializer::ParameterKind::Control));
 
     // module "aec" is compound of 1 "aec parameter" and one "ns parameter".
     // Check module aec has 2 parameters
@@ -172,22 +174,22 @@ TEST_CASE("Test parameter serializer getMapping()")
 {
     ParameterSerializer parameterSerializer(pfwConfFilePath);
 
-    std::map<uint32_t, std::string> children =
-        parameterSerializer.getChildren("cavs", "aec", ParameterSerializer::ParameterKind::Control);
+    std::map<uint32_t, std::string> children = parameterSerializer.getChildren(
+        "cavs", aecUuid, ParameterSerializer::ParameterKind::Control);
 
     std::string mapping;
     // Check bad mapping key behavior
     CHECK_THROWS_AS_MSG(mapping = parameterSerializer.getMapping(
-                            "cavs", "aec", ParameterSerializer::ParameterKind::Control, children[1],
-                            "badMappingKey"),
-                        ParameterSerializer::Exception,
-                        "Mapping \"badMappingKey\" not found for "
-                        "/BXTN/cavs/categories/aec/control/NoiseReduction");
+                            "cavs", aecUuid, ParameterSerializer::ParameterKind::Control,
+                            children[1], "badMappingKey"),
+                        ParameterSerializer::Exception, "Mapping \"badMappingKey\" not found for "
+                                                        "/BXTN/cavs/categories/" +
+                                                            aecUuid + "/control/NoiseReduction");
 
     // Check bad subsystem name behavior
     CHECK_NOTHROW(
         mapping = parameterSerializer.getMapping(
-            "cavs", "aec", ParameterSerializer::ParameterKind::Control, children[1], "ParamId"));
+            "cavs", aecUuid, ParameterSerializer::ParameterKind::Control, children[1], "ParamId"));
 
     CHECK(mapping == "25");
 
@@ -201,29 +203,30 @@ TEST_CASE("Test parameter serializer binary to xml")
 {
     ParameterSerializer parameterSerializer(pfwConfFilePath);
 
-    std::map<uint32_t, std::string> children =
-        parameterSerializer.getChildren("cavs", "aec", ParameterSerializer::ParameterKind::Control);
+    std::map<uint32_t, std::string> children = parameterSerializer.getChildren(
+        "cavs", aecUuid, ParameterSerializer::ParameterKind::Control);
 
     std::string aecControlParameter;
     // Check bad payload behavior
     const Buffer badPayload = {0xDD};
     CHECK_THROWS_AS_MSG(
         aecControlParameter = parameterSerializer.binaryToXml(
-            "cavs", "aec", ParameterSerializer::ParameterKind::Control, children[0], badPayload),
+            "cavs", aecUuid, ParameterSerializer::ParameterKind::Control, children[0], badPayload),
         ParameterSerializer::Exception,
         "Not able to set payload for AcousticEchoCanceler : Wrong size: Expected: 642 "
         "Provided: 1");
 
     // Check bad parameter name behavior
     CHECK_THROWS_AS_MSG(aecControlParameter = parameterSerializer.binaryToXml(
-                            "cavs", "aec", ParameterSerializer::ParameterKind::Control, "badName",
+                            "cavs", aecUuid, ParameterSerializer::ParameterKind::Control, "badName",
                             aecControlParameterPayload),
                         ParameterSerializer::Exception,
-                        "Child badName not found for /BXTN/cavs/categories/aec/control");
+                        "Child badName not found for /BXTN/cavs/categories/" + aecUuid +
+                            "/control");
 
     // Check child 0 which is aec parameter
     CHECK_NOTHROW(aecControlParameter = parameterSerializer.binaryToXml(
-                      "cavs", "aec", ParameterSerializer::ParameterKind::Control, children[0],
+                      "cavs", aecUuid, ParameterSerializer::ParameterKind::Control, children[0],
                       aecControlParameterPayload));
 
     CHECK(aecControlParameter == xmlFile("instance_aec_control_params"));
@@ -231,7 +234,7 @@ TEST_CASE("Test parameter serializer binary to xml")
     // Check child 1 which is ns parameter
     std::string nsControlParameter;
     CHECK_NOTHROW(nsControlParameter = parameterSerializer.binaryToXml(
-                      "cavs", "aec", ParameterSerializer::ParameterKind::Control, children[1],
+                      "cavs", aecUuid, ParameterSerializer::ParameterKind::Control, children[1],
                       nsControlParameterPayload));
 
     CHECK(nsControlParameter == xmlFile("instance_ns_control_params"));
@@ -241,22 +244,23 @@ TEST_CASE("Test parameter serializer xml to binary")
 {
     ParameterSerializer parameterSerializer(pfwConfFilePath);
 
-    std::map<uint32_t, std::string> children =
-        parameterSerializer.getChildren("cavs", "aec", ParameterSerializer::ParameterKind::Control);
+    std::map<uint32_t, std::string> children = parameterSerializer.getChildren(
+        "cavs", aecUuid, ParameterSerializer::ParameterKind::Control);
 
     Buffer localAecControlParameterPayload;
     // Check case when XML content is bad.
     CHECK_THROWS_AS_MSG(
         localAecControlParameterPayload = parameterSerializer.xmlToBinary(
-            "cavs", "aec", ParameterSerializer::ParameterKind::Control, "AcousticEchoCanceler",
+            "cavs", aecUuid, ParameterSerializer::ParameterKind::Control, "AcousticEchoCanceler",
             "<badXmlContent>"),
         ParameterSerializer::Exception,
-        "Not able to set XML stream for /BXTN/cavs/categories/aec/control/AcousticEchoCanceler : "
-        ":1:16: Premature end of data in tag badXmlContent line 1\n\nlibxml failed to read");
+        "Not able to set XML stream for /BXTN/cavs/categories/" + aecUuid +
+            "/control/AcousticEchoCanceler : "
+            ":1:16: Premature end of data in tag badXmlContent line 1\n\nlibxml failed to read");
 
     // Check child 0 which is aec parameter
     CHECK_NOTHROW(localAecControlParameterPayload = parameterSerializer.xmlToBinary(
-                      "cavs", "aec", ParameterSerializer::ParameterKind::Control,
+                      "cavs", aecUuid, ParameterSerializer::ParameterKind::Control,
                       "AcousticEchoCanceler", xmlFile("instance_aec_control_params")));
 
     CHECK(localAecControlParameterPayload == aecControlParameterPayload);
@@ -264,8 +268,8 @@ TEST_CASE("Test parameter serializer xml to binary")
     // Check child 1 which is ns parameter
     Buffer localNsControlParameterPayload;
     CHECK_NOTHROW(localNsControlParameterPayload = parameterSerializer.xmlToBinary(
-                      "cavs", "aec", ParameterSerializer::ParameterKind::Control, "NoiseReduction",
-                      xmlFile("instance_ns_control_params")));
+                      "cavs", aecUuid, ParameterSerializer::ParameterKind::Control,
+                      "NoiseReduction", xmlFile("instance_ns_control_params")));
 
     CHECK(localNsControlParameterPayload == nsControlParameterPayload);
 }
@@ -274,14 +278,14 @@ TEST_CASE("Test parameter serializer get structure XML")
 {
     ParameterSerializer parameterSerializer(pfwConfFilePath);
 
-    std::map<uint32_t, std::string> children =
-        parameterSerializer.getChildren("cavs", "aec", ParameterSerializer::ParameterKind::Control);
+    std::map<uint32_t, std::string> children = parameterSerializer.getChildren(
+        "cavs", aecUuid, ParameterSerializer::ParameterKind::Control);
 
     Buffer localAecControlParameterPayload;
 
     std::string aecControlParameter;
     CHECK_NOTHROW(aecControlParameter = parameterSerializer.getStructureXml(
-                      "cavs", "aec", ParameterSerializer::ParameterKind::Control, children[0]));
+                      "cavs", aecUuid, ParameterSerializer::ParameterKind::Control, children[0]));
 
     CHECK(aecControlParameter == xmlFile("parameter_aec_type_control_params"));
 }

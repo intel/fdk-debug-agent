@@ -26,6 +26,7 @@
 #include "Util/StringHelper.hpp"
 #include "Util/AssertAlways.hpp"
 #include "Util/convert.hpp"
+#include "Util/Uuid.hpp"
 #include <sstream>
 
 namespace debug_agent
@@ -69,11 +70,13 @@ std::set<std::string> ModuleParameterApplier::getSupportedTypes() const
 std::string ModuleParameterApplier::getParameterStructure(const std::string &type,
                                                           ParameterKind parameterKind)
 {
-    std::string cavsModuleType = fdkModuleTypeToCavs(type);
+    auto info = getModuleInfo(type);
+    const uint16_t &moduleTypeId = info.first;
+    const std::string &moduleTypeUuid = info.second;
 
     /* Getting parameter block names */
     const std::vector<std::string> children =
-        getModuleParameterNames(cavsModuleType, parameterKind);
+        getModuleParameterNames(moduleTypeUuid, parameterKind);
 
     /* Iterating over parameter blocks */
     std::string parameters;
@@ -83,7 +86,7 @@ std::string ModuleParameterApplier::getParameterStructure(const std::string &typ
             * @todo: use libstructure instead
             */
             parameters += mParameterSerializer->getStructureXml(
-                BaseModelConverter::subsystemName, cavsModuleType,
+                BaseModelConverter::subsystemName, moduleTypeUuid,
                 ParameterSerializer::ParameterKind::Control, blockName);
         } catch (ParameterSerializer::Exception &e) {
             throw Exception("Failed to get structure: " + std::string(e.what()));
@@ -102,13 +105,14 @@ void ModuleParameterApplier::setParameterValue(const std::string &type, Paramete
                                                const std::string &instanceIdStr,
                                                const std::string &parameterXML)
 {
-    std::string cavsModuleType = fdkModuleTypeToCavs(type);
-    uint16_t moduleTypeId = getModuleTypeId(cavsModuleType);
+    auto info = getModuleInfo(type);
+    const uint16_t &moduleTypeId = info.first;
+    const std::string &moduleTypeUuid = info.second;
     uint16_t instanceId = parseModuleInstanceId(instanceIdStr);
 
     /* Getting parameter block names */
     const std::vector<std::string> children =
-        getModuleParameterNames(cavsModuleType, parameterKind);
+        getModuleParameterNames(moduleTypeUuid, parameterKind);
 
     try {
         /** @todo: use libstructure instead of XmlHelper */
@@ -122,14 +126,14 @@ void ModuleParameterApplier::setParameterValue(const std::string &type, Paramete
             util::Buffer parameterPayload;
             try {
                 parameterPayload = mParameterSerializer->xmlToBinary(
-                    BaseModelConverter::subsystemName, cavsModuleType, translate(parameterKind),
+                    BaseModelConverter::subsystemName, moduleTypeUuid, translate(parameterKind),
                     blockName, block);
             } catch (ParameterSerializer::Exception &e) {
                 throw Exception("Xml to binary conversion failed: " + std::string(e.what()));
             };
 
             /* Getting firmware parameter id that matches the parameter name */
-            auto paramId = getParamIdFromName(cavsModuleType, parameterKind, blockName);
+            auto paramId = getParamIdFromName(moduleTypeUuid, parameterKind, blockName);
 
             /* Sending binary data to the fw */
             try {
@@ -147,19 +151,20 @@ std::string ModuleParameterApplier::getParameterValue(const std::string &type,
                                                       ParameterKind parameterKind,
                                                       const std::string &instanceIdStr)
 {
-    std::string cavsModuleType = fdkModuleTypeToCavs(type);
-    uint16_t moduleTypeId = getModuleTypeId(cavsModuleType);
+    auto info = getModuleInfo(type);
+    const uint16_t &moduleTypeId = info.first;
+    const std::string &moduleTypeUuid = info.second;
     uint16_t instanceId = parseModuleInstanceId(instanceIdStr);
 
     /* Getting parameter block names */
     const std::vector<std::string> children =
-        getModuleParameterNames(cavsModuleType, parameterKind);
+        getModuleParameterNames(moduleTypeUuid, parameterKind);
 
     std::string parameters;
     for (auto &blockName : children) {
 
         /* Getting firmware parameter id that matches the parameter name */
-        auto paramId = getParamIdFromName(cavsModuleType, parameterKind, blockName);
+        auto paramId = getParamIdFromName(moduleTypeUuid, parameterKind, blockName);
 
         /* Get parameter value from FW */
         util::Buffer parameterPayload;
@@ -172,7 +177,7 @@ std::string ModuleParameterApplier::getParameterValue(const std::string &type,
         /* Converting it to xml using the parameter serializer, and concatening the result. */
         try {
             parameters += mParameterSerializer->binaryToXml(
-                BaseModelConverter::subsystemName, cavsModuleType, translate(parameterKind),
+                BaseModelConverter::subsystemName, moduleTypeUuid, translate(parameterKind),
                 blockName, parameterPayload);
         } catch (ParameterSerializer::Exception &e) {
             throw Exception("Binary to xml conversion failed: " + std::string(e.what()));
@@ -266,7 +271,7 @@ dsp_fw::ParameterId ModuleParameterApplier::getParamIdFromName(const std::string
     return dsp_fw::ParameterId{paramId};
 }
 
-std::string ModuleParameterApplier::fdkModuleTypeToCavs(const std::string &fdkModuleType)
+std::string ModuleParameterApplier::fdkModuleTypeToCavs(const std::string &fdkModuleType) const
 {
     auto it = mFdkToCavsModuleNames.find(fdkModuleType);
     if (it == mFdkToCavsModuleNames.end()) {
@@ -275,16 +280,17 @@ std::string ModuleParameterApplier::fdkModuleTypeToCavs(const std::string &fdkMo
     return it->second;
 }
 
-uint16_t ModuleParameterApplier::getModuleTypeId(const std::string &cavsModuleType)
+std::pair<uint16_t, std::string> ModuleParameterApplier::getModuleInfo(
+    const std::string &fdkModuleTypeName) const
 {
-    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
-    for (auto &entry : entries) {
-        if (cavsModuleType == entry.getName()) {
-            return entry.module_id;
-        }
+    try {
+        auto &entry = mSystem.findModuleEntry(fdkModuleTypeToCavs(fdkModuleTypeName));
+        util::Uuid uuid;
+        uuid.fromOtherUuidType(entry.uuid);
+        return std::pair<uint16_t, std::string>(entry.module_id, uuid.toString());
+    } catch (System::Exception &e) {
+        throw Exception(e.what());
     }
-
-    throw Exception("Unknown module type : '" + cavsModuleType + "'");
 }
 }
 }

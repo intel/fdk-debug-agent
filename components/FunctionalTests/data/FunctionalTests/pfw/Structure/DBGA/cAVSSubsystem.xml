@@ -14,7 +14,7 @@
 	</ComponentLibrary>
 	<InstanceDefinition>
 		<ParameterBlock Name="categories">
-			<Component Name="aec" Type="tmodule-aec"/>
+			<Component Name="00000001-0001-0000-0100-000001000000" Type="tmodule-aec"/>
 		</ParameterBlock>
 	</InstanceDefinition>
 </Subsystem>
