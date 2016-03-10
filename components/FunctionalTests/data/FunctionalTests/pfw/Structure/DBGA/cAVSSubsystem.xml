@@ -11,16 +11,10 @@
 				<Component Name="NoiseReduction" Type="NoiseReduction" Mapping="ParamId:25"/>
 			</ParameterBlock>
 		</ComponentType>
-		<ComponentType Name="tmodule-nr">
-			<ParameterBlock Name="control">
-				<Component Name="NoiseReduction" Type="NoiseReduction" Mapping="ParamId:0"/>
-			</ParameterBlock>
-		</ComponentType>
 	</ComponentLibrary>
 	<InstanceDefinition>
 		<ParameterBlock Name="categories">
 			<Component Name="aec" Type="tmodule-aec"/>
-			<Component Name="ns" Type="tmodule-nr"/>
 		</ParameterBlock>
 	</InstanceDefinition>
 </Subsystem>
