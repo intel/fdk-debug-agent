@@ -51,6 +51,8 @@ TEST_CASE("blocking queue: simple monothread usage")
 {
     TestQueue queue(5, &sizeTest);
 
+    queue.open();
+
     // enqueue element
     CHECK(queue.add(makeTest(5)));
     queue.close();
@@ -68,6 +70,8 @@ TEST_CASE("blocking queue: simple monothread usage")
 TEST_CASE("blocking queue: dropping")
 {
     TestQueue queue(10, &sizeTest); /* Maximum memory size: 10 bytes */
+
+    queue.open();
 
     /* adding 2 bytes, -> current size: 2*/
     CHECK(queue.add(makeTest(2)));
@@ -96,6 +100,8 @@ TEST_CASE("blocking queue: clearing")
 {
     TestQueue queue(10, &sizeTest);
 
+    queue.open();
+
     CHECK(queue.add(makeTest(2)));
     CHECK(queue.add(makeTest(5)));
 
@@ -106,6 +112,8 @@ TEST_CASE("blocking queue: clearing")
 TEST_CASE("blocking queue: multithread closing")
 {
     TestQueue queue(10, &sizeTest);
+
+    queue.open();
 
     /* Closing in another thread */
     std::future<void> result(std::async(std::launch::async, [&]() { queue.close(); }));
@@ -119,6 +127,8 @@ TEST_CASE("blocking queue: multithread closing")
 TEST_CASE("blocking queue: multi theading usage")
 {
     TestQueue queue(10, &sizeTest);
+
+    queue.open();
 
     /* Performing add in another thread */
     std::future<bool> futureResult(std::async(std::launch::async, [&]() {
@@ -155,4 +165,54 @@ TEST_CASE("blocking queue: multi theading usage")
 
     /* Checking that adding element is successful */
     CHECK(futureResult.get());
+}
+
+TEST_CASE("blocking queue: opening/closing two times")
+{
+    TestQueue queue(5, &sizeTest);
+
+    // checking that queue is closed
+    CHECK_FALSE(queue.isOpen());
+    CHECK(queue.getElementCount() == 0);
+    CHECK(queue.remove() == nullptr);
+    CHECK_FALSE(queue.add(makeTest(1)));
+
+    // opening
+    queue.open();
+
+    // enqueue 2 elements
+    CHECK(queue.add(makeTest(1)));
+    CHECK(queue.add(makeTest(2)));
+
+    // closing
+    queue.close();
+
+    // removing one element, one remains in the queue
+    auto element = queue.remove();
+    CHECK(element != nullptr);
+    CHECK(element->mSize == 1);
+    CHECK(queue.getElementCount() == 1);
+
+    // opening again
+    queue.open();
+
+    // enqueue 1 element
+    CHECK(queue.add(makeTest(3)));
+
+    // closing
+    queue.close();
+
+    // removing 2nd element
+    element = queue.remove();
+    CHECK(element != nullptr);
+    CHECK(element->mSize == 2);
+
+    // removing 3rd element
+    element = queue.remove();
+    CHECK(element != nullptr);
+    CHECK(element->mSize == 3);
+
+    // removing again: queue is closed (returns nullptr)
+    CHECK(queue.remove() == nullptr);
+    CHECK(queue.getElementCount() == 0);
 }

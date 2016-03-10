@@ -65,11 +65,21 @@ public:
     BlockingQueue(std::size_t maxByteSize,
                   std::function<std::size_t(const T &)> elementSizeFunction)
         : mMaxByteSize(maxByteSize), mElementSizeFunction(elementSizeFunction), mCurrentSize(0),
-          mClosed(false)
+          mOpen(false)
     {
     }
 
     ~BlockingQueue() { close(); }
+
+    /** Open the queue (items can be enqueued) */
+    void open()
+    {
+        std::lock_guard<std::mutex> locker(mMembersMutex);
+
+        if (!mOpen) {
+            mOpen = true;
+        }
+    }
 
     /* Close the queue, i.e. :
      * - no more elements can be added.
@@ -80,8 +90,8 @@ public:
     {
         std::lock_guard<std::mutex> locker(mMembersMutex);
 
-        if (!mClosed) {
-            mClosed = true;
+        if (mOpen) {
+            mOpen = false;
             mCondVar.notify_all();
         }
     }
@@ -96,7 +106,7 @@ public:
 
         std::lock_guard<std::mutex> locker(mMembersMutex);
 
-        if (mClosed) {
+        if (!mOpen) {
             return false;
         }
 
@@ -124,7 +134,7 @@ public:
         std::unique_lock<std::mutex> locker(mMembersMutex);
 
         /* Testing if the queue is closed and that all elements have been consumed */
-        if (mQueue.empty() && mClosed) {
+        if (mQueue.empty() && !mOpen) {
             return nullptr;
         }
 
@@ -133,7 +143,7 @@ public:
             mCondVar.wait(locker);
 
             /* Testing again if the queue is closed and that all elements have been consumed */
-            if (mQueue.empty() && mClosed) {
+            if (mQueue.empty() && !mOpen) {
                 return nullptr;
             }
 
@@ -169,6 +179,12 @@ public:
     {
         std::unique_lock<std::mutex> locker(mMembersMutex);
         return mCurrentSize;
+    }
+
+    bool isOpen() const
+    {
+        std::unique_lock<std::mutex> locker(mMembersMutex);
+        return mOpen;
     }
 
 private:
@@ -228,7 +244,7 @@ private:
 
     QueueType mQueue;
     std::size_t mCurrentSize;
-    bool mClosed;
+    bool mOpen;
 };
 }
 }
