@@ -770,7 +770,9 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         // 6 : Getting probe service parameters, checking that it is started
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
 
-        // 7 : Stopping service
+        // 7 : Extract from an enabled probe -> no ioctl.
+
+        // 8 : Stopping service
 
         // getting current state : Active
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
@@ -781,7 +783,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
 
-        // 8: Getting probe service parameters, checking that it is stopped
+        // 9: Getting probe service parameters, checking that it is stopped
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
     }
 
@@ -845,13 +847,20 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         HttpClientSimulator::Status::Ok, "text/xml",
         HttpClientSimulator::FileContent(xmlFileName("probeservice_param_started"))));
 
-    // 7 : Stopping service
+    // 7 : Extract from an enabled probe. TODO: currently, extraction is not implemented and the
+    // result will be empty.
+    CHECK_NOTHROW(client.request("/instance/cavs.probe.endpoint/1/streaming",
+                                 HttpClientSimulator::Verb::Get, "",
+                                 HttpClientSimulator::Status::Ok, "application/vnd.ifdk-file",
+                                 HttpClientSimulator::StringContent("") /*todo*/));
+
+    // 8 : Stopping service
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
         file_helper::readAsString(xmlFileName("probeservice_param_stopped")),
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 
-    // 8: Getting probe service parameters, checking that it is stopped
+    // 9: Getting probe service parameters, checking that it is stopped
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
         HttpClientSimulator::Status::Ok, "text/xml",
