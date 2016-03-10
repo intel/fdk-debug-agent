@@ -187,6 +187,18 @@ public:
         return mOpen;
     }
 
+    /** Scope class that automatically opens and closes queue */
+    class AutoOpenClose
+    {
+    public:
+        AutoOpenClose(BlockingQueue<T> &queue) : mQueue(queue) { mQueue.open(); }
+
+        ~AutoOpenClose() { mQueue.close(); }
+
+    private:
+        BlockingQueue<T> &mQueue;
+    };
+
 private:
     using QueueType = std::queue<std::unique_ptr<T>>;
 

@@ -216,3 +216,21 @@ TEST_CASE("blocking queue: opening/closing two times")
     CHECK(queue.remove() == nullptr);
     CHECK(queue.getElementCount() == 0);
 }
+
+TEST_CASE("blocking queue: auto open close")
+{
+    TestQueue queue(5, &sizeTest);
+
+    // should be closed
+    CHECK_FALSE(queue.isOpen());
+
+    {
+        TestQueue::AutoOpenClose closer(queue);
+
+        // should be opened
+        CHECK(queue.isOpen());
+    }
+
+    // should be closed
+    CHECK_FALSE(queue.isOpen());
+}
