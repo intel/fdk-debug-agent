@@ -159,13 +159,13 @@ public:
         std::swap(mQueue, empty);
     }
 
-    std::size_t getElementCount()
+    std::size_t getElementCount() const
     {
         std::unique_lock<std::mutex> locker(mMembersMutex);
         return mQueue.size();
     }
 
-    std::size_t getMemorySize()
+    std::size_t getMemorySize() const
     {
         std::unique_lock<std::mutex> locker(mMembersMutex);
         return mCurrentSize;
@@ -223,7 +223,7 @@ private:
     const std::size_t mMaxByteSize;
     const std::function<std::size_t(const T &)> mElementSizeFunction;
 
-    std::mutex mMembersMutex;
+    mutable std::mutex mMembersMutex;
     std::condition_variable mCondVar;
 
     QueueType mQueue;
