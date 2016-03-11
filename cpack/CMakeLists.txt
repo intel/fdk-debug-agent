@@ -44,4 +44,15 @@ set(CPACK_WIX_UPGRADE_GUID "49A98B9B-BB0B-44BE-8ECE-3584E9EE83D7")
 # Use dpkg-shlibdeps (debian generator only) to generate better package dependency list.
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
+if (NOT ENABLE_ADMIN_STEPS)
+    # Wix uses Microsoft ICE validation to validate installer files
+    # see https://msdn.microsoft.com/en-us/library/windows/desktop/aa369206(v=vs.85).aspx
+    # But the ICE validation requires admin rights. So disabling it by setting the "-sval"
+    # parameter of the Wix "light" executable.
+    #
+    # More info about the issue:
+    # http://stackoverflow.com/questions/1064580/wix-3-0-throws-error-217-while-being-executed-by-continuous-integration
+    set(CPACK_WIX_LIGHT_EXTRA_FLAGS "-sval")
+endif()
+
 include(CPack)
