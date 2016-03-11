@@ -23,6 +23,7 @@
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/MockedDeviceCommands.hpp"
+#include "cAVS/Linux/MockedDeviceCatchHelper.hpp"
 #include "cAVS/Linux/ModuleHandler.hpp"
 #include "Util/Buffer.hpp"
 #include <catch.hpp>
@@ -40,7 +41,9 @@ using namespace debug_agent::cavs;
 using namespace debug_agent::cavs::linux;
 using namespace debug_agent::util;
 
-TEST_CASE("Module handling: getting FW configs")
+using Fixture = MockedDeviceFixture;
+
+TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
 {
     const size_t fwVersionValueOffsetInTlv = 8;
 
@@ -55,8 +58,6 @@ TEST_CASE("Module handling: getting FW configs")
                                  0x05, 0x06, 0x07, 0x08};
 
     const uint8_t *buf = fwConfigTlvList.data();
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -87,16 +88,13 @@ TEST_CASE("Module handling: getting FW configs")
     CHECK(fwConfig.fwVersion.build == injectedVersion->build);
 }
 
-TEST_CASE("Module handling: getting module parameter")
+TEST_CASE_METHOD(Fixture, "Module handling: getting module parameter")
 {
-
     static const Buffer fwParameterPayload = {1, 2, 3};
 
     static const uint16_t moduleId = 1;
     static const uint16_t instanceId = 2;
     static const dsp_fw::ParameterId parameterId(2);
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -121,13 +119,11 @@ TEST_CASE("Module handling: getting module parameter")
     CHECK(fwParameterPayload == parameterPayload);
 }
 
-TEST_CASE("Module handling: set module enable")
+TEST_CASE_METHOD(Fixture, "Module handling: set module enable")
 {
     const uint16_t moduleId = 1;
     const uint16_t instanceId = 2;
     const dsp_fw::ParameterId parameterId{dsp_fw::BaseModuleParams::MOD_INST_ENABLE};
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -147,15 +143,13 @@ TEST_CASE("Module handling: set module enable")
     CHECK_NOTHROW(moduleHandler.setModuleParameter(moduleId, instanceId, parameterId, {}));
 }
 
-TEST_CASE("Module handling: setting module parameter")
+TEST_CASE_METHOD(Fixture, "Module handling: setting module parameter")
 {
     const Buffer parameterPayload = {4, 5, 6};
 
     const uint16_t moduleId = 1;
     const uint16_t instanceId = 2;
     const dsp_fw::ParameterId parameterId{2};
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -176,15 +170,13 @@ TEST_CASE("Module handling: setting module parameter")
         moduleHandler.setModuleParameter(moduleId, instanceId, parameterId, parameterPayload));
 }
 
-TEST_CASE("Module handling: setting loadable module parameter")
+TEST_CASE_METHOD(Fixture, "Module handling: setting loadable module parameter")
 {
     const Buffer parameterPayload = {4, 5, 6};
 
     const uint16_t moduleId = 0x1024;
     const uint16_t instanceId = 2;
     const dsp_fw::ParameterId parameterId{2};
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -255,11 +247,9 @@ std::vector<dsp_fw::ModuleEntry> produceModuleEntries(std::size_t expectedModule
     return entries;
 }
 
-TEST_CASE("Module handling: getting module entries")
+TEST_CASE_METHOD(Fixture, "Module handling: getting module entries")
 {
     const uint32_t moduleCount = 2;
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
      * ----------------------- */
@@ -281,13 +271,11 @@ TEST_CASE("Module handling: getting module entries")
     checkModuleEntry(moduleHandler, moduleCount, expectedModuleEntry);
 }
 
-TEST_CASE("Module handling: getting pipeline list")
+TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
 {
     static const uint32_t fwMaxPplCount = 10;
     using ID = dsp_fw::PipeLineIdType;
     static const std::vector<ID> fwPipelineIdList = {ID{1}, ID{2}, ID{3}};
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -313,14 +301,12 @@ TEST_CASE("Module handling: getting pipeline list")
     CHECK(fwPipelineIdList == pipelineIds);
 }
 
-TEST_CASE("Module handling: getting pipeline props")
+TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline props")
 {
     using PlID = dsp_fw::PipeLineIdType;
     static const PlID pipelineId{1};
     static const dsp_fw::PplProps fwProps = {PlID{1}, 2, 3, 4, 5, 6, {{1, 0}, {2, 0}, {3, 0}},
                                              {4, 5},  {}};
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -346,7 +332,7 @@ TEST_CASE("Module handling: getting pipeline props")
     CHECK(props == fwProps);
 }
 
-TEST_CASE("Module handling: getting schedulers info")
+TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
 {
     static const dsp_fw::CoreId coreId{1};
 
@@ -358,8 +344,6 @@ TEST_CASE("Module handling: getting schedulers info")
     static const dsp_fw::SchedulerProps props2 = {4, 2, {task3}};
 
     static const dsp_fw::SchedulersInfo fwSchedulersInfo = {{props1, props2}};
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -390,12 +374,10 @@ bool isSameGateway(const dsp_fw::GatewayProps &a, const dsp_fw::GatewayProps &b)
     return a.attribs == b.attribs && a.id == b.id;
 }
 
-TEST_CASE("Module handling: getting gateways")
+TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
 {
     static const uint32_t fwGatewayCount = 10;
     static const std::vector<dsp_fw::GatewayProps> fwGateways = {{1, 2}, {3, 4}};
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */
@@ -420,7 +402,7 @@ TEST_CASE("Module handling: getting gateways")
     CHECK(std::equal(fwGateways.begin(), fwGateways.end(), gateways.begin(), isSameGateway));
 }
 
-TEST_CASE("Module handling: getting module instance properties")
+TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
 {
     static const dsp_fw::AudioDataFormatIpc audioFormat = {
         static_cast<dsp_fw::SamplingFrequency>(1),
@@ -457,8 +439,6 @@ TEST_CASE("Module handling: getting module instance properties")
 
     static const uint16_t moduleId = 1;
     static const uint16_t instanceId = 2;
-
-    MockedDevice device([] {});
 
     /* Setting the test vector
     * ----------------------- */

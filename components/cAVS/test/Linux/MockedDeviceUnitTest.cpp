@@ -21,6 +21,7 @@
 */
 
 #include "cAVS/Linux/MockedDevice.hpp"
+#include "cAVS/Linux/MockedDeviceCatchHelper.hpp"
 #include "TestCommon/TestHelpers.hpp"
 #include "Util/Buffer.hpp"
 #include "Util/TypedBuffer.hpp"
@@ -40,11 +41,12 @@ const Buffer write_buffer_02{7, 1, 2, 3, 4, 5, 6, 7};
 
 const int filehandler = 0xDEADBEEF;
 
+using Fixture = MockedDeviceFixture;
+
 /* This test case uses the mocked device with expected input, i.e. the mocking test is successful*/
-TEST_CASE("MockedDevice: linux read/write TEST")
+TEST_CASE_METHOD(Fixture, "MockedDevice: linux read/write TEST")
 {
     int nbbytes;
-    MockedDevice device([] {});
 
     /** Using the command below to add the test vectors to the mock driver */
 
@@ -73,10 +75,8 @@ TEST_CASE("MockedDevice: linux read/write TEST")
 }
 
 /* This test case uses the mocked device with falling input, mock device should return fail */
-TEST_CASE("MockedDevice: linux read/write testing exception when falling")
+TEST_CASE_METHOD(Fixture, "MockedDevice: linux read/write testing exception when falling")
 {
-    MockedDevice device([] {});
-
     /** add KO vector and check there is exceptions */
     SECTION ("OS Open error") {
         device.addDebugfsEntryKOOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl");
