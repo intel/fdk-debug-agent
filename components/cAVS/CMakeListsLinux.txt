@@ -22,7 +22,8 @@ set(LINUX_LIB_SRCS
     src/Linux/SystemDevice.cpp
     src/Linux/SystemDriverFactory.cpp
     src/Linux/Logger.cpp
-    src/Linux/ModuleHandler.cpp)
+    src/Linux/ModuleHandler.cpp
+    src/Linux/TinyCompressDevice.cpp)
 
 set(LIB_SRCS ${LIB_SRCS} ${LINUX_LIB_SRCS})
 
@@ -34,7 +35,13 @@ set(LINUX_LIB_INCS
     include/cAVS/Linux/Driver.hpp
     include/cAVS/Linux/Logger.hpp
     include/cAVS/Linux/DriverTypes.hpp
-    include/cAVS/Linux/ModuleHandler.hpp)
+    include/cAVS/Linux/ModuleHandler.hpp
+    include/cAVS/Linux/AudioProcfsHelper.hpp
+    include/cAVS/Linux/CompressTypes.hpp
+    include/cAVS/Linux/CompressDevice.hpp
+    include/cAVS/Linux/TinyCompressDevice.hpp
+    include/cAVS/Linux/CompressDeviceFactory.hpp
+    include/cAVS/Linux/TinyCompressDeviceFactory.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${LINUX_LIB_INCS})
 
