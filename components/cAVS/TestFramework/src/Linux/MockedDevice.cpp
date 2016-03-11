@@ -43,28 +43,28 @@ void MockedDevice::addDebugfsEntryKOOpen(const std::string &expectFilename)
     mEntries.push(std::make_unique<DebugfsEntryOpen>(expectFilename, false));
 }
 
-void MockedDevice::addDebugfsEntryOKWrite(const uint8_t *expectBuffer, const ssize_t expectSize,
-                                          const ssize_t returnSize)
+void MockedDevice::addDebugfsEntryOKWrite(const Buffer &expectBuffer, const ssize_t returnSize)
 {
-    mEntries.push(std::make_unique<DebugfsEntryWrite>(expectBuffer, expectSize, returnSize, true));
+    mEntries.push(std::make_unique<DebugfsEntryWrite>(expectBuffer, returnSize, true));
 }
 
-void MockedDevice::addDebugfsEntryKOWrite(const uint8_t *expectBuffer, const ssize_t expectSize,
-                                          const ssize_t returnSize)
+void MockedDevice::addDebugfsEntryKOWrite(const Buffer &expectBuffer, const ssize_t returnSize)
 {
-    mEntries.push(std::make_unique<DebugfsEntryWrite>(expectBuffer, expectSize, returnSize, false));
+    mEntries.push(std::make_unique<DebugfsEntryWrite>(expectBuffer, returnSize, false));
 }
 
-void MockedDevice::addDebugfsEntryOKRead(const ssize_t expectSize, const uint8_t *returnBuffer,
+void MockedDevice::addDebugfsEntryOKRead(const Buffer &returnBuffer, const ssize_t expectedReadSize,
                                          const ssize_t returnSize)
 {
-    mEntries.push(std::make_unique<DebugfsEntryRead>(expectSize, returnBuffer, returnSize, true));
+    mEntries.push(
+        std::make_unique<DebugfsEntryRead>(returnBuffer, expectedReadSize, returnSize, true));
 }
 
-void MockedDevice::addDebugfsEntryKORead(const ssize_t expectSize, const uint8_t *returnBuffer,
+void MockedDevice::addDebugfsEntryKORead(const Buffer &returnBuffer, const ssize_t expectedReadSize,
                                          const ssize_t returnSize)
 {
-    mEntries.push(std::make_unique<DebugfsEntryRead>(expectSize, returnBuffer, returnSize, false));
+    mEntries.push(
+        std::make_unique<DebugfsEntryRead>(returnBuffer, expectedReadSize, returnSize, false));
 }
 
 void MockedDevice::addDebugfsEntryOKClose()
@@ -79,7 +79,7 @@ void MockedDevice::addDebugfsEntryKOClose()
     mEntries.push(std::make_unique<DebugfsEntryClose>(false));
 }
 
-ssize_t MockedDevice::debugfsRead(uint8_t *buffer, const ssize_t nbBytes)
+ssize_t MockedDevice::debugfsRead(util::Buffer &buffer, const ssize_t nbBytes)
 {
     checkNonFailure();
     /* Several threads can call this method, so protecting against it.
@@ -100,13 +100,12 @@ ssize_t MockedDevice::debugfsRead(uint8_t *buffer, const ssize_t nbBytes)
         failure("Wrong debugfsRead method, expecting another command.");
     }
 
-    if (nbBytes != entry->mExpectedSize) {
+    if (nbBytes != entry->mExpectedReadSize) {
         failure(std::string("Wrong expected size for read. Expecting :") + std::to_string(nbBytes) +
-                " , having: " + std::to_string(entry->mExpectedSize));
+                " , having: " + std::to_string(entry->mExpectedReadSize));
     }
 
-    auto vectorBuffer = entry->mExpectedOutputBuffer.begin();
-    std::copy(entry->mExpectedOutputBuffer.begin(), entry->mExpectedOutputBuffer.end(), buffer);
+    buffer = entry->mExpectedOutputBuffer;
     mEntries.pop();
     mCurrentEntry++;
 
@@ -116,7 +115,7 @@ ssize_t MockedDevice::debugfsRead(uint8_t *buffer, const ssize_t nbBytes)
     return entry->mReturnedSize; /** May be different from nbBytes depending of vector */
 }
 
-ssize_t MockedDevice::debugfsWrite(const uint8_t *buffer, const ssize_t nbBytes)
+ssize_t MockedDevice::debugfsWrite(const Buffer &buffer)
 {
     checkNonFailure();
     /* Several threads can call this method, so protecting against it.
@@ -137,13 +136,14 @@ ssize_t MockedDevice::debugfsWrite(const uint8_t *buffer, const ssize_t nbBytes)
         failure("Wrong debugfsWrite method, expecting another command.");
     }
 
-    if (nbBytes != entry->mExpectedSize) {
+    if (buffer.size() != entry->mExpectedInputBuffer.size()) {
         failure(std::string("Wrong expected size for write. Expecting :") +
-                std::to_string(nbBytes) + " , having: " + std::to_string(entry->mExpectedSize));
+                std::to_string(buffer.size()) + " , having: " +
+                std::to_string(entry->mExpectedInputBuffer.size()));
     }
 
     if (not std::equal(entry->mExpectedInputBuffer.begin(), entry->mExpectedInputBuffer.end(),
-                       buffer)) {
+                       buffer.data())) {
         failure("Buffer is different than expected.");
     }
     mEntries.pop();
@@ -152,7 +152,7 @@ ssize_t MockedDevice::debugfsWrite(const uint8_t *buffer, const ssize_t nbBytes)
     if (entry->isNotSuccessful()) {
         throw Exception("error during write: error#MockDevice");
     }
-    return entry->mReturnedSize; /** May be different from nbBytes depending of vector */
+    return entry->mReturnedSize; /** May be different from buffer size depending of vector */
 }
 
 void MockedDevice::debugfsClose()

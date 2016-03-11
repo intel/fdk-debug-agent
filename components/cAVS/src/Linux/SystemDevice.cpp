@@ -53,27 +53,27 @@ void SystemDevice::debugfsClose()
     }
 }
 
-ssize_t SystemDevice::debugfsWrite(const uint8_t *bufferInput, const ssize_t nbBytes)
+ssize_t SystemDevice::debugfsWrite(const Buffer &bufferInput)
 {
     if (!mDebugFsFile.is_open()) {
         throw Exception("Illegal write operation on closed file");
     }
     try {
-        mDebugFsFile.write(reinterpret_cast<const char *>(bufferInput), nbBytes);
+        mDebugFsFile.write(reinterpret_cast<const char *>(bufferInput.data()), bufferInput.size());
     } catch (const std::exception &) {
         throw Exception("error during write operation: " + mDebugFsFile.rdstate());
     }
-    return nbBytes;
+    return bufferInput.size();
 }
 
-ssize_t SystemDevice::debugfsRead(uint8_t *bufferOutput, const ssize_t nbBytes)
+ssize_t SystemDevice::debugfsRead(Buffer &bufferOutput, const ssize_t nbBytes)
 {
     if (!mDebugFsFile.is_open()) {
         throw Exception("Illegal read operation on closed file");
     }
     try {
         mDebugFsFile.seekg(0, ios_base::beg);
-        mDebugFsFile.read(reinterpret_cast<char *>(bufferOutput), nbBytes);
+        mDebugFsFile.read(reinterpret_cast<char *>(bufferOutput.data()), nbBytes);
     } catch (const std::exception &) {
         if (mDebugFsFile.eof() && mDebugFsFile.gcount() > 0) {
             // Reading less than expected is not an error, as blind request with max size are ok.

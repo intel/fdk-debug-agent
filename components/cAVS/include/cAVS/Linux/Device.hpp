@@ -52,8 +52,8 @@ public:
     /** below are pure virtual function of Device interface */
     virtual void debugfsOpen(const std::string &name) = 0;
     virtual void debugfsClose() = 0;
-    virtual ssize_t debugfsWrite(const uint8_t *bufferInput, const ssize_t nbBytes) = 0;
-    virtual ssize_t debugfsRead(uint8_t *bufferOutput, const ssize_t nbBytes) = 0;
+    virtual ssize_t debugfsWrite(const util::Buffer &bufferInput) = 0;
+    virtual ssize_t debugfsRead(util::Buffer &bufferOutput, const ssize_t nbBytes) = 0;
 
 private:
     Device(const Device &) = delete;

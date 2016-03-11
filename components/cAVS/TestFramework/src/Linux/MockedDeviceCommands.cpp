@@ -202,7 +202,7 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus return
 
     mDevice.addDebugfsEntryOKOpen(driver::setGetCtrl);
 
-    mDevice.addDebugfsEntryOKWrite(sentMessage.data(), sentMessage.size(), sentMessage.size());
+    mDevice.addDebugfsEntryOKWrite(sentMessage, sentMessage.size());
 
     /* should close the file after that */
     mDevice.addDebugfsEntryOKClose();
@@ -223,7 +223,7 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus return
 
     mDevice.addDebugfsEntryOKOpen(driver::setGetCtrl);
 
-    mDevice.addDebugfsEntryOKWrite(sentMessage.data(), sentMessage.size(), sentMessage.size());
+    mDevice.addDebugfsEntryOKWrite(sentMessage, sentMessage.size());
 
     /* should close the file after that */
     mDevice.addDebugfsEntryOKClose();
@@ -247,7 +247,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus return
 
     mDevice.addDebugfsEntryOKOpen(driver::setGetCtrl);
 
-    mDevice.addDebugfsEntryOKWrite(sentMessage.data(), sentMessage.size(), sentMessage.size());
+    mDevice.addDebugfsEntryOKWrite(sentMessage, sentMessage.size());
 
     /* Format the expected buffer to be read from the written command, i.e.
      * the parameter access structure appended with the parameter payload. */
@@ -263,8 +263,8 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus return
     /* Read mock will return the buffer in parameter that contains the mocked reply. */
     /* We expect the read command to be done with MaxReadSize available space in read buffer. */
     /* Returned size will be the size of the parameter access + parameter payload. */
-    mDevice.addDebugfsEntryOKRead(ModuleHandler::maxParameterPayloadSize,
-                                  returnedReadMessage.data(), returnedReadMessage.size());
+    mDevice.addDebugfsEntryOKRead(returnedReadMessage, ModuleHandler::maxParameterPayloadSize,
+                                  returnedReadMessage.size());
 
     /* should close the file after that */
     mDevice.addDebugfsEntryOKClose();

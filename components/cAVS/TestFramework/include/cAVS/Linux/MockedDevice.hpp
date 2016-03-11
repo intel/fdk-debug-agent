@@ -98,14 +98,11 @@ public:
      * when using the debugfsWrite() method.
      *
      * @param[in] expectedBuffer the expected buffer that will be requested to write
-     * @param[in] expectedSize the expected number of byte requested to be written
      * @param[in] returnedSize the returned number of bytes that will be effectively written
      * @{
      */
-    void addDebugfsEntryOKWrite(const uint8_t *expectedBuffer, const ssize_t expectedSize,
-                                const ssize_t returnedSize);
-    void addDebugfsEntryKOWrite(const uint8_t *expectedBuffer, const ssize_t expectedSize,
-                                const ssize_t returnedSize);
+    void addDebugfsEntryOKWrite(const util::Buffer &expectedBuffer, const ssize_t returnedSize);
+    void addDebugfsEntryKOWrite(const util::Buffer &expectedBuffer, const ssize_t returnedSize);
     /** @} */
 
     /** Add a successful DebugfsEntry{OK|KO}Read entry into the test vector.
@@ -113,14 +110,15 @@ public:
      * All entries are added in an ordered way, and will be consumed in the same order
      * when using the debugfsRead() method.
      *
-     * @param[in] expectedSize the expected number of byte requested to be read
      * @param[in] returnedBuffer the buffer were data byte is put when reading.
+     * @param[in] expectedSize the expected number of byte requested to be read that may differ of
+     *                         expected read buffer
      * @param[in] returnedSize the returned number of bytes that will be effectively read
      * @{
      */
-    void addDebugfsEntryOKRead(const ssize_t expectedSize, const uint8_t *returnedBuffer,
+    void addDebugfsEntryOKRead(const util::Buffer &returnedBuffer, const ssize_t expectedReadSize,
                                const ssize_t returnedSize);
-    void addDebugfsEntryKORead(const ssize_t expectedSize, const uint8_t *returnedBuffer,
+    void addDebugfsEntryKORead(const util::Buffer &returnedBuffer, const ssize_t expectedReadSize,
                                const ssize_t returnedSize);
 
     /** Moked debugfsOpen that simulates the real interface using vector entries.
@@ -135,11 +133,10 @@ public:
 
     /** Moked debugfsWrite that simulates the real interface using vector entries.
      *
-     * @param[in] buffer_input buffer pointer that will be wrote to interface
-     * @param[in] nbBytes number of bytes
+     * @param[in] buffer_input buffer that will be written to interface
      * @return the number of bytes that have been written from buffer to interface
      */
-    ssize_t debugfsWrite(const uint8_t *buffer_input, const ssize_t nbBytes);
+    ssize_t debugfsWrite(const util::Buffer &buffer_input);
 
     /** Moked debugfsWrite that simulates the real interface using vector entries.
      *
@@ -147,7 +144,7 @@ public:
      * @param[in] nbBytes number of bytes
      * @return the number of byte that have been read from interface to buffer
      */
-    ssize_t debugfsRead(uint8_t *buffer_output, const ssize_t nbBytes);
+    ssize_t debugfsRead(util::Buffer &buffer_output, const ssize_t nbBytes);
 
 private:
     /** Entry DebugfsEntry class is the generic class that must be declined for each
@@ -195,17 +192,17 @@ private:
     class DebugfsEntryRead : public DebugfsEntry
     {
     public:
-        DebugfsEntryRead(const ssize_t expectedSize, const uint8_t *expectedBuffer,
+        DebugfsEntryRead(const util::Buffer &expectedBuffer, const ssize_t expectedReadSize,
                          const ssize_t returnedSize, const bool successful)
-            : DebugfsEntry(successful), mExpectedSize(expectedSize), mReturnedSize(returnedSize),
-              mExpectedOutputBuffer(expectedBuffer, expectedBuffer + expectedSize)
+            : DebugfsEntry(successful), mExpectedReadSize(expectedReadSize),
+              mReturnedSize(returnedSize), mExpectedOutputBuffer(expectedBuffer)
         {
         }
-        ssize_t mExpectedSize;
         ssize_t mReturnedSize;
+        ssize_t mExpectedReadSize;
         /** copy of the buffer that should be returned from read function.
          * use vector that only need constructor in initialization list and no need destructors */
-        std::vector<uint8_t> mExpectedOutputBuffer;
+        util::Buffer mExpectedOutputBuffer;
     };
 
     /** Vector class DebugfsEntryWrite is the class vector for debugfsWrite interface
@@ -213,17 +210,16 @@ private:
     class DebugfsEntryWrite : public DebugfsEntry
     {
     public:
-        DebugfsEntryWrite(const uint8_t *expectedBuffer, const ssize_t expectedSize,
-                          const ssize_t returnedSize, bool successful)
-            : DebugfsEntry(successful), mExpectedSize(expectedSize), mReturnedSize(returnedSize),
-              mExpectedInputBuffer(expectedBuffer, expectedBuffer + expectedSize)
+        DebugfsEntryWrite(const util::Buffer &expectedBuffer, const ssize_t returnedSize,
+                          bool successful)
+            : DebugfsEntry(successful), mReturnedSize(returnedSize),
+              mExpectedInputBuffer(expectedBuffer)
         {
         }
-        ssize_t mExpectedSize;
         ssize_t mReturnedSize;
 
         /**  mExpectedInputBuffer : copy of the buffer passed to write function. */
-        std::vector<uint8_t> mExpectedInputBuffer;
+        util::Buffer mExpectedInputBuffer;
     };
 
     /** Call this method in case of mock failure */

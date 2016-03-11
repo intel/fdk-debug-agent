@@ -33,12 +33,10 @@
 using namespace debug_agent::cavs::linux;
 using namespace debug_agent::util;
 
-const uint8_t read_buffer_01_ro[6] = {5, 1, 2, 3, 4, 5};
-uint8_t read_buffer_01_w[6];
-const uint8_t write_buffer_01[9] = {7, 1, 2, 3, 4, 5, 6, 7, 64};
-
-const uint8_t read_buffer_02[6] = {4, 1, 2, 3, 4, 5};
-const uint8_t write_buffer_02[8] = {7, 1, 2, 3, 4, 5, 6, 7};
+const Buffer read_buffer_01_ro{5, 1, 2, 3, 4, 5};
+const Buffer write_buffer_01{7, 1, 2, 3, 4, 5, 6, 7, 64};
+const Buffer read_buffer_02{4, 1, 2, 3, 4, 5};
+const Buffer write_buffer_02{7, 1, 2, 3, 4, 5, 6, 7};
 
 const int filehandler = 0xDEADBEEF;
 
@@ -51,9 +49,9 @@ TEST_CASE("MockedDevice: linux read/write TEST")
     /** Using the command below to add the test vectors to the mock driver */
 
     device.addDebugfsEntryOKOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl");
-    device.addDebugfsEntryOKWrite(write_buffer_01, NB_EL(write_buffer_01), NB_EL(write_buffer_01));
-    device.addDebugfsEntryOKRead(NB_EL(read_buffer_01_ro), read_buffer_01_ro,
-                                 NB_EL(read_buffer_01_ro));
+    device.addDebugfsEntryOKWrite(write_buffer_01, write_buffer_01.size());
+    device.addDebugfsEntryOKRead(read_buffer_01_ro, read_buffer_01_ro.size(),
+                                 read_buffer_01_ro.size());
     device.addDebugfsEntryOKClose();
 
     /** Now using the mocked device */
@@ -61,13 +59,15 @@ TEST_CASE("MockedDevice: linux read/write TEST")
     /** Open the file */
     CHECK_NOTHROW(device.debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"));
     /** write command */
-    CHECK_NOTHROW(nbbytes = device.debugfsWrite(write_buffer_01, NB_EL(write_buffer_01)));
+    CHECK_NOTHROW(nbbytes = device.debugfsWrite(write_buffer_01));
     /** the number of bytes that been written should be the same as requested */
-    CHECK(nbbytes == NB_EL(write_buffer_01));
+    CHECK(nbbytes == write_buffer_01.size());
     /** read reply */
-    CHECK_NOTHROW(nbbytes = device.debugfsRead(read_buffer_01_w, NB_EL(read_buffer_01_w)));
+    Buffer read_buffer_01_w;
+    read_buffer_01_w.resize(read_buffer_01_ro.size());
+    CHECK_NOTHROW(nbbytes = device.debugfsRead(read_buffer_01_w, read_buffer_01_w.size()));
     /** the number of bytes that been read should be the same as requested */
-    CHECK(nbbytes == NB_EL(read_buffer_01_w));
+    CHECK(nbbytes == read_buffer_01_w.size());
     /** the number of bytes read should be the number of bytes requested */
     CHECK_NOTHROW(device.debugfsClose());
 }
@@ -86,18 +86,20 @@ TEST_CASE("MockedDevice: linux read/write testing exception when falling")
     }
 
     SECTION ("OS Write error") {
-        device.addDebugfsEntryKOWrite(write_buffer_01, NB_EL(write_buffer_01),
-                                      NB_EL(write_buffer_01));
+        device.addDebugfsEntryKOWrite(write_buffer_01, write_buffer_01.size());
 
-        CHECK_THROWS_AS_MSG(device.debugfsWrite(write_buffer_01, NB_EL(write_buffer_01)),
-                            Device::Exception, "error during write: error#MockDevice");
+        CHECK_THROWS_AS_MSG(device.debugfsWrite(write_buffer_01), Device::Exception,
+                            "error during write: error#MockDevice");
     }
 
     SECTION ("OS Read error") {
-        device.addDebugfsEntryKORead(NB_EL(read_buffer_01_ro), read_buffer_01_ro,
-                                     NB_EL(read_buffer_01_ro));
+        device.addDebugfsEntryKORead(read_buffer_01_ro, read_buffer_01_ro.size(),
+                                     read_buffer_01_ro.size());
 
-        CHECK_THROWS_AS_MSG(device.debugfsRead(read_buffer_01_w, NB_EL(read_buffer_01_w)),
+        Buffer read_buffer_01_w;
+        read_buffer_01_w.resize(read_buffer_01_ro.size());
+
+        CHECK_THROWS_AS_MSG(device.debugfsRead(read_buffer_01_w, read_buffer_01_w.size()),
                             Device::Exception, "error during read: error#MockDevice");
     }
 

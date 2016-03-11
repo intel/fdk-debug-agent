@@ -54,7 +54,7 @@ util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
 
     /* Performing the debugfs write command, size ignored, as exception raised if partial write. */
     try {
-        mDevice.debugfsWrite(sentMessage.data(), sentMessage.size());
+        mDevice.debugfsWrite(sentMessage);
     } catch (const Device::Exception &e) {
         mDevice.debugfsClose();
         throw Exception("Get module parameter failed to write command IPC in file: " +
@@ -67,7 +67,7 @@ util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
 
     /* Reading the result of debugfs command read, size ignored as not meaningful info. */
     try {
-        mDevice.debugfsRead(receivedMessage.data(), receivedMessage.size());
+        mDevice.debugfsRead(receivedMessage, receivedMessage.size());
     } catch (const Device::Exception &e) {
         mDevice.debugfsClose();
         throw Exception("Get module parameter failed to read from file: " +
@@ -109,7 +109,7 @@ void ModuleHandler::configSet(uint16_t moduleId, uint16_t instanceId,
 
     /* Performing the debugfs write command, size ignored, as exception raised if partial write. */
     try {
-        mDevice.debugfsWrite(sentMessage.data(), sentMessage.size());
+        mDevice.debugfsWrite(sentMessage);
     } catch (const Device::Exception &e) {
         mDevice.debugfsClose();
         throw Exception("Get module parameter failed to write command IPC in file: " +

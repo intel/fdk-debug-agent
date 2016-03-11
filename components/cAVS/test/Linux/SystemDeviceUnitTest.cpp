@@ -47,7 +47,7 @@ TEST_CASE("SystemDevice: testing interface of the real device")
     int handlef = 0;
     ssize_t nbbytes = 0;
     const size_t sizeBuffRead = 10;
-    uint8_t bufferread[sizeBuffRead];
+    Buffer bufferread(sizeBuffRead, 0xff);
 
     /** For test purpose, need to create a temporary file */
     char name1[] = "./tmpDbgaSystemDeviceUnitTestXXXXXX";

@@ -38,8 +38,8 @@ class SystemDevice final : public Device
 public:
     void debugfsOpen(const std::string &name) override;
     void debugfsClose() override;
-    ssize_t debugfsWrite(const uint8_t *bufferInput, const ssize_t nbBytes) override;
-    ssize_t debugfsRead(uint8_t *bufferOutput, const ssize_t nbBytes) override;
+    ssize_t debugfsWrite(const util::Buffer &bufferInput) override;
+    ssize_t debugfsRead(util::Buffer &bufferOutput, const ssize_t nbBytes) override;
 
 private:
     std::fstream mDebugFsFile;
