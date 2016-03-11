@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -51,16 +51,18 @@ TEST_CASE("blocking queue: simple monothread usage")
 {
     TestQueue queue(5, &sizeTest);
 
+    // enqueue element
     CHECK(queue.add(makeTest(5)));
     queue.close();
     CHECK_FALSE(queue.add(makeTest(2)));
 
-    TestPtr element(queue.remove());
+    // removing element
+    TestPtr element = queue.remove();
     CHECK(element != nullptr);
     CHECK(element->mSize == 5);
 
-    element = std::move(queue.remove());
-    CHECK(element == nullptr);
+    // removing again: queue is closed (returns nullptr)
+    CHECK(queue.remove() == nullptr);
 }
 
 TEST_CASE("blocking queue: dropping")
@@ -135,20 +137,20 @@ TEST_CASE("blocking queue: multi theading usage")
 
     /* Consuming elements in the current thread */
     TestPtr element;
-    element = std::move(queue.remove());
+    element = queue.remove();
     CHECK(element != nullptr);
     CHECK(element->mSize == 2);
 
-    element = std::move(queue.remove());
+    element = queue.remove();
     CHECK(element != nullptr);
     CHECK(element->mSize == 5);
 
-    element = std::move(queue.remove());
+    element = queue.remove();
     CHECK(element != nullptr);
     CHECK(element->mSize == 3);
 
     /* Closed: last element is null */
-    element = std::move(queue.remove());
+    element = queue.remove();
     CHECK(element == nullptr);
 
     /* Checking that adding element is successful */
