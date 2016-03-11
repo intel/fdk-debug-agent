@@ -461,3 +461,145 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
     };
     checkUrlMap(client, systemUrlMap);
 }
+
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice")
+{
+    /* Setting the test vector
+    * ----------------------- */
+    {
+        linux::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+    }
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting log parameters*/
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("logservice_getparam_stopped_init_values"))));
+
+    /* 2: Setting log parameters ("1;Verbose;SRAM") */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("logservice_setparam_start")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    /* 3: Setting log parameters, starting twice ("1;Verbose;SRAM") */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("logservice_setparam_start")),
+        HttpClientSimulator::Status::InternalError, "text/plain",
+        HttpClientSimulator::StringContent(
+            "Internal error: ParameterDispatcher: cannot set control parameter value: "
+            "Unable to set log parameters: Unable to set log parameter: Can not change log "
+            "parameters while logging is activated. (type=cavs.fwlogs kind=Control instance=0\n"
+            "value:\n"
+            "<control_parameters>\n"
+            "    <BooleanParameter Name=\"Started\">1</BooleanParameter>\n"
+            "    <ParameterBlock Name=\"Buffering\">\n"
+            "        <IntegerParameter Name=\"Size\">100</IntegerParameter>\n"
+            "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
+            "    </ParameterBlock>\n"
+            "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
+            "    <EnumParameter Name=\"Verbosity\">Verbose</EnumParameter>\n"
+            "    <BooleanParameter Name=\"ViaPTI\">0</BooleanParameter>\n"
+            "</control_parameters>\n)")));
+}
+
+/** The following test is based on tempos, so it is not 100% safe. These tempos are
+* used to synchronize DebugAgent (and its HTTP server) and HTTP clients.
+* @todo: to be reworked.
+*/
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client is consuming log")
+{
+    /* Setting the test vector
+    * ----------------------- */
+    {
+        linux::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+    }
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+
+    /* Creating and starting the debug agent in another thread. It can be stopped using
+    * a condition variable*/
+    std::mutex debugAgentMutex;
+    std::condition_variable stopDebugAgentCondVar;
+    std::future<void> debugAgentFuture(std::async(std::launch::async, [&]() {
+
+        DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+        /* Waiting for stop order */
+        std::unique_lock<std::mutex> locker(debugAgentMutex);
+        stopDebugAgentCondVar.wait(locker);
+    }));
+
+    /* Give some time to DebugAgent to start its http server */
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* Starting log */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("logservice_setparam_start")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    /* Trying to get log data in another thread after 250 ms. This should result on "resource
+    * locked" http status */
+    std::future<void> delayedGetLogStreamFuture(std::async(std::launch::async, [&]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+        HttpClientSimulator client2("localhost");
+        client2.request("/instance/cavs.fwlogs/0/streaming", HttpClientSimulator::Verb::Get, "",
+                        HttpClientSimulator::Status::Locked, "text/plain",
+                        HttpClientSimulator::StringContent(
+                            "Resource is locked: Logging stream resource is already used."));
+    }));
+
+    /* Terminating the debug agent after 500ms in another thread, the client should be consuming
+    * log at this date */
+    std::future<void> debugAgentTerminationResult(std::async(std::launch::async, [&]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::unique_lock<std::mutex> locker(debugAgentMutex);
+
+        /* Terminating debug agent */
+        stopDebugAgentCondVar.notify_one();
+    }));
+
+    /* Consuming log */
+    try {
+        client.request("/instance/cavs.fwlogs/0/streaming", HttpClientSimulator::Verb::Get, "",
+                       HttpClientSimulator::Status::Ok, "application/vnd.ifdk-file",
+                       HttpClientSimulator::AnyContent());
+    } catch (HttpClientSimulator::NetworkException &) {
+        /* A network exception can occur here because the debug agent closes its sockets.
+        * This is a normal case.
+        */
+    }
+
+    /* Ensuring that the debug agent thread doesn't have thrown an exception*/
+    CHECK_NOTHROW(debugAgentFuture.get());
+
+    /* Checking that the thread that has tried to get log content although another client
+     * was already getting it has obtained the expected server response */
+    CHECK_NOTHROW(delayedGetLogStreamFuture.get());
+}
