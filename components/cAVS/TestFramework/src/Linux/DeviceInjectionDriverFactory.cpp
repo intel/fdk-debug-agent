@@ -22,6 +22,7 @@
 
 #include "cAVS/Linux/DeviceInjectionDriverFactory.hpp"
 #include "cAVS/Linux/Driver.hpp"
+#include "Util/AssertAlways.hpp"
 
 namespace debug_agent
 {
@@ -38,8 +39,11 @@ std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
         throw Exception("The injected device has already been used. "
                         "Please call newDriver() once.");
     }
+    ASSERT_ALWAYS(mInjectedCompressDeviceFactory != nullptr);
+
     /* After this call mInjectedDevice will be null */
-    return std::make_unique<linux::Driver>(std::move(mInjectedDevice));
+    return std::make_unique<linux::Driver>(std::move(mInjectedDevice),
+                                           std::move(mInjectedCompressDeviceFactory));
 }
 }
 }

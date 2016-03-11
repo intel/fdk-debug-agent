@@ -28,6 +28,7 @@
 #include "TestCommon/HttpClientSimulator.hpp"
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Linux/DeviceInjectionDriverFactory.hpp"
+#include "cAVS/Linux/StubbedCompressDeviceFactory.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/MockedDeviceCommands.hpp"
 #include "catch.hpp"
@@ -240,7 +241,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
      * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
-    linux::DeviceInjectionDriverFactory driverFactory(std::move(device));
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -318,7 +320,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
      * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
-    linux::DeviceInjectionDriverFactory driverFactory(std::move(device));
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -365,7 +368,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
      * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
-    linux::DeviceInjectionDriverFactory driverFactory(std::move(device));
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -410,7 +414,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
      * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
-    linux::DeviceInjectionDriverFactory driverFactory(std::move(device));
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -440,7 +445,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
      * --------------------------- */
 
     /* Creating the factory that will inject the mocked device */
-    linux::DeviceInjectionDriverFactory driverFactory(std::move(device));
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);

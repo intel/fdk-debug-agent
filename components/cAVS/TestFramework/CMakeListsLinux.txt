@@ -30,7 +30,9 @@ source_group("Source Files\\Linux" FILES ${LINUX_LIB_SRCS})
 set(LINUX_LIB_INCS
     include/cAVS/Linux/MockedDevice.hpp
     include/cAVS/Linux/DeviceInjectionDriverFactory.hpp
-    include/cAVS/Linux/MockedDeviceCommands.hpp)
+    include/cAVS/Linux/MockedDeviceCommands.hpp
+    include/cAVS/Linux/StubbedCompressDevice.hpp
+    include/cAVS/Linux/StubbedCompressDeviceFactory.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${LINUX_LIB_INCS})
 

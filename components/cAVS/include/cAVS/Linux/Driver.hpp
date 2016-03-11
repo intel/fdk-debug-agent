@@ -27,6 +27,7 @@
 #include "cAVS/DspFw/HwConfig.hpp"
 #include "cAVS/Linux/ModuleHandler.hpp"
 #include "cAVS/Linux/Logger.hpp"
+#include "Util/AssertAlways.hpp"
 
 namespace debug_agent
 {
@@ -41,9 +42,12 @@ namespace linux
 class Driver final : public cavs::Driver
 {
 public:
-    Driver(std::unique_ptr<Device> device)
-        : mDevice(std::move(device)), mLogger(*mDevice), mModuleHandler(*mDevice)
+    Driver(std::unique_ptr<Device> device,
+           std::unique_ptr<CompressDeviceFactory> compressDeviceFactory)
+        : mDevice(std::move(device)), mCompressDeviceFactory(std::move(compressDeviceFactory)),
+          mLogger(*mDevice, *mCompressDeviceFactory), mModuleHandler(*mDevice)
     {
+        ASSERT_ALWAYS(mCompressDeviceFactory != nullptr);
     }
 
     cavs::Logger &getLogger() override { return mLogger; }
@@ -76,9 +80,10 @@ private:
         }
     };
 
-    Logger mLogger;
     DummyProber mProber;
     std::unique_ptr<Device> mDevice;
+    std::unique_ptr<CompressDeviceFactory> mCompressDeviceFactory;
+    Logger mLogger;
     ModuleHandler mModuleHandler;
 };
 }

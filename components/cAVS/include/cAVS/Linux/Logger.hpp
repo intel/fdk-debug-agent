@@ -23,7 +23,7 @@
 
 #include "cAVS/Linux/Device.hpp"
 #include "cAVS/Linux/CompressTypes.hpp"
-#include "cAVS/Linux/TinyCompressDeviceFactory.hpp"
+#include "cAVS/Linux/CompressDeviceFactory.hpp"
 #include <cAVS/Logger.hpp>
 #include "Util/BlockingQueue.hpp"
 #include <list>
@@ -43,7 +43,9 @@ namespace linux
 class Logger final : public cavs::Logger
 {
 public:
-    Logger(Device &device) : mDevice(device), mLogEntryQueue(queueMaxMemoryBytes, logBlockSize)
+    Logger(Device &device, CompressDeviceFactory &compressDeviceFactory)
+        : mDevice(device), mCompressDeviceFactory(compressDeviceFactory),
+          mLogEntryQueue(queueMaxMemoryBytes, logBlockSize)
     {
         // Queue is open during Logger lifetime
         mLogEntryQueue.open();
@@ -155,7 +157,7 @@ private:
     std::list<std::unique_ptr<LogProducer>> mLogProducers;
     std::mutex mLogActivationContextMutex;
 
-    TinyCompressDeviceFactory mCompressDeviceFactory;
+    CompressDeviceFactory &mCompressDeviceFactory;
 };
 }
 }
