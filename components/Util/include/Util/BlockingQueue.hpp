@@ -69,7 +69,7 @@ public:
     {
     }
 
-    ~BlockingQueue() {}
+    ~BlockingQueue() { close(); }
 
     /* Close the queue, i.e. :
      * - no more elements can be added.
