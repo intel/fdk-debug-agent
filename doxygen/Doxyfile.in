@@ -1309,7 +1309,7 @@ GENERATE_HTMLHELP      = @DOXYGEN_GENERATE_HTMLHELP@
 # written to the html output directory.
 # This tag requires that the tag GENERATE_HTMLHELP is set to YES.
 
-CHM_FILE               =
+CHM_FILE               = DebugAgent.chm
 
 # The HHC_LOCATION tag can be used to specify the location (absolute path
 # including file name) of the HTML help compiler (hhc.exe). If non-empty,
