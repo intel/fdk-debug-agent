@@ -48,8 +48,8 @@ install(FILES resources/scripts/Windows/OpenCAVSFolder.bat DESTINATION bin)
 create_shortcut(bin/OpenCAVSFolder.bat "Open DBGA Config")
 
 # Installing README file and creating shortcut
-install(FILES "resources/docs/README.txt" DESTINATION ".")
-create_shortcut(README.txt "DBGA README")
+install(FILES "resources/docs/README.html" DESTINATION ".")
+create_shortcut(README.html "DBGA README")
 
 # including windows runtime libraries
 #
