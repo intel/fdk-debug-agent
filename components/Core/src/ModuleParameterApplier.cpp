@@ -71,7 +71,6 @@ std::string ModuleParameterApplier::getParameterStructure(const std::string &typ
                                                           ParameterKind parameterKind)
 {
     auto info = getModuleInfo(type);
-    const uint16_t &moduleTypeId = info.first;
     const std::string &moduleTypeUuid = info.second;
 
     /* Getting parameter block names */

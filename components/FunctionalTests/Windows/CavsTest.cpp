@@ -869,8 +869,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases")
 {
-    static const std::size_t probeCount = 8;
-
     /* Setting the test vector
     * ----------------------- */
 
