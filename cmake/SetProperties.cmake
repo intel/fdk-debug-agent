@@ -31,5 +31,5 @@ else()
     set(DBGA_VERSION_TWEAK ${CMAKE_MATCH_4})
 endif()
 
-set(DBGA_NAME "Firmware development kit debug agent")
+set(DBGA_NAME "Intel FDK Debug Agent")
 set(DBGA_DESCRIPTION "Tool for runtime debugging of CAVS dsp firmware.")
