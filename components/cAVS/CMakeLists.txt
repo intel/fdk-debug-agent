@@ -67,6 +67,13 @@ set(LIBRAIRIES)
 if (WIN32)
     # Windows IOCTL SST Driver
     include("CMakeListsWindows.txt")
+
+    # including also Linux sources, but excluding them from build
+    include("CMakeListsLinux.txt")
+    set_source_files_properties(${LINUX_LIB_SRCS} PROPERTIES HEADER_FILE_ONLY true)
+
+    # adding also os-specific cmake files to the visual studio project
+    set(LIB_SRCS ${LIB_SRCS} CMakeListsWindows.txt CMakeListsLinux.txt)
 elseif (UNIX)
     # Linux Debug FS SST Driver
     include("CMakeListsLinux.txt")
