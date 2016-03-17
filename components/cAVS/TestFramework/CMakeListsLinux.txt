@@ -22,7 +22,9 @@ set(LINUX_LIB_SRCS
     src/Linux/MockedDevice.cpp
     src/Linux/DeviceInjectionDriverFactory.cpp
     src/Linux/MockedDeviceCommands.cpp
-    src/Linux/MockedCompressDevice.cpp)
+    src/Linux/MockedCompressDevice.cpp
+    src/Linux/MockedControlDevice.cpp
+    src/Linux/MockedControlDeviceCommands.cpp)
 
 set(LIB_SRCS ${LIB_SRCS} ${LINUX_LIB_SRCS})
 
@@ -36,7 +38,9 @@ set(LINUX_LIB_INCS
     include/cAVS/Linux/StubbedCompressDeviceFactory.hpp
     include/cAVS/Windows/MockedDeviceCatchHelper.hpp
     include/cAVS/Linux/MockedCompressDevice.hpp
-    include/cAVS/Linux/MockedCompressDeviceFactory.hpp)
+    include/cAVS/Linux/MockedCompressDeviceFactory.hpp
+    include/cAVS/Linux/MockedControlDevice.hpp
+    include/cAVS/Linux/MockedControlDeviceCommands.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${LINUX_LIB_INCS})
 

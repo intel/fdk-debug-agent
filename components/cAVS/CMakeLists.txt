@@ -20,6 +20,9 @@
 
 # cmake configuration file of the "cAVS" component
 
+# option to use Alsa-lib based Control device
+SET_PROPERTY(CACHE MIXER_CONTROL_LIB_TO_USE PROPERTY STRINGS Tinyalsa Alsa-lib Stub STRING
+    "library selected to set/get control mixer on soundcard")
 
 # Common source files
 set(LIB_SRCS

@@ -22,12 +22,14 @@
 #include <cAVS/SystemDriverFactory.hpp>
 #include <cAVS/Linux/Driver.hpp>
 #include <cAVS/Linux/SystemDevice.hpp>
+#include <cAVS/Linux/ControlDeviceFactory.hpp>
 #include "cAVS/Linux/TinyCompressDeviceFactory.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
+static const std::string controlDevice{"control"};
 
 std::unique_ptr<Driver> SystemDriverFactory::newDriver() const
 {
@@ -37,13 +39,28 @@ std::unique_ptr<Driver> SystemDriverFactory::newDriver() const
 
     assert(compressDeviceFactory != nullptr);
 
+    /* Finding ALSA Device Card for control using compress Factory */
+    const std::string controlCard{linux::AudioProcfsHelper::getDeviceType(controlDevice)};
+    assert(!controlCard.empty());
+
+    /* Creating the Control Device for the control Card */
+    std::unique_ptr<linux::ControlDevice> controlDevice;
+    try {
+        linux::ControlDeviceFactory controlDeviceFactory;
+        controlDevice = controlDeviceFactory.newControlDevice(controlCard);
+    } catch (linux::ControlDevice::Exception &e) {
+        throw Exception("Cannot create control device: " + std::string(e.what()));
+    }
+    assert(controlDevice != nullptr);
+
     std::unique_ptr<linux::Device> device;
     try {
         device = std::make_unique<linux::SystemDevice>();
     } catch (linux::Device::Exception &e) {
         throw Exception("Cannot create device: " + std::string(e.what()));
     }
-    return std::make_unique<linux::Driver>(std::move(device), std::move(compressDeviceFactory));
+    return std::make_unique<linux::Driver>(std::move(device), std::move(controlDevice),
+                                           std::move(compressDeviceFactory));
 }
 }
 }

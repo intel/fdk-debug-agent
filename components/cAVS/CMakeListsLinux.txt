@@ -25,6 +25,10 @@ set(LINUX_LIB_SRCS
     src/Linux/ModuleHandler.cpp
     src/Linux/TinyCompressDevice.cpp)
 
+if (MIXER_CONTROL_LIB_TO_USE MATCHES "Stub")
+    SET(LINUX_LIB_SRCS ${LINUX_LIB_SRCS} src/Linux/StubbedControlDeviceFactory.cpp)
+endif ()
+
 set(LIB_SRCS ${LIB_SRCS} ${LINUX_LIB_SRCS})
 
 source_group("Source Files\\Linux" FILES ${LINUX_LIB_SRCS})
@@ -41,7 +45,14 @@ set(LINUX_LIB_INCS
     include/cAVS/Linux/CompressDevice.hpp
     include/cAVS/Linux/TinyCompressDevice.hpp
     include/cAVS/Linux/CompressDeviceFactory.hpp
-    include/cAVS/Linux/TinyCompressDeviceFactory.hpp)
+    include/cAVS/Linux/TinyCompressDeviceFactory.hpp
+    include/cAVS/Linux/ControlDevice.hpp
+    include/cAVS/Linux/ControlDeviceTypes.hpp
+    include/cAVS/Linux/ControlDeviceFactory.hpp)
+
+if (MIXER_CONTROL_LIB_TO_USE MATCHES "Stub")
+    SET(LINUX_LIB_INCS ${LINUX_LIB_INCS} include/cAVS/Linux/StubbedControlDevice.hpp)
+endif ()
 
 set(LIB_INCS ${LIB_INCS} ${LINUX_LIB_INCS})
 

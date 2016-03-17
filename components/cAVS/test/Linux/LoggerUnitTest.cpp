@@ -21,7 +21,8 @@
 */
 
 #include "TestCommon/TestHelpers.hpp"
-#include "cAVS/Linux/MockedDevice.hpp"
+#include "cAVS/Linux/StubbedControlDevice.hpp"
+#include "cAVS/Linux/MockedControlDeviceCommands.hpp"
 #include "cAVS/Linux/MockedDeviceCommands.hpp"
 #include "cAVS/Linux/MockedDeviceCatchHelper.hpp"
 #include "cAVS/Linux/StubbedCompressDeviceFactory.hpp"
@@ -30,6 +31,7 @@
 #include <catch.hpp>
 
 using namespace debug_agent::cavs;
+using namespace debug_agent::util;
 using namespace debug_agent::cavs::linux;
 
 using Fixture = MockedDeviceFixture;
@@ -40,7 +42,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stub")
 
     /* Setting the test vector
      * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     commands.addSetCorePowerCommand(true, 0, false);
     commands.addSetCorePowerCommand(true, 1, false);
@@ -51,7 +53,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stub")
      * -------------------------------------- */
 
     /* Creating the windows logger, that will use the mocked device*/
-    linux::Logger logger(device, compressDeviceFactory);
+    linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
 
     /* Defining parameters that will be used for set then get*/
     linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
@@ -76,7 +78,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Open Fai
 {
     /* Setting the test vector
      * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     commands.addSetCorePowerCommand(true, 0, false);
     commands.addSetCorePowerCommand(true, 0, true);
@@ -89,7 +91,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Open Fai
      * --------------------------- */
 
     /* Creating the windows logger, that will use the mocked device*/
-    linux::Logger logger(device, compressDeviceFactory);
+    linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
 
     /* Defining parameters that will be used for set then get*/
     linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
@@ -104,7 +106,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Start Fa
 {
     /* Setting the test vector
      * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     commands.addSetCorePowerCommand(true, 0, false);
     commands.addSetCorePowerCommand(true, 0, true);
@@ -119,7 +121,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Start Fa
      * --------------------------- */
 
     /* Creating the windows logger, that will use the mocked device*/
-    linux::Logger logger(device, compressDeviceFactory);
+    linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
 
     /* Defining parameters that will be used for set then get*/
     linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
@@ -134,7 +136,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stop Fai
 {
     /* Setting the test vector
      * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     commands.addSetCorePowerCommand(true, 0, false);
     commands.addSetCorePowerCommand(true, 0, true);
@@ -149,7 +151,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stop Fai
      * --------------------------- */
 
     /* Creating the windows logger, that will use the mocked device*/
-    linux::Logger logger(device, compressDeviceFactory);
+    linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
 
     /* Defining parameters that will be used for set then get*/
     linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
@@ -177,7 +179,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Empty Lo
      * --------------------------- */
 
     /* Creating the windows logger, that will use the mocked device*/
-    linux::Logger logger(device, compressDeviceFactory);
+    linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
 
     /* Defining parameters that will be used for set then get*/
     linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,

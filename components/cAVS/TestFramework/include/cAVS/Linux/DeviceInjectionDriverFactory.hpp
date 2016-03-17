@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/Linux/Device.hpp"
+#include "cAVS/Linux/ControlDevice.hpp"
 #include "cAVS/Linux/CompressDeviceFactory.hpp"
 #include "cAVS/DriverFactory.hpp"
 #include <memory>
@@ -41,8 +42,10 @@ class DeviceInjectionDriverFactory : public DriverFactory
 public:
     DeviceInjectionDriverFactory(
         std::unique_ptr<Device> injectedDevice,
+        std::unique_ptr<ControlDevice> injectedControlDevice,
         std::unique_ptr<CompressDeviceFactory> injectedCompressDeviceFactory)
         : mInjectedDevice(std::move(injectedDevice)),
+          mInjectedControlDevice(std::move(injectedControlDevice)),
           mInjectedCompressDeviceFactory(std::move(injectedCompressDeviceFactory))
     {
     }
@@ -55,6 +58,9 @@ private:
      * But in the DeviceInjectionDriverFactory case, the following unique pointer will loose its
      * content when newDriver() is called, so declaring it mutable */
     mutable std::unique_ptr<Device> mInjectedDevice;
+
+    /* Same point for this member */
+    mutable std::unique_ptr<ControlDevice> mInjectedControlDevice;
 
     /* Same point for this member */
     mutable std::unique_ptr<CompressDeviceFactory> mInjectedCompressDeviceFactory;

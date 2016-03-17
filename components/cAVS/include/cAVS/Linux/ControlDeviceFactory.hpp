@@ -19,10 +19,11 @@
 *
 ********************************************************************************
 */
+#pragma once
 
-#include "cAVS/Linux/DeviceInjectionDriverFactory.hpp"
-#include "cAVS/Linux/Driver.hpp"
-#include "Util/AssertAlways.hpp"
+#include <cAVS/Linux/ControlDevice.hpp>
+#include <memory>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -31,21 +32,24 @@ namespace cavs
 namespace linux
 {
 
-std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
+class ControlDeviceFactory final
 {
-    if (mInjectedDevice == nullptr) {
-        /* mInjectedDevice is null -> the cause is that newDriver() has already been called,
-         * leading to transfert mInjectedDevice unique pointer content, setting it to null */
-        throw Exception("The injected device has already been used. "
-                        "Please call newDriver() once.");
-    }
-    ASSERT_ALWAYS(mInjectedCompressDeviceFactory != nullptr);
+public:
+    struct Exception : std::logic_error
+    {
+        using std::logic_error::logic_error;
+    };
 
-    /* After this call mInjectedDevice will be null */
-    return std::make_unique<linux::Driver>(std::move(mInjectedDevice),
-                                           std::move(mInjectedControlDevice),
-                                           std::move(mInjectedCompressDeviceFactory));
-}
+    ControlDeviceFactory() = default;
+
+    /** @throw ControlDeviceFactory::Exception */
+    std::unique_ptr<ControlDevice> newControlDevice(const std::string &name) const;
+
+private:
+    /* Make this class non copyable */
+    ControlDeviceFactory(const ControlDeviceFactory &) = delete;
+    ControlDeviceFactory &operator=(const ControlDeviceFactory &) = delete;
+};
 }
 }
 }

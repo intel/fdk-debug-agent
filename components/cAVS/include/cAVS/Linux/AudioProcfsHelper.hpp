@@ -23,6 +23,7 @@
 
 #include "cAVS/Linux/CompressTypes.hpp"
 #include "Poco/String.h"
+#include "Poco/StringTokenizer.h"
 #include <stdexcept>
 #include <memory>
 #include <iostream>
@@ -42,7 +43,7 @@ static const std::string pcmDevicePrefix{"pcm"};
 static const std::string infoId{"id:"};
 static const std::string soundDeviceDir{"/dev/snd"};
 static const std::string soundProcDir{"/proc/asound/"};
-
+static const std::string devicesProcfsEntry{"/proc/asound/devices"};
 static const std::string infoProcEntry{"info"};
 
 /** Id Info field for a logger compress device shall be as "id: Core x Trace Buffer". */
@@ -58,6 +59,22 @@ struct Exception : std::runtime_error
 class AudioProcfsHelper
 {
 public:
+    /** Procfs /proc/asound/devices entry exposes the list of device and their associated type
+     * e.g. control, playback, capture.
+     * This helper function returns the name of the device of the given type.
+     */
+    static const std::string getDeviceType(const std::string &type)
+    {
+        std::string deviceTypeLine{getLineWithTagFromFile(devicesProcfsEntry, type)};
+        if (!deviceTypeLine.empty()) {
+            Poco::StringTokenizer tokenize(deviceTypeLine, ":", Poco::StringTokenizer::TOK_TRIM);
+            if (tokenize.count()) {
+                return tokenize[0];
+            }
+        }
+        return {};
+    }
+
     /** Check and extract the logger compress device information from the info procfs entry of a
      * device.
      * @param[in] infoId literal value of the info id field of the procfs entry
@@ -207,25 +224,35 @@ public:
         const std::string deviceProcInfo{soundProcDir + soundCardPrefix + std::to_string(cardId) +
                                          "/" + devicePrefix + std::to_string(deviceId) + suffix +
                                          "/" + infoProcEntry};
+
+        std::string lineWithInfoField = getLineWithTagFromFile(deviceProcInfo, field);
+        if (!lineWithInfoField.empty()) {
+            // Removes "id:" from the line.
+            lineWithInfoField = lineWithInfoField.substr(field.size());
+        }
+        return lineWithInfoField;
+    }
+
+    static const std::string getLineWithTagFromFile(const std::string &fileName,
+                                                    const std::string &tag)
+    {
         std::ifstream infoFileStream;
         infoFileStream.exceptions(std::ifstream::failbit | std::ifstream::badbit |
                                   std::ifstream::eofbit);
         try {
-            infoFileStream.open(deviceProcInfo, std::ifstream::in);
+            infoFileStream.open(fileName, std::ifstream::in);
         } catch (const std::exception &) {
-            throw Exception("error while opening " + deviceProcInfo + " file.");
+            throw Exception("error while opening " + fileName + " file.");
         }
-        std::string infoFileIdLine;
+        std::string lineWithTag;
         try {
-            while (std::getline(infoFileStream, infoFileIdLine)) {
-                if (infoFileIdLine.find(field) != std::string::npos) {
-                    infoFileIdLine = infoFileIdLine.substr(field.size());
+            while (std::getline(infoFileStream, lineWithTag)) {
+                if (lineWithTag.find(tag) != std::string::npos) {
                     break;
                 }
                 // Not found, reset the line.
-                infoFileIdLine.clear();
+                lineWithTag.clear();
             }
-
         } catch (const std::exception &) {
             throw Exception("error during read operation: " + infoFileStream.rdstate());
         }
@@ -233,7 +260,7 @@ public:
             infoFileStream.close();
         } catch (const std::exception &) {
         }
-        return infoFileIdLine;
+        return lineWithTag;
     }
 
     /** Extract the "id" field of "info" procfs entry for a given sound device.

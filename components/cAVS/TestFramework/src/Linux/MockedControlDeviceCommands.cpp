@@ -19,12 +19,15 @@
  *
  ********************************************************************************
  */
-#pragma once
 
-#include "cAVS/Linux/MockedDevice.hpp"
-#include "cAVS/Linux/MockedControlDevice.hpp"
-#include "cAVS/Linux/MockedCompressDevice.hpp"
-#include <catch.hpp>
+#include "cAVS/Linux/MockedControlDeviceCommands.hpp"
+#include "cAVS/Linux/ModuleHandler.hpp"
+#include "cAVS/Linux/DriverTypes.hpp"
+#include "Util/Buffer.hpp"
+#include "Util/ByteStreamWriter.hpp"
+#include "Util/ByteStreamReader.hpp"
+
+using namespace debug_agent::util;
 
 namespace debug_agent
 {
@@ -33,26 +36,30 @@ namespace cavs
 namespace linux
 {
 
-struct MockedDeviceFixture
+void MockedControlDeviceCommands::addGetLogLevelCommand(bool controlSuccess,
+                                                        mixer_ctl::LogPriority expectedLogPrio)
 {
-    std::unique_ptr<MockedDevice> device = std::make_unique<MockedDevice>([] {
-        INFO("There are leftover test inputs");
-        CHECK(false);
-    });
+    MemoryByteStreamWriter writer;
+    writer.write(static_cast<long>(expectedLogPrio));
+    if (controlSuccess) {
+        mControlDevice.addSuccessfulControlReadEntry(mixer_ctl::logLevelMixer, {},
+                                                     writer.getBuffer());
+    } else {
+        mControlDevice.addFailedControlReadEntry(mixer_ctl::logLevelMixer, {}, writer.getBuffer());
+    }
+}
 
-    std::unique_ptr<MockedControlDevice> controlDevice =
-        std::make_unique<MockedControlDevice>("myMockedControlCard", [] {
-            INFO("There are leftover test inputs");
-            CHECK(false);
-        });
-
-    std::unique_ptr<MockedCompressDevice> compressDevice =
-        std::make_unique<MockedCompressDevice>(compress::DeviceInfo{0, 5},
-                                               [] {
-                                                   INFO("There are leftover test inputs");
-                                                   CHECK(false);
-                                               });
-};
+void MockedControlDeviceCommands::addSetLogLevelCommand(bool controlSuccess,
+                                                        mixer_ctl::LogPriority logPrio)
+{
+    MemoryByteStreamWriter writer;
+    writer.write(static_cast<long>(logPrio));
+    if (controlSuccess) {
+        mControlDevice.addSuccessfulControlWriteEntry(mixer_ctl::logLevelMixer, writer.getBuffer());
+    } else {
+        mControlDevice.addFailedControlWriteEntry(mixer_ctl::logLevelMixer, writer.getBuffer());
+    }
+}
 }
 }
 }

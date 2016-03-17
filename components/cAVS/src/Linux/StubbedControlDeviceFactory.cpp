@@ -20,9 +20,8 @@
 ********************************************************************************
 */
 
-#include "cAVS/Linux/DeviceInjectionDriverFactory.hpp"
-#include "cAVS/Linux/Driver.hpp"
-#include "Util/AssertAlways.hpp"
+#include "cAVS/Linux/ControlDeviceFactory.hpp"
+#include "cAVS/Linux/StubbedControlDevice.hpp"
 
 namespace debug_agent
 {
@@ -31,20 +30,10 @@ namespace cavs
 namespace linux
 {
 
-std::unique_ptr<cavs::Driver> DeviceInjectionDriverFactory::newDriver() const
+/** @throw ControlDeviceFactory::Exception */
+std::unique_ptr<ControlDevice> ControlDeviceFactory::newControlDevice(const std::string &name) const
 {
-    if (mInjectedDevice == nullptr) {
-        /* mInjectedDevice is null -> the cause is that newDriver() has already been called,
-         * leading to transfert mInjectedDevice unique pointer content, setting it to null */
-        throw Exception("The injected device has already been used. "
-                        "Please call newDriver() once.");
-    }
-    ASSERT_ALWAYS(mInjectedCompressDeviceFactory != nullptr);
-
-    /* After this call mInjectedDevice will be null */
-    return std::make_unique<linux::Driver>(std::move(mInjectedDevice),
-                                           std::move(mInjectedControlDevice),
-                                           std::move(mInjectedCompressDeviceFactory));
+    return std::make_unique<StubbedControlDevice>(name);
 }
 }
 }

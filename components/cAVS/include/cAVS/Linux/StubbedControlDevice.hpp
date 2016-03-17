@@ -19,12 +19,14 @@
  *
  ********************************************************************************
  */
+
 #pragma once
 
-#include "cAVS/Linux/MockedDevice.hpp"
-#include "cAVS/Linux/MockedControlDevice.hpp"
-#include "cAVS/Linux/MockedCompressDevice.hpp"
-#include <catch.hpp>
+#include "cAVS/Linux/ControlDevice.hpp"
+#include "cAVS/Linux/ControlDeviceTypes.hpp"
+#include "Util/Buffer.hpp"
+#include "Util/ByteStreamWriter.hpp"
+#include <map>
 
 namespace debug_agent
 {
@@ -33,25 +35,33 @@ namespace cavs
 namespace linux
 {
 
-struct MockedDeviceFixture
+class StubbedControlDevice final : public ControlDevice
 {
-    std::unique_ptr<MockedDevice> device = std::make_unique<MockedDevice>([] {
-        INFO("There are leftover test inputs");
-        CHECK(false);
-    });
+public:
+    /** @throw Device::Exception if the device initialization has failed */
+    StubbedControlDevice(const std::string &name) : ControlDevice(name)
+    {
+        util::MemoryByteStreamWriter writer;
+        writer.write(static_cast<long>(mixer_ctl::LogPriority::Critical));
+        mBackupedControl[mixer_ctl::logLevelMixer] = writer.getBuffer();
+    }
 
-    std::unique_ptr<MockedControlDevice> controlDevice =
-        std::make_unique<MockedControlDevice>("myMockedControlCard", [] {
-            INFO("There are leftover test inputs");
-            CHECK(false);
-        });
+    void ctlRead(const std::string &name, util::Buffer &bufferOutput) override
+    {
+        if (mBackupedControl.find(name) != mBackupedControl.end()) {
+            bufferOutput = mBackupedControl[name];
+            std::cout << "CtlRead for " << name << " found" << std::endl;
+        } else
+            std::cout << "CtlRead for " << name << " NOT found" << std::endl;
+    }
 
-    std::unique_ptr<MockedCompressDevice> compressDevice =
-        std::make_unique<MockedCompressDevice>(compress::DeviceInfo{0, 5},
-                                               [] {
-                                                   INFO("There are leftover test inputs");
-                                                   CHECK(false);
-                                               });
+    void ctlWrite(const std::string &name, const util::Buffer &bufferInput) override
+    {
+        mBackupedControl[name] = bufferInput;
+    }
+
+private:
+    std::map<std::string, util::Buffer> mBackupedControl;
 };
 }
 }

@@ -22,6 +22,8 @@
 #pragma once
 
 #include "cAVS/Linux/Device.hpp"
+#include "cAVS/Linux/ControlDevice.hpp"
+#include "cAVS/Linux/ControlDeviceTypes.hpp"
 #include "cAVS/Linux/CompressTypes.hpp"
 #include "cAVS/Linux/CompressDeviceFactory.hpp"
 #include <cAVS/Logger.hpp>
@@ -43,8 +45,10 @@ namespace linux
 class Logger final : public cavs::Logger
 {
 public:
-    Logger(Device &device, CompressDeviceFactory &compressDeviceFactory)
-        : mDevice(device), mCompressDeviceFactory(compressDeviceFactory),
+    Logger(Device &device, ControlDevice &controlDevice,
+           CompressDeviceFactory &compressDeviceFactory)
+        : mDevice(device), mControlDevice(controlDevice),
+          mCompressDeviceFactory(compressDeviceFactory),
           mLogEntryQueue(queueMaxMemoryBytes, logBlockSize)
     {
         // Queue is open during Logger lifetime
@@ -156,6 +160,7 @@ private:
     void resetProducers();
 
     Device &mDevice;
+    ControlDevice &mControlDevice;
 
     BlockingLogQueue mLogEntryQueue;
 

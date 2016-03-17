@@ -50,28 +50,28 @@ TEST_CASE_METHOD(Fixture, "MockedDevice: linux read/write TEST")
 
     /** Using the command below to add the test vectors to the mock driver */
 
-    device.addDebugfsEntryOKOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl");
-    device.addDebugfsEntryOKWrite(write_buffer_01, write_buffer_01.size());
-    device.addDebugfsEntryOKRead(read_buffer_01_ro, read_buffer_01_ro.size(),
-                                 read_buffer_01_ro.size());
-    device.addDebugfsEntryOKClose();
+    device->addDebugfsEntryOKOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl");
+    device->addDebugfsEntryOKWrite(write_buffer_01, write_buffer_01.size());
+    device->addDebugfsEntryOKRead(read_buffer_01_ro, read_buffer_01_ro.size(),
+                                  read_buffer_01_ro.size());
+    device->addDebugfsEntryOKClose();
 
     /** Now using the mocked device */
 
     /** Open the file */
-    CHECK_NOTHROW(device.debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"));
+    CHECK_NOTHROW(device->debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"));
     /** write command */
-    CHECK_NOTHROW(nbbytes = device.debugfsWrite(write_buffer_01));
+    CHECK_NOTHROW(nbbytes = device->debugfsWrite(write_buffer_01));
     /** the number of bytes that been written should be the same as requested */
     CHECK(nbbytes == write_buffer_01.size());
     /** read reply */
     Buffer read_buffer_01_w;
     read_buffer_01_w.resize(read_buffer_01_ro.size());
-    CHECK_NOTHROW(nbbytes = device.debugfsRead(read_buffer_01_w, read_buffer_01_w.size()));
+    CHECK_NOTHROW(nbbytes = device->debugfsRead(read_buffer_01_w, read_buffer_01_w.size()));
     /** the number of bytes that been read should be the same as requested */
     CHECK(nbbytes == read_buffer_01_w.size());
     /** the number of bytes read should be the number of bytes requested */
-    CHECK_NOTHROW(device.debugfsClose());
+    CHECK_NOTHROW(device->debugfsClose());
 }
 
 /* This test case uses the mocked device with falling input, mock device should return fail */
@@ -79,41 +79,41 @@ TEST_CASE_METHOD(Fixture, "MockedDevice: linux read/write testing exception when
 {
     /** add KO vector and check there is exceptions */
     SECTION ("OS Open error") {
-        device.addDebugfsEntryKOOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl");
+        device->addDebugfsEntryKOOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl");
 
-        CHECK_THROWS_AS_MSG(device.debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"),
+        CHECK_THROWS_AS_MSG(device->debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"),
                             Device::Exception, "error during open: error#MockDevice");
     }
 
     SECTION ("OS Write error") {
-        device.addDebugfsEntryKOWrite(write_buffer_01, write_buffer_01.size());
+        device->addDebugfsEntryKOWrite(write_buffer_01, write_buffer_01.size());
 
-        CHECK_THROWS_AS_MSG(device.debugfsWrite(write_buffer_01), Device::Exception,
+        CHECK_THROWS_AS_MSG(device->debugfsWrite(write_buffer_01), Device::Exception,
                             "error during write: error#MockDevice");
     }
 
     SECTION ("OS Read error") {
-        device.addDebugfsEntryKORead(read_buffer_01_ro, read_buffer_01_ro.size(),
-                                     read_buffer_01_ro.size());
+        device->addDebugfsEntryKORead(read_buffer_01_ro, read_buffer_01_ro.size(),
+                                      read_buffer_01_ro.size());
 
         Buffer read_buffer_01_w;
         read_buffer_01_w.resize(read_buffer_01_ro.size());
 
-        CHECK_THROWS_AS_MSG(device.debugfsRead(read_buffer_01_w, read_buffer_01_w.size()),
+        CHECK_THROWS_AS_MSG(device->debugfsRead(read_buffer_01_w, read_buffer_01_w.size()),
                             Device::Exception, "error during read: error#MockDevice");
     }
 
     SECTION ("OS Close error") {
-        device.addDebugfsEntryKOClose();
+        device->addDebugfsEntryKOClose();
 
-        CHECK_THROWS_AS_MSG(device.debugfsClose(), Device::Exception,
+        CHECK_THROWS_AS_MSG(device->debugfsClose(), Device::Exception,
                             "error during close: error#MockDevice");
     }
 
     SECTION ("Reach unexpected end of vector") {
-        device.addDebugfsEntryOKOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl");
-        CHECK_NOTHROW(device.debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"));
-        CHECK_THROWS_AS_MSG(device.debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"),
+        device->addDebugfsEntryOKOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl");
+        CHECK_NOTHROW(device->debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"));
+        CHECK_THROWS_AS_MSG(device->debugfsOpen("/sys/kernel/debug/snd_soc_test/adsp_prop_ctrl"),
                             Device::Exception, "Mock failed: Debugfs vector already consumed.");
     }
 }

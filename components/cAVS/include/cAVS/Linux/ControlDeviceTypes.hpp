@@ -19,12 +19,11 @@
  *
  ********************************************************************************
  */
+
 #pragma once
 
-#include "cAVS/Linux/MockedDevice.hpp"
-#include "cAVS/Linux/MockedControlDevice.hpp"
-#include "cAVS/Linux/MockedCompressDevice.hpp"
-#include <catch.hpp>
+#include "cAVS/DspFw/Common.hpp"
+#include "cAVS/ModuleHandler.hpp"
 
 namespace debug_agent
 {
@@ -32,27 +31,24 @@ namespace cavs
 {
 namespace linux
 {
-
-struct MockedDeviceFixture
+namespace mixer_ctl
 {
-    std::unique_ptr<MockedDevice> device = std::make_unique<MockedDevice>([] {
-        INFO("There are leftover test inputs");
-        CHECK(false);
-    });
 
-    std::unique_ptr<MockedControlDevice> controlDevice =
-        std::make_unique<MockedControlDevice>("myMockedControlCard", [] {
-            INFO("There are leftover test inputs");
-            CHECK(false);
-        });
+static const std::string logLevelMixer{"FW LOGGING Log level"};
 
-    std::unique_ptr<MockedCompressDevice> compressDevice =
-        std::make_unique<MockedCompressDevice>(compress::DeviceInfo{0, 5},
-                                               [] {
-                                                   INFO("There are leftover test inputs");
-                                                   CHECK(false);
-                                               });
+/**
+ * Log Mixer Ctl levels, beware of the type, it shall match the mixer ctl value type
+ */
+enum class LogPriority : long
+{
+    Quiet,
+    Critical,
+    High,
+    Medium,
+    Low,
+    Verbose
 };
+}
 }
 }
 }

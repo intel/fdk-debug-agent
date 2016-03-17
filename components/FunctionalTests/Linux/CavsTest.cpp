@@ -27,10 +27,12 @@
 #include "Util/FileHelper.hpp"
 #include "TestCommon/HttpClientSimulator.hpp"
 #include "TestCommon/TestHelpers.hpp"
+#include "cAVS/Linux/MockedDeviceCatchHelper.hpp"
 #include "cAVS/Linux/DeviceInjectionDriverFactory.hpp"
 #include "cAVS/Linux/StubbedCompressDeviceFactory.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/MockedDeviceCommands.hpp"
+#include "cAVS/Linux/MockedControlDeviceCommands.hpp"
 #include "catch.hpp"
 #include <chrono>
 #include <thread>
@@ -43,6 +45,9 @@ using namespace debug_agent::core;
 using namespace debug_agent::cavs;
 using namespace debug_agent::test_common;
 using namespace debug_agent::util;
+using namespace debug_agent::cavs::linux;
+
+using Fixture = MockedDeviceFixture;
 
 static const util::Buffer aecControlParameterPayload = {
     0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00,
@@ -217,14 +222,6 @@ static void checkUrlMap(HttpClientSimulator &client,
     }
 }
 
-struct Fixture
-{
-    // When the mocked device is destructed, check that all inputs were
-    // consumed.
-    std::unique_ptr<linux::MockedDevice> device{
-        new linux::MockedDevice([] { INFO("There are leftover test inputs."; CHECK(false);) })};
-};
-
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
 {
     /* Setting the test vector
@@ -242,7 +239,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
 
     /* Creating the factory that will inject the mocked device */
     linux::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -321,7 +319,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
 
     /* Creating the factory that will inject the mocked device */
     linux::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -369,7 +368,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
 
     /* Creating the factory that will inject the mocked device */
     linux::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -415,7 +415,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
 
     /* Creating the factory that will inject the mocked device */
     linux::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -446,7 +447,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
 
     /* Creating the factory that will inject the mocked device */
     linux::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -481,7 +483,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice")
 
     /* Creating the factory that will inject the mocked device */
     linux::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -546,7 +549,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
 
     /* Creating the factory that will inject the mocked device */
     linux::DeviceInjectionDriverFactory driverFactory(
-        std::move(device), std::make_unique<linux::StubbedCompressDeviceFactory>());
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
 
     /* Creating and starting the debug agent in another thread. It can be stopped using
     * a condition variable*/

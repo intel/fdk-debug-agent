@@ -19,12 +19,13 @@
  *
  ********************************************************************************
  */
+
 #pragma once
 
-#include "cAVS/Linux/MockedDevice.hpp"
-#include "cAVS/Linux/MockedControlDevice.hpp"
-#include "cAVS/Linux/MockedCompressDevice.hpp"
-#include <catch.hpp>
+#include "Util/Buffer.hpp"
+#include <exception>
+#include <string>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -33,25 +34,30 @@ namespace cavs
 namespace linux
 {
 
-struct MockedDeviceFixture
+/** This class abstracts a Linux ALSA Device for control operation (ctl read, ctl write)
+ */
+class ControlDevice
 {
-    std::unique_ptr<MockedDevice> device = std::make_unique<MockedDevice>([] {
-        INFO("There are leftover test inputs");
-        CHECK(false);
-    });
+public:
+    struct Exception : std::logic_error
+    {
+        using std::logic_error::logic_error;
+    };
 
-    std::unique_ptr<MockedControlDevice> controlDevice =
-        std::make_unique<MockedControlDevice>("myMockedControlCard", [] {
-            INFO("There are leftover test inputs");
-            CHECK(false);
-        });
+    /** @throw Device::Exception if the device initialization has failed */
+    ControlDevice(const std::string &name) : mName(name) {}
+    virtual ~ControlDevice() = default;
 
-    std::unique_ptr<MockedCompressDevice> compressDevice =
-        std::make_unique<MockedCompressDevice>(compress::DeviceInfo{0, 5},
-                                               [] {
-                                                   INFO("There are leftover test inputs");
-                                                   CHECK(false);
-                                               });
+    virtual void ctlRead(const std::string &name, util::Buffer &bufferOutput) = 0;
+    virtual void ctlWrite(const std::string &name, const util::Buffer &bufferInput) = 0;
+
+    const std::string getCardName() const { return mName; }
+
+private:
+    ControlDevice(const ControlDevice &) = delete;
+    ControlDevice &operator=(const ControlDevice &) = delete;
+
+    std::string mName; /** ALSA Device name. */
 };
 }
 }

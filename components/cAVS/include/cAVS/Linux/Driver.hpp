@@ -23,6 +23,7 @@
 
 #include "cAVS/Driver.hpp"
 #include "cAVS/Linux/Device.hpp"
+#include "cAVS/Linux/ControlDevice.hpp"
 #include "cAVS/DspFw/FwConfig.hpp"
 #include "cAVS/DspFw/HwConfig.hpp"
 #include "cAVS/Linux/ModuleHandler.hpp"
@@ -42,10 +43,11 @@ namespace linux
 class Driver final : public cavs::Driver
 {
 public:
-    Driver(std::unique_ptr<Device> device,
+    Driver(std::unique_ptr<Device> device, std::unique_ptr<ControlDevice> controlDevice,
            std::unique_ptr<CompressDeviceFactory> compressDeviceFactory)
-        : mDevice(std::move(device)), mCompressDeviceFactory(std::move(compressDeviceFactory)),
-          mLogger(*mDevice, *mCompressDeviceFactory), mModuleHandler(*mDevice)
+        : mDevice(std::move(device)), mControlDevice(std::move(controlDevice)),
+          mCompressDeviceFactory(std::move(compressDeviceFactory)),
+          mLogger(*mDevice, *mControlDevice, *mCompressDeviceFactory), mModuleHandler(*mDevice)
     {
         ASSERT_ALWAYS(mCompressDeviceFactory != nullptr);
     }
@@ -82,6 +84,7 @@ private:
 
     DummyProber mProber;
     std::unique_ptr<Device> mDevice;
+    std::unique_ptr<ControlDevice> mControlDevice;
     std::unique_ptr<CompressDeviceFactory> mCompressDeviceFactory;
     Logger mLogger;
     ModuleHandler mModuleHandler;

@@ -19,12 +19,12 @@
  *
  ********************************************************************************
  */
+
 #pragma once
 
-#include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/MockedControlDevice.hpp"
-#include "cAVS/Linux/MockedCompressDevice.hpp"
-#include <catch.hpp>
+#include "cAVS/Linux/Logger.hpp"
+#include "Util/Buffer.hpp"
 
 namespace debug_agent
 {
@@ -33,25 +33,20 @@ namespace cavs
 namespace linux
 {
 
-struct MockedDeviceFixture
+class MockedControlDeviceCommands final
 {
-    std::unique_ptr<MockedDevice> device = std::make_unique<MockedDevice>([] {
-        INFO("There are leftover test inputs");
-        CHECK(false);
-    });
+public:
+    MockedControlDeviceCommands(MockedControlDevice &device) : mControlDevice(device) {}
 
-    std::unique_ptr<MockedControlDevice> controlDevice =
-        std::make_unique<MockedControlDevice>("myMockedControlCard", [] {
-            INFO("There are leftover test inputs");
-            CHECK(false);
-        });
+    void addGetLogLevelCommand(bool controlSuccess, mixer_ctl::LogPriority expectedLogPrio);
 
-    std::unique_ptr<MockedCompressDevice> compressDevice =
-        std::make_unique<MockedCompressDevice>(compress::DeviceInfo{0, 5},
-                                               [] {
-                                                   INFO("There are leftover test inputs");
-                                                   CHECK(false);
-                                               });
+    void addSetLogLevelCommand(bool controlSuccess, mixer_ctl::LogPriority logPrio);
+
+private:
+    MockedControlDeviceCommands(const MockedControlDeviceCommands &) = delete;
+    MockedControlDeviceCommands &operator=(const MockedControlDeviceCommands &) = delete;
+
+    MockedControlDevice &mControlDevice;
 };
 }
 }

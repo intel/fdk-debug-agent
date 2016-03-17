@@ -61,7 +61,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful get fw config command */
     commands.addGetFwConfigCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, fwConfigTlvList);
@@ -70,7 +70,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     dsp_fw::FwConfig fwConfig;
 
@@ -98,10 +98,10 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module parameter")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /* Successful command */
     commands.addGetModuleParameterCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, instanceId,
@@ -127,7 +127,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: set module enable")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful command */
     commands.addSetModuleParameterCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, instanceId,
@@ -137,7 +137,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: set module enable")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /*Successful command */
     CHECK_NOTHROW(moduleHandler.setModuleParameter(moduleId, instanceId, parameterId, {}));
@@ -153,7 +153,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: setting module parameter")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful command */
     commands.addSetModuleParameterCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, instanceId,
@@ -163,7 +163,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: setting module parameter")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /*Successful command */
     CHECK_NOTHROW(
@@ -180,7 +180,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: setting loadable module parameter")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful command */
     commands.addSetModuleParameterCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, instanceId,
@@ -190,7 +190,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: setting loadable module parameter")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /*Successful command */
     CHECK_NOTHROW(
@@ -253,7 +253,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module entries")
 
     /* Setting the test vector
      * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     std::vector<dsp_fw::ModuleEntry> expectedModuleEntry = produceModuleEntries(moduleCount);
 
@@ -265,7 +265,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module entries")
      * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /*Successful get module info command with 2 modules*/
     checkModuleEntry(moduleHandler, moduleCount, expectedModuleEntry);
@@ -279,7 +279,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful get pipeline list command */
     commands.addGetPipelineListCommand(
@@ -290,7 +290,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /* Simulating an os error during getting pipeline list */
     std::vector<dsp_fw::PipeLineIdType> pipelineIds;
@@ -310,7 +310,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline props")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful command */
     commands.addGetPipelinePropsCommand(
@@ -320,7 +320,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline props")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /* Simulating an os error */
 
@@ -347,7 +347,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful command */
     commands.addGetSchedulersInfoCommand(
@@ -357,7 +357,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /* Simulating an os error */
 
@@ -381,7 +381,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful command */
     commands.addGetGatewaysCommand(/*true, STATUS_SUCCESS,*/ dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
@@ -391,7 +391,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /* Simulating an os error during getting pipeline list */
     std::vector<dsp_fw::GatewayProps> gateways;
@@ -442,7 +442,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
 
     /* Setting the test vector
     * ----------------------- */
-    MockedDeviceCommands commands(device);
+    MockedDeviceCommands commands(*device);
 
     /* Successful command */
     commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
@@ -453,7 +453,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(device);
+    linux::ModuleHandler moduleHandler(*device);
 
     /* Simulating an os error */
 
