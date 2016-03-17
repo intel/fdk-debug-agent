@@ -32,6 +32,10 @@ if (MIXER_CONTROL_LIB_TO_USE MATCHES "Tinyalsa")
     SET(LINUX_LIB_SRCS ${LINUX_LIB_SRCS}
         src/Linux/TinyalsaControlDevice.cpp
         src/Linux/TinyalsaControlDeviceFactory.cpp)
+elseif (MIXER_CONTROL_LIB_TO_USE MATCHES "Alsa-lib")
+    SET(LINUX_LIB_SRCS ${LINUX_LIB_SRCS}
+        src/Linux/AlsaControlDevice.cpp
+        src/Linux/AlsaControlDeviceFactory.cpp)
 elseif (MIXER_CONTROL_LIB_TO_USE MATCHES "Stub")
     SET(LINUX_LIB_SRCS ${LINUX_LIB_SRCS} src/Linux/StubbedControlDeviceFactory.cpp)
 endif ()
@@ -65,6 +69,8 @@ set(LINUX_LIB_INCS
 
 if (MIXER_CONTROL_LIB_TO_USE MATCHES "Tinyalsa")
     SET(LINUX_LIB_INCS ${LINUX_LIB_INCS} include/cAVS/Linux/TinyalsaControlDevice.hpp)
+elseif (MIXER_CONTROL_LIB_TO_USE MATCHES "Alsa-lib")
+    SET(LINUX_LIB_INCS ${LINUX_LIB_INCS} include/cAVS/Linux/AlsaControlDevice.hpp)
 elseif (MIXER_CONTROL_LIB_TO_USE MATCHES "Stub")
     SET(LINUX_LIB_INCS ${LINUX_LIB_INCS} include/cAVS/Linux/StubbedControlDevice.hpp)
 endif ()
