@@ -29,7 +29,8 @@ set(TEST_SRCS
     RingBufferReader.cpp
     EnumHelperTest.cpp
     StructureChangeTrackingTest.cpp
-    FileHelperTest.cpp)
+    FileHelperTest.cpp
+    MemoryStreamTest.cpp)
 
 set(TEST_INCS)
 

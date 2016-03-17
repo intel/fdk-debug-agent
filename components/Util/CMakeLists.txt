@@ -35,6 +35,7 @@ set(INCS
     include/Util/FileHelper.hpp
     include/Util/Iterator.hpp
     include/Util/Locker.hpp
+    include/Util/MemoryStream.hpp
     include/Util/PointerHelper.hpp
     include/Util/RingBufferReader.hpp
     include/Util/Stream.hpp
