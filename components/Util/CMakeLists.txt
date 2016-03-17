@@ -36,6 +36,7 @@ set(INCS
     include/Util/Locker.hpp
     include/Util/PointerHelper.hpp
     include/Util/RingBufferReader.hpp
+    include/Util/Stream.hpp
     include/Util/StringHelper.hpp
     include/Util/StructureChangeTracking.hpp
     include/Util/TypedBuffer.hpp
