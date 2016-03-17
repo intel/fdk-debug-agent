@@ -23,6 +23,7 @@
 #pragma once
 
 #include "Util/ByteStreamCommon.hpp"
+#include "Util/MemoryStream.hpp"
 #include "Util/Buffer.hpp"
 #include <vector>
 #include <limits>
@@ -39,7 +40,11 @@ namespace util
 class ByteStreamWriter
 {
 public:
-    ByteStreamWriter() {}
+    using Exception = util::Exception<ByteStreamReader>;
+
+    ByteStreamWriter(OutputStream &os) : mOutput(os) {}
+    ByteStreamWriter(const ByteStreamWriter &) = delete;
+    ByteStreamWriter &operator=(const ByteStreamWriter &) = delete;
 
     /** Write a "simple type" value.
      *
@@ -99,7 +104,11 @@ public:
     /** Write a raw buffer. Its size is not written in the stream */
     void writeRawBuffer(const util::Buffer &buffer)
     {
-        mBuffer.insert(mBuffer.end(), buffer.begin(), buffer.end());
+        try {
+            mOutput.write(buffer.data(), buffer.size());
+        } catch (InputStream::Exception &e) {
+            throw Exception("Write raw buffer failed: " + std::string(e.what()));
+        }
     }
 
     /* Write a vector of type supplied as template parameter, the supplied type could be either
@@ -128,21 +137,33 @@ public:
         }
     }
 
-    /** Return the produced buffer */
-    const util::Buffer &getBuffer() const { return mBuffer; }
-
 private:
     template <typename T>
     void writeUsingMemoryCopy(const T &value)
     {
         std::size_t elementSize = sizeof(T);
-        const uint8_t *valuePtr = reinterpret_cast<const uint8_t *>(&value);
 
-        /* Write the value as bytes*/
-        mBuffer.insert(mBuffer.end(), valuePtr, valuePtr + elementSize);
+        try {
+            mOutput.write(reinterpret_cast<const StreamByte *>(&value), elementSize);
+        } catch (InputStream::Exception &e) {
+            throw Exception("Write failed: " + std::string(e.what()));
+        }
     }
 
-    util::Buffer mBuffer;
+    OutputStream &mOutput;
+};
+
+class MemoryByteStreamWriter : public ByteStreamWriter
+{
+public:
+    MemoryByteStreamWriter() : ByteStreamWriter(mOutput), mOutput(mBuffer) {}
+
+    /** @return the underlying buffer */
+    const Buffer &getBuffer() const { return mBuffer; }
+
+private:
+    Buffer mBuffer;
+    MemoryOutputStream mOutput;
 };
 }
 }

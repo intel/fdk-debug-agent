@@ -48,7 +48,7 @@ public:
     void readFrom(const util::Buffer &binarySource) override
     {
         try {
-            util::ByteStreamReader reader(binarySource);
+            util::MemoryByteStreamReader reader(binarySource);
             reader.read(mValue);
 
             if (!reader.isEOS()) {

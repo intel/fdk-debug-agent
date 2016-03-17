@@ -53,11 +53,11 @@ static const AudioDataFormatIpc audioFormat = {static_cast<SamplingFrequency>(1)
 template <typename T>
 void testType(const T &expectedValue, const Buffer &expectedBuffer)
 {
-    ByteStreamWriter writer;
+    MemoryByteStreamWriter writer;
     writer.write(expectedValue);
     CHECK(writer.getBuffer() == expectedBuffer);
 
-    ByteStreamReader reader(expectedBuffer);
+    MemoryByteStreamReader reader(expectedBuffer);
     T readValue;
     reader.read(readValue);
     CHECK(readValue == expectedValue);

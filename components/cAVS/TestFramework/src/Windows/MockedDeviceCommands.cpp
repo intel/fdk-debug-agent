@@ -39,7 +39,7 @@ void MockedDeviceCommands::addModuleParameterCommand(
     bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus)
 {
     /* Expected output buffer*/
-    util::ByteStreamWriter expectedOutputWriter;
+    util::MemoryByteStreamWriter expectedOutputWriter;
 
     /* Adding driver Intc_App_Cmd_Body structure */
     driver::Intc_App_Cmd_Body bodyCmd;
@@ -54,7 +54,7 @@ void MockedDeviceCommands::addModuleParameterCommand(
     expectedOutputWriter.writeRawBuffer(expectedParameterContent);
 
     /* Creating the ioctl input buffer*/
-    util::ByteStreamWriter inputWriter;
+    util::MemoryByteStreamWriter inputWriter;
 
     /* Adding driver Intc_App_Cmd_Header structure */
     driver::Intc_App_Cmd_Header ioctlInput(
@@ -73,7 +73,7 @@ void MockedDeviceCommands::addModuleParameterCommand(
     }
 
     /* Expected returned buffer*/
-    util::ByteStreamWriter returnedOutputWriter;
+    util::MemoryByteStreamWriter returnedOutputWriter;
 
     /* Adding driver Intc_App_Cmd_Body structure */
     bodyCmd.Status = returnedDriverStatus;
@@ -106,7 +106,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
 {
     util::Buffer expectedOutput(expectedOutputBufferSize, 0xFF);
 
-    util::ByteStreamWriter writer;
+    util::MemoryByteStreamWriter writer;
     writer.write(parameter);
 
     addModuleParameterCommand(Command::Get, moduleId, instanceId, parameterTypeId, expectedOutput,
@@ -124,7 +124,7 @@ void MockedDeviceCommands::addTinyCommand(typename const IoCtlDescription::Data 
                   "For now, MockedDeviceCommands only supports Tiny ioctls");
 
     /* First creating expected body to know its serialized size */
-    util::ByteStreamWriter expectedBodyWriter;
+    util::MemoryByteStreamWriter expectedBodyWriter;
     driver::Intc_App_Cmd_Body body;
     expectedBodyWriter.write(body);
     expectedBodyWriter.write(inputDriverStruct);
@@ -134,7 +134,7 @@ void MockedDeviceCommands::addTinyCommand(typename const IoCtlDescription::Data 
     driver::Intc_App_Cmd_Header header(IoCtlDescription::feature, IoCtlDescription::id, bodySize);
 
     /* Creating ioctl expected buffer containing header + body */
-    util::ByteStreamWriter expectedWriter;
+    util::MemoryByteStreamWriter expectedWriter;
     expectedWriter.write(header);
     expectedWriter.writeRawBuffer(expectedBodyWriter.getBuffer());
 
@@ -149,7 +149,7 @@ void MockedDeviceCommands::addTinyCommand(typename const IoCtlDescription::Data 
     }
 
     /* Creating ioctl returned buffer */
-    util::ByteStreamWriter returnedWriter;
+    util::MemoryByteStreamWriter returnedWriter;
 
     /* Putting same header */
     returnedWriter.write(header);

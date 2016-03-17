@@ -66,7 +66,7 @@ public:
 
 private:
     const TlvResponseHandlerInterface &mResponseHandler;
-    util::ByteStreamReader mBufferReader;
+    util::MemoryByteStreamReader mBufferReader;
 };
 }
 }

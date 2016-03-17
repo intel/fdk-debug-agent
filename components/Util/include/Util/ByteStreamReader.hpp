@@ -23,7 +23,9 @@
 #pragma once
 
 #include "Util/ByteStreamCommon.hpp"
+#include "Util/MemoryStream.hpp"
 #include "Util/Buffer.hpp"
+#include "Util/Exception.hpp"
 #include <vector>
 #include <stdexcept>
 #include <cassert>
@@ -39,13 +41,17 @@ namespace util
 class ByteStreamReader
 {
 public:
-    struct Exception : std::logic_error
+    using Exception = util::Exception<ByteStreamReader>;
+
+    struct EOSException : public Exception
     {
-        using std::logic_error::logic_error;
+        using Exception::Exception;
     };
 
-    /** @param vector: the input buffer */
-    ByteStreamReader(const util::Buffer &vector) : mIndex(0), mBuffer(vector) {}
+    /** Ownership is not transferred */
+    ByteStreamReader(InputStream &input) : mInput(input) {}
+    ByteStreamReader(const ByteStreamReader &) = delete;
+    ByteStreamReader &operator=(const ByteStreamReader &) = delete;
 
     /** Read a "simple type" value.
      *
@@ -139,33 +145,45 @@ public:
         }
     }
 
-    /** @return true if stream is fully consumed, i.e. end of stream is reached */
-    bool isEOS() const { return mIndex == mBuffer.size(); }
-
-    /** @return the underlying buffer */
-    const util::Buffer &getBuffer() const { return mBuffer; }
-
-    /** @return the current stream pointer index */
-    std::size_t getPointerOffset() { return mIndex; }
-
 private:
     template <typename T>
     void readUsingMemoryCopy(T &value)
     {
         std::size_t elementSize = sizeof(T);
-        if (mIndex + elementSize > mBuffer.size()) {
-            /* Setting index to buffer size, in this way subsequent calls to isEOS() will return
-            * true */
-            mIndex = mBuffer.size();
-            throw Exception("Read failed: end of stream reached");
+
+        try {
+            auto read = mInput.read(reinterpret_cast<StreamByte *>(&value), elementSize);
+            if (read < elementSize) {
+                throw EOSException("Read failed: end of stream reached");
+            }
+        } catch (InputStream::Exception &e) {
+            throw Exception("Read failed: " + std::string(e.what()));
         }
-        T *valuePtr = reinterpret_cast<T *>(&mBuffer[mIndex]);
-        value = *valuePtr;
-        mIndex += elementSize;
     }
 
-    std::size_t mIndex;
-    util::Buffer mBuffer;
+    InputStream &mInput;
+};
+
+class MemoryByteStreamReader : public ByteStreamReader
+{
+public:
+    MemoryByteStreamReader(const Buffer &buffer)
+        : ByteStreamReader(mInput), mBuffer(buffer), mInput(buffer)
+    {
+    }
+
+    /** @return true if stream is fully consumed, i.e. end of stream is reached */
+    bool isEOS() const { return mInput.isEOS(); }
+
+    /** @return the underlying buffer */
+    const Buffer &getBuffer() const { return mBuffer; }
+
+    /** @return the current stream pointer index */
+    std::size_t getPointerOffset() { return mInput.getPointerOffset(); }
+
+private:
+    const Buffer &mBuffer;
+    MemoryInputStream mInput;
 };
 }
 }

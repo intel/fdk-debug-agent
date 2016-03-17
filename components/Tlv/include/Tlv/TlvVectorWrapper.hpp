@@ -50,7 +50,7 @@ public:
     {
         mValues.clear();
         try {
-            util::ByteStreamReader reader(binarySource);
+            util::MemoryByteStreamReader reader(binarySource);
             while (!reader.isEOS()) {
                 ValueType value;
                 reader.read(value);

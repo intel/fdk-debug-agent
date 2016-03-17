@@ -265,7 +265,7 @@ void Logger::logParameterIoctl(Direction direction, const driver::IoctlFwLogsSta
                                driver::IoctlFwLogsState &outputFwParams)
 {
     /* Creating the body payload using the IoctlFwLogsState type */
-    util::ByteStreamWriter bodyPayloadWriter;
+    util::MemoryByteStreamWriter bodyPayloadWriter;
     bodyPayloadWriter.write(inputFwParams);
 
     /* Creating the TinySet/Get ioctl buffer */
@@ -295,7 +295,7 @@ void Logger::logParameterIoctl(Direction direction, const driver::IoctlFwLogsSta
         }
 
         /* Reading IoctlFwLogsState structure from body payload */
-        util::ByteStreamReader reader(bodyPayloadBuffer);
+        util::MemoryByteStreamReader reader(bodyPayloadBuffer);
         reader.read(outputFwParams);
 
         if (!reader.isEOS()) {

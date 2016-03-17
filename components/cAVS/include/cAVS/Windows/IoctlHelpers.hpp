@@ -89,7 +89,7 @@ public:
      */
     static std::pair<NTSTATUS, util::Buffer> fromBigCmdBodyBuffer(const util::Buffer &bodyBuffer)
     {
-        util::ByteStreamReader reader(bodyBuffer);
+        util::MemoryByteStreamReader reader(bodyBuffer);
         return fromBodyBuffer(reader);
     }
 
@@ -111,7 +111,7 @@ public:
         util::Buffer bodyBuffer;
         std::tie(headerBuffer, bodyBuffer) = toBigCmdBuffers(featureID, parameterID, bodyPayload);
 
-        util::ByteStreamWriter writer;
+        util::MemoryByteStreamWriter writer;
         writer.writeRawBuffer(headerBuffer);
         writer.writeRawBuffer(bodyBuffer);
         return writer.getBuffer();
@@ -125,7 +125,7 @@ public:
      */
     static std::pair<NTSTATUS, util::Buffer> fromTinyCmdBuffer(const util::Buffer &buffer)
     {
-        util::ByteStreamReader reader(buffer);
+        util::MemoryByteStreamReader reader(buffer);
         fromHeaderBuffer(reader);
         return fromBodyBuffer(reader);
     }
@@ -138,7 +138,7 @@ private:
     {
         driver::Intc_App_Cmd_Header header(featureID, parameterID, bodySize);
 
-        util::ByteStreamWriter writer;
+        util::MemoryByteStreamWriter writer;
         writer.write(header);
         return writer.getBuffer();
     }
@@ -155,7 +155,7 @@ private:
     {
         driver::Intc_App_Cmd_Body body;
 
-        util::ByteStreamWriter writer;
+        util::MemoryByteStreamWriter writer;
         writer.write(body);
         writer.writeRawBuffer(bodyPayload);
 
@@ -163,7 +163,7 @@ private:
     }
 
     /** Deserialize a body */
-    static std::pair<NTSTATUS, util::Buffer> fromBodyBuffer(util::ByteStreamReader &reader)
+    static std::pair<NTSTATUS, util::Buffer> fromBodyBuffer(util::MemoryByteStreamReader &reader)
     {
         driver::Intc_App_Cmd_Body body;
         reader.read(body);

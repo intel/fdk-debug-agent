@@ -44,7 +44,7 @@ util::Buffer ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleI
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, moduleParamId,
                                            static_cast<uint32_t>(suppliedOutputBuffer.size()));
 
-    util::ByteStreamWriter bodyPayloadWriter;
+    util::MemoryByteStreamWriter bodyPayloadWriter;
     bodyPayloadWriter.write(moduleParam);
     bodyPayloadWriter.writeRawBuffer(suppliedOutputBuffer);
 
@@ -78,7 +78,7 @@ util::Buffer ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleI
         }
 
         /* Reading driver IoctlFwModuleParam structure from body payload */
-        util::ByteStreamReader reader(bodyPayloadBuffer);
+        util::MemoryByteStreamReader reader(bodyPayloadBuffer);
         reader.read(moduleParam);
 
         /* Checking firwmare status */

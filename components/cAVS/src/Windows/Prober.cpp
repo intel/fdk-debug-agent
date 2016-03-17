@@ -235,7 +235,7 @@ void Prober::ioctl(typename T::Data &inout)
     using std::to_string;
 
     /* Creating the body payload using the IoctlFwLogsState type */
-    util::ByteStreamWriter bodyPayloadWriter;
+    util::MemoryByteStreamWriter bodyPayloadWriter;
     bodyPayloadWriter.write(inout);
 
     /* Creating the TinySet/Get ioctl buffer */
@@ -260,7 +260,7 @@ void Prober::ioctl(typename T::Data &inout)
 
     try {
         /* Reading structure from body payload */
-        util::ByteStreamReader reader(bodyPayloadBuffer);
+        util::MemoryByteStreamReader reader(bodyPayloadBuffer);
         reader.read(inout);
 
         if (!reader.isEOS()) {

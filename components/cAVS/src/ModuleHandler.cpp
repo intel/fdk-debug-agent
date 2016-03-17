@@ -39,7 +39,7 @@ void ModuleHandler::getFwParameterValue(uint16_t moduleId, uint16_t instanceId,
 {
     util::Buffer buffer = configGet(moduleId, instanceId, moduleParamId, fwParameterSize);
 
-    util::ByteStreamReader reader(buffer);
+    util::MemoryByteStreamReader reader(buffer);
     try {
         /* Reading parameter */
         reader.read(result);

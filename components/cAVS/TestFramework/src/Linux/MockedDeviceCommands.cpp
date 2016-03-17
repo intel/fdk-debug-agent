@@ -68,7 +68,7 @@ void MockedDeviceCommands::addGetPipelineListCommand(
     dsp_fw::PipelinesListInfo pipelinesListInfo;
     pipelinesListInfo.ppl_id = pipelineIds;
 
-    util::ByteStreamWriter writer;
+    util::MemoryByteStreamWriter writer;
     writer.write(pipelinesListInfo);
 
     util::Buffer returnedOutput(parameterSize, 0xFF);
@@ -88,7 +88,7 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(dsp_fw::IxcStatus returned
     auto paramId =
         ModuleHandler::getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
 
-    util::ByteStreamWriter writer;
+    util::MemoryByteStreamWriter writer;
     writer.write(props);
 
     util::Buffer returnedOutput(ModuleHandler::maxParameterPayloadSize, 0xFF);
@@ -107,7 +107,7 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(dsp_fw::IxcStatus returne
     auto paramId =
         ModuleHandler::getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
 
-    util::ByteStreamWriter writer;
+    util::MemoryByteStreamWriter writer;
     writer.write(info);
 
     util::Buffer returnedOutput(ModuleHandler::maxParameterPayloadSize, 0xFF);
@@ -128,7 +128,7 @@ void MockedDeviceCommands::addGetGatewaysCommand(dsp_fw::IxcStatus returnedFirmw
     dsp_fw::GatewaysInfo gatewaysInfo;
     gatewaysInfo.gateways = gateways;
 
-    util::ByteStreamWriter writer;
+    util::MemoryByteStreamWriter writer;
     writer.write(gatewaysInfo);
 
     util::Buffer returnedOutput(parameterSize, 0xFF);
@@ -144,7 +144,7 @@ void MockedDeviceCommands::addGetModuleInstancePropsCommand(
     dsp_fw::IxcStatus returnedFirmwareStatus, uint16_t moduleId, uint16_t instanceId,
     const dsp_fw::ModuleInstanceProps &props)
 {
-    util::ByteStreamWriter writer;
+    util::MemoryByteStreamWriter writer;
     writer.write(props);
 
     util::Buffer returnedOutput(ModuleHandler::maxParameterPayloadSize, 0xFF);
@@ -164,7 +164,7 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(
     dsp_fw::ModulesInfo modulesInfo;
     modulesInfo.module_info = returnedEntries;
 
-    util::ByteStreamWriter writer;
+    util::MemoryByteStreamWriter writer;
     writer.write(modulesInfo);
 
     util::Buffer returnedOutput(moduleInfoSize, 0xFF);
@@ -196,7 +196,7 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus return
                                                 parameterPayload.size(), parameterPayload);
 
     /* write parameter access structure to file to send the getParameter command*/
-    util::ByteStreamWriter messageWriter;
+    util::MemoryByteStreamWriter messageWriter;
     messageWriter.write(largeConfigAccess);
     util::Buffer sentMessage = messageWriter.getBuffer();
 
@@ -217,7 +217,7 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus return
                                             instanceId, parameterId.getValue());
 
     /* write parameter access structure to file to send the getParameter command*/
-    util::ByteStreamWriter messageWriter;
+    util::MemoryByteStreamWriter messageWriter;
     messageWriter.write(configAccess);
     util::Buffer sentMessage = messageWriter.getBuffer();
 
@@ -240,7 +240,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus return
                                                 instanceId, parameterId.getValue(), parameterSize);
 
     /* write parameter access structure to file to send the getParameter command*/
-    util::ByteStreamWriter messageWriter;
+    util::MemoryByteStreamWriter messageWriter;
     messageWriter.write(largeConfigAccess);
 
     util::Buffer sentMessage = messageWriter.getBuffer();
@@ -251,7 +251,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus return
 
     /* Format the expected buffer to be read from the written command, i.e.
      * the parameter access structure appended with the parameter payload. */
-    util::ByteStreamWriter returnedReadMsgWriter = {};
+    util::MemoryByteStreamWriter returnedReadMsgWriter = {};
     if (driver::requireTunneledAccess(moduleId, parameterId.getValue())) {
         driver::TunneledHeader tunneledAccess = {parameterId.getValue(),
                                                  (uint32_t)parameterPayload.size()};

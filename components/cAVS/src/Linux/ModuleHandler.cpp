@@ -48,7 +48,7 @@ util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
                                            instanceId, parameterId.getValue(), parameterSize);
 
     /* Creating debugfs command buffers. */
-    util::ByteStreamWriter messageWriter;
+    util::MemoryByteStreamWriter messageWriter;
     messageWriter.write(configAccess);
     util::Buffer sentMessage = messageWriter.getBuffer();
 
@@ -77,7 +77,7 @@ util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
     mDevice.debugfsClose();
 
     /* Reading the answer using the header of the corresponding replied debugfs command. */
-    util::ByteStreamReader messageReader(receivedMessage);
+    util::MemoryByteStreamReader messageReader(receivedMessage);
     messageReader.read(configAccess);
 
     const auto &payloadBegin = messageReader.getBuffer().begin() + messageReader.getPointerOffset();
@@ -94,7 +94,7 @@ void ModuleHandler::configSet(uint16_t moduleId, uint16_t instanceId,
     }
 
     /* Creating the header and body payload using the Large or Module ConfigAccess type */
-    util::ByteStreamWriter messageWriter;
+    util::MemoryByteStreamWriter messageWriter;
     if (parameterId.getValue() == dsp_fw::BaseModuleParams::MOD_INST_ENABLE) {
         driver::ModuleConfigAccess configAccess(driver::ModuleConfigAccess::CmdType::Set, moduleId,
                                                 instanceId, parameterId.getValue());

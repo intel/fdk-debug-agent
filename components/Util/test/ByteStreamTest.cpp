@@ -66,7 +66,7 @@ const Buffer expectedBuffer = {
 
 TEST_CASE("Byte stream writer")
 {
-    ByteStreamWriter writer;
+    MemoryByteStreamWriter writer;
 
     writer.write(static_cast<uint8_t>(1));
     writer.write(static_cast<uint32_t>(2));
@@ -88,7 +88,7 @@ TEST_CASE("Byte stream writer")
 
 TEST_CASE("Byte stream reader")
 {
-    ByteStreamReader reader(expectedBuffer);
+    MemoryByteStreamReader reader(expectedBuffer);
 
     uint8_t v1;
     reader.read(v1);
@@ -111,11 +111,11 @@ TEST_CASE("Byte stream reader : end of stream")
 {
     Buffer v{1}; /* Adding only one byte */
 
-    ByteStreamReader reader(v);
+    MemoryByteStreamReader reader(v);
 
     /* Checking end of stream exception */
     uint16_t myInt;
-    CHECK_THROWS_AS(reader.read(myInt), ByteStreamReader::Exception);
+    CHECK_THROWS_AS(reader.read(myInt), MemoryByteStreamReader::Exception);
 
     /* Checking that subsequent calls to isEOS() returns true */
     CHECK(reader.isEOS());
@@ -145,7 +145,7 @@ TEST_CASE("Byte stream reader : enums")
     };
     static_assert(sizeof(Enum32) == 4, "Wrong Enum32 size");
 
-    ByteStreamWriter writer;
+    MemoryByteStreamWriter writer;
     writer.write(Enum8::val1);
     writer.write(Enum16::val2);
     writer.write(Enum32::val3);
@@ -158,7 +158,7 @@ TEST_CASE("Byte stream reader : enums")
     Enum16 enum16Value;
     Enum32 enum32Value;
 
-    ByteStreamReader reader(writer.getBuffer());
+    MemoryByteStreamReader reader(writer.getBuffer());
     reader.read(enum8Value);
     reader.read(enum16Value);
     reader.read(enum32Value);
@@ -202,12 +202,12 @@ TEST_CASE("Byte Stream reader/writer: arrays")
     };
     // clang-format on
 
-    ByteStreamWriter writer;
+    MemoryByteStreamWriter writer;
     writer.write(simpleArray);
     writer.write(structArray);
     writer.write(stdArray);
 
-    ByteStreamReader reader(writer.getBuffer());
+    MemoryByteStreamReader reader(writer.getBuffer());
 
     for (const auto expected : simpleArray) {
         Buffer::value_type back;
