@@ -464,6 +464,76 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
     checkUrlMap(client, systemUrlMap);
 }
 
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
+{
+    /* Setting the test vector
+    * ----------------------- */
+
+    {
+        linux::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+        commands.addSetCorePowerCommand(true, 0, false);
+        commands.addSetCorePowerCommand(true, 1, false);
+        commands.addSetCorePowerCommand(true, 0, true);
+        commands.addSetCorePowerCommand(true, 1, true);
+
+        MockedControlDeviceCommands controlCommands(*controlDevice);
+
+        /* 1: Get log parameter, will return
+        * - isStarted : false  (Up to the logger that does not start yet the compress devices
+        * - level: critical (Up to the control device that get the level using ctl mixer)
+        * - output: Sram (not used)
+        */
+        controlCommands.addGetLogLevelCommand(true, mixer_ctl::LogPriority::Critical);
+
+        /* 2: Set log parameter to
+        * - isStarted : true
+        * - level: verbose
+        * - output: sram
+        */
+        controlCommands.addSetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
+
+        /* 3: Get log parameter , will return
+        * - isStarted : true
+        * - level: verbose
+        * - output: sram
+        */
+        controlCommands.addGetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
+    }
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* 1: Getting log parameters*/
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("logservice_getparam_stopped_init_values"))));
+
+    /* 2: Setting log parameters ("1;Verbose;SRAM") */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("logservice_setparam_start")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    /* 3: Getting log parameters again */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("logservice_getparam_started"))));
+}
+
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice")
 {
     /* Setting the test vector
@@ -471,11 +541,14 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice")
     {
         linux::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
-
         commands.addSetCorePowerCommand(true, 0, false);
         commands.addSetCorePowerCommand(true, 1, false);
         commands.addSetCorePowerCommand(true, 0, true);
         commands.addSetCorePowerCommand(true, 1, true);
+
+        MockedControlDeviceCommands controlCommands(*controlDevice);
+        controlCommands.addGetLogLevelCommand(true, mixer_ctl::LogPriority::Critical);
+        controlCommands.addSetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
     }
 
     /* Now using the mocked device
@@ -537,11 +610,13 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
     {
         linux::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
-
         commands.addSetCorePowerCommand(true, 0, false);
         commands.addSetCorePowerCommand(true, 1, false);
         commands.addSetCorePowerCommand(true, 0, true);
         commands.addSetCorePowerCommand(true, 1, true);
+
+        MockedControlDeviceCommands controlCommands(*controlDevice);
+        controlCommands.addSetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
     }
 
     /* Now using the mocked device
