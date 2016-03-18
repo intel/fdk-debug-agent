@@ -133,4 +133,19 @@ if (CMAKE_SYSTEM_NAME MATCHES Linux)
 
     find_library(TINYCOMPRESS_LIBRARY NAMES libtinycompress.so REQUIRED)
     target_link_libraries(cAVS ${TINYCOMPRESS_LIBRARY})
+
+    if (MIXER_CONTROL_LIB_TO_USE MATCHES "Tinyalsa")
+        find_path(TINYALSA_INCLUDE_DIR NAMES tinyalsa/asoundlib.h REQUIRED)
+        # Why do I need to filter the tinyalsa include dir?
+        # Tinyalsa is exposing 2 include directories:
+        #   -"sound" directory with a asound.h file
+        #   -"tinyalsa" directory with asoundlib.h file.
+        # asound.h file is conflicting with libasound asound.h file.
+        # As we do not need to include this file, we limit the inclusion to tinyalsa subfolder to
+        # avoid conflict.
+        target_include_directories(cAVS PUBLIC "${TINYALSA_INCLUDE_DIR}/tinyalsa")
+
+        find_library(TINYALSA_LIBRARY NAMES tinyalsa REQUIRED)
+        target_link_libraries(cAVS ${TINYALSA_LIBRARY})
+    endif ()
 endif ()
