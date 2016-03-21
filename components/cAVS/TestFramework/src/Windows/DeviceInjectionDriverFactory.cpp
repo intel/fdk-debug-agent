@@ -34,11 +34,11 @@ namespace windows
 /** Check that all event handles (injection/extraction) are valid */
 bool checkProbeEventHandles(const Prober::EventHandles &handles)
 {
-    if (handles.extractionHandle.get() == nullptr) {
+    if (handles.extractionHandle->handle() == nullptr) {
         return false;
     }
     for (auto &handle : handles.injectionHandles) {
-        if (handle.get() == nullptr) {
+        if (handle->handle() == nullptr) {
             return false;
         }
     }

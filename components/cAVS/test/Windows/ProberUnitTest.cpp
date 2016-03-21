@@ -37,7 +37,7 @@ using Me = windows::Prober;
 
 TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
 {
-    windows::Prober::EventHandles probeEvents;
+    auto &&probeEvents = windows::Prober::SystemEventHandlesFactory::createHandles();
     MockedDeviceCommands commands(device);
     Me prober(device, probeEvents);
 
@@ -83,7 +83,7 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
 }
 TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
 {
-    windows::Prober::EventHandles probeEvents;
+    auto &&probeEvents = windows::Prober::SystemEventHandlesFactory::createHandles();
     MockedDeviceCommands commands(device);
     Me prober(device, probeEvents);
 

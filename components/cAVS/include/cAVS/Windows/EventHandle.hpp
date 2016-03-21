@@ -24,6 +24,7 @@
 
 #include "cAVS/Windows/WindowsTypes.hpp"
 #include "cAVS/Windows/LastError.hpp"
+#include "Util/Exception.hpp"
 #include <stdexcept>
 #include <iostream>
 
@@ -38,12 +39,21 @@ namespace windows
 class EventHandle
 {
 public:
-    class Exception : public std::runtime_error
-    {
-        using std::runtime_error::runtime_error;
-    };
+    using Exception = util::Exception<EventHandle>;
 
-    EventHandle()
+    virtual ~EventHandle() {}
+    EventHandle() = default;
+    EventHandle(const EventHandle &) = delete;
+    EventHandle &operator=(const EventHandle &) = delete;
+
+    /** @returns the underlying windows event handle */
+    virtual HANDLE handle() const = 0;
+};
+
+class SystemEventHandle : public EventHandle
+{
+public:
+    SystemEventHandle()
     {
         HANDLE event = CreateEventA(NULL,  /* default security attributes */
                                     FALSE, /* auto-reset event */
@@ -56,13 +66,7 @@ public:
         mEventHandle = event;
     }
 
-    EventHandle(EventHandle &&other)
-    {
-        mEventHandle = other.mEventHandle;
-        other.mEventHandle = NULL;
-    }
-
-    ~EventHandle()
+    ~SystemEventHandle()
     {
         if (mEventHandle != NULL) {
             /* According to the documentation, "CloseHandle" returns a nonzero value in success
@@ -74,12 +78,9 @@ public:
         }
     }
 
-    HANDLE get() const { return mEventHandle; }
+    HANDLE handle() const override { return mEventHandle; }
 
 private:
-    EventHandle(const EventHandle &) = delete;
-    EventHandle &operator=(const EventHandle &) = delete;
-
     HANDLE mEventHandle;
 };
 }

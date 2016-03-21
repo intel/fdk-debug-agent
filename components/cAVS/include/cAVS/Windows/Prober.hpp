@@ -30,6 +30,7 @@
 #include "cAVS/Windows/DriverTypes.hpp"
 
 #include <array>
+#include <memory>
 
 namespace debug_agent
 {
@@ -41,13 +42,35 @@ namespace windows
 class Prober : public cavs::Prober
 {
 public:
-    using EventArray = std::array<EventHandle, driver::maxProbes>;
-
+    /** Contains all probe event handles */
     struct EventHandles
     {
-        EventHandle extractionHandle;
-        EventArray injectionHandles;
+        using HandlePtr = std::unique_ptr<EventHandle>;
+        using HandlePtrArray = std::array<HandlePtr, driver::maxProbes>;
+
+        HandlePtr extractionHandle;
+        HandlePtrArray injectionHandles;
     };
+
+    /** This factory creates event handles using the type provided by the template parameter */
+    template <typename HandleT>
+    struct EventHandlesFactory
+    {
+
+        static EventHandles createHandles()
+        {
+            EventHandles handles;
+            handles.extractionHandle = makeHandle();
+            for (auto &ptr : handles.injectionHandles) {
+                ptr = makeHandle();
+            }
+            return handles;
+        }
+
+        static EventHandles::HandlePtr makeHandle() { return std::make_unique<HandleT>(); }
+    };
+
+    using SystemEventHandlesFactory = EventHandlesFactory<SystemEventHandle>;
 
     /** Create a driver probe config from os-agnostic config and event handles */
     static driver::ProbePointConfiguration toWindows(
