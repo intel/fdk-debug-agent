@@ -1,0 +1,39 @@
+From 9ace5982ed23863f53f9348f4f4c69cf6f78f785 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fran=C3=A7ois=20Gaffie?= <francois.gaffie@intel.com>
+Date: Wed, 2 Mar 2016 16:55:29 +0100
+Subject: [PATCH - tinycompress - brace issue 1/1] tinycompress: fix
+ compilation error: missing brace issue
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: François Gaffie <francois.gaffie@intel.com>
+
+diff --git a/include/tinycompress/tinycompress.h b/include/tinycompress/tinycompress.h
+index 68626a4..d35801b 100644
+--- a/include/tinycompress/tinycompress.h
++++ b/include/tinycompress/tinycompress.h
+@@ -273,4 +273,7 @@ int is_compress_ready(struct compress *compress);
+ /* Returns a human readable reason for the last error */
+ const char *compress_get_error(struct compress *compress);
+ 
++#if defined(__cplusplus)
++}
++#endif
+ #endif
+diff --git a/include/tinycompress/tinymp3.h b/include/tinycompress/tinymp3.h
+index a709c39..7015320 100644
+--- a/include/tinycompress/tinymp3.h
++++ b/include/tinycompress/tinymp3.h
+@@ -102,5 +102,7 @@ enum mp3_stereo_mode {
+ 	DUAL = 0x02,
+ 	MONO = 0x03
+ };
+-
++#if defined(__cplusplus)
++}
++#endif
+ #endif
+-- 
+2.5.0
+
