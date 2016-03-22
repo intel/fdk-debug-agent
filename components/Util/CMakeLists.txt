@@ -33,6 +33,7 @@ set(INCS
     include/Util/EnumHelper.hpp
     include/Util/Exception.hpp
     include/Util/FileHelper.hpp
+    include/Util/Iterator.hpp
     include/Util/Locker.hpp
     include/Util/PointerHelper.hpp
     include/Util/RingBufferReader.hpp
