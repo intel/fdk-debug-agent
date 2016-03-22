@@ -39,42 +39,35 @@ SCENARIO("Normal operation", "[ring-buffer]")
     };
     Buffer out;
     RingBufferReader ringBuff(buff.data(), buff.size(), getProdPos);
-    WHEN ("Reading a size bigger than the buffer") {
-        THEN ("Read should fail by throwing") {
-            CHECK_THROWS_AS(ringBuff.read(buff.size() + 1, out), RingBufferReader::Exception);
-            AND_THEN ("Out buffer should be left unmodified") {
-                CHECK(out.empty());
-            }
-        }
-    }
 
     GIVEN ("A starving ring buffer") {
         positions = {0};
-        THEN ("Read should fail by returning false") {
-            CHECK_FALSE(ringBuff.read(1, out));
+        THEN ("Read should succeed") {
+            CHECK_NOTHROW(ringBuff.readAvailable(out));
             AND_THEN ("Out buffer should be left unmodified") {
                 CHECK(out.empty());
             }
         }
     }
-    WHEN ("Reading 1 bytes") {
-        positions = {buff.size(), buff.size()};
+    WHEN ("3 bytes are available") {
+        positions = {3};
         THEN ("Producer positions should have been updated") {
-            CHECK(ringBuff.read(1, out));
-            CHECK(out == Buffer{'a'});
+            CHECK_NOTHROW(ringBuff.readAvailable(out));
+            CHECK(out == (Buffer{'a', 'b', 'c'}));
             CHECK(positions.size() == 0);
-            WHEN ("Reading all the buffer") {
-                positions = {buff.size()};
-                CHECK(ringBuff.read(buff.size() - 1, out));
-                CHECK(out == buff);
+            WHEN ("3 bytes more are available") {
+                positions = {6};
+                CHECK_NOTHROW(ringBuff.readAvailable(out));
+                CHECK(out == (Buffer{'a', 'b', 'c', 'd', 'e', 'a'}));
+                CHECK(positions.size() == 0);
             }
         }
     }
 
     GIVEN ("Overflow condition detection") {
-        positions = {buff.size(), buff.size() + 1};
+        positions = {buff.size() + 1};
         THEN ("Read should fail by returning throwing") {
-            CHECK_THROWS_AS(ringBuff.read(buff.size(), out), RingBufferReader::Exception);
+            CHECK_THROWS_AS(ringBuff.readAvailable(out), RingBufferReader::Exception);
             AND_THEN ("Out buffer should be left unmodified") {
                 CHECK(out.empty());
             }
@@ -85,17 +78,14 @@ SCENARIO("Normal operation", "[ring-buffer]")
         struct Test
         {
             std::string name;
-            size_t sizeToRead;
-            size_t initialPos;
-            size_t postReadPos;
+            size_t position;
             std::string result;
         };
         const Test tests[] = {
-            {"Read first byte", 1, 1, 1, "a"},
-            {"Read the rest", buff.size() - 1, buff.size(), buff.size(), "bcde"},
-            {"Buffer loop", 2, buff.size() + 2, buff.size() + 2, "ab"},
-            {"Read over buffer end", buff.size(), buff.size() * 2 + 2, buff.size() * 2 + 2,
-             "cdeab"},
+            {"Read first byte", 1, "a"},
+            {"Read the rest", buff.size(), "bcde"},
+            {"Buffer loop", buff.size() + 2, "ab"},
+            {"Read over buffer end", buff.size() * 2 + 2, "cdeab"},
         };
 
         for (auto test : tests) {
@@ -104,9 +94,9 @@ SCENARIO("Normal operation", "[ring-buffer]")
 
             Buffer expectedBuff = out;
             expectedBuff.insert(end(expectedBuff), begin(test.result), end(test.result));
-            positions = {test.initialPos, test.postReadPos};
+            positions = {test.position};
 
-            CHECK(ringBuff.read(test.sizeToRead, out));
+            CHECK_NOTHROW(ringBuff.readAvailable(out));
             INFO("Expected insertion of \"" + test.result + '"');
             CHECK(out == expectedBuff);
             CHECK(positions.empty());

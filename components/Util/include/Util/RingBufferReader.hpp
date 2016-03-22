@@ -90,64 +90,41 @@ public:
 
     size_t getSize() const { return mSize; }
 
-    /** Read the exact given size values and append it to the buffer.
-     * If the ringBuffer does not contain enouth data, the buffer is not modified.
-     * If a ringbuffer overflow is detected,
+    /** Read available bytes and append them to the buffer.
      *
-     * @param[in] size The size to read in the ring buffer.
      * @param[out] buffer Read data will be copied in the end of this buffer on success.
      *                    Left unmodified on failure.
-     * @return true if all size values could be read,
-     *         false if the ring buffer is not filled enough.
-     * @throw Exception if an unrecoverable error happen such as:
-     *                  - query a size bigger than the buffer size
-     *                  - an overflow happened. Ie producerPos - consumerPos > size
+     * @throw Exception if an unrecoverable error happen such as an overflow happened.
+     *                  Ie producerPos - consumerPos > size
      */
-    bool read(size_t size, Buffer &buffer)
+    void readAvailable(Buffer &buffer)
     {
-        if (size > mSize) {
-            using std::to_string;
-            throw Exception("Can not extract " + to_string(size) + " bytes of a buffer of " +
-                            to_string(mSize) + "bytes.");
+        std::size_t producerPosition = mGetProducerLinearPosition();
+        if (producerPosition < mConsumerPosition) {
+            throw Exception("Driver has returned a non linear position: " +
+                            std::to_string(producerPosition));
         }
 
-        // Check that the data queried is available
-        LinearPosition futureConsumerPosition = mConsumerPosition + size;
-        if (mProducerPosition < futureConsumerPosition) {
-            // Seems that their is not enouth data
-            // Update producer position and retest to make sure
-            if (updateProducerPosition() < futureConsumerPosition) {
-                return false; // not enough data available
+        std::size_t available = producerPosition - mConsumerPosition;
+        if (available > 0) {
+
+            if (available > mSize) {
+                throw Exception("Producer has written over consumer position.");
             }
-        }
-        // Get the required data
-        unsafeCopy(size, buffer);
 
-        // Check that the producer has not overwritten read interval
-        if (updateProducerPosition() - mConsumerPosition > mSize) {
-            // Rollback buffer
-            buffer.erase(buffer.end() - size, buffer.end());
-            throw Exception("Producer has written over consumer position.");
-        }
+            // Get the required data
+            unsafeCopy(available, buffer);
 
-        // Read succeeded, commit changes
-        mConsumerPosition += size;
-        return true;
+            // Read succeeded, commit changes
+            mConsumerPosition += available;
+        }
     }
-
-    /** @return the data available in the ring buffer. */
-    size_t inAvail() { return updateProducerPosition() - mConsumerPosition; }
 
 private:
     const Sample *getConsumerPosition() const { return begin() + getConsumerOffset(); }
     size_t getConsumerOffset() const { return mConsumerPosition % mSize; }
     const Sample *begin() const { return mStart; }
     const Sample *end() const { return mStart + mSize; }
-
-    LinearPosition updateProducerPosition()
-    {
-        return mProducerPosition = mGetProducerLinearPosition();
-    }
 
     void unsafeCopy(size_t size, Buffer &buffer) const
     {
