@@ -25,8 +25,10 @@
 #include "cAVS/Windows/WindowsTypes.hpp"
 #include "cAVS/Windows/LastError.hpp"
 #include "Util/Exception.hpp"
+#include "Util/AssertAlways.hpp"
 #include <stdexcept>
 #include <iostream>
+#include <atomic>
 
 namespace debug_agent
 {
@@ -35,7 +37,6 @@ namespace cavs
 namespace windows
 {
 
-/** Wrap a windows event handle*/
 class EventHandle
 {
 public:
@@ -48,8 +49,18 @@ public:
 
     /** @returns the underlying windows event handle */
     virtual HANDLE handle() const = 0;
+
+    /** Threadsafe: Will force an exit of wait(). */
+    virtual void stopWait() = 0;
+
+    /** Wait for the provided handle to be notified.
+    * @return true if the handle was notified.
+    *         false if the wait was interrupted by a call to stopWait()
+    */
+    virtual bool wait() = 0;
 };
 
+/** Wrap a windows event handle*/
 class SystemEventHandle : public EventHandle
 {
 public:
@@ -80,8 +91,34 @@ public:
 
     HANDLE handle() const override { return mEventHandle; }
 
+    void stopWait() override
+    {
+        mStopped = true;
+        SetEvent(mEventHandle);
+    }
+
+    bool wait() override
+    {
+        // Wait for any handle to be notified
+        auto status = WaitForSingleObject(mEventHandle, INFINITE);
+
+        bool stopped = mStopped; // Did we exit due to a stop request ?
+        mStopped = false;
+
+        switch (status) {
+        case WAIT_FAILED:
+            throw Exception("Wait for handle failed: " + LastError::get());
+        case WAIT_TIMEOUT:
+            ASSERT_ALWAYS(false); // INFINITE should not timeout
+        case WAIT_OBJECT_0:
+            return not stopped;
+        };
+        throw Exception("Unsupported WaitForSingleObject return code: " + std::to_string(status));
+    }
+
 private:
     HANDLE mEventHandle;
+    std::atomic<bool> mStopped = {false};
 };
 }
 }
