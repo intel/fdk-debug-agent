@@ -32,6 +32,7 @@
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
 #include "cAVS/Windows/StubbedWppClientFactory.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
+#include "cAVS/Windows/TestEventHandle.hpp"
 #include "catch.hpp"
 #include <chrono>
 #include <thread>
@@ -705,6 +706,74 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
     CHECK_NOTHROW(delayedGetLogStreamFuture.get());
 }
 
+/**
+ * Generate a buffer filled with 20 probe extraction packets. Packet size is deduced from
+ * the index [0..20[
+ */
+Buffer generateProbeExtractionContent()
+{
+    MemoryByteStreamWriter writer;
+    for (uint32_t i = 0; i < 20; i++) {
+        dsp_fw::Packet packet{};
+        packet.probePointId = 1;
+
+        // using index as size and byte value
+        packet.data.resize(i, i);
+        writer.write(packet);
+    }
+    return writer.getBuffer();
+}
+
+/**
+ * Split a buffer into chunks.
+ * Each chunk size is deduced from a size list, using this formula:
+ * chunk_size[i] = sizeList[ i % sizeList.size() ]
+ */
+std::vector<Buffer> splitBuffer(const util::Buffer &buffer, std::vector<std::size_t> sizeList)
+{
+    std::size_t current = 0;
+    std::size_t i = 0;
+    std::vector<Buffer> buffers;
+    while (current < buffer.size()) {
+        std::size_t chunkSize = std::min(sizeList[i % sizeList.size()], buffer.size() - current);
+        buffers.emplace_back(buffer.begin() + current, buffer.begin() + current + chunkSize);
+        current += chunkSize;
+        ++i;
+    }
+    return buffers;
+}
+
+/** Simulate driver probe extraction ring buffer */
+class FakeRingBuffer
+{
+public:
+    FakeRingBuffer(std::size_t size) : mBuffer(size), mLinearOffset(0) {}
+
+    /** Write content in the ring buffer */
+    void write(const Buffer &content)
+    {
+        std::size_t arrayOffset = mLinearOffset % mBuffer.size();
+
+        ASSERT_ALWAYS(content.size() <= mBuffer.size());
+        if (arrayOffset + content.size() <= mBuffer.size()) {
+            std::copy(content.begin(), content.end(), mBuffer.begin() + arrayOffset);
+        } else {
+            std::size_t firstPartSize = mBuffer.size() - arrayOffset;
+
+            std::copy_n(content.begin(), firstPartSize, mBuffer.begin() + arrayOffset);
+            std::copy(content.begin() + firstPartSize, content.end(), mBuffer.begin());
+        }
+        mLinearOffset += content.size();
+    }
+
+    uint8_t *getBufferPtr() { return mBuffer.data(); }
+    std::size_t getBufferSize() { return mBuffer.size(); }
+
+private:
+    Buffer mBuffer;
+    uint64_t mLinearOffset;
+};
+
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases")
 {
     static const std::size_t probeCount = 8;
@@ -714,7 +783,25 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     /* Setting the test vector
      * ----------------------- */
 
-    auto &&probeEventHandles = windows::Prober::SystemEventHandlesFactory::createHandles();
+    auto probeEventHandles =
+        windows::Prober::EventHandlesFactory<windows::TestEventHandle>::createHandles();
+
+    // Getting a reference to the extraction event handle, in order to simulate driver
+    // behaviour */
+    auto &extractionHandle =
+        dynamic_cast<windows::TestEventHandle &>(*probeEventHandles.extractionHandle);
+
+    // Generating probe extraction content
+    Buffer extractedContent = generateProbeExtractionContent();
+
+    // Splitting extraction content in blocks : each block will be written to the ring buffer
+    // Block sizes are {1, 10, 20, 30} (cycling)
+    auto blocks = splitBuffer(extractedContent, {1, 10, 20, 30});
+
+    // Creating the fake ring buffer, with a size that matches the max block size, in order
+    // to test the case (written data size == ring buffer size)
+    FakeRingBuffer fakeRingBuffer(30);
+
     {
         windows::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
@@ -761,7 +848,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
                                          windows::driver::ProbeState::Allocated);
 
         // going to Get ring buffers
-        windows::driver::RingBuffersDescription rb = {{nullptr, 0}, {}};
+        windows::driver::RingBuffersDescription rb = {
+            {fakeRingBuffer.getBufferPtr(), fakeRingBuffer.getBufferSize()}, {}};
         commands.addGetRingBuffers(true, STATUS_SUCCESS, rb);
 
         // going to Active
@@ -770,7 +858,14 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         // 6 : Getting probe service parameters, checking that it is started
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
 
-        // 7 : Extract from an enabled probe -> no ioctl.
+        // 7 : Extract from an enabled probe
+
+        // Adding a "get extraction linear position" command for each block written by the driver
+        uint64_t linearPosition = 0;
+        for (auto &block : blocks) {
+            linearPosition += block.size();
+            commands.addGetExtractionRingBufferLinearPosition(true, STATUS_SUCCESS, linearPosition);
+        }
 
         // 8 : Stopping service
 
@@ -852,8 +947,18 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     auto future = std::async(std::launch::async, [&] {
         client.request("/instance/cavs.probe.endpoint/1/streaming", HttpClientSimulator::Verb::Get,
                        "", HttpClientSimulator::Status::Ok, "application/vnd.ifdk-file",
-                       HttpClientSimulator::StringContent(""));
+                       HttpClientSimulator::FileContent(dataPath + "probe_1_extraction.bin"));
     });
+
+    // simulating the driver by filling the ring buffer
+    for (auto &block : blocks) {
+        // writing the block in the ring buffer
+        fakeRingBuffer.write(block);
+
+        // notify the DBGA that the content has been written
+        // and wait until the DBGA has finished to read it
+        extractionHandle.raiseEventAndBlockUntilWait();
+    }
 
     // 8 : Stopping service
     CHECK_NOTHROW(client.request(
