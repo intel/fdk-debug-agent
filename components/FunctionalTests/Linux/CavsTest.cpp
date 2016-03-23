@@ -469,6 +469,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice")
     {
         linux::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
+
+        commands.addSetCorePowerCommand(true, 0, false);
+        commands.addSetCorePowerCommand(true, 1, false);
+        commands.addSetCorePowerCommand(true, 0, true);
+        commands.addSetCorePowerCommand(true, 1, true);
     }
 
     /* Now using the mocked device
@@ -529,6 +534,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
     {
         linux::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
+
+        commands.addSetCorePowerCommand(true, 0, false);
+        commands.addSetCorePowerCommand(true, 1, false);
+        commands.addSetCorePowerCommand(true, 0, true);
+        commands.addSetCorePowerCommand(true, 1, true);
     }
 
     /* Now using the mocked device

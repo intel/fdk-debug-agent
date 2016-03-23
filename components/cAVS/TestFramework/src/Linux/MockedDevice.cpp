@@ -79,6 +79,44 @@ void MockedDevice::addDebugfsEntryKOClose()
     mEntries.push(std::make_unique<DebugfsEntryClose>(false));
 }
 
+void MockedDevice::setCorePowerState(unsigned int coreId, bool allowedToSleep)
+{
+    checkNonFailure();
+    /* Several threads can call this method, so protecting against it.
+     *
+     * Note: although this mutex protects against concurrent calls,
+     *       no concurrent calls should happen because this leads to randomize the call order
+     *       which won't match probably the test vector.
+     */
+    std::lock_guard<std::mutex> locker(mMemberMutex);
+
+    /* Checking that the test vector is not already consumed */
+    if (consumed()) {
+        failure("Debugfs vector already consumed.");
+    }
+    DebugfsEntryPtr entryPtr(std::move(mEntries.front()));
+    const DeviceCorePowerCommand *entry = dynamic_cast<DeviceCorePowerCommand *>(entryPtr.get());
+    if (entry == nullptr) {
+        failure("Wrong debugfsRead method, expecting another command.");
+    }
+
+    if (coreId != entry->getCoreId()) {
+        failure(std::string("Wrong expected coreId. Expecting :") + std::to_string(coreId) +
+                " , having: " + std::to_string(entry->getCoreId()));
+    }
+    if (allowedToSleep != entry->allowedToSleep()) {
+        failure(std::string("Wrong expected allowedToSleep. Expecting :") +
+                std::to_string(allowedToSleep) + " , having: " +
+                std::to_string(entry->allowedToSleep()));
+    }
+    mEntries.pop();
+    mCurrentEntry++;
+
+    if (entry->isNotSuccessful()) {
+        throw Exception("error during setCorePowerState: error#MockDevice");
+    }
+}
+
 ssize_t MockedDevice::debugfsRead(util::Buffer &buffer, const ssize_t nbBytes)
 {
     checkNonFailure();

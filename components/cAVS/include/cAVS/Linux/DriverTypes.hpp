@@ -39,10 +39,33 @@ struct Exception : std::runtime_error
     using std::runtime_error::runtime_error;
 };
 
+static const std::string wakeUpCoreCmd{"wake"};
+static const std::string sleepCoreCmd{"sleep"};
 static const std::string setGetCtrl{"/sys/kernel/debug/snd_soc_skl/modules/set_get_ctrl"};
+static const std::string corePowerCtrl{"/sys/kernel/debug/snd_soc_skl/core_power"};
 
 static const uint32_t LOADABLE_MODULE_ID = 0x1000;
 static const uint32_t VENDOR_CONFIG_PARAM = 0xFF;
+
+class CorePowerCommand
+{
+public:
+    CorePowerCommand(bool isAllowedToSleep, unsigned int coreId)
+        : mCoreId(coreId), mAllowedToSleep(isAllowedToSleep)
+    {
+    }
+
+    util::Buffer getBuffer() const
+    {
+        std::string command((mAllowedToSleep ? sleepCoreCmd : wakeUpCoreCmd) + " " +
+                            std::to_string(mCoreId));
+        return {command.begin(), command.end()};
+    }
+
+private:
+    bool mAllowedToSleep;
+    unsigned int mCoreId;
+};
 
 static bool requireTunneledAccess(uint32_t moduleId, uint32_t paramId)
 {

@@ -191,6 +191,11 @@ public:
      */
     static const std::string getDeviceInfoField(const std::string &device, const std::string &field)
     {
+        size_t positionC = device.find("C");
+        if (positionC == std::string::npos) {
+            throw Exception("Invalid device name, shall have reference to Card.");
+        }
+        const std::string devicePrefix{device.substr(0, positionC)};
         int cardId = getCardId(device);
         int deviceId = getDeviceId(device);
 
@@ -200,7 +205,7 @@ public:
             suffix.clear();
         }
         const std::string deviceProcInfo{soundProcDir + soundCardPrefix + std::to_string(cardId) +
-                                         "/" + pcmDevicePrefix + std::to_string(deviceId) + suffix +
+                                         "/" + devicePrefix + std::to_string(deviceId) + suffix +
                                          "/" + infoProcEntry};
         std::ifstream infoFileStream;
         infoFileStream.exceptions(std::ifstream::failbit | std::ifstream::badbit |

@@ -36,6 +36,8 @@ namespace linux
 class SystemDevice final : public Device
 {
 public:
+    void setCorePowerState(unsigned int coreId, bool allowedToSleep) override;
+
     void debugfsOpen(const std::string &name) override;
     void debugfsClose() override;
     ssize_t debugfsWrite(const util::Buffer &bufferInput) override;

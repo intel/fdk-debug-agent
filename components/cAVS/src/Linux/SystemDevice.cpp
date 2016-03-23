@@ -21,6 +21,7 @@
  */
 
 #include "cAVS/Linux/SystemDevice.hpp"
+#include "cAVS/Linux/DriverTypes.hpp"
 
 using namespace debug_agent::util;
 using namespace std;
@@ -31,6 +32,29 @@ namespace cavs
 {
 namespace linux
 {
+
+void SystemDevice::setCorePowerState(unsigned int coreId, bool allowedToSleep)
+{
+    if (mDebugFsFile.is_open()) {
+        throw Exception("Parallel operation not permitted.");
+    }
+    driver::CorePowerCommand corePowerCmd(allowedToSleep, coreId);
+    try {
+        debugfsOpen(driver::corePowerCtrl);
+    } catch (const Device::Exception &e) {
+        throw Exception("Device returns an exception: " + std::string(e.what()));
+    }
+    try {
+        debugfsWrite(corePowerCmd.getBuffer());
+    } catch (const Device::Exception &e) {
+        debugfsClose();
+        throw Exception("Get module parameter failed to write command IPC in file: " +
+                        std::string(driver::corePowerCtrl) + ", Device returns an exception: " +
+                        std::string(e.what()));
+    }
+    debugfsClose();
+}
+
 void SystemDevice::debugfsOpen(const std::string &name)
 {
     if (mDebugFsFile.is_open()) {

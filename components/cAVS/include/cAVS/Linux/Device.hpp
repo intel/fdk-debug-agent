@@ -49,6 +49,15 @@ public:
     Device() = default;
     virtual ~Device() = default;
 
+    /** For some operation (e.g. logging), we shall ensure a core is woken up.
+     * Debug Fs provides a mean to increment a reference counter to prevent from sleeping.
+     *
+     * @param[in] coreId id of the core concerned by the operation
+     * @param[in] allowedToSleep true if incrementing the counter is requested,
+     *                           false to decrement.
+     */
+    virtual void setCorePowerState(unsigned int coreId, bool allowedToSleep) = 0;
+
     /** below are pure virtual function of Device interface */
     virtual void debugfsOpen(const std::string &name) = 0;
     virtual void debugfsClose() = 0;

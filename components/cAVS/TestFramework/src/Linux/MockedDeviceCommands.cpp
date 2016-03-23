@@ -269,6 +269,16 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus return
     /* should close the file after that */
     mDevice.addDebugfsEntryOKClose();
 }
+
+void MockedDeviceCommands::addSetCorePowerCommand(bool controlSuccess, unsigned int coreId,
+                                                  bool allowedToSleep)
+{
+    if (controlSuccess) {
+        mDevice.addDeviceCorePowerCommandOK(coreId, allowedToSleep);
+    } else {
+        mDevice.addDeviceCorePowerCommandKO(coreId, allowedToSleep);
+    }
+}
 }
 }
 }

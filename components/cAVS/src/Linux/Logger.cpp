@@ -113,7 +113,7 @@ void Logger::constructProducers()
     for (const auto &loggerInfo : loggersInfo) {
         /* @todo: if one is failing, shall we continue in degradated mode? */
         mLogProducers.push_back(
-            std::make_unique<LogProducer>(mLogEntryQueue, loggerInfo.coreId(),
+            std::make_unique<LogProducer>(mLogEntryQueue, loggerInfo.coreId(), mDevice,
                                           mCompressDeviceFactory.newCompressDevice(loggerInfo)));
     }
     if (mLogProducers.empty()) {
@@ -168,9 +168,9 @@ void Logger::LogProducer::sendCommand(CommandPtr cmd)
 }
 
 /* The constructor starts the log producer thread */
-Logger::LogProducer::LogProducer(BlockingLogQueue &queue, unsigned int coreId,
+Logger::LogProducer::LogProducer(BlockingLogQueue &queue, unsigned int coreId, Device &device,
                                  std::unique_ptr<CompressDevice> logDevice)
-    : mQueue(queue), mCoreId(coreId), mLogDevice(std::move(logDevice)),
+    : mQueue(queue), mCoreId(coreId), mLogDevice(std::move(logDevice)), mDevice(device),
       mCommandQueue(maxCommandQueueSize, commandSize)
 {
     /* No parameter to start / stop logging on linux. So, just consider that if a log device
@@ -200,16 +200,24 @@ void Logger::LogProducer::startLogDevice()
 {
     assert(mLogDevice != nullptr);
 
+    /* First wake up associated core, or at least prevent from sleeping. */
+    try {
+        mDevice.setCorePowerState(mCoreId, false);
+    } catch (const Device::Exception &e) {
+        throw Exception("Error: could not set core power: " + std::string(e.what()));
+    }
     compress::Config config(fragmentSize, nbFragments);
     try {
         mLogDevice->open(Mode::NonBlocking, Role::Capture, config);
     } catch (const CompressDevice::Exception &e) {
+        setCoreAllowedToSleep();
         throw Exception("Error opening Log Device: " + std::string(e.what()));
     }
     try {
         mLogDevice->start();
     } catch (const CompressDevice::Exception &e) {
         mLogDevice->close();
+        setCoreAllowedToSleep();
         throw Exception("Error starting Log Device: " + std::string(e.what()));
     }
 }
@@ -223,6 +231,18 @@ void Logger::LogProducer::stopLogDevice()
         std::cout << "Error stopping Log Device: " << std::string(e.what()) << std::endl;
     }
     mLogDevice->close();
+
+    /* Can decrease core wake up ref count. */
+    setCoreAllowedToSleep();
+}
+
+void Logger::LogProducer::setCoreAllowedToSleep() noexcept
+{
+    try {
+        mDevice.setCorePowerState(mCoreId, true);
+    } catch (const Device::Exception &e) {
+        std::cout << "Error: could not restore core power:" << std::string(e.what()) << std::endl;
+    }
 }
 
 void Logger::LogProducer::produceEntries()

@@ -121,6 +121,29 @@ public:
     void addDebugfsEntryKORead(const util::Buffer &returnedBuffer, const ssize_t expectedReadSize,
                                const ssize_t returnedSize);
 
+    /** Add a successful DeviceCorePowerCommand{OK|KO}Read entry into the test vector.
+     *
+     * All entries are added in an ordered way, and will be consumed in the same order
+     * when using the debugfsRead() method.
+     *
+     * @param[in] returnedBuffer the buffer were data byte is put when reading.
+     * @param[in] expectedSize the expected number of byte requested to be read that may differ of
+     *                         expected read buffer
+     * @param[in] returnedSize the returned number of bytes that will be effectively read
+     * @{
+     */
+    void addDeviceCorePowerCommandOK(unsigned int coreId, bool allowedToSleep)
+    {
+        mEntries.push(std::make_unique<DeviceCorePowerCommand>(coreId, allowedToSleep, true));
+    }
+
+    void addDeviceCorePowerCommandKO(unsigned int coreId, bool allowedToSleep)
+    {
+        mEntries.push(std::make_unique<DeviceCorePowerCommand>(coreId, allowedToSleep, false));
+    }
+
+    void setCorePowerState(unsigned int coreId, bool allowedToSleep) override;
+
     /** Moked debugfsOpen that simulates the real interface using vector entries.
      *
      * @param[in] name the filename to open
@@ -164,6 +187,21 @@ private:
 
     private:
         bool mSuccesssful; /**< vector should be successful. */
+    };
+
+    class DeviceCorePowerCommand : public DebugfsEntry
+    {
+    public:
+        DeviceCorePowerCommand(unsigned int coreId, bool allowedToSleep, bool successful)
+            : DebugfsEntry(successful), mCoreId(coreId), mAllowedToSleep(allowedToSleep)
+        {
+        }
+        bool allowedToSleep() const { return mAllowedToSleep; }
+        unsigned int getCoreId() const { return mCoreId; }
+
+    private:
+        unsigned int mCoreId;
+        bool mAllowedToSleep;
     };
 
     /** Entry DebugfsEntryOpen class is the class for debugfsOpen interface

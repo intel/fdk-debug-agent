@@ -223,6 +223,16 @@ public:
     void addGetModuleEntriesCommand(dsp_fw::IxcStatus returnedFirmwareStatus, uint32_t moduleCount,
                                     const std::vector<dsp_fw::ModuleEntry> &returnedEntries);
 
+    /** Add a set core power entries command.
+     *
+     * @param[in] controlSuccess true if the command shall be successful, false otherwise
+     * @param[in] coreId core expected to be concerned by the command
+     * @param[in] allowedToSleep true if the core is allowed to sleep, false otherwise.
+     *
+     * @throw Device::Exception
+     */
+    void addSetCorePowerCommand(bool controlSuccess, unsigned int coreId, bool allowedToSleep);
+
 private:
     MockedDeviceCommands(const MockedDeviceCommands &) = delete;
     MockedDeviceCommands &operator=(const MockedDeviceCommands &) = delete;

@@ -73,7 +73,7 @@ private:
     {
     public:
         /* The constructor starts the log producer thread */
-        LogProducer(BlockingLogQueue &queue, unsigned int coreId,
+        LogProducer(BlockingLogQueue &queue, unsigned int coreId, Device &device,
                     std::unique_ptr<CompressDevice> logDevice);
 
         /** The destructor stops (and joins) the log producer thread */
@@ -86,11 +86,14 @@ private:
         static const size_t nbFragments = 16;
 
     private:
+        /** Allow the DSP core associated with the log producer to sleep. */
+        void setCoreAllowedToSleep() noexcept;
+
         static const unsigned int maxCommandQueueSize = 10;
         static const unsigned int maxPollWaitMs = 500;
 
         /** Command to interact with LogProducer thread.
-         * Only stop supported until now, maybe used to drain, flush...
+         * Only stop supported until now, may be used to drain, flush...
          */
         enum class Command : uint32_t
         {
@@ -135,6 +138,8 @@ private:
 
         /** Logging is produced by a compress device. */
         std::unique_ptr<CompressDevice> mLogDevice;
+
+        Device &mDevice;
     };
     /** A non empty producer list garantees that we could open and start the log device.
      */

@@ -22,6 +22,7 @@
 
 #include "TestCommon/TestHelpers.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
+#include "cAVS/Linux/MockedDeviceCommands.hpp"
 #include "cAVS/Linux/MockedDeviceCatchHelper.hpp"
 #include "cAVS/Linux/StubbedCompressDeviceFactory.hpp"
 #include "cAVS/Linux/MockedCompressDeviceFactory.hpp"
@@ -36,6 +37,15 @@ using Fixture = MockedDeviceFixture;
 TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stub")
 {
     StubbedCompressDeviceFactory compressDeviceFactory;
+
+    /* Setting the test vector
+     * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    commands.addSetCorePowerCommand(true, 0, false);
+    commands.addSetCorePowerCommand(true, 1, false);
+    commands.addSetCorePowerCommand(true, 0, true);
+    commands.addSetCorePowerCommand(true, 1, true);
 
     /* Now using the stubbed compress device
      * -------------------------------------- */
@@ -66,6 +76,10 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Open Fai
 {
     /* Setting the test vector
      * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    commands.addSetCorePowerCommand(true, 0, false);
+    commands.addSetCorePowerCommand(true, 0, true);
 
     MockedCompressDeviceFactory compressDeviceFactory;
     compressDevice->addFailedCompressDeviceEntryOpen();
@@ -90,6 +104,10 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Start Fa
 {
     /* Setting the test vector
      * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    commands.addSetCorePowerCommand(true, 0, false);
+    commands.addSetCorePowerCommand(true, 0, true);
 
     MockedCompressDeviceFactory compressDeviceFactory;
 
@@ -116,6 +134,10 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stop Fai
 {
     /* Setting the test vector
      * ----------------------- */
+    MockedDeviceCommands commands(device);
+
+    commands.addSetCorePowerCommand(true, 0, false);
+    commands.addSetCorePowerCommand(true, 0, true);
 
     MockedCompressDeviceFactory compressDeviceFactory;
     compressDevice->addSuccessfulCompressDeviceEntryOpen();
