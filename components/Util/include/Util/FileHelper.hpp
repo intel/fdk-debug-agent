@@ -21,6 +21,7 @@
 */
 #pragma once
 
+#include "Util/Buffer.hpp"
 #include <fstream>
 #include <string>
 #include <stdexcept>
@@ -37,15 +38,14 @@ struct Exception : std::runtime_error
     using std::runtime_error::runtime_error;
 };
 
-/** Read file content as string */
-static std::string readAsString(const std::string &fileName)
+static util::Buffer readAsBytes(const std::string &fileName)
 {
     std::ifstream file(fileName);
     if (!file) { /* Using stream bool operator */
         throw Exception("Unable to open file: " + fileName);
     }
 
-    std::string content{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+    Buffer content{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
 
     if (file.bad()) {
         throw Exception("Error while reading file: " + fileName);
@@ -55,18 +55,32 @@ static std::string readAsString(const std::string &fileName)
 }
 
 /** Create a file from string */
-static void writeFromString(const std::string &fileName, const std::string &content)
+static void writeFromBytes(const std::string &fileName, const util::Buffer &content)
 {
-    std::ofstream file(fileName);
+    std::ofstream file(fileName, std::ios::binary);
     if (!file) { /* Using stream bool operator */
         throw Exception("Unable to create file: " + fileName);
     }
 
-    file << content;
+    file.write(reinterpret_cast<const char *>(content.data()), content.size());
 
     if (file.bad()) {
         throw Exception("Error while writing file: " + fileName);
     }
+}
+
+/** Read file content as string */
+static std::string readAsString(const std::string &fileName)
+{
+    auto buffer = readAsBytes(fileName);
+    return std::string(buffer.begin(), buffer.end());
+}
+
+/** Create a file from string */
+static void writeFromString(const std::string &fileName, const std::string &content)
+{
+    Buffer buffer(content.begin(), content.end());
+    writeFromBytes(fileName, buffer);
 }
 
 /** Remove a file */
