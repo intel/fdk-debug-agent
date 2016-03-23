@@ -121,39 +121,40 @@ std::size_t HttpClientSimulator::StringContent::getStringDiffOffset(const std::s
     return minSize;
 }
 
-void HttpClientSimulator::StringContent::checkExpected(const std::string &content) const
+void HttpClientSimulator::StringContent::checkExpected(const util::Buffer &content) const
 {
-    if (content != mExpectedContent) {
+    std::string stringContent(content.begin(), content.end());
+
+    if (stringContent != mExpectedContent) {
         /* The substring that contains difference will not exceed 15 chars */
         static const std::size_t diffLength = 15;
 
         /* Getting the index of the first different char */
-        std::size_t diffIndex = getStringDiffOffset(content, mExpectedContent);
+        std::size_t diffIndex = getStringDiffOffset(stringContent, mExpectedContent);
 
         /* "Got" content substring that contains the difference */
-        std::string substringContent = getSubStringSafe(content, diffIndex, diffLength);
+        std::string substringContent = getSubStringSafe(stringContent, diffIndex, diffLength);
 
         /* "Expected" content substring that contains the difference */
         std::string substringExpectedContent =
             getSubStringSafe(mExpectedContent, diffIndex, diffLength);
 
-        throw RequestFailureException("Wrong response content, got:\n" + content + "\nexpected: '" +
-                                      mExpectedContent + "' at index " + std::to_string(diffIndex) +
-                                      ": got substring: '" + substringContent +
-                                      "' expected substring: '" + substringExpectedContent + "'");
+        throw RequestFailureException(
+            "Wrong response content, got:\n" + stringContent + "\nexpected: '" + mExpectedContent +
+            "' at index " + std::to_string(diffIndex) + ": got substring: '" + substringContent +
+            "' expected substring: '" + substringExpectedContent + "'");
     }
 }
 
 /* File content */
-
-void HttpClientSimulator::FileContent::checkExpected(const std::string &content) const
+void HttpClientSimulator::FileContent::checkExpected(const util::Buffer &gotContent) const
 {
     try {
-        std::string expectedContent = util::file_helper::readAsString(mReferenceFile);
+        auto expectedContent = util::file_helper::readAsBytes(mReferenceFile);
 
-        if (util::StringHelper::trim(content) != util::StringHelper::trim(expectedContent)) {
+        if (gotContent != expectedContent) {
             std::string gotFile(mReferenceFile + "_got");
-            util::file_helper::writeFromString(gotFile, content);
+            util::file_helper::writeFromBytes(gotFile, gotContent);
 
             throw RequestFailureException("Wrong response content. See diff between:\n"
                                           "ref: " +
@@ -175,7 +176,7 @@ void HttpClientSimulator::request(const std::string &uri, Verb verb,
 
     HTTPRequest request(toString(verb), uri);
     HTTPResponse response;
-    std::string responseContent;
+    util::Buffer responseContent;
 
     try {
         request.setChunkedTransferEncoding(true);
@@ -191,7 +192,9 @@ void HttpClientSimulator::request(const std::string &uri, Verb verb,
         std::istream &responseStream = session.receiveResponse(response);
 
         /* Receiving the response content */
-        Poco::StreamCopier::copyToString(responseStream, responseContent);
+
+        responseContent = util::Buffer(std::istreambuf_iterator<char>(responseStream),
+                                       std::istreambuf_iterator<char>());
     } catch (NetException &e) {
         throw NetworkException(std::string("Network error: ") + e.what());
     }

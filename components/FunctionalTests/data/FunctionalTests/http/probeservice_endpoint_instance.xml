@@ -1,4 +1,4 @@
- <endpoint Id="0" Type="probe.endpoint">
+<endpoint Id="0" Type="probe.endpoint">
     <info_parameters/>
     <control_parameters/>
     <parents>

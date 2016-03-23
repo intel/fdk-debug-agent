@@ -1,4 +1,4 @@
- <endpoint_collection>
+<endpoint_collection>
     <endpoint Id="0" Type="probe.endpoint">
         <info_parameters/>
         <control_parameters/>

@@ -953,7 +953,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
             "    <ParameterBlock Name=\"State\">\n"
             "        <BooleanParameter Name=\"Started\">1</BooleanParameter>\n"
             "    </ParameterBlock>\n"
-            "</control_parameters>\n)")));
+            "</control_parameters>\n\n)")));
 
     // 3 : getting state: should be Idle
     CHECK_NOTHROW(client.request(

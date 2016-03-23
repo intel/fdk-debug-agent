@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <Util/Buffer.hpp>
 #include <string>
 #include <inttypes.h>
 #include <exception>
@@ -89,14 +90,14 @@ public:
     public:
         virtual ~Content() {}
         /** Check that the content passed as parameter is the expected one */
-        virtual void checkExpected(const std::string &content) const = 0;
+        virtual void checkExpected(const util::Buffer &content) const = 0;
     };
 
     /* Accepts any content */
     class AnyContent : public Content
     {
     public:
-        void checkExpected(const std::string & /*content*/) const override {}
+        void checkExpected(const util::Buffer & /*content*/) const override {}
     };
 
     /* Checking the http request content from a string.
@@ -112,7 +113,7 @@ public:
         {
         }
 
-        void checkExpected(const std::string &content) const override;
+        void checkExpected(const util::Buffer &content) const override;
 
     private:
         const std::string mExpectedContent;
@@ -138,7 +139,7 @@ public:
     public:
         explicit FileContent(const std::string &referenceFile) : mReferenceFile(referenceFile) {}
 
-        void checkExpected(const std::string &content) const override;
+        void checkExpected(const util::Buffer &content) const override;
 
     private:
         const std::string mReferenceFile;
