@@ -208,6 +208,19 @@ public:
     void addGetRingBuffers(bool ioctlSuccess, NTSTATUS returnedStatus,
                            const driver::RingBuffersDescription &returnedBuffers);
 
+    /** Add a get extraction ring buffer linear position command
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedStatus the returned driver status
+     * @param[in] position the position reurned by the ioctl
+     *
+     * @note: position is unused if
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedStatus) returns false
+     */
+    void addGetExtractionRingBufferLinearPosition(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                                  uint64_t position);
+
     /** Add a get pipeline list command.
      *
      * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)

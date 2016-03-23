@@ -296,6 +296,14 @@ void MockedDeviceCommands::addGetRingBuffers(bool ioctlSuccess, NTSTATUS returne
                                                       returnedStatus);
 }
 
+void MockedDeviceCommands::addGetExtractionRingBufferLinearPosition(bool ioctlSuccess,
+                                                                    NTSTATUS returnedStatus,
+                                                                    uint64_t position)
+{
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE, 3, uint64_t>(
+        position, ioctlSuccess, returnedStatus);
+}
+
 void MockedDeviceCommands::addGetPipelineListCommand(
     bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
     uint32_t maxPplCount, const std::vector<dsp_fw::PipeLineIdType> &pipelineIds)
