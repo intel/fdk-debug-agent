@@ -105,13 +105,6 @@ struct Packet
         writer.writeVector<uint32_t>(data);
         writer.write(sum());
     }
-
-    /** @return an approximation of the memory used by this instance */
-    std::size_t getMemorySize() const
-    {
-        return sizeof(probePointId) + sizeof(format) + sizeof(dspWallClockTsHw) +
-               sizeof(dspWallClockTsLw) + data.size() + sizeof(headerChecksum);
-    }
 };
 }
 }
