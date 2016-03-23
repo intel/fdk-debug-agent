@@ -23,7 +23,8 @@
 
 #include "cAVS/Windows/Prober.hpp"
 #include "cAVS/Windows/IoctlHelpers.hpp"
-
+#include "Util/AssertAlways.hpp"
+#include <functional>
 #include <string>
 #include <cstring>
 #include <map>
@@ -123,6 +124,15 @@ Prober::ProbePurpose Prober::fromWindows(const driver::ProbePurpose &from)
     throw Exception("Wrong purpose value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
 }
 
+Prober::Prober(Device &device, const EventHandles &eventHandles)
+    : mDevice(device), mEventHandles(eventHandles)
+{
+    for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {
+        mExtractionQueues.emplace_back(mQueueSize,
+                                       [](const util::Buffer &buffer) { return buffer.size(); });
+    }
+}
+
 void Prober::setState(State state)
 {
     switch (state) {
@@ -177,6 +187,7 @@ driver::ProbePointConfiguration Prober::toWindows(const cavs::Prober::SessionPro
 
 void Prober::setSessionProbes(const SessionProbes probes)
 {
+    mCachedProbeConfiguration = probes;
     ioctl<SetProbePointConfiguration>(toWindows(probes, mEventHandles));
 }
 
@@ -194,10 +205,17 @@ Prober::SessionProbes Prober::getSessionProbes()
     return result;
 }
 
+void Prober::checkProbeId(ProbeId probeId) const
+{
+    if (probeId.getValue() >= getMaxProbeCount()) {
+        throw Exception("Invalid probe index: " + std::to_string(probeId.getValue()));
+    }
+}
+
 std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(ProbeId probeIndex)
 {
-    /* TO DO */
-    return nullptr;
+    checkProbeId(probeIndex);
+    return mExtractionQueues[probeIndex.getValue()].remove();
 }
 
 bool Prober::enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer)
@@ -275,13 +293,63 @@ void Prober::ioctl(typename T::Data &inout)
     }
 }
 
+std::pair<std::set<ProbeId> /*Extract*/, std::set<ProbeId> /*Inject*/> Prober::getActiveProbes()
+    const
+{
+    std::set<ProbeId> extractionProbes;
+    std::set<ProbeId> injectionProbes;
+
+    ProbeId::RawType probeIndex{0};
+    for (auto &probe : mCachedProbeConfiguration) {
+        if (probe.enabled) {
+            ASSERT_ALWAYS(probePurposeHelper().isValid(probe.purpose));
+            if (probe.purpose == ProbePurpose::Extract ||
+                probe.purpose == ProbePurpose::InjectReextract) {
+                extractionProbes.insert(ProbeId{probeIndex});
+            }
+            if (probe.purpose == ProbePurpose::Inject ||
+                probe.purpose == ProbePurpose::InjectReextract) {
+                injectionProbes.insert(ProbeId{probeIndex});
+            }
+        }
+        ++probeIndex;
+    }
+    return {extractionProbes, injectionProbes};
+}
+
 void Prober::startStreaming()
 {
     auto ringBuffers = getRingBuffers();
+
+    auto result = getActiveProbes();
+    auto &extractionProbes = result.first;
+
+    if (!extractionProbes.empty()) {
+
+        // opening queues of the active probes
+        for (auto probeId : extractionProbes) {
+            mExtractionQueues[probeId.getValue()].open();
+        }
+
+        // starting exractor
+        mExtractor = std::make_unique<probe::Extractor>(
+            *mEventHandles.extractionHandle,
+            util::RingBufferReader(ringBuffers.extractionRBDescription.startAdress,
+                                   ringBuffers.extractionRBDescription.size,
+                                   [this] { return getExtractionRingBufferLinearPosition(); }),
+            mExtractionQueues);
+    }
 }
 
 void Prober::stopStreaming()
 {
+    // Deleting extractor (the packet producer)
+    mExtractor.reset();
+
+    // then closing the queues to make wakup listening threads
+    for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {
+        mExtractionQueues[probeIndex].close();
+    }
 }
 }
 }

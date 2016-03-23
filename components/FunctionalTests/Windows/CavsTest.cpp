@@ -849,16 +849,20 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
     // 7 : Extract from an enabled probe. TODO: currently, extraction is not implemented and the
     // result will be empty.
-    CHECK_NOTHROW(client.request("/instance/cavs.probe.endpoint/1/streaming",
-                                 HttpClientSimulator::Verb::Get, "",
-                                 HttpClientSimulator::Status::Ok, "application/vnd.ifdk-file",
-                                 HttpClientSimulator::StringContent("") /*todo*/));
+    auto future = std::async(std::launch::async, [&] {
+        client.request("/instance/cavs.probe.endpoint/1/streaming", HttpClientSimulator::Verb::Get,
+                       "", HttpClientSimulator::Status::Ok, "application/vnd.ifdk-file",
+                       HttpClientSimulator::StringContent(""));
+    });
 
     // 8 : Stopping service
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
         file_helper::readAsString(xmlFileName("probeservice_param_stopped")),
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // Checking that step 7 has not failed
+    CHECK_NOTHROW(future.get());
 
     // 9: Getting probe service parameters, checking that it is stopped
     CHECK_NOTHROW(client.request(

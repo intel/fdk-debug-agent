@@ -77,7 +77,7 @@ public:
         mCurrentSize = other.mCurrentSize;
         mOpen = other.mOpen;
 
-        other.clear();
+        other.clearLocked();
     }
     BlockingQueue(const BlockingQueue &) = delete;
     BlockingQueue &operator=(const BlockingQueue &) = delete;
@@ -177,9 +177,7 @@ public:
     void clear()
     {
         std::lock_guard<std::mutex> locker(mMembersMutex);
-        QueueType empty;
-        std::swap(mQueue, empty);
-        mCurrentSize = 0;
+        clearLocked();
     }
 
     std::size_t getElementCount() const
@@ -256,6 +254,14 @@ private:
         mQueue.pop();
 
         return ptr;
+    }
+
+    /** Must be called in a locked context */
+    void clearLocked()
+    {
+        QueueType empty;
+        std::swap(mQueue, empty);
+        mCurrentSize = 0;
     }
 
     const std::size_t mMaxByteSize;

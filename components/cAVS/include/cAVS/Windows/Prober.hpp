@@ -22,15 +22,19 @@
 #pragma once
 
 #include "cAVS/Prober.hpp"
+#include "cAVS/DspFw/Probe.hpp"
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/IoCtlDescription.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/BlockingQueue.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
+#include "cAVS/Windows/Probe/Extractor.hpp"
 
 #include <array>
 #include <memory>
+#include <set>
 
 namespace debug_agent
 {
@@ -45,6 +49,11 @@ public:
     /** Contains all probe event handles */
     struct EventHandles
     {
+        EventHandles() = default;
+        EventHandles(EventHandles &&) = default;
+        EventHandles(const EventHandles &) = delete;
+        EventHandles &operator=(const EventHandles &) = delete;
+
         using HandlePtr = std::unique_ptr<EventHandle>;
         using HandlePtrArray = std::array<HandlePtr, driver::maxProbes>;
 
@@ -77,10 +86,7 @@ public:
         const cavs::Prober::SessionProbes &probes,
         const windows::Prober::EventHandles &eventHandles);
 
-    Prober(Device &device, const EventHandles &eventHandles)
-        : mDevice(device), mEventHandles(eventHandles)
-    {
-    }
+    Prober(Device &device, const EventHandles &eventHandles);
 
     std::size_t getMaxProbeCount() const override { return driver::maxProbes; }
     void setState(State state) override;
@@ -95,6 +101,9 @@ public:
 
 private:
     static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_PROBE_CAPTURE;
+    static constexpr std::size_t mQueueSize = 5 * 1024 * 1024;
+
+    using PacketQueue = util::BlockingQueue<util::Buffer>;
 
     // 0 = get/setState
     using GetState =
@@ -132,11 +141,19 @@ private:
     static ProbePurpose fromWindows(const driver::ProbePurpose &from);
     /** @} */
 
+    void checkProbeId(ProbeId id) const;
+
     void startStreaming();
     void stopStreaming();
 
+    /** @return active probe indexes (extraction/injection) */
+    std::pair<std::set<ProbeId> /*Extract*/, std::set<ProbeId> /*Inject*/> getActiveProbes() const;
+
     Device &mDevice;
     const EventHandles &mEventHandles;
+    SessionProbes mCachedProbeConfiguration;
+    std::vector<PacketQueue> mExtractionQueues;
+    std::unique_ptr<probe::Extractor> mExtractor;
 };
 }
 }
