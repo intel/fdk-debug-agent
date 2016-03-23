@@ -61,14 +61,26 @@ public:
      * @param[in] elementSizeFunction A function that provides the memory size of one queue
      *                                element.
      */
-
     BlockingQueue(std::size_t maxByteSize,
                   std::function<std::size_t(const T &)> elementSizeFunction)
         : mMaxByteSize(maxByteSize), mElementSizeFunction(elementSizeFunction), mCurrentSize(0),
           mOpen(false)
     {
     }
+    BlockingQueue(BlockingQueue &&other)
+        : mMaxByteSize(other.mMaxByteSize),
+          mElementSizeFunction(std::move(other.mElementSizeFunction))
+    {
+        std::lock_guard<std::mutex> locker(other.mMembersMutex);
 
+        mQueue = std::move(other.mQueue);
+        mCurrentSize = other.mCurrentSize;
+        mOpen = other.mOpen;
+
+        other.clear();
+    }
+    BlockingQueue(const BlockingQueue &) = delete;
+    BlockingQueue &operator=(const BlockingQueue &) = delete;
     ~BlockingQueue() { close(); }
 
     /** Open the queue (items can be enqueued) */
@@ -167,6 +179,7 @@ public:
         std::lock_guard<std::mutex> locker(mMembersMutex);
         QueueType empty;
         std::swap(mQueue, empty);
+        mCurrentSize = 0;
     }
 
     std::size_t getElementCount() const
@@ -201,9 +214,6 @@ public:
 
 private:
     using QueueType = std::queue<std::unique_ptr<T>>;
-
-    BlockingQueue(const BlockingQueue &) = delete;
-    BlockingQueue &operator=(const BlockingQueue &) = delete;
 
     /** Add an element if possible
      *
