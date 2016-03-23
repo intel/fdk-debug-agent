@@ -52,7 +52,7 @@ public:
     /** Type of the items in the ring buffer.
      * The ring buffer is manipulated as an array of bytes.
      */
-    using Sample = uint8_t;
+    using Sample = volatile uint8_t;
 
     /** The type to implement the linear position in the ring buffer.
      *
