@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -29,10 +29,7 @@ set(TEST_INCS)
 add_dbga_executable(ParameterSerializerTest ${TEST_SRCS} ${TEST_INCS})
 add_catch_test(ParameterSerializerTest "${PROJECT_SOURCE_DIR}/components/FunctionalTests")
 
-add_test_dependencies(ParameterSerializerTest
-    ParameterFramework::parameter
-    ParameterFramework::remote-processor
-    ParameterFramework::libxml2)
+add_test_dependencies(ParameterSerializerTest ParameterFramework::parameter)
 set_common_settings(ParameterSerializerTest)
 
 # external libraries

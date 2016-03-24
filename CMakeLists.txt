@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -48,10 +48,7 @@ endif()
 # Provinding poco library
 find_package(Poco REQUIRED COMPONENTS Foundation Net Util Zip)
 
-# Providing parameter framework ?
-if (NOT IGNORE_PFW_CMAKE_FILE)
-    find_package(ParameterFramework REQUIRED)
-endif (NOT IGNORE_PFW_CMAKE_FILE)
+find_package(ParameterFramework REQUIRED)
 
 if (NOT ${Poco_FOUND})
     message( FATAL_ERROR "Poco not found : ${Poco_NOT_FOUND_MESSAGE}" )

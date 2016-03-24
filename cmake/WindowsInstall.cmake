@@ -21,12 +21,11 @@
 # Contains windows-specific installation
 
 # installing PFW shared libraries and dependencies
-# note: install(TARGETS... ) cannot be used with imported target
-set (PFW_SHAREDLIBS
+install(FILES
     $<TARGET_FILE:ParameterFramework::parameter>
     $<TARGET_FILE:ParameterFramework::remote-processor>
-    $<TARGET_FILE:ParameterFramework::libxml2>)
-install(FILES ${PFW_SHAREDLIBS} DESTINATION bin)
+    ${PFW_INSTALL_DIR}/bin/libxml2.dll
+    DESTINATION bin)
 
 #installing Root PFW configuration files
 install(DIRECTORY resources/parameter-framework DESTINATION .)

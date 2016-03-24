@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -34,15 +34,7 @@ set_common_settings(ParameterSerializer)
 # exporting "include" directory
 target_include_directories(ParameterSerializer PUBLIC "include")
 
-# other dependencies
-if (IGNORE_PFW_CMAKE_FILE)
-    target_link_libraries(ParameterSerializer Util parameter)
-    find_path(PARAMETER_INCLUDE_DIR /parameter/client/ParameterMgrPlatformConnector.h)
-    target_include_directories(ParameterSerializer PUBLIC
-        "${PARAMETER_INCLUDE_DIR}/parameter/client")
-else ()
-    target_link_libraries(ParameterSerializer Util ParameterFramework::parameter)
-endif (IGNORE_PFW_CMAKE_FILE)
+target_link_libraries(ParameterSerializer Util ParameterFramework::parameter)
 
 # Adding test
 add_subdirectory("test")
