@@ -146,7 +146,6 @@ private:
     GetProducerLinearPosition mGetProducerLinearPosition;
 
     LinearPosition mConsumerPosition = 0;
-    LinearPosition mProducerPosition = 0;
 };
 }
 }
