@@ -148,15 +148,15 @@ TEST_CASE("blocking queue: multi theading usage")
     /* Consuming elements in the current thread */
     TestPtr element;
     element = queue.remove();
-    CHECK(element != nullptr);
+    REQUIRE(element != nullptr);
     CHECK(element->mSize == 2);
 
     element = queue.remove();
-    CHECK(element != nullptr);
+    REQUIRE(element != nullptr);
     CHECK(element->mSize == 5);
 
     element = queue.remove();
-    CHECK(element != nullptr);
+    REQUIRE(element != nullptr);
     CHECK(element->mSize == 3);
 
     /* Closed: last element is null */

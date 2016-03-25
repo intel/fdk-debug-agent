@@ -40,6 +40,7 @@ struct Packet
 {
     Packet() = default;
     Packet(Packet &&) = default;
+    Packet &operator=(Packet &&) = default;
 
     /** Probe packet sync word. TODO: Should be include from fw headers. */
     static constexpr const uint32_t syncWord = 0xBABEBEBA;
