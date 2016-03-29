@@ -70,194 +70,118 @@ public:
     /** @returns whether all test inputs have been consumed */
     bool consumed() const;
 
-    /** Add a DebugfsEntry{OK|KO}Open entry into the test vector.
-     *
-     * All entries are added in an ordered way, and will be consumed in the same order
-     * when using the debugfsOpen() method.
+    /** Add a CommandWrite{OK|KO} entry into the test vector.
+    *
+    * @param[in] expectedFilename the expected filename
+    * @param[in] expectedBuffer the buffer expected to be written.
+    * @param[in] returnedSize the returned number of bytes that will be effectively written.
+    * @{
+    */
+    void addCommandWriteOK(const std::string &expectedFilename, const util::Buffer &expectedBuffer,
+                           const ssize_t returnedSize)
+    {
+        mEntries.push(std::make_unique<CommandWriteEntry>(expectedFilename, expectedBuffer,
+                                                          returnedSize, true));
+    }
+
+    void addCommandWriteKO(const std::string &expectedFilename, const util::Buffer &expectedBuffer,
+                           const ssize_t returnedSize)
+    {
+        mEntries.push(std::make_unique<CommandWriteEntry>(expectedFilename, expectedBuffer,
+                                                          returnedSize, false));
+    }
+
+    /** Add a CommandRead{OK|KO} entry into the test vector.
      *
      * @param[in] expectedFilename the expected filename
+     * @param[in] expectedInputBuffer the buffer expected to be sent as a read command.
+     * @param[in] expectedOutputBuffer the buffer expected to be returned by the read.
+     * @param[in] expectedreturnedBuffer the returned number of bytes that will be effectively read
      * @{
      */
-    void addDebugfsEntryOKOpen(const std::string &expectedFilename);
-    void addDebugfsEntryKOOpen(const std::string &expectedFilename);
-    /** @} */
-
-    /** Add a successful DebugfsEntryClose entry into the test vector.
-     *
-     * All entries are added in an ordered way, and will be consumed in the same order
-     * when using the debugfsClose() method.
-     * @{
-     */
-    void addDebugfsEntryOKClose();
-    void addDebugfsEntryKOClose();
-    /** @} */
-
-    /** Add a DebugfsEntry{OK|KO}Write entry into the test vector.
-     *
-     * All entries are added in an ordered way, and will be consumed in the same order
-     * when using the debugfsWrite() method.
-     *
-     * @param[in] expectedBuffer the expected buffer that will be requested to write
-     * @param[in] returnedSize the returned number of bytes that will be effectively written
-     * @{
-     */
-    void addDebugfsEntryOKWrite(const util::Buffer &expectedBuffer, const ssize_t returnedSize);
-    void addDebugfsEntryKOWrite(const util::Buffer &expectedBuffer, const ssize_t returnedSize);
-    /** @} */
-
-    /** Add a successful DebugfsEntry{OK|KO}Read entry into the test vector.
-     *
-     * All entries are added in an ordered way, and will be consumed in the same order
-     * when using the debugfsRead() method.
-     *
-     * @param[in] returnedBuffer the buffer were data byte is put when reading.
-     * @param[in] expectedSize the expected number of byte requested to be read that may differ of
-     *                         expected read buffer
-     * @param[in] returnedSize the returned number of bytes that will be effectively read
-     * @{
-     */
-    void addDebugfsEntryOKRead(const util::Buffer &returnedBuffer, const ssize_t expectedReadSize,
-                               const ssize_t returnedSize);
-    void addDebugfsEntryKORead(const util::Buffer &returnedBuffer, const ssize_t expectedReadSize,
-                               const ssize_t returnedSize);
-
-    /** Add a successful DeviceCorePowerCommand{OK|KO}Read entry into the test vector.
-     *
-     * All entries are added in an ordered way, and will be consumed in the same order
-     * when using the debugfsRead() method.
-     *
-     * @param[in] returnedBuffer the buffer were data byte is put when reading.
-     * @param[in] expectedSize the expected number of byte requested to be read that may differ of
-     *                         expected read buffer
-     * @param[in] returnedSize the returned number of bytes that will be effectively read
-     * @{
-     */
-    void addDeviceCorePowerCommandOK(unsigned int coreId, bool allowedToSleep)
+    void addCommandReadOK(const std::string &expectedFilename,
+                          const util::Buffer &expectedInputBuffer,
+                          const util::Buffer &expectedOutputBuffer,
+                          const util::Buffer &expectedreturnedBuffer)
     {
-        mEntries.push(std::make_unique<DeviceCorePowerCommand>(coreId, allowedToSleep, true));
+        mEntries.push(std::make_unique<CommandReadEntry>(expectedFilename, expectedInputBuffer,
+                                                         expectedOutputBuffer,
+                                                         expectedreturnedBuffer, true));
     }
 
-    void addDeviceCorePowerCommandKO(unsigned int coreId, bool allowedToSleep)
+    void addCommandReadKO(const std::string &expectedFilename,
+                          const util::Buffer &expectedInputBuffer,
+                          const util::Buffer &expectedOutputBuffer,
+                          const util::Buffer &expectedreturnedBuffer)
     {
-        mEntries.push(std::make_unique<DeviceCorePowerCommand>(coreId, allowedToSleep, false));
+        mEntries.push(std::make_unique<CommandReadEntry>(expectedFilename, expectedInputBuffer,
+                                                         expectedOutputBuffer,
+                                                         expectedreturnedBuffer, false));
     }
 
-    void setCorePowerState(unsigned int coreId, bool allowedToSleep) override;
+    ssize_t commandWrite(const std::string &name, const util::Buffer &bufferInput) override;
 
-    /** Moked debugfsOpen that simulates the real interface using vector entries.
-     *
-     * @param[in] name the filename to open
-     */
-    void debugfsOpen(const std::string &name);
-
-    /** Moked debugfsClose that simulates the real interface using vector entries.
-     */
-    void debugfsClose();
-
-    /** Moked debugfsWrite that simulates the real interface using vector entries.
-     *
-     * @param[in] buffer_input buffer that will be written to interface
-     * @return the number of bytes that have been written from buffer to interface
-     */
-    ssize_t debugfsWrite(const util::Buffer &buffer_input);
-
-    /** Moked debugfsWrite that simulates the real interface using vector entries.
-     *
-     * @param[in] buffer_output buffer pointer that will be used to put read bytes from interface
-     * @param[in] nbBytes number of bytes
-     * @return the number of byte that have been read from interface to buffer
-     */
-    ssize_t debugfsRead(util::Buffer &buffer_output, const ssize_t nbBytes);
+    void commandRead(const std::string &name, const util::Buffer &bufferInput,
+                     util::Buffer &bufferOutput) override;
 
 private:
     /** Entry DebugfsEntry class is the generic class that must be declined for each
      *  method of the interface. It contains common information.
      */
-    class DebugfsEntry
+    class CommandEntry
     {
     public:
-        DebugfsEntry(bool successsful) : mSuccesssful(successsful) {}
+        CommandEntry(bool successsful) : mSuccesssful(successsful) {}
         bool isNotSuccessful() const { return !mSuccesssful; }
 
         /** destructor MUST be virtual, so DebugfsEntry is polymorphic, which allows the DynamicCast
          *  on entries.
          *  it is pure virtual as DebugfsEntry must be derived to make sense.
          */
-        virtual ~DebugfsEntry() = 0;
+        virtual ~CommandEntry() = 0;
 
     private:
         bool mSuccesssful; /**< vector should be successful. */
     };
 
-    class DeviceCorePowerCommand : public DebugfsEntry
+    class CommandWriteEntry : public CommandEntry
     {
     public:
-        DeviceCorePowerCommand(unsigned int coreId, bool allowedToSleep, bool successful)
-            : DebugfsEntry(successful), mCoreId(coreId), mAllowedToSleep(allowedToSleep)
+        CommandWriteEntry(const std::string &expectedFilename, const util::Buffer &expectedBuffer,
+                          const ssize_t returnedSize, bool successful)
+            : CommandEntry(successful), mReturnedSize(returnedSize),
+              mExpectedPath(expectedFilename), mExpectedInputBuffer(expectedBuffer)
         {
         }
-        bool allowedToSleep() const { return mAllowedToSleep; }
-        unsigned int getCoreId() const { return mCoreId; }
+        ssize_t mReturnedSize;
 
-    private:
-        unsigned int mCoreId;
-        bool mAllowedToSleep;
-    };
-
-    /** Entry DebugfsEntryOpen class is the class for debugfsOpen interface
-     */
-    class DebugfsEntryOpen : public DebugfsEntry
-    {
-    public:
-        DebugfsEntryOpen(const std::string &expectedFilename, const bool successful)
-            : DebugfsEntry(successful), mExpectedPath(expectedFilename)
-        {
-        }
-        /** mExpectedPath : path that should be given to the open function. */
+        /** path that should be given to the write function. */
         std::string mExpectedPath;
-    };
-    /** Entry DebugfsEntryClose class is the class for debugfsClose interface
-     *  Pretty simple as it will just check the handle when closing file.
-     */
-    class DebugfsEntryClose : public DebugfsEntry
-    {
-    public:
-        DebugfsEntryClose(const bool successful) : DebugfsEntry(successful) {}
-    };
 
-    /** Entry DebugfsEntryRead class is the class for debugfsRead interface
-     */
-    class DebugfsEntryRead : public DebugfsEntry
-    {
-    public:
-        DebugfsEntryRead(const util::Buffer &expectedBuffer, const ssize_t expectedReadSize,
-                         const ssize_t returnedSize, const bool successful)
-            : DebugfsEntry(successful), mExpectedReadSize(expectedReadSize),
-              mReturnedSize(returnedSize), mExpectedOutputBuffer(expectedBuffer)
-        {
-        }
-        ssize_t mExpectedReadSize;
-        ssize_t mReturnedSize;
-        /** copy of the buffer that should be returned from read function.
-         * use vector that only need constructor in initialization list and no need destructors */
-        util::Buffer mExpectedOutputBuffer;
-    };
-
-    /** Vector class DebugfsEntryWrite is the class vector for debugfsWrite interface
-     */
-    class DebugfsEntryWrite : public DebugfsEntry
-    {
-    public:
-        DebugfsEntryWrite(const util::Buffer &expectedBuffer, const ssize_t returnedSize,
-                          bool successful)
-            : DebugfsEntry(successful), mReturnedSize(returnedSize),
-              mExpectedInputBuffer(expectedBuffer)
-        {
-        }
-        ssize_t mReturnedSize;
-
-        /**  mExpectedInputBuffer : copy of the buffer passed to write function. */
+        /** copy of the buffer passed to write function. */
         util::Buffer mExpectedInputBuffer;
+    };
+
+    class CommandReadEntry : public CommandEntry
+    {
+    public:
+        CommandReadEntry(const std::string &expectedFilename,
+                         const util::Buffer &expectedInputBuffer,
+                         const util::Buffer &expectedOutputBuffer,
+                         const util::Buffer &expectedReturnedBuffer, bool successful)
+            : CommandEntry(successful), mExpectedPath(expectedFilename),
+              mExpectedInputBuffer(expectedInputBuffer),
+              mExpectedOutputBuffer(expectedOutputBuffer),
+              mExpectedReturnedBuffer(expectedReturnedBuffer)
+        {
+        }
+        /** path that should be given to the read function. */
+        std::string mExpectedPath;
+
+        /** copy of the buffer passed to read function. */
+        util::Buffer mExpectedInputBuffer;
+        util::Buffer mExpectedOutputBuffer;
+        util::Buffer mExpectedReturnedBuffer;
     };
 
     /** Call this method in case of mock failure */
@@ -282,8 +206,8 @@ private:
             throw Exception("Mock failed: " + mFailureMessage);
         }
     }
-    using DebugfsEntryPtr = std::unique_ptr<DebugfsEntry>;
-    using EntryCollection = std::queue<DebugfsEntryPtr>;
+    using CommandEntryPtr = std::unique_ptr<CommandEntry>;
+    using EntryCollection = std::queue<CommandEntryPtr>;
     EntryCollection mEntries;
 
     std::size_t mCurrentEntry;

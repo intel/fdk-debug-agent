@@ -20,6 +20,7 @@
 
 set(LINUX_LIB_SRCS
     src/Linux/SystemDevice.cpp
+    src/Linux/DebugFsEntryHandler.cpp
     src/Linux/SystemDriverFactory.cpp
     src/Linux/Logger.cpp
     src/Linux/ModuleHandler.cpp
@@ -35,6 +36,8 @@ source_group("Source Files\\Linux" FILES ${LINUX_LIB_SRCS})
 
 set(LINUX_LIB_INCS
     include/cAVS/Linux/SystemDevice.hpp
+    include/cAVS/Linux/FileEntryHandler.hpp
+    include/cAVS/Linux/DebugFsEntryHandler.hpp
     include/cAVS/Linux/Device.hpp
     include/cAVS/Linux/Driver.hpp
     include/cAVS/Linux/Logger.hpp

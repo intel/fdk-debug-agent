@@ -33,80 +33,54 @@ namespace cavs
 namespace linux
 {
 
-void SystemDevice::setCorePowerState(unsigned int coreId, bool allowedToSleep)
+ssize_t SystemDevice::commandWrite(const std::string &name, const util::Buffer &bufferInput)
 {
-    if (mDebugFsFile.is_open()) {
-        throw Exception("Parallel operation not permitted.");
-    }
-    driver::CorePowerCommand corePowerCmd(allowedToSleep, coreId);
+    std::lock_guard<std::mutex> locker(mClientMutex);
+    ssize_t written;
     try {
-        debugfsOpen(driver::corePowerCtrl);
-    } catch (const Device::Exception &e) {
-        throw Exception("Device returns an exception: " + std::string(e.what()));
+        mFileHandler->open(name);
+    } catch (const FileEntryHandler::Exception &e) {
+        throw Exception("DebugFs handler returns an exception: " + std::string(e.what()));
     }
     try {
-        debugfsWrite(corePowerCmd.getBuffer());
-    } catch (const Device::Exception &e) {
-        debugfsClose();
-        throw Exception("Get module parameter failed to write command IPC in file: " +
-                        std::string(driver::corePowerCtrl) + ", Device returns an exception: " +
-                        std::string(e.what()));
+        written = mFileHandler->write(bufferInput);
+    } catch (const FileEntryHandler::Exception &e) {
+        mFileHandler->close();
+        throw Exception("Failed to write command in file: " + name +
+                        ", DebugFs handler returns an exception: " + std::string(e.what()));
     }
-    debugfsClose();
+    mFileHandler->close();
+    return written;
 }
 
-void SystemDevice::debugfsOpen(const std::string &name)
+void SystemDevice::commandRead(const std::string &name, const util::Buffer &bufferInput,
+                               util::Buffer &bufferOutput)
 {
-    if (mDebugFsFile.is_open()) {
-        debugfsClose();
-    }
-    mDebugFsFile.exceptions(fstream::failbit | fstream::badbit | fstream::eofbit);
+    std::lock_guard<std::mutex> locker(mClientMutex);
     try {
-        mDebugFsFile.open(name, std::fstream::in | std::fstream::out);
-    } catch (const std::exception &) {
-        throw Exception("error while opening debugfs " + name + " file.");
+        mFileHandler->open(name);
+    } catch (FileEntryHandler::Exception &e) {
+        throw Exception("DebugFs handler returns an exception: " + std::string(e.what()));
     }
-}
 
-void SystemDevice::debugfsClose()
-{
+    /* Performing the debugfs write command, size ignored, as exception raised if partial write. */
     try {
-        mDebugFsFile.close();
-    } catch (const std::exception &) {
-        mDebugFsFile.clear();
+        mFileHandler->write(bufferInput);
+    } catch (const FileEntryHandler::Exception &e) {
+        mFileHandler->close();
+        throw Exception("Failed to write command in file: " + name +
+                        ", DebugFs handler returns an exception: " + std::string(e.what()));
     }
-}
 
-ssize_t SystemDevice::debugfsWrite(const Buffer &bufferInput)
-{
-    if (!mDebugFsFile.is_open()) {
-        throw Exception("Illegal write operation on closed file");
-    }
+    /* Reading the result of debugfs command read, size ignored as not meaningful info. */
     try {
-        mDebugFsFile.write(reinterpret_cast<const char *>(bufferInput.data()), bufferInput.size());
-    } catch (const std::exception &) {
-        throw Exception("error during write operation: " + mDebugFsFile.rdstate());
+        mFileHandler->read(bufferOutput, bufferOutput.size());
+    } catch (const FileEntryHandler::Exception &e) {
+        mFileHandler->close();
+        throw Exception("Failed to read command answer from file: " + name +
+                        ", DebugFs handler returns an exception: " + std::string(e.what()));
     }
-    return bufferInput.size();
-}
-
-ssize_t SystemDevice::debugfsRead(Buffer &bufferOutput, const ssize_t nbBytes)
-{
-    if (!mDebugFsFile.is_open()) {
-        throw Exception("Illegal read operation on closed file");
-    }
-    try {
-        mDebugFsFile.seekg(0, ios_base::beg);
-        mDebugFsFile.read(reinterpret_cast<char *>(bufferOutput.data()), nbBytes);
-    } catch (const std::exception &) {
-        if (mDebugFsFile.eof() && mDebugFsFile.gcount() > 0) {
-            // Reading less than expected is not an error, as blind request with max size are ok.
-            mDebugFsFile.clear();
-        } else {
-            throw Exception("error during read operation: " + mDebugFsFile.rdstate());
-        }
-    }
-    return mDebugFsFile.gcount();
+    mFileHandler->close();
 }
 }
 }

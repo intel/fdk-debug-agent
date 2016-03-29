@@ -22,6 +22,7 @@
 #include <cAVS/SystemDriverFactory.hpp>
 #include <cAVS/Linux/Driver.hpp>
 #include <cAVS/Linux/SystemDevice.hpp>
+#include <cAVS/Linux/DebugFsEntryHandler.hpp>
 #include <cAVS/Linux/ControlDeviceFactory.hpp>
 #include "cAVS/Linux/TinyCompressDeviceFactory.hpp"
 
@@ -55,7 +56,8 @@ std::unique_ptr<Driver> SystemDriverFactory::newDriver() const
 
     std::unique_ptr<linux::Device> device;
     try {
-        device = std::make_unique<linux::SystemDevice>();
+        device =
+            std::make_unique<linux::SystemDevice>(std::make_unique<linux::DebugFsEntryHandler>());
     } catch (linux::Device::Exception &e) {
         throw Exception("Cannot create device: " + std::string(e.what()));
     }

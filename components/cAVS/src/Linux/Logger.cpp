@@ -20,6 +20,7 @@
 ********************************************************************************
 */
 #include <cAVS/Linux/Logger.hpp>
+#include <cAVS/Linux/DriverTypes.hpp>
 #include "Util/PointerHelper.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "Util/ByteStreamReader.hpp"
@@ -235,23 +236,19 @@ void Logger::LogProducer::startLogDevice()
     assert(mLogDevice != nullptr);
 
     /* First wake up associated core, or at least prevent from sleeping. */
-    try {
-        mDevice.setCorePowerState(mCoreId, false);
-    } catch (const Device::Exception &e) {
-        throw Exception("Error: could not set core power: " + std::string(e.what()));
-    }
+    preventCoreFromSleeping();
     compress::Config config(fragmentSize, nbFragments);
     try {
         mLogDevice->open(Mode::NonBlocking, Role::Capture, config);
     } catch (const CompressDevice::Exception &e) {
-        setCoreAllowedToSleep();
+        allowCoreToSleep();
         throw Exception("Error opening Log Device: " + std::string(e.what()));
     }
     try {
         mLogDevice->start();
     } catch (const CompressDevice::Exception &e) {
         mLogDevice->close();
-        setCoreAllowedToSleep();
+        allowCoreToSleep();
         throw Exception("Error starting Log Device: " + std::string(e.what()));
     }
 }
@@ -267,13 +264,24 @@ void Logger::LogProducer::stopLogDevice()
     mLogDevice->close();
 
     /* Can decrease core wake up ref count. */
-    setCoreAllowedToSleep();
+    allowCoreToSleep();
 }
 
-void Logger::LogProducer::setCoreAllowedToSleep() noexcept
+void Logger::LogProducer::preventCoreFromSleeping()
 {
+    driver::CorePowerCommand corePowerCmd(false, mCoreId);
     try {
-        mDevice.setCorePowerState(mCoreId, true);
+        mDevice.commandWrite(driver::corePowerCtrl, corePowerCmd.getBuffer());
+    } catch (const Device::Exception &e) {
+        throw Exception("Error: could not set core power: " + std::string(e.what()));
+    }
+}
+
+void Logger::LogProducer::allowCoreToSleep() noexcept
+{
+    driver::CorePowerCommand corePowerCmd(true, mCoreId);
+    try {
+        mDevice.commandWrite(driver::corePowerCtrl, corePowerCmd.getBuffer());
     } catch (const Device::Exception &e) {
         std::cout << "Error: could not restore core power:" << std::string(e.what()) << std::endl;
     }

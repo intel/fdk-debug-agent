@@ -22,11 +22,8 @@
 
 #pragma once
 
-#include "Util/Buffer.hpp"
-#include <exception>
-#include <string>
-#include <inttypes.h>
-#include <stdexcept>
+#include "cAVS/Linux/FileEntryHandler.hpp"
+#include <fstream>
 
 namespace debug_agent
 {
@@ -35,45 +32,17 @@ namespace cavs
 namespace linux
 {
 
-/** This class abstracts a Linux Debug file system (open,close,read,write...)
- */
-class Device
+/** This class implementation uses the real open/read/write/close functions */
+class DebugFsEntryHandler final : public FileEntryHandler
 {
 public:
-    struct Exception : std::logic_error
-    {
-        using std::logic_error::logic_error;
-    };
-
-    /** @throw Device::Exception if the device initialization has failed */
-    Device() = default;
-    virtual ~Device() = default;
-
-    /** Write a command to the debugFs entry "name" with the given input buffer.
-     *
-     * @param[in] name of the debug fs entry.
-     * @param[in] bufferInput command to write.
-     *
-     * @return bytes writen to the debugfs entry
-     * @throw Device::Exception in case of write error.
-     */
-    virtual ssize_t commandWrite(const std::string &name, const util::Buffer &bufferInput) = 0;
-
-    /** read a command to the debugFs entry "name" with the given input buffer as a command
-     * and store the result of the read command in the output buffer.
-     *
-     * @param[in] name of the debug fs entry.
-     * @param[in] bufferInput command to write.
-     * @param[out] bufferOutput result of the read command.
-     *
-     * @throw Device::Exception in case of read error.
-     */
-    virtual void commandRead(const std::string &name, const util::Buffer &bufferInput,
-                             util::Buffer &bufferOutput) = 0;
+    void open(const std::string &name) override;
+    void close() noexcept override;
+    ssize_t write(const util::Buffer &bufferInput) override;
+    ssize_t read(util::Buffer &bufferOutput, const ssize_t nbBytes) override;
 
 private:
-    Device(const Device &) = delete;
-    Device &operator=(const Device &) = delete;
+    std::fstream mFileEntry;
 };
 }
 }

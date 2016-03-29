@@ -91,7 +91,8 @@ private:
 
     private:
         /** Allow the DSP core associated with the log producer to sleep. */
-        void setCoreAllowedToSleep() noexcept;
+        void allowCoreToSleep() noexcept;
+        void preventCoreFromSleeping();
 
         static const unsigned int maxCommandQueueSize = 10;
         static const unsigned int maxPollWaitMs = 500;

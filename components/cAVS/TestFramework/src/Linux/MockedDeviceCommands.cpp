@@ -200,12 +200,7 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus, uint1
     messageWriter.write(largeConfigAccess);
     util::Buffer sentMessage = messageWriter.getBuffer();
 
-    mDevice.addDebugfsEntryOKOpen(driver::setGetCtrl);
-
-    mDevice.addDebugfsEntryOKWrite(sentMessage, sentMessage.size());
-
-    /* should close the file after that */
-    mDevice.addDebugfsEntryOKClose();
+    mDevice.addCommandWriteOK(driver::setGetCtrl, sentMessage, sentMessage.size());
 }
 
 void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus, uint16_t moduleId,
@@ -221,12 +216,7 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus, uint1
     messageWriter.write(configAccess);
     util::Buffer sentMessage = messageWriter.getBuffer();
 
-    mDevice.addDebugfsEntryOKOpen(driver::setGetCtrl);
-
-    mDevice.addDebugfsEntryOKWrite(sentMessage, sentMessage.size());
-
-    /* should close the file after that */
-    mDevice.addDebugfsEntryOKClose();
+    mDevice.addCommandWriteOK(driver::setGetCtrl, sentMessage, sentMessage.size());
 }
 
 void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus, uint16_t moduleId,
@@ -243,12 +233,6 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus, uint1
     util::MemoryByteStreamWriter messageWriter;
     messageWriter.write(largeConfigAccess);
 
-    util::Buffer sentMessage = messageWriter.getBuffer();
-
-    mDevice.addDebugfsEntryOKOpen(driver::setGetCtrl);
-
-    mDevice.addDebugfsEntryOKWrite(sentMessage, sentMessage.size());
-
     /* Format the expected buffer to be read from the written command, i.e.
      * the parameter access structure appended with the parameter payload. */
     util::MemoryByteStreamWriter returnedReadMsgWriter = {};
@@ -258,25 +242,25 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus, uint1
         returnedReadMsgWriter.write(tunneledAccess);
     };
     returnedReadMsgWriter.writeRawBuffer(parameterPayload);
-    util::Buffer returnedReadMessage = returnedReadMsgWriter.getBuffer();
 
-    /* Read mock will return the buffer in parameter that contains the mocked reply. */
-    /* We expect the read command to be done with MaxReadSize available space in read buffer. */
-    /* Returned size will be the size of the parameter access + parameter payload. */
-    mDevice.addDebugfsEntryOKRead(returnedReadMessage, ModuleHandler::maxParameterPayloadSize,
-                                  returnedReadMessage.size());
+    /** The read command output buffer is expected to be sized at param payload max size. */
+    util::Buffer outputBuffer;
+    outputBuffer.resize(ModuleHandler::maxParameterPayloadSize);
 
-    /* should close the file after that */
-    mDevice.addDebugfsEntryOKClose();
+    mDevice.addCommandReadOK(driver::setGetCtrl, messageWriter.getBuffer(), outputBuffer,
+                             returnedReadMsgWriter.getBuffer());
 }
 
 void MockedDeviceCommands::addSetCorePowerCommand(bool controlSuccess, unsigned int coreId,
                                                   bool allowedToSleep)
 {
+    driver::CorePowerCommand corePowerCmd(allowedToSleep, coreId);
     if (controlSuccess) {
-        mDevice.addDeviceCorePowerCommandOK(coreId, allowedToSleep);
+        mDevice.addCommandWriteOK(driver::corePowerCtrl, corePowerCmd.getBuffer(),
+                                  corePowerCmd.getBuffer().size());
     } else {
-        mDevice.addDeviceCorePowerCommandKO(coreId, allowedToSleep);
+        mDevice.addCommandWriteKO(driver::corePowerCtrl, corePowerCmd.getBuffer(),
+                                  corePowerCmd.getBuffer().size());
     }
 }
 }

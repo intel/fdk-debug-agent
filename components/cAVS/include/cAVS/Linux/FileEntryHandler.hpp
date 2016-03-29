@@ -37,7 +37,7 @@ namespace linux
 
 /** This class abstracts a Linux Debug file system (open,close,read,write...)
  */
-class Device
+class FileEntryHandler
 {
 public:
     struct Exception : std::logic_error
@@ -46,34 +46,17 @@ public:
     };
 
     /** @throw Device::Exception if the device initialization has failed */
-    Device() = default;
-    virtual ~Device() = default;
+    FileEntryHandler() = default;
+    virtual ~FileEntryHandler() = default;
 
-    /** Write a command to the debugFs entry "name" with the given input buffer.
-     *
-     * @param[in] name of the debug fs entry.
-     * @param[in] bufferInput command to write.
-     *
-     * @return bytes writen to the debugfs entry
-     * @throw Device::Exception in case of write error.
-     */
-    virtual ssize_t commandWrite(const std::string &name, const util::Buffer &bufferInput) = 0;
-
-    /** read a command to the debugFs entry "name" with the given input buffer as a command
-     * and store the result of the read command in the output buffer.
-     *
-     * @param[in] name of the debug fs entry.
-     * @param[in] bufferInput command to write.
-     * @param[out] bufferOutput result of the read command.
-     *
-     * @throw Device::Exception in case of read error.
-     */
-    virtual void commandRead(const std::string &name, const util::Buffer &bufferInput,
-                             util::Buffer &bufferOutput) = 0;
+    virtual void open(const std::string &name) = 0;
+    virtual void close() noexcept = 0;
+    virtual ssize_t write(const util::Buffer &bufferInput) = 0;
+    virtual ssize_t read(util::Buffer &bufferOutput, const ssize_t nbBytes) = 0;
 
 private:
-    Device(const Device &) = delete;
-    Device &operator=(const Device &) = delete;
+    FileEntryHandler(const FileEntryHandler &) = delete;
+    FileEntryHandler &operator=(const FileEntryHandler &) = delete;
 };
 }
 }

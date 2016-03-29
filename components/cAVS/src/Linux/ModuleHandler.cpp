@@ -37,12 +37,6 @@ namespace linux
 util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
                                       dsp_fw::ParameterId parameterId, size_t parameterSize)
 {
-    try {
-        mDevice.debugfsOpen(driver::setGetCtrl);
-    } catch (Device::Exception &e) {
-        throw Exception("Device returns an exception: " + std::string(e.what()));
-    }
-
     /* Creating the header and body payload using the LargeConfigAccess type */
     driver::LargeConfigAccess configAccess(driver::LargeConfigAccess::CmdType::Get, moduleId,
                                            instanceId, parameterId.getValue(), parameterSize);
@@ -50,31 +44,17 @@ util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
     /* Creating debugfs command buffers. */
     util::MemoryByteStreamWriter messageWriter;
     messageWriter.write(configAccess);
-    util::Buffer sentMessage = messageWriter.getBuffer();
-
-    /* Performing the debugfs write command, size ignored, as exception raised if partial write. */
-    try {
-        mDevice.debugfsWrite(sentMessage);
-    } catch (const Device::Exception &e) {
-        mDevice.debugfsClose();
-        throw Exception("Get module parameter failed to write command IPC in file: " +
-                        std::string(driver::setGetCtrl) + ", Device returns an exception: " +
-                        std::string(e.what()));
-    }
 
     util::Buffer receivedMessage;
     receivedMessage.resize(maxParameterPayloadSize);
 
-    /* Reading the result of debugfs command read, size ignored as not meaningful info. */
     try {
-        mDevice.debugfsRead(receivedMessage, receivedMessage.size());
+        mDevice.commandRead(driver::setGetCtrl, messageWriter.getBuffer(), receivedMessage);
     } catch (const Device::Exception &e) {
-        mDevice.debugfsClose();
-        throw Exception("Get module parameter failed to read from file: " +
+        throw Exception("Get module parameter failed to read command debugfs in file: " +
                         std::string(driver::setGetCtrl) + ", Device returns an exception: " +
                         std::string(e.what()));
     }
-    mDevice.debugfsClose();
 
     /* Reading the answer using the header of the corresponding replied debugfs command. */
     util::MemoryByteStreamReader messageReader(receivedMessage);
@@ -87,12 +67,6 @@ util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
 void ModuleHandler::configSet(uint16_t moduleId, uint16_t instanceId,
                               dsp_fw::ParameterId parameterId, const util::Buffer &parameterPayload)
 {
-    try {
-        mDevice.debugfsOpen(driver::setGetCtrl);
-    } catch (const Device::Exception &e) {
-        throw Exception("Device returns an exception: " + std::string(e.what()));
-    }
-
     /* Creating the header and body payload using the Large or Module ConfigAccess type */
     util::MemoryByteStreamWriter messageWriter;
     if (parameterId.getValue() == dsp_fw::BaseModuleParams::MOD_INST_ENABLE) {
@@ -105,18 +79,13 @@ void ModuleHandler::configSet(uint16_t moduleId, uint16_t instanceId,
                                                parameterPayload.size(), parameterPayload);
         messageWriter.write(configAccess);
     }
-    util::Buffer sentMessage = messageWriter.getBuffer();
-
-    /* Performing the debugfs write command, size ignored, as exception raised if partial write. */
     try {
-        mDevice.debugfsWrite(sentMessage);
+        mDevice.commandWrite(driver::setGetCtrl, messageWriter.getBuffer());
     } catch (const Device::Exception &e) {
-        mDevice.debugfsClose();
-        throw Exception("Get module parameter failed to write command IPC in file: " +
+        throw Exception("Get module parameter failed to write command debugfs in file: " +
                         std::string(driver::setGetCtrl) + ", Device returns an exception: " +
                         std::string(e.what()));
     }
-    mDevice.debugfsClose();
 }
 }
 }

@@ -23,7 +23,10 @@
 #pragma once
 
 #include "cAVS/Linux/Device.hpp"
-#include <fstream>
+#include "cAVS/Linux/FileEntryHandler.hpp"
+#include "Util/AssertAlways.hpp"
+#include <mutex>
+#include <memory>
 
 namespace debug_agent
 {
@@ -36,15 +39,21 @@ namespace linux
 class SystemDevice final : public Device
 {
 public:
-    void setCorePowerState(unsigned int coreId, bool allowedToSleep) override;
+    SystemDevice(std::unique_ptr<FileEntryHandler> fileHandler)
+        : mFileHandler(std::move(fileHandler))
+    {
+        ASSERT_ALWAYS(mFileHandler != nullptr);
+    }
 
-    void debugfsOpen(const std::string &name) override;
-    void debugfsClose() override;
-    ssize_t debugfsWrite(const util::Buffer &bufferInput) override;
-    ssize_t debugfsRead(util::Buffer &bufferOutput, const ssize_t nbBytes) override;
+    ssize_t commandWrite(const std::string &name, const util::Buffer &bufferInput) override;
+    void commandRead(const std::string &name, const util::Buffer &bufferInput,
+                     util::Buffer &bufferOutput) override;
 
 private:
-    std::fstream mDebugFsFile;
+    /* A device supports concurent file manipulation calls */
+    std::mutex mClientMutex;
+
+    std::unique_ptr<FileEntryHandler> mFileHandler;
 };
 }
 }

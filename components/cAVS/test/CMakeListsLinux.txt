@@ -21,8 +21,8 @@
 # Source files
 
 set(LINUX_TEST_SRCS
+    Linux/DebugFsEntryHandlerUnitTest.cpp
     Linux/SystemDeviceUnitTest.cpp
-    Linux/MockedDeviceUnitTest.cpp
     Linux/ModuleHandlerUnitTest.cpp
     Linux/LoggerUnitTest.cpp)
 
