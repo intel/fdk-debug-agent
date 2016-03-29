@@ -230,10 +230,8 @@ size_t Prober::getExtractionRingBufferLinearPosition()
 }
 
 template <class T>
-void Prober::ioctl(typename T::Data &inout)
+void Prober::ioctl(driver::IoCtlType ioctlType, ULONG feature, ULONG parameterId, T &inout)
 {
-    static_assert(T::type == driver::IoCtlType::TinyGet || T::type == driver::IoCtlType::TinySet,
-                  "For now, windows::Prober::ioctl only supports Tiny ioctls");
     using driver::to_string;
     using std::to_string;
 
@@ -243,12 +241,12 @@ void Prober::ioctl(typename T::Data &inout)
 
     /* Creating the TinySet/Get ioctl buffer */
     util::Buffer buffer =
-        IoctlHelpers::toTinyCmdBuffer(T::feature, T::id, bodyPayloadWriter.getBuffer());
+        IoctlHelpers::toTinyCmdBuffer(feature, parameterId, bodyPayloadWriter.getBuffer());
 
     try {
-        mDevice.ioControl(T::type, &buffer, &buffer);
+        mDevice.ioControl(ioctlType, &buffer, &buffer);
     } catch (Device::Exception &e) {
-        throw Exception(to_string(T::type) + " error: " + e.what());
+        throw Exception(to_string(ioctlType) + " error: " + e.what());
     }
 
     NTSTATUS driverStatus;
@@ -268,7 +266,7 @@ void Prober::ioctl(typename T::Data &inout)
 
         if (!reader.isEOS()) {
             throw Exception("Probe ioctl buffer has not been fully consumed, type=" +
-                            to_string(T::type) + ", pointer=" +
+                            to_string(ioctlType) + ", pointer=" +
                             to_string(reader.getPointerOffset()) + ", size=" +
                             to_string(reader.getBuffer().size()) + ", remaining=" +
                             to_string(reader.getBuffer().size() - reader.getBuffer().size()));
@@ -276,6 +274,14 @@ void Prober::ioctl(typename T::Data &inout)
     } catch (util::ByteStreamReader::Exception &e) {
         throw Exception("Cannot decode probe parameter ioctl buffer: " + std::string(e.what()));
     }
+}
+
+template <class T>
+void Prober::ioctl(typename T::Data &inout)
+{
+    static_assert(T::type == driver::IoCtlType::TinyGet || T::type == driver::IoCtlType::TinySet,
+                  "For now, windows::Prober::ioctl only supports Tiny ioctls");
+    ioctl(T::type, T::feature, T::id, inout);
 }
 
 std::pair<std::set<ProbeId> /*Extract*/, std::set<ProbeId> /*Inject*/> Prober::getActiveProbes()

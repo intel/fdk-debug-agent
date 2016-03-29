@@ -114,15 +114,12 @@ void MockedDeviceCommands::addGetModuleParameterCommand(
                               returnedFirmwareStatus);
 }
 
-template <class IoCtlDescription>
-void MockedDeviceCommands::addTinyCommand(typename const IoCtlDescription::Data &inputDriverStruct,
-                                          typename const IoCtlDescription::Data &outputDriverStruct,
-                                          bool ioctlSuccess, NTSTATUS returnedDriverStatus)
+template <class T>
+void MockedDeviceCommands::addTinyCommand(driver::IoCtlType ioctlType, ULONG feature,
+                                          ULONG parameterId, const T &inputDriverStruct,
+                                          const T &outputDriverStruct, bool ioctlSuccess,
+                                          NTSTATUS returnedDriverStatus)
 {
-    static_assert(IoCtlDescription::type == driver::IoCtlType::TinyGet ||
-                      IoCtlDescription::type == driver::IoCtlType::TinySet,
-                  "For now, MockedDeviceCommands only supports Tiny ioctls");
-
     /* First creating expected body to know its serialized size */
     util::MemoryByteStreamWriter expectedBodyWriter;
     driver::Intc_App_Cmd_Body body;
@@ -131,14 +128,14 @@ void MockedDeviceCommands::addTinyCommand(typename const IoCtlDescription::Data 
     ULONG bodySize = static_cast<ULONG>(expectedBodyWriter.getBuffer().size());
 
     /* Creating header */
-    driver::Intc_App_Cmd_Header header(IoCtlDescription::feature, IoCtlDescription::id, bodySize);
+    driver::Intc_App_Cmd_Header header(feature, parameterId, bodySize);
 
     /* Creating ioctl expected buffer containing header + body */
     util::MemoryByteStreamWriter expectedWriter;
     expectedWriter.write(header);
     expectedWriter.writeRawBuffer(expectedBodyWriter.getBuffer());
 
-    uint32_t ioctlCode = IoCtlDescription::type == driver::IoCtlType::TinyGet
+    uint32_t ioctlCode = ioctlType == driver::IoCtlType::TinyGet
                              ? IOCTL_CMD_APP_TO_AUDIODSP_TINY_GET
                              : IOCTL_CMD_APP_TO_AUDIODSP_TINY_SET;
 
@@ -167,6 +164,33 @@ void MockedDeviceCommands::addTinyCommand(typename const IoCtlDescription::Data 
     /* Adding entry */
     mDevice.addSuccessfulIoctlEntry(ioctlCode, &expectedWriter.getBuffer(),
                                     &expectedWriter.getBuffer(), &returnedWriter.getBuffer());
+}
+
+template <class IoCtlDescription>
+void MockedDeviceCommands::addTinyCommand(typename const IoCtlDescription::Data &inputDriverStruct,
+                                          typename const IoCtlDescription::Data &outputDriverStruct,
+                                          bool ioctlSuccess, NTSTATUS returnedDriverStatus)
+{
+    static_assert(IoCtlDescription::type == driver::IoCtlType::TinyGet ||
+                      IoCtlDescription::type == driver::IoCtlType::TinySet,
+                  "For now, MockedDeviceCommands only supports Tiny ioctls");
+
+    addTinyCommand(IoCtlDescription::type, IoCtlDescription::feature, IoCtlDescription::id,
+                   inputDriverStruct, outputDriverStruct, ioctlSuccess, returnedDriverStatus);
+}
+
+template <typename DriverStructure>
+void MockedDeviceCommands::addTinyGetCommand(driver::IOCTL_FEATURE feature, uint32_t parameter,
+                                             const DriverStructure &returnedDriverStruct,
+                                             bool ioctlSuccess, NTSTATUS returnedDriverStatus)
+{
+    DriverStructure inputDriverStruct;
+
+    /* By convention unset memory areas passed through ioctl are filled with 0xFF */
+    memset(&inputDriverStruct, 0xFF, sizeof(DriverStructure));
+
+    addTinyCommand(driver::IoCtlType::TinyGet, feature, parameter, inputDriverStruct,
+                   returnedDriverStruct, ioctlSuccess, returnedDriverStatus);
 }
 
 template <driver::IOCTL_FEATURE feature, uint32_t parameter, typename DriverStructure>

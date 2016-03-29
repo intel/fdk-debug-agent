@@ -151,6 +151,10 @@ private:
     template <class T>
     void ioctl(typename T::Data &inout);
 
+    /** Same as previous ioctl() method, but with dynamic params */
+    template <class T>
+    void ioctl(driver::IoCtlType type, ULONG feature, ULONG parameterId, T &inout);
+
     /** Convert values from OS-agnostic cAVS to cAVS Windows driver and vice-versa
      */
     /** @{ */

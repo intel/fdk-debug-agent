@@ -397,9 +397,20 @@ private:
     void addTinyGetCommand(const DriverStructure &returnedDriverStruct, bool ioctlSuccess,
                            NTSTATUS returnedDriverStatus);
 
+    /** Same as previous addTinyGetCommand() method, but with with dynamic parameters */
+    template <typename DriverStructure>
+    void addTinyGetCommand(driver::IOCTL_FEATURE feature, uint32_t parameter,
+                           const DriverStructure &returnedDriverStruct, bool ioctlSuccess,
+                           NTSTATUS returnedDriverStatus);
+
     template <driver::IOCTL_FEATURE feature, uint32_t parameter, typename DriverStructure>
     void addTinySetCommand(const DriverStructure &inputDriverStruct, bool ioctlSuccess,
                            NTSTATUS returnedDriverStatus);
+
+    template <class T>
+    void addTinyCommand(driver::IoCtlType, ULONG feature, ULONG parameterId,
+                        const T &inputDriverStr, const T &outputDriverStr, bool ioctlSuccess,
+                        NTSTATUS returnedDriverStatus);
 
     /* Performs a TinyGet/Set command with a supplied ioctl description passed as template parameter
      */
