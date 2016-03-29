@@ -229,6 +229,19 @@ size_t Prober::getExtractionRingBufferLinearPosition()
     return size_t{from};
 }
 
+size_t Prober::getInjectionRingBufferLinearPosition(ProbeId probeId)
+{
+    checkProbeId(probeId);
+
+    uint64_t from;
+    memset(&from, 0xFF, sizeof(from));
+
+    ULONG paramId = driver::ProbeFeatureParameter::INJECTION_BUFFER0_STATUS +
+                    probeId.getValue(); // According to the SwAS
+    ioctl(driver::IoCtlType::TinyGet, mProbeFeature, paramId, from);
+    return size_t{from};
+}
+
 template <class T>
 void Prober::ioctl(driver::IoCtlType ioctlType, ULONG feature, ULONG parameterId, T &inout)
 {

@@ -110,9 +110,6 @@ public:
     std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override;
     bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) override;
 
-    driver::RingBuffersDescription getRingBuffers();
-    size_t getExtractionRingBufferLinearPosition();
-
 private:
     static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_FW_PROBE;
     static constexpr std::size_t mQueueSize = 5 * 1024 * 1024;
@@ -173,6 +170,10 @@ private:
 
     /** @return active probe indexes (extraction/injection) */
     std::pair<std::set<ProbeId> /*Extract*/, std::set<ProbeId> /*Inject*/> getActiveProbes() const;
+
+    driver::RingBuffersDescription getRingBuffers();
+    size_t getExtractionRingBufferLinearPosition();
+    size_t getInjectionRingBufferLinearPosition(ProbeId probeId);
 
     Device &mDevice;
     const EventHandles &mEventHandles;

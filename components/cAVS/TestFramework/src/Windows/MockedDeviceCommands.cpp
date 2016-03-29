@@ -334,6 +334,16 @@ void MockedDeviceCommands::addGetExtractionRingBufferLinearPosition(bool ioctlSu
         position, ioctlSuccess, returnedStatus);
 }
 
+void MockedDeviceCommands::addGetInjectionRingBufferLinearPosition(bool ioctlSuccess,
+                                                                   NTSTATUS returnedStatus,
+                                                                   uint32_t probeIndex,
+                                                                   uint64_t position)
+{
+    addTinyGetCommand(driver::IOCTL_FEATURE::FEATURE_FW_PROBE,
+                      driver::ProbeFeatureParameter::INJECTION_BUFFER0_STATUS + probeIndex,
+                      position, ioctlSuccess, returnedStatus);
+}
+
 void MockedDeviceCommands::addGetPipelineListCommand(
     bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
     uint32_t maxPplCount, const std::vector<dsp_fw::PipeLineIdType> &pipelineIds)

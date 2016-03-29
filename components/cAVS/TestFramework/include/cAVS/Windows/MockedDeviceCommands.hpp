@@ -221,6 +221,20 @@ public:
     void addGetExtractionRingBufferLinearPosition(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                   uint64_t position);
 
+    /** Add a get injection ring buffer linear position command
+    *
+    * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+    * @param[in] returnedStatus the returned driver status
+    * @param[in] probeIndex the probe index to query
+    * @param[in] position the position reurned by the ioctl
+    *
+    * @note: probeIndex and position are unused if
+    * - ioctlSuccess is false or
+    * - NT_SUCCESS(returnedStatus) returns false
+    */
+    void addGetInjectionRingBufferLinearPosition(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                                 uint32_t probeIndex, uint64_t position);
+
     /** Add a get pipeline list command.
      *
      * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
