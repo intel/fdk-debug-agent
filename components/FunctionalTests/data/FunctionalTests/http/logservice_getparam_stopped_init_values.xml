@@ -5,6 +5,6 @@
         <BooleanParameter Name="Circular">0</BooleanParameter>
     </ParameterBlock>
     <BooleanParameter Name="PersistsState">0</BooleanParameter>
-    <EnumParameter Name="Verbosity">Critical</EnumParameter>
+    <EnumParameter Name="Verbosity">Verbose</EnumParameter>
     <BooleanParameter Name="ViaPTI">0</BooleanParameter>
 </control_parameters>

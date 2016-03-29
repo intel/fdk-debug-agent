@@ -31,6 +31,7 @@
 #include "cAVS/DspFw/Scheduler.hpp"
 #include "cAVS/DspFw/Infrastructure.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
+#include "cAVS/Linux/DriverTypes.hpp"
 #include "Util/Buffer.hpp"
 
 namespace debug_agent
@@ -232,6 +233,18 @@ public:
      * @throw Device::Exception
      */
     void addSetCorePowerCommand(bool controlSuccess, unsigned int coreId, bool allowedToSleep);
+
+    /** Add a set Log Info State command.
+     *
+     * @param[in] controlSuccess true if the command shall be successful, false otherwise
+     * @param[in] coreMask mask of the core to set the info
+     * @param[in] enabled true if log is enabled, false otherwise.
+     * @param[in] level of the log to set.
+     *
+     * @throw Device::Exception
+     */
+    void addSetLogInfoStateCommand(bool controlSuccess, driver::CoreMask coreMask, bool enabled,
+                                   Logger::Level level);
 
 private:
     MockedDeviceCommands(const MockedDeviceCommands &) = delete;

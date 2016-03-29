@@ -43,9 +43,14 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stub")
     /* Setting the test vector
      * ----------------------- */
     MockedDeviceCommands commands(*device);
-
     commands.addSetCorePowerCommand(true, 0, false);
     commands.addSetCorePowerCommand(true, 1, false);
+
+    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
+                                       debug_agent::cavs::Logger::Level::Verbose);
+    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
+                                       debug_agent::cavs::Logger::Level::Verbose);
+
     commands.addSetCorePowerCommand(true, 0, true);
     commands.addSetCorePowerCommand(true, 1, true);
 
@@ -67,6 +72,106 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stub")
 
     /* Checking successful get log parameters command */
     debug_agent::cavs::Logger::Parameters outputParameters;
+    CHECK_NOTHROW(outputParameters = logger.getParameters());
+
+    /* Checking that returned parameters are correct */
+    CHECK(outputParameters == inputParameters);
+}
+
+TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters using Stubbed Control Device")
+{
+    /* Setting the test vector
+     * ----------------------- */
+
+    StubbedCompressDeviceFactory compressDeviceFactory;
+
+    /* Setting the test vector
+     * ----------------------- */
+    MockedDeviceCommands commands(*device);
+
+    commands.addSetCorePowerCommand(true, 0, false);
+    commands.addSetCorePowerCommand(true, 1, false);
+    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
+                                       debug_agent::cavs::Logger::Level::Verbose);
+    commands.addSetCorePowerCommand(true, 0, true);
+    commands.addSetCorePowerCommand(true, 1, true);
+
+    std::unique_ptr<ControlDevice> stubbedControlDevice =
+        std::make_unique<StubbedControlDevice>("myStubbedControlCard");
+    /* Now using the mocked device
+     * --------------------------- */
+
+    //* Creating the windows logger, that will use the mocked device*/
+    /* Creating the windows logger, that will use the mocked device*/
+    linux::Logger logger(*device, *stubbedControlDevice, compressDeviceFactory);
+
+    /* Defining parameters that will be used for set then get*/
+    linux::Logger::Parameters inputParameters(false, debug_agent::cavs::Logger::Level::Verbose,
+                                              debug_agent::cavs::Logger::Output::Sram);
+
+    debug_agent::cavs::Logger::Parameters initOutputParameters;
+    CHECK_NOTHROW(initOutputParameters = logger.getParameters());
+
+    /* Checking that returned parameters are correct */
+    CHECK(initOutputParameters == inputParameters);
+
+    /* Change the log lovel to verbose for activation. */
+    inputParameters.mIsStarted = true;
+    inputParameters.mLevel = debug_agent::cavs::Logger::Level::Verbose;
+
+    /* Checking successful set log parameters command */
+    CHECK_NOTHROW(logger.setParameters(inputParameters));
+
+    /* Checking successful get log parameters command */
+    debug_agent::cavs::Logger::Parameters outputParameters;
+    CHECK_NOTHROW(outputParameters = logger.getParameters());
+
+    /* Checking that returned parameters are correct */
+    CHECK(outputParameters == inputParameters);
+}
+
+TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
+{
+    /* Setting the test vector
+     * ----------------------- */
+    MockedDeviceCommands commands(*device);
+
+    commands.addSetCorePowerCommand(true, 0, false);
+    /** Adding a failed set log parameters command due to control error. */
+    commands.addSetLogInfoStateCommand(false, driver::CoreMask(1 << 0), true,
+                                       debug_agent::cavs::Logger::Level::Verbose);
+
+    /** Adding a successful set log parameters command */
+    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0), true,
+                                       debug_agent::cavs::Logger::Level::Verbose);
+    commands.addSetCorePowerCommand(true, 0, true);
+
+    MockedCompressDeviceFactory compressDeviceFactory;
+    compressDevice->addSuccessfulCompressDeviceEntryOpen();
+    compressDevice->addSuccessfulCompressDeviceEntryStart();
+    compressDevice->addSuccessfulCompressDeviceEntryStop();
+    compressDeviceFactory.addMockedDevice(std::move(compressDevice));
+
+    /* Now using the mocked device
+     * --------------------------- */
+
+    //* Creating the windows logger, that will use the mocked device*/
+    linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
+
+    /* Defining parameters that will be used for set then get*/
+    linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
+                                              debug_agent::cavs::Logger::Output::Sram);
+
+    /* Checking that set log parameters command produces OS error */
+    CHECK_THROWS_AS_MSG(logger.setParameters(inputParameters), linux::Logger::Exception,
+                        "Failed to write the log level: "
+                        "error during commandWrite: error#MockDevice");
+
+    /* Checking successful set log parameters command */
+    CHECK_NOTHROW(logger.setParameters(inputParameters));
+
+    /* Checking successful get log parameters command */
+    linux::Logger::Parameters outputParameters;
     CHECK_NOTHROW(outputParameters = logger.getParameters());
 
     /* Checking that returned parameters are correct */
@@ -138,7 +243,11 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stop Fai
     MockedDeviceCommands commands(*device);
 
     commands.addSetCorePowerCommand(true, 0, false);
+    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0), true,
+                                       debug_agent::cavs::Logger::Level::Verbose);
     commands.addSetCorePowerCommand(true, 0, true);
+    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0), false,
+                                       debug_agent::cavs::Logger::Level::Verbose);
 
     MockedCompressDeviceFactory compressDeviceFactory;
     compressDevice->addSuccessfulCompressDeviceEntryOpen();

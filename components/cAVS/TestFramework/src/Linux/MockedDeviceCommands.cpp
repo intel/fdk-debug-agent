@@ -263,6 +263,30 @@ void MockedDeviceCommands::addSetCorePowerCommand(bool controlSuccess, unsigned 
                                   corePowerCmd.getBuffer().size());
     }
 }
+
+void MockedDeviceCommands::addSetLogInfoStateCommand(bool controlSuccess, driver::CoreMask coreMask,
+                                                     bool enabled, Logger::Level level)
+{
+    driver::LogStateInfo logStateInfo(coreMask, enabled, level);
+    util::MemoryByteStreamWriter payloadWriter;
+    payloadWriter.write(logStateInfo);
+
+    driver::LargeConfigAccess configAccess(
+        driver::LargeConfigAccess::CmdType::Set, dsp_fw::baseFirmwareModuleId,
+        dsp_fw::baseFirmwareInstanceId, dsp_fw::BaseFwParams::ENABLE_LOGS,
+        payloadWriter.getBuffer().size(), payloadWriter.getBuffer());
+
+    util::MemoryByteStreamWriter messageWriter;
+    messageWriter.write(configAccess);
+
+    if (controlSuccess) {
+        mDevice.addCommandWriteOK(driver::setGetCtrl, messageWriter.getBuffer(),
+                                  messageWriter.getBuffer().size());
+    } else {
+        mDevice.addCommandWriteKO(driver::setGetCtrl, messageWriter.getBuffer(),
+                                  messageWriter.getBuffer().size());
+    }
+}
 }
 }
 }

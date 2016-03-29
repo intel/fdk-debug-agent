@@ -52,6 +52,12 @@ void Logger::setParameters(const Parameters &parameters)
             stopLogLocked(parameters);
         }
     }
+
+    mLogLevel = parameters.mLevel;
+    /** Log level IPC shall be sent once logger started to overwrite the log level of the driver
+     * It can be updated during log session, and no matter the order when stopping
+     */
+    setLogStateInfo(driver::LogStateInfo(mCoreMask, parameters.mIsStarted, mLogLevel));
 }
 
 void Logger::startLogLocked(const Parameters &parameters)
@@ -73,12 +79,32 @@ Logger::Parameters Logger::getParameters()
      * Log production is started once tinycompress devices
      * are opened and started
      */
-    return {isLogProductionRunning(), Level::Verbose, Output::Sram};
+    return {isLogProductionRunning(), mLogLevel, Output::Sram};
 }
 
 std::unique_ptr<LogBlock> Logger::readLogBlock()
 {
     return mLogEntryQueue.remove();
+}
+
+void Logger::setLogStateInfo(const driver::LogStateInfo &logStateInfo)
+{
+    util::MemoryByteStreamWriter payloadWriter;
+    payloadWriter.write(logStateInfo);
+
+    driver::LargeConfigAccess configAccess(
+        driver::LargeConfigAccess::CmdType::Set, dsp_fw::baseFirmwareModuleId,
+        dsp_fw::baseFirmwareInstanceId, dsp_fw::BaseFwParams::ENABLE_LOGS,
+        payloadWriter.getBuffer().size(), payloadWriter.getBuffer());
+
+    util::MemoryByteStreamWriter messageWriter;
+    messageWriter.write(configAccess);
+
+    try {
+        mDevice.commandWrite(driver::setGetCtrl, messageWriter.getBuffer());
+    } catch (const Device::Exception &e) {
+        throw Exception("Failed to write the log level: " + std::string(e.what()));
+    }
 }
 
 void Logger::constructProducers()
@@ -89,12 +115,13 @@ void Logger::constructProducers()
     } catch (const CompressDeviceFactory::Exception &e) {
         throw Exception("Failed to get Logger Device Info list. " + std::string(e.what()));
     }
-
+    mCoreMask.reset();
     for (const auto &loggerInfo : loggersInfo) {
         /* @todo: if one is failing, shall we continue in degradated mode? */
         mLogProducers.push_back(
             std::make_unique<LogProducer>(mLogEntryQueue, loggerInfo.coreId(), mDevice,
                                           mCompressDeviceFactory.newCompressDevice(loggerInfo)));
+        mCoreMask.set(loggerInfo.coreId());
     }
     if (mLogProducers.empty()) {
         throw Exception("No Log Producers instantiated.");
