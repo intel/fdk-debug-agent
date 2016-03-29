@@ -100,7 +100,7 @@ public:
             throw Exception("Invalid core id found in info " + infoId);
         }
         info.setCoreId(coreId);
-        return true;
+        return coreId == 0; /** @todo: remove workaround: Only accept logging on Core 0. */
     }
 
     /** Find and extract the information of a given type of compress device available on the
