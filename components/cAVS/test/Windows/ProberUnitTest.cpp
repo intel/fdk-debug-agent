@@ -103,9 +103,12 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
     driver::ProbePointConfiguration sampleDriverConfig =
         Me::toWindows(sampleCavsConfig, probeEvents);
 
+    /* Currently not used */
+    std::map<ProbeId, std::size_t> injectionSampleByteSizeMap;
+
     // Check nominal cases
     commands.addSetProbeConfigurationCommand(true, STATUS_SUCCESS, sampleDriverConfig);
-    CHECK_NOTHROW(prober.setSessionProbes(sampleCavsConfig));
+    CHECK_NOTHROW(prober.setSessionProbes(sampleCavsConfig, injectionSampleByteSizeMap));
     commands.addGetProbeConfigurationCommand(true, STATUS_SUCCESS, sampleDriverConfig);
     CHECK_NOTHROW(prober.getSessionProbes() == sampleCavsConfig);
 
@@ -115,18 +118,20 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
     illegalPurposeCavsConfig.insert(
         end(illegalPurposeCavsConfig), 7,
         {true, {0, 0, dsp_fw::ProbeType::Input, 0}, Me::ProbePurpose::Inject});
-    CHECK_THROWS_AS_MSG(prober.setSessionProbes(illegalPurposeCavsConfig), Me::Exception,
-                        "Wrong purpose value (3).");
+    CHECK_THROWS_AS_MSG(
+        prober.setSessionProbes(illegalPurposeCavsConfig, injectionSampleByteSizeMap),
+        Me::Exception, "Wrong purpose value (3).");
 
     // Have the driver return an error (the ProbeState argument is irrelevant)
     commands.addSetProbeConfigurationCommand(true, STATUS_FLOAT_DIVIDE_BY_ZERO, sampleDriverConfig);
-    CHECK_THROWS_AS_MSG(prober.setSessionProbes(sampleCavsConfig), Me::Exception,
+    CHECK_THROWS_AS_MSG(prober.setSessionProbes(sampleCavsConfig, injectionSampleByteSizeMap),
+                        Me::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
 
     // Have the OS make the ioctl() call fail (driver status and ProbeState
     // arguments are irrelevant)
     commands.addSetProbeConfigurationCommand(false, STATUS_SUCCESS, sampleDriverConfig);
-    CHECK_THROWS_AS_MSG(prober.setSessionProbes(sampleCavsConfig), Me::Exception,
-                        "TinySet error: OS says that io control has failed.");
+    CHECK_THROWS_AS_MSG(prober.setSessionProbes(sampleCavsConfig, injectionSampleByteSizeMap),
+                        Me::Exception, "TinySet error: OS says that io control has failed.");
 }

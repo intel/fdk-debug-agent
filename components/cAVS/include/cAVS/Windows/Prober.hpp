@@ -104,7 +104,8 @@ public:
     std::size_t getMaxProbeCount() const override { return driver::maxProbes; }
     void setState(State state) override;
     State getState() override;
-    void setSessionProbes(const SessionProbes probes) override;
+    void setSessionProbes(const SessionProbes probes,
+                          std::map<ProbeId, std::size_t> injectionSampleByteSizes) override;
     SessionProbes getSessionProbes() override;
     std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override;
     bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) override;
@@ -172,6 +173,7 @@ private:
     Device &mDevice;
     const EventHandles &mEventHandles;
     SessionProbes mCachedProbeConfiguration;
+    std::map<ProbeId, std::size_t> mCachedInjectionSampleByteSizes;
     std::vector<PacketQueue> mExtractionQueues;
     std::unique_ptr<probe::Extractor> mExtractor;
 };

@@ -115,7 +115,7 @@ System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
       mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
       mProbeInjectionMutexes(mDriver->getProber().getMaxProbeCount()),
-      mProbeService(mDriver->getProber())
+      mProbeService(mDriver->getProber(), mDriver->getModuleHandler())
 {
     try {
         mDriver->getModuleHandler().getFwConfig(mFwConfig);

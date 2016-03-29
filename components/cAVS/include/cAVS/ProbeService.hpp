@@ -22,6 +22,7 @@
 #pragma once
 
 #include "cAVS/Prober.hpp"
+#include "cAVS/ModuleHandler.hpp"
 #include <vector>
 #include <mutex>
 #include <map>
@@ -50,7 +51,10 @@ public:
         using std::runtime_error::runtime_error;
     };
 
-    ProbeService(Prober &prober) : mProbeConfigs(prober.getMaxProbeCount()), mProber(prober) {}
+    ProbeService(Prober &prober, ModuleHandler &moduleHandler)
+        : mProbeConfigs(prober.getMaxProbeCount()), mProber(prober), mModuleHandler(moduleHandler)
+    {
+    }
     ~ProbeService();
 
     /** Set service state
@@ -114,6 +118,11 @@ private:
      */
     void setStateToDriver(Prober::State state);
 
+    /** @return a map that provides the sample byte size of each injection probes
+     * @throw ProbeService::Exception
+     */
+    std::map<ProbeId, std::size_t> getInjectionSampleByteSizeMap() const;
+
     /** State machine transitions leading to "Active" state from any other state*/
     static const Transitions mStartTransitions;
 
@@ -122,6 +131,7 @@ private:
 
     std::vector<Prober::ProbeConfig> mProbeConfigs;
     Prober &mProber;
+    ModuleHandler &mModuleHandler;
     mutable std::mutex mDriverLogServiceStateMutex;
     mutable std::mutex mProbeConfigMutex;
 };

@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <map>
 
 namespace debug_agent
 {
@@ -156,9 +157,14 @@ public:
      *
      * Probe service state shall be 'Owned'.
      *
+     * @param[in] probes the probe configuration
+     * @param[in] injectionSampleByteSizes A <probe index,  sample byte size> map used to inject
+     *                                     silence if underrun happens.
+     *
      * @throw Prober::Exception
      */
-    virtual void setSessionProbes(const SessionProbes probes) = 0;
+    virtual void setSessionProbes(const SessionProbes probes,
+                                  std::map<ProbeId, std::size_t> injectionSampleByteSizes) = 0;
 
     /** Get probes for the current/future session.
      *

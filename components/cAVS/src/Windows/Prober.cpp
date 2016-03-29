@@ -165,9 +165,14 @@ driver::ProbePointConfiguration Prober::toWindows(const cavs::Prober::SessionPro
     return toDriver;
 }
 
-void Prober::setSessionProbes(const SessionProbes probes)
+void Prober::setSessionProbes(const SessionProbes probes,
+                              std::map<ProbeId, std::size_t> injectionSampleByteSizes)
 {
+    // Caching info needed to start probing
     mCachedProbeConfiguration = probes;
+    mCachedInjectionSampleByteSizes = injectionSampleByteSizes;
+
+    // Calling the ioctl
     ioctl<SetProbePointConfiguration>(toWindows(probes, mEventHandles));
 }
 
