@@ -23,6 +23,7 @@
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/LogStreamer.hpp"
 #include "Util/StringHelper.hpp"
+#include "System/IfdkStreamHeader.hpp"
 #include <algorithm>
 #include <utility>
 #include <set>
@@ -43,6 +44,16 @@ void System::LogStreamResource::doWriting(std::ostream &os)
 // System::ProbeStreamResource class
 void System::ProbeExtractionStreamResource::doWriting(std::ostream &os)
 {
+    // header attributes
+    const std::string systemType = "generic";
+    const std::string formatType = "probe";
+    const int majorVersion = 1;
+    const int minorVersion = 0;
+
+    // writing header
+    system::IfdkStreamHeader header(systemType, formatType, majorVersion, minorVersion);
+    os << header;
+
     try {
         while (true) {
             std::unique_ptr<util::Buffer> block = mProber.dequeueExtractionBlock(mProbeIndex);
