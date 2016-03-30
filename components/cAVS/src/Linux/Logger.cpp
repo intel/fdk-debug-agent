@@ -51,23 +51,12 @@ void Logger::setParameters(const Parameters &parameters)
         } else {
             stopLogLocked(parameters);
         }
-    } else {
-        /* Start/Stop state has not changed */
-
-        if (isLogProductionRunning()) {
-            throw Exception("Can not change log parameters while logging is activated.");
-        } else {
-            updateLogLocked(parameters);
-        }
     }
 }
 
 void Logger::startLogLocked(const Parameters &parameters)
 {
     assert(!isLogProductionRunning());
-
-    /* Log level must be set before starting the compress devices for logging as per HLD. */
-    setLogParameterCtl(parameters.mLevel);
 
     /* Starting the producer thread after setting level of logs into the fw */
     constructProducers();
@@ -76,50 +65,6 @@ void Logger::startLogLocked(const Parameters &parameters)
 void Logger::stopLogLocked(const Parameters &parameters)
 {
     destroyProducers();
-
-    /* Update anyway parameters? */
-    setLogParameterCtl(parameters.mLevel);
-}
-
-void Logger::updateLogLocked(const Parameters &parameters)
-{
-    /* Cannot change log parameters during running session */
-    assert(!isLogProductionRunning());
-
-    /** Control Device exposes only a control to set the log level */
-    setLogParameterCtl(parameters.mLevel);
-}
-
-void Logger::setLogParameterCtl(const Level &level)
-{
-    util::MemoryByteStreamWriter writer;
-    writer.write(static_cast<long>(translateToMixer(level)));
-    try {
-        mControlDevice.ctlWrite(mixer_ctl::logLevelMixer, writer.getBuffer());
-    } catch (const ControlDevice::Exception &e) {
-        throw Exception("Failed to write the log level control: " + std::string(e.what()));
-    }
-}
-
-Logger::Level Logger::getLogParameterCtl() const
-{
-    mixer_ctl::LogPriority logPriority;
-
-    // Avoid strict-aliasing violations
-    static_assert(sizeof(long) == sizeof(logPriority), "mixer_ctl::LogPriority should be a long");
-    long hack;
-
-    util::Buffer logLevelBuffer{};
-    try {
-        mControlDevice.ctlRead(mixer_ctl::logLevelMixer, logLevelBuffer);
-    } catch (const ControlDevice::Exception &e) {
-        throw Exception("Failed to read the log level control: " + std::string(e.what()));
-    }
-    util::MemoryByteStreamReader reader(logLevelBuffer);
-    reader.read(hack);
-    logPriority = static_cast<mixer_ctl::LogPriority>(hack);
-
-    return translateFromMixer(logPriority);
 }
 
 Logger::Parameters Logger::getParameters()
@@ -128,7 +73,7 @@ Logger::Parameters Logger::getParameters()
      * Log production is started once tinycompress devices
      * are opened and started
      */
-    return {isLogProductionRunning(), getLogParameterCtl(), Output::Sram};
+    return {isLogProductionRunning(), Level::Verbose, Output::Sram};
 }
 
 std::unique_ptr<LogBlock> Logger::readLogBlock()
@@ -320,43 +265,6 @@ void Logger::LogProducer::produceEntries()
         }
     }
     mCommandQueue.close();
-}
-
-mixer_ctl::LogPriority Logger::translateToMixer(Level level)
-{
-    switch (level) {
-    case Level::Verbose:
-        return mixer_ctl::LogPriority::Verbose;
-    case Level::Low:
-        return mixer_ctl::LogPriority::Low;
-    case Level::Medium:
-        return mixer_ctl::LogPriority::Medium;
-    case Level::High:
-        return mixer_ctl::LogPriority::High;
-    case Level::Critical:
-        return mixer_ctl::LogPriority::Critical;
-    }
-    throw Exception("Wrong log level value: " + std::to_string(static_cast<uint32_t>(level)));
-}
-
-Logger::Level Logger::translateFromMixer(mixer_ctl::LogPriority level)
-{
-    switch (level) {
-    case mixer_ctl::LogPriority::Verbose:
-        return Level::Verbose;
-    case mixer_ctl::LogPriority::Low:
-        return Level::Low;
-    case mixer_ctl::LogPriority::Medium:
-        return Level::Medium;
-    case mixer_ctl::LogPriority::High:
-        return Level::High;
-    case mixer_ctl::LogPriority::Critical:
-        return Level::Critical;
-    case mixer_ctl::LogPriority::Quiet:
-        // WTF???
-        return Level::Verbose;
-    }
-    throw Exception("Wrong Mixer log level value: " + std::to_string(static_cast<uint32_t>(level)));
 }
 }
 }

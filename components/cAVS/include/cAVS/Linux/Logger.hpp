@@ -153,18 +153,8 @@ private:
     static const std::size_t queueMaxMemoryBytes =
         LogProducer::nbFragments * LogProducer::fragmentSize * 320; /* 10 meg. */
 
-    void setLogParameterCtl(const Level &level);
-    Level getLogParameterCtl() const;
-
-    /** Translate log level to driver type */
-    static mixer_ctl::LogPriority translateToMixer(Level level);
-
-    /** Translate log level from driver type */
-    static Level translateFromMixer(mixer_ctl::LogPriority level);
-
     void startLogLocked(const Parameters &parameters);
     void stopLogLocked(const Parameters &parameters);
-    void updateLogLocked(const Parameters &parameters);
     void constructProducers();
     void destroyProducers();
     void resetProducers();
