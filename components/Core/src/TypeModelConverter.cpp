@@ -394,8 +394,17 @@ void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
         ch.add(
             Characteristic("Total number of DMA gateways", std::to_string(hwConfig.gatewayCount)));
     }
-    if (hwConfig.isEbbCountValid) {
-        ch.add(Characteristic("Number of SRAM memory banks", std::to_string(hwConfig.ebbCount)));
+    if (hwConfig.isLpEbbCountValid) {
+        ch.add(Characteristic("Number of LP SRAM memory banks manageable by DSP",
+                              std::to_string(hwConfig.lpEbbCount)));
+    }
+    if (hwConfig.isHpEbbCountValid) {
+        ch.add(Characteristic("Number of HP SRAM memory banks manageable by DSP",
+                              std::to_string(hwConfig.hpEbbCount)));
+    }
+    if (hwConfig.isEbbSizeBytesValid) {
+        ch.add(Characteristic("Size of a single memory bank (EBB) in bytes",
+                              std::to_string(hwConfig.ebbSizeBytes)));
     }
 }
 }

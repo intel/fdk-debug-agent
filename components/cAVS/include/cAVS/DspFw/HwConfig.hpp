@@ -123,8 +123,14 @@ public:
     uint32_t gatewayCount;
     bool isGatewayCountValid;
 
-    uint32_t ebbCount;
-    bool isEbbCountValid;
+    uint32_t hpEbbCount;
+    bool isHpEbbCountValid;
+
+    uint32_t lpEbbCount;
+    bool isLpEbbCountValid;
+
+    uint32_t ebbSizeBytes;
+    bool isEbbSizeBytesValid;
 
     HwConfig() : mHwConfigTlvMap(), mHwConfigTlvDictionary(mHwConfigTlvMap)
     {
@@ -145,8 +151,12 @@ public:
             std::make_unique<TlvWrapper<GpdmaCapabilities>>(gpdmaCaps, isGpdmaCapsValid);
         mHwConfigTlvMap[Tags::GATEWAY_COUNT_HW_CFG] =
             std::make_unique<TlvWrapper<uint32_t>>(gatewayCount, isGatewayCountValid);
-        mHwConfigTlvMap[Tags::EBB_COUNT_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(ebbCount, isEbbCountValid);
+        mHwConfigTlvMap[Tags::LP_EBB_COUNT_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(lpEbbCount, isLpEbbCountValid);
+        mHwConfigTlvMap[Tags::HP_EBB_COUNT_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(hpEbbCount, isHpEbbCountValid);
+        mHwConfigTlvMap[Tags::EBB_SIZE_BYTES_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(ebbSizeBytes, isEbbSizeBytesValid);
     }
 
     const tlv::TlvDictionaryInterface &getTlvDictionary() const noexcept override
