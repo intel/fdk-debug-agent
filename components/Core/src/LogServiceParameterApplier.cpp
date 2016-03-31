@@ -23,6 +23,8 @@
 #include "XmlHelper.hpp"
 #include "Core/LogServiceParameterApplier.hpp"
 #include "Core/BaseModelConverter.hpp"
+#include "cAVS/Logger.hpp"
+#include <type_traits>
 
 namespace debug_agent
 {
@@ -41,6 +43,16 @@ LogServiceParameterApplier::LogServiceParameterApplier(cavs::System &system)
 std::string LogServiceParameterApplier::getServiceParameterStructure()
 {
     /** @todo: currently hardcoded, use libstructure later */
+    auto toString = [](auto level) {
+        return std::to_string(static_cast<std::underlying_type_t<decltype(level)>>(level));
+    };
+
+    auto strValuePair = [&](auto numerical, auto literal) {
+        return "<ValuePair Numerical=\"" + toString(numerical) + "\" Literal=\"" + literal + "\"/>";
+    };
+
+    using Level = cavs::Logger::Level;
+
     return R"(<control_parameters>
     <BooleanParameter Name="Started"/>
     <ParameterBlock Name="Buffering">
@@ -49,11 +61,16 @@ std::string LogServiceParameterApplier::getServiceParameterStructure()
     </ParameterBlock>
     <BooleanParameter Name="PersistsState"/>
     <EnumParameter Size="8" Name="Verbosity">
-        <ValuePair Numerical="2" Literal="Critical"/>
-        <ValuePair Numerical="3" Literal="High"/>
-        <ValuePair Numerical="4" Literal="Medium"/>
-        <ValuePair Numerical="5" Literal="Low"/>
-        <ValuePair Numerical="6" Literal="Verbose"/>
+        )" +
+           strValuePair(Level::Critical, "Critical") + R"(
+        )" +
+           strValuePair(Level::High, "High") + R"(
+        )" +
+           strValuePair(Level::Medium, "Medium") + R"(
+        )" +
+           strValuePair(Level::Low, "Low") + R"(
+        )" +
+           strValuePair(Level::Verbose, "Verbose") + R"(
     </EnumParameter>
     <BooleanParameter Name="ViaPTI" Description="Set to 1 if PTI interface is to be used"/>
 </control_parameters>

@@ -6,11 +6,11 @@
     </ParameterBlock>
     <BooleanParameter Name="PersistsState"/>
     <EnumParameter Size="8" Name="Verbosity">
-        <ValuePair Numerical="2" Literal="Critical"/>
-        <ValuePair Numerical="3" Literal="High"/>
-        <ValuePair Numerical="4" Literal="Medium"/>
-        <ValuePair Numerical="5" Literal="Low"/>
-        <ValuePair Numerical="6" Literal="Verbose"/>
+        <ValuePair Numerical="1" Literal="Critical"/>
+        <ValuePair Numerical="2" Literal="High"/>
+        <ValuePair Numerical="3" Literal="Medium"/>
+        <ValuePair Numerical="4" Literal="Low"/>
+        <ValuePair Numerical="5" Literal="Verbose"/>
     </EnumParameter>
     <BooleanParameter Name="ViaPTI" Description="Set to 1 if PTI interface is to be used"/>
 </control_parameters>

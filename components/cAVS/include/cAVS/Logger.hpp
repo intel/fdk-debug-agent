@@ -63,11 +63,11 @@ public:
     }
 
     /**
-     * Log level
+     * Log level. This enumeration matches the cAVS FW Log Level definition.
      */
-    enum class Level
+    enum class Level : uint32_t
     {
-        Critical,
+        Critical = 1,
         High,
         Medium,
         Low,
