@@ -246,34 +246,32 @@ struct IoctlFwLogsState
 };
 
 /** State of the probing service */
-enum class ProbeState : uint32_t
-{
-    Idle,
-    Owned,     /// probe service is owned (required because it's a monoclient service)
-    Allocated, /// Buffers are allocated
-    Active     /// Probing is running
-};
 
-// TODO: import from driver headers
-static constexpr uint32_t maxProbes{8};
+/** Importing Probe feature param enum */
+using ProbeFeatureParameter = private_driver::IntcIoctlFeatures::FwProbeFeature::Params;
 
-// TODO: import from driver headers
-enum class ProbeType : uint32_t
-{
-    Input = 0,
-    Output = 1,
-    Internal = 2
-};
+/** Importing Probe state enum */
+using ProbeState =
+    private_driver::IntcIoctlFeatures::FwProbeFeature::FeatureStateParam::ProbeFeatureState;
 
-// TODO: import from driver headers
-enum class ProbePurpose : uint32_t
-{
-    Inject = 0,
-    Extract = 1,
-    InjectReextract = 2
-};
+/** Importing probe count */
+static constexpr uint32_t maxProbes =
+    private_driver::IntcIoctlFeatures::FwProbeFeature::MAX_INJECTION_BUFFERS;
 
-// TODO: import from driver headers
+/** Importing probe type enum */
+using ProbeType =
+    private_driver::IntcIoctlFeatures::FwProbeFeature::PointConfigurationParam::ProbePointType;
+
+/** Importing probe purpose enum */
+using ProbePurpose = private_driver::IntcIoctlFeatures::FwProbeFeature::PointConfigurationParam::
+    ProbePointConnectionPurpose;
+
+/** ProbePointId */
+using private_ProbePointId =
+    private_driver::IntcIoctlFeatures::FwProbeFeature::PointConfigurationParam::ProbePointId;
+CHECK_SIZE(private_ProbePointId, 4);
+CHECK_MEMBER(private_ProbePointId, full, 0, UINT32);
+
 union ProbePointId
 {
     static constexpr int moduleIdSize{16};
@@ -297,7 +295,24 @@ union ProbePointId
     void toStream(util::ByteStreamWriter &writer) const { writer.write(full); }
 };
 
-// TODO: import from driver headers
+/** EventHandleType */
+using private_EventHandleType =
+    private_driver::IntcIoctlFeatures::FwProbeFeature::PointConfigurationParam::EventHandleType;
+CHECK_SIZE(private_EventHandleType, 8);
+
+/** ProbePointConnection */
+using private_EventHandle = private_driver::IntcIoctlFeatures::FwProbeFeature::
+    PointConfigurationParam::ProbePointConnection;
+
+using private_ProbePointConnection = private_driver::IntcIoctlFeatures::FwProbeFeature::
+    PointConfigurationParam::ProbePointConnection;
+CHECK_SIZE(private_ProbePointConnection, 20);
+CHECK_MEMBER(private_ProbePointConnection, enabled, 0, BOOL);
+CHECK_MEMBER(private_ProbePointConnection, probePointId, 4, private_ProbePointId);
+CHECK_MEMBER(private_ProbePointConnection, purpose, 8, ProbePurpose);
+CHECK_MEMBER(private_ProbePointConnection, injectionBufferCompletionEventHandle, 12,
+             private_EventHandleType);
+
 struct ProbePointConnection
 {
     bool enabled;
@@ -329,7 +344,15 @@ struct ProbePointConnection
     }
 };
 
-// TODO: import from driver headers
+/** ProbePointConnection */
+using private_ProbePointConfiguration =
+    private_driver::IntcIoctlFeatures::FwProbeFeature::PointConfigurationParam::BufferStruct;
+CHECK_SIZE(private_ProbePointConfiguration, 168);
+CHECK_MEMBER(private_ProbePointConfiguration, extractionBufferCompletionEventHandle, 0,
+             private_EventHandleType);
+CHECK_MEMBER(private_ProbePointConfiguration, probePointConnections, 8,
+             private_ProbePointConnection[maxProbes]);
+
 struct ProbePointConfiguration
 {
     HANDLE extractionBufferCompletionEventHandle;
@@ -347,7 +370,18 @@ struct ProbePointConfiguration
     }
 };
 
-// TODO: import from driver headers
+/** UserModeBufferPointerType */
+using private_UserModeBufferPointerType = private_driver::IntcIoctlFeatures::FwProbeFeature::
+    BuffersDescriptionParam::UserModeBufferPointerType;
+CHECK_SIZE(private_UserModeBufferPointerType, 8);
+
+/** RingBufferDescription */
+using private_RingBufferDescription = private_driver::IntcIoctlFeatures::FwProbeFeature::
+    BuffersDescriptionParam::RingBufferDescription;
+CHECK_SIZE(private_RingBufferDescription, 16);
+CHECK_MEMBER(private_RingBufferDescription, pStartAddress, 0, private_UserModeBufferPointerType);
+CHECK_MEMBER(private_RingBufferDescription, size, 8, size_t);
+
 struct RingBufferDescription
 {
     volatile uint8_t *startAdress;
@@ -365,7 +399,15 @@ struct RingBufferDescription
     }
 };
 
-// TODO: import from driver headers
+/** RingBuffersDescription */
+using private_RingBuffersDescription =
+    private_driver::IntcIoctlFeatures::FwProbeFeature::BuffersDescriptionParam::BufferStruct;
+CHECK_SIZE(private_RingBuffersDescription, 16 + 16 * 8);
+CHECK_MEMBER(private_RingBuffersDescription, extractionRBDescription, 0,
+             private_RingBufferDescription);
+CHECK_MEMBER(private_RingBuffersDescription, injectionRBDescriptions, 16,
+             private_RingBufferDescription[maxProbes]);
+
 struct RingBuffersDescription
 {
     RingBufferDescription extractionRBDescription;

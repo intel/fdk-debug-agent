@@ -43,8 +43,8 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
 
     // Check that all states are correctly converted (special case for `Active`
     // because of a side-effect.
-    for (auto state :
-         {driver::ProbeState::Idle, driver::ProbeState::Owned, driver::ProbeState::Allocated}) {
+    for (auto state : {driver::ProbeState::ProbeFeatureIdle, driver::ProbeState::ProbeFeatureOwned,
+                       driver::ProbeState::ProbeFeatureAllocated}) {
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS, state);
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS, state);
     }
@@ -58,10 +58,10 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
     // buffers descriptions.
     windows::driver::RingBuffersDescription rb = {{nullptr, 0}, {}};
     commands.addGetRingBuffers(true, STATUS_SUCCESS, rb);
-    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, driver::ProbeState::Active);
+    commands.addSetProbeStateCommand(true, STATUS_SUCCESS, driver::ProbeState::ProbeFeatureActive);
     CHECK_NOTHROW(prober.setState(Me::State::Active));
 
-    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, driver::ProbeState::Active);
+    commands.addGetProbeStateCommand(true, STATUS_SUCCESS, driver::ProbeState::ProbeFeatureActive);
     CHECK(prober.getState() == Me::State::Active);
 
     // Have the prober throw on an illegal state (arguments passed to
@@ -70,14 +70,15 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
                         "Wrong state value (42).")
 
     // Have the driver return an error (the ProbeState argument is irrelevant)
-    commands.addSetProbeStateCommand(true, STATUS_FLOAT_DIVIDE_BY_ZERO, driver::ProbeState::Idle);
+    commands.addSetProbeStateCommand(true, STATUS_FLOAT_DIVIDE_BY_ZERO,
+                                     driver::ProbeState::ProbeFeatureIdle);
     CHECK_THROWS_AS_MSG(prober.setState(Me::State::Idle), Me::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
 
     // Have the OS make the ioctl() call fail (driver status and ProbeState
     // arguments are irrelevant)
-    commands.addSetProbeStateCommand(false, STATUS_SUCCESS, driver::ProbeState::Idle);
+    commands.addSetProbeStateCommand(false, STATUS_SUCCESS, driver::ProbeState::ProbeFeatureIdle);
     CHECK_THROWS_AS_MSG(prober.setState(Me::State::Idle), Me::Exception,
                         "TinySet error: OS says that io control has failed.");
 }

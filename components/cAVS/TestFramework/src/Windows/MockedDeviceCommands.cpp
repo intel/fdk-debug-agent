@@ -259,14 +259,16 @@ void MockedDeviceCommands::addSetLogParametersCommand(bool ioctlSuccess, NTSTATU
 void MockedDeviceCommands::addGetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                    driver::ProbeState returnedState)
 {
-    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE, 0, driver::ProbeState>(
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE,
+                      driver::ProbeFeatureParameter::FEATURE_STATE, driver::ProbeState>(
         returnedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetProbeStateCommand(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                    driver::ProbeState expectedState)
 {
-    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE, 0, driver::ProbeState>(
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE,
+                      driver::ProbeFeatureParameter::FEATURE_STATE, driver::ProbeState>(
         expectedState, ioctlSuccess, returnedStatus);
 }
 
@@ -274,31 +276,38 @@ void MockedDeviceCommands::addGetProbeConfigurationCommand(
     bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::ProbePointConfiguration &returnedConfiguration)
 {
-    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE, 1, driver::ProbePointConfiguration>(
-        returnedConfiguration, ioctlSuccess, returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE,
+                      driver::ProbeFeatureParameter::POINT_CONFIGURATION,
+                      driver::ProbePointConfiguration>(returnedConfiguration, ioctlSuccess,
+                                                       returnedStatus);
 }
 
 void MockedDeviceCommands::addSetProbeConfigurationCommand(
     bool ioctlSuccess, NTSTATUS returnedStatus,
     const driver::ProbePointConfiguration &expectedConfiguration)
 {
-    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE, 1, driver::ProbePointConfiguration>(
-        expectedConfiguration, ioctlSuccess, returnedStatus);
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE,
+                      driver::ProbeFeatureParameter::POINT_CONFIGURATION,
+                      driver::ProbePointConfiguration>(expectedConfiguration, ioctlSuccess,
+                                                       returnedStatus);
 }
 
 void MockedDeviceCommands::addGetRingBuffers(bool ioctlSuccess, NTSTATUS returnedStatus,
                                              const driver::RingBuffersDescription &returnedBuffers)
 {
-    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE, 2, driver::RingBuffersDescription>(
-        returnedBuffers, ioctlSuccess, returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE,
+                      driver::ProbeFeatureParameter::BUFFERS_DESCRIPTION,
+                      driver::RingBuffersDescription>(returnedBuffers, ioctlSuccess,
+                                                      returnedStatus);
 }
 
 void MockedDeviceCommands::addGetExtractionRingBufferLinearPosition(bool ioctlSuccess,
                                                                     NTSTATUS returnedStatus,
                                                                     uint64_t position)
 {
-    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE, 3, uint64_t>(position, ioctlSuccess,
-                                                                            returnedStatus);
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_FW_PROBE,
+                      driver::ProbeFeatureParameter::EXTRACTION_BUFFER_STATUS, uint64_t>(
+        position, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addGetPipelineListCommand(

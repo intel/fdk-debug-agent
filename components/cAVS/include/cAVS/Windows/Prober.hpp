@@ -107,18 +107,27 @@ private:
 
     // 0 = get/setState
     using GetState =
-        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature, 0, driver::ProbeState>;
+        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
+                         driver::ProbeFeatureParameter::FEATURE_STATE, driver::ProbeState>;
     using SetState =
-        IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature, 0, driver::ProbeState>;
+        IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature,
+                         driver::ProbeFeatureParameter::FEATURE_STATE, driver::ProbeState>;
     // 1 = get/setProbePointConfiguration
-    using GetProbePointConfiguration = IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
-                                                        1, driver::ProbePointConfiguration>;
-    using SetProbePointConfiguration = IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature,
-                                                        1, driver::ProbePointConfiguration>;
-    using GetRingBuffersDescription = IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature, 2,
-                                                       driver::RingBuffersDescription>;
+    using GetProbePointConfiguration =
+        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
+                         driver::ProbeFeatureParameter::POINT_CONFIGURATION,
+                         driver::ProbePointConfiguration>;
+    using SetProbePointConfiguration =
+        IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature,
+                         driver::ProbeFeatureParameter::POINT_CONFIGURATION,
+                         driver::ProbePointConfiguration>;
+    using GetRingBuffersDescription =
+        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
+                         driver::ProbeFeatureParameter::BUFFERS_DESCRIPTION,
+                         driver::RingBuffersDescription>;
     using GetExtractionRingBufferPosition =
-        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature, 3, uint64_t>;
+        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
+                         driver::ProbeFeatureParameter::EXTRACTION_BUFFER_STATUS, uint64_t>;
     /** Send a probes-related ioctl to the driver
      *
      * @tparam T A type describing the ioctl (id, direction, type of the data

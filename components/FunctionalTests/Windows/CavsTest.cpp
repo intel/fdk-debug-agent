@@ -145,7 +145,8 @@ public:
     ~DBGACommandScope()
     {
         // When the probe service is destroyed, it checks if the driver service state is Idle
-        mCommands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        mCommands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                          windows::driver::ProbeState::ProbeFeatureIdle);
     }
 
 private:
@@ -807,7 +808,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         DBGACommandScope scope(commands);
 
         // 1 : Getting probe service parameters, checking that it is stopped
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureIdle);
 
         // 2 : Getting probe endpoint parameters, checking that they are deactivated
         // -> involves no ioctl
@@ -822,10 +824,12 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         // 5 : Starting service
 
         // getting current state : idle
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureIdle);
 
         // going to Owned
-        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureOwned);
 
         using Type = Prober::ProbeType;
         using Purpose = Prober::ProbePurpose;
@@ -845,7 +849,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
         // going to Allocated
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
-                                         windows::driver::ProbeState::Allocated);
+                                         windows::driver::ProbeState::ProbeFeatureAllocated);
 
         // going to Get ring buffers
         windows::driver::RingBuffersDescription rb = {
@@ -853,10 +857,12 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         commands.addGetRingBuffers(true, STATUS_SUCCESS, rb);
 
         // going to Active
-        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureActive);
 
         // 6 : Getting probe service parameters, checking that it is started
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureActive);
 
         // 7 : Extract from an enabled probe
 
@@ -870,16 +876,20 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         // 8 : Stopping service
 
         // getting current state : Active
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Active);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureActive);
 
         // going to Allocated, Owned and Idle
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
-                                         windows::driver::ProbeState::Allocated);
-        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
-        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+                                         windows::driver::ProbeState::ProbeFeatureAllocated);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureOwned);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureIdle);
 
         // 9: Getting probe service parameters, checking that it is stopped
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureIdle);
     }
 
     /* Now using the mocked device
@@ -987,13 +997,16 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
         DBGACommandScope scope(commands);
 
         // 1 : Getting probe service state, with an inconsistent driver state (Owned)
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureOwned);
 
         // 2 : If service starting fails, it should come back to "Idle" state
 
         // going to Owned state and setting configuration
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
-        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureIdle);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureOwned);
 
         using Type = Prober::ProbeType;
         using Purpose = Prober::ProbePurpose;
@@ -1011,14 +1024,17 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
 
         // going to Allocated, but the it fails!
         commands.addSetProbeStateCommand(false, STATUS_SUCCESS,
-                                         windows::driver::ProbeState::Allocated);
+                                         windows::driver::ProbeState::ProbeFeatureAllocated);
 
         // coming back to idle : firstly getting current state (Owned), then going to Idle state
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Owned);
-        commands.addSetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureOwned);
+        commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureIdle);
 
         // 3 : getting state: should be Idle
-        commands.addGetProbeStateCommand(true, STATUS_SUCCESS, windows::driver::ProbeState::Idle);
+        commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
+                                         windows::driver::ProbeState::ProbeFeatureIdle);
     }
 
     /* Now using the mocked device

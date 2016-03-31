@@ -39,15 +39,15 @@ namespace windows
 {
 
 static const std::map<Prober::ProbePurpose, driver::ProbePurpose> purposeConversion = {
-    {Prober::ProbePurpose::Inject, driver::ProbePurpose::Inject},
-    {Prober::ProbePurpose::Extract, driver::ProbePurpose::Extract},
-    {Prober::ProbePurpose::InjectReextract, driver::ProbePurpose::InjectReextract}};
+    {Prober::ProbePurpose::Inject, driver::ProbePurpose::InjectPurpose},
+    {Prober::ProbePurpose::Extract, driver::ProbePurpose::ExtractPurpose},
+    {Prober::ProbePurpose::InjectReextract, driver::ProbePurpose::InjectReextractPurpose}};
 
 static const std::map<Prober::State, driver::ProbeState> stateConversion = {
-    {Prober::State::Idle, driver::ProbeState::Idle},
-    {Prober::State::Owned, driver::ProbeState::Owned},
-    {Prober::State::Allocated, driver::ProbeState::Allocated},
-    {Prober::State::Active, driver::ProbeState::Active}};
+    {Prober::State::Idle, driver::ProbeState::ProbeFeatureIdle},
+    {Prober::State::Owned, driver::ProbeState::ProbeFeatureOwned},
+    {Prober::State::Allocated, driver::ProbeState::ProbeFeatureAllocated},
+    {Prober::State::Active, driver::ProbeState::ProbeFeatureActive}};
 
 void Prober::throwIfIllegal(const ProbePointId &candidate)
 {
