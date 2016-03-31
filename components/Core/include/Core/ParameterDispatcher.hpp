@@ -144,7 +144,7 @@ public:
     {
         ParameterApplier &applier = getParamApplierByType(type);
         try {
-            return applier.setParameterValue(type, kind, instanceId, value);
+            applier.setParameterValue(type, kind, instanceId, value);
         } catch (ParameterApplier::UnsupportedException &) {
             throw UnsupportedException("command not supported: setValue", type, kind, instanceId);
         } catch (ParameterApplier::Exception &e) {

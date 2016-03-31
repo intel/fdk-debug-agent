@@ -55,6 +55,7 @@ TEST_CASE("SystemDevice: testing interface of the real device")
     CHECK(tmpFd != -1);
     std::cout << "filename is " << name1;
     handlef = open(name1, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    REQUIRE(handlef != -1);
     CHECK(write(handlef, (void *)"0123456789012345", sizeBuffRead) == sizeBuffRead);
     close(handlef);
 
