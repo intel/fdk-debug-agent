@@ -68,6 +68,8 @@ const std::size_t BaseModelConverter::logServiceEndPointCount = 0;
 const std::string BaseModelConverter::probeServiceTypeName = "probe";
 const std::size_t BaseModelConverter::probeServiceEndPointCount = 8;
 
+const std::string BaseModelConverter::perfServiceTypeName = "perf_measurement";
+
 const std::string BaseModelConverter::modulePrefix("module-");
 
 const std::vector<std::string> BaseModelConverter::staticServiceTypes = {logServiceTypeName};

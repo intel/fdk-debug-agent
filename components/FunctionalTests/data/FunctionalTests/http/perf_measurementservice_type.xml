@@ -1,0 +1,7 @@
+<service_type Name="perf_measurement">
+    <description>cAVS subsystem perf_measurement service</description>
+    <characteristics/>
+    <info_parameters/>
+    <control_parameters/>
+    <children/>
+</service_type>

@@ -68,6 +68,7 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
     /* Services */
     addServiceInstanceCollection(collectionMap, logServiceTypeName, logServiceEndPointCount);
     addServiceInstanceCollection(collectionMap, probeServiceTypeName, probeServiceEndPointCount);
+    addServiceInstanceCollection(collectionMap, perfServiceTypeName, 0);
 
     return std::make_shared<InstanceModel>(collectionMap);
 }
@@ -187,6 +188,7 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
 
     serviceCollection->add(ServiceRef(logServiceTypeName, serviceId));
     serviceCollection->add(ServiceRef(probeServiceTypeName, serviceId));
+    serviceCollection->add(ServiceRef(perfServiceTypeName, serviceId));
     children.add(serviceCollection);
 
     /* Links between modules */

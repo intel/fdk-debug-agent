@@ -47,6 +47,7 @@
         <service_collection Name="services">
             <service Id="0" Type="fwlogs"/>
             <service Id="0" Type="probe"/>
+            <service Id="0" Type="perf_measurement"/>
         </service_collection>
     </children>
     <inputs/>

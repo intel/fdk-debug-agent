@@ -53,6 +53,7 @@ public:
     static const std::size_t logServiceEndPointCount;
     static const std::string probeServiceTypeName;
     static const std::size_t probeServiceEndPointCount;
+    static const std::string perfServiceTypeName;
     static const std::string modulePrefix;
 
 protected:

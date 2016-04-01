@@ -1,0 +1,8 @@
+<service Id="0" Type="perf_measurement">
+    <info_parameters/>
+    <control_parameters/>
+    <parents>
+        <subsystem Id="0" Type="cavs"/>
+    </parents>
+    <children/>
+</service>

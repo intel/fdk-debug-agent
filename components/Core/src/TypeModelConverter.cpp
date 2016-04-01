@@ -67,6 +67,7 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
                              logServiceEndPointCount);
     addSubsystemServiceTypes(typeMap, probeServiceTypeName, EndPoint::Direction::Bidirectional,
                              probeServiceEndPointCount);
+    addSubsystemServiceTypes(typeMap, perfServiceTypeName, EndPoint::Direction::Outgoing, 0);
 
     return std::make_shared<TypeModel>(createSystem(), typeMap);
 }

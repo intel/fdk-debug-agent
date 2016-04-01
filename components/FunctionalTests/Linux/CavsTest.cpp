@@ -294,6 +294,10 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
         {"/instance/cavs.probe", "probeservice_instance_collection"},
         {"/instance/cavs.probe/0", "probeservice_instance"},
 
+        {"/type/cavs.perf_measurement", "perf_measurementservice_type"},
+        {"/instance/cavs.perf_measurement", "perf_measurementservice_instance_collection"},
+        {"/instance/cavs.perf_measurement/0", "perf_measurementservice_instance"},
+
         {"/type/cavs.probe.endpoint", "probeservice_endpoint_type"},
         {"/instance/cavs.probe.endpoint", "probeservice_endpoint_instance_collection"},
         {"/instance/cavs.probe.endpoint/0", "probeservice_endpoint_instance"},
