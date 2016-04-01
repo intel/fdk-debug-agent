@@ -124,6 +124,22 @@ Prober::ProbePurpose Prober::fromWindows(const driver::ProbePurpose &from)
     throw Exception("Wrong purpose value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
 }
 
+BOOL Prober::toWindows(bool value)
+{
+    return value ? TRUE : FALSE;
+}
+
+bool Prober::fromWindows(BOOL value)
+{
+    switch (value) {
+    case TRUE:
+        return true;
+    case FALSE:
+        return false;
+    }
+    throw Exception("Unknown BOOL value: " + std::to_string(value));
+}
+
 Prober::Prober(Device &device, const EventHandles &eventHandles)
     : mDevice(device), mEventHandles(eventHandles)
 {
@@ -173,7 +189,7 @@ driver::ProbePointConfiguration Prober::toWindows(const cavs::Prober::SessionPro
     std::size_t probeIndex = 0;
     for (const auto &probe : probes) {
         driver::ProbePointId probePointId = toWindows(probe.probePoint);
-        connections.emplace_back(probe.enabled, probePointId, toWindows(probe.purpose),
+        connections.emplace_back(toWindows(probe.enabled), probePointId, toWindows(probe.purpose),
                                  eventHandles.injectionHandles[probeIndex].get());
 
         ++probeIndex;
@@ -199,7 +215,7 @@ Prober::SessionProbes Prober::getSessionProbes()
 
     SessionProbes result;
     for (const auto &connection : from.probePointConnection) {
-        result.emplace_back(connection.enabled, fromWindows(connection.probePointId),
+        result.emplace_back(fromWindows(connection.enabled), fromWindows(connection.probePointId),
                             fromWindows(connection.purpose));
     }
     return result;

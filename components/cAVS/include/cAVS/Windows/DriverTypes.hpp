@@ -315,13 +315,13 @@ CHECK_MEMBER(private_ProbePointConnection, injectionBufferCompletionEventHandle,
 
 struct ProbePointConnection
 {
-    bool enabled;
+    BOOL enabled;
     ProbePointId probePointId;
     ProbePurpose purpose;
     HANDLE injectionBufferCompletionEventHandle;
 
     ProbePointConnection() = default;
-    ProbePointConnection(bool enabled, ProbePointId probePointId, ProbePurpose purpose,
+    ProbePointConnection(BOOL enabled, ProbePointId probePointId, ProbePurpose purpose,
                          HANDLE handle)
         : enabled(enabled), probePointId(probePointId), purpose(purpose),
           injectionBufferCompletionEventHandle(handle)

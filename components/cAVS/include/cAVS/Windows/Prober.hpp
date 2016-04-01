@@ -148,6 +148,8 @@ private:
     static ProbePointId fromWindows(const driver::ProbePointId &from);
     static driver::ProbePurpose toWindows(const ProbePurpose &from);
     static ProbePurpose fromWindows(const driver::ProbePurpose &from);
+    static BOOL toWindows(bool value);
+    static bool fromWindows(BOOL value);
     /** @} */
 
     void checkProbeId(ProbeId id) const;
