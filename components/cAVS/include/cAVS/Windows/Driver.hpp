@@ -28,6 +28,7 @@
 #include "cAVS/Windows/Prober.hpp"
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/WppClientFactory.hpp"
+#include "Util/AssertAlways.hpp"
 #include <memory>
 
 namespace debug_agent
@@ -49,6 +50,7 @@ public:
           mEventHandles(std::move(eventHandles)), mLogger(*mDevice, *mWppClientFactory),
           mModuleHandler(*mDevice), mProber(*mDevice, mEventHandles)
     {
+        ASSERT_ALWAYS(mEventHandles.isValid());
     }
 
     cavs::Logger &getLogger() override { return mLogger; }

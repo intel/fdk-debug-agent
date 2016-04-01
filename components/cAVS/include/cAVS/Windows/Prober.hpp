@@ -54,6 +54,19 @@ public:
         EventHandles(const EventHandles &) = delete;
         EventHandles &operator=(const EventHandles &) = delete;
 
+        bool isValid() const
+        {
+            if (extractionHandle->handle() == nullptr) {
+                return false;
+            }
+            for (auto &handle : injectionHandles) {
+                if (handle->handle() == nullptr) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         using HandlePtr = std::unique_ptr<EventHandle>;
         using HandlePtrArray = std::array<HandlePtr, driver::maxProbes>;
 
