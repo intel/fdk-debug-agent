@@ -119,8 +119,14 @@ add_subdirectory("test")
 target_link_libraries(cAVS System Util Tlv)
 
 if (CMAKE_SYSTEM_NAME MATCHES Linux)
+    find_path(TINYCOMPRESS_INCLUDE_DIR NAMES tinycompress/tinycompress.h PATHS
+        ${CMAKE_INCLUDE_PATH} NO_DEFAULT_PATH)
     find_path(TINYCOMPRESS_INCLUDE_DIR NAMES tinycompress/tinycompress.h REQUIRED)
     target_include_directories(cAVS SYSTEM PUBLIC "${TINYCOMPRESS_INCLUDE_DIR}")
+
+    find_path(EXT_TINYCOMPRESS_INCLUDE_DIR NAMES tinycompress.h PATHS ${CMAKE_PREFIX_PATH}
+        PATH_SUFFIXES /include/tinycompress REQUIRED)
+    target_include_directories(cAVS PUBLIC "${EXT_TINYCOMPRESS_INCLUDE_DIR}")
 
     find_library(TINYCOMPRESS_LIBRARY NAMES libtinycompress.so REQUIRED)
     target_link_libraries(cAVS ${TINYCOMPRESS_LIBRARY})

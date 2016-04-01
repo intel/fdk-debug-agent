@@ -21,7 +21,6 @@
  */
 
 #include "cAVS/Linux/TinyCompressDevice.hpp"
-#include <tinycompress/tinycompress.h>
 #include "Util/convert.hpp"
 #include <string.h>
 #include <iostream>
