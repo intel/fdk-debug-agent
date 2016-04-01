@@ -34,6 +34,10 @@ namespace cavs
 namespace linux
 {
 
+/* Explicit definition, so that it can be referenced.  See
+ * https://gcc.gnu.org/wiki/VerboseDiagnostics#missing_static_const_definition */
+const size_t Logger::LogProducer::fragmentSize;
+
 void Logger::setParameters(const Parameters &parameters)
 {
     std::lock_guard<std::mutex> locker(mLogActivationContextMutex);
