@@ -21,11 +21,13 @@
  */
 #pragma once
 
+#include "cAVS/DspFw/ExternalFirmwareHeaders.hpp"
 #include "Util/Buffer.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "Util/EnumHelper.hpp"
 #include "Util/Exception.hpp"
+#include "Util/StructureChangeTracking.hpp"
 #include "Util/AssertAlways.hpp"
 #include <cstdint>
 #include <string>
@@ -40,9 +42,9 @@ namespace dsp_fw
 
 enum class ProbeType
 {
-    Input,
-    Output,
-    Internal
+    Input = private_fw::dsp_fw::INPUT,
+    Output = private_fw::dsp_fw::OUTPUT,
+    Internal = private_fw::dsp_fw::INTERNAL
 };
 
 static const util::EnumHelper<ProbeType> &probeTypeHelper()
@@ -66,6 +68,9 @@ static constexpr int indexSize{6};
 }
 
 /** Identify a probe point into the topology */
+using private_ProbePointId = private_fw::dsp_fw::ProbePointId;
+CHECK_SIZE(private_ProbePointId, 4);
+CHECK_MEMBER(private_ProbePointId, full_probe_id, 0, uint32_t);
 union ProbePointId
 {
     using Exception = util::Exception<ProbePointId>;
@@ -159,7 +164,11 @@ union ProbePointId
     void toStream(util::ByteStreamWriter &writer) const { writer.write(full); }
 };
 
-/** Probe packet. TODO: Should be include from fw headers. */
+/** Probe packet
+ * @todo Currently it is not possible to track changes of the original firmware structure
+ * because the inclusion of the <ixc/probe_header_defs.h> header produces this error:
+ *    private_fw::intel_adsp::InterleavingStyle' : redefinition; different basic types
+ */
 struct Packet
 {
     Packet() = default;

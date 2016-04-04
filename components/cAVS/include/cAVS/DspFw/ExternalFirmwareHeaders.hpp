@@ -45,4 +45,5 @@ namespace private_fw
 
 #include <ixc/basefw_config.h>
 #include <ixc/module_config.h>
+#include <ixc/probe_config.h>
 }
