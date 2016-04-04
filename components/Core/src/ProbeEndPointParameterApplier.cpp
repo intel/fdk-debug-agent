@@ -42,10 +42,10 @@ void ProbeEndPointParameterApplier::setUnusedMembers(Prober::ProbeConfig &config
      * values that will not make fail lowest layers
      */
     config.purpose = Prober::ProbePurpose::Inject;
-    config.probePoint.moduleTypeId = 0;
-    config.probePoint.moduleInstanceId = 0;
-    config.probePoint.type = Prober::ProbeType::Input;
-    config.probePoint.pinIndex = 0;
+    config.probePoint.fields.setModuleId(0);
+    config.probePoint.fields.setInstanceId(0);
+    config.probePoint.fields.setType(dsp_fw::ProbeType::Input);
+    config.probePoint.fields.setIndex(0);
 }
 
 ProbeEndPointParameterApplier::ProbeEndPointParameterApplier(System &system)
@@ -106,20 +106,18 @@ void ProbeEndPointParameterApplier::setEndPointParameterValue(const std::size_t 
 
             std::string cavsModuleTypeName = getCavsModuleNameFromFdk(fdkModuleTypeName);
             try {
-                config.probePoint.moduleTypeId =
-                    mSystem.findModuleEntry(cavsModuleTypeName).module_id;
+                config.probePoint.fields.setModuleId(
+                    mSystem.findModuleEntry(cavsModuleTypeName).module_id);
             } catch (System::Exception &e) {
                 throw Exception("Cannot get cavs module id: " + std::string(e.what()));
             }
 
-            config.probePoint.moduleInstanceId =
-                xml.getValueFromXPath<decltype(config.probePoint.moduleInstanceId)>(
-                    connectionBlockUrl + "IntegerParameter[@Name='InstanceId']");
-            config.probePoint.type = xml.getValueFromXPathAsEnum<Prober::ProbeType>(
-                connectionBlockUrl + "EnumParameter[@Name='Type']", Prober::probeTypeHelper());
-            config.probePoint.pinIndex =
-                xml.getValueFromXPath<decltype(config.probePoint.pinIndex)>(
-                    connectionBlockUrl + "IntegerParameter[@Name='Index']");
+            config.probePoint.fields.setInstanceId(xml.getValueFromXPath<uint32_t>(
+                connectionBlockUrl + "IntegerParameter[@Name='InstanceId']"));
+            config.probePoint.fields.setType(xml.getValueFromXPathAsEnum<dsp_fw::ProbeType>(
+                connectionBlockUrl + "EnumParameter[@Name='Type']", dsp_fw::probeTypeHelper()));
+            config.probePoint.fields.setIndex(xml.getValueFromXPath<uint32_t>(
+                connectionBlockUrl + "IntegerParameter[@Name='Index']"));
         } else {
             setUnusedMembers(config);
         }
@@ -127,6 +125,8 @@ void ProbeEndPointParameterApplier::setEndPointParameterValue(const std::size_t 
     } catch (XmlHelper::Exception &e) {
         throw Exception("Cannot parse xml to set probe endpoint parameter value : " +
                         std::string(e.what()));
+    } catch (dsp_fw::ProbePointId::Exception &e) {
+        throw Exception("Cannot set probe point id: " + std::string(e.what()));
     }
 
     /* Setting probe configuration to the driver */
@@ -154,7 +154,7 @@ std::string ProbeEndPointParameterApplier::getEndPointParameterValue(
     if (config.enabled) {
         try {
             std::string cavsModuleTypeName =
-                mSystem.findModuleEntry(config.probePoint.moduleTypeId).getName();
+                mSystem.findModuleEntry(config.probePoint.fields.getModuleId()).getName();
             fdkModuleTypeName = getFdkModuleNameFromCavs(cavsModuleTypeName);
         } catch (System::Exception &e) {
             throw Exception("Cannot get cavs module name: " + std::string(e.what()));
@@ -176,11 +176,12 @@ std::string ProbeEndPointParameterApplier::getEndPointParameterValue(
            << Prober::probePurposeHelper().toString(config.purpose) << "</EnumParameter>\n"
            << "        <StringParameter Name=\"ComponentType\">" << fdkModuleTypeName
            << "</StringParameter>\n"
-           << "        <IntegerParameter Name=\"InstanceId\">" << config.probePoint.moduleInstanceId
-           << "</IntegerParameter>\n"
+           << "        <IntegerParameter Name=\"InstanceId\">"
+           << config.probePoint.fields.getInstanceId() << "</IntegerParameter>\n"
            << "        <EnumParameter Name=\"Type\">"
-           << Prober::probeTypeHelper().toString(config.probePoint.type) << "</EnumParameter>\n"
-           << "        <IntegerParameter Name=\"Index\">" << config.probePoint.pinIndex
+           << dsp_fw::probeTypeHelper().toString(config.probePoint.fields.getType())
+           << "</EnumParameter>\n"
+           << "        <IntegerParameter Name=\"Index\">" << config.probePoint.fields.getIndex()
            << "</IntegerParameter>\n"
            << "    </ParameterBlock>\n"
            << "</control_parameters>\n";

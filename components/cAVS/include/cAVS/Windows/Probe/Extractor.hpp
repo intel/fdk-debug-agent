@@ -33,6 +33,7 @@
 #include <vector>
 #include <memory>
 #include <future>
+#include <map>
 
 namespace debug_agent
 {
@@ -51,17 +52,20 @@ public:
     using Sample = uint8_t;
     using Exception = util::Exception<Extractor>;
     using FIFO = util::BlockingQueue<util::Buffer>;
+    using ProbePointMap = std::map<dsp_fw::ProbePointId, ProbeId>;
 
     /**
      * @param[in] eventHandle The windows event handle that notifies when the ring buffer
      *                        is filled.
      * @param[in] ringBuffer The extraction ring buffer
+     * @param[in] probePointMap A <probe point id, probe index> map used to deduce probe index
+     *                          from probe point id.
      * @param[in] queues the extraction queues that will receive the packetd
      */
     Extractor(EventHandle &eventHandle, util::RingBufferReader &&ringBuffer,
-              std::vector<FIFO> &queues)
+              const ProbePointMap &probePointMap, std::vector<FIFO> &queues)
         : mRingBuffer(std::move(ringBuffer)), mInputStream(eventHandle, mRingBuffer),
-          mByteReader(mInputStream), mQueues(queues),
+          mByteReader(mInputStream), mQueues(queues), mProbePointMap(probePointMap),
           mExtractionResult{std::async(std::launch::async, &Extractor::extract, this)}
     {
     }
@@ -81,9 +85,18 @@ private:
                 dsp_fw::Packet packet;
                 mByteReader.read(packet);
 
-                auto probeId = packet.probePointId;
-                if (probeId >= mQueues.size()) {
-                    throw Exception("Packet with wrong probe id: " + std::to_string(probeId));
+                // finding the probe index that matches the probe point id
+                auto it = mProbePointMap.find(packet.probePointId);
+                if (it == mProbePointMap.end()) {
+                    throw Exception("Packet with unknown probe point id: " +
+                                    packet.probePointId.toString());
+                }
+
+                // Checking that the probe index is in a valid range
+                ProbeId probeId(it->second);
+                if (probeId.getValue() >= mQueues.size()) {
+                    throw Exception("Packet with wrong probe id: " +
+                                    std::to_string(probeId.getValue()));
                 }
 
                 // Writing the packet to a buffer
@@ -92,8 +105,8 @@ private:
                 util::ByteStreamWriter writer(outputStream);
                 writer.write(packet);
 
-                // enqueueing the buffer
-                if (!mQueues[probeId].add(std::move(buffer))) {
+                // Enqueueing the buffer into the right queue
+                if (!mQueues[probeId.getValue()].add(std::move(buffer))) {
                     std::cerr << "Warning: extraction packet dropped." << std::endl;
                 }
             }
@@ -111,6 +124,7 @@ private:
     ExtractionInputStream mInputStream;
     util::ByteStreamReader mByteReader;
     std::vector<FIFO> &mQueues;
+    ProbePointMap mProbePointMap;
     std::future<void> mExtractionResult;
 };
 }

@@ -711,12 +711,12 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
  * Generate a buffer filled with 20 probe extraction packets. Packet size is deduced from
  * the index [0..20[
  */
-Buffer generateProbeExtractionContent()
+Buffer generateProbeExtractionContent(dsp_fw::ProbePointId probePointId)
 {
     MemoryByteStreamWriter writer;
     for (uint32_t i = 0; i < 20; i++) {
         dsp_fw::Packet packet{};
-        packet.probePointId = 1;
+        packet.probePointId = probePointId;
 
         // using index as size and byte value
         packet.data.resize(i, i);
@@ -793,7 +793,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         dynamic_cast<windows::TestEventHandle &>(*probeEventHandles.extractionHandle);
 
     // Generating probe extraction content
-    Buffer extractedContent = generateProbeExtractionContent();
+    const dsp_fw::ProbePointId probePointId(1, 2, dsp_fw::ProbeType::Output, 0);
+    Buffer extractedContent = generateProbeExtractionContent(probePointId);
 
     // Splitting extraction content in blocks : each block will be written to the ring buffer
     // Block sizes are {1, 10, 20, 30} (cycling)
@@ -831,18 +832,17 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::ProbeFeatureOwned);
 
-        using Type = Prober::ProbeType;
+        using Type = dsp_fw::ProbeType;
         using Purpose = Prober::ProbePurpose;
         // setting probe configuration (probe #1 is enabled)
-        cavs::Prober::SessionProbes probes = {
-            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
-            {true, {1, 2, Type::Output, 0}, Purpose::Extract}, // Enabled
-            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
-            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
-            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
-            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
-            {false, {0, 0, Type::Input, 0}, Purpose::Inject},
-            {false, {0, 0, Type::Input, 0}, Purpose::Inject}};
+        cavs::Prober::SessionProbes probes = {{false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {true, probePointId, Purpose::Extract}, // Enabled
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject}};
 
         commands.addSetProbeConfigurationCommand(
             true, STATUS_SUCCESS, windows::Prober::toWindows(probes, probeEventHandles));
@@ -1008,7 +1008,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::ProbeFeatureOwned);
 
-        using Type = Prober::ProbeType;
+        using Type = dsp_fw::ProbeType;
         using Purpose = Prober::ProbePurpose;
         cavs::Prober::SessionProbes probes = {{false, {0, 0, Type::Input, 0}, Purpose::Inject},
                                               {false, {0, 0, Type::Input, 0}, Purpose::Inject},

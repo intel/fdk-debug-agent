@@ -21,6 +21,7 @@
 */
 #pragma once
 
+#include "cAVS/DspFw/Probe.hpp"
 #include "Util/Buffer.hpp"
 #include "Util/EnumHelper.hpp"
 #include "Util/WrappedRaw.hpp"
@@ -88,23 +89,6 @@ public:
         return helper;
     }
 
-    enum class ProbeType
-    {
-        Input,
-        Output,
-        Internal
-    };
-
-    static const util::EnumHelper<ProbeType> &probeTypeHelper()
-    {
-        static const util::EnumHelper<ProbeType> helper({
-            {ProbeType::Input, "Input"},
-            {ProbeType::Output, "Output"},
-            {ProbeType::Internal, "Internal"},
-        });
-        return helper;
-    }
-
     enum class ProbePurpose
     {
         Inject,
@@ -122,39 +106,15 @@ public:
         return helper;
     }
 
-    /** Identify a probe point into the topology */
-    struct ProbePointId
-    {
-        uint32_t moduleTypeId;
-        uint32_t moduleInstanceId;
-        ProbeType type;
-        uint32_t pinIndex;
-
-        ProbePointId() = default;
-        ProbePointId(uint32_t moduleTypeId, uint32_t moduleInstanceId, ProbeType type,
-                     uint32_t pinIndex)
-            : moduleTypeId(moduleTypeId), moduleInstanceId(moduleInstanceId), type(type),
-              pinIndex(pinIndex)
-        {
-        }
-
-        bool operator==(const ProbePointId &other) const
-        {
-            return moduleTypeId == other.moduleTypeId &&
-                   moduleInstanceId == other.moduleInstanceId && type == other.type &&
-                   pinIndex == other.pinIndex;
-        }
-    };
-
     /** Configuration of one probe instance */
     struct ProbeConfig
     {
         bool enabled;
-        ProbePointId probePoint; /* The probe point id where the probe will be connected */
-        ProbePurpose purpose;    /* The probe purpose (inject, extract, both) */
+        dsp_fw::ProbePointId probePoint; /* The probe point id where the probe will be connected */
+        ProbePurpose purpose;            /* The probe purpose (inject, extract, both) */
 
         ProbeConfig() = default;
-        ProbeConfig(bool enabled, const ProbePointId &probePoint, ProbePurpose purpose)
+        ProbeConfig(bool enabled, const dsp_fw::ProbePointId &probePoint, ProbePurpose purpose)
             : enabled(enabled), probePoint(probePoint), purpose(purpose)
         {
         }

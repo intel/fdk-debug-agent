@@ -150,15 +150,11 @@ private:
     template <class T>
     void ioctl(typename T::Data &inout);
 
-    static void throwIfIllegal(const ProbePointId &candidate);
-
     /** Convert values from OS-agnostic cAVS to cAVS Windows driver and vice-versa
      */
     /** @{ */
     static driver::ProbeState toWindows(const State &from);
     static State fromWindows(const driver::ProbeState &from);
-    static driver::ProbePointId toWindows(const ProbePointId &from);
-    static ProbePointId fromWindows(const driver::ProbePointId &from);
     static driver::ProbePurpose toWindows(const ProbePurpose &from);
     static ProbePurpose fromWindows(const driver::ProbePurpose &from);
     static BOOL toWindows(bool value);

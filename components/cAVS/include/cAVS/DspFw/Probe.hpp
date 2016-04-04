@@ -24,6 +24,9 @@
 #include "Util/Buffer.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
+#include "Util/EnumHelper.hpp"
+#include "Util/Exception.hpp"
+#include "Util/AssertAlways.hpp"
 #include <cstdint>
 #include <string>
 #include <sstream>
@@ -35,6 +38,127 @@ namespace cavs
 namespace dsp_fw
 {
 
+enum class ProbeType
+{
+    Input,
+    Output,
+    Internal
+};
+
+static const util::EnumHelper<ProbeType> &probeTypeHelper()
+{
+    static const util::EnumHelper<ProbeType> helper({
+        {ProbeType::Input, "Input"},
+        {ProbeType::Output, "Output"},
+        {ProbeType::Internal, "Internal"},
+    });
+    return helper;
+}
+
+namespace probe_point_id
+{
+// Cannot not add these static variables in ProbePointId  because
+// ProbePointId is an union
+static constexpr int moduleIdSize{16};
+static constexpr int instanceIdSize{8};
+static constexpr int typeSize{2};
+static constexpr int indexSize{6};
+}
+
+/** Identify a probe point into the topology */
+union ProbePointId
+{
+    using Exception = util::Exception<ProbePointId>;
+
+    struct
+    {
+    public:
+        /**@{
+         * Using setters to validate values
+         * @throw ProbePointId::Exception if value is invalid
+         */
+        void setModuleId(uint32_t moduleId)
+        {
+            if (moduleId >= 1 << probe_point_id::moduleIdSize) {
+                throw Exception("Module id too large (" + std::to_string(moduleId) + ")");
+            }
+            this->moduleId = moduleId;
+        }
+
+        void setInstanceId(uint32_t instanceId)
+        {
+            if (instanceId >= 1 << probe_point_id::instanceIdSize) {
+                throw Exception("Instance id too large (" + std::to_string(instanceId) + ")");
+            }
+            this->instanceId = instanceId;
+        }
+
+        void setType(ProbeType type)
+        {
+            auto typeAsInt = static_cast<uint32_t>(type);
+            if (!probeTypeHelper().isValid(type)) {
+                throw Exception("Invalid probe type (" + std::to_string(typeAsInt) + ")");
+            }
+            this->type = static_cast<uint32_t>(type);
+        }
+
+        void setIndex(uint32_t index)
+        {
+            if (index >= 1 << probe_point_id::indexSize) {
+                throw Exception("Pin index too large (" + std::to_string(index) + ")");
+            }
+            this->index = index;
+        }
+
+        /**@}*/
+
+        uint32_t getModuleId() const { return moduleId; }
+        uint32_t getInstanceId() const { return instanceId; }
+        ProbeType getType() const { return static_cast<ProbeType>(type); }
+        uint32_t getIndex() const { return index; }
+
+    private:
+        uint32_t moduleId : probe_point_id::moduleIdSize;
+        uint32_t instanceId : probe_point_id::instanceIdSize;
+
+        // Can not use directly ProbeType here because gcc complains "type  is too small to hold
+        // all values"
+        uint32_t type : probe_point_id::typeSize;
+
+        uint32_t index : probe_point_id::indexSize;
+    } fields;
+    uint32_t full;
+
+    ProbePointId() = default;
+
+    /** @throw ProbePointId::Exception if values are not in valid range */
+    ProbePointId(uint32_t moduleId, uint32_t instanceId, ProbeType type, uint32_t index)
+    {
+        fields.setModuleId(moduleId);
+        fields.setInstanceId(instanceId);
+        fields.setType(type);
+        fields.setIndex(index);
+    }
+
+    std::string toString() const
+    {
+        std::stringstream stream;
+        stream << "moduleId=" << fields.getModuleId() << " instanceId=" << fields.getInstanceId()
+               << " type=" << probeTypeHelper().toString(fields.getType())
+               << " index=" << fields.getIndex();
+        return stream.str();
+    }
+
+    bool operator==(const ProbePointId &other) const { return full == other.full; }
+
+    /** Operator< enables using this type as key map*/
+    bool operator<(const ProbePointId &other) const { return full < other.full; }
+
+    void fromStream(util::ByteStreamReader &reader) { reader.read(full); }
+
+    void toStream(util::ByteStreamWriter &writer) const { writer.write(full); }
+};
+
 /** Probe packet. TODO: Should be include from fw headers. */
 struct Packet
 {
@@ -45,7 +169,7 @@ struct Packet
     /** Probe packet sync word. TODO: Should be include from fw headers. */
     static constexpr const uint32_t syncWord = 0xBABEBEBA;
 
-    uint32_t probePointId;
+    ProbePointId probePointId;
     uint32_t format;
     uint32_t dspWallClockTsHw;
     uint32_t dspWallClockTsLw;
@@ -54,7 +178,7 @@ struct Packet
 
     uint32_t sum() const
     {
-        return syncWord + probePointId + format + dspWallClockTsHw + dspWallClockTsLw +
+        return syncWord + probePointId.full + format + dspWallClockTsHw + dspWallClockTsLw +
                static_cast<uint32_t>(data.size());
     }
 
@@ -62,9 +186,10 @@ struct Packet
     {
         using std::to_string;
         std::stringstream ss;
-        ss << "Probe packet header { " << std::hex << std::showbase << "syncWord=" << syncWord
-           << ", format=" << format << ", dspWallClockTsHw=" << dspWallClockTsHw
-           << ", dspWallClockTsLw=" << dspWallClockTsLw << ", dataSize=" << data.size() << " }";
+        ss << "Probe packet header { probe point id {" << probePointId.toString() << "} "
+           << std::hex << std::showbase << "syncWord=" << syncWord << ", format=" << format
+           << ", dspWallClockTsHw=" << dspWallClockTsHw << ", dspWallClockTsLw=" << dspWallClockTsLw
+           << ", dataSize=" << data.size() << " }";
         return ss.str();
     }
 

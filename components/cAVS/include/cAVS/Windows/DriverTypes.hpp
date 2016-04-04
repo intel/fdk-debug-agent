@@ -32,6 +32,7 @@ namespace private_driver
 }
 
 #include "cAVS/DspFw/Common.hpp"
+#include "cAVS/DspFw/Probe.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "Util/StructureChangeTracking.hpp"
@@ -266,34 +267,14 @@ using ProbeType =
 using ProbePurpose = private_driver::IntcIoctlFeatures::FwProbeFeature::PointConfigurationParam::
     ProbePointConnectionPurpose;
 
-/** ProbePointId */
+/**
+ * ProbePointId
+ * Note: checking only structure changed because this type is already defined in the fw part
+ */
 using private_ProbePointId =
     private_driver::IntcIoctlFeatures::FwProbeFeature::PointConfigurationParam::ProbePointId;
 CHECK_SIZE(private_ProbePointId, 4);
 CHECK_MEMBER(private_ProbePointId, full, 0, UINT32);
-
-union ProbePointId
-{
-    static constexpr int moduleIdSize{16};
-    static constexpr int instanceIdSize{8};
-    static constexpr int typeSize{2};
-    static constexpr int indexSize{6};
-
-    struct
-    {
-        uint32_t moduleId : moduleIdSize;
-        uint32_t instanceId : instanceIdSize;
-        uint32_t type : typeSize;
-        uint32_t index : indexSize;
-    } fields;
-    uint32_t full;
-
-    bool operator==(const ProbePointId &other) { return full == other.full; }
-
-    void fromStream(util::ByteStreamReader &reader) { reader.read(full); }
-
-    void toStream(util::ByteStreamWriter &writer) const { writer.write(full); }
-};
 
 /** EventHandleType */
 using private_EventHandleType =
@@ -316,12 +297,12 @@ CHECK_MEMBER(private_ProbePointConnection, injectionBufferCompletionEventHandle,
 struct ProbePointConnection
 {
     BOOL enabled;
-    ProbePointId probePointId;
+    dsp_fw::ProbePointId probePointId;
     ProbePurpose purpose;
     HANDLE injectionBufferCompletionEventHandle;
 
     ProbePointConnection() = default;
-    ProbePointConnection(BOOL enabled, ProbePointId probePointId, ProbePurpose purpose,
+    ProbePointConnection(BOOL enabled, dsp_fw::ProbePointId probePointId, ProbePurpose purpose,
                          HANDLE handle)
         : enabled(enabled), probePointId(probePointId), purpose(purpose),
           injectionBufferCompletionEventHandle(handle)

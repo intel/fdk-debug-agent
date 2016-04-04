@@ -25,7 +25,8 @@ set(TEST_SRCS
     Main.cpp
     LogBlockTest.cpp
     LogStreamerTest.cpp
-    FirmwareTypesTest.cpp)
+    FirmwareTypesTest.cpp
+    ProbeTest.cpp)
 
 set(TEST_INCS)
 

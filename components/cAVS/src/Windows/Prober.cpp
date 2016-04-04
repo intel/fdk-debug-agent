@@ -49,28 +49,6 @@ static const std::map<Prober::State, driver::ProbeState> stateConversion = {
     {Prober::State::Allocated, driver::ProbeState::ProbeFeatureAllocated},
     {Prober::State::Active, driver::ProbeState::ProbeFeatureActive}};
 
-void Prober::throwIfIllegal(const ProbePointId &candidate)
-{
-    auto type = static_cast<uint32_t>(candidate.type);
-
-    if (candidate.moduleTypeId >= 1 << driver::ProbePointId::moduleIdSize) {
-        throw Exception("Module id too large (" + std::to_string(candidate.moduleTypeId) + ").");
-    }
-
-    if (candidate.moduleInstanceId >= 1 << driver::ProbePointId::instanceIdSize) {
-        throw Exception("Instance id too large (" + std::to_string(candidate.moduleInstanceId) +
-                        ").");
-    }
-
-    if (type >= 1 << driver::ProbePointId::typeSize) {
-        throw Exception("Type too large (" + std::to_string(type) + ").");
-    }
-
-    if (candidate.pinIndex >= 1 << driver::ProbePointId::indexSize) {
-        throw Exception("Pin index too large (" + std::to_string(candidate.pinIndex) + ").");
-    }
-}
-
 driver::ProbeState Prober::toWindows(const State &from)
 {
     try {
@@ -88,20 +66,6 @@ Prober::State Prober::fromWindows(const driver::ProbeState &from)
         }
     }
     throw Exception("Wrong state value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
-}
-
-driver::ProbePointId Prober::toWindows(const Prober::ProbePointId &from)
-{
-    throwIfIllegal(from);
-
-    return {from.moduleTypeId, from.moduleInstanceId, static_cast<uint32_t>(from.type),
-            from.pinIndex};
-}
-
-Prober::ProbePointId Prober::fromWindows(const driver::ProbePointId &from)
-{
-    const auto &fields = from.fields;
-    return {fields.moduleId, fields.instanceId, static_cast<ProbeType>(fields.type), fields.index};
 }
 
 driver::ProbePurpose Prober::toWindows(const ProbePurpose &from)
@@ -188,8 +152,8 @@ driver::ProbePointConfiguration Prober::toWindows(const cavs::Prober::SessionPro
     std::vector<driver::ProbePointConnection> connections;
     std::size_t probeIndex = 0;
     for (const auto &probe : probes) {
-        driver::ProbePointId probePointId = toWindows(probe.probePoint);
-        connections.emplace_back(toWindows(probe.enabled), probePointId, toWindows(probe.purpose),
+        connections.emplace_back(toWindows(probe.enabled), probe.probePoint,
+                                 toWindows(probe.purpose),
                                  eventHandles.injectionHandles[probeIndex].get());
 
         ++probeIndex;
@@ -215,7 +179,7 @@ Prober::SessionProbes Prober::getSessionProbes()
 
     SessionProbes result;
     for (const auto &connection : from.probePointConnection) {
-        result.emplace_back(fromWindows(connection.enabled), fromWindows(connection.probePointId),
+        result.emplace_back(fromWindows(connection.enabled), connection.probePointId,
                             fromWindows(connection.purpose));
     }
     return result;
@@ -340,20 +304,40 @@ void Prober::startStreaming()
     auto result = getActiveProbes();
     auto &extractionProbes = result.first;
 
-    if (!extractionProbes.empty()) {
+    try {
+        if (!extractionProbes.empty()) {
 
-        // opening queues of the active probes
-        for (auto probeId : extractionProbes) {
-            mExtractionQueues[probeId.getValue()].open();
+            // opening queues of the active probes, and collecting probe point id
+            probe::Extractor::ProbePointMap probePointMap;
+            for (auto probeId : extractionProbes) {
+                mExtractionQueues[probeId.getValue()].open();
+
+                dsp_fw::ProbePointId probePointId =
+                    mCachedProbeConfiguration[probeId.getValue()].probePoint;
+                // Checking that the probe point id is not already in the map
+                if (probePointMap.find(probePointId) != probePointMap.end()) {
+                    throw Exception("Two active extraction probes have the same probe point id: " +
+                                    probePointId.toString());
+                }
+
+                probePointMap[probePointId] = probeId;
+            }
+
+            // starting exractor
+            mExtractor = std::make_unique<probe::Extractor>(
+                *mEventHandles.extractionHandle,
+                util::RingBufferReader(ringBuffers.extractionRBDescription.startAdress,
+                                       ringBuffers.extractionRBDescription.size,
+                                       [this] { return getExtractionRingBufferLinearPosition(); }),
+                probePointMap, mExtractionQueues);
         }
-
-        // starting exractor
-        mExtractor = std::make_unique<probe::Extractor>(
-            *mEventHandles.extractionHandle,
-            util::RingBufferReader(ringBuffers.extractionRBDescription.startAdress,
-                                   ringBuffers.extractionRBDescription.size,
-                                   [this] { return getExtractionRingBufferLinearPosition(); }),
-            mExtractionQueues);
+    } catch (std::exception &e1) {
+        try {
+            std::cerr << "Cancelling starting because: " << e1.what() << std::endl;
+            stopStreaming();
+        } catch (Exception &e2) {
+            std::cerr << "Unable to cancel starting : " << e2.what() << std::endl;
+        }
     }
 }
 
