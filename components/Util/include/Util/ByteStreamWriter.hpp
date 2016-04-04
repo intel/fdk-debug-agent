@@ -40,7 +40,7 @@ namespace util
 class ByteStreamWriter
 {
 public:
-    using Exception = util::Exception<ByteStreamReader>;
+    using Exception = util::Exception<ByteStreamWriter>;
 
     ByteStreamWriter(OutputStream &os) : mOutput(os) {}
     ByteStreamWriter(const ByteStreamWriter &) = delete;
