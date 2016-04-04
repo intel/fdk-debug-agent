@@ -19,59 +19,31 @@
 *
 ********************************************************************************
 */
-#pragma once
 
-#include "Util/EnumHelper.hpp"
+#include "Core/ServiceParameterApplier.hpp"
+#include "cAVS/System.hpp"
 
 namespace debug_agent
 {
-namespace cavs
+namespace core
 {
 
-class Perf
+/** Applies FDK parameters to the cAVS perf measurement service */
+class PerfServiceParameterApplier : public ServiceParameterApplier
 {
 public:
-    enum class State : uint32_t
-    {
-        Disabled = 0,
-        Stopped = 1,
-        Started = 2,
-        Paused = 3
-    };
-    static const util::EnumHelper<State> &stateHelper()
-    {
-        static const util::EnumHelper<State> helper({{State::Started, "Started"},
-                                                     {State::Paused, "Paused"},
-                                                     {State::Stopped, "Stopped"},
-                                                     {State::Disabled, "Disabled"}});
-        return helper;
-    }
+    PerfServiceParameterApplier(cavs::System &system);
 
-    enum class PowerMode : uint32_t
-    {
-        D0 = 0,
-        D0i3 = 1
-    };
-    static const util::EnumHelper<PowerMode> &powerModeHelper()
-    {
-        static const util::EnumHelper<PowerMode> helper(
-            {{PowerMode::D0, "D0"}, {PowerMode::D0i3, "D0i3"}});
-        return helper;
-    }
+    std::string getServiceParameterStructure() override;
 
-    struct Item
-    {
-        uint32_t resourceId;
-        PowerMode powerMode;
-        uint32_t budget;
-        uint32_t peak;
-        uint32_t average;
-    };
+    std::string getServiceParameterValue() override;
 
-    virtual ~Perf() = default;
+    void setServiceParameterValue(const std::string &parameterValue) override;
 
-    virtual State getState() = 0;
-    virtual void setState(State) = 0;
+private:
+    using Base = ServiceParameterApplier;
+
+    cavs::System &mSystem;
 };
 }
 }

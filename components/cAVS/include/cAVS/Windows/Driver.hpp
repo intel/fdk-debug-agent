@@ -26,6 +26,7 @@
 #include "cAVS/Windows/Logger.hpp"
 #include "cAVS/Windows/ModuleHandler.hpp"
 #include "cAVS/Windows/Prober.hpp"
+#include "cAVS/Windows/Perf.hpp"
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/WppClientFactory.hpp"
 #include "Util/AssertAlways.hpp"
@@ -48,7 +49,7 @@ public:
            Prober::EventHandles &eventHandles)
         : mDevice(std::move(device)), mWppClientFactory(std::move(wppClientFactory)),
           mEventHandles(std::move(eventHandles)), mLogger(*mDevice, *mWppClientFactory),
-          mModuleHandler(*mDevice), mProber(*mDevice, mEventHandles)
+          mModuleHandler(*mDevice), mProber(*mDevice, mEventHandles), mPerf(*mDevice)
     {
         ASSERT_ALWAYS(mEventHandles.isValid());
     }
@@ -64,6 +65,7 @@ private:
     Logger mLogger;
     ModuleHandler mModuleHandler;
     Prober mProber;
+    Perf mPerf;
 };
 }
 }

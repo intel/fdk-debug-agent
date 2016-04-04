@@ -26,6 +26,7 @@
 #include "cAVS/Topology.hpp"
 #include "cAVS/Prober.hpp"
 #include "cAVS/ProbeService.hpp"
+#include "cAVS/PerfService.hpp"
 #include "Util/WrappedRaw.hpp"
 #include <memory>
 #include <stdexcept>
@@ -196,6 +197,10 @@ public:
     */
     Prober::ProbeConfig getProbeConfiguration(ProbeId probeId);
 
+    Perf::State getPerfState();
+
+    void setPerfState(Perf::State state);
+
     /** Stop internal threads and unblock consumer threads */
     void stop() noexcept { mDriver->stop(); }
 
@@ -286,6 +291,7 @@ private:
     std::vector<std::mutex> mProbeInjectionMutexes;
 
     ProbeService mProbeService;
+    PerfService mPerfService;
 };
 }
 }

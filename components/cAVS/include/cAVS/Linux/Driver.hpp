@@ -28,6 +28,7 @@
 #include "cAVS/DspFw/HwConfig.hpp"
 #include "cAVS/Linux/ModuleHandler.hpp"
 #include "cAVS/Linux/Logger.hpp"
+#include "cAVS/Linux/Perf.hpp"
 #include "Util/AssertAlways.hpp"
 
 namespace debug_agent
@@ -85,6 +86,7 @@ private:
     std::unique_ptr<CompressDeviceFactory> mCompressDeviceFactory;
     Logger mLogger;
     ModuleHandler mModuleHandler;
+    Perf mPerf;
 };
 }
 }

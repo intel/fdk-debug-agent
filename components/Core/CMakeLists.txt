@@ -29,6 +29,7 @@ set(SRCS
     src/TypeModelConverter.cpp
     src/DebugResources.cpp
     src/LogServiceParameterApplier.cpp
+    src/PerfServiceParameterApplier.cpp
     src/ModuleParameterApplier.cpp
     src/ProbeServiceParameterApplier.cpp
     src/ProbeEndPointParameterApplier.cpp)
@@ -47,6 +48,7 @@ set(INCS
     include/Core/ParameterDispatcher.hpp
     include/Core/ServiceParameterApplier.hpp
     include/Core/LogServiceParameterApplier.hpp
+    include/Core/PerfServiceParameterApplier.hpp
     include/Core/ModuleParameterApplier.hpp
     include/Core/ProbeServiceParameterApplier.hpp
     include/Core/EndPointParameterApplier.hpp

@@ -19,59 +19,24 @@
 *
 ********************************************************************************
 */
-#pragma once
-
-#include "Util/EnumHelper.hpp"
+#include "cAVS/Perf.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
-
-class Perf
+namespace windows
+{
+class Perf : public cavs::Perf
 {
 public:
-    enum class State : uint32_t
-    {
-        Disabled = 0,
-        Stopped = 1,
-        Started = 2,
-        Paused = 3
-    };
-    static const util::EnumHelper<State> &stateHelper()
-    {
-        static const util::EnumHelper<State> helper({{State::Started, "Started"},
-                                                     {State::Paused, "Paused"},
-                                                     {State::Stopped, "Stopped"},
-                                                     {State::Disabled, "Disabled"}});
-        return helper;
-    }
+    Perf(Device &device) : mDevice(device) {}
 
-    enum class PowerMode : uint32_t
-    {
-        D0 = 0,
-        D0i3 = 1
-    };
-    static const util::EnumHelper<PowerMode> &powerModeHelper()
-    {
-        static const util::EnumHelper<PowerMode> helper(
-            {{PowerMode::D0, "D0"}, {PowerMode::D0i3, "D0i3"}});
-        return helper;
-    }
-
-    struct Item
-    {
-        uint32_t resourceId;
-        PowerMode powerMode;
-        uint32_t budget;
-        uint32_t peak;
-        uint32_t average;
-    };
-
-    virtual ~Perf() = default;
-
-    virtual State getState() = 0;
-    virtual void setState(State) = 0;
+    State getState() override { return State::Disabled; }
+    void setState(State state) override {}
+private:
+    Device &mDevice;
 };
+}
 }
 }

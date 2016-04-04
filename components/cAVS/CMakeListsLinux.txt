@@ -41,6 +41,7 @@ set(LINUX_LIB_INCS
     include/cAVS/Linux/Device.hpp
     include/cAVS/Linux/Driver.hpp
     include/cAVS/Linux/Logger.hpp
+    include/cAVS/Linux/Perf.hpp
     include/cAVS/Linux/DriverTypes.hpp
     include/cAVS/Linux/ModuleHandler.hpp
     include/cAVS/Linux/AudioProcfsHelper.hpp

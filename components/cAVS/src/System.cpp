@@ -396,5 +396,16 @@ Prober::ProbeConfig System::getProbeConfiguration(ProbeId id)
         throw Exception("Cannot get probe config: " + std::string(e.what()));
     }
 }
+
+Perf::State System::getPerfState()
+{
+    // TODO
+    return Perf::State::Disabled;
+}
+
+void System::setPerfState(Perf::State)
+{
+    // TODO
+}
 }
 }

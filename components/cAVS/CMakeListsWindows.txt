@@ -52,6 +52,7 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/Probe/Extractor.hpp
     include/cAVS/Windows/Probe/Injector.hpp
     include/cAVS/Windows/Prober.hpp
+    include/cAVS/Windows/Perf.hpp
     include/cAVS/Windows/RealTimeWppClientFactory.hpp
     include/cAVS/Windows/RealTimeWppClient.hpp
     include/cAVS/Windows/StubbedWppClientFactory.hpp
