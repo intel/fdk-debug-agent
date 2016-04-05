@@ -56,12 +56,12 @@ public:
      * @param[in,out] ringBuffer The probe extraction ring buffer
      */
     ExtractionInputStream(EventHandle &handle, util::RingBufferReader &ringBuffer)
-        : mCurentBlockStream(mCurrentBlock), mHandle(handle), mRingBuffer(ringBuffer)
+        : mCurentBlockStream(mCurrentBlock), mHandleWaiter(handle), mRingBuffer(ringBuffer)
     {
     }
 
     /** Close the stream, leading to unblock the thread that is reading */
-    void close() { mHandle.stopWait(); }
+    void close() { mHandleWaiter.stopWait(); }
 
     std::size_t read(util::StreamByte *begin, std::size_t byteCount) override
     {
@@ -89,7 +89,7 @@ public:
 private:
     bool fetchNextBlock()
     {
-        if (not mHandle.wait()) {
+        if (not mHandleWaiter.wait()) {
             /** Event handle is closed */
             return false;
         }
@@ -104,7 +104,7 @@ private:
 
     /** Input stream that reads from the current block */
     util::MemoryInputStream mCurentBlockStream;
-    EventHandle &mHandle;
+    EventHandle::Waiter mHandleWaiter;
     util::RingBufferReader &mRingBuffer;
 };
 }

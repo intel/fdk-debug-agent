@@ -42,6 +42,37 @@ class EventHandle
 public:
     using Exception = util::Exception<EventHandle>;
 
+    class Waiter
+    {
+    public:
+        Waiter(EventHandle &handle) : mHandle(handle) {}
+
+        Waiter(const Waiter &) = delete;
+        Waiter &operator=(const Waiter &) = delete;
+
+        /** Wait for the provided handle to be notified.
+         * @return true if the handle was notified.
+         *         false if the wait was interrupted by a call to stopWait()
+         */
+        bool wait()
+        {
+            mHandle.wait();
+            return not mStopped;
+            ;
+        }
+
+        /** Threadsafe: Will force an exit of wait(). */
+        void stopWait()
+        {
+            mStopped = true;
+            mHandle.notify();
+        }
+
+    private:
+        EventHandle &mHandle;
+        std::atomic<bool> mStopped = {false};
+    };
+
     virtual ~EventHandle() {}
     EventHandle() = default;
     EventHandle(const EventHandle &) = delete;
@@ -50,14 +81,12 @@ public:
     /** @returns the underlying windows event handle */
     virtual HANDLE handle() const = 0;
 
-    /** Threadsafe: Will force an exit of wait(). */
-    virtual void stopWait() = 0;
+protected:
+    /** Raise the event */
+    virtual void notify() = 0;
 
-    /** Wait for the provided handle to be notified.
-    * @return true if the handle was notified.
-    *         false if the wait was interrupted by a call to stopWait()
-    */
-    virtual bool wait() = 0;
+    /** Wait for the provided handle to be notified */
+    virtual void wait() = 0;
 };
 
 /** Wrap a windows event handle*/
@@ -67,7 +96,7 @@ public:
     SystemEventHandle()
     {
         HANDLE event = CreateEventA(NULL,  /* default security attributes */
-                                    FALSE, /* auto-reset event */
+                                    FALSE, /* FALSE = auto reset event */
                                     FALSE, /* initial state is nonsignaled */
                                     NULL   /* no name */
                                     );
@@ -91,34 +120,30 @@ public:
 
     HANDLE handle() const override { return mEventHandle; }
 
-    void stopWait() override
+    void notify() override
     {
-        mStopped = true;
-        SetEvent(mEventHandle);
+        if (SetEvent(mEventHandle) != TRUE) {
+            std::cout << "Cannot set event: " << LastError::get() << std::endl;
+        }
     }
 
-    bool wait() override
+    void wait() override
     {
         // Wait for any handle to be notified
         auto status = WaitForSingleObject(mEventHandle, INFINITE);
-
-        bool stopped = mStopped; // Did we exit due to a stop request ?
-        mStopped = false;
-
         switch (status) {
         case WAIT_FAILED:
             throw Exception("Wait for handle failed: " + LastError::get());
         case WAIT_TIMEOUT:
             ASSERT_ALWAYS(false); // INFINITE should not timeout
         case WAIT_OBJECT_0:
-            return not stopped;
+            return;
         };
         throw Exception("Unsupported WaitForSingleObject return code: " + std::to_string(status));
     }
 
 private:
     HANDLE mEventHandle;
-    std::atomic<bool> mStopped = {false};
 };
 }
 }

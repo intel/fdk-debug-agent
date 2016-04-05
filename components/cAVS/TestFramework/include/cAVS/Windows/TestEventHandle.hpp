@@ -42,17 +42,17 @@ public:
     void raiseEventAndBlockUntilWait()
     {
         std::unique_lock<std::mutex> locker(mWaitVarMutex);
-        SetEvent(handle());
+        notify();
         mWaitVar.wait(locker);
     }
 
-    bool wait() override
+    void wait() override
     {
         {
             std::unique_lock<std::mutex> locker(mWaitVarMutex);
             mWaitVar.notify_one();
         }
-        return Base::wait();
+        Base::wait();
     }
 
 private:
