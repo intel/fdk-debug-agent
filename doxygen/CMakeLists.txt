@@ -18,9 +18,10 @@
 #
 ################################################################################
 
-find_package(Doxygen)
+if(DOXYGEN)
 
-if(DOXYGEN_FOUND)
+    find_package(Doxygen REQUIRED)
+
     if(NOT DOXYGEN_DOT_FOUND)
         message(SEND_ERROR "The 'dot' utility was  not found")
     endif()

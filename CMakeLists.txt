@@ -22,6 +22,9 @@
 
 project(DebugAgent)
 
+# option to enable doxygen documentation build
+option(DOXYGEN "Enable Doxygen documentation build" OFF)
+
 # option to prevent from compiling functional test
 option(EXCLUDE_TEST_IN_ALL_TARGET "Prevent Functional Test compilation" OFF)
 
