@@ -171,12 +171,12 @@ private:
     Device &mDevice;
     ControlDevice &mControlDevice;
 
+    CompressDeviceFactory &mCompressDeviceFactory;
+
     BlockingLogQueue mLogEntryQueue;
 
     std::list<std::unique_ptr<LogProducer>> mLogProducers;
     std::mutex mLogActivationContextMutex;
-
-    CompressDeviceFactory &mCompressDeviceFactory;
 };
 }
 }

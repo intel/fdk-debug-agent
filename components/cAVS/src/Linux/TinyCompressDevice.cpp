@@ -45,6 +45,9 @@ unsigned int TinyCompressDevice::translateRole(Role role)
     case Role::Playback:
         return COMPRESS_IN;
     }
+    throw Exception("Don't know how to convert role " +
+                    std::to_string(static_cast<unsigned int>(role)) +
+                    " into tinycompress role type.");
 }
 
 void TinyCompressDevice::open(Mode mode, Role role, compress::Config &config)

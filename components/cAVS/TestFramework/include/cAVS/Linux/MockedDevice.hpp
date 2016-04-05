@@ -236,8 +236,8 @@ private:
               mReturnedSize(returnedSize), mExpectedOutputBuffer(expectedBuffer)
         {
         }
-        ssize_t mReturnedSize;
         ssize_t mExpectedReadSize;
+        ssize_t mReturnedSize;
         /** copy of the buffer that should be returned from read function.
          * use vector that only need constructor in initialization list and no need destructors */
         util::Buffer mExpectedOutputBuffer;

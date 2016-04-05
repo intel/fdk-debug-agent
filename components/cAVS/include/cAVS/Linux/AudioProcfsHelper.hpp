@@ -84,12 +84,12 @@ public:
     static bool getCompressDeviceInfo(const std::string &infoId, compress::LoggerInfo &info)
     {
         /* is it a logger device? */
-        int rolePos = infoId.find(infoIdLogger);
+        std::string::size_type rolePos = infoId.find(infoIdLogger);
         if (rolePos == std::string::npos) {
             return false;
         }
         /* it is a logger device, which core for? */
-        int corePos = infoId.find(infoIdCore);
+        std::string::size_type corePos = infoId.find(infoIdCore);
         if (corePos == std::string::npos) {
             throw Exception("Compress Device found for Log without Core assigned.");
         }

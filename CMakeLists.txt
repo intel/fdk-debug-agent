@@ -129,26 +129,7 @@ include("cmake/SetProperties.cmake")
 # "include(CTest)"
 include("ctest/CMakeLists.txt")
 
-# Adding components in the right order (less dependent first)
-add_subdirectory("components/Util")
-add_subdirectory("components/IfdkObjects")
-add_subdirectory("components/TestCommon")
-add_subdirectory("components/Tlv")
-add_subdirectory("components/Rest")
-add_subdirectory("components/System")
-add_subdirectory("components/cAVS")
-add_subdirectory("components/ParameterSerializer")
-add_subdirectory("components/Core")
-add_subdirectory("components/Main")
-
-if (NOT ${EXCLUDE_TEST_IN_ALL_TARGET})
-    add_subdirectory("components/FunctionalTests")
-endif (NOT ${EXCLUDE_TEST_IN_ALL_TARGET})
-
-# Windows only components
-if (WIN32)
-    add_subdirectory("components/LogGrabber")
-endif()
+add_subdirectory("components")
 
 # Windows specific installation
 if (WIN32)

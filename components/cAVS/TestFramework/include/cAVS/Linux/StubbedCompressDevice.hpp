@@ -39,7 +39,7 @@ class StubbedCompressDevice : public CompressDevice
 {
 public:
     StubbedCompressDevice(const compress::DeviceInfo &info)
-        : mIsStarted(false), CompressDevice(info)
+        : CompressDevice(info), mIsStarted(false)
     {
     }
 

@@ -41,9 +41,9 @@ MockedControlDevice::ControlEntry::ControlEntry(Command command, const std::stri
                                                 const Buffer &expectedOutputBuffer,
                                                 const Buffer &returnedOutputBuffer,
                                                 bool successsful)
-    : mCommand(command), mControlName(controlName), mSuccesssful(successsful),
-      mExpectedInputBuffer(expectedInputBuffer), mExpectedOutputBuffer(expectedOutputBuffer),
-      mReturnedOutputBuffer(returnedOutputBuffer)
+    : mCommand(command), mControlName(controlName), mExpectedInputBuffer(expectedInputBuffer),
+      mExpectedOutputBuffer(expectedOutputBuffer), mReturnedOutputBuffer(returnedOutputBuffer),
+      mSuccesssful(successsful)
 {
 }
 

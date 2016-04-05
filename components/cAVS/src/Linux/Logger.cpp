@@ -104,6 +104,10 @@ Logger::Level Logger::getLogParameterCtl() const
 {
     mixer_ctl::LogPriority logPriority;
 
+    // Avoid strict-aliasing violations
+    static_assert(sizeof(long) == sizeof(logPriority), "mixer_ctl::LogPriority should be a long");
+    long hack;
+
     util::Buffer logLevelBuffer{};
     try {
         mControlDevice.ctlRead(mixer_ctl::logLevelMixer, logLevelBuffer);
@@ -111,7 +115,8 @@ Logger::Level Logger::getLogParameterCtl() const
         throw Exception("Failed to read the log level control: " + std::string(e.what()));
     }
     util::MemoryByteStreamReader reader(logLevelBuffer);
-    reader.read(reinterpret_cast<long &>(logPriority));
+    reader.read(hack);
+    logPriority = static_cast<mixer_ctl::LogPriority>(hack);
 
     return translateFromMixer(logPriority);
 }
@@ -199,8 +204,8 @@ void Logger::LogProducer::sendCommand(CommandPtr cmd)
 /* The constructor starts the log producer thread */
 Logger::LogProducer::LogProducer(BlockingLogQueue &queue, unsigned int coreId, Device &device,
                                  std::unique_ptr<CompressDevice> logDevice)
-    : mQueue(queue), mCoreId(coreId), mLogDevice(std::move(logDevice)), mDevice(device),
-      mCommandQueue(maxCommandQueueSize, commandSize)
+    : mCommandQueue(maxCommandQueueSize, commandSize), mQueue(queue), mCoreId(coreId),
+      mLogDevice(std::move(logDevice)), mDevice(device)
 {
     /* No parameter to start / stop logging on linux. So, just consider that if a log device
      * could be opened and started and consequently a log producer instantiated it is enough

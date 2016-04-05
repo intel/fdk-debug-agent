@@ -47,7 +47,7 @@ public:
      */
     MockedCompressDevice(const compress::DeviceInfo &info,
                          std::function<void(void)> leftoverCallback)
-        : mIsStarted(false), CompressDevice(info), mFailed(false),
+        : CompressDevice(info), mFailed(false), mIsStarted(false),
           mLeftoverCallback(leftoverCallback), mMockedInfo(info)
     {
     }

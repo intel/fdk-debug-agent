@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -18,31 +18,26 @@
 #
 ################################################################################
 
-# cmake configuration file of the "TestCommon" component
-
-# this component intends to share utility classes between unit tests.
-
-# library
-set(LIB_SRCS
-    src/HttpClientSimulator.cpp)
-
-if(UNIX)
-    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/HttpClientSimulator.cpp PROPERTIES
-        COMPILE_FLAGS "-Wno-switch")
+if (UNIX)
+    # FIXME: unused-function errors stem from static functions defined in
+    # header files; they should be declared inline.
+    # unused-parameter errors in Release mode stem from parameters being only
+    # used in assert() calls, which are disabled in that mode.
+    set_directory_properties(PROPERTIES
+        COMPILE_OPTIONS "-Wall;-Wno-unused-function;$<$<CONFIG:Release>:-Wno-unused-parameter>")
 endif()
 
-set(LIB_INCS
-    include/TestCommon/HttpClientSimulator.hpp
-    include/TestCommon/TestHelpers.hpp
-    include/TestCommon/ThreadHelpers.hpp)
+# Adding components in the right order (less dependent first)
+foreach(dir Util IfdkObjects TestCommon Tlv Rest System cAVS ParameterSerializer Core Main)
+    add_subdirectory("${dir}")
+endforeach()
 
-add_library(TestCommon STATIC ${LIB_SRCS} ${LIB_INCS})
-set_common_settings(TestCommon)
+if (NOT ${EXCLUDE_TEST_IN_ALL_TARGET})
+    add_subdirectory("FunctionalTests")
+endif (NOT ${EXCLUDE_TEST_IN_ALL_TARGET})
 
-# exporting the include directory
-target_include_directories(TestCommon PUBLIC "include")
-
-target_link_libraries(TestCommon Util)
-
-link_poco(TestCommon)
+# Windows only components
+if (WIN32)
+    add_subdirectory("LogGrabber")
+endif()
 

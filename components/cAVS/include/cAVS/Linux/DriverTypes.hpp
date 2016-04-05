@@ -63,8 +63,8 @@ public:
     }
 
 private:
-    bool mAllowedToSleep;
     unsigned int mCoreId;
+    bool mAllowedToSleep;
 };
 
 static bool requireTunneledAccess(uint32_t moduleId, uint32_t paramId)
