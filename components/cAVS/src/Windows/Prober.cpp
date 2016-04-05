@@ -249,35 +249,11 @@ size_t Prober::getInjectionRingBufferLinearPosition(ProbeId probeId)
     return size_t{from};
 }
 
-std::pair<std::set<ProbeId> /*Extract*/, std::set<ProbeId> /*Inject*/> Prober::getActiveProbes()
-    const
-{
-    std::set<ProbeId> extractionProbes;
-    std::set<ProbeId> injectionProbes;
-
-    ProbeId::RawType probeIndex{0};
-    for (auto &probe : mCachedProbeConfiguration) {
-        if (probe.enabled) {
-            ASSERT_ALWAYS(probePurposeHelper().isValid(probe.purpose));
-            if (probe.purpose == ProbePurpose::Extract ||
-                probe.purpose == ProbePurpose::InjectReextract) {
-                extractionProbes.insert(ProbeId{probeIndex});
-            }
-            if (probe.purpose == ProbePurpose::Inject ||
-                probe.purpose == ProbePurpose::InjectReextract) {
-                injectionProbes.insert(ProbeId{probeIndex});
-            }
-        }
-        ++probeIndex;
-    }
-    return {extractionProbes, injectionProbes};
-}
-
 void Prober::startStreaming()
 {
     auto ringBuffers = getRingBuffers();
 
-    auto result = getActiveProbes();
+    auto result = getActiveSession(mCachedProbeConfiguration);
     auto &extractionProbes = result.first;
     auto &injectionProbes = result.second;
 

@@ -70,12 +70,9 @@ private:
 
         State getState() override { return State::Idle; }
 
-        void setSessionProbes(const std::vector<ProbeConfig>,
-                              std::map<ProbeId, std::size_t>) override
-        {
-        }
+        void setSessionProbes(const SessionProbes, std::map<ProbeId, std::size_t>) override {}
 
-        std::vector<ProbeConfig> getSessionProbes() override { return std::vector<ProbeConfig>(); }
+        SessionProbes getSessionProbes() override { return SessionProbes(); }
 
         std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId) override { return nullptr; }
 

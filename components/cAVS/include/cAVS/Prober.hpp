@@ -31,6 +31,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <set>
 
 namespace debug_agent
 {
@@ -129,6 +130,31 @@ public:
 
     /** Maps endpoint IDs to probe configurations */
     using SessionProbes = std::vector<ProbeConfig>;
+
+    /** @return active probe indexes (extraction/injection) */
+    static std::pair<std::set<ProbeId> /*Extract*/, std::set<ProbeId> /*Inject*/> getActiveSession(
+        const SessionProbes &probeSessions)
+    {
+        std::set<ProbeId> extractionProbes;
+        std::set<ProbeId> injectionProbes;
+
+        ProbeId::RawType probeIndex{0};
+        for (auto &probe : probeSessions) {
+            if (probe.enabled) {
+                ASSERT_ALWAYS(probePurposeHelper().isValid(probe.purpose));
+                if (probe.purpose == ProbePurpose::Extract ||
+                    probe.purpose == ProbePurpose::InjectReextract) {
+                    extractionProbes.insert(ProbeId{probeIndex});
+                }
+                if (probe.purpose == ProbePurpose::Inject ||
+                    probe.purpose == ProbePurpose::InjectReextract) {
+                    injectionProbes.insert(ProbeId{probeIndex});
+                }
+            }
+            ++probeIndex;
+        }
+        return {extractionProbes, injectionProbes};
+    }
 
     Prober() = default;
 

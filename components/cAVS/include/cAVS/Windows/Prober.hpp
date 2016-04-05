@@ -158,9 +158,6 @@ private:
     void startStreaming();
     void stopStreaming();
 
-    /** @return active probe indexes (extraction/injection) */
-    std::pair<std::set<ProbeId> /*Extract*/, std::set<ProbeId> /*Inject*/> getActiveProbes() const;
-
     driver::RingBuffersDescription getRingBuffers();
     size_t getExtractionRingBufferLinearPosition();
     size_t getInjectionRingBufferLinearPosition(ProbeId probeId);

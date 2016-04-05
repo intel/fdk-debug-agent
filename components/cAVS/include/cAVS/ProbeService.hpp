@@ -129,7 +129,7 @@ private:
     /** State machine transitions leading to "Idle" state from any other state */
     static const Transitions mStopTransitions;
 
-    std::vector<Prober::ProbeConfig> mProbeConfigs;
+    Prober::SessionProbes mProbeConfigs;
     Prober &mProber;
     ModuleHandler &mModuleHandler;
     mutable std::mutex mDriverLogServiceStateMutex;
