@@ -28,6 +28,8 @@
 #include "Util/StructureChangeTracking.hpp"
 #include "Util/StringHelper.hpp"
 
+#include <array>
+
 namespace debug_agent
 {
 namespace cavs
@@ -149,7 +151,7 @@ public:
     uint8_t name[MAX_MODULE_NAME_LEN];
     uint32_t uuid[uuidLen];
     ModuleType type; // ModuleType
-    uint8_t hash[DEFAULT_HASH_SHA256_LEN];
+    std::array<uint8_t, DEFAULT_HASH_SHA256_LEN> hash;
     uint32_t entry_point;
     uint16_t cfg_offset;
     uint16_t cfg_count;
@@ -164,9 +166,9 @@ public:
         return module_id == other.module_id && state_flags == other.state_flags &&
                isArrayEqual(name, other.name, MAX_MODULE_NAME_LEN) &&
                isArrayEqual(uuid, other.uuid, uuidLen) && type == other.type &&
-               isArrayEqual(hash, other.hash, DEFAULT_HASH_SHA256_LEN) &&
-               entry_point == other.entry_point && cfg_offset == other.cfg_offset &&
-               cfg_count == other.cfg_count && affinity_mask == other.affinity_mask &&
+               hash == other.hash && entry_point == other.entry_point &&
+               cfg_offset == other.cfg_offset && cfg_count == other.cfg_count &&
+               affinity_mask == other.affinity_mask &&
                instance_max_count == other.instance_max_count &&
                instance_stack_size == other.instance_stack_size &&
                isArrayEqual(segments, other.segments, segmentCount);
