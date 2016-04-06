@@ -169,14 +169,17 @@ union ProbePointId
  * because the inclusion of the <ixc/probe_header_defs.h> header produces this error:
  *    private_fw::intel_adsp::InterleavingStyle' : redefinition; different basic types
  */
+/** Probe packet sync word. TODO: Should be include from fw headers. */
+namespace packet
+{
+static constexpr const uint32_t syncWord = 0xBABEBEBA;
+}
+
 struct Packet
 {
     Packet() = default;
     Packet(Packet &&) = default;
     Packet &operator=(Packet &&) = default;
-
-    /** Probe packet sync word. TODO: Should be include from fw headers. */
-    static constexpr const uint32_t syncWord = 0xBABEBEBA;
 
     ProbePointId probePointId;
     uint32_t format;
@@ -186,7 +189,7 @@ struct Packet
 
     uint64_t sum() const
     {
-        return syncWord + probePointId.full + format + dspWallClockTsHw + dspWallClockTsLw +
+        return packet::syncWord + probePointId.full + format + dspWallClockTsHw + dspWallClockTsLw +
                data.size();
     }
 
@@ -195,7 +198,7 @@ struct Packet
         using std::to_string;
         std::stringstream ss;
         ss << "Probe packet header { probe point id {" << probePointId.toString() << "} "
-           << std::hex << std::showbase << "syncWord=" << syncWord << ", format=" << format
+           << std::hex << std::showbase << "syncWord=" << packet::syncWord << ", format=" << format
            << ", dspWallClockTsHw=" << dspWallClockTsHw << ", dspWallClockTsLw=" << dspWallClockTsLw
            << ", dataSize=" << data.size() << " }";
         return ss.str();
@@ -206,11 +209,11 @@ struct Packet
         uint32_t syncWordValue;
         reader.read(syncWordValue);
 
-        if (syncWordValue != syncWord) {
+        if (syncWordValue != packet::syncWord) {
             throw util::ByteStreamReader::Exception(
                 "Invalid sync word in extracted probe packet header. "
                 "Expected " +
-                std::to_string(syncWord) + ", found " + std::to_string(syncWordValue));
+                std::to_string(packet::syncWord) + ", found " + std::to_string(syncWordValue));
         }
 
         reader.read(probePointId);
@@ -242,7 +245,7 @@ struct Packet
     template <typename ChecksumType = uint64_t>
     void toStream(util::ByteStreamWriter &writer) const
     {
-        writer.write(syncWord);
+        writer.write(packet::syncWord);
         writer.write(probePointId);
         writer.write(format);
         writer.write(dspWallClockTsHw);
