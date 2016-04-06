@@ -36,7 +36,7 @@ enum class ParameterKind
     Control /** Read-write */
 };
 
-static const util::EnumHelper<ParameterKind> &parameterKindHelper()
+inline static const util::EnumHelper<ParameterKind> &parameterKindHelper()
 {
     static const util::EnumHelper<ParameterKind> helper({
         {ParameterKind::Info, "Info"}, {ParameterKind::Control, "Control"},

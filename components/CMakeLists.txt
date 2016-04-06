@@ -19,12 +19,10 @@
 ################################################################################
 
 if (UNIX)
-    # FIXME: unused-function errors stem from static functions defined in
-    # header files; they should be declared inline.
     # unused-parameter errors in Release mode stem from parameters being only
     # used in assert() calls, which are disabled in that mode.
     set_directory_properties(PROPERTIES
-        COMPILE_OPTIONS "-Wall;-Wno-unused-function;$<$<CONFIG:Release>:-Wno-unused-parameter>")
+        COMPILE_OPTIONS "-Wall;$<$<CONFIG:Release>:-Wno-unused-parameter>")
 endif()
 
 # Adding components in the right order (less dependent first)

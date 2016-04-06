@@ -60,8 +60,8 @@ static const std::string ContentTypeIfdkFile("application/vnd.ifdk-file");
  *
  *  @returns a std::string corresponding to the value of an XML node
  */
-static const std::string getNodeValueFromXPath(const Poco::XML::Document *document,
-                                               const std::string &url)
+inline static const std::string getNodeValueFromXPath(const Poco::XML::Document *document,
+                                                      const std::string &url)
 {
     Poco::XML::Node *node = document->getNodeByPath(url);
     if (node) {

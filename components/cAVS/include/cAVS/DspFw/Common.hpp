@@ -104,7 +104,7 @@ private:
     }
 };
 
-static std::ostream &operator<<(std::ostream &stream, const CompoundModuleId &id)
+inline static std::ostream &operator<<(std::ostream &stream, const CompoundModuleId &id)
 {
     stream << id.toString();
     return stream;

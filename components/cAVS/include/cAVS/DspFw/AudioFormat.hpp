@@ -40,7 +40,7 @@ namespace dsp_fw
 using StreamType = private_fw::StreamType;
 static_assert(StreamType::eMaxStreamType == 3, "Wrong StreamType enum value count");
 
-static const util::EnumHelper<StreamType> &getStreamTypeHelper()
+inline static const util::EnumHelper<StreamType> &getStreamTypeHelper()
 {
     static const util::EnumHelper<StreamType> helper({
         {StreamType::ePcm, "PCM"}, {StreamType::eMp3, "MP3"}, {StreamType::eAac, "AAC"},

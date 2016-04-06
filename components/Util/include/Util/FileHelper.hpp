@@ -38,7 +38,7 @@ struct Exception : std::runtime_error
     using std::runtime_error::runtime_error;
 };
 
-static util::Buffer readAsBytes(const std::string &fileName)
+inline static util::Buffer readAsBytes(const std::string &fileName)
 {
     std::ifstream file(fileName);
     if (!file) { /* Using stream bool operator */
@@ -55,7 +55,7 @@ static util::Buffer readAsBytes(const std::string &fileName)
 }
 
 /** Create a file from string */
-static void writeFromBytes(const std::string &fileName, const util::Buffer &content)
+inline static void writeFromBytes(const std::string &fileName, const util::Buffer &content)
 {
     std::ofstream file(fileName, std::ios::binary);
     if (!file) { /* Using stream bool operator */
@@ -70,21 +70,21 @@ static void writeFromBytes(const std::string &fileName, const util::Buffer &cont
 }
 
 /** Read file content as string */
-static std::string readAsString(const std::string &fileName)
+inline static std::string readAsString(const std::string &fileName)
 {
     auto buffer = readAsBytes(fileName);
     return std::string(buffer.begin(), buffer.end());
 }
 
 /** Create a file from string */
-static void writeFromString(const std::string &fileName, const std::string &content)
+inline static void writeFromString(const std::string &fileName, const std::string &content)
 {
     Buffer buffer(content.begin(), content.end());
     writeFromBytes(fileName, buffer);
 }
 
 /** Remove a file */
-static void remove(const std::string &fileName)
+inline static void remove(const std::string &fileName)
 {
     if (std::remove(fileName.c_str()) != 0) {
         throw Exception("Cannot remove file: " + fileName);
