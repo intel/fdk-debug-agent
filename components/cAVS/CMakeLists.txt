@@ -96,14 +96,14 @@ target_include_directories(cAVS PUBLIC "include")
 find_path(CAVS_FW_HEADERS_INCLUDE_DIRECTORIES FW/src/common/include/stream_type.h)
 
 # including and exporting cAVS fw headers
-target_include_directories(cAVS PUBLIC
+target_include_directories(cAVS SYSTEM PUBLIC
     "${CAVS_FW_HEADERS_INCLUDE_DIRECTORIES}/FW/src/common/include"
     "${CAVS_FW_HEADERS_INCLUDE_DIRECTORIES}/FW/src/intel_adsp/include"
 )
 
 if (WIN32)
     # including and exporting OED driver headers
-    target_include_directories(cAVS PUBLIC
+    target_include_directories(cAVS SYSTEM PUBLIC
         "${PROJECT_SOURCE_DIR}/external/cAVS/cavs_sw/SW/OEPrivIface")
 endif()
 
@@ -120,7 +120,7 @@ target_link_libraries(cAVS System Util Tlv)
 
 if (CMAKE_SYSTEM_NAME MATCHES Linux)
     find_path(TINYCOMPRESS_INCLUDE_DIR NAMES tinycompress/tinycompress.h REQUIRED)
-    target_include_directories(cAVS PUBLIC "${TINYCOMPRESS_INCLUDE_DIR}")
+    target_include_directories(cAVS SYSTEM PUBLIC "${TINYCOMPRESS_INCLUDE_DIR}")
 
     find_library(TINYCOMPRESS_LIBRARY NAMES libtinycompress.so REQUIRED)
     target_link_libraries(cAVS ${TINYCOMPRESS_LIBRARY})
