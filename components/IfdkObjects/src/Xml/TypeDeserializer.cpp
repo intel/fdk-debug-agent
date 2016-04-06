@@ -184,7 +184,7 @@ void TypeDeserializer::enter(Description &desc)
     desc.setValue(getText());
 }
 
-void TypeDeserializer::enter(Parameters &parameters, bool isConcrete)
+void TypeDeserializer::enter(Parameters &, bool isConcrete)
 {
     assert(!isConcrete);
 }

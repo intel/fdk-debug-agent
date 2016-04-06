@@ -104,7 +104,7 @@ private:
             Exit
         };
         using CommandPtr = std::unique_ptr<Command>;
-        static std::size_t commandSize(const Command &cmd) { return sizeof(uint32_t); }
+        static std::size_t commandSize(const Command &) { return sizeof(uint32_t); }
         using BlockingCommandQueue = util::BlockingQueue<Command>;
         BlockingCommandQueue mCommandQueue;
 
@@ -147,7 +147,7 @@ private:
     };
     /** A non empty producer list garantees that we could open and start the log device.
      */
-    const bool isLogProductionRunning() const { return !mLogProducers.empty(); }
+    bool isLogProductionRunning() const { return !mLogProducers.empty(); }
     static std::size_t logBlockSize(const LogBlock &block) { return block.getLogSize(); }
     static const std::size_t queueMaxMemoryBytes =
         LogProducer::nbFragments * LogProducer::fragmentSize * 320; /* 10 meg. */

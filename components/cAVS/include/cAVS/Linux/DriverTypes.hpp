@@ -129,7 +129,7 @@ struct MessageHeader
     };
 
     // It is a no-op, the driver will never send back the message header.
-    virtual void fromStream(util::ByteStreamReader &reader) {}
+    virtual void fromStream(util::ByteStreamReader &) {}
 
     virtual void toStream(util::ByteStreamWriter &writer) const
     {

@@ -361,8 +361,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
 
     /* Simulating an os error */
 
-    static const dsp_fw::SchedulersInfo emptyInfo = {};
-    dsp_fw::SchedulersInfo info = emptyInfo;
+    dsp_fw::SchedulersInfo info;
 
     /*Successful command */
     CHECK_NOTHROW(moduleHandler.getSchedulersInfo(coreId, info));

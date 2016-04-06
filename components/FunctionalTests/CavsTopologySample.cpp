@@ -44,7 +44,7 @@ const dsp_fw::AudioDataFormatIpc audioFormat = {
     dsp_fw::SampleType::SIGNED_INTEGER,
     0};
 
-enum Modules
+enum Modules : uint16_t
 {
     module_copier = 0,
     module_aec = 1,
@@ -85,9 +85,9 @@ dsp_fw::PinListInfo newEmptyPinList()
 /** Helper function to create pin list */
 dsp_fw::PinListInfo newPinList(const std::vector<Queue> queueIds)
 {
-    dsp_fw::PinListInfo info{};
+    dsp_fw::PinListInfo info;
     for (auto queueId : queueIds) {
-        dsp_fw::PinProps props{};
+        dsp_fw::PinProps props;
         props.format = audioFormat;
         props.stream_type = dsp_fw::StreamType::ePcm;
         props.phys_queue_id = queueId;
@@ -99,16 +99,25 @@ dsp_fw::PinListInfo newPinList(const std::vector<Queue> queueIds)
 
 /** Helper function to create module instance */
 dsp_fw::ModuleInstanceProps newModuleInstance(
-    Modules type, uint32_t instance, const dsp_fw::PinListInfo &inputs,
+    Modules type, uint16_t instance, const dsp_fw::PinListInfo &inputs,
     const dsp_fw::PinListInfo &outputs,
     const dsp_fw::ConnectorNodeId &inputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId),
     const dsp_fw::ConnectorNodeId &outputGateway =
         dsp_fw::ConnectorNodeId(dsp_fw::ConnectorNodeId::kInvalidNodeId))
 {
-    dsp_fw::ModuleInstanceProps props{};
-    props.id.moduleId = type;
-    props.id.instanceId = instance;
+    dsp_fw::ModuleInstanceProps props;
+    props.id = {type, instance};
+    props.dp_queue_type = 0;
+    props.queue_alignment = 0;
+    props.cp_usage_mask = 0;
+    props.stack_bytes = 0;
+    props.bss_total_bytes = 0;
+    props.bss_used_bytes = 0;
+    props.ibs_bytes = 0;
+    props.obs_bytes = 0;
+    props.cpc = 0;
+    props.cpc_peak = 0;
     props.input_gateway = inputGateway;
     props.output_gateway = outputGateway;
     props.input_pins = inputs;
@@ -119,7 +128,7 @@ dsp_fw::ModuleInstanceProps newModuleInstance(
 /** Helper function to create gateway */
 dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 {
-    dsp_fw::GatewayProps p{};
+    dsp_fw::GatewayProps p;
     p.attribs.dw = 0;
     p.id = connectorId.val.dw;
     return p;
@@ -128,7 +137,7 @@ dsp_fw::GatewayProps newGateway(const dsp_fw::ConnectorNodeId &connectorId)
 /** Helper function to create task */
 dsp_fw::TaskProps newTask(uint32_t id, const std::vector<dsp_fw::CompoundModuleId> &ids)
 {
-    dsp_fw::TaskProps props{};
+    dsp_fw::TaskProps props;
     props.task_id = id;
     props.module_instance_id = ids;
     return props;
@@ -137,7 +146,8 @@ dsp_fw::TaskProps newTask(uint32_t id, const std::vector<dsp_fw::CompoundModuleI
 /** Helper function to create scheduler */
 dsp_fw::SchedulersInfo newScheduler(const std::vector<dsp_fw::TaskProps> &tasks)
 {
-    dsp_fw::SchedulerProps props{};
+    dsp_fw::SchedulerProps props;
+    props.processing_domain = 0;
     props.core_id = 0;
     props.task_info = tasks;
 
@@ -152,9 +162,13 @@ dsp_fw::PplProps newPipeline(dsp_fw::PipeLineIdType id, uint32_t priority,
                              const std::vector<dsp_fw::CompoundModuleId> &instanceIds,
                              const std::vector<uint32_t> &taskIds)
 {
-    dsp_fw::PplProps props{};
+    dsp_fw::PplProps props;
     props.id = id;
     props.priority = priority;
+    props.state = 0;
+    props.total_memory_bytes = 0;
+    props.used_memory_bytes = 0;
+    props.context_pages = 0;
     props.module_instances = instanceIds;
     props.ll_tasks = taskIds;
     return props;
@@ -290,7 +304,7 @@ void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> 
 {
     /* Filling module entries */
     for (auto &moduleEntry : moduleHelper.getEnumToStringMap()) {
-        dsp_fw::ModuleEntry entry{};
+        dsp_fw::ModuleEntry entry;
         StringHelper::setStringToFixedSizeArray(entry.name, sizeof(entry.name), moduleEntry.second);
 
         for (uint32_t &intValue : entry.uuid) {
@@ -298,6 +312,22 @@ void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> 
             intValue = moduleEntry.first;
         }
         entry.module_id = moduleEntry.first;
+
+        entry.state_flags = 0;
+        entry.type.ul = 0;
+        entry.hash.fill(0);
+        entry.entry_point = 0;
+        entry.cfg_offset = 0;
+        entry.cfg_count = 0;
+        entry.affinity_mask = 0;
+        entry.instance_max_count = 0;
+        entry.instance_stack_size = 0;
+
+        for (auto &segment : entry.segments) {
+            segment.flags.ul = 0;
+            segment.v_base_addr = 0;
+            segment.file_offset = 0;
+        }
 
         modules.push_back(entry);
     }

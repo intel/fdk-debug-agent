@@ -22,7 +22,7 @@ if (UNIX)
     # unused-parameter errors in Release mode stem from parameters being only
     # used in assert() calls, which are disabled in that mode.
     set_directory_properties(PROPERTIES
-        COMPILE_OPTIONS "-Wall;$<$<CONFIG:Release>:-Wno-unused-parameter>")
+        COMPILE_OPTIONS "-Wall;$<$<CONFIG:Release>:-Wno-unused-parameter>;-Wextra")
 endif()
 
 # Adding components in the right order (less dependent first)

@@ -159,7 +159,7 @@ void TypeSerializer::enter(const Description &description)
     setText(description.getValue());
 }
 
-void TypeSerializer::enter(const Parameters &parameters, bool isConcrete)
+void TypeSerializer::enter(const Parameters &, bool isConcrete)
 {
     assert(!isConcrete);
 }

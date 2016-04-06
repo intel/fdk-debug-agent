@@ -66,7 +66,7 @@ public:
     }
 
 protected:
-    virtual bool equalsTo(const Parameters &other) const noexcept { return true; }
+    virtual bool equalsTo(const Parameters &) const noexcept { return true; }
 
 private:
     template <typename T, typename Visitor>

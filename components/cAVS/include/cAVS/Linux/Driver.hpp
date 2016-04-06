@@ -63,23 +63,17 @@ private:
     public:
         std::size_t getMaxProbeCount() const override { return 0; }
 
-        void setState(State state) override {}
+        void setState(State) override {}
 
         State getState() override { return State::Idle; }
 
-        void setSessionProbes(const std::vector<ProbeConfig> probes) override {}
+        void setSessionProbes(const std::vector<ProbeConfig>) override {}
 
         std::vector<ProbeConfig> getSessionProbes() override { return std::vector<ProbeConfig>(); }
 
-        std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override
-        {
-            return nullptr;
-        }
+        std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId) override { return nullptr; }
 
-        bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) override
-        {
-            return false;
-        }
+        bool enqueueInjectionBlock(ProbeId, const util::Buffer &) override { return false; }
     };
 
     DummyProber mProber;

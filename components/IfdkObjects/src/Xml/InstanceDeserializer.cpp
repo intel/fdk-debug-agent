@@ -161,7 +161,7 @@ void InstanceDeserializer::enter(Parents &parents)
         parents.getElements());
 }
 
-void InstanceDeserializer::enter(Parameters &parameters, bool isConcrete)
+void InstanceDeserializer::enter(Parameters &, bool isConcrete)
 {
     assert(!isConcrete);
 }

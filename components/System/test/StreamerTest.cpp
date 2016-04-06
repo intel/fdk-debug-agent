@@ -49,7 +49,7 @@ public:
         }
     }
 
-    void streamFirst(std::ostream &os) override
+    void streamFirst(std::ostream &) override
     {
         // Shall be called only once, before streamNext
         CHECK(mIteration == 0);

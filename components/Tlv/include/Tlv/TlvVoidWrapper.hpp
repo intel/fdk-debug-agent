@@ -39,7 +39,7 @@ class TlvVoidWrapper final : public TlvWrapperInterface
 public:
     TlvVoidWrapper() {}
 
-    void readFrom(const util::Buffer &binarySource) override {}
+    void readFrom(const util::Buffer &) override {}
 
     virtual void invalidate() noexcept override {}
 };

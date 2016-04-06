@@ -185,8 +185,8 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus return
                                  parameterPayload.size(), parameterPayload);
 }
 
-void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                        uint16_t moduleId, uint16_t instanceId,
+void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus, uint16_t moduleId,
+                                                        uint16_t instanceId,
                                                         dsp_fw::ParameterId parameterId,
                                                         const util::Buffer &parameterPayload)
 {
@@ -208,8 +208,8 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus return
     mDevice.addDebugfsEntryOKClose();
 }
 
-void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                        uint16_t moduleId, uint16_t instanceId,
+void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus, uint16_t moduleId,
+                                                        uint16_t instanceId,
                                                         dsp_fw::ParameterId parameterId)
 {
     /* Fill the test vector for get parameter command and reply */
@@ -229,8 +229,8 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus return
     mDevice.addDebugfsEntryOKClose();
 }
 
-void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
-                                                        uint16_t moduleId, uint16_t instanceId,
+void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus, uint16_t moduleId,
+                                                        uint16_t instanceId,
                                                         dsp_fw::ParameterId parameterId,
                                                         size_t parameterSize,
                                                         const util::Buffer &parameterPayload)

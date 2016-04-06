@@ -48,7 +48,7 @@ struct ATestValueType
 
 TEST_CASE("TlvWrapper", "[WrapperRead]")
 {
-    ATestValueType testValue{};
+    ATestValueType testValue;
     bool testValueIsValid = false;
     TlvWrapper<ATestValueType> tlvWrapper(testValue, testValueIsValid);
 

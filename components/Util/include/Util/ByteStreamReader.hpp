@@ -139,7 +139,7 @@ public:
         for (std::size_t i = 0; i < size; ++i) {
             /* Initializing element with default values because otherwise klocwork believes that
              * uninitialized values are used, which is a false positive */
-            T element{};
+            T element;
             read(element);
             vector.push_back(element);
         }

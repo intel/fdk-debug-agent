@@ -147,7 +147,7 @@ void InstanceSerializer::enter(const Parents &instance)
     pushElement(instance);
 }
 
-void InstanceSerializer::enter(const Parameters &parameters, bool isConcrete)
+void InstanceSerializer::enter(const Parameters &, bool isConcrete)
 {
     assert(!isConcrete);
 }

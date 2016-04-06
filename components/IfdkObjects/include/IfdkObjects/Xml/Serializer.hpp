@@ -74,7 +74,7 @@ protected:
      * The xml tag name is deduced from the type using traits.
      */
     template <class C>
-    void pushElement(C &e)
+    void pushElement(C &)
     {
         using NonConstC = typename std::remove_const<C>::type;
 

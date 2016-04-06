@@ -96,7 +96,7 @@ std::string gatewayToString(const dsp_fw::ConnectorNodeId &connector)
     return stream.str();
 }
 
-Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
+Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &)
 {
     /* Segment count per module entry, as defined in firmware structures */
     static const std::size_t segmentCount = 3;
@@ -160,7 +160,7 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &request)
     return std::make_unique<Response>(ContentTypeHtml, html.getHtmlContent());
 }
 
-Resource::ResponsePtr TopologyDebugResource::handleGet(const Request &request)
+Resource::ResponsePtr TopologyDebugResource::handleGet(const Request &)
 {
     Topology topology;
     try {
@@ -412,7 +412,7 @@ void TopologyDebugResource::dumpPins(HtmlHelper &html,
     }
 }
 
-Resource::ResponsePtr ModelDumpDebugResource::handleGet(const Request &request)
+Resource::ResponsePtr ModelDumpDebugResource::handleGet(const Request &)
 {
     auto guard = mInstanceModel.lock();
     auto handle = guard->get();

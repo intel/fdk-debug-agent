@@ -73,7 +73,7 @@ inline static const std::string getNodeValueFromXPath(const Poco::XML::Document 
     }
 }
 
-Resource::ResponsePtr SystemTypeResource::handleGet(const Request &request)
+Resource::ResponsePtr SystemTypeResource::handleGet(const Request &)
 {
     xml::TypeSerializer serializer;
     mTypeModel.getSystem()->accept(serializer);
@@ -81,7 +81,7 @@ Resource::ResponsePtr SystemTypeResource::handleGet(const Request &request)
     return std::make_unique<Response>(ContentTypeXml, serializer.getXml());
 }
 
-Resource::ResponsePtr SystemInstanceResource::handleGet(const Request &request)
+Resource::ResponsePtr SystemInstanceResource::handleGet(const Request &)
 {
     xml::InstanceSerializer serializer;
     mSystemInstance.accept(serializer);
@@ -160,7 +160,7 @@ Resource::ResponsePtr InstanceResource::handleGet(const Request &request)
     return std::make_unique<Response>(ContentTypeXml, serializer.getXml());
 }
 
-Resource::ResponsePtr RefreshSubsystemResource::handlePost(const Request &request)
+Resource::ResponsePtr RefreshSubsystemResource::handlePost(const Request &)
 {
     std::shared_ptr<InstanceModel> instanceModel;
     auto guard = mInstanceModel.lock();
@@ -260,7 +260,7 @@ private:
     std::unique_ptr<System::OutputStreamResource> mStreamResource;
 };
 
-Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &request)
+Resource::ResponsePtr LogServiceStreamResource::handleGet(const Request &)
 {
     /** Acquiring the log stream resource */
     auto &&resource = mSystem.tryToAcquireLogStreamResource();

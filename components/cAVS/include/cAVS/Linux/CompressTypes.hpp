@@ -64,8 +64,8 @@ struct Config
 
     struct compr_config *getConfig() { return &mConfig; }
 
-    struct compr_config mConfig = {};
-    struct snd_codec mCodec = {};
+    struct compr_config mConfig;
+    struct snd_codec mCodec;
 };
 
 class DeviceInfo

@@ -44,7 +44,7 @@ public:
     }
 
     /** below are pure virtual function of Device interface */
-    void open(Mode mode, Role role, compress::Config &config) override {}
+    void open(Mode, Role, compress::Config &) override {}
 
     void close() noexcept override {}
 

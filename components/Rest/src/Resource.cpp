@@ -41,22 +41,22 @@ Resource::ResponsePtr Resource::handleRequest(const Request &request)
     throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
-Resource::ResponsePtr Resource::handleGet(const Request &request)
+Resource::ResponsePtr Resource::handleGet(const Request &)
 {
     throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
-Resource::ResponsePtr Resource::handlePut(const Request &request)
+Resource::ResponsePtr Resource::handlePut(const Request &)
 {
     throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
-Resource::ResponsePtr Resource::handlePost(const Request &request)
+Resource::ResponsePtr Resource::handlePost(const Request &)
 {
     throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
 
-Resource::ResponsePtr Resource::handleDelete(const Request &request)
+Resource::ResponsePtr Resource::handleDelete(const Request &)
 {
     throw Response::HttpError(Response::ErrorStatus::VerbNotAllowed);
 }
