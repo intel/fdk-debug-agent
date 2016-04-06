@@ -22,6 +22,7 @@
 
 #include "cAVS/Windows/ProberBackend.hpp"
 #include "cAVS/Windows/IoctlHelpers.hpp"
+#include "cAVS/Windows/Probe/ExtractionInputStream.hpp"
 
 namespace debug_agent
 {
@@ -284,7 +285,7 @@ void ProberBackend::startStreaming()
         if (!extractionProbes.empty()) {
 
             // opening queues of the active probes, and collecting probe point id
-            probe::Extractor::ProbePointMap probePointMap;
+            ProbeExtractor::ProbePointMap probePointMap;
             for (auto probeId : extractionProbes) {
                 mExtractionQueues[probeId.getValue()].open();
 
@@ -299,13 +300,14 @@ void ProberBackend::startStreaming()
                 probePointMap[probePointId] = probeId;
             }
 
-            // starting exractor
-            mExtractor = std::make_unique<probe::Extractor>(
+            // starting extractor
+            auto inputStream = std::make_unique<probe::ExtractionInputStream>(
                 *mEventHandles.extractionHandle,
                 util::RingBufferReader(ringBuffers.extractionRBDescription.startAdress,
                                        ringBuffers.extractionRBDescription.size,
-                                       [this] { return getExtractionRingBufferLinearPosition(); }),
-                probePointMap, mExtractionQueues);
+                                       [this] { return getExtractionRingBufferLinearPosition(); }));
+            mExtractor = std::make_unique<ProbeExtractor>(mExtractionQueues, probePointMap,
+                                                          std::move(inputStream));
         }
 
         // opening queues of the active probes and creating injectors

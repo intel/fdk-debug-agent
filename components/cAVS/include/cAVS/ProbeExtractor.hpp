@@ -23,74 +23,74 @@
 #pragma once
 
 #include "cAVS/DspFw/Probe.hpp"
-#include "cAVS/Windows/Probe/ExtractionInputStream.hpp"
-#include "Util/RingBufferReader.hpp"
-#include "Util/BlockingQueue.hpp"
+#include "cAVS/Prober.hpp"
+
+#include "Util/AssertAlways.hpp"
+#include "Util/PointerHelper.hpp"
+#include "Util/Stream.hpp"
 #include "Util/Exception.hpp"
-#include "Util/ByteStreamReader.hpp"
-#include "Util/ByteStreamWriter.hpp"
-#include "Util/MemoryStream.hpp"
-#include <vector>
-#include <memory>
+#include "Util/Buffer.hpp"
+#include "Util/BlockingQueue.hpp"
+
 #include <future>
+#include <memory>
 #include <map>
 
 namespace debug_agent
 {
 namespace cavs
 {
-namespace windows
-{
-namespace probe
-{
 
-/** Active object that performs probe packets extraction from a ring buffer, and then dispatches
+/** Active object that performs probe packets extraction from an input stream, and then dispatches
  * them to the matching queue */
-class Extractor
+class ProbeExtractor
 {
 public:
-    using Sample = uint8_t;
-    using Exception = util::Exception<Extractor>;
-    using FIFO = util::BlockingQueue<util::Buffer>;
     using ProbePointMap = std::map<dsp_fw::ProbePointId, ProbeId>;
+    using Exception = util::Exception<ProbeExtractor>;
+    using BlockingPacketQueue = util::BlockingQueue<util::Buffer>;
+    using BlockingExtractionQueues = std::vector<BlockingPacketQueue>;
 
-    /**
-     * @param[in] eventHandle The windows event handle that notifies when the ring buffer
-     *                        is filled.
-     * @param[in] ringBuffer The extraction ring buffer
+    /** The constructor starts the probe extractor thread
+     *
+     * @param[in] extractionQueues to push extracted and demultiplexed probe streams.
      * @param[in] probePointMap A <probe point id, probe index> map used to deduce probe index
      *                          from probe point id.
-     * @param[in] queues the extraction queues that will receive the packetd
+     * @param[in] inputStream the extraction queues that will receive the packets
      */
-    Extractor(EventHandle &eventHandle, util::RingBufferReader &&ringBuffer,
-              const ProbePointMap &probePointMap, std::vector<FIFO> &queues)
-        : mRingBuffer(std::move(ringBuffer)), mInputStream(eventHandle, mRingBuffer),
-          mByteReader(mInputStream), mQueues(queues), mProbePointMap(probePointMap)
+    ProbeExtractor(BlockingExtractionQueues &extractionQueues, const ProbePointMap &probePointMap,
+                   std::unique_ptr<util::InputStream> inputStream)
+        : mExtractionQueues(extractionQueues), mInputStream(std::move(inputStream)),
+          mProbePointMap(probePointMap)
     {
         // Clearing the extraction queues at session start, in this way data can still be retrieved
         // after session stop
-        for (auto &queue : queues) {
+        for (auto &queue : mExtractionQueues) {
             queue.clear();
         }
 
         // Starting extractor thread
-        mExtractionResult = std::async(std::launch::async, &Extractor::extract, this);
+        mExtractionResult = std::async(std::launch::async, &ProbeExtractor::extract, this);
     }
 
-    ~Extractor() { stop(); }
+    ~ProbeExtractor() { stop(); }
 
     /** Stop the extractor thread */
-    void stop() { mInputStream.close(); }
+    void stop() { mInputStream->close(); }
 
 private:
+    ProbeExtractor(const ProbeExtractor &) = delete;
+    ProbeExtractor &operator=(const ProbeExtractor &) = delete;
+
     void extract()
     {
+        util::ByteStreamReader byteReader(*mInputStream);
         try {
             while (true) {
 
                 // reading one packet
                 dsp_fw::Packet packet;
-                mByteReader.read(packet);
+                byteReader.read(packet);
 
                 // finding the probe index that matches the probe point id
                 auto it = mProbePointMap.find(packet.probePointId);
@@ -101,7 +101,7 @@ private:
 
                 // Checking that the probe index is in a valid range
                 ProbeId probeId(it->second);
-                if (probeId.getValue() >= mQueues.size()) {
+                if (probeId.getValue() >= mExtractionQueues.size()) {
                     throw Exception("Packet with wrong probe id: " +
                                     std::to_string(probeId.getValue()));
                 }
@@ -117,7 +117,7 @@ private:
                 packet.toStream<uint32_t>(writer);
 
                 // Enqueueing the buffer into the right queue
-                if (!mQueues[probeId.getValue()].add(std::move(buffer))) {
+                if (!mExtractionQueues[probeId.getValue()].add(std::move(buffer))) {
                     std::cerr << "Warning: extraction packet dropped." << std::endl;
                 }
             }
@@ -131,14 +131,14 @@ private:
         }
     }
 
-    util::RingBufferReader mRingBuffer;
-    ExtractionInputStream mInputStream;
-    util::ByteStreamReader mByteReader;
-    std::vector<FIFO> &mQueues;
+    BlockingExtractionQueues &mExtractionQueues;
+
+    /** Probe extraction is performed by an input stream that read from the probe device. */
+    std::unique_ptr<util::InputStream> mInputStream;
+
     ProbePointMap mProbePointMap;
+
     std::future<void> mExtractionResult;
 };
-}
-}
 }
 }

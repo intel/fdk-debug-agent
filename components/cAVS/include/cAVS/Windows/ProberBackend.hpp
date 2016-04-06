@@ -23,6 +23,7 @@
 
 #include "cAVS/DspFw/Probe.hpp"
 #include "cAVS/Prober.hpp"
+#include "cAVS/ProbeExtractor.hpp"
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/IoCtlDescription.hpp"
 #include "Util/ByteStreamReader.hpp"
@@ -32,7 +33,6 @@
 #include "Util/RingBuffer.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
-#include "cAVS/Windows/Probe/Extractor.hpp"
 #include "cAVS/Windows/Probe/Injector.hpp"
 
 #include <array>
@@ -274,8 +274,9 @@ private:
 
     /** map that provides the sample byte size of each injection probes. */
     std::map<ProbeId, std::size_t> mCachedInjectionSampleByteSizes;
-    std::vector<PacketQueue> mExtractionQueues;
-    std::unique_ptr<probe::Extractor> mExtractor;
+    ProbeExtractor::BlockingExtractionQueues mExtractionQueues;
+    std::unique_ptr<ProbeExtractor> mExtractor;
+
     std::vector<util::RingBuffer> mInjectionQueues;
     std::vector<probe::Injector> mInjectors;
 

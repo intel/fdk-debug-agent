@@ -55,8 +55,9 @@ public:
      * @param[in,out] handle A windows event handle to know when the ring buffer has been filled
      * @param[in,out] ringBuffer The probe extraction ring buffer
      */
-    ExtractionInputStream(EventHandle &handle, util::RingBufferReader &ringBuffer)
-        : mCurentBlockStream(mCurrentBlock), mHandleWaiter(handle), mRingBuffer(ringBuffer)
+    ExtractionInputStream(EventHandle &handle, util::RingBufferReader &&ringBuffer)
+        : mCurentBlockStream(mCurrentBlock), mHandleWaiter(handle),
+          mRingBuffer(std::move(ringBuffer))
     {
     }
 
@@ -105,7 +106,7 @@ private:
     /** Input stream that reads from the current block */
     util::MemoryInputStream mCurentBlockStream;
     EventHandle::Waiter mHandleWaiter;
-    util::RingBufferReader &mRingBuffer;
+    util::RingBufferReader mRingBuffer;
 };
 }
 }

@@ -45,6 +45,13 @@ public:
     virtual ~InputStream() = default;
 
     /**
+     * An input stream read function is expected to block until the required bytes have been read.
+     * In some case, the client of the input stream may decide to stop the ongoing read and close
+     * the stream. So, upon close, if the read is blocked, it shall unblock it.
+     */
+    virtual void close() {}
+
+    /**
      * This method blocks until all the required bytes are read.
      * @return the read byte count. If it is less than byteCount, end of
      *         stream is reached.

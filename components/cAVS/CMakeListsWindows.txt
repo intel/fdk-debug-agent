@@ -55,7 +55,6 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/ProberBackend.hpp
     include/cAVS/Windows/ProberStateMachine.hpp
     include/cAVS/Windows/Probe/ExtractionInputStream.hpp
-    include/cAVS/Windows/Probe/Extractor.hpp
     include/cAVS/Windows/Probe/Injector.hpp
     include/cAVS/Windows/Prober.hpp
     include/cAVS/Windows/Perf.hpp

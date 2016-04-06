@@ -44,7 +44,8 @@ set(LIB_INCS
     include/cAVS/ModuleHandler.hpp
     include/cAVS/Topology.hpp
     include/cAVS/Prober.hpp
-    include/cAVS/Perf.hpp)
+    include/cAVS/Perf.hpp
+    include/cAVS/ProbeExtractor.hpp)
 
 # firwmare include files
 set(FW_INCS
