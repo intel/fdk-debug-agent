@@ -30,6 +30,7 @@
 #include "winres.h"
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+IDI_ICON1 ICON DISCARDABLE "@PROJECT_SOURCE_DIR@/resources/icon/dbga.ico"
 
 // See https://msdn.microsoft.com/en-us/library/windows/desktop/aa381058%28v=vs.85%29.aspx
 VS_VERSION_INFO VERSIONINFO
