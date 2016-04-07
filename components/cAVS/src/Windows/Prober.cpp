@@ -154,7 +154,7 @@ driver::ProbePointConfiguration Prober::toWindows(const cavs::Prober::SessionPro
     for (const auto &probe : probes) {
         connections.emplace_back(toWindows(probe.enabled), probe.probePoint,
                                  toWindows(probe.purpose),
-                                 eventHandles.injectionHandles[probeIndex].get());
+                                 eventHandles.injectionHandles[probeIndex]->handle());
 
         ++probeIndex;
     }
