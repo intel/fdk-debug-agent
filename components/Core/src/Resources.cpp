@@ -318,5 +318,13 @@ Resource::ResponsePtr ProbeStreamResource::handlePut(const Request &request)
 
     return std::make_unique<Response>();
 }
+
+Resource::ResponsePtr PerfDataResource::handleGet(const Request &)
+{
+    // TODO: error-handling when the service is disabled
+    auto data = std::string();
+
+    return std::make_unique<Response>(ContentTypeXml, data);
+}
 }
 }

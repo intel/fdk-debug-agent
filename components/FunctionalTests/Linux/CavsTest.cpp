@@ -666,3 +666,31 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
      * was already getting it has obtained the expected server response */
     CHECK_NOTHROW(delayedGetLogStreamFuture.get());
 }
+
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement")
+{
+    /* Setting the test vector
+     * ----------------------- */
+    {
+        linux::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+    }
+
+    /* Now using the mocked device
+     * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.perf_measurement/0/perf", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml", HttpClientSimulator::StringContent("")));
+}

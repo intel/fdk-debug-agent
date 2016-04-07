@@ -69,13 +69,16 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
 
     std::unique_ptr<rest::Dispatcher> dispatcher = std::make_unique<rest::Dispatcher>();
 
-    /* Log and probe streaming (hardcoded urls)
+    /* Service-specific URLs
      */
     dispatcher->addResource("/instance/cavs.fwlogs/0/streaming",
                             std::make_shared<LogServiceStreamResource>(mSystem));
 
     dispatcher->addResource("/instance/cavs.probe.endpoint/${instance_id}/streaming",
                             std::make_shared<ProbeStreamResource>(mSystem));
+
+    dispatcher->addResource("/instance/cavs.perf_measurement/0/perf",
+                            std::make_shared<PerfDataResource>(mSystem));
 
     /* System */
     dispatcher->addResource("/type", std::make_shared<SystemTypeResource>(*mTypeModel));

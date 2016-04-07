@@ -181,5 +181,14 @@ private:
     ResponsePtr handleGet(const rest::Request &request) override;
     ResponsePtr handlePut(const rest::Request &request) override;
 };
+
+/** This resource returns the Perf data */
+class PerfDataResource : public SystemResource
+{
+public:
+    PerfDataResource(cavs::System &system) : SystemResource(system) {}
+protected:
+    virtual ResponsePtr handleGet(const rest::Request &request) override;
+};
 }
 }
