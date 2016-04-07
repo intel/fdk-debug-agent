@@ -65,9 +65,16 @@ public:
     Extractor(EventHandle &eventHandle, util::RingBufferReader &&ringBuffer,
               const ProbePointMap &probePointMap, std::vector<FIFO> &queues)
         : mRingBuffer(std::move(ringBuffer)), mInputStream(eventHandle, mRingBuffer),
-          mByteReader(mInputStream), mQueues(queues), mProbePointMap(probePointMap),
-          mExtractionResult{std::async(std::launch::async, &Extractor::extract, this)}
+          mByteReader(mInputStream), mQueues(queues), mProbePointMap(probePointMap)
     {
+        // Clearing the extraction queues at session start, in this way data can still be retrieved
+        // after session stop
+        for (auto &queue : queues) {
+            queue.clear();
+        }
+
+        // Starting extractor thread
+        mExtractionResult = std::async(std::launch::async, &Extractor::extract, this);
     }
 
     ~Extractor() { stop(); }
