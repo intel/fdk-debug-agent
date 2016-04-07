@@ -179,7 +179,7 @@ private:
     static cavs::ProbeId getProbeId(const rest::Request &request);
 
     ResponsePtr handleGet(const rest::Request &request) override;
-    ResponsePtr handlePost(const rest::Request &request) override;
+    ResponsePtr handlePut(const rest::Request &request) override;
 };
 }
 }

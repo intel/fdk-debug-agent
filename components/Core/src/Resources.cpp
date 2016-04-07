@@ -297,7 +297,7 @@ Resource::ResponsePtr ProbeStreamResource::handleGet(const Request &request)
     return std::make_unique<StreamResponse>(ContentTypeIfdkFile, std::move(resource));
 }
 
-Resource::ResponsePtr ProbeStreamResource::handlePost(const Request &request)
+Resource::ResponsePtr ProbeStreamResource::handlePut(const Request &request)
 {
     ProbeId probeId = getProbeId(request);
 
