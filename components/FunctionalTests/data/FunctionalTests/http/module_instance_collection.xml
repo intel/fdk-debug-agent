@@ -9,10 +9,10 @@
         </parents>
         <children/>
         <inputs>
-            <input Format="config=stereo/bit_depth=16/sample_type=signed integer/interleaving=block/channel_count=1/valid_bit_depth=0" Id="0"/>
+            <input Format="config=stereo/bit_depth=16/sample_type=signed integer/interleaving=block/channel_count=1/valid_bit_depth=0/sampling_frequency=48000" Id="0"/>
         </inputs>
         <outputs>
-            <output Format="config=stereo/bit_depth=16/sample_type=signed integer/interleaving=block/channel_count=1/valid_bit_depth=0" Id="0"/>
+            <output Format="config=stereo/bit_depth=16/sample_type=signed integer/interleaving=block/channel_count=1/valid_bit_depth=0/sampling_frequency=48000" Id="0"/>
         </outputs>
         <links/>
     </component>
@@ -26,10 +26,10 @@
         </parents>
         <children/>
         <inputs>
-            <input Format="config=stereo/bit_depth=16/sample_type=signed integer/interleaving=block/channel_count=1/valid_bit_depth=0" Id="0"/>
+            <input Format="config=stereo/bit_depth=16/sample_type=signed integer/interleaving=block/channel_count=1/valid_bit_depth=0/sampling_frequency=48000" Id="0"/>
         </inputs>
         <outputs>
-            <output Format="config=stereo/bit_depth=16/sample_type=signed integer/interleaving=block/channel_count=1/valid_bit_depth=0" Id="0"/>
+            <output Format="config=stereo/bit_depth=16/sample_type=signed integer/interleaving=block/channel_count=1/valid_bit_depth=0/sampling_frequency=48000" Id="0"/>
         </outputs>
         <links/>
     </component>

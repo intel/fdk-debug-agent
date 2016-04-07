@@ -1,7 +1,7 @@
 /*
  ********************************************************************************
  *                              INTEL CONFIDENTIAL
- *   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+ *   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
  *   The source code contained  or  described herein and all documents related to
  *   the source code ("Material") are owned by Intel Corporation or its suppliers
  *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -191,7 +191,8 @@ struct AudioDataFormatIpc
                getSampleTypeHelper().toString(sample_type) + "/interleaving=" +
                getInterleavingStyleHelper().toString(interleaving_style) + "/channel_count=" +
                std::to_string(number_of_channels) + "/valid_bit_depth=" +
-               std::to_string(valid_bit_depth);
+               std::to_string(valid_bit_depth) + "/sampling_frequency=" +
+               std::to_string(sampling_frequency);
     }
 };
 }
