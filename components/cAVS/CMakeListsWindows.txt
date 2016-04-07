@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -50,6 +50,7 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/ModuleHandler.hpp
     include/cAVS/Windows/Probe/ExtractionInputStream.hpp
     include/cAVS/Windows/Probe/Extractor.hpp
+    include/cAVS/Windows/Probe/Injector.hpp
     include/cAVS/Windows/Prober.hpp
     include/cAVS/Windows/RealTimeWppClientFactory.hpp
     include/cAVS/Windows/RealTimeWppClient.hpp
