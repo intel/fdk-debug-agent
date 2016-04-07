@@ -28,9 +28,11 @@
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "Util/BlockingQueue.hpp"
+#include "Util/RingBuffer.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
 #include "cAVS/Windows/Probe/Extractor.hpp"
+#include "cAVS/Windows/Probe/Injector.hpp"
 
 #include <array>
 #include <memory>
@@ -181,6 +183,8 @@ private:
     std::map<ProbeId, std::size_t> mCachedInjectionSampleByteSizes;
     std::vector<PacketQueue> mExtractionQueues;
     std::unique_ptr<probe::Extractor> mExtractor;
+    std::vector<util::RingBuffer> mInjectionQueues;
+    std::vector<probe::Injector> mInjectors;
 };
 }
 }

@@ -30,6 +30,7 @@
 #include <map>
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
 
 namespace debug_agent
 {
@@ -110,6 +111,7 @@ Prober::Prober(Device &device, const EventHandles &eventHandles)
     for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {
         mExtractionQueues.emplace_back(mQueueSize,
                                        [](const util::Buffer &buffer) { return buffer.size(); });
+        mInjectionQueues.emplace_back(mQueueSize);
     }
 }
 
@@ -205,8 +207,10 @@ std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(ProbeId probeIndex)
 
 bool Prober::enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer)
 {
-    /* TO DO */
-    return false;
+    checkProbeId(probeIndex);
+
+    // Blocks if the injection queue is full
+    return mInjectionQueues[probeIndex.getValue()].writeBlocking(buffer.data(), buffer.size());
 }
 
 driver::RingBuffersDescription Prober::getRingBuffers()
@@ -327,6 +331,7 @@ void Prober::startStreaming()
 
     auto result = getActiveProbes();
     auto &extractionProbes = result.first;
+    auto &injectionProbes = result.second;
 
     try {
         if (!extractionProbes.empty()) {
@@ -355,6 +360,32 @@ void Prober::startStreaming()
                                        [this] { return getExtractionRingBufferLinearPosition(); }),
                 probePointMap, mExtractionQueues);
         }
+
+        // opening queues of the active probes and creating injectors
+        for (auto probeId : injectionProbes) {
+            mInjectionQueues[probeId.getValue()].open();
+
+            // Finding associated sample byte size
+            auto it = mCachedInjectionSampleByteSizes.find(probeId);
+            if (it == mCachedInjectionSampleByteSizes.end()) {
+                throw Exception("Sample byte size not found for injection probe id " +
+                                std::to_string(probeId.getValue()));
+            }
+            if (it->second == 0) {
+                throw Exception("Sample byte size must be greater than 0 for injection probe id " +
+                                std::to_string(probeId.getValue()));
+            }
+
+            auto &rbDesc = ringBuffers.injectionRBDescriptions[probeId.getValue()];
+
+            // Creating injector
+            mInjectors.emplace_back(
+                *mEventHandles.injectionHandles[probeId.getValue()],
+                util::RingBufferWriter(
+                    rbDesc.startAdress, rbDesc.size,
+                    [this, probeId] { return getInjectionRingBufferLinearPosition(probeId); }),
+                mInjectionQueues[probeId.getValue()], it->second);
+        }
     } catch (std::exception &e1) {
         try {
             std::cerr << "Cancelling starting because: " << e1.what() << std::endl;
@@ -370,9 +401,13 @@ void Prober::stopStreaming()
     // Deleting extractor (the packet producer)
     mExtractor.reset();
 
+    // deleting injectors
+    mInjectors.clear();
+
     // then closing the queues to make wakup listening threads
     for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {
         mExtractionQueues[probeIndex].close();
+        mInjectionQueues[probeIndex].close();
     }
 }
 }
