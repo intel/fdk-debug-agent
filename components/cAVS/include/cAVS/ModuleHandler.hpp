@@ -28,6 +28,7 @@
 #include "cAVS/DspFw/HwConfig.hpp"
 #include "cAVS/DspFw/Pipeline.hpp"
 #include "cAVS/DspFw/Gateway.hpp"
+#include "cAVS/DspFw/GlobalPerfData.hpp"
 #include "cAVS/DspFw/Scheduler.hpp"
 #include "DspFw/Common.hpp"
 #include "cAVS/DspFw/Infrastructure.hpp"
@@ -82,6 +83,9 @@ public:
 
     /** @return the gateways */
     void getGatewaysInfo(uint32_t gatewayCount, std::vector<dsp_fw::GatewayProps> &gateways);
+
+    /** @return the performance items */
+    void getPerfItems(uint32_t itemCount, std::vector<dsp_fw::PerfDataItem> &perfItems);
 
     /** @return the properties of one module instance */
     void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,

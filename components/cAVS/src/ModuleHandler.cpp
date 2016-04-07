@@ -178,6 +178,27 @@ void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
     gateways = gatewaysInfo.gateways;
 }
 
+void ModuleHandler::getPerfItems(uint32_t itemCount, std::vector<dsp_fw::PerfDataItem> &perfItems)
+{
+    /* Calculating the memory space required */
+    std::size_t parameterSize = dsp_fw::GlobalPerfData::getAllocationSize(itemCount);
+
+    /* Query FW through driver */
+    dsp_fw::GlobalPerfData perfData;
+    getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
+                        dsp_fw::toParameterId(dsp_fw::BaseFwParams::GLOBAL_PERF_DATA),
+                        parameterSize, perfData);
+
+    /* Checking returned perf item count */
+    if (perfData.items.size() > itemCount) {
+        throw Exception("Firmware has returned an invalid performance entries count: " +
+                        std::to_string(perfData.items.size()) + " max is: " +
+                        std::to_string(itemCount));
+    }
+
+    perfItems = perfData.items;
+}
+
 void ModuleHandler::getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
                                            dsp_fw::ModuleInstanceProps &props)
 {

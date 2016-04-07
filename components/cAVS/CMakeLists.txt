@@ -44,6 +44,7 @@ set(LIB_INCS
     include/cAVS/ModuleHandler.hpp
     include/cAVS/Topology.hpp
     include/cAVS/Prober.hpp
+    include/cAVS/Perf.hpp
     include/cAVS/ProbeService.hpp)
 
 # firwmare include files
@@ -60,7 +61,8 @@ set(FW_INCS
     include/cAVS/DspFw/ModuleType.hpp
     include/cAVS/DspFw/Scheduler.hpp
     include/cAVS/DspFw/ExternalFirmwareHeaders.hpp
-    include/cAVS/DspFw/Probe.hpp)
+    include/cAVS/DspFw/Probe.hpp
+    include/cAVS/DspFw/GlobalPerfData.hpp)
 
 source_group("Header Files\\DspFw" FILES ${FW_INCS})
 set(LIB_INCS ${LIB_INCS} ${FW_INCS})
