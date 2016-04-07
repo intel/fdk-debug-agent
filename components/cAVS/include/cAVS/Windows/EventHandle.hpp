@@ -46,7 +46,7 @@ public:
     {
     public:
         Waiter(EventHandle &handle) : mHandle(handle) {}
-
+        Waiter(Waiter &&other) : mHandle(other.mHandle), mStopped(other.mStopped.load()) {}
         Waiter(const Waiter &) = delete;
         Waiter &operator=(const Waiter &) = delete;
 
@@ -58,7 +58,6 @@ public:
         {
             mHandle.wait();
             return not mStopped;
-            ;
         }
 
         /** Threadsafe: Will force an exit of wait(). */
