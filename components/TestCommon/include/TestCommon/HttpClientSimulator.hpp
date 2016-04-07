@@ -150,16 +150,22 @@ public:
      *
      * @param[in] uri the URI of the request
      * @param[in] verb the http verb
-     * @param[in] requestContent the content of the request
+     * @param[in] requestContent the content of the request (as std::string or util::Buffer)
      * @param[in] expectedStatus the expected http status returned by the server
      * @param[in] expectedContentType the expected response content type returned by the server
      * @param[in] expectedResponseContent the expected response content returned by the server. It
      *                                    can be either an AnyContent, a StringContent or a
      *                                    FileContent
      */
+    /** @{ */
     void request(const std::string &uri, Verb verb, const std::string &requestContent,
                  Status expectedStatus, const std::string &expectedContentType,
                  const Content &expectedResponseContent);
+
+    void request(const std::string &uri, Verb verb, const util::Buffer &requestContent,
+                 Status expectedStatus, const std::string &expectedContentType,
+                 const Content &expectedResponseContent);
+    /** @} */
 
 private:
     HttpClientSimulator(const HttpClientSimulator &) = delete;

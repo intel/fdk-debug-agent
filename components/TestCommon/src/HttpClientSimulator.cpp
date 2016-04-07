@@ -172,6 +172,16 @@ void HttpClientSimulator::request(const std::string &uri, Verb verb,
                                   const std::string &expectedContentType,
                                   const Content &expectedResponseContent)
 {
+    util::Buffer requestContentBuffer(requestContent.begin(), requestContent.end());
+    request(uri, verb, requestContentBuffer, expectedStatus, expectedContentType,
+            expectedResponseContent);
+}
+
+void HttpClientSimulator::request(const std::string &uri, Verb verb,
+                                  const util::Buffer &requestContent, Status expectedStatus,
+                                  const std::string &expectedContentType,
+                                  const Content &expectedResponseContent)
+{
     HTTPClientSession session(mServer, mPort);
 
     HTTPRequest request(toString(verb), uri);
@@ -186,7 +196,8 @@ void HttpClientSimulator::request(const std::string &uri, Verb verb,
         std::ostream &requestStream = session.sendRequest(request);
 
         /* Sending the request content */
-        requestStream << requestContent;
+        requestStream.write(reinterpret_cast<const char *>(requestContent.data()),
+                            requestContent.size());
 
         /* Receiving the response header */
         std::istream &responseStream = session.receiveResponse(response);
