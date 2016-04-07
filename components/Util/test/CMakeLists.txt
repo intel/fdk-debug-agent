@@ -26,6 +26,7 @@ set(TEST_SRCS
     BlockingQueueTest.cpp
     ByteStreamTest.cpp
     StringHelperTest.cpp
+    RingBuffer.cpp
     RingBufferReader.cpp
     EnumHelperTest.cpp
     StructureChangeTrackingTest.cpp
