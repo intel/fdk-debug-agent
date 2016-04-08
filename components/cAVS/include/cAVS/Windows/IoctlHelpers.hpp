@@ -33,8 +33,7 @@ namespace cavs
 {
 namespace windows
 {
-
-/** This class helps to manipulate buffers of TinySet/Get and BigSet/Get ioctls
+/** This namespace helps to manipulate buffers of TinySet/Get and BigSet/Get ioctls
  *
  * There are two kind of ioctls:
  * - BigGet/BigSet: allow to set/get driver parameters using shared memory across user space
@@ -57,121 +56,121 @@ namespace windows
  * - input buffer <- a buffer that contains the header followed by the body
  * - output buffer <- the same buffer (header + body).
  */
-class IoctlHelpers
+namespace ioctl_helpers
 {
-public:
-    /** Generate header and body buffers to perform a BigSet/Get ioctl
-     *
-     * The BigSet/Get ioctl requires two distinct buffers, a header buffer and a body buffer.
-     *
-     * @param[in] featureID the driver feature id
-     * @param[in] parameterID the driver parameter id
-     * @param[in] bodyPayload a buffer which is the body payload. Its content format depends
-     *                        of the couple (featureID, parameterID)
-     *
-     * @returns a pair of buffers to be used with the ioctl call: 1) the header and 2) the body
-     */
-    static std::pair<util::Buffer, util::Buffer> toBigCmdBuffers(ULONG featureID, ULONG parameterID,
-                                                                 const util::Buffer &bodyPayload)
-    {
-        auto bodyBuffer = toBodyBuffer(bodyPayload);
-        auto headerBuffer =
-            toHeaderBuffer(featureID, parameterID, static_cast<ULONG>(bodyBuffer.size()));
+namespace details
+{
+/** Serialize a header */
+static util::Buffer toHeaderBuffer(ULONG featureID, ULONG parameterID, ULONG bodySize)
+{
+    driver::Intc_App_Cmd_Header header(featureID, parameterID, bodySize);
 
-        return {headerBuffer, bodyBuffer};
-    }
+    util::MemoryByteStreamWriter writer;
+    writer.write(header);
+    return writer.getBuffer();
+}
 
-    /** Parse a body buffer returned by the BigSet/Get ioctl
-     *
-     * @param[in] bodyBuffer the body buffer returned by the ioctl
-     *
-     * @returns a pair of: 1) the driver status and 2) a buffer with the body payload
-     */
-    static std::pair<NTSTATUS, util::Buffer> fromBigCmdBodyBuffer(const util::Buffer &bodyBuffer)
-    {
-        util::MemoryByteStreamReader reader(bodyBuffer);
-        return fromBodyBuffer(reader);
-    }
+/** Deserialize a header */
+static void fromHeaderBuffer(util::ByteStreamReader &reader)
+{
+    driver::Intc_App_Cmd_Header header(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+    reader.read(header);
+}
 
-    /** Generate one buffers to perform a TinySet/Get ioctl
-     *
-     * The TinySet/Get ioctl requires one buffer that contains both header and body.
-     *
-     * @param[in] featureID the driver feature id
-     * @param[in] parameterID the driver parameter id
-     * @param[in] bodyPayload a buffer which is the body payload. Its content format depends
-     *                        of the couple (featureID, parameterID)
-     *
-     * @returns the created buffer that should be used with ioctl call
-     */
-    static util::Buffer toTinyCmdBuffer(ULONG featureID, ULONG parameterID,
-                                        const util::Buffer &bodyPayload)
-    {
-        util::Buffer headerBuffer;
-        util::Buffer bodyBuffer;
-        std::tie(headerBuffer, bodyBuffer) = toBigCmdBuffers(featureID, parameterID, bodyPayload);
+/** Serialize a body */
+static util::Buffer toBodyBuffer(const util::Buffer &bodyPayload)
+{
+    driver::Intc_App_Cmd_Body body;
 
-        util::MemoryByteStreamWriter writer;
-        writer.writeRawBuffer(headerBuffer);
-        writer.writeRawBuffer(bodyBuffer);
-        return writer.getBuffer();
-    }
+    util::MemoryByteStreamWriter writer;
+    writer.write(body);
+    writer.writeRawBuffer(bodyPayload);
 
-    /** Parse a body buffer returned by the TinySet/Get ioctl
-     *
-     * @param[in] buffer the buffer returned by the ioctl
-     *
-     * @returns a pair of: 1) the driver status and 2) a buffer with the body payload
-     */
-    static std::pair<NTSTATUS, util::Buffer> fromTinyCmdBuffer(const util::Buffer &buffer)
-    {
-        util::MemoryByteStreamReader reader(buffer);
-        fromHeaderBuffer(reader);
-        return fromBodyBuffer(reader);
-    }
+    return writer.getBuffer();
+}
 
-private:
-    IoctlHelpers();
+/** Deserialize a body */
+static std::pair<NTSTATUS, util::Buffer> fromBodyBuffer(util::MemoryByteStreamReader &reader)
+{
+    driver::Intc_App_Cmd_Body body;
+    reader.read(body);
 
-    /** Serialize a header */
-    static util::Buffer toHeaderBuffer(ULONG featureID, ULONG parameterID, ULONG bodySize)
-    {
-        driver::Intc_App_Cmd_Header header(featureID, parameterID, bodySize);
+    return {body.Status,
+            {reader.getBuffer().begin() + reader.getPointerOffset(), reader.getBuffer().end()}};
+}
+} // namespace details
 
-        util::MemoryByteStreamWriter writer;
-        writer.write(header);
-        return writer.getBuffer();
-    }
+/** Generate header and body buffers to perform a BigSet/Get ioctl
+ *
+ * The BigSet/Get ioctl requires two distinct buffers, a header buffer and a body buffer.
+ *
+ * @param[in] featureID the driver feature id
+ * @param[in] parameterID the driver parameter id
+ * @param[in] bodyPayload a buffer which is the body payload. Its content format depends
+ *                        of the couple (featureID, parameterID)
+ *
+ * @returns a pair of buffers to be used with the ioctl call: 1) the header and 2) the body
+ */
+static std::pair<util::Buffer, util::Buffer> toBigCmdBuffers(ULONG featureID, ULONG parameterID,
+                                                             const util::Buffer &bodyPayload)
+{
+    auto bodyBuffer = details::toBodyBuffer(bodyPayload);
+    auto headerBuffer =
+        details::toHeaderBuffer(featureID, parameterID, static_cast<ULONG>(bodyBuffer.size()));
 
-    /** Deserialize a header */
-    static void fromHeaderBuffer(util::ByteStreamReader &reader)
-    {
-        driver::Intc_App_Cmd_Header header(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-        reader.read(header);
-    }
+    return {headerBuffer, bodyBuffer};
+}
 
-    /** Serialize a body */
-    static util::Buffer toBodyBuffer(const util::Buffer &bodyPayload)
-    {
-        driver::Intc_App_Cmd_Body body;
+/** Parse a body buffer returned by the BigSet/Get ioctl
+ *
+ * @param[in] bodyBuffer the body buffer returned by the ioctl
+ *
+ * @returns a pair of: 1) the driver status and 2) a buffer with the body payload
+ */
+static std::pair<NTSTATUS, util::Buffer> fromBigCmdBodyBuffer(const util::Buffer &bodyBuffer)
+{
+    util::MemoryByteStreamReader reader(bodyBuffer);
+    return details::fromBodyBuffer(reader);
+}
 
-        util::MemoryByteStreamWriter writer;
-        writer.write(body);
-        writer.writeRawBuffer(bodyPayload);
+/** Generate one buffers to perform a TinySet/Get ioctl
+ *
+ * The TinySet/Get ioctl requires one buffer that contains both header and body.
+ *
+ * @param[in] featureID the driver feature id
+ * @param[in] parameterID the driver parameter id
+ * @param[in] bodyPayload a buffer which is the body payload. Its content format depends
+ *                        of the couple (featureID, parameterID)
+ *
+ * @returns the created buffer that should be used with ioctl call
+ */
+static util::Buffer toTinyCmdBuffer(ULONG featureID, ULONG parameterID,
+                                    const util::Buffer &bodyPayload)
+{
+    util::Buffer headerBuffer;
+    util::Buffer bodyBuffer;
+    std::tie(headerBuffer, bodyBuffer) = toBigCmdBuffers(featureID, parameterID, bodyPayload);
 
-        return writer.getBuffer();
-    }
+    util::MemoryByteStreamWriter writer;
+    writer.writeRawBuffer(headerBuffer);
+    writer.writeRawBuffer(bodyBuffer);
+    return writer.getBuffer();
+}
 
-    /** Deserialize a body */
-    static std::pair<NTSTATUS, util::Buffer> fromBodyBuffer(util::MemoryByteStreamReader &reader)
-    {
-        driver::Intc_App_Cmd_Body body;
-        reader.read(body);
+/** Parse a body buffer returned by the TinySet/Get ioctl
+ *
+ * @param[in] buffer the buffer returned by the ioctl
+ *
+ * @returns a pair of: 1) the driver status and 2) a buffer with the body payload
+ */
+static std::pair<NTSTATUS, util::Buffer> fromTinyCmdBuffer(const util::Buffer &buffer)
+{
+    util::MemoryByteStreamReader reader(buffer);
+    details::fromHeaderBuffer(reader);
+    return details::fromBodyBuffer(reader);
+}
 
-        return {body.Status,
-                {reader.getBuffer().begin() + reader.getPointerOffset(), reader.getBuffer().end()}};
-    }
-};
+} // namespace ioctl_helpers
 }
 }
 }

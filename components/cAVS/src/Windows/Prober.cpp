@@ -258,7 +258,7 @@ void Prober::ioctl(driver::IoCtlType ioctlType, ULONG feature, ULONG parameterId
 
     /* Creating the TinySet/Get ioctl buffer */
     util::Buffer buffer =
-        IoctlHelpers::toTinyCmdBuffer(feature, parameterId, bodyPayloadWriter.getBuffer());
+        ioctl_helpers::toTinyCmdBuffer(feature, parameterId, bodyPayloadWriter.getBuffer());
 
     try {
         mDevice.ioControl(ioctlType, &buffer, &buffer);
@@ -269,7 +269,7 @@ void Prober::ioctl(driver::IoCtlType ioctlType, ULONG feature, ULONG parameterId
     NTSTATUS driverStatus;
     util::Buffer bodyPayloadBuffer;
     /* Parsing returned buffer */
-    std::tie(driverStatus, bodyPayloadBuffer) = IoctlHelpers::fromTinyCmdBuffer(buffer);
+    std::tie(driverStatus, bodyPayloadBuffer) = ioctl_helpers::fromTinyCmdBuffer(buffer);
 
     if (!NT_SUCCESS(driverStatus)) {
         throw Exception("Driver returns invalid status: " +

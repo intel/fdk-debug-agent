@@ -269,7 +269,7 @@ void Logger::logParameterIoctl(Direction direction, const driver::IoctlFwLogsSta
     bodyPayloadWriter.write(inputFwParams);
 
     /* Creating the TinySet/Get ioctl buffer */
-    util::Buffer buffer = IoctlHelpers::toTinyCmdBuffer(
+    util::Buffer buffer = ioctl_helpers::toTinyCmdBuffer(
         static_cast<uint32_t>(driver::IOCTL_FEATURE::FEATURE_FW_LOGS),
         driver::logParametersCommandparameterId, bodyPayloadWriter.getBuffer());
 
@@ -287,7 +287,7 @@ void Logger::logParameterIoctl(Direction direction, const driver::IoctlFwLogsSta
         util::Buffer bodyPayloadBuffer;
 
         /* Parsing returned buffer */
-        std::tie(driverStatus, bodyPayloadBuffer) = IoctlHelpers::fromTinyCmdBuffer(buffer);
+        std::tie(driverStatus, bodyPayloadBuffer) = ioctl_helpers::fromTinyCmdBuffer(buffer);
 
         if (!NT_SUCCESS(driverStatus)) {
             throw Exception("Driver returns invalid status: " +
