@@ -22,6 +22,7 @@
 
 #include "cAVS/Linux/Prober.hpp"
 #include "cAVS/Linux/Probe/ExtractionInputStream.hpp"
+#include "cAVS/Linux/Probe/InjectionOutputStream.hpp"
 #include "cAVS/Linux/ControlDeviceTypes.hpp"
 
 #include "Util/AssertAlways.hpp"
@@ -42,6 +43,10 @@ namespace cavs
 namespace linux
 {
 
+/* Explicit definition, so that it can be referenced.  See
+ * https://gcc.gnu.org/wiki/VerboseDiagnostics#missing_static_const_definition */
+const size_t Prober::mQueueSize;
+
 static const std::map<Prober::ProbePurpose, mixer_ctl::ProbePurpose> purposeConversion = {
     {Prober::ProbePurpose::Inject, mixer_ctl::ProbePurpose::Inject},
     {Prober::ProbePurpose::Extract, mixer_ctl::ProbePurpose::Extract},
@@ -54,6 +59,7 @@ Prober::Prober(ControlDevice &controlDevice, CompressDeviceFactory &compressDevi
     for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {
         mExtractionQueues.emplace_back(mQueueSize,
                                        [](const util::Buffer &buffer) { return buffer.size(); });
+        mInjectionQueues.emplace_back(mQueueSize);
     }
 }
 
@@ -122,6 +128,7 @@ void Prober::setProbeConfig(ProbeId probeId, const ProbeConfig &probe,
             probe.purpose == ProbePurpose::InjectReextract) {
             mControlDevice.ctlWrite(mixer_ctl::getProbeInjectControlMixer(probeId.getValue()),
                                     controlWriter.getBuffer());
+            mCachedInjectionSampleByteSizes[probeId] = injectionSampleByteSize;
         }
         if (probe.purpose == ProbePurpose::Extract ||
             probe.purpose == ProbePurpose::InjectReextract) {
@@ -169,14 +176,17 @@ std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(ProbeId probeIndex)
 
 bool Prober::enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer)
 {
-    /* TO DO */
-    return false;
+    checkProbeId(probeIndex);
+
+    // Blocks if the injection queue is full
+    return mInjectionQueues[probeIndex.getValue()].writeBlocking(buffer.data(), buffer.size());
 }
 
 void Prober::startStreaming()
 {
     auto result = getActiveSession(mCachedProbeConfiguration);
     auto &extractionProbes = result.first;
+    auto &injectionProbes = result.second;
 
     if (not extractionProbes.empty()) {
 
@@ -220,6 +230,39 @@ void Prober::startStreaming()
             throw Exception("Could not start extraction input stream: " + std::string(e.what()));
         }
     }
+    // opening queues of the active probes and creating injectors
+    for (auto probeId : injectionProbes) {
+        mInjectionQueues[probeId.getValue()].open();
+
+        // Finding associated sample byte size
+        auto it = mCachedInjectionSampleByteSizes.find(probeId);
+        if (it == mCachedInjectionSampleByteSizes.end()) {
+            throw Exception("Sample byte size not found for injection probe id " +
+                            std::to_string(probeId.getValue()));
+        }
+        if (it->second == 0) {
+            throw Exception("Sample byte size must be greater than 0 for injection probe id " +
+                            std::to_string(probeId.getValue()));
+        }
+
+        compress::InjectionProbesInfo injectionProbesInfo;
+        try {
+            injectionProbesInfo = mCompressDeviceFactory.getInjectionProbeDeviceInfoList();
+        } catch (const CompressDeviceFactory::Exception &e) {
+            throw Exception("Failed to get Extract Probe Devices Info. " + std::string(e.what()));
+        }
+        std::unique_ptr<InjectionOutputStream> outputStream;
+        try {
+            outputStream = std::make_unique<InjectionOutputStream>(
+                mCompressDeviceFactory.newCompressDevice(injectionProbesInfo[0]));
+        } catch (const InjectionOutputStream::Exception &e) {
+            throw Exception("Could not start extraction output stream: " + std::string(e.what()));
+        }
+
+        // Creating injector
+        mProbeInjectors.emplace_back(std::move(outputStream), mInjectionQueues[probeId.getValue()],
+                                     it->second);
+    }
 }
 
 void Prober::stopStreaming()
@@ -230,6 +273,9 @@ void Prober::stopStreaming()
     }
     // Deleting extractor (the packet producer)
     mProbeExtractor.reset();
+
+    // deleting injectors
+    mProbeInjectors.clear();
 
     // then closing the queues to make wakup listening threads
     for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {

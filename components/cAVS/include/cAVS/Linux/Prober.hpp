@@ -27,6 +27,7 @@
 #include "cAVS/Linux/CompressDeviceFactory.hpp"
 
 #include "cAVS/ProbeExtractor.hpp"
+#include "cAVS/ProbeInjector.hpp"
 #include "cAVS/Prober.hpp"
 
 #include "Util/BlockingQueue.hpp"
@@ -74,7 +75,9 @@ private:
 
     using BlockingPacketQueue = util::BlockingQueue<util::Buffer>;
     using BlockingExtractionQueues = std::vector<BlockingPacketQueue>;
-    static constexpr std::size_t mQueueSize = 5 * 1024 * 1024;
+
+    /** All probe streams will work with 5 meg Queues, aligned with windows adaptation layer. */
+    static const std::size_t mQueueSize = 5 * 1024 * 1024;
 
     static mixer_ctl::ProbeState toLinux(bool from);
     static bool fromLinux(const mixer_ctl::ProbeState &from);
@@ -91,11 +94,14 @@ private:
 
     /** Collection of probe configurations with their state, ID, purpose*/
     SessionProbes mCachedProbeConfiguration;
+    std::map<ProbeId, std::size_t> mCachedInjectionSampleByteSizes;
 
     /** Extraction of multiplexed probe points is performed by a compress device. */
     std::unique_ptr<ProbeExtractor> mProbeExtractor;
+    std::vector<ProbeInjector> mProbeInjectors;
 
     BlockingExtractionQueues mExtractionQueues;
+    std::vector<util::RingBuffer> mInjectionQueues;
 
     bool mIsActiveState;
 
