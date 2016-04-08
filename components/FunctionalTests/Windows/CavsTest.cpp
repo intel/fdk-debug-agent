@@ -707,6 +707,22 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
     CHECK_NOTHROW(delayedGetLogStreamFuture.get());
 }
 
+// Probing constants
+static const std::size_t probeCount = 8;
+static const std::size_t injectionProbeIndex = 0;
+static const std::size_t extractionProbeIndex = 1;
+static_assert(extractionProbeIndex < probeCount, "wrong extraction probe index");
+static_assert(injectionProbeIndex < probeCount, "wrong injection probe index");
+
+static const dsp_fw::BitDepth bitDepth = dsp_fw::BitDepth::DEPTH_16BIT;
+static const std::size_t channelCount = 4;
+static const std::size_t sampleByteSize = (dsp_fw::BitDepth::DEPTH_16BIT / 8) * channelCount;
+static const std::size_t ringBufferSize = 31;
+
+// To test corner cases better
+static_assert(ringBufferSize % sampleByteSize != 0, "Ring buffer size shall not be aligned "
+                                                    "with sample byte size");
+
 /**
  * Generate a buffer filled with 20 probe extraction packets. Packet size is deduced from
  * the index [0..20[
@@ -748,7 +764,8 @@ std::vector<Buffer> splitBuffer(const util::Buffer &buffer, std::vector<std::siz
 class FakeRingBuffer
 {
 public:
-    FakeRingBuffer(std::size_t size) : mBuffer(size), mLinearOffset(0) {}
+    /** Note: buffer is initialized with 0xFF values */
+    FakeRingBuffer(std::size_t size) : mBuffer(size, 0xFF), mLinearOffset(0) {}
 
     /** Write content in the ring buffer */
     void write(const Buffer &content)
@@ -770,17 +787,91 @@ public:
     uint8_t *getBufferPtr() { return mBuffer.data(); }
     std::size_t getBufferSize() { return mBuffer.size(); }
 
+    const Buffer &getBuffer() { return mBuffer; }
+    uint64_t getProducerPosition() { return mLinearOffset; }
+
 private:
     Buffer mBuffer;
     uint64_t mLinearOffset;
 };
 
+/** Create data for probe injection */
+Buffer createInjectionData()
+{
+    static const std::size_t sampleCount = 100;
+    static std::size_t byteCount = sampleCount * sampleByteSize;
+    Buffer buffer(byteCount);
+    for (std::size_t i = 0; i < byteCount; i++) {
+        buffer[i] = i % 256;
+    }
+    return buffer;
+}
+
+/** Create injection expected ring buffer content and consumer position list from injected data.
+ *
+ * @param[in] data injected data
+ * @param[out] consumerPositions list of consumer (=the driver) positions
+ * @return the list of expected ring buffers
+ */
+std::vector<Buffer> createExpectedInjectionBuffers(const util::Buffer &data,
+                                                   std::vector<std::size_t> &consumerPositions)
+{
+    /** Consumer position will be incremented by this value */
+    static const std::size_t consumerPositionDelta = 21;
+    static_assert(consumerPositionDelta % sampleByteSize != 0,
+                  "consumerPositionDelta shall "
+                  "not be a multiple of sampleByteSize");
+
+    static const std::size_t ringBufferSampleCount = ringBufferSize / sampleByteSize;
+
+    std::vector<Buffer> buffers;
+    std::size_t consumerPosition = 0;
+    FakeRingBuffer ringBuffer(ringBufferSize);
+    MemoryInputStream is(data);
+
+    // Prefilling buffer with silence
+    util::Buffer block(ringBufferSampleCount * sampleByteSize, 0);
+    ringBuffer.write(block);
+    buffers.push_back(ringBuffer.getBuffer());
+
+    // Simulating consumer update
+    consumerPosition += consumerPositionDelta;
+    consumerPositions.push_back(consumerPosition);
+
+    // Then filling buffer from injected data
+    while (!is.isEOS()) {
+
+        // calculating next block size
+        std::size_t availableBytes =
+            ringBuffer.getBufferSize() - (ringBuffer.getProducerPosition() - consumerPosition);
+        std::size_t availableSamples = availableBytes / sampleByteSize;
+        std::size_t availableSampleBytes = availableSamples * sampleByteSize;
+        block.resize(availableSampleBytes);
+
+        // Reading injected data
+        auto read = is.read(block.data(), block.size());
+        if (read < block.size()) {
+
+            // Completing with silence if needed
+            std::fill(block.begin() + read, block.end(), 0);
+        }
+
+        // Writing to the ring buffer
+        ringBuffer.write(block);
+
+        // Saving buffer
+        buffers.push_back(ringBuffer.getBuffer());
+
+        // Simulating consumer update
+        consumerPosition += consumerPositionDelta;
+        consumerPositions.push_back(consumerPosition);
+    };
+
+    return buffers;
+}
+
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases")
 {
-    static const std::size_t probeCount = 8;
-    static const std::size_t enabledProbeIndex = 1;
-    static_assert(enabledProbeIndex < probeCount, "wrong probe index");
-
     /* Setting the test vector
      * ----------------------- */
 
@@ -791,6 +882,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     // behaviour */
     auto &extractionHandle =
         dynamic_cast<windows::TestEventHandle &>(*probeEventHandles.extractionHandle);
+    auto &injectionHandle =
+        dynamic_cast<windows::TestEventHandle &>(*probeEventHandles.injectionHandles[0]);
 
     // Generating probe extraction content
     const dsp_fw::ProbePointId probePointId(1, 2, dsp_fw::ProbeType::Output, 0);
@@ -802,7 +895,17 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
     // Creating the fake ring buffer, with a size that matches the max block size, in order
     // to test the case (written data size == ring buffer size)
-    FakeRingBuffer fakeRingBuffer(30);
+    FakeRingBuffer extractionBuffer(ringBufferSize);
+
+    // Creating the fake injection buffer
+    Buffer injectionBuffer(ringBufferSize, 0xFF);
+
+    // Creating injection data
+    Buffer injectData = createInjectionData();
+
+    // Creating expected injection blocks and consumer positions
+    std::vector<size_t> consumerPositions;
+    auto expectedInjectionBlocks = createExpectedInjectionBuffers(injectData, consumerPositions);
 
     {
         windows::MockedDeviceCommands commands(*device);
@@ -815,7 +918,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         // 2 : Getting probe endpoint parameters, checking that they are deactivated
         // -> involves no ioctl
 
-        // 3 : Configuring probe #1 to be enabled
+        // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
+        //     extraction
         // -> involves no ioctl
 
         // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one
@@ -832,11 +936,20 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::ProbeFeatureOwned);
 
+        // enabling injection probe involves to retrieve a module instance props in order to
+        // calculate sample byte size
+        dsp_fw::ModuleInstanceProps props;
+        props.input_pins.pin_info.resize(1);
+        props.input_pins.pin_info[0].format.bit_depth = bitDepth;
+        props.input_pins.pin_info[0].format.number_of_channels = channelCount;
+        commands.addGetModuleInstancePropsCommand(true, STATUS_SUCCESS,
+                                                  dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, 1, 2, props);
+
         using Type = dsp_fw::ProbeType;
         using Purpose = Prober::ProbePurpose;
         // setting probe configuration (probe #1 is enabled)
-        cavs::Prober::SessionProbes probes = {{false, {0, 0, Type::Input, 0}, Purpose::Inject},
-                                              {true, probePointId, Purpose::Extract}, // Enabled
+        cavs::Prober::SessionProbes probes = {{true, {1, 2, Type::Input, 0}, Purpose::Inject},
+                                              {true, {1, 2, Type::Output, 0}, Purpose::Extract},
                                               {false, {0, 0, Type::Input, 0}, Purpose::Inject},
                                               {false, {0, 0, Type::Input, 0}, Purpose::Inject},
                                               {false, {0, 0, Type::Input, 0}, Purpose::Inject},
@@ -853,7 +966,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
         // going to Get ring buffers
         windows::driver::RingBuffersDescription rb = {
-            {fakeRingBuffer.getBufferPtr(), fakeRingBuffer.getBufferSize()}, {}};
+            {extractionBuffer.getBufferPtr(), extractionBuffer.getBufferSize()},
+            {{injectionBuffer.data(), injectionBuffer.size()}}};
         commands.addGetRingBuffers(true, STATUS_SUCCESS, rb);
 
         // going to Active
@@ -871,6 +985,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         for (auto &block : blocks) {
             linearPosition += block.size();
             commands.addGetExtractionRingBufferLinearPosition(true, STATUS_SUCCESS, linearPosition);
+        }
+
+        // Adding a "get injection linear position" command for each block read by the driver
+        for (auto consumerPos : consumerPositions) {
+            commands.addGetInjectionRingBufferLinearPosition(true, STATUS_SUCCESS, 0, consumerPos);
         }
 
         // 8 : Stopping service
@@ -919,20 +1038,33 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
             HttpClientSimulator::FileContent(xmlFileName("probeservice_endpoint_param_disabled"))));
     }
 
-    // 3 : Configuring probe #1 to be enabled
+    // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
+    //     extraction
     CHECK_NOTHROW(client.request(
-        "/instance/cavs.probe.endpoint/" + std::to_string(enabledProbeIndex) +
+        "/instance/cavs.probe.endpoint/" + std::to_string(extractionProbeIndex) +
             "/control_parameters",
         HttpClientSimulator::Verb::Put,
-        file_helper::readAsString(xmlFileName("probeservice_endpoint_param_enabled")),
+        file_helper::readAsString(xmlFileName("probeservice_endpoint_param_enabled_extract")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe.endpoint/" + std::to_string(injectionProbeIndex) +
+            "/control_parameters",
+        HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_endpoint_param_enabled_inject")),
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 
     // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one that
     //     has been enabled
     for (std::size_t probeIndex = 0; probeIndex < probeCount; ++probeIndex) {
-        std::string expectedFile = (probeIndex == enabledProbeIndex)
-                                       ? "probeservice_endpoint_param_enabled"
-                                       : "probeservice_endpoint_param_disabled";
+        std::string expectedFile;
+        if (probeIndex == extractionProbeIndex) {
+            expectedFile = "probeservice_endpoint_param_enabled_extract";
+        } else if (probeIndex == injectionProbeIndex) {
+            expectedFile = "probeservice_endpoint_param_enabled_inject";
+        } else {
+            expectedFile = "probeservice_endpoint_param_disabled";
+        }
 
         CHECK_NOTHROW(client.request(
             "/instance/cavs.probe.endpoint/" + std::to_string(probeIndex) + "/control_parameters",
@@ -955,19 +1087,33 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     // 7 : Extract from an enabled probe. TODO: currently, extraction is not implemented and the
     // result will be empty.
     auto future = std::async(std::launch::async, [&] {
-        client.request("/instance/cavs.probe.endpoint/1/streaming", HttpClientSimulator::Verb::Get,
-                       "", HttpClientSimulator::Status::Ok, "application/vnd.ifdk-file",
+        client.request("/instance/cavs.probe.endpoint/" + std::to_string(extractionProbeIndex) +
+                           "/streaming",
+                       HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok,
+                       "application/vnd.ifdk-file",
                        HttpClientSimulator::FileContent(dataPath + "probe_1_extraction.bin"));
     });
 
-    // simulating the driver by filling the ring buffer
+    // simulating the driver extraction by filling the ring buffer
     for (auto &block : blocks) {
         // writing the block in the ring buffer
-        fakeRingBuffer.write(block);
+        extractionBuffer.write(block);
 
         // notify the DBGA that the content has been written
         // and wait until the DBGA has finished to read it
         extractionHandle.raiseEventAndBlockUntilWait();
+    }
+
+    // Sending inject data to the DBGA
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe.endpoint/" + std::to_string(injectionProbeIndex) + "/streaming",
+        HttpClientSimulator::Verb::Put, injectData, HttpClientSimulator::Status::Ok, "",
+        HttpClientSimulator::StringContent("")));
+
+    // Simulating the driver injection by checking the ring buffer content
+    for (auto &expectedBlock : expectedInjectionBlocks) {
+        REQUIRE(injectionBuffer == expectedBlock);
+        injectionHandle.raiseEventAndBlockUntilWait();
     }
 
     // 8 : Stopping service
