@@ -72,11 +72,6 @@ std::vector<dsp_fw::ModuleEntry> produceModuleEntries(std::size_t expectedModule
     return entries;
 }
 
-bool isSameGateway(const dsp_fw::GatewayProps &a, const dsp_fw::GatewayProps &b)
-{
-    return a.attribs == b.attribs && a.id == b.id;
-}
-
 /** Perform a module entry ioctl and check the result using the supplied expected module count */
 void checkModuleEntryIoctl(windows::ModuleHandler &moduleHandler, std::size_t expectedModuleCount)
 {
@@ -484,8 +479,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
 
     /*Successful get pipeline list command */
     CHECK_NOTHROW(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways));
-    REQUIRE(fwGateways.size() == gateways.size());
-    CHECK(std::equal(fwGateways.begin(), fwGateways.end(), gateways.begin(), isSameGateway));
+    CHECK(fwGateways == gateways);
 }
 
 TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")

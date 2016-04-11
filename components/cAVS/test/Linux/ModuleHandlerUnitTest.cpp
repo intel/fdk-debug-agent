@@ -368,11 +368,6 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
     CHECK(fwSchedulersInfo == info);
 }
 
-bool isSameGateway(const dsp_fw::GatewayProps &a, const dsp_fw::GatewayProps &b)
-{
-    return a.attribs == b.attribs && a.id == b.id;
-}
-
 TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
 {
     static const uint32_t fwGatewayCount = 10;
@@ -397,8 +392,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
 
     /*Successful get pipeline list command */
     CHECK_NOTHROW(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways));
-    CHECK(fwGateways.size() == gateways.size());
-    CHECK(std::equal(fwGateways.begin(), fwGateways.end(), gateways.begin(), isSameGateway));
+    CHECK(fwGateways == gateways);
 }
 
 TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
