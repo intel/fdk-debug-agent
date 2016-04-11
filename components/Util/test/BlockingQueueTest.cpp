@@ -60,7 +60,7 @@ TEST_CASE("blocking queue: simple monothread usage")
 
     // removing element
     TestPtr element = queue.remove();
-    CHECK(element != nullptr);
+    REQUIRE(element != nullptr);
     CHECK(element->mSize == 5);
 
     // removing again: queue is closed (returns nullptr)
@@ -189,7 +189,7 @@ TEST_CASE("blocking queue: opening/closing two times")
 
     // removing one element, one remains in the queue
     auto element = queue.remove();
-    CHECK(element != nullptr);
+    REQUIRE(element != nullptr);
     CHECK(element->mSize == 1);
     CHECK(queue.getElementCount() == 1);
 
@@ -204,12 +204,12 @@ TEST_CASE("blocking queue: opening/closing two times")
 
     // removing 2nd element
     element = queue.remove();
-    CHECK(element != nullptr);
+    REQUIRE(element != nullptr);
     CHECK(element->mSize == 2);
 
     // removing 3rd element
     element = queue.remove();
-    CHECK(element != nullptr);
+    REQUIRE(element != nullptr);
     CHECK(element->mSize == 3);
 
     // removing again: queue is closed (returns nullptr)
