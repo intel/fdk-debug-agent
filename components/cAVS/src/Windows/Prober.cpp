@@ -39,6 +39,8 @@ namespace cavs
 namespace windows
 {
 
+using ioctl_helpers::ioctl;
+
 static const std::map<Prober::ProbePurpose, driver::ProbePurpose> purposeConversion = {
     {Prober::ProbePurpose::Inject, driver::ProbePurpose::InjectPurpose},
     {Prober::ProbePurpose::Extract, driver::ProbePurpose::ExtractPurpose},
@@ -129,14 +131,14 @@ void Prober::setState(State state)
     }
 
     auto tmp = toWindows(state);
-    ioctl<SetState>(tmp);
+    ioctl<SetState, Exception>(mDevice, tmp);
 }
 
 Prober::State Prober::getState()
 {
     // Initialize with an illegal value in case the driver fails to overwrite it.
     driver::ProbeState state{static_cast<driver::ProbeState>(-1)};
-    ioctl<GetState>(state);
+    ioctl<GetState, Exception>(mDevice, state);
 
     return fromWindows(state);
 }
@@ -175,14 +177,14 @@ void Prober::setSessionProbes(const SessionProbes probes,
     mCachedInjectionSampleByteSizes = injectionSampleByteSizes;
 
     // Calling the ioctl
-    ioctl<SetProbePointConfiguration>(toWindows(probes, mEventHandles));
+    ioctl<SetProbePointConfiguration, Exception>(mDevice, toWindows(probes, mEventHandles));
 }
 
 Prober::SessionProbes Prober::getSessionProbes()
 {
     driver::ProbePointConfiguration from;
     memset(&from, 0xFF, sizeof(from));
-    ioctl<GetProbePointConfiguration>(from);
+    ioctl<GetProbePointConfiguration, Exception>(mDevice, from);
 
     SessionProbes result;
     for (const auto &connection : from.probePointConnection) {
@@ -220,7 +222,7 @@ driver::RingBuffersDescription Prober::getRingBuffers()
 
     driver::RingBuffersDescription from;
     memset(&from, 0xFF, sizeof(from));
-    ioctl<GetRingBuffersDescription>(from);
+    ioctl<GetRingBuffersDescription, Exception>(mDevice, from);
 
     return from;
 }
@@ -229,7 +231,7 @@ size_t Prober::getExtractionRingBufferLinearPosition()
 {
     uint64_t from;
     memset(&from, 0xFF, sizeof(from));
-    ioctl<GetExtractionRingBufferPosition>(from);
+    ioctl<GetExtractionRingBufferPosition, Exception>(mDevice, from);
     return size_t{from};
 }
 
@@ -242,63 +244,9 @@ size_t Prober::getInjectionRingBufferLinearPosition(ProbeId probeId)
 
     ULONG paramId = driver::ProbeFeatureParameter::INJECTION_BUFFER0_STATUS +
                     probeId.getValue(); // According to the SwAS
-    ioctl(driver::IoCtlType::TinyGet, mProbeFeature, paramId, from);
+    ioctl<decltype(from), Exception>(mDevice, driver::IoCtlType::TinyGet, mProbeFeature, paramId,
+                                     from);
     return size_t{from};
-}
-
-template <class T>
-void Prober::ioctl(driver::IoCtlType ioctlType, ULONG feature, ULONG parameterId, T &inout)
-{
-    using driver::to_string;
-    using std::to_string;
-
-    /* Creating the body payload using the IoctlFwLogsState type */
-    util::MemoryByteStreamWriter bodyPayloadWriter;
-    bodyPayloadWriter.write(inout);
-
-    /* Creating the TinySet/Get ioctl buffer */
-    util::Buffer buffer =
-        ioctl_helpers::toTinyCmdBuffer(feature, parameterId, bodyPayloadWriter.getBuffer());
-
-    try {
-        mDevice.ioControl(ioctlType, &buffer, &buffer);
-    } catch (Device::Exception &e) {
-        throw Exception(to_string(ioctlType) + " error: " + e.what());
-    }
-
-    NTSTATUS driverStatus;
-    util::Buffer bodyPayloadBuffer;
-    /* Parsing returned buffer */
-    std::tie(driverStatus, bodyPayloadBuffer) = ioctl_helpers::fromTinyCmdBuffer(buffer);
-
-    if (!NT_SUCCESS(driverStatus)) {
-        throw Exception("Driver returns invalid status: " +
-                        std::to_string(static_cast<uint32_t>(driverStatus)));
-    }
-
-    try {
-        /* Reading structure from body payload */
-        util::MemoryByteStreamReader reader(bodyPayloadBuffer);
-        reader.read(inout);
-
-        if (!reader.isEOS()) {
-            throw Exception("Probe ioctl buffer has not been fully consumed, type=" +
-                            to_string(ioctlType) + ", pointer=" +
-                            to_string(reader.getPointerOffset()) + ", size=" +
-                            to_string(reader.getBuffer().size()) + ", remaining=" +
-                            to_string(reader.getBuffer().size() - reader.getBuffer().size()));
-        }
-    } catch (util::ByteStreamReader::Exception &e) {
-        throw Exception("Cannot decode probe parameter ioctl buffer: " + std::string(e.what()));
-    }
-}
-
-template <class T>
-void Prober::ioctl(typename T::Data &inout)
-{
-    static_assert(T::type == driver::IoCtlType::TinyGet || T::type == driver::IoCtlType::TinySet,
-                  "For now, windows::Prober::ioctl only supports Tiny ioctls");
-    ioctl(T::type, T::feature, T::id, inout);
 }
 
 std::pair<std::set<ProbeId> /*Extract*/, std::set<ProbeId> /*Inject*/> Prober::getActiveProbes()

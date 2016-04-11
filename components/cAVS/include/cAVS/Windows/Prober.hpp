@@ -141,18 +141,6 @@ private:
     using GetExtractionRingBufferPosition =
         IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
                          driver::ProbeFeatureParameter::EXTRACTION_BUFFER_STATUS, uint64_t>;
-    /** Send a probes-related ioctl to the driver
-     *
-     * @tparam T A type describing the ioctl (id, direction, type of the data
-     *           to be sent - described by a Data member).
-     * @param[in,out] inout Reference to the data to be sent/received.
-     */
-    template <class T>
-    void ioctl(typename T::Data &inout);
-
-    /** Same as previous ioctl() method, but with dynamic params */
-    template <class T>
-    void ioctl(driver::IoCtlType type, ULONG feature, ULONG parameterId, T &inout);
 
     /** Convert values from OS-agnostic cAVS to cAVS Windows driver and vice-versa
      */

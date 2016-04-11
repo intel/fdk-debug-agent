@@ -23,9 +23,11 @@
 #pragma once
 
 #include "cAVS/Windows/DriverTypes.hpp"
+#include "cAVS/Windows/Device.hpp"
 #include <tuple>
 #include <Util/Buffer.hpp>
 #include <utility>
+#include <stdexcept>
 
 namespace debug_agent
 {
@@ -170,6 +172,73 @@ static std::pair<NTSTATUS, util::Buffer> fromTinyCmdBuffer(const util::Buffer &b
     return details::fromBodyBuffer(reader);
 }
 
+/** Send an ioctl to the driver.
+ *
+ * @see the other ioctl() function.
+ */
+template <class T, class Exception>
+void ioctl(Device &device, driver::IoCtlType ioctlType, ULONG feature, ULONG parameterId, T &inout)
+{
+    using driver::to_string;
+    using std::to_string;
+
+    /* Creating the body payload using the IoctlFwLogsState type */
+    util::MemoryByteStreamWriter bodyPayloadWriter;
+    bodyPayloadWriter.write(inout);
+
+    /* Creating the TinySet/Get ioctl buffer */
+    util::Buffer buffer =
+        ioctl_helpers::toTinyCmdBuffer(feature, parameterId, bodyPayloadWriter.getBuffer());
+
+    try {
+        device.ioControl(ioctlType, &buffer, &buffer);
+    } catch (Device::Exception &e) {
+        throw Exception(to_string(ioctlType) + " error: " + e.what());
+    }
+
+    NTSTATUS driverStatus;
+    util::Buffer bodyPayloadBuffer;
+    /* Parsing returned buffer */
+    std::tie(driverStatus, bodyPayloadBuffer) = ioctl_helpers::fromTinyCmdBuffer(buffer);
+
+    if (!NT_SUCCESS(driverStatus)) {
+        throw Exception("Driver returns invalid status: " +
+                        to_string(static_cast<uint32_t>(driverStatus)));
+    }
+
+    try {
+        /* Reading structure from body payload */
+        util::MemoryByteStreamReader reader(bodyPayloadBuffer);
+        reader.read(inout);
+
+        if (!reader.isEOS()) {
+            throw Exception("Ioctl buffer has not been fully consumed, type=" +
+                            to_string(ioctlType) + ", pointer=" +
+                            to_string(reader.getPointerOffset()) + ", size=" +
+                            to_string(reader.getBuffer().size()) + ", remaining=" +
+                            to_string(reader.getBuffer().size() - reader.getBuffer().size()));
+        }
+    } catch (util::ByteStreamReader::Exception &e) {
+        throw Exception("Cannot decode ioctl buffer: " + std::string(e.what()));
+    }
+}
+
+/** Send an ioctl to the driver
+ *
+ * @tparam T A type describing the ioctl (id, direction, type of the data
+ *           to be sent - described by a Data member).
+ * @tparam Exception The type of exception to be thrown.
+ *
+ * @param[in] device The device on which to call the ioctl.
+ * @param[in,out] inout Reference to the data to be sent/received.
+ */
+template <class T, class Exception>
+void ioctl(Device &device, typename T::Data &inout)
+{
+    static_assert(T::type == driver::IoCtlType::TinyGet || T::type == driver::IoCtlType::TinySet,
+                  "For now, windows::ioctl_helpers::ioctl only supports Tiny ioctls");
+    ioctl<T::Data, Exception>(device, T::type, T::feature, T::id, inout);
+}
 } // namespace ioctl_helpers
 }
 }
