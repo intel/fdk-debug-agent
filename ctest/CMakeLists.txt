@@ -41,6 +41,9 @@ function(add_catch_test executable working_dir)
     if (NOT ENABLE_ADMIN_STEPS)
         set(COMMAND ${COMMAND} "exclude:[admin_rights]")
     endif()
+    if(ENABLE_WAIVERS)
+        set(COMMAND ${COMMAND} "exclude:[waiver]")
+    endif()
     add_test(
         NAME ${executable}
         COMMAND ${COMMAND}
