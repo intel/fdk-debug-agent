@@ -23,6 +23,7 @@
 #include "cAVS/Windows/ProberBackend.hpp"
 #include "cAVS/Windows/IoctlHelpers.hpp"
 #include "cAVS/Windows/Probe/ExtractionInputStream.hpp"
+#include "cAVS/Windows/Probe/InjectionOutputStream.hpp"
 
 namespace debug_agent
 {
@@ -328,12 +329,13 @@ void ProberBackend::startStreaming()
             auto &rbDesc = ringBuffers.injectionRBDescriptions[probeId.getValue()];
 
             // Creating injector
-            mInjectors.emplace_back(
+            auto outputStream = std::make_unique<probe::InjectionOutputStream>(
                 *mEventHandles.injectionHandles[probeId.getValue()],
-                util::RingBufferWriter(
-                    rbDesc.startAdress, rbDesc.size,
-                    [this, probeId] { return getInjectionRingBufferLinearPosition(probeId); }),
-                mInjectionQueues[probeId.getValue()], it->second);
+                util::RingBufferWriter(rbDesc.startAdress, rbDesc.size, [this, probeId] {
+                    return getInjectionRingBufferLinearPosition(probeId);
+                }));
+            mInjectors.emplace_back(std::move(outputStream), mInjectionQueues[probeId.getValue()],
+                                    it->second);
         }
     } catch (std::exception &e1) {
         try {

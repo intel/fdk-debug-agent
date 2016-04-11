@@ -24,6 +24,7 @@
 #include "cAVS/DspFw/Probe.hpp"
 #include "cAVS/Prober.hpp"
 #include "cAVS/ProbeExtractor.hpp"
+#include "cAVS/ProbeInjector.hpp"
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/IoCtlDescription.hpp"
 #include "Util/ByteStreamReader.hpp"
@@ -33,7 +34,6 @@
 #include "Util/RingBuffer.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
-#include "cAVS/Windows/Probe/Injector.hpp"
 
 #include <array>
 #include <memory>
@@ -278,7 +278,7 @@ private:
     std::unique_ptr<ProbeExtractor> mExtractor;
 
     std::vector<util::RingBuffer> mInjectionQueues;
-    std::vector<probe::Injector> mInjectors;
+    std::vector<ProbeInjector> mInjectors;
 
     mutable std::mutex mProbeConfigMutex;
 };

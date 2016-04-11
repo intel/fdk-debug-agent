@@ -22,8 +22,7 @@
 
 #pragma once
 
-#include "cAVS/Windows/EventHandle.hpp"
-#include "Util/RingBufferWriter.hpp"
+#include "Util/RingBufferOutputStream.hpp"
 #include "Util/RingBuffer.hpp"
 #include "Util/Buffer.hpp"
 #include "Util/AssertAlways.hpp"
@@ -34,10 +33,6 @@ namespace debug_agent
 {
 namespace cavs
 {
-namespace windows
-{
-namespace probe
-{
 
 /**
  * The injector is an active object that forwards data from a input ring buffer (feed by the http
@@ -47,10 +42,10 @@ namespace probe
  * it, the injector knows the audio format sample byte size in order to not break the sample
  * alignment.
  */
-class Injector
+class ProbeInjector
 {
 public:
-    using Exception = util::Exception<Injector>;
+    using Exception = util::Exception<ProbeInjector>;
 
     /**
      * @param[in,out] handle A windows event handle to know when the ring buffer should be filled
@@ -58,49 +53,45 @@ public:
      * @param[in,out] inputRingBuffer The input ring buffer
      * @param[in] sampleByteSize The audio format sample byte size
      */
-    Injector(EventHandle &handle, util::RingBufferWriter &&ringBufferWriter,
-             util::RingBuffer &inputRingBuffer, std::size_t sampleByteSize)
-        : mHandleWaiter(handle), mOutputRingBuffer(std::move(ringBufferWriter)),
-          mInputRingBuffer(inputRingBuffer), mSampleByteSize(sampleByteSize)
+    ProbeInjector(std::unique_ptr<util::RingBufferOutputStream> rbOutputStream,
+                  util::RingBuffer &inputRingBuffer, std::size_t sampleByteSize)
+        : mRbOutputStream(std::move(rbOutputStream)), mInputRingBuffer(inputRingBuffer),
+          mSampleByteSize(sampleByteSize)
     {
         // First pre-filling the output ring buffer
         // Note: the input buffer may already have been provisioned
-        std::size_t outputBufferBytes = mOutputRingBuffer.getSize();
+        std::size_t outputBufferBytes = mRbOutputStream->getSize();
         std::size_t outputBufferSamples = outputBufferBytes / mSampleByteSize;
         injectSamples(outputBufferSamples);
 
         // Then starting the injector thread
-        mInjectionResult = std::async(std::launch::async, &Injector::inject, this);
+        mInjectionResult = std::async(std::launch::async, &ProbeInjector::inject, this);
     }
 
-    Injector(Injector &&) = default;
-    Injector(const Injector &) = delete;
-    Injector &operator=(const Injector &) = delete;
-    ~Injector()
+    ProbeInjector(ProbeInjector &&) = default;
+    ProbeInjector(const ProbeInjector &) = delete;
+    ProbeInjector &operator=(const ProbeInjector &) = delete;
+    ~ProbeInjector()
     {
-        close();
+        mRbOutputStream->close();
 
         // Clearing the input ring buffer at probe session stop instead of probe session start
         // in order to allow to provision the input ring buffer before the session start
         mInputRingBuffer.clear();
     }
 
-    /** Close the stream, leading to unblock the thread that is writing */
-    void close() { mHandleWaiter.stopWait(); }
-
 private:
     void inject()
     {
         try {
-            util::Buffer buffer;
             while (true) {
-                if (!mHandleWaiter.wait()) {
+                if (not mRbOutputStream->wait()) {
                     /* Closed */
                     return;
                 }
 
                 // Getting available sample count from the output ring buffer for production
-                std::size_t outputAvailableBytes = mOutputRingBuffer.getAvailableProduction();
+                std::size_t outputAvailableBytes = mRbOutputStream->getAvailable();
                 std::size_t outputAvailableSamples = outputAvailableBytes / mSampleByteSize;
 
                 if (outputAvailableSamples > 0) {
@@ -120,7 +111,6 @@ private:
         // resizing the temporary buffer used for copy from input ring buffer to output one
         mCopyBuffer.resize(sampleCount * mSampleByteSize);
         auto copyBufferIt = mCopyBuffer.begin();
-
         // copying available samples from input ring buffer
         std::size_t inputRingBufferAvailableSamples =
             mInputRingBuffer.getUsedSize() / mSampleByteSize;
@@ -140,17 +130,14 @@ private:
         }
 
         // writing the temporary buffer to the output ring buffer
-        mOutputRingBuffer.unsafeWrite(mCopyBuffer);
+        mRbOutputStream->write(mCopyBuffer.data(), mCopyBuffer.size());
     }
 
-    EventHandle::Waiter mHandleWaiter;
-    util::RingBufferWriter mOutputRingBuffer;
+    std::unique_ptr<util::RingBufferOutputStream> mRbOutputStream;
     util::RingBuffer &mInputRingBuffer;
     std::size_t mSampleByteSize;
     std::future<void> mInjectionResult;
     util::Buffer mCopyBuffer;
 };
-}
-}
 }
 }
