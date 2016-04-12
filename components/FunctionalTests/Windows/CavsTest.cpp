@@ -937,13 +937,17 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
                                          windows::driver::ProbeState::ProbeFeatureOwned);
 
         // enabling injection probe involves to retrieve a module instance props in order to
-        // calculate sample byte size
-        dsp_fw::ModuleInstanceProps props;
-        props.input_pins.pin_info.resize(1);
-        props.input_pins.pin_info[0].format.bit_depth = bitDepth;
-        props.input_pins.pin_info[0].format.number_of_channels = channelCount;
-        commands.addGetModuleInstancePropsCommand(true, STATUS_SUCCESS,
-                                                  dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, 1, 2, props);
+        // calculate sample byte size. So initializing bit depth and channel count of the module
+        // instance pin used for injection
+        dsp_fw::PinProps pinProps{};
+        pinProps.format.bit_depth = bitDepth;
+        pinProps.format.number_of_channels = channelCount;
+
+        dsp_fw::ModuleInstanceProps moduleInstanceProps{};
+        moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
+
+        commands.addGetModuleInstancePropsCommand(
+            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, 1, 2, moduleInstanceProps);
 
         using Type = dsp_fw::ProbeType;
         using Purpose = Prober::ProbePurpose;
