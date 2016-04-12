@@ -176,6 +176,28 @@ void MockedDeviceCommands::addGetModuleEntriesCommand(
                                  moduleInfoSize, returnedOutput);
 }
 
+void MockedDeviceCommands::addGetGlobalPerfDataCommand(
+    dsp_fw::IxcStatus returnedFirmwareStatus, uint32_t maxItemCount,
+    const std::vector<dsp_fw::PerfDataItem> &perfItems)
+{
+    /* Calculating the memory space required */
+    std::size_t parameterSize = dsp_fw::GlobalPerfData::getAllocationSize(maxItemCount);
+
+    dsp_fw::GlobalPerfData perfData;
+    perfData.items = perfItems;
+
+    util::MemoryByteStreamWriter writer;
+    writer.write(perfData);
+
+    util::Buffer returnedOutput(parameterSize, 0xFF);
+    returnedOutput = writer.getBuffer();
+
+    addGetModuleParameterCommand(returnedFirmwareStatus, dsp_fw::baseFirmwareModuleId,
+                                 dsp_fw::baseFirmwareInstanceId,
+                                 dsp_fw::toParameterId(dsp_fw::BaseFwParams::GLOBAL_PERF_DATA),
+                                 parameterSize, returnedOutput);
+}
+
 void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
                                                         uint16_t moduleId, uint16_t instanceId,
                                                         dsp_fw::ParameterId parameterId,

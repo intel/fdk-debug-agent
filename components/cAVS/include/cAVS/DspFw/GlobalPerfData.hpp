@@ -62,6 +62,20 @@ struct PerfDataItem
     /** Average KCPS (Kilo Cycles Per Second) measured. */
     uint32_t average;
 
+    PerfDataItem(uint16_t moduleId, uint16_t instanceId, bool powerMode, bool isRemoved,
+                 uint32_t _peak, uint32_t _average)
+    {
+        resourceId.moduleId = moduleId;
+        resourceId.instanceId = instanceId;
+        details.bits.powerMode = (powerMode ? 1 : 0);
+        details.bits.reserved = 0;
+        details.bits.isRemoved = (isRemoved ? 1 : 0);
+        peak = _peak;
+        average = _average;
+    }
+
+    PerfDataItem() : PerfDataItem(0, 0, false, false, 0, 0) {}
+
     bool operator==(const PerfDataItem &other) const
     {
         return resourceId == other.resourceId && details.full == other.details.full &&

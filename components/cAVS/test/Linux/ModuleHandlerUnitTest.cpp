@@ -471,3 +471,36 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
     CHECK_NOTHROW(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props));
     CHECK(fwInstanceProps == props);
 }
+
+TEST_CASE_METHOD(Fixture, "Module handling: getting perf items")
+{
+    // some arbitrarily large value. Mimicks the max number of module instances + number of cores.
+    static const uint32_t maxItemCount = 22;
+    static const std::vector<dsp_fw::PerfDataItem> expectedPerfItems = {
+        dsp_fw::PerfDataItem(0, 0, false, false, 1337, 42),   // Core 0
+        dsp_fw::PerfDataItem(1, 0, true, false, 123456, 789), // Module 1, instance 0
+        dsp_fw::PerfDataItem(0, 1, true, true, 987654, 321),  // Core 1
+        dsp_fw::PerfDataItem(12, 0, false, false, 1111, 222), // Module 12, instance 0
+        dsp_fw::PerfDataItem(12, 1, true, false, 3333, 444)   // Module 12, instance 1
+    };
+
+    /* Setting the test vector
+    * ----------------------- */
+    MockedDeviceCommands commands(*device);
+
+    /* Successful command */
+    commands.addGetGlobalPerfDataCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, maxItemCount,
+                                         expectedPerfItems);
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the module handler, that will use the mocked device*/
+    linux::ModuleHandler moduleHandler(*device);
+
+    std::vector<dsp_fw::PerfDataItem> actualPerfItems;
+
+    /*Successful getPerfItems command */
+    CHECK_NOTHROW(moduleHandler.getPerfItems(maxItemCount, actualPerfItems));
+    CHECK(actualPerfItems == expectedPerfItems);
+}

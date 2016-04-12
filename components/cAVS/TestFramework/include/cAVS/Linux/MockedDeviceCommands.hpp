@@ -30,6 +30,7 @@
 #include "cAVS/DspFw/Gateway.hpp"
 #include "cAVS/DspFw/Scheduler.hpp"
 #include "cAVS/DspFw/Infrastructure.hpp"
+#include "cAVS/DspFw/GlobalPerfData.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/DriverTypes.hpp"
 #include "Util/Buffer.hpp"
@@ -223,6 +224,21 @@ public:
      */
     void addGetModuleEntriesCommand(dsp_fw::IxcStatus returnedFirmwareStatus, uint32_t moduleCount,
                                     const std::vector<dsp_fw::ModuleEntry> &returnedEntries);
+
+    /** Add a get global perf data command.
+     *
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] maxItemCount the number of items the firmware can return
+     * @param[in] perfItems the list of perf data returned by the ioctl.
+     *
+     * Note: the perfItems parameter is unused if :
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     *
+     * @throw Device::Exception
+     */
+    void addGetGlobalPerfDataCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
+                                     uint32_t maxItemCount,
+                                     const std::vector<dsp_fw::PerfDataItem> &perfItems);
 
     /** Add a set core power entries command.
      *
