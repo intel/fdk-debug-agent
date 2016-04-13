@@ -24,6 +24,7 @@
 #include "cAVS/Logger.hpp"
 #include "cAVS/ModuleHandler.hpp"
 #include "cAVS/Prober.hpp"
+#include "cAVS/Perf.hpp"
 
 namespace debug_agent
 {
@@ -44,6 +45,8 @@ public:
     virtual ModuleHandler &getModuleHandler() = 0;
 
     virtual Prober &getProber() = 0;
+
+    virtual Perf &getPerf() = 0;
 
     /** Stop threads and unblock consumer threads, currently only logging is concerned. */
     void stop() noexcept { getLogger().stop(); }

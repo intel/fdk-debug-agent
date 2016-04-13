@@ -115,7 +115,8 @@ System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
       mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
       mProbeInjectionMutexes(mDriver->getProber().getMaxProbeCount()),
-      mProbeService(mDriver->getProber(), mDriver->getModuleHandler())
+      mProbeService(mDriver->getProber(), mDriver->getModuleHandler()),
+      mPerfService(mDriver->getPerf(), mDriver->getModuleHandler())
 {
     try {
         mDriver->getModuleHandler().getFwConfig(mFwConfig);
@@ -140,6 +141,12 @@ System::System(const DriverFactory &driverFactory)
     } else {
         /** @todo use logging */
         std::cout << "Cannot get module entries: module count is invalid." << std::endl;
+    }
+    if (mFwConfig.isMaxModInstCountValid and mHwConfig.isDspCoreCountValid) {
+        mPerfService.setMaxItemCount(mFwConfig.maxModInstCount + mHwConfig.dspCoreCount);
+    } else {
+        std::cout << "Perf Service won't work: can't retrieve the maximum amount of perf items."
+                  << std::endl;
     }
 }
 
@@ -399,13 +406,17 @@ Prober::ProbeConfig System::getProbeConfiguration(ProbeId id)
 
 Perf::State System::getPerfState()
 {
-    // TODO
-    return Perf::State::Disabled;
+    return mPerfService.getState();
 }
 
-void System::setPerfState(Perf::State)
+void System::setPerfState(Perf::State state)
 {
-    // TODO
+    mPerfService.setState(state);
+}
+
+std::string System::getPerfData()
+{
+    return mPerfService.getData();
 }
 }
 }

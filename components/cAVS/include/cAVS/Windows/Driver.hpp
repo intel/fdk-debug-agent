@@ -57,6 +57,7 @@ public:
     cavs::Logger &getLogger() override { return mLogger; }
     cavs::ModuleHandler &getModuleHandler() override { return mModuleHandler; }
     cavs::Prober &getProber() override { return mProber; }
+    cavs::Perf &getPerf() override { return mPerf; }
 
 private:
     std::unique_ptr<Device> mDevice;

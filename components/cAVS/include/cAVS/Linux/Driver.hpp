@@ -56,6 +56,7 @@ public:
     cavs::Logger &getLogger() override { return mLogger; }
     cavs::ModuleHandler &getModuleHandler() override { return mModuleHandler; }
     cavs::Prober &getProber() override { return mProber; }
+    cavs::Perf &getPerf() override { return mPerf; }
 
 private:
     /* Will be replaced by the true implementation*/

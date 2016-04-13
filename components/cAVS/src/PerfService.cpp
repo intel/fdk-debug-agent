@@ -19,32 +19,39 @@
 *
 ********************************************************************************
 */
-#pragma once
 
-#include "cAVS/Perf.hpp"
-#include "cAVS/ModuleHandler.hpp"
+#include "cAVS/PerfService.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
-class PerfService
+PerfService::PerfService(Perf &perf, ModuleHandler &moduleHandler)
+    : mPerf(perf), mModuleHandler(moduleHandler)
 {
-public:
-    PerfService(Perf &perf, ModuleHandler &moduleHandler);
-
-    void setMaxItemCount(uint32_t maxItemCount);
-
-    Perf::State getState();
-    void setState(Perf::State);
-
-    std::string getData();
-
-private:
-    Perf &mPerf;
-    ModuleHandler &mModuleHandler;
-
-    uint32_t mMaxItemCount{0};
-};
 }
+
+// TODO: this setter is needed because the System constructor can't create the PerfService with a
+// correct number of max items. We will be able to fix this if/when the ModuleHandler returns
+// results by value instead of via output arguments.
+void PerfService::setMaxItemCount(uint32_t maxItemCount)
+{
+    mMaxItemCount = maxItemCount;
 }
+
+Perf::State PerfService::getState()
+{
+    return mPerf.getState();
+}
+
+void PerfService::setState(Perf::State state)
+{
+    mPerf.setState(state);
+}
+
+std::string PerfService::getData()
+{
+    return "";
+}
+} // namespace cavs
+} // namespace debug_agent

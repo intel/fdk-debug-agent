@@ -30,7 +30,8 @@ set(LIB_SRCS
     src/LogStreamer.cpp
     src/System.cpp
     src/Topology.cpp
-    src/ProbeService.cpp)
+    src/ProbeService.cpp
+    src/PerfService.cpp)
 
 # Common include files
 set(LIB_INCS
