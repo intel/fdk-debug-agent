@@ -822,13 +822,23 @@ std::vector<Buffer> createExpectedInjectionBuffers(const util::Buffer &data,
                   "consumerPositionDelta shall "
                   "not be a multiple of sampleByteSize");
 
+    static const std::size_t ringBufferSampleCount = ringBufferSize / sampleByteSize;
+
     std::vector<Buffer> buffers;
     std::size_t consumerPosition = 0;
     FakeRingBuffer ringBuffer(ringBufferSize);
     MemoryInputStream is(data);
-    util::Buffer block;
 
-    // Filling expected buffer content from injected data
+    // Prefilling buffer with silence
+    util::Buffer block(ringBufferSampleCount * sampleByteSize, 0);
+    ringBuffer.write(block);
+    buffers.push_back(ringBuffer.getBuffer());
+
+    // Simulating consumer update
+    consumerPosition += consumerPositionDelta;
+    consumerPositions.push_back(consumerPosition);
+
+    // Then filling buffer from injected data
     while (!is.isEOS()) {
 
         // calculating next block size
@@ -916,10 +926,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         //     that has been enabled
         // -> involves no ioctl
 
-        // 5: Sending inject data to the DBGA before probe session starting
-        // -> involves no ioctl
-
-        // 6 : Starting service
+        // 5 : Starting service
 
         // getting current state : idle
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
@@ -971,11 +978,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::ProbeFeatureActive);
 
-        // 7 : Getting probe service parameters, checking that it is started
+        // 6 : Getting probe service parameters, checking that it is started
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::ProbeFeatureActive);
 
-        // 8 : Extract from an enabled probe
+        // 7 : Extract from an enabled probe
 
         // Adding a "get extraction linear position" command for each block written by the driver
         uint64_t linearPosition = 0;
@@ -989,7 +996,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
             commands.addGetInjectionRingBufferLinearPosition(true, STATUS_SUCCESS, 0, consumerPos);
         }
 
-        // 9 : Stopping service
+        // 8 : Stopping service
 
         // getting current state : Active
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
@@ -1003,7 +1010,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::ProbeFeatureIdle);
 
-        // 10: Getting probe service parameters, checking that it is stopped
+        // 9: Getting probe service parameters, checking that it is stopped
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::ProbeFeatureIdle);
     }
@@ -1069,25 +1076,19 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
             HttpClientSimulator::FileContent(xmlFileName(expectedFile))));
     }
 
-    // 5: Sending inject data to the DBGA before probe session startings
-    CHECK_NOTHROW(client.request(
-        "/instance/cavs.probe.endpoint/" + std::to_string(injectionProbeIndex) + "/streaming",
-        HttpClientSimulator::Verb::Put, injectData, HttpClientSimulator::Status::Ok, "",
-        HttpClientSimulator::StringContent("")));
-
-    // 6 : Starting service
+    // 5 : Starting service
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
         file_helper::readAsString(xmlFileName("probeservice_param_started")),
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 
-    // 7 : Getting probe service parameters, checking that it is started
+    // 6 : Getting probe service parameters, checking that it is started
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
         HttpClientSimulator::Status::Ok, "text/xml",
         HttpClientSimulator::FileContent(xmlFileName("probeservice_param_started"))));
 
-    // 8 : Extract from an enabled probe. TODO: currently, extraction is not implemented and the
+    // 7 : Extract from an enabled probe. TODO: currently, extraction is not implemented and the
     // result will be empty.
     auto future = std::async(std::launch::async, [&] {
         client.request("/instance/cavs.probe.endpoint/" + std::to_string(extractionProbeIndex) +
@@ -1112,6 +1113,12 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     // Waiting until the extraction thread is idle to prevent of races with injection thread
     extractionHandle.blockUntilWait();
 
+    // Sending inject data to the DBGA
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe.endpoint/" + std::to_string(injectionProbeIndex) + "/streaming",
+        HttpClientSimulator::Verb::Put, injectData, HttpClientSimulator::Status::Ok, "",
+        HttpClientSimulator::StringContent("")));
+
     // Simulating the driver injection by checking the ring buffer content
     for (auto &expectedBlock : expectedInjectionBlocks) {
         // waiting until the inkection thread is idle
@@ -1124,7 +1131,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         injectionHandle.notify();
     }
 
-    // 9 : Stopping service
+    // 8 : Stopping service
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
         file_helper::readAsString(xmlFileName("probeservice_param_stopped")),
@@ -1133,7 +1140,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     // Checking that step 7 has not failed
     CHECK_NOTHROW(future.get());
 
-    // 10: Getting probe service parameters, checking that it is stopped
+    // 9: Getting probe service parameters, checking that it is stopped
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
         HttpClientSimulator::Status::Ok, "text/xml",

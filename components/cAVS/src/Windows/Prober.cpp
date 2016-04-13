@@ -112,9 +112,6 @@ Prober::Prober(Device &device, const EventHandles &eventHandles)
         mExtractionQueues.emplace_back(mQueueSize,
                                        [](const util::Buffer &buffer) { return buffer.size(); });
         mInjectionQueues.emplace_back(mQueueSize);
-
-        // injection queues are always open in order to accept data at any time
-        mInjectionQueues[probeIndex].open();
     }
 }
 
@@ -364,8 +361,10 @@ void Prober::startStreaming()
                 probePointMap, mExtractionQueues);
         }
 
-        // Creating injectors
+        // opening queues of the active probes and creating injectors
         for (auto probeId : injectionProbes) {
+            mInjectionQueues[probeId.getValue()].open();
+
             // Finding associated sample byte size
             auto it = mCachedInjectionSampleByteSizes.find(probeId);
             if (it == mCachedInjectionSampleByteSizes.end()) {
@@ -408,7 +407,7 @@ void Prober::stopStreaming()
     // then closing the queues to make wakup listening threads
     for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {
         mExtractionQueues[probeIndex].close();
-        // Do not close injection queues, in this way data can be queued before session start
+        mInjectionQueues[probeIndex].close();
     }
 }
 }
