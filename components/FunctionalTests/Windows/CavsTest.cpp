@@ -870,7 +870,7 @@ std::vector<Buffer> createExpectedInjectionBuffers(const util::Buffer &data,
     return buffers;
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases", "[waiver]")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases")
 {
     /* Setting the test vector
      * ----------------------- */
