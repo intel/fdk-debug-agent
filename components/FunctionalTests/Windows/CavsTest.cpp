@@ -1101,18 +1101,29 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
     // simulating the driver extraction by filling the ring buffer
     for (auto &block : blocks) {
+        // waiting until the extraction thread is idle
+        extractionHandle.blockUntilWait();
+
         // writing the block in the ring buffer
         extractionBuffer.write(block);
 
         // notify the DBGA that the content has been written
-        // and wait until the DBGA has finished to read it
-        extractionHandle.raiseEventAndBlockUntilWait();
+        extractionHandle.notify();
     }
+
+    // Waiting until the extraction thread is idle to prevent of races with injection thread
+    extractionHandle.blockUntilWait();
 
     // Simulating the driver injection by checking the ring buffer content
     for (auto &expectedBlock : expectedInjectionBlocks) {
+        // waiting until the inkection thread is idle
+        injectionHandle.blockUntilWait();
+
+        // Checking that ring buffer content is the expected one
         REQUIRE(injectionBuffer == expectedBlock);
-        injectionHandle.raiseEventAndBlockUntilWait();
+
+        // notify the DBGA that the content has been read
+        injectionHandle.notify();
     }
 
     // 9 : Stopping service

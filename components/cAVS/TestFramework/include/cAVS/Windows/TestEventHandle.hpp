@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/Windows/EventHandle.hpp"
+#include "Util/AssertAlways.hpp"
 #include <condition_variable>
 #include <mutex>
 
@@ -38,18 +39,22 @@ namespace windows
 class TestEventHandle : public SystemEventHandle
 {
 public:
-    /** Raise the event and blocks until someone calls the wait() method */
-    void raiseEventAndBlockUntilWait()
+    /** Block until someone calls the wait() method */
+    void blockUntilWait()
     {
         std::unique_lock<std::mutex> locker(mWaitVarMutex);
-        notify();
-        mWaitVar.wait(locker);
+        if (!mWaiting) {
+            mWaitVar.wait(locker);
+        }
+        ASSERT_ALWAYS(mWaiting);
+        mWaiting = false;
     }
 
     void wait() override
     {
         {
             std::unique_lock<std::mutex> locker(mWaitVarMutex);
+            mWaiting = true;
             mWaitVar.notify_one();
         }
         Base::wait();
@@ -59,6 +64,7 @@ private:
     using Base = SystemEventHandle;
     std::condition_variable mWaitVar;
     std::mutex mWaitVarMutex;
+    bool mWaiting = false;
 };
 }
 }
