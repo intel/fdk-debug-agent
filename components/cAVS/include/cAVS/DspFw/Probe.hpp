@@ -184,10 +184,10 @@ struct Packet
     uint32_t dspWallClockTsLw;
     util::Buffer data;
 
-    uint32_t sum() const
+    uint64_t sum() const
     {
         return syncWord + probePointId.full + format + dspWallClockTsHw + dspWallClockTsLw +
-               static_cast<uint32_t>(data.size());
+               data.size();
     }
 
     std::string toString() const
@@ -219,7 +219,7 @@ struct Packet
         reader.read(dspWallClockTsLw);
         reader.readVector<uint32_t>(data);
 
-        uint32_t headerChecksumValue;
+        uint64_t headerChecksumValue;
         reader.read(headerChecksumValue);
 
 // Disabling checksum because currently the FW produces invalid ones
@@ -237,6 +237,9 @@ struct Packet
 #endif
     }
 
+    // Allowing an optional custom checksum type for fdk tool compatibility (requires uint32_t)
+    // @todo remove this template argument when the fdk tools supports 64bits checksum
+    template <typename ChecksumType = uint64_t>
     void toStream(util::ByteStreamWriter &writer) const
     {
         writer.write(syncWord);
@@ -245,7 +248,7 @@ struct Packet
         writer.write(dspWallClockTsHw);
         writer.write(dspWallClockTsLw);
         writer.writeVector<uint32_t>(data);
-        writer.write(sum());
+        writer.write(static_cast<ChecksumType>(sum()));
     }
 };
 }

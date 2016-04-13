@@ -110,7 +110,11 @@ private:
                 auto buffer = std::make_unique<util::Buffer>();
                 util::MemoryOutputStream outputStream(*buffer);
                 util::ByteStreamWriter writer(outputStream);
-                writer.write(packet);
+
+                // Writing packet to the stream but with an uint32_t checksum to ensure
+                // compatibility with the fdk tool
+                // @todo remove this specificity when the fdk tools supports 64bits checksum
+                packet.toStream<uint32_t>(writer);
 
                 // Enqueueing the buffer into the right queue
                 if (!mQueues[probeId.getValue()].add(std::move(buffer))) {
