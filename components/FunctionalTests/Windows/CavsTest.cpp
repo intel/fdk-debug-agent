@@ -822,8 +822,6 @@ std::vector<Buffer> createExpectedInjectionBuffers(const util::Buffer &data,
                   "consumerPositionDelta shall "
                   "not be a multiple of sampleByteSize");
 
-    static const std::size_t ringBufferSampleCount = ringBufferSize / sampleByteSize;
-
     std::vector<Buffer> buffers;
     std::size_t consumerPosition = 0;
     FakeRingBuffer ringBuffer(ringBufferSize);
