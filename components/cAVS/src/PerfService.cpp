@@ -60,6 +60,11 @@ static float computeBudget(const dsp_fw::ModuleInstanceProps &props)
                           std::numeric_limits<decltype(format.valid_bit_depth)>::max() <=
                       std::numeric_limits<float>::max(),
                   "Potential floating-point overflow at runtime.");
+    if (format.valid_bit_depth % 8 != 0) {
+        throw std::range_error("The valid bit depth for module instance (" +
+                               std::to_string(props.id.moduleId) + ", " +
+                               std::to_string(props.id.instanceId) + ") is not a multiple of 8.");
+    }
     return (float(props.cpc) * format.sampling_frequency * format.number_of_channels *
             (format.valid_bit_depth / 8) / props.ibs_bytes) /
            1000;
@@ -73,10 +78,12 @@ PerfService::CompoundPerfData PerfService::getData()
         std::vector<dsp_fw::PerfDataItem> raw;
         mModuleHandler.getPerfItems(mMaxItemCount, raw);
 
+        // Compute the budget for each module instance
         for (const auto &rawItem : raw) {
             bool isCore = rawItem.resourceId.moduleId == 0;
             float budget = 0;
 
+            // The budget for cores defaults to 0
             if (not isCore) {
                 dsp_fw::ModuleInstanceProps props;
                 mModuleHandler.getModuleInstanceProps(rawItem.resourceId.moduleId,
@@ -90,7 +97,8 @@ PerfService::CompoundPerfData PerfService::getData()
             Perf::Item item{
                 rawItem.resourceId.toInt(),
                 (rawItem.details.bits.powerMode == 0 ? Perf::PowerMode::D0 : Perf::PowerMode::D0i3),
-                uint32_t(budget), rawItem.peak, rawItem.average};
+                decltype(Perf::Item::budget)(budget), rawItem.peak, rawItem.average};
+            // Separate modules and cores, each kind in its own list.
             if (isCore) {
                 result.cores.push_back(item);
             } else {
