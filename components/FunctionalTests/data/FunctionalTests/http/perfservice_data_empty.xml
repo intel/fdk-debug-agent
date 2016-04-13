@@ -1,0 +1,4 @@
+<ParameterBlock Name="PerformanceData">
+    <ParameterBlock Name="Cores">
+    <ParameterBlock Name="Modules">
+</ParameterBlock>

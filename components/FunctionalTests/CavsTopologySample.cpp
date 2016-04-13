@@ -355,7 +355,14 @@ void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> 
                 /* Length = 4 bytes */
                 0x04, 0x00, 0x00, 0x00,
                 /* Value */
-                static_cast<uint8_t>(maxPplCount), 0x00, 0x00, 0x00};
+                static_cast<uint8_t>(maxPplCount), 0x00, 0x00, 0x00,
+
+                /* Tag for MAX_MOD_INST_COUNT : 13 */
+                0x0d, 0x00, 0x00, 0x00,
+                /* Length = 4 bytes */
+                0x04, 0x00, 0x00, 0x00,
+                /* Value */
+                uint8_t{maxModInstCount}, 0x00, 0x00, 0x00};
 
     /* Filling hardware config */
     hwConfig = {/* Tag for DSP_CORES: 0x00000001 */
@@ -363,7 +370,7 @@ void CavsTopologySample::createFirmwareObjects(std::vector<dsp_fw::ModuleEntry> 
                 /* Length = 4 bytes */
                 0x04, 0x00, 0x00, 0x00,
                 /* Value: nb core */
-                0x01, 0x00, 0x00, 0x00,
+                uint8_t{dspCoreCount}, 0x00, 0x00, 0x00,
 
                 /* Tag for GATEWAY_COUNT : 6 */
                 0x06, 0x00, 0x00, 0x00,

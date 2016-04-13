@@ -26,6 +26,7 @@ namespace debug_agent
 {
 namespace cavs
 {
+
 PerfService::PerfService(Perf &perf, ModuleHandler &moduleHandler)
     : mPerf(perf), mModuleHandler(moduleHandler)
 {
@@ -49,9 +50,56 @@ void PerfService::setState(Perf::State state)
     mPerf.setState(state);
 }
 
-std::string PerfService::getData()
+static float computeBudget(const dsp_fw::ModuleInstanceProps &props)
 {
-    return "";
+    auto &format = props.input_pins.pin_info[0].format;
+    // Check if there can be any runtime overflow with the computation below.
+    static_assert(double(std::numeric_limits<decltype(props.cpc)>::max()) *
+                          std::numeric_limits<decltype(format.sampling_frequency)>::max() *
+                          std::numeric_limits<decltype(format.number_of_channels)>::max() *
+                          std::numeric_limits<decltype(format.valid_bit_depth)>::max() <=
+                      std::numeric_limits<float>::max(),
+                  "Potential floating-point overflow at runtime.");
+    return (float(props.cpc) * format.sampling_frequency * format.number_of_channels *
+            (format.valid_bit_depth / 8) / props.ibs_bytes) /
+           1000;
+}
+
+PerfService::CompoundPerfData PerfService::getData()
+{
+    CompoundPerfData result;
+
+    {
+        std::vector<dsp_fw::PerfDataItem> raw;
+        mModuleHandler.getPerfItems(mMaxItemCount, raw);
+
+        for (const auto &rawItem : raw) {
+            bool isCore = rawItem.resourceId.moduleId == 0;
+            float budget = 0;
+
+            if (not isCore) {
+                dsp_fw::ModuleInstanceProps props;
+                mModuleHandler.getModuleInstanceProps(rawItem.resourceId.moduleId,
+                                                      rawItem.resourceId.instanceId, props);
+                budget = computeBudget(props);
+                if (budget > std::numeric_limits<decltype(Perf::Item::budget)>::max()) {
+                    // TODO: error-handling
+                }
+            }
+
+            Perf::Item item{
+                rawItem.resourceId.toInt(),
+                (rawItem.details.bits.powerMode == 0 ? Perf::PowerMode::D0 : Perf::PowerMode::D0i3),
+                uint32_t(budget), rawItem.peak, rawItem.average};
+            if (isCore) {
+                result.cores.push_back(item);
+            } else {
+                result.modules.push_back(item);
+            }
+        }
+    }
+
+    return result;
 }
 } // namespace cavs
 } // namespace debug_agent

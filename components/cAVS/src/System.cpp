@@ -414,7 +414,7 @@ void System::setPerfState(Perf::State state)
     mPerfService.setState(state);
 }
 
-std::string System::getPerfData()
+PerfService::CompoundPerfData System::getPerfData()
 {
     return mPerfService.getData();
 }

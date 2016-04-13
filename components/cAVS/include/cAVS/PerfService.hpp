@@ -23,6 +23,7 @@
 
 #include "cAVS/Perf.hpp"
 #include "cAVS/ModuleHandler.hpp"
+#include <vector>
 
 namespace debug_agent
 {
@@ -31,6 +32,10 @@ namespace cavs
 class PerfService
 {
 public:
+    struct CompoundPerfData
+    {
+        std::vector<Perf::Item> cores, modules;
+    };
     PerfService(Perf &perf, ModuleHandler &moduleHandler);
 
     void setMaxItemCount(uint32_t maxItemCount);
@@ -38,7 +43,7 @@ public:
     Perf::State getState();
     void setState(Perf::State);
 
-    std::string getData();
+    CompoundPerfData getData();
 
 private:
     Perf &mPerf;

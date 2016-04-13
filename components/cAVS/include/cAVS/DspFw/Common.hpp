@@ -71,7 +71,7 @@ struct CompoundModuleId
     }
 
     /* Required because this class is used as key of std::map */
-    bool operator<(const CompoundModuleId &other) const { return toInt(*this) < toInt(other); }
+    bool operator<(const CompoundModuleId &other) const { return toInt() < other.toInt(); }
 
     void fromStream(util::ByteStreamReader &reader)
     {
@@ -97,10 +97,9 @@ struct CompoundModuleId
         return "(" + std::to_string(moduleId) + "," + std::to_string(instanceId) + ")";
     }
 
-private:
-    static inline uint32_t toInt(const CompoundModuleId &compId)
+    constexpr uint32_t toInt() const
     {
-        return (static_cast<uint32_t>(compId.moduleId) << 16) | compId.instanceId;
+        return (static_cast<uint32_t>(moduleId) << 16) | instanceId;
     }
 };
 

@@ -48,6 +48,8 @@ public:
 
     static const size_t maxPplCount;
     static const size_t gatewaysCount;
+    static constexpr size_t dspCoreCount = 1;
+    static constexpr size_t maxModInstCount = 4;
 
 private:
     CavsTopologySample();

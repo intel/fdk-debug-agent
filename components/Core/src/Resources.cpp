@@ -28,6 +28,7 @@
 #include "IfdkObjects/Xml/InstanceDeserializer.hpp"
 #include "IfdkObjects/Xml/InstanceSerializer.hpp"
 #include "Util/convert.hpp"
+#include <sstream>
 
 using namespace debug_agent::rest;
 using namespace debug_agent::cavs;
@@ -319,12 +320,39 @@ Resource::ResponsePtr ProbeStreamResource::handlePut(const Request &request)
     return std::make_unique<Response>();
 }
 
+static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item> &items)
+{
+    int index = 0;
+    for (const auto &item : items) {
+        out << "    <ParameterBlock Name=\"" << index << "\">\n"
+            << "        <IntegerParameter Name=\"resource_id\">" << item.resourceId
+            << "</IntegerParameter>\n"
+            << "        <StringParameter Name=\"power_mode\">"
+            << Perf::powerModeHelper().toString(item.powerMode) << "</StringParameter>\n"
+            << "        <IntegerParameter Name=\"budget\">" << item.budget
+            << "</IntegerParameter>\n"
+            << "        <IntegerParameter Name=\"peak\">" << item.peak << "</IntegerParameter>\n"
+            << "        <IntegerParameter Name=\"average\">" << item.average
+            << "</IntegerParameter>\n"
+            << "    </ParameterBlock>\n";
+        ++index;
+    }
+}
+
 Resource::ResponsePtr PerfDataResource::handleGet(const Request &)
 {
     // TODO: error-handling when the service is disabled
     auto data = mSystem.getPerfData();
 
-    return std::make_unique<Response>(ContentTypeXml, data);
+    std::ostringstream result;
+    result << "<ParameterBlock Name=\"PerformanceData\">\n"
+           << "    <ParameterBlock Name=\"Cores\">\n";
+    printPerfItems(result, data.cores);
+    result << "    <ParameterBlock Name=\"Modules\">\n";
+    printPerfItems(result, data.modules);
+    result << "</ParameterBlock>";
+
+    return std::make_unique<Response>(ContentTypeXml, result.str());
 }
 }
 }

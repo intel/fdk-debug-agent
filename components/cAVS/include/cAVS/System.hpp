@@ -201,7 +201,7 @@ public:
 
     void setPerfState(Perf::State state);
 
-    std::string getPerfData();
+    PerfService::CompoundPerfData getPerfData();
 
     /** Stop internal threads and unblock consumer threads */
     void stop() noexcept { mDriver->stop(); }

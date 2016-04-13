@@ -4,6 +4,7 @@
         <characteristic Name="Firmware version">1.2.3.4</characteristic>
         <characteristic Name="Maximum number of pipelines instances">10</characteristic>
         <characteristic Name="Current total number of module entries loaded into the DSP">7</characteristic>
+        <characteristic Name="Maximum module instance count">4</characteristic>
         <characteristic Name="Number of cores">1</characteristic>
         <characteristic Name="Total number of DMA gateways">5</characteristic>
     </characteristics>

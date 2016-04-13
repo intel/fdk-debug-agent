@@ -678,6 +678,9 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
     {
         linux::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
+        commands.addGetGlobalPerfDataCommand(
+            dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+            CavsTopologySample::maxModInstCount + CavsTopologySample::dspCoreCount, {});
     }
 
     /* Now using the mocked device
@@ -694,7 +697,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
     /* Creating the http client */
     HttpClientSimulator client("localhost");
 
-    CHECK_NOTHROW(client.request(
-        "/instance/cavs.perf_measurement/0/perf", HttpClientSimulator::Verb::Get, "",
-        HttpClientSimulator::Status::Ok, "text/xml", HttpClientSimulator::StringContent("")));
+    CHECK_NOTHROW(
+        client.request("/instance/cavs.perf_measurement/0/perf", HttpClientSimulator::Verb::Get, "",
+                       HttpClientSimulator::Status::Ok, "text/xml",
+                       HttpClientSimulator::FileContent(xmlFileName("perfservice_data_empty"))));
 }
