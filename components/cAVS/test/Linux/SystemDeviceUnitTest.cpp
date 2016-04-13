@@ -53,8 +53,6 @@ struct Fixture
 /* This test case uses the mocked device with expected input, i.e. the mocking test is successful*/
 TEST_CASE_METHOD(Fixture, "SystemDevice: read command TEST")
 {
-    int nbbytes;
-
     /** Using the command below to add the test vectors to the mock driver */
     mockedDebugFsEntryHandler->addDebugfsEntryOKOpen(debugFsEntryFileName);
     mockedDebugFsEntryHandler->addDebugfsEntryOKWrite(write_buffer_01, write_buffer_01.size());
@@ -79,8 +77,6 @@ TEST_CASE_METHOD(Fixture, "SystemDevice: read command TEST")
 
 TEST_CASE_METHOD(Fixture, "SystemDevice: write command TEST")
 {
-    int nbbytes;
-
     /** Using the command below to add the test vectors to the mock driver */
     mockedDebugFsEntryHandler->addDebugfsEntryOKOpen(debugFsEntryFileName);
     mockedDebugFsEntryHandler->addDebugfsEntryOKWrite(write_buffer_01, write_buffer_01.size());

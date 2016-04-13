@@ -60,7 +60,7 @@ void Logger::setParameters(const Parameters &parameters)
     setLogStateInfo(driver::LogStateInfo(mCoreMask, parameters.mIsStarted, mLogLevel));
 }
 
-void Logger::startLogLocked(const Parameters &parameters)
+void Logger::startLogLocked(const Parameters & /*parameters*/)
 {
     assert(!isLogProductionRunning());
 
@@ -68,7 +68,7 @@ void Logger::startLogLocked(const Parameters &parameters)
     constructProducers();
 }
 
-void Logger::stopLogLocked(const Parameters &parameters)
+void Logger::stopLogLocked(const Parameters & /*parameters*/)
 {
     destroyProducers();
 }
