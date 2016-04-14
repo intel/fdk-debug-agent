@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "cAVS/DspFw/Probe.hpp"
 #include "cAVS/DspFw/Common.hpp"
 #include "cAVS/ModuleHandler.hpp"
 
@@ -47,6 +48,62 @@ enum class LogPriority : long
     Medium,
     Low,
     Verbose
+};
+
+enum class ProbeState : uint8_t
+{
+    Connect = 3,
+    Disconnect = 4
+};
+enum class ProbePurpose : uint32_t
+{
+    Inject,
+    Extract,
+    InjectReextract
+};
+
+static inline const std::string getProbeExtractControlMixer(size_t index)
+{
+    return {"Probe probe 0 Extractor" + std::to_string(index) + " params"};
+}
+
+static inline const std::string getProbeInjectControlMixer(size_t index)
+{
+    return {"Probe probe 0 Injector" + std::to_string(index) + " params"};
+}
+
+static constexpr uint32_t maxProbes = 8;
+
+class ProbeControl
+{
+public:
+    ProbeControl() = default;
+    ProbeControl(ProbeState state, ProbePurpose purpose, dsp_fw::ProbePointId point)
+        : mState(state), mPurpose(purpose), mPointId(point)
+    {
+    }
+
+    virtual void fromStream(util::ByteStreamReader &reader)
+    {
+        reader.read(mState);
+        reader.read(mPurpose);
+        mPointId.fromStream(reader);
+    }
+
+    virtual void toStream(util::ByteStreamWriter &writer) const
+    {
+        writer.write(mState);
+        writer.write(mPurpose);
+        mPointId.toStream(writer);
+    }
+    ProbeState getState() const { return mState; }
+    ProbePurpose getPurpose() const { return mPurpose; }
+    dsp_fw::ProbePointId getPointId() const { return mPointId; }
+
+private:
+    ProbeState mState;
+    ProbePurpose mPurpose;
+    dsp_fw::ProbePointId mPointId; /**< ProbeID is directly mapped on FW IPC structure. */
 };
 }
 }

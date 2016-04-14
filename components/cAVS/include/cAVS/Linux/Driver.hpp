@@ -29,6 +29,7 @@
 #include "cAVS/Linux/ModuleHandler.hpp"
 #include "cAVS/Linux/Logger.hpp"
 #include "cAVS/Linux/Perf.hpp"
+#include "cAVS/Linux/Prober.hpp"
 #include "Util/AssertAlways.hpp"
 
 namespace debug_agent
@@ -48,7 +49,8 @@ public:
            std::unique_ptr<CompressDeviceFactory> compressDeviceFactory)
         : mDevice(std::move(device)), mControlDevice(std::move(controlDevice)),
           mCompressDeviceFactory(std::move(compressDeviceFactory)),
-          mLogger(*mDevice, *mControlDevice, *mCompressDeviceFactory), mModuleHandler(*mDevice),
+          mLogger(*mDevice, *mControlDevice, *mCompressDeviceFactory),
+          mProber(*mControlDevice, *mCompressDeviceFactory), mModuleHandler(*mDevice),
           mPerf(*mDevice, mModuleHandler)
     {
         ASSERT_ALWAYS(mCompressDeviceFactory != nullptr);
@@ -60,30 +62,11 @@ public:
     cavs::Perf &getPerf() override { return mPerf; }
 
 private:
-    /* Will be replaced by the true implementation*/
-    class DummyProber : public Prober
-    {
-    public:
-        std::size_t getMaxProbeCount() const override { return 0; }
-
-        void setState(bool) override {}
-
-        bool isActive() override { return false; }
-
-        void setProbeConfig(ProbeId, const ProbeConfig &, std::size_t) override {}
-
-        ProbeConfig getProbeConfig(ProbeId) const override { return ProbeConfig(); }
-
-        std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId) override { return nullptr; }
-
-        bool enqueueInjectionBlock(ProbeId, const util::Buffer &) override { return false; }
-    };
-
-    DummyProber mProber;
     std::unique_ptr<Device> mDevice;
     std::unique_ptr<ControlDevice> mControlDevice;
     std::unique_ptr<CompressDeviceFactory> mCompressDeviceFactory;
     Logger mLogger;
+    Prober mProber;
     ModuleHandler mModuleHandler;
     Perf mPerf;
 };

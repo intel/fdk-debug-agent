@@ -24,6 +24,7 @@ set(LINUX_LIB_SRCS
     src/Linux/SystemDriverFactory.cpp
     src/Linux/Logger.cpp
     src/Linux/Perf.cpp
+    src/Linux/Prober.cpp
     src/Linux/ModuleHandler.cpp
     src/Linux/TinyCompressDevice.cpp)
 
@@ -47,6 +48,8 @@ set(LINUX_LIB_INCS
     include/cAVS/Linux/Driver.hpp
     include/cAVS/Linux/Logger.hpp
     include/cAVS/Linux/Perf.hpp
+    include/cAVS/Linux/Prober.hpp
+    include/cAVS/Linux/Probe/ExtractionInputStream.hpp
     include/cAVS/Linux/DriverTypes.hpp
     include/cAVS/Linux/ModuleHandler.hpp
     include/cAVS/Linux/AudioProcfsHelper.hpp
