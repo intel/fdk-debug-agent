@@ -27,12 +27,16 @@
 #include "Util/FileHelper.hpp"
 #include "TestCommon/HttpClientSimulator.hpp"
 #include "TestCommon/TestHelpers.hpp"
+#include "cAVS/Linux/SyncWait.hpp"
 #include "cAVS/Linux/MockedDeviceCatchHelper.hpp"
 #include "cAVS/Linux/DeviceInjectionDriverFactory.hpp"
 #include "cAVS/Linux/StubbedCompressDeviceFactory.hpp"
+#include "cAVS/Linux/MockedCompressDeviceFactory.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/MockedDeviceCommands.hpp"
 #include "cAVS/Linux/MockedControlDeviceCommands.hpp"
+#include "cAVS/Linux/Prober.hpp"
+#include "cAVS/DspFw/Probe.hpp"
 #include "catch.hpp"
 #include <chrono>
 #include <thread>
@@ -45,9 +49,9 @@ using namespace debug_agent::core;
 using namespace debug_agent::cavs;
 using namespace debug_agent::test_common;
 using namespace debug_agent::util;
-using namespace debug_agent::cavs::linux;
+using debug_agent::cavs::linux::SyncWait;
 
-using Fixture = MockedDeviceFixture;
+using Fixture = linux::MockedDeviceFixture;
 
 static const util::Buffer aecControlParameterPayload = {
     0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00,
@@ -492,7 +496,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
         * - level: verbose
         * - output: sram
         */
-        commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
+        commands.addSetLogInfoStateCommand(true, linux::driver::CoreMask(1 << 0 | 1 << 1), true,
                                            debug_agent::cavs::Logger::Level::Verbose);
 
         commands.addSetCorePowerCommand(true, 0, true);
@@ -541,9 +545,9 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice", "[l
         DBGACommandScope scope(commands);
         commands.addSetCorePowerCommand(true, 0, false);
         commands.addSetCorePowerCommand(true, 1, false);
-        commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
+        commands.addSetLogInfoStateCommand(true, linux::driver::CoreMask(1 << 0 | 1 << 1), true,
                                            debug_agent::cavs::Logger::Level::Verbose);
-        commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
+        commands.addSetLogInfoStateCommand(true, linux::driver::CoreMask(1 << 0 | 1 << 1), true,
                                            debug_agent::cavs::Logger::Level::Verbose);
         commands.addSetCorePowerCommand(true, 0, true);
         commands.addSetCorePowerCommand(true, 1, true);
@@ -684,4 +688,485 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
         client.request("/instance/cavs.perf_measurement/0/perf", HttpClientSimulator::Verb::Get, "",
                        HttpClientSimulator::Status::Ok, "text/xml",
                        HttpClientSimulator::FileContent(xmlFileName("perfservice_data"))));
+}
+
+// Probing constants
+static const std::size_t probeCount = 8;
+static const std::size_t injectionProbeIndex = 0;
+static const std::size_t extractionProbeIndex = 1;
+static_assert(extractionProbeIndex < probeCount, "wrong extraction probe index");
+static_assert(injectionProbeIndex < probeCount, "wrong injection probe index");
+
+static const dsp_fw::BitDepth bitDepth = dsp_fw::BitDepth::DEPTH_16BIT;
+static const std::size_t channelCount = 4;
+static const std::size_t sampleByteSize = (dsp_fw::BitDepth::DEPTH_16BIT / 8) * channelCount;
+static const std::size_t injectionProbeDevicePeriodSize = 31;
+
+// To test corner cases better
+static_assert(injectionProbeDevicePeriodSize % sampleByteSize != 0,
+              "Ring buffer size shall not "
+              "be aligned with sample byte size");
+
+/**
+ * Generate a buffer filled with 20 probe extraction packets. Packet size is deduced from
+ * the index [0..20[
+ */
+Buffer generateProbeExtractionContent(dsp_fw::ProbePointId probePointId)
+{
+    MemoryByteStreamWriter writer;
+    for (uint32_t i = 0; i < 20; i++) {
+        dsp_fw::Packet packet;
+        packet.format = 0;
+        packet.dspWallClockTsHw = 0;
+        packet.dspWallClockTsLw = 0;
+        packet.probePointId = probePointId;
+
+        // using index as size and byte value
+        packet.data.resize(i, i);
+        writer.write(packet);
+    }
+    return writer.getBuffer();
+}
+
+/**
+ * Split a buffer into chunks.
+ * Each chunk size is deduced from a size list, using this formula:
+ * chunk_size[i] = sizeList[ i % sizeList.size() ]
+ */
+std::vector<Buffer> splitBuffer(const util::Buffer &buffer, std::vector<std::size_t> sizeList)
+{
+    std::size_t current = 0;
+    std::size_t i = 0;
+    std::vector<Buffer> buffers;
+    while (current < buffer.size()) {
+        std::size_t chunkSize = std::min(sizeList[i % sizeList.size()], buffer.size() - current);
+        buffers.emplace_back(buffer.begin() + current, buffer.begin() + current + chunkSize);
+        current += chunkSize;
+        ++i;
+    }
+    return buffers;
+}
+
+/** Create data for probe injection */
+Buffer createInjectionData()
+{
+    static const std::size_t sampleCount = 100;
+    static std::size_t byteCount = sampleCount * sampleByteSize;
+    Buffer buffer(byteCount);
+    for (std::size_t i = 0; i < byteCount; i++) {
+        buffer[i] = i % 256;
+    }
+    return buffer;
+}
+
+/** Create injection expected ring buffer content and consumer position list from injected data.
+ *
+ * @param[in] data injected data
+ * @return the list of expected ring buffers
+ */
+std::vector<Buffer> createExpectedInjectionBuffers(const util::Buffer &data)
+{
+    /** Consumer position will be incremented by this value */
+    static const std::size_t consumerPositionDelta = injectionProbeDevicePeriodSize;
+    static_assert(consumerPositionDelta % sampleByteSize != 0,
+                  "consumerPositionDelta shall "
+                  "not be a multiple of sampleByteSize");
+
+    static const std::size_t ringBufferSampleCount =
+        injectionProbeDevicePeriodSize / sampleByteSize;
+
+    std::vector<Buffer> buffers;
+    std::size_t consumerPosition = 0;
+    MemoryInputStream is(data);
+
+    // Prefilling buffer with silence
+    util::Buffer block(ringBufferSampleCount * sampleByteSize, 0);
+    buffers.push_back(block);
+
+    // Then filling buffer from injected data
+    while (!is.isEOS()) {
+
+        // calculating next block size
+        std::size_t availableBytes = injectionProbeDevicePeriodSize;
+        std::size_t availableSamples = availableBytes / sampleByteSize;
+        std::size_t availableSampleBytes = availableSamples * sampleByteSize;
+        block.resize(availableSampleBytes);
+
+        // Reading injected data
+        auto read = is.read(block.data(), block.size());
+        if (read < block.size()) {
+
+            // Completing with silence if needed
+            std::fill(block.begin() + read, block.end(), 0);
+        }
+
+        // Saving buffer
+        buffers.push_back(block);
+    };
+
+    return buffers;
+}
+
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases", "[probe]")
+{
+    /* Setting the test vector
+     * ----------------------- */
+    // Generating probe extraction content
+    const dsp_fw::ProbePointId probePointId(1, 2, dsp_fw::ProbeType::Output, 0);
+    Buffer extractedContent = generateProbeExtractionContent(probePointId);
+
+    // Splitting extraction content in blocks : each block will be written to the mocked compress
+    // device
+    // Block sizes are {1, 10, 20, 30} (cycling)
+    auto blocks = splitBuffer(extractedContent, {1, 10, 20, 30});
+
+    // Creating the mocked compress probe extractor device,
+    // with a size that matches the max block size, in order
+    // to test the case (written data size == ring buffer size)
+
+    // Creating injection data
+    Buffer injectData = createInjectionData();
+
+    // Creating expected injection blocks
+    auto expectedInjectionBlocks = createExpectedInjectionBuffers(injectData);
+
+    std::unique_ptr<linux::MockedCompressDeviceFactory> compressDeviceFactory =
+        std::make_unique<linux::MockedCompressDeviceFactory>();
+    compressDevice->addSuccessfulCompressDeviceEntryOpen();
+    compressDevice->addSuccessfulCompressDeviceEntryStart();
+    for (auto &block : blocks) {
+        compressDevice->addSuccessfulCompressDeviceEntryWait(0, true);
+        compressDevice->addSuccessfulCompressDeviceEntryRead(block, block.size());
+    }
+    // At the end, the stream will be stopped, the compress wait shall return an error, so
+    // and exception is raised. It will be translated into an error.
+    compressDevice->addFailedCompressDeviceEntryWait(linux::CompressDevice::mInfiniteTimeout, true);
+    compressDevice->addSuccessfulCompressDeviceEntryStop();
+    // Use the mocked compress device of the fixture as the prober extraction device.
+    compressDeviceFactory->setMockedProbeExtractDevice(std::move(compressDevice));
+
+    // Injection probe device mock configuration
+    compressProbeInjectDevice->addSuccessfulCompressDeviceEntryOpen();
+    // First avail shall return the size of the compress device ring buffer (since empty)
+    std::shared_ptr<SyncWait> syncWaiter(new SyncWait);
+
+    for (auto &expectedBlock : expectedInjectionBlocks) {
+        if (&expectedBlock == &expectedInjectionBlocks.front()) {
+            compressProbeInjectDevice->addSuccessfulCompressDeviceEntryGetBufferSize(
+                expectedBlock.size());
+            compressProbeInjectDevice->addSuccessfulCompressDeviceEntryWrite(expectedBlock,
+                                                                             expectedBlock.size());
+            // The first write will start the device as per design
+            compressProbeInjectDevice->addSuccessfulCompressDeviceEntryStart();
+            // Only for the first one we shall expect a sync for the sake of test and buffer match
+            compressProbeInjectDevice->addSuccessfulCompressDeviceEntryWait(
+                linux::CompressDevice::mInfiniteTimeout, true, syncWaiter);
+            continue;
+        }
+        compressProbeInjectDevice->addSuccessfulCompressDeviceEntryAvail(expectedBlock.size());
+        compressProbeInjectDevice->addSuccessfulCompressDeviceEntryWrite(expectedBlock,
+                                                                         expectedBlock.size());
+        if (&expectedBlock != &expectedInjectionBlocks.back()) {
+            compressProbeInjectDevice->addSuccessfulCompressDeviceEntryWait(0, true);
+        }
+    }
+    // At the end, the stream will be stopped, the compress wait shall return an error, so
+    // and exception is raised. It will be translated into an error.
+    compressProbeInjectDevice->addFailedCompressDeviceEntryWait(
+        linux::CompressDevice::mInfiniteTimeout, true);
+    compressProbeInjectDevice->addSuccessfulCompressDeviceEntryStop();
+    // Use the mocked compress device of the fixture as the prober extraction device.
+    compressDeviceFactory->addMockedProbeInjectDevice(std::move(compressProbeInjectDevice));
+
+    {
+        linux::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+
+        using Type = dsp_fw::ProbeType;
+        using Purpose = Prober::ProbePurpose;
+        // setting probe configuration (probe #1 is enabled)
+        cavs::Prober::SessionProbes probes = {{true, {1, 2, Type::Input, 0}, Purpose::Inject},
+                                              {true, {1, 2, Type::Output, 0}, Purpose::Extract},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject}};
+
+        linux::MockedControlDeviceCommands controlCommands(*controlDevice);
+
+        // For step 1 : Getting probe service parameters, checking that it is stopped
+        std::size_t probeIndex = 0;
+        for (probeIndex = 0; probeIndex < probeCount; probeIndex++) {
+            linux::mixer_ctl::ProbeControl probeControl(
+                linux::Prober::toLinux({false, {0, 0, Type::Input, 0}, Purpose::Inject}));
+            controlCommands.addGetProbeControlCommand(true, probeIndex, probeControl);
+        }
+        // For step 3 : Configuring probe #1 to be enabled in extraction
+        // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
+        //     extraction
+        // enabling injection probe involves to retrieve a module instance props in order to
+        // calculate sample byte size
+        dsp_fw::PinProps pinProps;
+        pinProps.stream_type = static_cast<dsp_fw::StreamType>(0);
+        pinProps.phys_queue_id = 0;
+        pinProps.format.valid_bit_depth = 0;
+        pinProps.format.bit_depth = bitDepth;
+        pinProps.format.number_of_channels = channelCount;
+
+        dsp_fw::ModuleInstanceProps moduleInstanceProps;
+        moduleInstanceProps.id.moduleId = 0;
+        moduleInstanceProps.id.instanceId = 0;
+        moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
+
+        commands.addGetModuleInstancePropsCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, 1, 2,
+                                                  moduleInstanceProps);
+
+        linux::mixer_ctl::ProbeControl probeControl(
+            linux::Prober::toLinux(probes[extractionProbeIndex]));
+        controlCommands.addSetProbeControlCommand(true, extractionProbeIndex, probeControl);
+        probeControl =
+            linux::mixer_ctl::ProbeControl(linux::Prober::toLinux(probes[injectionProbeIndex]));
+        controlCommands.addSetProbeControlCommand(true, injectionProbeIndex, probeControl);
+
+        // For step 4 : Getting probe endpoint parameters, checking that they are deactivated except
+        // the one that has been enabled
+        probeIndex = 0;
+        for (auto probe : probes) {
+            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
+            controlCommands.addGetProbeControlCommand(true, probeIndex, probeControl);
+            ++probeIndex;
+        }
+    }
+
+    /* Now using the mocked device
+     * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    linux::DeviceInjectionDriverFactory driverFactory(std::move(device), std::move(controlDevice),
+                                                      std::move(compressDeviceFactory));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    // 1 : Getting probe service parameters, checking that it is stopped
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_stopped"))));
+
+    // 2 : Getting probe endpoint parameters, checking that they are deactivated
+    for (std::size_t probeIndex = 0; probeIndex < probeCount; ++probeIndex) {
+        CHECK_NOTHROW(client.request(
+            "/instance/cavs.probe.endpoint/" + std::to_string(probeIndex) + "/control_parameters",
+            HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok, "text/xml",
+            HttpClientSimulator::FileContent(xmlFileName("probeservice_endpoint_param_disabled"))));
+    }
+
+    // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
+    //     extraction
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe.endpoint/" + std::to_string(extractionProbeIndex) +
+            "/control_parameters",
+        HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_endpoint_param_enabled_extract")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe.endpoint/" + std::to_string(injectionProbeIndex) +
+            "/control_parameters",
+        HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_endpoint_param_enabled_inject")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one that
+    //     has been enabled
+    for (std::size_t probeIndex = 0; probeIndex < probeCount; ++probeIndex) {
+        std::string expectedFile;
+        if (probeIndex == extractionProbeIndex) {
+            expectedFile = "probeservice_endpoint_param_enabled_extract";
+        } else if (probeIndex == injectionProbeIndex) {
+            expectedFile = "probeservice_endpoint_param_enabled_inject";
+        } else {
+            expectedFile = "probeservice_endpoint_param_disabled";
+        }
+
+        CHECK_NOTHROW(client.request(
+            "/instance/cavs.probe.endpoint/" + std::to_string(probeIndex) + "/control_parameters",
+            HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok, "text/xml",
+            HttpClientSimulator::FileContent(xmlFileName(expectedFile))));
+    }
+
+    // 5 : Starting service
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_param_started")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 6 : Getting probe service parameters, checking that it is started
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_started"))));
+
+    // 7 : Extract from an enabled probe.
+    auto future = std::async(std::launch::async, [&] {
+        client.request("/instance/cavs.probe.endpoint/" + std::to_string(extractionProbeIndex) +
+                           "/streaming",
+                       HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok,
+                       "application/vnd.ifdk-file",
+                       HttpClientSimulator::FileContent(dataPath + "probe_1_extraction.bin"));
+    });
+
+    // Sending inject data to the DBGA
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe.endpoint/" + std::to_string(injectionProbeIndex) + "/streaming",
+        HttpClientSimulator::Verb::Put, injectData, HttpClientSimulator::Status::Ok, "",
+        HttpClientSimulator::StringContent("")));
+
+    // Now the stream injection has been done, trig the probe inject device to consume data.
+    syncWaiter->unblockWait();
+
+    // 8 : Stopping service
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_param_stopped")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // Checking that step 7 has not failed
+    CHECK_NOTHROW(future.get());
+
+    // 9: Getting probe service parameters, checking that it is stopped
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_stopped"))));
+}
+
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases", "[probe]")
+{
+    static const std::size_t probeCount = 8;
+    static const std::size_t extractionProbeIndex = 1;
+
+    /* Setting the test vector
+    * ----------------------- */
+    std::unique_ptr<linux::MockedCompressDeviceFactory> compressDeviceFactory =
+        std::make_unique<linux::MockedCompressDeviceFactory>();
+    compressDevice->addFailedCompressDeviceEntryOpen();
+    // Use the mocked compress device of the fixture as the prober extraction device.
+    compressDeviceFactory->setMockedProbeExtractDevice(std::move(compressDevice));
+
+    {
+        linux::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+
+        using Type = dsp_fw::ProbeType;
+        using Purpose = Prober::ProbePurpose;
+        const dsp_fw::ProbePointId probePointId(1, 2, dsp_fw::ProbeType::Output, 0);
+        cavs::Prober::SessionProbes probes = {{false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {true, probePointId, Purpose::Extract}, // Enabled
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject},
+                                              {false, {0, 0, Type::Input, 0}, Purpose::Inject}};
+
+        linux::MockedControlDeviceCommands controlCommands(*controlDevice);
+
+        // For step 1 : Getting probe service parameters, checking that it is stopped
+        std::size_t probeIndex = 0;
+        for (probeIndex = 0; probeIndex < probeCount; probeIndex++) {
+            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probes[0]));
+            controlCommands.addGetProbeControlCommand(true, probeIndex, probeControl);
+        }
+        // For step 3 : Configuring probe #1 to be enabled
+        linux::mixer_ctl::ProbeControl probeControl(
+            linux::Prober::toLinux(probes[extractionProbeIndex]));
+        controlCommands.addSetProbeControlCommand(true, extractionProbeIndex, probeControl);
+
+        // For step 4 : Getting probe endpoint parameters, checking that they are deactivated
+        //     except the one that has been enabled
+        probeIndex = 0;
+        for (auto probe : probes) {
+            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
+            controlCommands.addGetProbeControlCommand(true, probeIndex, probeControl);
+            ++probeIndex;
+        }
+    }
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    linux::DeviceInjectionDriverFactory driverFactory(std::move(device), std::move(controlDevice),
+                                                      std::move(compressDeviceFactory));
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    // 1 : Getting probe service parameters, checking that it is stopped
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_stopped"))));
+
+    // 2 : Getting probe endpoint parameters, checking that they are deactivated
+    for (std::size_t probeIndex = 0; probeIndex < probeCount; ++probeIndex) {
+        CHECK_NOTHROW(client.request(
+            "/instance/cavs.probe.endpoint/" + std::to_string(probeIndex) + "/control_parameters",
+            HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok, "text/xml",
+            HttpClientSimulator::FileContent(xmlFileName("probeservice_endpoint_param_disabled"))));
+    }
+
+    // 3 : Configuring probe #1 to be enabled
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe.endpoint/" + std::to_string(extractionProbeIndex) +
+            "/control_parameters",
+        HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_endpoint_param_enabled_extract")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one that
+    //     has been enabled
+    for (std::size_t probeIndex = 0; probeIndex < probeCount; ++probeIndex) {
+        std::string expectedFile = (probeIndex == extractionProbeIndex)
+                                       ? "probeservice_endpoint_param_enabled_extract"
+                                       : "probeservice_endpoint_param_disabled";
+
+        CHECK_NOTHROW(client.request(
+            "/instance/cavs.probe.endpoint/" + std::to_string(probeIndex) + "/control_parameters",
+            HttpClientSimulator::Verb::Get, "", HttpClientSimulator::Status::Ok, "text/xml",
+            HttpClientSimulator::FileContent(xmlFileName(expectedFile))));
+    }
+
+    // 5 : If service starting fails, it should come back to "Idle" state
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("probeservice_param_started")),
+        HttpClientSimulator::Status::InternalError, "text/plain",
+        HttpClientSimulator::StringContent(
+            "Internal error: ParameterDispatcher: cannot set "
+            "control parameter value: Unable to set probe service state: Cannot set probe service "
+            "state: Could not start extraction input stream: Error opening Extraction Device: "
+            "error during compress open: error#MockDevice "
+            "(type=cavs.probe kind=Control instance=0\nvalue:\n"
+            "<control_parameters>\n"
+            "    <ParameterBlock Name=\"State\">\n"
+            "        <BooleanParameter Name=\"Started\">1</BooleanParameter>\n"
+            "    </ParameterBlock>\n"
+            "</control_parameters>\n\n)")));
+
+    // 3 : getting state: should be Idle
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("probeservice_param_stopped"))));
 }
