@@ -42,6 +42,12 @@ public:
 
     void addSetLogLevelCommand(bool controlSuccess, mixer_ctl::LogPriority logPrio);
 
+    void addGetProbeControlCommand(bool controlSuccess, unsigned int probeIndex,
+                                   mixer_ctl::ProbeControl expectedProbeControl);
+
+    void addSetProbeControlCommand(bool controlSuccess, unsigned int probeIndex,
+                                   mixer_ctl::ProbeControl probeControl);
+
 private:
     MockedControlDeviceCommands(const MockedControlDeviceCommands &) = delete;
     MockedControlDeviceCommands &operator=(const MockedControlDeviceCommands &) = delete;

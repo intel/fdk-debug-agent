@@ -76,6 +76,15 @@ bool MockedControlDevice::consumed() const
     return mEntries.empty();
 }
 
+void MockedControlDevice::addControlReadEntry(bool isSuccessful, const std::string &controlName,
+                                              const Buffer &expectedOutput,
+                                              const Buffer &returnedOutput)
+{
+    /* No need to lock members, this method is called by the main thread of the test,
+     * when it fills the test vector. */
+    mEntries.push(ControlEntry(controlName, expectedOutput, returnedOutput, isSuccessful));
+}
+
 void MockedControlDevice::addSuccessfulControlReadEntry(const std::string &controlName,
                                                         const Buffer &expectedOutput,
                                                         const Buffer &returnedOutput)
@@ -92,6 +101,14 @@ void MockedControlDevice::addFailedControlReadEntry(const std::string &controlNa
     /* No need to lock members, this method is called by the main thread of the test,
      * when it fills the test vector. */
     mEntries.push(ControlEntry(controlName, expectedOutput, returnedOutput, false));
+}
+
+void MockedControlDevice::addControlWriteEntry(bool isSuccessful, const std::string &controlName,
+                                               const Buffer &expectedInput)
+{
+    /* No need to lock members, this method is called by the main thread of the test,
+     * when it fills the test vector. */
+    mEntries.push(ControlEntry(controlName, expectedInput, isSuccessful));
 }
 
 void MockedControlDevice::addSuccessfulControlWriteEntry(const std::string &controlName,
@@ -145,12 +162,12 @@ void MockedControlDevice::ctlRW(Command command, const std::string &controlName,
     mCurrentEntry++;
 
     if (command != entry.getCommand()) {
-        entryFailure("Command: " + CommandHelper().toString(command) + " expected : " +
-                     CommandHelper().toString(entry.getCommand()));
+        entryFailure("Command: '" + CommandHelper().toString(command) + "', expected : '" +
+                     CommandHelper().toString(entry.getCommand()) + "'");
     }
     /* Checking io control code */
     if (controlName != entry.getControlName()) {
-        entryFailure("Control: " + controlName + " expected : " + entry.getControlName());
+        entryFailure("Control: '" + controlName + "', expected : '" + entry.getControlName() + "'");
     }
 
     /* Checking input buffer content */

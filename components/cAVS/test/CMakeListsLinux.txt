@@ -24,7 +24,8 @@ set(LINUX_TEST_SRCS
     Linux/DebugFsEntryHandlerUnitTest.cpp
     Linux/SystemDeviceUnitTest.cpp
     Linux/ModuleHandlerUnitTest.cpp
-    Linux/LoggerUnitTest.cpp)
+    Linux/LoggerUnitTest.cpp
+    Linux/ProberUnitTest.cpp)
 
 set(TEST_SRCS ${TEST_SRCS} ${LINUX_TEST_SRCS})
 

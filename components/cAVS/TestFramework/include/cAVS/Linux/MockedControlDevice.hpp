@@ -72,6 +72,27 @@ public:
     /** @returns whether all test inputs have been consumed */
     bool consumed() const;
 
+    /** Add a read control entry into the test queue.
+     *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
+     *  - if an output buffer is required, the 'expectedOutput' AND 'returnedOutput' arguments
+     *    shall be specified. They must have the same size.
+     *
+     * All entries are added in an ordered way, and will be consumed in the same order
+     * when using the ioControl() method.
+     *
+     * @param[in] isSuccessful true if read is expected to be succesful, false otherwise
+     * @param[in] controlName the expected control name
+     * @param[in] expectedOutput the expected output buffer (because output buffer can be used
+     *                           also as input buffer)
+     * @param[in] returnedOutput the returned buffer
+     * @throw Device::Exception
+     *
+     * Note: Supplied buffers are cloned, ownership is not transferred.
+     */
+    void addControlReadEntry(bool isSuccessful, const std::string &controlName,
+                             const util::Buffer &expectedOutput,
+                             const util::Buffer &returnedOutput);
+
     /** Add a successful read control entry into the test queue.
      *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
      *  - if an output buffer is required, the 'expectedOutput' AND 'returnedOutput' arguments
@@ -81,7 +102,6 @@ public:
      * when using the ioControl() method.
      *
      * @param[in] controlName the expected control name
-     * @param[in] expectedInput the expected input buffer
      * @param[in] expectedOutput the expected output buffer (because output buffer can be used
      *                           also as input buffer)
      * @param[in] returnedOutput the returned buffer
@@ -120,11 +140,26 @@ public:
      * All entries are added in an ordered way, and will be consumed in the same order
      * when using the ioControl() method.
      *
+     * @param[in] isSuccessful true if write is expected to be succesful, false otherwise
      * @param[in] controlName the expected control name
      * @param[in] expectedInput the expected input buffer
-     * @param[in] expectedOutput the expected output buffer (because output buffer can be used
-     *                           also as input buffer)
-     * @param[in] returnedOutput the returned buffer
+     * @throw Device::Exception
+     *
+     * Note: Supplied buffers are cloned, ownership is not transferred.
+     */
+    void addControlWriteEntry(bool isSuccessful, const std::string &controlName,
+                              const util::Buffer &expectedInput);
+
+    /** Add a successful write control entry into the test queue.
+     *  - if an input buffer is required, the 'expectedInput' argument shall be specified.
+     *  - if an output buffer is required, the 'expectedOutput' AND 'returnedOutput' arguments
+     *    shall be specified. They must have the same size.
+     *
+     * All entries are added in an ordered way, and will be consumed in the same order
+     * when using the ioControl() method.
+     *
+     * @param[in] controlName the expected control name
+     * @param[in] expectedInput the expected input buffer
      * @throw Device::Exception
      *
      * Note: Supplied buffers are cloned, ownership is not transferred.
@@ -141,8 +176,6 @@ public:
     *
     * @param[in] controlName the expected control name
     * @param[in] expectedInput the expected input buffer
-    * @param[in] expectedOutput the expected output buffer (because output buffer can be used
-    *                           also as input buffer)
     * @throw Device::Exception
     *
     * Note: Supplied buffers are cloned, ownership is not transferred.

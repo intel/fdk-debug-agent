@@ -54,10 +54,42 @@ void MockedControlDeviceCommands::addSetLogLevelCommand(bool controlSuccess,
 {
     MemoryByteStreamWriter writer;
     writer.write(static_cast<long>(logPrio));
-    if (controlSuccess) {
-        mControlDevice.addSuccessfulControlWriteEntry(mixer_ctl::logLevelMixer, writer.getBuffer());
+    mControlDevice.addControlWriteEntry(controlSuccess, mixer_ctl::logLevelMixer,
+                                        writer.getBuffer());
+}
+
+void MockedControlDeviceCommands::addGetProbeControlCommand(
+    bool controlSuccess, unsigned int probeIndex, mixer_ctl::ProbeControl expectedProbeControl)
+{
+    MemoryByteStreamWriter writer;
+    writer.write(expectedProbeControl);
+    if (expectedProbeControl.getPurpose() == mixer_ctl::ProbePurpose::Inject ||
+        expectedProbeControl.getPurpose() == mixer_ctl::ProbePurpose::InjectReextract) {
+        mControlDevice.addControlReadEntry(controlSuccess,
+                                           mixer_ctl::getProbeInjectControlMixer(probeIndex), {},
+                                           writer.getBuffer());
     } else {
-        mControlDevice.addFailedControlWriteEntry(mixer_ctl::logLevelMixer, writer.getBuffer());
+        mControlDevice.addControlReadEntry(controlSuccess,
+                                           mixer_ctl::getProbeExtractControlMixer(probeIndex), {},
+                                           writer.getBuffer());
+    }
+}
+
+void MockedControlDeviceCommands::addSetProbeControlCommand(bool controlSuccess,
+                                                            unsigned int probeIndex,
+                                                            mixer_ctl::ProbeControl probeControl)
+{
+    MemoryByteStreamWriter writer;
+    writer.write(probeControl);
+    if (probeControl.getPurpose() == mixer_ctl::ProbePurpose::Inject ||
+        probeControl.getPurpose() == mixer_ctl::ProbePurpose::InjectReextract) {
+        mControlDevice.addControlWriteEntry(
+            controlSuccess, mixer_ctl::getProbeInjectControlMixer(probeIndex), writer.getBuffer());
+    }
+    if (probeControl.getPurpose() == mixer_ctl::ProbePurpose::Extract ||
+        probeControl.getPurpose() == mixer_ctl::ProbePurpose::InjectReextract) {
+        mControlDevice.addControlWriteEntry(
+            controlSuccess, mixer_ctl::getProbeExtractControlMixer(probeIndex), writer.getBuffer());
     }
 }
 }
