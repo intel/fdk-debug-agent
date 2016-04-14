@@ -69,7 +69,7 @@ PerfService::CompoundPerfData PerfService::getData()
 {
     CompoundPerfData result;
 
-    {
+    try {
         std::vector<dsp_fw::PerfDataItem> raw;
         mModuleHandler.getPerfItems(mMaxItemCount, raw);
 
@@ -83,7 +83,7 @@ PerfService::CompoundPerfData PerfService::getData()
                                                       rawItem.resourceId.instanceId, props);
                 budget = computeBudget(props);
                 if (budget > std::numeric_limits<decltype(Perf::Item::budget)>::max()) {
-                    // TODO: error-handling
+                    throw Exception("Budget kCPS computation overflow.");
                 }
             }
 
@@ -97,6 +97,8 @@ PerfService::CompoundPerfData PerfService::getData()
                 result.modules.push_back(item);
             }
         }
+    } catch (ModuleHandler::Exception &e) {
+        throw Exception("When getting perf items from firmware: " + std::string(e.what()));
     }
 
     return result;

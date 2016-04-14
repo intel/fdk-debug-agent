@@ -406,17 +406,29 @@ Prober::ProbeConfig System::getProbeConfiguration(ProbeId id)
 
 Perf::State System::getPerfState()
 {
-    return mPerfService.getState();
+    try {
+        return mPerfService.getState();
+    } catch (Perf::Exception &e) {
+        throw Exception("When getting perf state: " + std::string(e.what()));
+    }
 }
 
 void System::setPerfState(Perf::State state)
 {
-    mPerfService.setState(state);
+    try {
+        mPerfService.setState(state);
+    } catch (Perf::Exception &e) {
+        throw Exception("When setting perf state: " + std::string(e.what()));
+    }
 }
 
 PerfService::CompoundPerfData System::getPerfData()
 {
-    return mPerfService.getData();
+    try {
+        return mPerfService.getData();
+    } catch (Perf::Exception &e) {
+        throw Exception("When fetching perf data: " + std::string(e.what()));
+    }
 }
 }
 }

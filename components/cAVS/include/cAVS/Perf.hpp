@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Util/EnumHelper.hpp"
+#include "Util/Exception.hpp"
 
 namespace debug_agent
 {
@@ -31,6 +32,7 @@ namespace cavs
 class Perf
 {
 public:
+    using Exception = util::Exception<Perf>;
     enum class State : uint32_t
     {
         Disabled = 0,

@@ -341,7 +341,6 @@ static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item
 
 Resource::ResponsePtr PerfDataResource::handleGet(const Request &)
 {
-    // TODO: error-handling when the service is disabled
     auto data = mSystem.getPerfData();
 
     std::ostringstream result;

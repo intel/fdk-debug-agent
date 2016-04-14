@@ -24,6 +24,7 @@
 #include "cAVS/Perf.hpp"
 #include "cAVS/ModuleHandler.hpp"
 #include <vector>
+#include "Util/Exception.hpp"
 
 namespace debug_agent
 {
@@ -36,14 +37,20 @@ public:
     {
         std::vector<Perf::Item> cores, modules;
     };
+    using Exception = util::Exception<PerfService, Perf::Exception>;
+
     PerfService(Perf &perf, ModuleHandler &moduleHandler);
 
     void setMaxItemCount(uint32_t maxItemCount);
 
+    /** @throws Perf::Exception */
+    /** @{ */
     Perf::State getState();
     void setState(Perf::State);
 
+    /** @returns performance measurement data. */
     CompoundPerfData getData();
+    /** @} */
 
 private:
     Perf &mPerf;
