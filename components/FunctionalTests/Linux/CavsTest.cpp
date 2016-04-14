@@ -222,7 +222,7 @@ static void checkUrlMap(HttpClientSimulator &client,
     }
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology", "[topology]")
 {
     /* Setting the test vector
      * ----------------------- */
@@ -306,7 +306,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
     checkUrlMap(client, urlMap);
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls", "[debug]")
 {
     /* Setting the test vector
      * ----------------------- */
@@ -344,7 +344,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
 static const dsp_fw::ParameterId AecParameterId{0};
 
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control parameters "
-                          "(URL: /instance/cavs.module-aec/1/control_parameters)")
+                          "(URL: /instance/cavs.module-aec/1/control_parameters)",
+                 "[module][settings]")
 {
     /* Setting the test vector
      * ----------------------- */
@@ -392,7 +393,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
 }
 
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control parameters "
-                          "(URL: /instance/cavs.module-aec/1/control_parameters)")
+                          "(URL: /instance/cavs.module-aec/1/control_parameters)",
+                 "[module][settings]")
 {
     /* Setting the test vector
      * ----------------------- */
@@ -437,7 +439,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(module, logs)")
+TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(module, logs)",
+                 "[log][module][structure]")
 {
     /* Setting the test vector
      * ----------------------- */
@@ -468,7 +471,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
     checkUrlMap(client, systemUrlMap);
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.fwlogs/0)", "[log]")
 {
     /* Setting the test vector
     * ----------------------- */
@@ -524,7 +527,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
         HttpClientSimulator::FileContent(xmlFileName("logservice_getparam_started"))));
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice", "[log]")
 {
     /* Setting the test vector
     * ----------------------- */
@@ -578,7 +581,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice")
 * used to synchronize DebugAgent (and its HTTP server) and HTTP clients.
 * @todo: to be reworked.
 */
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client is consuming log")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client is consuming log",
+                 "[log]")
 {
     /* Setting the test vector
     * ----------------------- */
@@ -667,7 +671,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
     CHECK_NOTHROW(delayedGetLogStreamFuture.get());
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
 {
     /* Setting the test vector
      * ----------------------- */
