@@ -25,6 +25,8 @@
 #include "cAVS/Linux/TinyCompressDevice.hpp"
 #include "cAVS/Linux/AudioProcfsHelper.hpp"
 
+#include "Util/AssertAlways.hpp"
+
 namespace debug_agent
 {
 namespace cavs
@@ -46,6 +48,21 @@ public:
     {
         AudioProcfsHelper procfsHelper;
         return procfsHelper.getCompressDeviceInfoList<compress::LoggerInfo>();
+    }
+
+    const compress::ExtractionProbeInfo getExtractionProbeDeviceInfo() const override
+    {
+        AudioProcfsHelper procfsHelper;
+        auto extractProbesInfo =
+            procfsHelper.getCompressDeviceInfoList<compress::ExtractionProbeInfo>();
+        ASSERT_ALWAYS(extractProbesInfo.size() == 1);
+        return extractProbesInfo[0];
+    }
+
+    const compress::InjectionProbesInfo getInjectionProbeDeviceInfoList() const override
+    {
+        AudioProcfsHelper procfsHelper;
+        return procfsHelper.getCompressDeviceInfoList<compress::InjectionProbeInfo>();
     }
 };
 }

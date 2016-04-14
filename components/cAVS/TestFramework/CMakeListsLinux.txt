@@ -42,7 +42,8 @@ set(LINUX_LIB_INCS
     include/cAVS/Linux/MockedCompressDevice.hpp
     include/cAVS/Linux/MockedCompressDeviceFactory.hpp
     include/cAVS/Linux/MockedControlDevice.hpp
-    include/cAVS/Linux/MockedControlDeviceCommands.hpp)
+    include/cAVS/Linux/MockedControlDeviceCommands.hpp
+    include/cAVS/Linux/SyncWait.hpp)
 
 set(LIB_INCS ${LIB_INCS} ${LINUX_LIB_INCS})
 

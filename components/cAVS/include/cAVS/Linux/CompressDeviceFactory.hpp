@@ -53,6 +53,16 @@ public:
      */
     virtual const compress::LoggersInfo getLoggerDeviceInfoList() const = 0;
 
+    /** get a list of injection probe device information found on the platform.
+     * @return injection probe info list.
+     */
+    virtual const compress::InjectionProbesInfo getInjectionProbeDeviceInfoList() const = 0;
+
+    /** get the extraction probe device information found on the platform.
+     * @return extraction probe info.
+     */
+    virtual const compress::ExtractionProbeInfo getExtractionProbeDeviceInfo() const = 0;
+
     /** @todo provides methods to get probe devices. */
 
 private:

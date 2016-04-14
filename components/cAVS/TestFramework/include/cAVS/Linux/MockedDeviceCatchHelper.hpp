@@ -52,6 +52,12 @@ struct MockedDeviceFixture
                                                    INFO("There are leftover test inputs");
                                                    CHECK(false);
                                                });
+    std::unique_ptr<MockedCompressDevice> compressProbeInjectDevice =
+        std::make_unique<MockedCompressDevice>(compress::DeviceInfo{0, 6},
+                                               [] {
+                                                   INFO("There are leftover test inputs");
+                                                   CHECK(false);
+                                               });
 };
 }
 }

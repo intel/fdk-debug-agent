@@ -49,6 +49,18 @@ public:
     std::unique_ptr<CompressDevice> newCompressDevice(
         const compress::DeviceInfo &info) const override
     {
+        // Do we request an extraction device?
+        if (mMockedProbeExtractDevice != nullptr &&
+            info.name() == mMockedProbeExtractDevice->getInfo().name()) {
+            return std::move(mMockedProbeExtractDevice);
+        }
+        // Do we request an injection device?
+        for (auto &injectionDevice : mMockedProbeInjectDevices) {
+            if (info.name() == injectionDevice->getInfo().name()) {
+                return std::move(injectionDevice);
+            }
+        }
+        // so we must be requesting a logger device
         std::unique_ptr<CompressDevice> compressDevice(std::move(mMockedDevices.front()));
         if (compressDevice == nullptr) {
             throw CompressDeviceFactory::Exception("");
@@ -75,8 +87,37 @@ public:
         mMockedDevices.push_back(std::move(mockedDevice));
     }
 
+    void setMockedProbeExtractDevice(std::unique_ptr<MockedCompressDevice> mockedDevice)
+    {
+        mMockedProbeExtractDevice = std::move(mockedDevice);
+    }
+    void addMockedProbeInjectDevice(std::unique_ptr<MockedCompressDevice> mockedDevice)
+    {
+        mMockedProbeInjectDevices.push_back(std::move(mockedDevice));
+    }
+
+    const compress::InjectionProbesInfo getInjectionProbeDeviceInfoList() const override
+    {
+        std::size_t probeIndex = 0;
+        compress::InjectionProbesInfo injectionProbesInfo{};
+        for (const auto &mockedProbeInjectDevice : mMockedProbeInjectDevices) {
+            compress::DeviceInfo info = mockedProbeInjectDevice->getInfo();
+            injectionProbesInfo.push_back({info.cardId(), info.deviceId(), probeIndex++});
+        }
+        return injectionProbesInfo;
+    }
+
+    const compress::ExtractionProbeInfo getExtractionProbeDeviceInfo() const override
+    {
+        assert(mMockedProbeExtractDevice != nullptr);
+        return {mMockedProbeExtractDevice->getInfo().cardId(),
+                mMockedProbeExtractDevice->getInfo().deviceId()};
+    }
+
 private:
     mutable std::vector<std::unique_ptr<MockedCompressDevice>> mMockedDevices;
+    mutable std::unique_ptr<MockedCompressDevice> mMockedProbeExtractDevice;
+    mutable std::vector<std::unique_ptr<MockedCompressDevice>> mMockedProbeInjectDevices;
 };
 }
 }

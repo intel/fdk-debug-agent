@@ -36,12 +36,12 @@ namespace cavs
 namespace linux
 {
 
-unsigned int TinyCompressDevice::translateRole(Role role)
+unsigned int TinyCompressDevice::translateRole(compress::Role role)
 {
     switch (role) {
-    case Role::Capture:
+    case compress::Role::Capture:
         return COMPRESS_OUT;
-    case Role::Playback:
+    case compress::Role::Playback:
         return COMPRESS_IN;
     }
     throw Exception("Don't know how to convert role " +
@@ -49,8 +49,9 @@ unsigned int TinyCompressDevice::translateRole(Role role)
                     " into tinycompress role type.");
 }
 
-void TinyCompressDevice::open(Mode mode, Role role, compress::Config &config)
+void TinyCompressDevice::open(Mode mode, compress::Role role, compress::Config &config)
 {
+    CompressDevice::setConfig(config);
     mDevice = compress_open(cardId(), deviceId(), translateRole(role), config.getConfig());
     if (!mDevice || !is_compress_ready(mDevice)) {
         throw Exception("Unable to open Compress device " + getName() + ", error=" +
@@ -64,11 +65,21 @@ void TinyCompressDevice::close() noexcept
     compress_close(mDevice);
 }
 
-bool TinyCompressDevice::wait(unsigned int maxWaitMs)
+bool TinyCompressDevice::isRunning() const noexcept
+{
+    return mDevice != nullptr && is_compress_running(mDevice);
+}
+
+bool TinyCompressDevice::isReady() const noexcept
+{
+    return mDevice != nullptr && is_compress_ready(mDevice);
+}
+
+bool TinyCompressDevice::wait(int timeoutMs)
 {
     int retryMax = 10;
     while (retryMax-- > 0) {
-        if (compress_wait(mDevice, maxWaitMs) == 0) {
+        if (compress_wait(mDevice, timeoutMs) == 0) {
             return true;
         }
         if (errno == ETIME) {
@@ -104,14 +115,22 @@ void TinyCompressDevice::stop()
 
 size_t TinyCompressDevice::write(const util::Buffer &inputBuffer)
 {
-    return inputBuffer.size();
+    int ret = compress_write(mDevice, (const void *)inputBuffer.data(), inputBuffer.size());
+    if (ret < 0) {
+        throw CompressDevice::Exception("Error writing from device: " + getName() + ", error:" +
+                                        std::string(compress_get_error(mDevice)));
+    }
+    if ((ret >= 0) && (ret < static_cast<int>(inputBuffer.size()))) {
+        std::cout << "overrun detected: wrote less than expected: " << ret << "bytes." << std::endl;
+    }
+    return ret;
 }
 
 size_t TinyCompressDevice::read(util::Buffer &outputBuffer)
 {
     int ret = compress_read(mDevice, (void *)outputBuffer.data(), outputBuffer.size());
     if (ret < 0) {
-        throw CompressDevice::Exception("Error reading log from device: " + getName() + ", error:" +
+        throw CompressDevice::Exception("Error reading from device: " + getName() + ", error:" +
                                         std::string(compress_get_error(mDevice)));
     }
     if ((ret >= 0) && (ret < static_cast<int>(outputBuffer.size()))) {
@@ -119,6 +138,20 @@ size_t TinyCompressDevice::read(util::Buffer &outputBuffer)
         outputBuffer.resize(ret);
     }
     return ret;
+}
+
+std::size_t TinyCompressDevice::getAvailable()
+{
+    assert(mDevice != nullptr);
+    unsigned int available;
+    struct timespec tstamp;
+    int ret = compress_get_hpointer(mDevice, &available, &tstamp);
+    if (ret < 0) {
+        throw CompressDevice::Exception("Error getting available samples from device: " +
+                                        getName() + ", error:" +
+                                        std::string(compress_get_error(mDevice)));
+    }
+    return available;
 }
 
 void TinyCompressDevice::recover()

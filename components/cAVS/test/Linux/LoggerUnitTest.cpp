@@ -137,23 +137,21 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
     MockedDeviceCommands commands(*device);
 
     commands.addSetCorePowerCommand(true, 0, false);
+    commands.addSetCorePowerCommand(true, 1, false);
     /** Adding a failed set log parameters command due to control error. */
-    commands.addSetLogInfoStateCommand(false, driver::CoreMask(1 << 0), true,
+    commands.addSetLogInfoStateCommand(false, driver::CoreMask(1 << 0 | 1 << 1), true,
                                        debug_agent::cavs::Logger::Level::Verbose);
 
     /** Adding a successful set log parameters command */
-    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0), true,
+    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
                                        debug_agent::cavs::Logger::Level::Verbose);
-    commands.addSetCorePowerCommand(true, 0, true);
 
-    MockedCompressDeviceFactory compressDeviceFactory;
-    compressDevice->addSuccessfulCompressDeviceEntryOpen();
-    compressDevice->addSuccessfulCompressDeviceEntryStart();
-    compressDevice->addSuccessfulCompressDeviceEntryStop();
-    compressDeviceFactory.addMockedDevice(std::move(compressDevice));
+    commands.addSetCorePowerCommand(true, 0, true);
+    commands.addSetCorePowerCommand(true, 1, true);
 
     /* Now using the mocked device
      * --------------------------- */
+    StubbedCompressDeviceFactory compressDeviceFactory;
 
     //* Creating the windows logger, that will use the mocked device*/
     linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
@@ -234,46 +232,6 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Start Fa
     /* Checking that set log parameters command produces OS error if cannot start log device*/
     CHECK_THROWS_AS_MSG(logger.setParameters(inputParameters), linux::Logger::Exception,
                         "Error starting Log Device: error during compress start: error#MockDevice");
-}
-
-TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stop Fail Mock")
-{
-    /* Setting the test vector
-     * ----------------------- */
-    MockedDeviceCommands commands(*device);
-
-    commands.addSetCorePowerCommand(true, 0, false);
-    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0), true,
-                                       debug_agent::cavs::Logger::Level::Verbose);
-    commands.addSetCorePowerCommand(true, 0, true);
-    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0), false,
-                                       debug_agent::cavs::Logger::Level::Verbose);
-
-    MockedCompressDeviceFactory compressDeviceFactory;
-    compressDevice->addSuccessfulCompressDeviceEntryOpen();
-    compressDevice->addSuccessfulCompressDeviceEntryStart();
-    compressDevice->addFailedCompressDeviceEntryStop();
-    compressDeviceFactory.addMockedDevice(std::move(compressDevice));
-
-    /* Now using the mocked device
-     * --------------------------- */
-
-    /* Creating the windows logger, that will use the mocked device*/
-    linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
-
-    /* Defining parameters that will be used for set then get*/
-    linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
-                                              debug_agent::cavs::Logger::Output::Sram);
-
-    /* Checking successful set log parameters command */
-    CHECK_NOTHROW(logger.setParameters(inputParameters));
-
-    /* Now stopping the log, */
-    inputParameters = linux::Logger::Parameters(false, debug_agent::cavs::Logger::Level::Verbose,
-                                                debug_agent::cavs::Logger::Output::Sram);
-
-    /* Checking that set log parameters command produces OS error if cannot close*/
-    CHECK_NOTHROW(logger.setParameters(inputParameters));
 }
 
 TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Empty Logger device list")

@@ -33,36 +33,6 @@ namespace cavs
 namespace linux
 {
 
-void MockedCompressDevice::addSuccessfulCompressDeviceEntryOpen()
-{
-    mEntries.push(std::make_unique<CompressOperationEntry>(true, "open"));
-}
-
-void MockedCompressDevice::addFailedCompressDeviceEntryOpen()
-{
-    mEntries.push(std::make_unique<CompressOperationEntry>(false, "open"));
-}
-
-void MockedCompressDevice::addSuccessfulCompressDeviceEntryStart()
-{
-    mEntries.push(std::make_unique<CompressOperationEntry>(true, "start"));
-}
-
-void MockedCompressDevice::addFailedCompressDeviceEntryStart()
-{
-    mEntries.push(std::make_unique<CompressOperationEntry>(false, "start"));
-}
-
-void MockedCompressDevice::addSuccessfulCompressDeviceEntryStop()
-{
-    mEntries.push(std::make_unique<CompressOperationEntry>(true, "stop"));
-}
-
-void MockedCompressDevice::addFailedCompressDeviceEntryStop()
-{
-    mEntries.push(std::make_unique<CompressOperationEntry>(false, "stop"));
-}
-
 void MockedCompressDevice::basicMockedOperation(const std::string &func)
 {
     checkNonFailure();
@@ -83,8 +53,8 @@ void MockedCompressDevice::basicMockedOperation(const std::string &func)
         failure("Wrong CompressDevice method, invalid command.");
     }
     if (func != entryPtr->getOpName()) {
-        failure("Wrong CompressDevice method, expecting " + func + "got " + entryPtr->getOpName() +
-                " command.");
+        failure("Wrong CompressDevice method, expecting " + func + ", got " +
+                entryPtr->getOpName() + " command.");
     }
     mEntries.pop();
 
@@ -94,26 +64,63 @@ void MockedCompressDevice::basicMockedOperation(const std::string &func)
 }
 
 /** below are pure virtual function of Device interface */
-void MockedCompressDevice::open(Mode /*mode*/, Role /*role*/, compress::Config & /*config*/)
+void MockedCompressDevice::open(Mode /*mode*/, compress::Role /*role*/,
+                                compress::Config & /*config*/)
 {
+    {
+        std::lock_guard<std::mutex> locker(mMutex);
+        mIsReady = true;
+    }
     basicMockedOperation(__func__);
 }
 
 void MockedCompressDevice::close() noexcept
 {
+    std::lock_guard<std::mutex> locker(mMutex);
+    mIsRunning = false;
+    mIsReady = false;
 }
 
-bool MockedCompressDevice::wait(unsigned int maxWaitMs)
+bool MockedCompressDevice::wait(int /*waitMs*/)
 {
-    usleep(maxWaitMs);
-    return true;
+    checkNonFailure();
+    /* Several threads can call this method, so protecting against it.
+     *
+     * Note: although this mutex protects against concurrent calls,
+     *       no concurrent calls should happen because this leads to randomize the call order
+     *       which won't match probably the test vector.
+     */
+    std::unique_lock<std::mutex> locker(mMutex);
+
+    /* Checking that the test vector is not already consumed */
+    if (consumed()) {
+        failure("MockedCompressDevice vector already consumed.");
+    }
+    CompressOperationEntryPtr entryPtr = std::move(mEntries.front());
+    CompressWaitEntry *entry = dynamic_cast<CompressWaitEntry *>(entryPtr.get());
+    if (entry == nullptr) {
+        failure("Wrong CompressDevice method, expecting wait, got " + entryPtr->getOpName() +
+                " command.");
+    }
+    mEntries.pop();
+    if (entry->getSyncWait() != nullptr) {
+        // External sync
+        entry->getSyncWait()->waitUntilUnblock();
+    } else if (entry->getTimeToWaitInMs() < 0) {
+        // Blocked until compress device is stopped (internal sync)
+        mCondVar.wait(locker);
+    }
+    if (entry->isFailing()) {
+        throw Exception("error during compress wait: error#MockDevice");
+    }
+    return entry->getReply();
 }
 
 void MockedCompressDevice::start()
 {
     {
         std::unique_lock<std::mutex> locker(mMutex);
-        mIsStarted = true;
+        mIsRunning = true;
     }
     basicMockedOperation(__func__);
 }
@@ -122,19 +129,142 @@ void MockedCompressDevice::stop()
 {
     {
         std::unique_lock<std::mutex> locker(mMutex);
-        mIsStarted = false;
+        if (mIsRunning) {
+            mCondVar.notify_one();
+        }
     }
     basicMockedOperation(__func__);
 }
 
+bool MockedCompressDevice::isRunning() const noexcept
+{
+    std::unique_lock<std::mutex> locker(mMutex);
+    return mIsRunning;
+}
+
+bool MockedCompressDevice::isReady() const noexcept
+{
+    std::unique_lock<std::mutex> locker(mMutex);
+    return mIsReady;
+}
+
 size_t MockedCompressDevice::write(const util::Buffer &inputBuffer)
 {
-    return inputBuffer.size();
+    checkNonFailure();
+    /* Several threads can call this method, so protecting against it.
+     *
+     * Note: although this mutex protects against concurrent calls,
+     *       no concurrent calls should happen because this leads to randomize the call order
+     *       which won't match probably the test vector.
+     */
+    std::lock_guard<std::mutex> locker(mMutex);
+
+    /* Checking that the test vector is not already consumed */
+    if (consumed()) {
+        failure("MockedCompressDevice vector already consumed.");
+    }
+    CompressOperationEntryPtr entryPtr(std::move(mEntries.front()));
+    const CompressWriteEntry *entry = dynamic_cast<CompressWriteEntry *>(entryPtr.get());
+    if (entry == nullptr) {
+        failure("Wrong CompressDevice method, expecting write, got " + entryPtr->getOpName() +
+                " command.");
+    }
+    mEntries.pop();
+
+    if (entry->isFailing()) {
+        throw Exception("error during compress read error#MockDevice");
+    }
+    /* Checking input buffer content */
+    compareBuffers("Input buffer", inputBuffer, entry->getExpectedInputBuffer());
+    return entry->getReturnedSize();
 }
 
 size_t MockedCompressDevice::read(util::Buffer &outputBuffer)
 {
-    return outputBuffer.size();
+    checkNonFailure();
+    /* Several threads can call this method, so protecting against it.
+     *
+     * Note: although this mutex protects against concurrent calls,
+     *       no concurrent calls should happen because this leads to randomize the call order
+     *       which won't match probably the test vector.
+     */
+    std::lock_guard<std::mutex> locker(mMutex);
+
+    /* Checking that the test vector is not already consumed */
+    if (consumed()) {
+        failure("MockedCompressDevice vector already consumed.");
+    }
+    CompressOperationEntryPtr entryPtr(std::move(mEntries.front()));
+    const CompressReadEntry *entry = dynamic_cast<CompressReadEntry *>(entryPtr.get());
+    if (entry == nullptr) {
+        failure("Wrong CompressDevice method, expecting read, got " + entryPtr->getOpName() +
+                " command.");
+    }
+    mEntries.pop();
+
+    if (entry->isFailing()) {
+        throw Exception("error during compress read error#MockDevice");
+    }
+    outputBuffer = entry->getReturnedOutputBuffer();
+    return entry->getReturnedSize();
+}
+
+std::size_t MockedCompressDevice::getAvailable()
+{
+    checkNonFailure();
+    /* Several threads can call this method, so protecting against it.
+     *
+     * Note: although this mutex protects against concurrent calls,
+     *       no concurrent calls should happen because this leads to randomize the call order
+     *       which won't match probably the test vector.
+     */
+    std::lock_guard<std::mutex> locker(mMutex);
+
+    /* Checking that the test vector is not already consumed */
+    if (consumed()) {
+        failure("MockedCompressDevice vector already consumed.");
+    }
+    CompressOperationEntryPtr entryPtr(std::move(mEntries.front()));
+    const CompressAvailEntry *entry = dynamic_cast<CompressAvailEntry *>(entryPtr.get());
+    if (entry == nullptr) {
+        failure("Wrong method, expecting another command.");
+    }
+    mEntries.pop();
+
+    if (entry->isFailing()) {
+        throw Exception("error during compress getAvailable error#MockDevice");
+    }
+    return entry->getReturnedSize();
+}
+
+std::size_t MockedCompressDevice::getBufferSize() const
+{
+    MockedCompressDevice *me = const_cast<MockedCompressDevice *>(this);
+    me->checkNonFailure();
+    /* Several threads can call this method, so protecting against it.
+     *
+     * Note: although this mutex protects against concurrent calls,
+     *       no concurrent calls should happen because this leads to randomize the call order
+     *       which won't match probably the test vector.
+     */
+    std::lock_guard<std::mutex> locker(mMutex);
+
+    /* Checking that the test vector is not already consumed */
+    if (consumed()) {
+        me->failure("MockedCompressDevice vector already consumed.");
+    }
+    CompressOperationEntryPtr entryPtr(std::move(me->mEntries.front()));
+    const CompressGetBufferSizeEntry *entry =
+        dynamic_cast<CompressGetBufferSizeEntry *>(entryPtr.get());
+    if (entry == nullptr) {
+        me->failure("Wrong method, expecting another command.");
+    }
+    me->mEntries.pop();
+
+    if (entry->isFailing()) {
+        throw Exception("error during compress getBufferSize error#MockDevice");
+    }
+    return entry->getReturnedSize();
 }
 
 MockedCompressDevice::~MockedCompressDevice()
@@ -147,6 +277,22 @@ MockedCompressDevice::~MockedCompressDevice()
 bool MockedCompressDevice::consumed() const
 {
     return mEntries.empty();
+}
+
+void MockedCompressDevice::compareBuffers(const std::string &bufferName,
+                                          const Buffer &candidateBuffer,
+                                          const Buffer &expectedBuffer)
+{
+    /* Checking size */
+    if (candidateBuffer.size() != expectedBuffer.size()) {
+        entryFailure(bufferName + " candidate with size " + std::to_string(candidateBuffer.size()) +
+                     " differs from required size: " + std::to_string(expectedBuffer.size()));
+    }
+
+    /* Checking buffer content */
+    if (candidateBuffer != expectedBuffer) {
+        entryFailure(bufferName + " content is not the expected one.");
+    }
 }
 }
 }

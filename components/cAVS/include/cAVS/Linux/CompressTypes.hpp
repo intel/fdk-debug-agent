@@ -48,6 +48,12 @@ struct Exception : std::runtime_error
     using std::runtime_error::runtime_error;
 };
 
+enum class Role
+{
+    Playback,
+    Capture
+};
+
 struct Config
 {
     Config(size_t fragmentSize, size_t nbFragments)
@@ -61,7 +67,7 @@ struct Config
         mConfig.fragments = nbFragments;
         mConfig.codec = &mCodec;
     }
-
+    std::size_t getBufferSize() const { return mConfig.fragment_size * mConfig.fragments; }
     struct compr_config *getConfig() { return &mConfig; }
 
     struct compr_config mConfig;
@@ -105,6 +111,33 @@ private:
     unsigned int mCoreId;
 };
 
+class InjectionProbeInfo : public DeviceInfo
+{
+public:
+    InjectionProbeInfo() = default;
+    InjectionProbeInfo(unsigned int cardId, unsigned int deviceId, std::size_t probeIndex = 0)
+        : DeviceInfo(cardId, deviceId), mProbeIndex(probeIndex)
+    {
+    }
+    void setProbeIndex(unsigned int probeIndex) { mProbeIndex = probeIndex; }
+    std::size_t probeIndex() const { return mProbeIndex; }
+
+private:
+    /**
+     * Each compress device for probe injection is dedicated to a probe index or id.
+     */
+    std::size_t mProbeIndex;
+};
+
+template <Role role>
+class ProbeInfo : public DeviceInfo
+{
+public:
+    ProbeInfo(unsigned int cardId, unsigned int deviceId) : DeviceInfo(cardId, deviceId) {}
+};
+
+using ExtractionProbeInfo = ProbeInfo<Role::Capture>;
+using InjectionProbesInfo = std::vector<InjectionProbeInfo>;
 using DevicesInfo = std::vector<DeviceInfo>;
 using LoggersInfo = std::vector<LoggerInfo>;
 }

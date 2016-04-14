@@ -38,17 +38,20 @@ class TinyCompressDevice : public CompressDevice
 public:
     TinyCompressDevice(const compress::DeviceInfo &info) : CompressDevice(info) {}
     /** below are pure virtual function of Device interface */
-    void open(Mode mode, Role role, compress::Config &config) override;
+    void open(Mode mode, compress::Role role, compress::Config &config) override;
     void close() noexcept override;
-    bool wait(unsigned int maxWaitMs) override;
+    bool wait(int timeoutMs) override;
     void start() override;
     void stop() override;
     size_t write(const util::Buffer &inputBuffer) override;
     size_t read(util::Buffer &outputBuffer) override;
+    bool isRunning() const noexcept override;
+    bool isReady() const noexcept override;
+    std::size_t getAvailable() override;
 
 private:
     void recover();
-    static unsigned int translateRole(Role role);
+    static unsigned int translateRole(compress::Role role);
 
     struct compress *mDevice;
 };

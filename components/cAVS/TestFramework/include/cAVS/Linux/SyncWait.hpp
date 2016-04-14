@@ -19,10 +19,12 @@
 *
 ********************************************************************************
 */
+
 #pragma once
 
-#include "cAVS/Linux/CompressDeviceFactory.hpp"
-#include "cAVS/Linux/StubbedCompressDevice.hpp"
+#include "Util/AssertAlways.hpp"
+#include <condition_variable>
+#include <mutex>
 
 namespace debug_agent
 {
@@ -31,34 +33,31 @@ namespace cavs
 namespace linux
 {
 
-/* This factory creates real compress device */
-class StubbedCompressDeviceFactory : public CompressDeviceFactory
+class SyncWait
 {
 public:
-    std::unique_ptr<CompressDevice> newCompressDevice(
-        const compress::DeviceInfo &info) const override
+    /** Block until someone calls the unblockWait() method */
+    void waitUntilUnblock()
     {
-        return std::make_unique<StubbedCompressDevice>(info);
-    }
-
-    const compress::LoggersInfo getLoggerDeviceInfoList() const override
-    {
-        const unsigned int nbCoreSimulated = 2;
-        compress::LoggersInfo loggersInfo;
-        for (unsigned int i = 0; i < nbCoreSimulated; i++) {
-            loggersInfo.push_back(compress::LoggerInfo{0, i, i});
+        std::unique_lock<std::mutex> locker(mWaitVarMutex);
+        if (!mWaiting) {
+            mWaiting = true;
+            mWaitVar.wait(locker);
         }
-        return loggersInfo;
+        ASSERT_ALWAYS(!mWaiting);
     }
 
-    const compress::InjectionProbesInfo getInjectionProbeDeviceInfoList() const override
+    void unblockWait()
     {
-        return {{0, 4}};
+        std::unique_lock<std::mutex> locker(mWaitVarMutex);
+        mWaiting = false;
+        mWaitVar.notify_one();
     }
-    const compress::ExtractionProbeInfo getExtractionProbeDeviceInfo() const override
-    {
-        return {0, 5};
-    }
+
+private:
+    std::condition_variable mWaitVar;
+    std::mutex mWaitVarMutex;
+    bool mWaiting = false;
 };
 }
 }

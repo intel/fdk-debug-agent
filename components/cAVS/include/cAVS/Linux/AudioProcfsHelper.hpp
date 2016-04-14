@@ -48,7 +48,28 @@ static const std::string infoProcEntry{"info"};
 
 /** Id Info field for a logger compress device shall be as "id: Core x Trace Buffer". */
 static const std::string infoIdCore{"Core"};
-static const std::string infoIdLogger{"Trace Buffer"};
+
+template <typename info>
+struct DeviceInfoTrait;
+
+template <>
+struct DeviceInfoTrait<compress::ExtractionProbeInfo>
+{
+    static const std::string mTag;
+};
+template <>
+struct DeviceInfoTrait<compress::InjectionProbeInfo>
+{
+    static const std::string mTag;
+};
+template <>
+struct DeviceInfoTrait<compress::LoggerInfo>
+{
+    static const std::string mTag;
+};
+const std::string DeviceInfoTrait<compress::LoggerInfo>::mTag{"Trace Buffer"};
+const std::string DeviceInfoTrait<compress::ExtractionProbeInfo>::mTag{"Probe Capture"};
+const std::string DeviceInfoTrait<compress::InjectionProbeInfo>::mTag{"Probe Playback"};
 
 struct Exception : std::runtime_error
 {
@@ -75,7 +96,14 @@ public:
         return {};
     }
 
-    /** Check and extract the logger compress device information from the info procfs entry of a
+    /**
+     * Fallback for any compress device that does not provides any extra useful information
+     * from procfs.
+     * @return always true
+     */
+    static bool getCompressDeviceInfo(const std::string &, compress::DeviceInfo &) { return true; }
+
+    /** Extract the logger compress device information from the info procfs entry of a
      * device.
      * @param[in] infoId literal value of the info id field of the procfs entry
      * @param[out] info retrieved from the info if field for a logger device.
@@ -83,11 +111,7 @@ public:
      */
     static bool getCompressDeviceInfo(const std::string &infoId, compress::LoggerInfo &info)
     {
-        /* is it a logger device? */
-        std::string::size_type rolePos = infoId.find(infoIdLogger);
-        if (rolePos == std::string::npos) {
-            return false;
-        }
+        std::string::size_type rolePos{infoId.find(infoId)};
         /* it is a logger device, which core for? */
         std::string::size_type corePos = infoId.find(infoIdCore);
         if (corePos == std::string::npos) {
@@ -125,8 +149,8 @@ public:
 
             /* lets retrieve information from procfs for this device. */
             std::string infoId{getDeviceIdInfo(deviceName)};
-
-            if (getCompressDeviceInfo(infoId, info)) {
+            auto &infoTag = DeviceInfoTrait<CompressInfo>::mTag;
+            if (infoId.find(infoTag) != std::string::npos && getCompressDeviceInfo(infoId, info)) {
                 compressInfoList.push_back(info);
             }
         }

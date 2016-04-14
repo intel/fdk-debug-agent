@@ -38,41 +38,63 @@ namespace linux
 class StubbedCompressDevice : public CompressDevice
 {
 public:
-    StubbedCompressDevice(const compress::DeviceInfo &info)
-        : CompressDevice(info), mIsStarted(false)
-    {
-    }
+    StubbedCompressDevice(const compress::DeviceInfo &info) : CompressDevice(info) {}
 
     /** below are pure virtual function of Device interface */
-    void open(Mode, Role, compress::Config &) override {}
-
-    void close() noexcept override {}
-
-    bool wait(unsigned int maxWaitMs) override
+    void open(Mode, compress::Role, compress::Config &) override
     {
-        usleep(maxWaitMs);
+        std::unique_lock<std::mutex> locker(mMutex);
+        mIsReady = true;
+    }
+
+    void close() noexcept override
+    {
+        std::unique_lock<std::mutex> locker(mMutex);
+        mIsRunning = false;
+        mIsReady = false;
+    }
+
+    bool wait(int timeWaitMs) override
+    {
+        std::unique_lock<std::mutex> locker(mMutex);
+        if (not mIsRunning || not mIsReady) {
+            return false;
+        }
+        if (timeWaitMs < 0) {
+            mCondVar.wait(locker);
+            return false;
+        }
         return true;
     }
 
     void start() override
     {
         std::unique_lock<std::mutex> locker(mMutex);
-        mIsStarted = true;
+        mIsRunning = true;
     }
 
     void stop() override
     {
         std::unique_lock<std::mutex> locker(mMutex);
-        mIsStarted = false;
+        if (mIsRunning) {
+            mCondVar.notify_one();
+        }
     }
+
+    bool isRunning() const noexcept override { return mIsRunning; }
+    bool isReady() const noexcept override { return mIsReady; }
 
     size_t write(const util::Buffer &inputBuffer) override { return inputBuffer.size(); }
 
     size_t read(util::Buffer &outputBuffer) override { return outputBuffer.size(); }
 
+    std::size_t getAvailable() override { return 0; }
+
 private:
-    bool mIsStarted;
+    bool mIsRunning = false;
+    bool mIsReady;
     std::mutex mMutex;
+    std::condition_variable mCondVar;
 };
 }
 }

@@ -42,12 +42,6 @@ enum class Mode
     NonBlocking
 };
 
-enum class Role
-{
-    Playback,
-    Capture
-};
-
 /** This class abstracts a compress device
  */
 class CompressDevice
@@ -59,7 +53,9 @@ public:
     };
 
     /** @throw Device::Exception if the device initialization has failed */
-    CompressDevice(const compress::DeviceInfo &info) : mInfo(info) {}
+    CompressDevice(const compress::DeviceInfo &info) : mInfo(info), mConfig(compress::Config(0, 0))
+    {
+    }
     virtual ~CompressDevice() = default;
 
     /** below are pure virtual function of compress Device interface */
@@ -69,7 +65,15 @@ public:
      * @param[in] role of the device (capture or playback)
      * @param[in] configuration of the device to use (buffering mode, codec specifications, ...)
      */
-    virtual void open(Mode mode, Role role, compress::Config &config) = 0;
+    virtual void open(Mode mode, compress::Role role, compress::Config &config) = 0;
+
+    /** @return true if the compress device is running, false otherwise.
+     */
+    virtual bool isRunning() const noexcept = 0;
+
+    /** @return true if the compress device is ready to use, false otherwise.
+     */
+    virtual bool isReady() const noexcept = 0;
 
     /** Close a compress device
      */
@@ -81,7 +85,7 @@ public:
      * @param[in] maxWaitMs max time to wait for available data before returning
      * @return true if data available, false if exiting with timeout reason
      */
-    virtual bool wait(unsigned int maxWaitMs) = 0;
+    virtual bool wait(int timeoutMs = mMaxPollWaitMs) = 0;
 
     /** start the compress device
      */
@@ -103,15 +107,29 @@ public:
      */
     virtual size_t read(util::Buffer &outputBuffer) = 0;
 
+    /** Get available samples:
+     * @return for write operation: the empty samples ready to be written by application
+     *         for read operation: the samples ready to be read by application
+     */
+    virtual std::size_t getAvailable() = 0;
+
     const std::string getName() const { return mInfo.name(); }
     unsigned int cardId() const { return mInfo.cardId(); }
     unsigned int deviceId() const { return mInfo.deviceId(); }
 
+    void setConfig(const compress::Config &config) { mConfig = config; }
+    virtual std::size_t getBufferSize() const { return mConfig.getBufferSize(); }
+
+    static const int mInfiniteTimeout = -1;
+
 private:
+    static const int mMaxPollWaitMs = 500;
+
     CompressDevice(const CompressDevice &) = delete;
     CompressDevice &operator=(const CompressDevice &) = delete;
 
     compress::DeviceInfo mInfo;
+    compress::Config mConfig;
 };
 }
 }

@@ -206,7 +206,7 @@ void Logger::LogProducer::startLogDevice()
     preventCoreFromSleeping();
     compress::Config config(fragmentSize, nbFragments);
     try {
-        mLogDevice->open(Mode::NonBlocking, Role::Capture, config);
+        mLogDevice->open(Mode::NonBlocking, compress::Role::Capture, config);
     } catch (const CompressDevice::Exception &e) {
         allowCoreToSleep();
         throw Exception("Error opening Log Device: " + std::string(e.what()));
