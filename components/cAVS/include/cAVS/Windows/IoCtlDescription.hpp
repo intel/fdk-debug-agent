@@ -34,7 +34,7 @@ template <driver::IoCtlType type, driver::IOCTL_FEATURE feature, ULONG id, class
 struct IoCtlDescription
 {
     static constexpr driver::IoCtlType type{type};
-    static constexpr ULONG feature{feature};
+    static constexpr driver::IOCTL_FEATURE feature{feature};
     static constexpr ULONG id{id};
     using Data = T;
 };
