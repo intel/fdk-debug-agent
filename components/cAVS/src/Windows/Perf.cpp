@@ -32,10 +32,10 @@ namespace windows
 using ioctl_helpers::ioctl;
 using driver::IoCtlType;
 using driver::IOCTL_FEATURE;
-using GetState =
-    IoCtlDescription<IoCtlType::TinyGet, static_cast<IOCTL_FEATURE>(0x270000), 0, uint32_t>;
-using SetState =
-    IoCtlDescription<IoCtlType::TinySet, static_cast<IOCTL_FEATURE>(0x270000), 0, uint32_t>;
+using GetState = IoCtlDescription<IoCtlType::TinyGet, driver::FEATURE_GLOBAL_PERF_DATA,
+                                  driver::GlobalPerfDataFeatureParameter::FEATURE_STATE, uint32_t>;
+using SetState = IoCtlDescription<IoCtlType::TinySet, driver::FEATURE_GLOBAL_PERF_DATA,
+                                  driver::GlobalPerfDataFeatureParameter::FEATURE_STATE, uint32_t>;
 
 void Perf::setState(Perf::State state)
 {

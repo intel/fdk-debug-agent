@@ -405,6 +405,18 @@ struct RingBuffersDescription
         writer.write(injectionRBDescriptions);
     }
 };
+
+/** Adding missing "global perf data" value in IOCTL_FEATURE enum
+* @todo: remove it when availabe */
+static constexpr IOCTL_FEATURE FEATURE_GLOBAL_PERF_DATA = static_cast<IOCTL_FEATURE>(0x270000);
+
+/** Missing perf global data enum that holds parameters
+ * @todo Import it when available
+ */
+enum GlobalPerfDataFeatureParameter : ULONG
+{
+    FEATURE_STATE = 0
+};
 }
 }
 }
