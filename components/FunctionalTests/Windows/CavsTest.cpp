@@ -1247,3 +1247,158 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
         HttpClientSimulator::Status::Ok, "text/xml",
         HttpClientSimulator::FileContent(xmlFileName("probeservice_param_stopped"))));
 }
+
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
+{
+    /* Setting the test vector
+    * ----------------------- */
+    {
+        windows::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+
+        // 1 Starting
+        commands.addSetPerfState(true, STATUS_SUCCESS, Perf::State::Started);
+
+        // 2 Check that "get state" returns "started"
+        commands.addGetPerfState(true, STATUS_SUCCESS, Perf::State::Started);
+
+        // 3 Paused
+        commands.addSetPerfState(true, STATUS_SUCCESS, Perf::State::Paused);
+
+        // 4 Stop
+        commands.addSetPerfState(true, STATUS_SUCCESS, Perf::State::Stopped);
+
+        // 5 get perf data
+
+        // perf items ioctl
+        static const std::vector<dsp_fw::PerfDataItem> returnedItems = {
+            dsp_fw::PerfDataItem(0, 0, false, false, 1337, 42),   // Core 0
+            dsp_fw::PerfDataItem(1, 0, true, false, 123456, 789), // Module 1, instance 0
+            dsp_fw::PerfDataItem(0, 1, true, true, 987654, 321),  // Core 1
+            dsp_fw::PerfDataItem(12, 0, false, false, 1111, 222), // Module 12, instance 0
+            dsp_fw::PerfDataItem(12, 1, true, false, 3333, 444)   // Module 12, instance 1
+        };
+        commands.addGetPerfItems(
+            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+            CavsTopologySample::maxModInstCount + CavsTopologySample::dspCoreCount, returnedItems);
+
+        // 1st module instance props ioctl
+        {
+            dsp_fw::ModuleInstanceProps moduleInstanceProps{};
+            moduleInstanceProps.id = {1, 0};
+            moduleInstanceProps.ibs_bytes = 1;
+            moduleInstanceProps.cpc = 2000;
+
+            dsp_fw::PinProps pinProps{};
+            pinProps.format.sampling_frequency = dsp_fw::SamplingFrequency::FS_8000HZ;
+            pinProps.format.number_of_channels = 4;
+            pinProps.format.valid_bit_depth = 8;
+
+            moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
+            commands.addGetModuleInstancePropsCommand(
+                true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                moduleInstanceProps.id.moduleId, moduleInstanceProps.id.instanceId,
+                moduleInstanceProps);
+        }
+
+        // 2nd module instance props ioctl
+        {
+            dsp_fw::ModuleInstanceProps moduleInstanceProps{};
+            moduleInstanceProps.id = {12, 0};
+            moduleInstanceProps.ibs_bytes = 9;
+            moduleInstanceProps.cpc = 10000;
+
+            dsp_fw::PinProps pinProps{};
+            pinProps.format.sampling_frequency = dsp_fw::SamplingFrequency::FS_11025HZ;
+            pinProps.format.number_of_channels = 12;
+            pinProps.format.valid_bit_depth = 16;
+
+            moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
+            commands.addGetModuleInstancePropsCommand(
+                true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                moduleInstanceProps.id.moduleId, moduleInstanceProps.id.instanceId,
+                moduleInstanceProps);
+        }
+
+        // 3rd module instance props ioctl
+        {
+            dsp_fw::ModuleInstanceProps moduleInstanceProps{};
+            moduleInstanceProps.id = {12, 1};
+            moduleInstanceProps.ibs_bytes = 17;
+            moduleInstanceProps.cpc = 18000;
+
+            dsp_fw::PinProps pinProps{};
+            pinProps.format.sampling_frequency = dsp_fw::SamplingFrequency::FS_12000HZ;
+            pinProps.format.number_of_channels = 20;
+            pinProps.format.valid_bit_depth = 24;
+
+            moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
+            commands.addGetModuleInstancePropsCommand(
+                true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                moduleInstanceProps.id.moduleId, moduleInstanceProps.id.instanceId,
+                moduleInstanceProps);
+        }
+
+        // 6 Disabled
+        commands.addSetPerfState(true, STATUS_SUCCESS, Perf::State::Disabled);
+
+        // 7 Check that "get state" returns "disabled"
+        commands.addGetPerfState(true, STATUS_SUCCESS, Perf::State::Disabled);
+    }
+
+    /* Now using the mocked device
+    * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    windows::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
+        windows::Prober::SystemEventHandlesFactory::createHandles());
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    // 1 Starting
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("perfservice_started")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 2 Check that "get state" returns "started"
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("perfservice_started"))));
+
+    // 3 Paused
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("perfservice_paused")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 4 Stopped
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("perfservice_stopped")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 5 get perf data
+    CHECK_NOTHROW(
+        client.request("/instance/cavs.perf_measurement/0/perf", HttpClientSimulator::Verb::Get, "",
+                       HttpClientSimulator::Status::Ok, "text/xml",
+                       HttpClientSimulator::FileContent(xmlFileName("perfservice_data"))));
+
+    // 6 get Stopped
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("perfservice_disabled")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+
+    // 7 Check that "get state" returns "disabled"
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("perfservice_disabled"))));
+}
