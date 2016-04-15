@@ -30,6 +30,8 @@
 #include "cAVS/DspFw/Gateway.hpp"
 #include "cAVS/DspFw/Scheduler.hpp"
 #include "cAVS/DspFw/Infrastructure.hpp"
+#include "cAVS/DspFw/GlobalPerfData.hpp"
+#include "cAVS/Perf.hpp"
 #include "cAVS/Windows/DriverTypes.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "cAVS/Windows/IoCtlDescription.hpp"
@@ -234,6 +236,50 @@ public:
     */
     void addGetInjectionRingBufferLinearPosition(bool ioctlSuccess, NTSTATUS returnedStatus,
                                                  uint32_t probeIndex, uint64_t position);
+
+    /** Add a get perf items command
+     *
+     * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+     * @param[in] returnedDriverStatus the returned driver status
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] itemCount the max item count
+     * @param[in] perfItems the perf items reurned by the ioctl
+     *
+     * @note: perfItems is unused if
+     * - ioctlSuccess is false or
+     * - NT_SUCCESS(returnedStatus) returns false
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     */
+    void addGetPerfItems(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+                         dsp_fw::IxcStatus returnedFirmwareStatus, uint32_t itemCount,
+                         const std::vector<dsp_fw::PerfDataItem> &perfItems);
+
+    /** Add a get perf state command
+    *
+    * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+    * @param[in] returnedStatus the returned driver status
+    * @param[in] returnedState the perf state returned by the ioctl
+    *
+    * Note: returnedState is unused if
+    * - ioctlSuccess is false or
+    * - NT_SUCCESS(returnedStatus) returns false
+    *
+    * @throw Device::Exception
+    */
+    void addGetPerfState(bool ioctlSuccess, NTSTATUS returnedStatus, Perf::State returnedState);
+
+    /** Add a set perf state command.
+    *
+    * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+    * @param[in] returnedStatus the returned driver status
+    * @param[in] expectedState the expected perf state passed as input buffer to the ioctl
+    *
+    * Note: the expectedState parameter is alwayse used,
+    * even if NT_SUCCESS(returnedStatus) returns false or if ioctlSuccess is false
+    *
+    * @throw Device::Exception
+    */
+    void addSetPerfState(bool ioctlSuccess, NTSTATUS returnedStatus, Perf::State expectedState);
 
     /** Add a get pipeline list command.
      *

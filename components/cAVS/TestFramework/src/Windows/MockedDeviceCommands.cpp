@@ -344,6 +344,38 @@ void MockedDeviceCommands::addGetInjectionRingBufferLinearPosition(bool ioctlSuc
                       position, ioctlSuccess, returnedStatus);
 }
 
+void MockedDeviceCommands::addGetPerfItems(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+                                           dsp_fw::IxcStatus returnedFirmwareStatus,
+                                           uint32_t itemCount,
+                                           const std::vector<dsp_fw::PerfDataItem> &perfItems)
+{
+    std::size_t parameterSize = dsp_fw::GlobalPerfData::getAllocationSize(itemCount);
+
+    dsp_fw::GlobalPerfData perfData;
+    perfData.items = perfItems;
+
+    addGetModuleParameterCommand(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
+                                 dsp_fw::toParameterId(dsp_fw::BaseFwParams::GLOBAL_PERF_DATA),
+                                 parameterSize, perfData, ioctlSuccess, returnedDriverStatus,
+                                 returnedFirmwareStatus);
+}
+
+void MockedDeviceCommands::addGetPerfState(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                           Perf::State returnedState)
+{
+    addTinyGetCommand<driver::FEATURE_GLOBAL_PERF_DATA,
+                      driver::GlobalPerfDataFeatureParameter::FEATURE_STATE, Perf::State>(
+        returnedState, ioctlSuccess, returnedStatus);
+}
+
+void MockedDeviceCommands::addSetPerfState(bool ioctlSuccess, NTSTATUS returnedStatus,
+                                           Perf::State expectedState)
+{
+    addTinySetCommand<driver::FEATURE_GLOBAL_PERF_DATA,
+                      driver::GlobalPerfDataFeatureParameter::FEATURE_STATE, Perf::State>(
+        expectedState, ioctlSuccess, returnedStatus);
+}
+
 void MockedDeviceCommands::addGetPipelineListCommand(
     bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
     uint32_t maxPplCount, const std::vector<dsp_fw::PipeLineIdType> &pipelineIds)
