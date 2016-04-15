@@ -23,6 +23,7 @@ set(WINDOWS_LIB_SRCS
     src/Windows/SystemDriverFactory.cpp
     src/Windows/Logger.cpp
     src/Windows/Prober.cpp
+    src/Windows/Perf.cpp
     src/Windows/SystemDevice.cpp
     src/Windows/LastError.cpp
     src/Windows/DeviceIdFinder.cpp

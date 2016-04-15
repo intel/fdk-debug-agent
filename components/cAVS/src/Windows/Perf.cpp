@@ -19,8 +19,9 @@
 *
 ********************************************************************************
 */
-#include "cAVS/Perf.hpp"
-#include "cAVS/Windows/Device.hpp"
+#include "cAVS/Windows/Perf.hpp"
+#include "cAVS/Windows/IoCtlDescription.hpp"
+#include "cAVS/Windows/IoctlHelpers.hpp"
 
 namespace debug_agent
 {
@@ -28,17 +29,26 @@ namespace cavs
 {
 namespace windows
 {
-class Perf : public cavs::Perf
+using ioctl_helpers::ioctl;
+using driver::IoCtlType;
+using driver::IOCTL_FEATURE;
+using GetState =
+    IoCtlDescription<IoCtlType::TinyGet, static_cast<IOCTL_FEATURE>(0x270000), 0, uint32_t>;
+using SetState =
+    IoCtlDescription<IoCtlType::TinySet, static_cast<IOCTL_FEATURE>(0x270000), 0, uint32_t>;
+
+void Perf::setState(Perf::State state)
 {
-public:
-    Perf(Device &device) : mDevice(device) {}
+    auto hack = static_cast<SetState::Data>(state);
+    ioctl<SetState, Perf::Exception>(mDevice, hack);
+}
 
-    State getState() override;
-    void setState(State state) override;
-
-private:
-    Device &mDevice;
-};
+Perf::State Perf::getState()
+{
+    GetState::Data state{0xffffffff};
+    ioctl<GetState, Perf::Exception>(mDevice, state);
+    return static_cast<Perf::State>(state);
+}
 }
 }
 }
