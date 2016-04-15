@@ -1,0 +1,3 @@
+<control_parameters>
+    <StringParameter Name="State">Stopped</StringParameter>
+</control_parameters>

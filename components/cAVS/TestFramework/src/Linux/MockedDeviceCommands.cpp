@@ -309,6 +309,26 @@ void MockedDeviceCommands::addSetLogInfoStateCommand(bool controlSuccess, driver
                                   messageWriter.getBuffer().size());
     }
 }
+
+void MockedDeviceCommands::addSetPerfState(Perf::State state)
+{
+    util::MemoryByteStreamWriter toDriver;
+    toDriver.write(static_cast<uint32_t>(state));
+    addSetModuleParameterCommand(
+        /*true, STATUS_SUCCESS, */ dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
+        dsp_fw::ParameterId{dsp_fw::BaseFwParams::PERF_MEASUREMENTS_STATE}, toDriver.getBuffer());
+}
+
+void MockedDeviceCommands::addGetPerfState(Perf::State state)
+{
+    util::MemoryByteStreamWriter toDriver;
+    toDriver.write(static_cast<uint32_t>(state));
+    addGetModuleParameterCommand(
+        /*true, STATUS_SUCCESS, */ dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+        dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
+        dsp_fw::ParameterId{dsp_fw::BaseFwParams::PERF_MEASUREMENTS_STATE}, toDriver.getBuffer());
+}
 }
 }
 }

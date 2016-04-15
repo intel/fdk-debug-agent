@@ -33,6 +33,7 @@
 #include "cAVS/DspFw/GlobalPerfData.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/DriverTypes.hpp"
+#include "cAVS/Perf.hpp"
 #include "Util/Buffer.hpp"
 
 namespace debug_agent
@@ -261,6 +262,9 @@ public:
      */
     void addSetLogInfoStateCommand(bool controlSuccess, driver::CoreMask coreMask, bool enabled,
                                    Logger::Level level);
+
+    void addGetPerfState(Perf::State state);
+    void addSetPerfState(Perf::State state);
 
 private:
     MockedDeviceCommands(const MockedDeviceCommands &) = delete;
