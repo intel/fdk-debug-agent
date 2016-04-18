@@ -560,7 +560,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
         */
         windows::driver::IoctlFwLogsState setLogParams = {
             windows::driver::IOCTL_LOG_STATE::STARTED, windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
-            windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
+            windows::driver::FW_LOG_OUTPUT::OUTPUT_WPP};
         commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
 
         /* 3: Get log parameter , will return
@@ -574,7 +574,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
         * destructor to stop log */
         setLogParams = {windows::driver::IOCTL_LOG_STATE::STOPPED,
                         windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
-                        windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
+                        windows::driver::FW_LOG_OUTPUT::OUTPUT_WPP};
         commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
     }
 
@@ -627,13 +627,13 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: debug agent shutdown while a client 
         /* 1: start log command */
         windows::driver::IoctlFwLogsState setLogParams = {
             windows::driver::IOCTL_LOG_STATE::STARTED, windows::driver::FW_LOG_LEVEL::LOG_VERBOSE,
-            windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
+            windows::driver::FW_LOG_OUTPUT::OUTPUT_WPP};
         commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
 
         /* 2: Stop log command, will be called by the debug agent termination */
         setLogParams.started = windows::driver::IOCTL_LOG_STATE::STOPPED;
         setLogParams.level = windows::driver::FW_LOG_LEVEL::LOG_VERBOSE;
-        setLogParams.output = windows::driver::FW_LOG_OUTPUT::OUTPUT_SRAM;
+        setLogParams.output = windows::driver::FW_LOG_OUTPUT::OUTPUT_WPP;
         commands.addSetLogParametersCommand(true, STATUS_SUCCESS, setLogParams);
     }
 

@@ -104,8 +104,11 @@ driver::FW_LOG_OUTPUT Logger::translateToDriver(Output output)
     switch (output) {
     case Output::Pti:
         return driver::FW_LOG_OUTPUT::OUTPUT_PTI;
+
+    /** @todo: remove this workaround : now translating Output::Sram --> FW_LOG_OUTPUT::OUTPUT_WPP
+     */
     case Output::Sram:
-        return driver::FW_LOG_OUTPUT::OUTPUT_SRAM;
+        return driver::FW_LOG_OUTPUT::OUTPUT_WPP;
     }
     throw Exception("Wrong log output value: " + std::to_string(static_cast<uint32_t>(output)));
 }
@@ -145,7 +148,9 @@ Logger::Output Logger::translateFromDriver(driver::FW_LOG_OUTPUT output)
     switch (output) {
     case driver::FW_LOG_OUTPUT::OUTPUT_PTI:
         return Output::Pti;
-    case driver::FW_LOG_OUTPUT::OUTPUT_SRAM:
+    /** @todo: remove this workaround : now translating FW_LOG_OUTPUT::OUTPUT_WPP --> Output::Sram
+     */
+    case driver::FW_LOG_OUTPUT::OUTPUT_WPP:
         return Output::Sram;
     }
     throw Exception("Wrong driver log output value: " +

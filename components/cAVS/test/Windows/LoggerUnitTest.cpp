@@ -45,7 +45,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
 
     driver::IoctlFwLogsState expectedFwLogState = {driver::IOCTL_LOG_STATE::STARTED,
                                                    driver::FW_LOG_LEVEL::LOG_HIGH,
-                                                   driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
+                                                   driver::FW_LOG_OUTPUT::OUTPUT_WPP};
 
     /** Adding a failed set log parameters command due to OS error */
     commands.addSetLogParametersCommand(false, STATUS_SUCCESS, expectedFwLogState);
@@ -70,7 +70,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
     /** Adding a successful set log parameters command, this is called by the logger destructor
      * to stop log */
     expectedFwLogState = {driver::IOCTL_LOG_STATE::STOPPED, driver::FW_LOG_LEVEL::LOG_VERBOSE,
-                          driver::FW_LOG_OUTPUT::OUTPUT_SRAM};
+                          driver::FW_LOG_OUTPUT::OUTPUT_WPP};
     commands.addSetLogParametersCommand(true, STATUS_SUCCESS, expectedFwLogState);
 
     /* Now using the mocked device
