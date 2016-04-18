@@ -31,7 +31,8 @@
 #include "Util/BlockingQueue.hpp"
 #include <list>
 #include <mutex>
-#include <thread>
+#include <future>
+#include <condition_variable>
 
 namespace debug_agent
 {
@@ -98,18 +99,6 @@ private:
         static const unsigned int maxCommandQueueSize = 10;
         static const unsigned int maxPollWaitMs = 500;
 
-        /** Command to interact with LogProducer thread.
-         * Only stop supported until now, may be used to drain, flush...
-         */
-        enum class Command : uint32_t
-        {
-            Exit
-        };
-        using CommandPtr = std::unique_ptr<Command>;
-        static std::size_t commandSize(const Command &) { return sizeof(uint32_t); }
-        using BlockingCommandQueue = util::BlockingQueue<Command>;
-        BlockingCommandQueue mCommandQueue;
-
         LogProducer(const LogProducer &) = delete;
         LogProducer &operator=(const LogProducer &) = delete;
 
@@ -125,12 +114,6 @@ private:
         /** Method called by the log producer thread */
         void produceEntries();
 
-        /** Method to communicate with the log producer thread */
-        void stopProducerThread() { sendCommand(std::make_unique<Command>(Command::Exit)); }
-        void sendCommand(CommandPtr cmd);
-
-        std::thread mProducerThread;
-
         /** All log producers have a reference on the logger blocking queue that allows to
          * concatenate the production of log of all the DSP cores.
          */
@@ -144,8 +127,12 @@ private:
 
         /** Logging is produced by a compress device. */
         std::unique_ptr<CompressDevice> mLogDevice;
-
+        std::condition_variable mCondVar;
+        std::mutex mLogDeviceMutex;
+        bool mProductionThreadBlocked = false;
         Device &mDevice;
+
+        std::future<void> mLogResult;
     };
     /** A non empty producer list garantees that we could open and start the log device.
      */
