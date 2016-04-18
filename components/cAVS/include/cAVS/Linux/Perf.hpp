@@ -22,6 +22,8 @@
 #pragma once
 
 #include "cAVS/Perf.hpp"
+#include "cAVS/Linux/Device.hpp"
+#include "cAVS/Linux/ModuleHandler.hpp"
 
 namespace debug_agent
 {
@@ -32,8 +34,17 @@ namespace linux
 class Perf : public cavs::Perf
 {
 public:
-    State getState() override { return State::Disabled; }
-    void setState(State) override {}
+    Perf(Device &device, ModuleHandler &moduleHandler)
+        : mDevice(device), mModuleHandler(moduleHandler)
+    {
+    }
+
+    State getState() override;
+    void setState(State) override;
+
+private:
+    Device &mDevice;
+    ModuleHandler &mModuleHandler;
 };
 }
 }

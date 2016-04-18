@@ -48,7 +48,8 @@ public:
            std::unique_ptr<CompressDeviceFactory> compressDeviceFactory)
         : mDevice(std::move(device)), mControlDevice(std::move(controlDevice)),
           mCompressDeviceFactory(std::move(compressDeviceFactory)),
-          mLogger(*mDevice, *mControlDevice, *mCompressDeviceFactory), mModuleHandler(*mDevice)
+          mLogger(*mDevice, *mControlDevice, *mCompressDeviceFactory), mModuleHandler(*mDevice),
+          mPerf(*mDevice, mModuleHandler)
     {
         ASSERT_ALWAYS(mCompressDeviceFactory != nullptr);
     }
