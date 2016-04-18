@@ -19,6 +19,7 @@
 *
 ********************************************************************************
 */
+#pragma once
 
 #include "Core/ServiceParameterApplier.hpp"
 #include "cAVS/System.hpp"

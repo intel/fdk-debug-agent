@@ -19,6 +19,8 @@
 *
 ********************************************************************************
 */
+#pragma once
+
 #include "cAVS/Perf.hpp"
 
 namespace debug_agent
