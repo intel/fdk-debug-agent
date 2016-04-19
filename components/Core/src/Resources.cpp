@@ -324,17 +324,18 @@ static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item
 {
     int index = 0;
     for (const auto &item : items) {
-        out << "    <ParameterBlock Name=\"" << index << "\">\n"
-            << "        <IntegerParameter Name=\"resource_id\">" << item.resourceId
+        out << "        <ParameterBlock Name=\"" << index << "\">\n"
+            << "            <IntegerParameter Name=\"resource_id\">" << item.resourceId
             << "</IntegerParameter>\n"
-            << "        <StringParameter Name=\"power_mode\">"
+            << "            <StringParameter Name=\"power_mode\">"
             << Perf::powerModeHelper().toString(item.powerMode) << "</StringParameter>\n"
-            << "        <IntegerParameter Name=\"budget\">" << item.budget
+            << "            <IntegerParameter Name=\"budget\">" << item.budget
             << "</IntegerParameter>\n"
-            << "        <IntegerParameter Name=\"peak\">" << item.peak << "</IntegerParameter>\n"
-            << "        <IntegerParameter Name=\"average\">" << item.average
+            << "            <IntegerParameter Name=\"peak\">" << item.peak
             << "</IntegerParameter>\n"
-            << "    </ParameterBlock>\n";
+            << "            <IntegerParameter Name=\"average\">" << item.average
+            << "</IntegerParameter>\n"
+            << "        </ParameterBlock>\n";
         ++index;
     }
 }
@@ -347,9 +348,11 @@ Resource::ResponsePtr PerfDataResource::handleGet(const Request &)
     result << "<ParameterBlock Name=\"PerformanceData\">\n"
            << "    <ParameterBlock Name=\"Cores\">\n";
     printPerfItems(result, data.cores);
-    result << "    <ParameterBlock Name=\"Modules\">\n";
+    result << "    </ParameterBlock>\n"
+           << "    <ParameterBlock Name=\"Modules\">\n";
     printPerfItems(result, data.modules);
-    result << "</ParameterBlock>";
+    result << "    </ParameterBlock>\n"
+           << "</ParameterBlock>";
 
     return std::make_unique<Response>(ContentTypeXml, result.str());
 }
