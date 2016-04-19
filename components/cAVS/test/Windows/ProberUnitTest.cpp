@@ -80,7 +80,7 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getState", "[prober]")
         {true, {0, 0, dsp_fw::ProbeType::Input, 0}, WinProber::ProbePurpose::Extract}};
 
     /* Currently not used */
-    std::map<ProbeId, std::size_t> injectionSampleByteSizes;
+    WinProber::InjectionSampleByteSizes injectionSampleByteSizes;
 
     driver::ProbePointConfiguration sampleDriverConfig =
         ProberBackend::toWindows(sampleCavsConfig, probeEvents);
@@ -139,7 +139,7 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
         {true, {0, 0, dsp_fw::ProbeType::Input, 0}, WinProber::ProbePurpose::Extract},
         {true, {0, 0, dsp_fw::ProbeType::Input, 0}, WinProber::ProbePurpose::Extract}};
 
-    std::map<ProbeId, std::size_t> injectionSampleByteSizes;
+    WinProber::InjectionSampleByteSizes injectionSampleByteSizes;
 
     driver::ProbePointConfiguration sampleDriverConfig =
         ProberBackend::toWindows(sampleCavsConfig, probeEvents);

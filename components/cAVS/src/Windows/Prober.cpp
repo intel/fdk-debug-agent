@@ -76,20 +76,11 @@ std::size_t Prober::getMaxProbeCount() const
     return mBackend.getMaxProbeCount();
 }
 
-void Prober::setProbeConfig(ProbeId probeId, const Prober::ProbeConfig &config,
-                            std::size_t injectionSampleByteSize)
+void Prober::setProbesConfig(const SessionProbes &probes,
+                             const InjectionSampleByteSizes &injectionSampleByteSizes)
 {
     try {
-        mBackend.setProbeConfig(probeId, config, injectionSampleByteSize);
-    } catch (ProberBackend::Exception &e) {
-        throw Exception(std::string(e.what()));
-    }
-}
-
-Prober::ProbeConfig Prober::getProbeConfig(ProbeId probeId) const
-{
-    try {
-        return mBackend.getProbeConfig(probeId);
+        mBackend.setSessionProbes(probes, injectionSampleByteSizes);
     } catch (ProberBackend::Exception &e) {
         throw Exception(std::string(e.what()));
     }

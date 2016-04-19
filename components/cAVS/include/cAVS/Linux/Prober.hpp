@@ -53,10 +53,15 @@ public:
 
     bool isActive() override;
 
-    void setProbeConfig(ProbeId id, const ProbeConfig &config,
-                        std::size_t injectionSampleByteSize) override;
+    void setProbesConfig(const SessionProbes &probes,
+                         const InjectionSampleByteSizes &injectionSampleByteSizes) override;
 
-    ProbeConfig getProbeConfig(ProbeId id) const override;
+    /** Get probes for the current/future session.
+     * It retrieves information from the Driver/FW and not from cached configuration.
+     *
+     * @throw Prober::Exception
+     */
+    SessionProbes getProbesConfig() const;
 
     std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override;
 
@@ -94,7 +99,7 @@ private:
 
     /** Collection of probe configurations with their state, ID, purpose*/
     SessionProbes mCachedProbeConfiguration;
-    std::map<ProbeId, std::size_t> mCachedInjectionSampleByteSizes;
+    InjectionSampleByteSizes mCachedInjectionSampleByteSizes;
 
     /** Extraction of multiplexed probe points is performed by a compress device. */
     std::unique_ptr<ProbeExtractor> mProbeExtractor;

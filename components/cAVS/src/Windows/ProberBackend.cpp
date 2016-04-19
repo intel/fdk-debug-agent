@@ -174,27 +174,9 @@ void ProberBackend::checkProbeId(ProbeId probeId) const
     }
 }
 
-void ProberBackend::setProbeConfig(ProbeId probeId, const Prober::ProbeConfig &config,
-                                   std::size_t injectionSampleByteSize)
-{
-    checkProbeId(probeId);
-
-    std::lock_guard<std::mutex> guard(mProbeConfigMutex);
-    // Caching info needed to start probing
-    mCachedProbeConfiguration[probeId.getValue()] = config;
-    mCachedInjectionSampleByteSizes[probeId] = injectionSampleByteSize;
-}
-
-Prober::ProbeConfig ProberBackend::getProbeConfig(ProbeId probeId) const
-{
-    checkProbeId(probeId);
-
-    std::lock_guard<std::mutex> guard(mProbeConfigMutex);
-    return mCachedProbeConfiguration[probeId.getValue()];
-}
-
-void ProberBackend::setSessionProbes(const cavs::Prober::SessionProbes &probes,
-                                     std::map<ProbeId, std::size_t> injectionSampleByteSizes)
+void ProberBackend::setSessionProbes(
+    const cavs::Prober::SessionProbes &probes,
+    const cavs::Prober::InjectionSampleByteSizes &injectionSampleByteSizes)
 {
     std::lock_guard<std::mutex> guard(mProbeConfigMutex);
 

@@ -58,10 +58,8 @@ public:
 
     bool isActive() override;
 
-    void setProbeConfig(ProbeId id, const ProbeConfig &config,
-                        std::size_t injectionSampleByteSize) override;
-
-    ProbeConfig getProbeConfig(ProbeId id) const override;
+    void setProbesConfig(const SessionProbes &probes,
+                         const InjectionSampleByteSizes &injectionSampleByteSizes) override;
 
     std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override;
 

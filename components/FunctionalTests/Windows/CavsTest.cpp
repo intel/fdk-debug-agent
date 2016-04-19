@@ -827,9 +827,16 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
         // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
         //     extraction
-        // enabling injection probe involves to retrieve a module instance props in order to
-        // calculate sample byte size. So initializing bit depth and channel count of the module
-        // instance pin used for injection
+        // -> involves no ioctl
+
+        // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one
+        //     that has been enabled
+        // -> involves no ioctl
+
+        // 5 : Starting service
+        // starting the service with enabled injection probe involves to retrieve a module instance
+        // props in order tocalculate sample byte size. So initializing bit depth and channel count
+        // of the module instance pin used for injection
         dsp_fw::PinProps pinProps{};
         pinProps.format.bit_depth = bitDepth;
         pinProps.format.number_of_channels = channelCount;
@@ -839,12 +846,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
         commands.addGetModuleInstancePropsCommand(
             true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, 1, 2, moduleInstanceProps);
-
-        // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one
-        //     that has been enabled
-        // -> involves no ioctl
-
-        // 5 : Starting service
 
         // getting current state : idle
         commands.addGetProbeStateCommand(true, STATUS_SUCCESS,

@@ -111,61 +111,65 @@ void Prober::checkProbeId(ProbeId probeId) const
     }
 }
 
-void Prober::setProbeConfig(ProbeId probeId, const ProbeConfig &probe,
-                            std::size_t injectionSampleByteSize)
+void Prober::setProbesConfig(const SessionProbes &probes,
+                             const InjectionSampleByteSizes &injectionSampleByteSizes)
 {
-    checkProbeId(probeId);
-
     std::lock_guard<std::mutex> guard(mProbeConfigMutex);
 
-    mCachedProbeConfiguration[probeId.getValue()] = probe;
+    mCachedProbeConfiguration = probes;
+    mCachedInjectionSampleByteSizes = injectionSampleByteSizes;
 
-    mixer_ctl::ProbeControl probeControl(toLinux(probe));
-    util::MemoryByteStreamWriter controlWriter;
-    controlWriter.write(probeControl);
-    try {
-        if (probe.purpose == ProbePurpose::Inject ||
-            probe.purpose == ProbePurpose::InjectReextract) {
-            mControlDevice.ctlWrite(mixer_ctl::getProbeInjectControlMixer(probeId.getValue()),
-                                    controlWriter.getBuffer());
-            mCachedInjectionSampleByteSizes[probeId] = injectionSampleByteSize;
+    ProbeId::RawType probeId = 0;
+    for (auto &probe : probes) {
+        mixer_ctl::ProbeControl probeControl(toLinux(probe));
+        util::MemoryByteStreamWriter controlWriter;
+        controlWriter.write(probeControl);
+        try {
+            if (probe.purpose == ProbePurpose::Inject ||
+                probe.purpose == ProbePurpose::InjectReextract) {
+                mControlDevice.ctlWrite(mixer_ctl::getProbeInjectControlMixer(probeId),
+                                        controlWriter.getBuffer());
+            }
+            if (probe.purpose == ProbePurpose::Extract ||
+                probe.purpose == ProbePurpose::InjectReextract) {
+                mControlDevice.ctlWrite(mixer_ctl::getProbeExtractControlMixer(probeId),
+                                        controlWriter.getBuffer());
+            }
+        } catch (const ControlDevice::Exception &e) {
+            throw Exception("Control Mixer failed: " + std::string(e.what()));
         }
-        if (probe.purpose == ProbePurpose::Extract ||
-            probe.purpose == ProbePurpose::InjectReextract) {
-            mControlDevice.ctlWrite(mixer_ctl::getProbeExtractControlMixer(probeId.getValue()),
-                                    controlWriter.getBuffer());
-        }
-    } catch (const ControlDevice::Exception &e) {
-        throw Exception("Control Mixer failed: " + std::string(e.what()));
+        probeId++;
     }
 }
 
-Prober::ProbeConfig Prober::getProbeConfig(ProbeId probeId) const
+Prober::SessionProbes Prober::getProbesConfig() const
 {
-    checkProbeId(probeId);
-
     std::lock_guard<std::mutex> guard(mProbeConfigMutex);
 
-    const auto &probe = mCachedProbeConfiguration[probeId.getValue()];
+    SessionProbes result;
+    ProbeId::RawType probeId = 0;
+    for (auto &probe : mCachedProbeConfiguration) {
 
-    mixer_ctl::ProbeControl probeControl;
-    util::Buffer controlRead;
-    try {
-        if (probe.purpose == ProbePurpose::Inject ||
-            probe.purpose == ProbePurpose::InjectReextract) {
-            mControlDevice.ctlRead(mixer_ctl::getProbeInjectControlMixer(probeId.getValue()),
-                                   controlRead);
-        } else {
-            mControlDevice.ctlRead(mixer_ctl::getProbeExtractControlMixer(probeId.getValue()),
-                                   controlRead);
+        mixer_ctl::ProbeControl probeControl;
+        util::Buffer controlRead;
+        try {
+            if (probe.purpose == ProbePurpose::Inject ||
+                probe.purpose == ProbePurpose::InjectReextract) {
+                mControlDevice.ctlRead(mixer_ctl::getProbeInjectControlMixer(probeId), controlRead);
+            } else {
+                mControlDevice.ctlRead(mixer_ctl::getProbeExtractControlMixer(probeId),
+                                       controlRead);
+            }
+        } catch (const ControlDevice::Exception &e) {
+            throw Exception("Control Mixer failed: " + std::string(e.what()));
         }
-    } catch (const ControlDevice::Exception &e) {
-        throw Exception("Control Mixer failed: " + std::string(e.what()));
-    }
-    util::MemoryByteStreamReader controlReader(controlRead);
-    controlReader.read(probeControl);
+        util::MemoryByteStreamReader controlReader(controlRead);
+        controlReader.read(probeControl);
 
-    return fromLinux(probeControl);
+        result.emplace_back(fromLinux(probeControl));
+        probeId++;
+    }
+    return result;
 }
 
 std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(ProbeId probeIndex)

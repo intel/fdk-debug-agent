@@ -150,17 +150,6 @@ public:
 
     /** Set probes for the future session.
      *
-     * Probe service state shall be 'Owned'.
-     *
-     * @throw ProberBackend::Exception
-     */
-    void setProbeConfig(ProbeId id, const cavs::Prober::ProbeConfig &config,
-                        std::size_t injectionSampleByteSize);
-
-    cavs::Prober::ProbeConfig getProbeConfig(ProbeId id) const;
-
-    /** Set probes for the future session.
-     *
      * Prober Backend state shall be 'Owned'.
      *
      * @param[in] probes the probe configuration
@@ -170,7 +159,7 @@ public:
      * @throw Prober::Exception
      */
     void setSessionProbes(const cavs::Prober::SessionProbes &probes,
-                          std::map<ProbeId, std::size_t> injectionSampleByteSizes);
+                          const cavs::Prober::InjectionSampleByteSizes &injectionSampleByteSizes);
 
     /** Get probes for the current/future session.
      *
@@ -273,7 +262,7 @@ private:
     cavs::Prober::SessionProbes mCachedProbeConfiguration;
 
     /** map that provides the sample byte size of each injection probes. */
-    std::map<ProbeId, std::size_t> mCachedInjectionSampleByteSizes;
+    cavs::Prober::InjectionSampleByteSizes mCachedInjectionSampleByteSizes;
     ProbeExtractor::BlockingExtractionQueues mExtractionQueues;
     std::unique_ptr<ProbeExtractor> mExtractor;
 

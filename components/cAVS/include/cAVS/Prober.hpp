@@ -130,6 +130,8 @@ public:
         return {extractionProbes, injectionProbes};
     }
 
+    using InjectionSampleByteSizes = std::map<ProbeId, std::size_t>;
+
     Prober() = default;
 
     virtual ~Prober() = default;
@@ -144,19 +146,15 @@ public:
      */
     virtual bool isActive() = 0;
 
-    /** Set configuration of one probe
+    /** Set configuration of probes
+     * @param[in] probes configuration of all active probe sessions.
      * @param[in] injectionSampleByteSizes sample byte size used to inject silence if underrun
      * happens.
      *
      * @throw Prober::Exception if the probe id is wrong
      */
-    virtual void setProbeConfig(ProbeId id, const ProbeConfig &config,
-                                std::size_t injectionSampleByteSize) = 0;
-
-    /** Get configuration of one probe
-     * @throw Prober::Exception if the probe id is wrong
-     */
-    virtual ProbeConfig getProbeConfig(ProbeId id) const = 0;
+    virtual void setProbesConfig(const SessionProbes &probes,
+                                 const InjectionSampleByteSizes &injectionSampleByteSizes) = 0;
 
     /** @return max supported probe count */
     virtual std::size_t getMaxProbeCount() const = 0;

@@ -897,17 +897,22 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         linux::MockedControlDeviceCommands controlCommands(*controlDevice);
 
         // For step 1 : Getting probe service parameters, checking that it is stopped
-        std::size_t probeIndex = 0;
-        for (probeIndex = 0; probeIndex < probeCount; probeIndex++) {
-            linux::mixer_ctl::ProbeControl probeControl(
-                linux::Prober::toLinux({false, {0, 0, Type::Input, 0}, Purpose::Inject}));
-            controlCommands.addGetProbeControlCommand(true, probeIndex, probeControl);
-        }
+
         // For step 3 : Configuring probe #1 to be enabled in extraction
         // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
         //     extraction
-        // enabling injection probe involves to retrieve a module instance props in order to
-        // calculate sample byte size
+        std::size_t probeIndex = 0;
+        for (auto &probe : probes) {
+            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
+            controlCommands.addSetProbeControlCommand(true, probeIndex, probeControl);
+            ++probeIndex;
+        }
+
+        // For step 4 : Getting probe endpoint parameters, checking that they are deactivated except
+        // the one that has been enabled
+
+        // For step 5: enabling probe service with injection probe enabled involve to retrieve
+        // a module instance props in order to calculate sample byte size
         dsp_fw::PinProps pinProps;
         pinProps.stream_type = static_cast<dsp_fw::StreamType>(0);
         pinProps.phys_queue_id = 0;
@@ -922,22 +927,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
         commands.addGetModuleInstancePropsCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, 1, 2,
                                                   moduleInstanceProps);
-
-        linux::mixer_ctl::ProbeControl probeControl(
-            linux::Prober::toLinux(probes[extractionProbeIndex]));
-        controlCommands.addSetProbeControlCommand(true, extractionProbeIndex, probeControl);
-        probeControl =
-            linux::mixer_ctl::ProbeControl(linux::Prober::toLinux(probes[injectionProbeIndex]));
-        controlCommands.addSetProbeControlCommand(true, injectionProbeIndex, probeControl);
-
-        // For step 4 : Getting probe endpoint parameters, checking that they are deactivated except
-        // the one that has been enabled
-        probeIndex = 0;
-        for (auto probe : probes) {
-            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
-            controlCommands.addGetProbeControlCommand(true, probeIndex, probeControl);
-            ++probeIndex;
-        }
     }
 
     /* Now using the mocked device
@@ -1079,24 +1068,17 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
         linux::MockedControlDeviceCommands controlCommands(*controlDevice);
 
         // For step 1 : Getting probe service parameters, checking that it is stopped
-        std::size_t probeIndex = 0;
-        for (probeIndex = 0; probeIndex < probeCount; probeIndex++) {
-            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probes[0]));
-            controlCommands.addGetProbeControlCommand(true, probeIndex, probeControl);
-        }
+
         // For step 3 : Configuring probe #1 to be enabled
-        linux::mixer_ctl::ProbeControl probeControl(
-            linux::Prober::toLinux(probes[extractionProbeIndex]));
-        controlCommands.addSetProbeControlCommand(true, extractionProbeIndex, probeControl);
+        std::size_t probeIndex = 0;
+        for (auto &probe : probes) {
+            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
+            controlCommands.addSetProbeControlCommand(true, probeIndex, probeControl);
+            ++probeIndex;
+        }
 
         // For step 4 : Getting probe endpoint parameters, checking that they are deactivated
         //     except the one that has been enabled
-        probeIndex = 0;
-        for (auto probe : probes) {
-            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
-            controlCommands.addGetProbeControlCommand(true, probeIndex, probeControl);
-            ++probeIndex;
-        }
     }
 
     /* Now using the mocked device

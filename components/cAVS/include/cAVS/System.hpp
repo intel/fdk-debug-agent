@@ -254,6 +254,9 @@ private:
         ProbeId mProbeIndex;
     };
 
+    /** Check if probe id is in valid range */
+    void checkProbeId(ProbeId id) const;
+
     /* Make this class non copyable */
     System(const System &) = delete;
     System &operator=(const System &) = delete;
@@ -270,7 +273,7 @@ private:
     /** @return the sample byte size of each injection probes used to inject silence if
      * underrun happens.
      */
-    std::size_t getInjectionSampleByteSize(ProbeId index, const Prober::ProbeConfig &config) const;
+    const Prober::InjectionSampleByteSizes getInjectionSampleByteSizes() const;
 
     std::unique_ptr<Driver> mDriver;
 
@@ -295,6 +298,9 @@ private:
     /** Mutexes that guarantee probe stream exclusive usage */
     std::vector<std::mutex> mProbeExtractionMutexes;
     std::vector<std::mutex> mProbeInjectionMutexes;
+
+    Prober::SessionProbes mProbeConfigs;
+    mutable std::mutex mProbeConfigMutex;
 
     Prober &mProber;
     PerfService mPerfService;
