@@ -40,6 +40,7 @@ public:
     using Exception = util::Exception<PerfService, Perf::Exception>;
 
     PerfService(Perf &perf, ModuleHandler &moduleHandler);
+    ~PerfService();
 
     void setMaxItemCount(uint32_t maxItemCount);
 

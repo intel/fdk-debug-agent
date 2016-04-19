@@ -32,6 +32,16 @@ PerfService::PerfService(Perf &perf, ModuleHandler &moduleHandler)
 {
 }
 
+PerfService::~PerfService()
+{
+    try {
+        mPerf.setState(Perf::State::Disabled);
+    } catch (Exception &e) {
+        /* @todo : use log */
+        std::cout << "Unable to stop driver perf service: " << e.what() << "\n";
+    }
+}
+
 // TODO: this setter is needed because the System constructor can't create the PerfService with a
 // correct number of max items. We will be able to fix this if/when the ModuleHandler returns
 // results by value instead of via output arguments.

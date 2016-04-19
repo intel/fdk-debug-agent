@@ -145,7 +145,12 @@ public:
                                              static_cast<uint32_t>(modules.size()), modules);
     }
 
-    ~DBGACommandScope() {}
+    ~DBGACommandScope()
+    {
+        mCommands.addGetPerfState(Perf::State::Stopped);
+        mCommands.addSetCorePowerCommand(true, 0, true);
+        mCommands.addSetPerfState(Perf::State::Disabled);
+    }
 
 private:
     linux::MockedDeviceCommands &mCommands;

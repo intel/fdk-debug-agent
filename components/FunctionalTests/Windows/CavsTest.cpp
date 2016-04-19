@@ -144,6 +144,9 @@ public:
 
     ~DBGACommandScope()
     {
+        // Upon Perf service destruction, it is disabled in the firmware
+        mCommands.addSetPerfState(true, STATUS_SUCCESS, Perf::State::Disabled);
+
         // When the probe service is destroyed, it checks if the driver service state is Idle
         mCommands.addGetProbeStateCommand(true, STATUS_SUCCESS,
                                           windows::driver::ProbeState::ProbeFeatureIdle);
@@ -1338,12 +1341,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
                 moduleInstanceProps.id.moduleId, moduleInstanceProps.id.instanceId,
                 moduleInstanceProps);
         }
-
-        // 6 Disabled
-        commands.addSetPerfState(true, STATUS_SUCCESS, Perf::State::Disabled);
-
-        // 7 Check that "get state" returns "disabled"
-        commands.addGetPerfState(true, STATUS_SUCCESS, Perf::State::Disabled);
     }
 
     /* Now using the mocked device
@@ -1389,16 +1386,4 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
         client.request("/instance/cavs.perf_measurement/0/perf", HttpClientSimulator::Verb::Get, "",
                        HttpClientSimulator::Status::Ok, "text/xml",
                        HttpClientSimulator::FileContent(xmlFileName("perfservice_data"))));
-
-    // 6 get Stopped
-    CHECK_NOTHROW(client.request(
-        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Put,
-        file_helper::readAsString(xmlFileName("perfservice_disabled")),
-        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
-
-    // 7 Check that "get state" returns "disabled"
-    CHECK_NOTHROW(client.request(
-        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Get, "",
-        HttpClientSimulator::Status::Ok, "text/xml",
-        HttpClientSimulator::FileContent(xmlFileName("perfservice_disabled"))));
 }
