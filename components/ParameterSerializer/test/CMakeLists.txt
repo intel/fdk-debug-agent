@@ -27,7 +27,7 @@ set(TEST_SRCS
 set(TEST_INCS)
 
 add_dbga_executable(ParameterSerializerTest ${TEST_SRCS} ${TEST_INCS})
-add_catch_test(ParameterSerializerTest "${PROJECT_SOURCE_DIR}/components/FunctionalTests")
+add_catch_test(ParameterSerializerTest)
 
 set_common_settings(ParameterSerializerTest)
 

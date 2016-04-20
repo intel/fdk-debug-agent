@@ -32,7 +32,7 @@ set(TEST_SRCS
 set(TEST_INCS)
 
 add_dbga_executable(TlvUnitTest ${TEST_SRCS} ${TEST_INCS})
-add_catch_test(TlvUnitTest ${CMAKE_CURRENT_LIST_DIR})
+add_catch_test(TlvUnitTest)
 set_common_settings(TlvUnitTest)
 
 # external libraries

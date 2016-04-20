@@ -37,7 +37,7 @@ else ()
 endif ()
 
 add_dbga_executable(FunctionalTests ${TEST_SRCS} ${TEST_INCS})
-add_catch_test(FunctionalTests ${CMAKE_CURRENT_LIST_DIR})
+add_catch_test(FunctionalTests)
 
 set_common_settings(FunctionalTests)
 

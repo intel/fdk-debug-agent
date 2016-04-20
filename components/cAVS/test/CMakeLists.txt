@@ -42,7 +42,7 @@ else ()
 endif ()
 
 add_dbga_executable(CavsUnitTest ${TEST_SRCS} ${TEST_INCS})
-add_catch_test(CavsUnitTest ${CMAKE_CURRENT_LIST_DIR}/Windows)
+add_catch_test(CavsUnitTest)
 set_common_settings(CavsUnitTest)
 
 # external libraries

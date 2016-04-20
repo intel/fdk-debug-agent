@@ -36,15 +36,14 @@ include(CTest)
 # Convenience method to add tests using "catch" for which we'll set the
 # reporter and/or output file
 set(catch_driver "${CMAKE_CURRENT_LIST_DIR}/catch_driver.py")
-function(add_catch_test executable working_dir)
+function(add_catch_test executable)
     set(COMMAND python "${catch_driver}" "$<TARGET_FILE:${executable}>")
     if (NOT ENABLE_ADMIN_STEPS)
         set(COMMAND ${COMMAND} "exclude:[admin_rights]")
     endif()
     add_test(
         NAME ${executable}
-        COMMAND ${COMMAND}
-        WORKING_DIRECTORY ${working_dir})
+        COMMAND ${COMMAND})
 endfunction()
 
 # Provides a PROJECT_PATH macro that holds the absolute project path, useful to locate test

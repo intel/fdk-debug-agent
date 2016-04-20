@@ -28,7 +28,7 @@ set(TEST_SRCS
 set(TEST_INCS)
 
 add_dbga_executable(IfdkObjectsTest ${TEST_SRCS} ${TEST_INCS})
-add_catch_test(IfdkObjectsTest ${CMAKE_CURRENT_LIST_DIR})
+add_catch_test(IfdkObjectsTest)
 set_common_settings(IfdkObjectsTest)
 
 # external libraries
