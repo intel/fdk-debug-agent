@@ -75,6 +75,17 @@ if (WIN32)
     # the NOMINMAX allows to not define them
     add_definitions(-DNOMINMAX)
 
+    # MSVC is a multi-configuration build system, so defining supported configurations
+    set(CMAKE_CONFIGURATION_TYPES Debug Release)
+
+    # Generating runtime files into a unique directory to find easily dependent shared libraries
+    set(RUNTIME_DIR ${CMAKE_BINARY_DIR}/Runtime)
+    foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${CONFIG} UPPER_CONFIG)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${UPPER_CONFIG} ${RUNTIME_DIR})
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${UPPER_CONFIG} ${RUNTIME_DIR})
+    endforeach()
+
 elseif (CMAKE_COMPILER_IS_GNUCXX)
     # warning as error. todo: activate all warnings.
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
