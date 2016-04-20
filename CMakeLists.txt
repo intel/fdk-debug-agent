@@ -86,6 +86,14 @@ if (WIN32)
         set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${UPPER_CONFIG} ${RUNTIME_DIR})
     endforeach()
 
+    # Adding a custom target that copies dependencies into the runtime directory
+    add_custom_target(CopyDependencies ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${RUNTIME_DIR}/
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ParameterFramework::parameter> ${RUNTIME_DIR}/
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ParameterFramework::remote-processor> ${RUNTIME_DIR}/
+        COMMAND ${CMAKE_COMMAND} -E copy ${PFW_INSTALL_DIR}/bin/libxml2.dll ${RUNTIME_DIR}/
+    )
+
 elseif (CMAKE_COMPILER_IS_GNUCXX)
     # warning as error. todo: activate all warnings.
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
