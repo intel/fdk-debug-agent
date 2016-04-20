@@ -58,6 +58,8 @@ Logger::LogProducer::~LogProducer()
 void Logger::LogProducer::produceEntries()
 {
     try {
+        // Queue is open during collectLogEntries() call
+        BlockingQueue::AutoOpenClose closer(mQueue);
         mWppClient->collectLogEntries(*this);
     } catch (WppClient::Exception &e) {
         /* Swallowing the exception because currently the SwAS doesn't propose any way

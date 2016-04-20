@@ -46,8 +46,6 @@ public:
         : mDevice(device), mWppClientFactory(wppClientFactory),
           mLogEntryQueue(queueMaxMemoryBytes, logBlockSize)
     {
-        // Queue is open during Logger lifetime
-        mLogEntryQueue.open();
     }
 
     ~Logger()
