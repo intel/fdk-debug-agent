@@ -96,7 +96,7 @@ static const util::Buffer nsControlParameterPayload = {
     0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-const std::string dataPath = "data/FunctionalTests/http/";
+const std::string dataPath = PROJECT_PATH "data/FunctionalTests/http/";
 
 std::string xmlFileName(const std::string &name)
 {
@@ -108,8 +108,8 @@ std::string htmlFileName(const std::string &name)
     return dataPath + name + ".html";
 }
 
-const std::string &pfwConfigPath =
-    "data/FunctionalTests/pfw/ParameterFrameworkConfigurationDBGA.xml";
+const std::string pfwConfigPath =
+    PROJECT_PATH "data/FunctionalTests/pfw/ParameterFrameworkConfigurationDBGA.xml";
 
 /** Helper function to set a module entry */
 void setModuleEntry(dsp_fw::ModuleEntry &entry, const std::string &name, const Uuid &uuid)

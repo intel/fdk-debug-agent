@@ -39,3 +39,6 @@ link_catch(ParameterSerializerTest)
 target_link_libraries(ParameterSerializerTest ParameterSerializer Util)
 # Binding with test common
 target_link_libraries(ParameterSerializerTest TestCommon)
+
+# Provide macro to locate test data files
+provideProjectPathMacro(ParameterSerializerTest ${CMAKE_CURRENT_LIST_DIR})

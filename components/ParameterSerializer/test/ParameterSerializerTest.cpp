@@ -34,8 +34,12 @@
 using namespace debug_agent::parameter_serializer;
 using namespace debug_agent::util;
 
+// Dirty: using FunctionTests data files
+// @todo: fix it.
+static const std::string rootDataPath = PROJECT_PATH "../../FunctionalTests/data/FunctionalTests/";
+
 static const std::string pfwConfFilePath =
-    "data/FunctionalTests/pfw/ParameterFrameworkConfigurationDBGA.xml";
+    rootDataPath + "pfw/ParameterFrameworkConfigurationDBGA.xml";
 
 static const Buffer aecControlParameterPayload = {
     0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00,
@@ -89,7 +93,7 @@ static const std::string aecUuid("00000001-0001-0000-0100-000001000000");
 /** @return the file content as string */
 std::string fileContent(const std::string &name)
 {
-    std::string fileName = "data/FunctionalTests/http/" + name;
+    std::string fileName = rootDataPath + "http/" + name;
 
     std::ifstream file(fileName);
     if (!file) { /* using operator () to check stream health */

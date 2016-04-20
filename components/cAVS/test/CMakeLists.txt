@@ -53,3 +53,6 @@ target_link_libraries(CavsUnitTest cAVS cAVSTestFramework)
 
 # Binding with test common in order to use the HttpClientSimulator
 target_link_libraries(CavsUnitTest TestCommon)
+
+# Provide macro to locate test data files
+provideProjectPathMacro(CavsUnitTest ${CMAKE_CURRENT_LIST_DIR})

@@ -51,3 +51,6 @@ link_catch(FunctionalTests)
 # dependent libraries
 target_link_libraries(FunctionalTests Core TestCommon cAVSTestFramework)
 link_poco(FunctionalTests)
+
+# Provide macro to locate test data files
+provideProjectPathMacro(FunctionalTests ${CMAKE_CURRENT_LIST_DIR})

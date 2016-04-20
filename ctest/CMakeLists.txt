@@ -63,3 +63,10 @@ function(add_test_dependencies executable)
         set_property(TEST ${executable} PROPERTY ENVIRONMENT "PATH=${TEST_PATH}")
     endif()
 endfunction()
+
+# Provides a PROJECT_PATH macro that holds the absolute project path, useful to locate test
+# data files relatively to the project path
+function(provideProjectPathMacro PROJECT_NAME PROJECT_PATH)
+    set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_DEFINITIONS
+        PROJECT_PATH="${PROJECT_PATH}/")
+endfunction()
