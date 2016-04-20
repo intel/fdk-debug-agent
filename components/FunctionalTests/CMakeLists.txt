@@ -38,7 +38,6 @@ endif ()
 
 add_dbga_executable(FunctionalTests ${TEST_SRCS} ${TEST_INCS})
 add_catch_test(FunctionalTests ${CMAKE_CURRENT_LIST_DIR})
-add_test_dependencies(FunctionalTests ParameterFramework::parameter)
 
 set_common_settings(FunctionalTests)
 

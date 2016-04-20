@@ -47,23 +47,6 @@ function(add_catch_test executable working_dir)
         WORKING_DIRECTORY ${working_dir})
 endfunction()
 
-# Add test executable dependencies using the PATH environment variable
-# Note: this is done only for Windows because Linux uses the
-# "rpath" feature to find dependent shared libraries.
-function(add_test_dependencies executable)
-    if(WIN32)
-        set(TEST_PATH "$ENV{PATH}")
-        foreach(DEP ${ARGN})
-            set(TEST_PATH "$<TARGET_FILE_DIR:${DEP}>;${TEST_PATH}")
-        endforeach()
-
-        #escaping list delimiter ";"
-        string(REPLACE ";" "\\;" TEST_PATH "${TEST_PATH}")
-
-        set_property(TEST ${executable} PROPERTY ENVIRONMENT "PATH=${TEST_PATH}")
-    endif()
-endfunction()
-
 # Provides a PROJECT_PATH macro that holds the absolute project path, useful to locate test
 # data files relatively to the project path
 function(provideProjectPathMacro PROJECT_NAME PROJECT_PATH)
