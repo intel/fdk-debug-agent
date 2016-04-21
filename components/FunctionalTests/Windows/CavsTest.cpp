@@ -1038,6 +1038,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         injectionHandle.notify();
     }
 
+    injectionHandle.blockUntilWait();
+
     // 8 : Stopping service
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe/0/control_parameters", HttpClientSimulator::Verb::Put,
