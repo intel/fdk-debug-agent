@@ -21,16 +21,13 @@
 */
 #pragma once
 
-#include "cAVS/DspFw/Probe.hpp"
-#include "Util/Buffer.hpp"
-#include "Util/EnumHelper.hpp"
+#include "DspFw/Probe.hpp"
+
+#include "Util/Exception.hpp"
 #include "Util/WrappedRaw.hpp"
-#include <inttypes.h>
-#include <stdexcept>
-#include <string>
-#include <vector>
+
 #include <memory>
-#include <map>
+#include <vector>
 #include <set>
 
 namespace debug_agent
@@ -66,30 +63,7 @@ using ProbeId = util::WrappedRaw<detail::ProbeIdTrait>;
 class Prober
 {
 public:
-    struct Exception : std::runtime_error
-    {
-        using std::runtime_error::runtime_error;
-    };
-
-    /** State of the probing service */
-    enum class State
-    {
-        Idle,
-        Owned,     /// probe service is owned (required because it's a monoclient service)
-        Allocated, /// Buffers are allocated
-        Active     /// Probing is running
-    };
-
-    static const util::EnumHelper<State> &stateHelper()
-    {
-        static const util::EnumHelper<State> helper({
-            {State::Idle, "Idle"},
-            {State::Owned, "Owned"},
-            {State::Allocated, "Allocated"},
-            {State::Active, "Active"},
-        });
-        return helper;
-    }
+    using Exception = util::Exception<Prober>;
 
     enum class ProbePurpose
     {
@@ -160,45 +134,32 @@ public:
 
     virtual ~Prober() = default;
 
+    /** Set service state
+     * @throw Prober::Exception
+     */
+    virtual void setState(bool active) = 0;
+
+    /** Get service state
+     * @throw Prober::Exception
+     */
+    virtual bool isActive() = 0;
+
+    /** Set configuration of one probe
+     * @param[in] injectionSampleByteSizes sample byte size used to inject silence if underrun
+     * happens.
+     *
+     * @throw Prober::Exception if the probe id is wrong
+     */
+    virtual void setProbeConfig(ProbeId id, const ProbeConfig &config,
+                                std::size_t injectionSampleByteSize) = 0;
+
+    /** Get configuration of one probe
+     * @throw Prober::Exception if the probe id is wrong
+     */
+    virtual ProbeConfig getProbeConfig(ProbeId id) const = 0;
+
     /** @return max supported probe count */
     virtual std::size_t getMaxProbeCount() const = 0;
-
-    /** Set the state of the probing service.
-     *
-     * The state machine specified in the SwAS must be respected.
-     *
-     * @todo draw state machine
-     * @throw Prober::Exception
-     */
-    virtual void setState(State state) = 0;
-
-    /**
-     * Get the state of the probing service
-     *
-     * @throw Prober::Exception
-     */
-    virtual State getState() = 0;
-
-    /** Set probes for the future session.
-     *
-     * Probe service state shall be 'Owned'.
-     *
-     * @param[in] probes the probe configuration
-     * @param[in] injectionSampleByteSizes A <probe index,  sample byte size> map used to inject
-     *                                     silence if underrun happens.
-     *
-     * @throw Prober::Exception
-     */
-    virtual void setSessionProbes(const SessionProbes probes,
-                                  std::map<ProbeId, std::size_t> injectionSampleByteSizes) = 0;
-
-    /** Get probes for the current/future session.
-     *
-     * Probe service state shall be in 'Owned, Allocated, Active'.
-     *
-     * @throw Prober::Exception
-     */
-    virtual SessionProbes getSessionProbes() = 0;
 
     /**
      * Return the next extraction block data
@@ -226,6 +187,9 @@ public:
      * @throw Prober::Exception
      */
     virtual bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) = 0;
+
+    Prober(const Prober &) = delete;
+    Prober &operator=(const Prober &) = delete;
 };
 }
 }

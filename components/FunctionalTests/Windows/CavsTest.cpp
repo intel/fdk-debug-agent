@@ -253,7 +253,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology")
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::Prober::SystemEventHandlesFactory::createHandles());
+        windows::ProberBackend::SystemEventHandlesFactory::createHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -337,7 +337,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls")
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::Prober::SystemEventHandlesFactory::createHandles());
+        windows::ProberBackend::SystemEventHandlesFactory::createHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -385,7 +385,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::Prober::SystemEventHandlesFactory::createHandles());
+        windows::ProberBackend::SystemEventHandlesFactory::createHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -427,7 +427,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: A refresh error erases the previous 
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::Prober::SystemEventHandlesFactory::createHandles());
+        windows::ProberBackend::SystemEventHandlesFactory::createHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -488,7 +488,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::Prober::SystemEventHandlesFactory::createHandles());
+        windows::ProberBackend::SystemEventHandlesFactory::createHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -520,7 +520,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(mo
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::Prober::SystemEventHandlesFactory::createHandles());
+        windows::ProberBackend::SystemEventHandlesFactory::createHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -587,7 +587,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::Prober::SystemEventHandlesFactory::createHandles());
+        windows::ProberBackend::SystemEventHandlesFactory::createHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
@@ -783,7 +783,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
      * ----------------------- */
 
     auto probeEventHandles =
-        windows::Prober::EventHandlesFactory<windows::TestEventHandle>::createHandles();
+        windows::ProberBackend::EventHandlesFactory<windows::TestEventHandle>::createHandles();
 
     // Getting a reference to the extraction event handle, in order to simulate driver
     // behaviour */
@@ -827,7 +827,18 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
 
         // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
         //     extraction
-        // -> involves no ioctl
+        // enabling injection probe involves to retrieve a module instance props in order to
+        // calculate sample byte size. So initializing bit depth and channel count of the module
+        // instance pin used for injection
+        dsp_fw::PinProps pinProps{};
+        pinProps.format.bit_depth = bitDepth;
+        pinProps.format.number_of_channels = channelCount;
+
+        dsp_fw::ModuleInstanceProps moduleInstanceProps{};
+        moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
+
+        commands.addGetModuleInstancePropsCommand(
+            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, 1, 2, moduleInstanceProps);
 
         // 4 : Getting probe endpoint parameters, checking that they are deactivated except the one
         //     that has been enabled
@@ -843,19 +854,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
                                          windows::driver::ProbeState::ProbeFeatureOwned);
 
-        // enabling injection probe involves to retrieve a module instance props in order to
-        // calculate sample byte size. So initializing bit depth and channel count of the module
-        // instance pin used for injection
-        dsp_fw::PinProps pinProps{};
-        pinProps.format.bit_depth = bitDepth;
-        pinProps.format.number_of_channels = channelCount;
-
-        dsp_fw::ModuleInstanceProps moduleInstanceProps{};
-        moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
-
-        commands.addGetModuleInstancePropsCommand(
-            true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, 1, 2, moduleInstanceProps);
-
         using Type = dsp_fw::ProbeType;
         using Purpose = Prober::ProbePurpose;
         // setting probe configuration (probe #1 is enabled)
@@ -869,7 +867,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
                                               {false, {0, 0, Type::Input, 0}, Purpose::Inject}};
 
         commands.addSetProbeConfigurationCommand(
-            true, STATUS_SUCCESS, windows::Prober::toWindows(probes, probeEventHandles));
+            true, STATUS_SUCCESS, windows::ProberBackend::toWindows(probes, probeEventHandles));
 
         // going to Allocated
         commands.addSetProbeStateCommand(true, STATUS_SUCCESS,
@@ -1061,7 +1059,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
     /* Setting the test vector
     * ----------------------- */
 
-    auto &&probeEventHandles = windows::Prober::SystemEventHandlesFactory::createHandles();
+    auto &&probeEventHandles = windows::ProberBackend::SystemEventHandlesFactory::createHandles();
     {
         windows::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
@@ -1090,7 +1088,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
                                               {false, {0, 0, Type::Input, 0}, Purpose::Inject}};
 
         commands.addSetProbeConfigurationCommand(
-            true, STATUS_SUCCESS, windows::Prober::toWindows(probes, probeEventHandles));
+            true, STATUS_SUCCESS, windows::ProberBackend::toWindows(probes, probeEventHandles));
 
         // going to Allocated, but the it fails!
         commands.addSetProbeStateCommand(false, STATUS_SUCCESS,
@@ -1251,7 +1249,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
     /* Creating the factory that will inject the mocked device */
     windows::DeviceInjectionDriverFactory driverFactory(
         std::move(device), std::make_unique<windows::StubbedWppClientFactory>(),
-        windows::Prober::SystemEventHandlesFactory::createHandles());
+        windows::ProberBackend::SystemEventHandlesFactory::createHandles());
 
     /* Creating and starting the debug agent */
     DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);

@@ -46,7 +46,7 @@ class Driver final : public cavs::Driver
 {
 public:
     Driver(std::unique_ptr<Device> device, std::unique_ptr<WppClientFactory> wppClientFactory,
-           Prober::EventHandles &eventHandles)
+           ProberBackend::EventHandles &eventHandles)
         : mDevice(std::move(device)), mWppClientFactory(std::move(wppClientFactory)),
           mEventHandles(std::move(eventHandles)), mLogger(*mDevice, *mWppClientFactory),
           mModuleHandler(*mDevice), mProber(*mDevice, mEventHandles), mPerf(*mDevice)
@@ -62,7 +62,7 @@ public:
 private:
     std::unique_ptr<Device> mDevice;
     std::unique_ptr<WppClientFactory> mWppClientFactory;
-    Prober::EventHandles mEventHandles;
+    ProberBackend::EventHandles mEventHandles;
     Logger mLogger;
     ModuleHandler mModuleHandler;
     Prober mProber;

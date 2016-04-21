@@ -66,8 +66,8 @@ std::unique_ptr<Driver> cavs::SystemDriverFactory::newDriver() const
 
     try {
         /* Creating Probe Event handles*/
-        windows::Prober::EventHandles eventHandles =
-            windows::Prober::SystemEventHandlesFactory::createHandles();
+        windows::ProberBackend::EventHandles eventHandles =
+            windows::ProberBackend::SystemEventHandlesFactory::createHandles();
 
         /* Creating Driver interface */
         return std::make_unique<windows::Driver>(std::move(device), std::move(wppClientFactory),

@@ -43,7 +43,7 @@ class DeviceInjectionDriverFactory : public DriverFactory
 public:
     DeviceInjectionDriverFactory(std::unique_ptr<Device> injectedDevice,
                                  std::unique_ptr<WppClientFactory> injectedWppClientFactory,
-                                 Prober::EventHandles &probeEventHandles)
+                                 ProberBackend::EventHandles &probeEventHandles)
         : mInjectedDevice(std::move(injectedDevice)),
           mInjectedWppClientFactory(std::move(injectedWppClientFactory)),
           mInjectedProbeEventHandles(std::move(probeEventHandles))
@@ -63,7 +63,7 @@ private:
     mutable std::unique_ptr<WppClientFactory> mInjectedWppClientFactory;
 
     /* Same point for this member */
-    mutable Prober::EventHandles mInjectedProbeEventHandles;
+    mutable ProberBackend::EventHandles mInjectedProbeEventHandles;
 };
 }
 }

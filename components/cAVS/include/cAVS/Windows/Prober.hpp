@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -22,21 +22,8 @@
 #pragma once
 
 #include "cAVS/Prober.hpp"
-#include "cAVS/DspFw/Probe.hpp"
-#include "cAVS/Windows/Device.hpp"
-#include "cAVS/Windows/IoCtlDescription.hpp"
-#include "Util/ByteStreamReader.hpp"
-#include "Util/ByteStreamWriter.hpp"
-#include "Util/BlockingQueue.hpp"
-#include "Util/RingBuffer.hpp"
-#include "cAVS/Windows/EventHandle.hpp"
-#include "cAVS/Windows/DriverTypes.hpp"
-#include "cAVS/Windows/Probe/Extractor.hpp"
-#include "cAVS/Windows/Probe/Injector.hpp"
-
-#include <array>
-#include <memory>
-#include <set>
+#include "cAVS/Windows/ProberBackend.hpp"
+#include "cAVS/Windows/ProberStateMachine.hpp"
 
 namespace debug_agent
 {
@@ -45,131 +32,44 @@ namespace cavs
 namespace windows
 {
 
-class Prober : public cavs::Prober
+/** This class pilots the driver probe service
+ *
+ * The client changes only a simple boolean state (active, stopped). Changing this state
+ * leads to set driver probe service state according the state machine specified in the SwAS.
+ * Note: Driver probe service states are (idle, owned, allocated, active)
+ *
+ * By choice, the high level state (active, stopped) is not stored in this class, but retrieved
+ * from driver. This helps to avoid divergent states.
+ *
+ * The public API of this class is thread safe.
+ */
+class Prober final : public cavs::Prober
 {
 public:
-    /** Contains all probe event handles */
-    struct EventHandles
+    Prober(Device &device, const ProberBackend::EventHandles &eventHandles)
+        : mBackend(device, eventHandles), mStateMachine(mBackend)
     {
-        EventHandles() = default;
-        EventHandles(EventHandles &&) = default;
-        EventHandles(const EventHandles &) = delete;
-        EventHandles &operator=(const EventHandles &) = delete;
+    }
+    ~Prober() override;
 
-        bool isValid() const
-        {
-            if (extractionHandle->handle() == nullptr) {
-                return false;
-            }
-            for (auto &handle : injectionHandles) {
-                if (handle->handle() == nullptr) {
-                    return false;
-                }
-            }
-            return true;
-        }
+    std::size_t getMaxProbeCount() const override;
 
-        using HandlePtr = std::unique_ptr<EventHandle>;
-        using HandlePtrArray = std::array<HandlePtr, driver::maxProbes>;
+    void setState(bool active) override;
 
-        HandlePtr extractionHandle;
-        HandlePtrArray injectionHandles;
-    };
+    bool isActive() override;
 
-    /** This factory creates event handles using the type provided by the template parameter */
-    template <typename HandleT>
-    struct EventHandlesFactory
-    {
+    void setProbeConfig(ProbeId id, const ProbeConfig &config,
+                        std::size_t injectionSampleByteSize) override;
 
-        static EventHandles createHandles()
-        {
-            EventHandles handles;
-            handles.extractionHandle = makeHandle();
-            for (auto &ptr : handles.injectionHandles) {
-                ptr = makeHandle();
-            }
-            return handles;
-        }
+    ProbeConfig getProbeConfig(ProbeId id) const override;
 
-        static EventHandles::HandlePtr makeHandle() { return std::make_unique<HandleT>(); }
-    };
-
-    using SystemEventHandlesFactory = EventHandlesFactory<SystemEventHandle>;
-
-    /** Create a driver probe config from os-agnostic config and event handles */
-    static driver::ProbePointConfiguration toWindows(
-        const cavs::Prober::SessionProbes &probes,
-        const windows::Prober::EventHandles &eventHandles);
-
-    Prober(Device &device, const EventHandles &eventHandles);
-
-    std::size_t getMaxProbeCount() const override { return driver::maxProbes; }
-    void setState(State state) override;
-    State getState() override;
-    void setSessionProbes(const SessionProbes probes,
-                          std::map<ProbeId, std::size_t> injectionSampleByteSizes) override;
-    SessionProbes getSessionProbes() override;
     std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId probeIndex) override;
+
     bool enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer) override;
 
 private:
-    static constexpr auto mProbeFeature = driver::IOCTL_FEATURE::FEATURE_FW_PROBE;
-    static constexpr std::size_t mQueueSize = 5 * 1024 * 1024;
-
-    using PacketQueue = util::BlockingQueue<util::Buffer>;
-
-    // 0 = get/setState
-    using GetState =
-        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
-                         driver::ProbeFeatureParameter::FEATURE_STATE, driver::ProbeState>;
-    using SetState =
-        IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature,
-                         driver::ProbeFeatureParameter::FEATURE_STATE, driver::ProbeState>;
-    // 1 = get/setProbePointConfiguration
-    using GetProbePointConfiguration =
-        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
-                         driver::ProbeFeatureParameter::POINT_CONFIGURATION,
-                         driver::ProbePointConfiguration>;
-    using SetProbePointConfiguration =
-        IoCtlDescription<driver::IoCtlType::TinySet, mProbeFeature,
-                         driver::ProbeFeatureParameter::POINT_CONFIGURATION,
-                         driver::ProbePointConfiguration>;
-    using GetRingBuffersDescription =
-        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
-                         driver::ProbeFeatureParameter::BUFFERS_DESCRIPTION,
-                         driver::RingBuffersDescription>;
-    using GetExtractionRingBufferPosition =
-        IoCtlDescription<driver::IoCtlType::TinyGet, mProbeFeature,
-                         driver::ProbeFeatureParameter::EXTRACTION_BUFFER_STATUS, uint64_t>;
-
-    /** Convert values from OS-agnostic cAVS to cAVS Windows driver and vice-versa
-     */
-    /** @{ */
-    static driver::ProbeState toWindows(const State &from);
-    static State fromWindows(const driver::ProbeState &from);
-    static driver::ProbePurpose toWindows(const ProbePurpose &from);
-    static ProbePurpose fromWindows(const driver::ProbePurpose &from);
-    static BOOL toWindows(bool value);
-    static bool fromWindows(BOOL value);
-    /** @} */
-
-    void checkProbeId(ProbeId id) const;
-
-    void startStreaming();
-    void stopStreaming();
-
-    driver::RingBuffersDescription getRingBuffers();
-    size_t getExtractionRingBufferLinearPosition();
-    size_t getInjectionRingBufferLinearPosition(ProbeId probeId);
-
-    Device &mDevice;
-    const EventHandles &mEventHandles;
-    SessionProbes mCachedProbeConfiguration;
-    std::map<ProbeId, std::size_t> mCachedInjectionSampleByteSizes;
-    std::vector<PacketQueue> mExtractionQueues;
-    std::unique_ptr<probe::Extractor> mExtractor;
-    std::vector<util::RingBuffer> mInjectionQueues;
-    std::vector<probe::Injector> mInjectors;
+    ProberBackend mBackend;
+    ProberStateMachine mStateMachine;
 };
 }
 }

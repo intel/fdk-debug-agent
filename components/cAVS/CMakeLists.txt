@@ -30,7 +30,6 @@ set(LIB_SRCS
     src/LogStreamer.cpp
     src/System.cpp
     src/Topology.cpp
-    src/ProbeService.cpp
     src/PerfService.cpp)
 
 # Common include files
@@ -45,8 +44,7 @@ set(LIB_INCS
     include/cAVS/ModuleHandler.hpp
     include/cAVS/Topology.hpp
     include/cAVS/Prober.hpp
-    include/cAVS/Perf.hpp
-    include/cAVS/ProbeService.hpp)
+    include/cAVS/Perf.hpp)
 
 # firwmare include files
 set(FW_INCS

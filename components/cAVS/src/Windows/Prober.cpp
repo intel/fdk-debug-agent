@@ -19,17 +19,8 @@
 *
 ********************************************************************************
 */
-#pragma once
-
 #include "cAVS/Windows/Prober.hpp"
-#include "cAVS/Windows/IoctlHelpers.hpp"
-#include "Util/AssertAlways.hpp"
-#include <functional>
-#include <string>
-#include <cstring>
-#include <map>
-#include <algorithm>
-#include <stdexcept>
+#include <Util/AssertAlways.hpp>
 #include <iostream>
 
 namespace debug_agent
@@ -39,299 +30,68 @@ namespace cavs
 namespace windows
 {
 
-using ioctl_helpers::ioctl;
+Prober::~Prober()
+{
+    mStateMachine.stopNoThrow();
+}
 
-static const std::map<Prober::ProbePurpose, driver::ProbePurpose> purposeConversion = {
-    {Prober::ProbePurpose::Inject, driver::ProbePurpose::InjectPurpose},
-    {Prober::ProbePurpose::Extract, driver::ProbePurpose::ExtractPurpose},
-    {Prober::ProbePurpose::InjectReextract, driver::ProbePurpose::InjectReextractPurpose}};
-
-static const std::map<Prober::State, driver::ProbeState> stateConversion = {
-    {Prober::State::Idle, driver::ProbeState::ProbeFeatureIdle},
-    {Prober::State::Owned, driver::ProbeState::ProbeFeatureOwned},
-    {Prober::State::Allocated, driver::ProbeState::ProbeFeatureAllocated},
-    {Prober::State::Active, driver::ProbeState::ProbeFeatureActive}};
-
-driver::ProbeState Prober::toWindows(const State &from)
+void Prober::setState(bool active)
 {
     try {
-        return stateConversion.at(from);
-    } catch (std::out_of_range &) {
-        throw Exception("Wrong state value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
+        mStateMachine.setState(active);
+    } catch (ProberStateMachine::Exception &e) {
+        throw Exception(std::string(e.what()));
     }
 }
 
-Prober::State Prober::fromWindows(const driver::ProbeState &from)
-{
-    for (auto &candidate : stateConversion) {
-        if (candidate.second == from) {
-            return candidate.first;
-        }
-    }
-    throw Exception("Wrong state value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
-}
-
-driver::ProbePurpose Prober::toWindows(const ProbePurpose &from)
+bool Prober::isActive()
 {
     try {
-        return purposeConversion.at(from);
-    } catch (std::out_of_range &) {
-        throw Exception("Wrong purpose value (" + std::to_string(static_cast<uint32_t>(from)) +
-                        ").");
-    }
-}
-
-Prober::ProbePurpose Prober::fromWindows(const driver::ProbePurpose &from)
-{
-    for (auto &candidate : purposeConversion) {
-        if (candidate.second == from) {
-            return candidate.first;
-        }
-    }
-    throw Exception("Wrong purpose value (" + std::to_string(static_cast<uint32_t>(from)) + ").");
-}
-
-BOOL Prober::toWindows(bool value)
-{
-    return value ? TRUE : FALSE;
-}
-
-bool Prober::fromWindows(BOOL value)
-{
-    switch (value) {
-    case TRUE:
-        return true;
-    case FALSE:
-        return false;
-    }
-    throw Exception("Unknown BOOL value: " + std::to_string(value));
-}
-
-Prober::Prober(Device &device, const EventHandles &eventHandles)
-    : mDevice(device), mEventHandles(eventHandles)
-{
-    for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {
-        mExtractionQueues.emplace_back(mQueueSize,
-                                       [](const util::Buffer &buffer) { return buffer.size(); });
-        mInjectionQueues.emplace_back(mQueueSize);
-    }
-}
-
-void Prober::setState(State state)
-{
-    switch (state) {
-    case State::Active:
-        startStreaming();
-        break;
-    // If not active, stop streaming
-    case State::Idle:
-    case State::Owned:
-    case State::Allocated:
-        stopStreaming();
-    }
-
-    auto tmp = toWindows(state);
-    ioctl<SetState, Exception>(mDevice, tmp);
-}
-
-Prober::State Prober::getState()
-{
-    // Initialize with an illegal value in case the driver fails to overwrite it.
-    driver::ProbeState state{static_cast<driver::ProbeState>(-1)};
-    ioctl<GetState, Exception>(mDevice, state);
-
-    return fromWindows(state);
-}
-
-driver::ProbePointConfiguration Prober::toWindows(const cavs::Prober::SessionProbes &probes,
-                                                  const windows::Prober::EventHandles &eventHandles)
-{
-    if (probes.size() != driver::maxProbes) {
-        throw Exception("Expected to receive " + std::to_string(driver::maxProbes) +
-                        " probe configurations to set. (Actually received " +
-                        std::to_string(probes.size()));
-    }
-
-    // Translate the high-level data into driver-specific structures
-    std::vector<driver::ProbePointConnection> connections;
-    std::size_t probeIndex = 0;
-    for (const auto &probe : probes) {
-        connections.emplace_back(toWindows(probe.enabled), probe.probePoint,
-                                 toWindows(probe.purpose),
-                                 eventHandles.injectionHandles[probeIndex]->handle());
-
-        ++probeIndex;
-    }
-
-    driver::ProbePointConfiguration toDriver;
-    toDriver.extractionBufferCompletionEventHandle = eventHandles.extractionHandle->handle();
-    std::copy_n(connections.begin(), driver::maxProbes, toDriver.probePointConnection);
-    return toDriver;
-}
-
-void Prober::setSessionProbes(const SessionProbes probes,
-                              std::map<ProbeId, std::size_t> injectionSampleByteSizes)
-{
-    // Caching info needed to start probing
-    mCachedProbeConfiguration = probes;
-    mCachedInjectionSampleByteSizes = injectionSampleByteSizes;
-
-    // Calling the ioctl
-    ioctl<SetProbePointConfiguration, Exception>(mDevice, toWindows(probes, mEventHandles));
-}
-
-Prober::SessionProbes Prober::getSessionProbes()
-{
-    driver::ProbePointConfiguration from;
-    memset(&from, 0xFF, sizeof(from));
-    ioctl<GetProbePointConfiguration, Exception>(mDevice, from);
-
-    SessionProbes result;
-    for (const auto &connection : from.probePointConnection) {
-        result.emplace_back(fromWindows(connection.enabled), connection.probePointId,
-                            fromWindows(connection.purpose));
-    }
-    return result;
-}
-
-void Prober::checkProbeId(ProbeId probeId) const
-{
-    if (probeId.getValue() >= getMaxProbeCount()) {
-        throw Exception("Invalid probe index: " + std::to_string(probeId.getValue()));
+        return mStateMachine.isActive();
+    } catch (ProberStateMachine::Exception &e) {
+        throw Exception(std::string(e.what()));
     }
 }
 
 std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(ProbeId probeIndex)
 {
-    checkProbeId(probeIndex);
-    return mExtractionQueues[probeIndex.getValue()].remove();
+    try {
+        return mBackend.dequeueExtractionBlock(probeIndex);
+    } catch (ProberBackend::Exception &e) {
+        throw Exception(std::string(e.what()));
+    }
 }
 
 bool Prober::enqueueInjectionBlock(ProbeId probeIndex, const util::Buffer &buffer)
 {
-    checkProbeId(probeIndex);
-
-    // Blocks if the injection queue is full
-    return mInjectionQueues[probeIndex.getValue()].writeBlocking(buffer.data(), buffer.size());
-}
-
-driver::RingBuffersDescription Prober::getRingBuffers()
-{
-    using RingBuffer = driver::RingBufferDescription;
-    using RingBuffers = driver::RingBuffersDescription;
-
-    driver::RingBuffersDescription from;
-    memset(&from, 0xFF, sizeof(from));
-    ioctl<GetRingBuffersDescription, Exception>(mDevice, from);
-
-    return from;
-}
-
-size_t Prober::getExtractionRingBufferLinearPosition()
-{
-    uint64_t from;
-    memset(&from, 0xFF, sizeof(from));
-    ioctl<GetExtractionRingBufferPosition, Exception>(mDevice, from);
-    return size_t{from};
-}
-
-size_t Prober::getInjectionRingBufferLinearPosition(ProbeId probeId)
-{
-    checkProbeId(probeId);
-
-    uint64_t from;
-    memset(&from, 0xFF, sizeof(from));
-
-    ULONG paramId = driver::ProbeFeatureParameter::INJECTION_BUFFER0_STATUS +
-                    probeId.getValue(); // According to the SwAS
-    ioctl<decltype(from), Exception>(mDevice, driver::IoCtlType::TinyGet, mProbeFeature, paramId,
-                                     from);
-    return size_t{from};
-}
-
-void Prober::startStreaming()
-{
-    auto ringBuffers = getRingBuffers();
-
-    auto result = getActiveSession(mCachedProbeConfiguration);
-    auto &extractionProbes = result.first;
-    auto &injectionProbes = result.second;
-
     try {
-        if (!extractionProbes.empty()) {
-
-            // opening queues of the active probes, and collecting probe point id
-            probe::Extractor::ProbePointMap probePointMap;
-            for (auto probeId : extractionProbes) {
-                mExtractionQueues[probeId.getValue()].open();
-
-                dsp_fw::ProbePointId probePointId =
-                    mCachedProbeConfiguration[probeId.getValue()].probePoint;
-                // Checking that the probe point id is not already in the map
-                if (probePointMap.find(probePointId) != probePointMap.end()) {
-                    throw Exception("Two active extraction probes have the same probe point id: " +
-                                    probePointId.toString());
-                }
-
-                probePointMap[probePointId] = probeId;
-            }
-
-            // starting exractor
-            mExtractor = std::make_unique<probe::Extractor>(
-                *mEventHandles.extractionHandle,
-                util::RingBufferReader(ringBuffers.extractionRBDescription.startAdress,
-                                       ringBuffers.extractionRBDescription.size,
-                                       [this] { return getExtractionRingBufferLinearPosition(); }),
-                probePointMap, mExtractionQueues);
-        }
-
-        // opening queues of the active probes and creating injectors
-        for (auto probeId : injectionProbes) {
-            mInjectionQueues[probeId.getValue()].open();
-
-            // Finding associated sample byte size
-            auto it = mCachedInjectionSampleByteSizes.find(probeId);
-            if (it == mCachedInjectionSampleByteSizes.end()) {
-                throw Exception("Sample byte size not found for injection probe id " +
-                                std::to_string(probeId.getValue()));
-            }
-            if (it->second == 0) {
-                throw Exception("Sample byte size must be greater than 0 for injection probe id " +
-                                std::to_string(probeId.getValue()));
-            }
-
-            auto &rbDesc = ringBuffers.injectionRBDescriptions[probeId.getValue()];
-
-            // Creating injector
-            mInjectors.emplace_back(
-                *mEventHandles.injectionHandles[probeId.getValue()],
-                util::RingBufferWriter(
-                    rbDesc.startAdress, rbDesc.size,
-                    [this, probeId] { return getInjectionRingBufferLinearPosition(probeId); }),
-                mInjectionQueues[probeId.getValue()], it->second);
-        }
-    } catch (std::exception &e1) {
-        try {
-            std::cerr << "Cancelling starting because: " << e1.what() << std::endl;
-            stopStreaming();
-        } catch (Exception &e2) {
-            std::cerr << "Unable to cancel starting : " << e2.what() << std::endl;
-        }
+        return mBackend.enqueueInjectionBlock(probeIndex, buffer);
+    } catch (ProberBackend::Exception &e) {
+        throw Exception(std::string(e.what()));
     }
 }
 
-void Prober::stopStreaming()
+std::size_t Prober::getMaxProbeCount() const
 {
-    // Deleting extractor (the packet producer)
-    mExtractor.reset();
+    return mBackend.getMaxProbeCount();
+}
 
-    // deleting injectors
-    mInjectors.clear();
+void Prober::setProbeConfig(ProbeId probeId, const Prober::ProbeConfig &config,
+                            std::size_t injectionSampleByteSize)
+{
+    try {
+        mBackend.setProbeConfig(probeId, config, injectionSampleByteSize);
+    } catch (ProberBackend::Exception &e) {
+        throw Exception(std::string(e.what()));
+    }
+}
 
-    // then closing the queues to make wakup listening threads
-    for (std::size_t probeIndex = 0; probeIndex < getMaxProbeCount(); ++probeIndex) {
-        mExtractionQueues[probeIndex].close();
-        mInjectionQueues[probeIndex].close();
+Prober::ProbeConfig Prober::getProbeConfig(ProbeId probeId) const
+{
+    try {
+        return mBackend.getProbeConfig(probeId);
+    } catch (ProberBackend::Exception &e) {
+        throw Exception(std::string(e.what()));
     }
 }
 }

@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -22,17 +22,20 @@
 #pragma once
 
 #include "cAVS/Prober.hpp"
-#include "cAVS/ModuleHandler.hpp"
-#include <vector>
+#include "cAVS/Windows/ProberBackend.hpp"
+
+#include <Util/Exception.hpp>
+
 #include <mutex>
-#include <map>
 
 namespace debug_agent
 {
 namespace cavs
 {
+namespace windows
+{
 
-/** This class pilots the driver probe service
+/** This class pilots the driver probe state machine
  *
  * The client changes only a simple boolean state (active, stopped). Changing this state
  * leads to set driver probe service state according the state machine specified in the SwAS.
@@ -40,88 +43,51 @@ namespace cavs
  *
  * By choice, the high level state (active, stopped) is not stored in this class, but retrieved
  * from driver. This helps to avoid divergent states.
- *
- * The public API of this class is thread safe.
  */
-class ProbeService
+class ProberStateMachine
 {
 public:
-    struct Exception : std::runtime_error
-    {
-        using std::runtime_error::runtime_error;
-    };
+    using Exception = util::Exception<ProberStateMachine>;
 
-    ProbeService(Prober &prober, ModuleHandler &moduleHandler)
-        : mProbeConfigs(prober.getMaxProbeCount()), mProber(prober), mModuleHandler(moduleHandler)
-    {
-    }
-    ~ProbeService();
+    ProberStateMachine(ProberBackend &proberBackend) : mProberBackend(proberBackend) {}
+    ProberStateMachine() = default;
 
-    /** Set service state
-     * @throw ProbeService::Exception
-     */
     void setState(bool active);
 
-    /** Get service state
-     * @throw ProbeService::Exception
-     */
     bool isActive();
 
-    /** Set configuration of one probe
-     * @throw ProbeService::Exception if the probe id is wrong
-     */
-    void setProbeConfig(ProbeId id, const Prober::ProbeConfig &config);
-
-    /** Get configuration of one probe
-     * @throw ProbeService::Exception if the probe id is wrong
-     */
-    Prober::ProbeConfig getProbeConfig(ProbeId id) const;
+    void stopNoThrow() noexcept;
 
 private:
-    ProbeService(const ProbeService &) = delete;
-    ProbeService &operator=(const ProbeService &) = delete;
+    ProberStateMachine(const ProberStateMachine &) = delete;
+    ProberStateMachine &operator=(const ProberStateMachine &) = delete;
 
-    using Transitions = std::map<Prober::State, Prober::State>;
-
-    /* Check if probe id is in valid range */
-    void checkProbeId(ProbeId id) const;
+    using Transitions = std::map<ProberBackend::State, ProberBackend::State>;
 
     /**
-    * @throw ProbeService::Exception
+    * @throw Prober::Exception
     */
     void start();
 
     /**
-    * @throw ProbeService::Exception
+    * @throw Prober::Exception
     */
     void stop();
 
-    void stopNoThrow() noexcept;
-
     /** Go to a target state using supplied transitions
-     * @throw ProbeService::Exception
+     * @throw Prober::Exception
      */
-    void goToState(Prober::State targetState, const Transitions &transitions, bool starting);
-
-    /** Process state-specific logic (for instance, the 'Owned' state requires probe configuration
-     * @throw ProbeService::Exception
-     */
-    void processState(Prober::State state, bool starting);
+    void goToState(ProberBackend::State targetState, const Transitions &transitions);
 
     /**
-     * @throw ProbeService::Exception
+     * @throw Prober::Exception
      */
-    Prober::State checkAndGetStateFromDriver();
+    ProberBackend::State checkAndGetStateFromDriver();
 
     /**
-     * @throw ProbeService::Exception
+     * @throw Prober::Exception
      */
-    void setStateToDriver(Prober::State state);
-
-    /** @return a map that provides the sample byte size of each injection probes
-     * @throw ProbeService::Exception
-     */
-    std::map<ProbeId, std::size_t> getInjectionSampleByteSizeMap() const;
+    void setStateTransitionToDriver(ProberBackend::State newState, ProberBackend::State oldState);
 
     /** State machine transitions leading to "Active" state from any other state*/
     static const Transitions mStartTransitions;
@@ -129,11 +95,10 @@ private:
     /** State machine transitions leading to "Idle" state from any other state */
     static const Transitions mStopTransitions;
 
-    Prober::SessionProbes mProbeConfigs;
-    Prober &mProber;
-    ModuleHandler &mModuleHandler;
-    mutable std::mutex mDriverLogServiceStateMutex;
-    mutable std::mutex mProbeConfigMutex;
+    ProberBackend &mProberBackend;
+
+    std::mutex mStateMutex;
 };
+}
 }
 }

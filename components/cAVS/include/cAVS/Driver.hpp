@@ -56,5 +56,5 @@ private:
     Driver(const Driver &) = delete;
     Driver &operator=(const Driver &) = delete;
 };
-};
-};
+}
+}

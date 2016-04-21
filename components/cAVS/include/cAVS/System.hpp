@@ -25,7 +25,6 @@
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/Topology.hpp"
 #include "cAVS/Prober.hpp"
-#include "cAVS/ProbeService.hpp"
 #include "cAVS/PerfService.hpp"
 #include "Util/WrappedRaw.hpp"
 #include <memory>
@@ -268,6 +267,11 @@ private:
     static std::unique_ptr<Driver> createDriver(const DriverFactory &driverFactory);
     void checkProbeIndex(ProbeId probeIndex) const;
 
+    /** @return the sample byte size of each injection probes used to inject silence if
+     * underrun happens.
+     */
+    std::size_t getInjectionSampleByteSize(ProbeId index, const Prober::ProbeConfig &config) const;
+
     std::unique_ptr<Driver> mDriver;
 
     /**
@@ -292,7 +296,7 @@ private:
     std::vector<std::mutex> mProbeExtractionMutexes;
     std::vector<std::mutex> mProbeInjectionMutexes;
 
-    ProbeService mProbeService;
+    Prober &mProber;
     PerfService mPerfService;
 };
 }

@@ -66,13 +66,13 @@ private:
     public:
         std::size_t getMaxProbeCount() const override { return 0; }
 
-        void setState(State) override {}
+        void setState(bool) override {}
 
-        State getState() override { return State::Idle; }
+        bool isActive() override { return false; }
 
-        void setSessionProbes(const SessionProbes, std::map<ProbeId, std::size_t>) override {}
+        void setProbeConfig(ProbeId, const ProbeConfig &, std::size_t) override {}
 
-        SessionProbes getSessionProbes() override { return SessionProbes(); }
+        ProbeConfig getProbeConfig(ProbeId) const override { return ProbeConfig(); }
 
         std::unique_ptr<util::Buffer> dequeueExtractionBlock(ProbeId) override { return nullptr; }
 

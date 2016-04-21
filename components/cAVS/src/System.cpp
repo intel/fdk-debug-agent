@@ -115,8 +115,7 @@ System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
       mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
       mProbeInjectionMutexes(mDriver->getProber().getMaxProbeCount()),
-      mProbeService(mDriver->getProber(), mDriver->getModuleHandler()),
-      mPerfService(mDriver->getPerf(), mDriver->getModuleHandler())
+      mProber(mDriver->getProber()), mPerfService(mDriver->getPerf(), mDriver->getModuleHandler())
 {
     try {
         mDriver->getModuleHandler().getFwConfig(mFwConfig);
@@ -368,8 +367,8 @@ void System::getTopology(Topology &topology)
 void System::setProberState(bool active)
 {
     try {
-        mProbeService.setState(active);
-    } catch (ProbeService::Exception &e) {
+        mProber.setState(active);
+    } catch (Prober::Exception &e) {
         throw Exception("Cannot set probe service state: " + std::string(e.what()));
     }
 }
@@ -380,8 +379,8 @@ void System::setProberState(bool active)
 bool System::isProberActive()
 {
     try {
-        return mProbeService.isActive();
-    } catch (ProbeService::Exception &e) {
+        return mProber.isActive();
+    } catch (Prober::Exception &e) {
         throw Exception("Cannot get probe service state: " + std::string(e.what()));
     }
 }
@@ -389,8 +388,8 @@ bool System::isProberActive()
 void System::setProbeConfiguration(ProbeId id, const Prober::ProbeConfig &probe)
 {
     try {
-        return mProbeService.setProbeConfig(id, probe);
-    } catch (ProbeService::Exception &e) {
+        return mProber.setProbeConfig(id, probe, getInjectionSampleByteSize(id, probe));
+    } catch (Prober::Exception &e) {
         throw Exception("Cannot set probe sconfig: " + std::string(e.what()));
     }
 }
@@ -398,8 +397,8 @@ void System::setProbeConfiguration(ProbeId id, const Prober::ProbeConfig &probe)
 Prober::ProbeConfig System::getProbeConfiguration(ProbeId id)
 {
     try {
-        return mProbeService.getProbeConfig(id);
-    } catch (ProbeService::Exception &e) {
+        return mProber.getProbeConfig(id);
+    } catch (Prober::Exception &e) {
         throw Exception("Cannot get probe config: " + std::string(e.what()));
     }
 }
@@ -429,6 +428,64 @@ PerfService::CompoundPerfData System::getPerfData()
     } catch (Perf::Exception &e) {
         throw Exception("When fetching perf data: " + std::string(e.what()));
     }
+}
+
+std::size_t System::getInjectionSampleByteSize(ProbeId probeIndex,
+                                               const Prober::ProbeConfig &probeConfig) const
+{
+    if (probeConfig.enabled) {
+        if (probeConfig.purpose == Prober::ProbePurpose::Inject ||
+            probeConfig.purpose == Prober::ProbePurpose::InjectReextract) {
+
+            // Getting props of the probed module instance
+            dsp_fw::ModuleInstanceProps props;
+            try {
+                mDriver->getModuleHandler().getModuleInstanceProps(
+                    probeConfig.probePoint.fields.getModuleId(),
+                    probeConfig.probePoint.fields.getInstanceId(), props);
+            } catch (ModuleHandler::Exception &e) {
+                throw Exception("Can not retreive injection format of probe id " +
+                                std::to_string(probeIndex.getValue()) + ": " +
+                                std::string(e.what()));
+            }
+
+            // Getting the pin list
+            dsp_fw::PinListInfo pinList;
+            switch (probeConfig.probePoint.fields.getType()) {
+            case dsp_fw::ProbeType::Input:
+                pinList = props.input_pins;
+                break;
+            case dsp_fw::ProbeType::Output:
+                pinList = props.output_pins;
+                break;
+            default:
+                throw Exception(
+                    "Unsupported pin type: " +
+                    dsp_fw::probeTypeHelper().toString(probeConfig.probePoint.fields.getType()));
+            }
+
+            // Checking pin index validy
+            if (probeConfig.probePoint.fields.getIndex() >= pinList.pin_info.size()) {
+                throw Exception("Invalid pin index: " +
+                                std::to_string(probeConfig.probePoint.fields.getIndex()) +
+                                " max: " + std::to_string(pinList.pin_info.size()));
+            }
+
+            // Checking bit depth validity
+            dsp_fw::PinProps &prop = pinList.pin_info[probeConfig.probePoint.fields.getIndex()];
+            if (prop.format.valid_bit_depth % 8 != 0) {
+                throw Exception("Unsupported format bit depth: " +
+                                std::to_string(prop.format.bit_depth) +
+                                " (should be a multiple of 8)");
+            }
+
+            // Calculating sample byte size and storing it in the map
+            std::size_t sampleByteSize =
+                (prop.format.bit_depth / 8) * prop.format.number_of_channels;
+            return sampleByteSize;
+        }
+    }
+    return 0;
 }
 }
 }

@@ -24,6 +24,8 @@ set(WINDOWS_LIB_SRCS
     src/Windows/Logger.cpp
     src/Windows/Prober.cpp
     src/Windows/Perf.cpp
+    src/Windows/ProberBackend.cpp
+    src/Windows/ProberStateMachine.cpp
     src/Windows/SystemDevice.cpp
     src/Windows/LastError.cpp
     src/Windows/DeviceIdFinder.cpp
@@ -49,6 +51,9 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/LastError.hpp
     include/cAVS/Windows/Logger.hpp
     include/cAVS/Windows/ModuleHandler.hpp
+    include/cAVS/Windows/Prober.hpp
+    include/cAVS/Windows/ProberBackend.hpp
+    include/cAVS/Windows/ProberStateMachine.hpp
     include/cAVS/Windows/Probe/ExtractionInputStream.hpp
     include/cAVS/Windows/Probe/Extractor.hpp
     include/cAVS/Windows/Probe/Injector.hpp
