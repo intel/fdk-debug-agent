@@ -112,6 +112,12 @@ public:
     virtual void ioControl(uint32_t ioControlCode, const util::Buffer *input,
                            util::Buffer *output) override;
 
+    /** Cause the debugger to break:
+     * - when the matching enty is added into the vector
+     * - when the matching entry is consumed from the vector
+     */
+    void breakOnItem(int itemIndex) { mBreakItemIndex = itemIndex; }
+
 private:
     /** An IO control entry, which is a 5-tuple */
     class IoCtlEntry final
@@ -139,6 +145,8 @@ private:
         std::shared_ptr<util::Buffer> mReturnedOutputBuffer;
         bool mSuccesssful;
     };
+
+    void addEntry(IoCtlEntry entry);
 
     /** Call this method in case of mock failure */
     void failure(const std::string &msg)
@@ -174,6 +182,7 @@ private:
     bool mFailed;
     std::function<void(void)> mLeftoverCallback;
     std::string mFailureMessage;
+    int mBreakItemIndex = -1;
 
     /* A device supports concurent ioctl calls */
     std::mutex mMemberMutex;

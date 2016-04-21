@@ -20,6 +20,7 @@
  ********************************************************************************
  */
 
+#include "cAVS/Windows/WindowsTypes.hpp"
 #include "cAVS/Windows/MockedDevice.hpp"
 #include <cassert>
 
@@ -91,6 +92,16 @@ bool MockedDevice::consumed() const
     return mEntries.empty();
 }
 
+void MockedDevice::addEntry(IoCtlEntry entry)
+{
+    mEntries.push(entry);
+
+    // by convention first entry index is 1, so checking index after insertion
+    if (mEntries.size() == mBreakItemIndex) {
+        DebugBreak();
+    }
+}
+
 void MockedDevice::addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
                                            const Buffer *expectedOutput,
                                            const Buffer *returnedOutput)
@@ -98,7 +109,7 @@ void MockedDevice::addSuccessfulIoctlEntry(uint32_t ioControlCode, const Buffer 
     /* No need to lock members, this method is called by the main thread of the test,
      * when it fills the test vector. */
 
-    mEntries.push(IoCtlEntry(ioControlCode, expectedInput, expectedOutput, returnedOutput, true));
+    addEntry(IoCtlEntry(ioControlCode, expectedInput, expectedOutput, returnedOutput, true));
 }
 
 void MockedDevice::addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *expectedInput,
@@ -107,7 +118,7 @@ void MockedDevice::addFailedIoctlEntry(uint32_t ioControlCode, const Buffer *exp
     /* No need to lock members, this method is called by the main thread of the test,
      * when it fills the test vector. */
 
-    mEntries.push(IoCtlEntry(ioControlCode, expectedInput, expectedOutput, nullptr, false));
+    addEntry(IoCtlEntry(ioControlCode, expectedInput, expectedOutput, nullptr, false));
 }
 
 void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer *output)
@@ -131,6 +142,10 @@ void MockedDevice::ioControl(uint32_t ioControlCode, const Buffer *input, Buffer
     const IoCtlEntry entry = mEntries.front();
     mEntries.pop();
     mCurrentEntry++;
+
+    if (mCurrentEntry == mBreakItemIndex) {
+        DebugBreak();
+    }
 
     /* Checking io control code */
     if (ioControlCode != entry.getIOControlCode()) {
