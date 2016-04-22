@@ -64,6 +64,10 @@ void Logger::startLogLocked(const Parameters & /*parameters*/)
 {
     assert(!isLogProductionRunning());
 
+    /* Clearing the log queue at session start and open it during all logger session. */
+    mLogEntryQueue.clear();
+    mLogEntryQueue.open();
+
     /* Starting the producer thread after setting level of logs into the fw */
     constructProducers();
 }
@@ -71,6 +75,9 @@ void Logger::startLogLocked(const Parameters & /*parameters*/)
 void Logger::stopLogLocked(const Parameters & /*parameters*/)
 {
     destroyProducers();
+
+    /* Unblocking log consumer threads */
+    mLogEntryQueue.close();
 }
 
 Logger::Parameters Logger::getParameters()
@@ -139,16 +146,6 @@ void Logger::destroyProducers()
     mLogProducers.clear();
 }
 
-void Logger::resetProducers()
-{
-    for (auto &producer : mLogProducers) {
-        assert(producer != nullptr);
-        /* Stopping the log producer thread in exception case */
-        producer.reset();
-    }
-    mLogProducers.clear();
-}
-
 void Logger::stop() noexcept
 {
     /* Stopping log session if one is running */
@@ -163,8 +160,6 @@ void Logger::stop() noexcept
             std::cout << "Cannot stop log producer : " << e.what() << std::endl;
         }
     }
-    /* Unblocking log consumer threads */
-    mLogEntryQueue.close();
 }
 
 void Logger::LogProducer::sendCommand(CommandPtr cmd)

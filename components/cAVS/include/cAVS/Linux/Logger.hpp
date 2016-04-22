@@ -52,8 +52,6 @@ public:
           mCompressDeviceFactory(compressDeviceFactory), mLogLevel(Level::Verbose), mCoreMask(0),
           mLogEntryQueue(queueMaxMemoryBytes, logBlockSize)
     {
-        // Queue is open during Logger lifetime
-        mLogEntryQueue.open();
     }
 
     ~Logger()
@@ -160,7 +158,6 @@ private:
     void stopLogLocked(const Parameters &parameters);
     void constructProducers();
     void destroyProducers();
-    void resetProducers();
 
     Device &mDevice;
     ControlDevice &mControlDevice;
