@@ -51,6 +51,9 @@ public:
                            const std::string &parameterValue) override;
 
 private:
+    std::string getInfoParameterValue(uint16_t moduleTypeId, uint16_t instanceId);
+    std::string getControlParameterValue(uint16_t moduleTypeId, const std::string &moduleTypeUuid,
+                                         uint16_t instanceId);
     /** Returns the xml tag that matches a parameter kind (info, control) */
     static std::string getParameterKindTag(ParameterKind parameterKind);
 

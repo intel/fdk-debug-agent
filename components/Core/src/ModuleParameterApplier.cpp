@@ -155,16 +155,43 @@ std::string ModuleParameterApplier::getParameterValue(const std::string &type,
     const uint16_t &moduleTypeId = info.first;
     const std::string &moduleTypeUuid = info.second;
     uint16_t instanceId = parseModuleInstanceId(instanceIdStr);
+    auto &&tag = getParameterKindTag(parameterKind);
 
+    std::ostringstream out;
+    out << "<" << tag << ">\n";
+    switch (parameterKind) {
+    case ParameterKind::Info:
+        out << getInfoParameterValue(moduleTypeId, instanceId);
+        break;
+    case ParameterKind::Control:
+        out << getControlParameterValue(moduleTypeId, moduleTypeUuid, instanceId);
+        break;
+    }
+
+    out << "</" << tag << ">\n";
+    return out.str();
+}
+
+std::string ModuleParameterApplier::getInfoParameterValue(uint16_t moduleTypeId,
+                                                          uint16_t instanceId)
+{
+    // TODO: actually return something (first: the module memory information).
+    return "";
+}
+
+std::string ModuleParameterApplier::getControlParameterValue(uint16_t moduleTypeId,
+                                                             const std::string &moduleTypeUuid,
+                                                             uint16_t instanceId)
+{
     /* Getting parameter block names */
     const std::vector<std::string> children =
-        getModuleParameterNames(moduleTypeUuid, parameterKind);
+        getModuleParameterNames(moduleTypeUuid, ParameterKind::Control);
 
     std::string parameters;
     for (auto &blockName : children) {
 
         /* Getting firmware parameter id that matches the parameter name */
-        auto paramId = getParamIdFromName(moduleTypeUuid, parameterKind, blockName);
+        auto paramId = getParamIdFromName(moduleTypeUuid, ParameterKind::Control, blockName);
 
         /* Get parameter value from FW */
         util::Buffer parameterPayload;
@@ -178,21 +205,14 @@ std::string ModuleParameterApplier::getParameterValue(const std::string &type,
         /* Converting it to xml using the parameter serializer, and concatening the result. */
         try {
             parameters += mParameterSerializer->binaryToXml(
-                BaseModelConverter::subsystemName, moduleTypeUuid, translate(parameterKind),
-                blockName, parameterPayload);
+                BaseModelConverter::subsystemName, moduleTypeUuid,
+                translate(ParameterKind::Control), blockName, parameterPayload);
         } catch (ParameterSerializer::Exception &e) {
             throw Exception("Binary to xml conversion failed: " + std::string(e.what()));
         }
     }
 
-    /** Producing the final xml rersult
-    *
-    * @todo use libstructure instead */
-    std::stringstream out;
-    auto &&tag = getParameterKindTag(parameterKind);
-    out << "<" << tag << ">\n" << parameters << "</" << tag << ">\n";
-
-    return out.str();
+    return parameters;
 }
 
 ParameterSerializer::ParameterKind ModuleParameterApplier::translate(ParameterKind kind)
