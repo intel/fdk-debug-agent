@@ -1,0 +1,7 @@
+<info_parameters>
+<ParameterBlock Name="Memory state">
+    <IntegerParameter Name="Stack bytes">128</IntegerParameter>
+    <IntegerParameter Name="BSS total bytes">256</IntegerParameter>
+    <IntegerParameter Name="BSS used bytes">64</IntegerParameter>
+</ParameterBlock>
+</info_parameters>

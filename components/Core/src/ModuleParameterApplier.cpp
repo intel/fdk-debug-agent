@@ -175,8 +175,18 @@ std::string ModuleParameterApplier::getParameterValue(const std::string &type,
 std::string ModuleParameterApplier::getInfoParameterValue(uint16_t moduleTypeId,
                                                           uint16_t instanceId)
 {
-    // TODO: actually return something (first: the module memory information).
-    return "";
+    auto props = mSystem.getModuleHandler().getModuleInstanceProps(moduleTypeId, instanceId);
+
+    std::ostringstream info;
+    info << "<ParameterBlock Name=\"Memory state\">\n"
+         << "    <IntegerParameter Name=\"Stack bytes\">" << props.stack_bytes
+         << "</IntegerParameter>\n"
+         << "    <IntegerParameter Name=\"BSS total bytes\">" << props.bss_total_bytes
+         << "</IntegerParameter>\n"
+         << "    <IntegerParameter Name=\"BSS used bytes\">" << props.bss_used_bytes
+         << "</IntegerParameter>\n"
+         << "</ParameterBlock>\n";
+    return info.str();
 }
 
 std::string ModuleParameterApplier::getControlParameterValue(uint16_t moduleTypeId,

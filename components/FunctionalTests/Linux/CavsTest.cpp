@@ -448,6 +448,56 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: Set module instance control paramete
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 }
 
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance info parameters "
+                          "(URL: /instance/cavs.module-aec/1/info_parameters)",
+                 "[module][info]")
+{
+    /* Setting the test vector
+     * ----------------------- */
+    {
+        linux::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+
+        /* Adding topology command */
+        addInstanceTopologyCommands(commands);
+
+        /* Add command for get module parameter */
+        uint16_t moduleId = 1;
+        uint16_t InstanceId = 1;
+        dsp_fw::ModuleInstanceProps props;
+        props.id.moduleId = 1;
+        props.id.instanceId = 1;
+        props.stack_bytes = 128;
+        props.bss_total_bytes = 256;
+        props.bss_used_bytes = 64;
+        commands.addGetModuleInstancePropsCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId,
+                                                  InstanceId, props);
+    }
+
+    /* Now using the mocked device
+     * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* Request an instance topology refresh */
+    CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
+
+    /* 1: Getting system information*/
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.module-aec/1/info_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("module_instance_info_params"))));
+}
+
 TEST_CASE_METHOD(Fixture, "DebugAgent / cAVS: Getting structure of parameters(module, logs)",
                  "[log][module][structure]")
 {
