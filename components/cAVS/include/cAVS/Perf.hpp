@@ -65,6 +65,7 @@ public:
     {
         uint32_t resourceId;
         PowerMode powerMode;
+        bool isRemoved;
         uint32_t budget;
         uint32_t peak;
         uint32_t average;

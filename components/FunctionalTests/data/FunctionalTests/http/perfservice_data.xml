@@ -3,6 +3,7 @@
         <ParameterBlock Name="0">
             <IntegerParameter Name="resource_id">0</IntegerParameter>
             <StringParameter Name="power_mode">D0</StringParameter>
+            <BooleanParameter Name="is_removed">0</BooleanParameter>
             <IntegerParameter Name="budget">0</IntegerParameter>
             <IntegerParameter Name="peak">1337</IntegerParameter>
             <IntegerParameter Name="average">42</IntegerParameter>
@@ -10,6 +11,7 @@
         <ParameterBlock Name="1">
             <IntegerParameter Name="resource_id">1</IntegerParameter>
             <StringParameter Name="power_mode">D0i3</StringParameter>
+            <BooleanParameter Name="is_removed">1</BooleanParameter>
             <IntegerParameter Name="budget">0</IntegerParameter>
             <IntegerParameter Name="peak">987654</IntegerParameter>
             <IntegerParameter Name="average">321</IntegerParameter>
@@ -19,6 +21,7 @@
         <ParameterBlock Name="0">
             <IntegerParameter Name="resource_id">65536</IntegerParameter>
             <StringParameter Name="power_mode">D0i3</StringParameter>
+            <BooleanParameter Name="is_removed">0</BooleanParameter>
             <IntegerParameter Name="budget">64000</IntegerParameter>
             <IntegerParameter Name="peak">123456</IntegerParameter>
             <IntegerParameter Name="average">789</IntegerParameter>
@@ -26,6 +29,7 @@
         <ParameterBlock Name="1">
             <IntegerParameter Name="resource_id">786432</IntegerParameter>
             <StringParameter Name="power_mode">D0</StringParameter>
+            <BooleanParameter Name="is_removed">0</BooleanParameter>
             <IntegerParameter Name="budget">294000</IntegerParameter>
             <IntegerParameter Name="peak">1111</IntegerParameter>
             <IntegerParameter Name="average">222</IntegerParameter>
@@ -33,6 +37,7 @@
         <ParameterBlock Name="2">
             <IntegerParameter Name="resource_id">786433</IntegerParameter>
             <StringParameter Name="power_mode">D0i3</StringParameter>
+            <BooleanParameter Name="is_removed">0</BooleanParameter>
             <IntegerParameter Name="budget">762352</IntegerParameter>
             <IntegerParameter Name="peak">3333</IntegerParameter>
             <IntegerParameter Name="average">444</IntegerParameter>

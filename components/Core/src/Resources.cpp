@@ -329,6 +329,8 @@ static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item
             << "</IntegerParameter>\n"
             << "            <StringParameter Name=\"power_mode\">"
             << Perf::powerModeHelper().toString(item.powerMode) << "</StringParameter>\n"
+            << "            <BooleanParameter Name=\"is_removed\">" << item.isRemoved
+            << "</BooleanParameter>\n"
             << "            <IntegerParameter Name=\"budget\">" << item.budget
             << "</IntegerParameter>\n"
             << "            <IntegerParameter Name=\"peak\">" << item.peak

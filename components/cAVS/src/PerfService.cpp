@@ -105,7 +105,10 @@ PerfService::CompoundPerfData PerfService::getData()
             Perf::Item item{
                 rawItem.resourceId.toInt(),
                 (rawItem.details.bits.powerMode == 0 ? Perf::PowerMode::D0 : Perf::PowerMode::D0i3),
-                decltype(Perf::Item::budget)(budget), rawItem.peak, rawItem.average};
+                bool(rawItem.details.bits.isRemoved),
+                decltype(Perf::Item::budget)(budget),
+                rawItem.peak,
+                rawItem.average};
             // Separate modules and cores, each kind in its own list.
             if (isCore) {
                 result.cores.push_back(item);
