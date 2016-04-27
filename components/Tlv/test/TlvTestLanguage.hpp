@@ -98,8 +98,22 @@ public:
     };
     static const unsigned int aTagIdWhichIsNotInTheLanguageTagsList = 42;
 
-    TlvTestLanguage() : mTestLanguageTlvMap(), mLanguageDictionary(mTestLanguageTlvMap)
+    TlvTestLanguage() : mLanguageDictionary(mkMap()) {}
+
+    const TlvDictionaryInterface &getTlvDictionary() const noexcept override
     {
+        return mLanguageDictionary;
+    }
+
+    TlvWrapperInterface *getReferenceWrapper(Tags tag)
+    {
+        return mLanguageDictionary.getTlvWrapperForTag(tag);
+    }
+
+private:
+    TlvDictionary<Tags>::TlvMap mkMap()
+    {
+        TlvDictionary<Tags>::TlvMap mTestLanguageTlvMap;
         mTestLanguageTlvMap[Tags::Hello] =
             std::make_unique<TlvWrapper<HelloValueType>>(hello, isHelloValid);
 
@@ -109,16 +123,8 @@ public:
             std::make_unique<TlvWrapper<WorldValueType>>(world, isWorldValid);
 
         mTestLanguageTlvMap[Tags::BadTag] = std::make_unique<TlvVoidWrapper>();
+
+        return mTestLanguageTlvMap;
     }
-
-    const TlvDictionaryInterface &getTlvDictionary() const noexcept override
-    {
-        return mLanguageDictionary;
-    }
-
-    TlvWrapperInterface *getReferenceWrapper(Tags tag) { return mTestLanguageTlvMap[tag].get(); }
-
-private:
-    TlvDictionary<Tags>::TlvMap mTestLanguageTlvMap;
     TlvDictionary<Tags> mLanguageDictionary;
 };

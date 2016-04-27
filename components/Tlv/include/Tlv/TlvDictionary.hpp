@@ -41,15 +41,18 @@ public:
     using TlvMap = std::map<TagsEnumClass, std::unique_ptr<TlvWrapperInterface>>;
 
     /**
-     * @param[in] tlvMap the reference to the map which associates a TlvWrapepr to a TLV tag
+     * @param[in] tlvMap the map which associates a TlvWrapepr to a TLV tag
      */
-    TlvDictionary(TlvMap &tlvMap) : mTlvMap(tlvMap) {}
+    TlvDictionary(TlvMap tlvMap) : mTlvMap(std::move(tlvMap)) {}
 
     TlvWrapperInterface *getTlvWrapperForTag(unsigned int tag) const noexcept override
     {
-        TagsEnumClass enumTag = static_cast<TagsEnumClass>(tag);
+        return getTlvWrapperForTag(static_cast<TagsEnumClass>(tag));
+    }
 
-        typename TlvMap::const_iterator it = mTlvMap.find(enumTag);
+    TlvWrapperInterface *getTlvWrapperForTag(TagsEnumClass tag) const noexcept
+    {
+        typename TlvMap::const_iterator it = mTlvMap.find(tag);
 
         if (it != mTlvMap.end()) {
 
@@ -72,7 +75,7 @@ public:
     }
 
 private:
-    TlvMap &mTlvMap;
+    TlvMap mTlvMap;
 };
 }
 }

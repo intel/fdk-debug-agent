@@ -100,49 +100,7 @@ public:
     uint32_t maxLibsCount;
     bool isMaxLibsCountValid;
 
-    FwConfig() : mFwConfigTlvMap(), mFwConfigTlvDictionary(mFwConfigTlvMap)
-    {
-        using Tags = FwConfigParams;
-        using namespace tlv;
-
-        mFwConfigTlvMap[Tags::FW_VERSION_FW_CFG] =
-            std::make_unique<TlvWrapper<FwVersion>>(fwVersion, isFwVersionValid);
-        mFwConfigTlvMap[Tags::MEMORY_RECLAIMED_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(memoryReclaimed, isMemoryReclaimedValid);
-        mFwConfigTlvMap[Tags::SLOW_CLOCK_FREQ_HZ_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(slowClockFreqHz, isSlowClockFreqHzValid);
-        mFwConfigTlvMap[Tags::FAST_CLOCK_FREQ_HZ_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(fastClockFreqHz, isFastClockFreqHzValid);
-        mFwConfigTlvMap[Tags::DMA_BUFFER_CONFIG_FW_CFG] =
-            std::make_unique<TlvVectorWrapper<DmaBufferConfig>>(dmaBufferConfig);
-        mFwConfigTlvMap[Tags::ALH_SUPPORT_LEVEL_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(alhSupportLevel, isAlhSupportLevelValid);
-        mFwConfigTlvMap[Tags::IPC_DL_MAILBOX_BYTES_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(ipcDlMailboxBytes, isIpcDlMailboxBytesValid);
-        mFwConfigTlvMap[Tags::IPC_UL_MAILBOX_BYTES_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(ipcUlMailboxBytes, isIpcUlMailboxBytesValid);
-        mFwConfigTlvMap[Tags::TRACE_LOG_BYTES_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(traceLogBytes, isTraceLogBytesValid);
-        mFwConfigTlvMap[Tags::MAX_PPL_CNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(maxPplCount, isMaxPplCountValid);
-        mFwConfigTlvMap[Tags::MAX_ASTATE_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(maxAstateCount, isMaxAstateCountValid);
-        mFwConfigTlvMap[Tags::MAX_MODULE_PIN_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(maxModulePinCount, isMaxModulePinCountValid);
-        mFwConfigTlvMap[Tags::MODULES_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(modulesCount, isModulesCountValid);
-        mFwConfigTlvMap[Tags::MAX_MOD_INST_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(maxModInstCount, isMaxModInstCountValid);
-        mFwConfigTlvMap[Tags::MAX_LL_TASKS_PER_PRI_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(maxLlTasksPerPriCount,
-                                                   isMaxLlTasksPerPriCountValid);
-        mFwConfigTlvMap[Tags::LL_PRI_COUNT] =
-            std::make_unique<TlvWrapper<uint32_t>>(llPriCount, isLlPriCountValid);
-        mFwConfigTlvMap[Tags::MAX_DP_TASKS_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(maxDpTasksCount, isMaxDpTasksCountValid);
-        mFwConfigTlvMap[Tags::MAX_LIBS_COUNT_FW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(maxLibsCount, isMaxLibsCountValid);
-    }
+    FwConfig() : mFwConfigTlvDictionary(mkMap()) {}
 
     const tlv::TlvDictionaryInterface &getTlvDictionary() const noexcept override
     {
@@ -150,8 +108,54 @@ public:
     }
 
 private:
-    tlv::TlvDictionary<FwConfigParams>::TlvMap mFwConfigTlvMap;
-    tlv::TlvDictionary<FwConfigParams> mFwConfigTlvDictionary;
+    using Dictionary = tlv::TlvDictionary<FwConfigParams>;
+
+    Dictionary::TlvMap mkMap()
+    {
+        using Tags = FwConfigParams;
+        using namespace tlv;
+
+        Dictionary::TlvMap tlvMap;
+        tlvMap[Tags::FW_VERSION_FW_CFG] =
+            std::make_unique<TlvWrapper<FwVersion>>(fwVersion, isFwVersionValid);
+        tlvMap[Tags::MEMORY_RECLAIMED_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(memoryReclaimed, isMemoryReclaimedValid);
+        tlvMap[Tags::SLOW_CLOCK_FREQ_HZ_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(slowClockFreqHz, isSlowClockFreqHzValid);
+        tlvMap[Tags::FAST_CLOCK_FREQ_HZ_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(fastClockFreqHz, isFastClockFreqHzValid);
+        tlvMap[Tags::DMA_BUFFER_CONFIG_FW_CFG] =
+            std::make_unique<TlvVectorWrapper<DmaBufferConfig>>(dmaBufferConfig);
+        tlvMap[Tags::ALH_SUPPORT_LEVEL_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(alhSupportLevel, isAlhSupportLevelValid);
+        tlvMap[Tags::IPC_DL_MAILBOX_BYTES_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(ipcDlMailboxBytes, isIpcDlMailboxBytesValid);
+        tlvMap[Tags::IPC_UL_MAILBOX_BYTES_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(ipcUlMailboxBytes, isIpcUlMailboxBytesValid);
+        tlvMap[Tags::TRACE_LOG_BYTES_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(traceLogBytes, isTraceLogBytesValid);
+        tlvMap[Tags::MAX_PPL_CNT_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(maxPplCount, isMaxPplCountValid);
+        tlvMap[Tags::MAX_ASTATE_COUNT_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(maxAstateCount, isMaxAstateCountValid);
+        tlvMap[Tags::MAX_MODULE_PIN_COUNT_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(maxModulePinCount, isMaxModulePinCountValid);
+        tlvMap[Tags::MODULES_COUNT_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(modulesCount, isModulesCountValid);
+        tlvMap[Tags::MAX_MOD_INST_COUNT_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(maxModInstCount, isMaxModInstCountValid);
+        tlvMap[Tags::MAX_LL_TASKS_PER_PRI_COUNT_FW_CFG] = std::make_unique<TlvWrapper<uint32_t>>(
+            maxLlTasksPerPriCount, isMaxLlTasksPerPriCountValid);
+        tlvMap[Tags::LL_PRI_COUNT] =
+            std::make_unique<TlvWrapper<uint32_t>>(llPriCount, isLlPriCountValid);
+        tlvMap[Tags::MAX_DP_TASKS_COUNT_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(maxDpTasksCount, isMaxDpTasksCountValid);
+        tlvMap[Tags::MAX_LIBS_COUNT_FW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(maxLibsCount, isMaxLibsCountValid);
+
+        return tlvMap;
+    }
+    Dictionary mFwConfigTlvDictionary;
 };
 }
 }

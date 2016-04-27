@@ -132,32 +132,7 @@ public:
     uint32_t ebbSizeBytes;
     bool isEbbSizeBytesValid;
 
-    HwConfig() : mHwConfigTlvMap(), mHwConfigTlvDictionary(mHwConfigTlvMap)
-    {
-        using Tags = HwConfigParams;
-        using namespace tlv;
-
-        mHwConfigTlvMap[Tags::cAVS_VER_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(cavsVersion, isCavsVersionValid);
-        mHwConfigTlvMap[Tags::DSP_CORES_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(dspCoreCount, isDspCoreCountValid);
-        mHwConfigTlvMap[Tags::MEM_PAGE_BYTES_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(memPageSize, isMemPageSizeValid);
-        mHwConfigTlvMap[Tags::TOTAL_PHYS_MEM_PAGES_HW_CFG] = std::make_unique<TlvWrapper<uint32_t>>(
-            totalPhysicalMemoryPage, isTotalPhysicalMemoryPageValid);
-        mHwConfigTlvMap[Tags::I2S_CAPS_HW_CFG] =
-            std::make_unique<TlvWrapper<I2sCapabilities>>(i2sCaps, isI2sCapsValid);
-        mHwConfigTlvMap[Tags::GPDMA_CAPS_HW_CFG] =
-            std::make_unique<TlvWrapper<GpdmaCapabilities>>(gpdmaCaps, isGpdmaCapsValid);
-        mHwConfigTlvMap[Tags::GATEWAY_COUNT_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(gatewayCount, isGatewayCountValid);
-        mHwConfigTlvMap[Tags::LP_EBB_COUNT_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(lpEbbCount, isLpEbbCountValid);
-        mHwConfigTlvMap[Tags::HP_EBB_COUNT_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(hpEbbCount, isHpEbbCountValid);
-        mHwConfigTlvMap[Tags::EBB_SIZE_BYTES_HW_CFG] =
-            std::make_unique<TlvWrapper<uint32_t>>(ebbSizeBytes, isEbbSizeBytesValid);
-    }
+    HwConfig() : mHwConfigTlvDictionary(mkMap()) {}
 
     const tlv::TlvDictionaryInterface &getTlvDictionary() const noexcept override
     {
@@ -165,8 +140,39 @@ public:
     }
 
 private:
-    tlv::TlvDictionary<HwConfigParams>::TlvMap mHwConfigTlvMap;
-    tlv::TlvDictionary<HwConfigParams> mHwConfigTlvDictionary;
+    using Dictionary = tlv::TlvDictionary<HwConfigParams>;
+
+    Dictionary::TlvMap mkMap()
+    {
+        using Tags = HwConfigParams;
+        using namespace tlv;
+
+        Dictionary::TlvMap tlvMap;
+        tlvMap[Tags::cAVS_VER_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(cavsVersion, isCavsVersionValid);
+        tlvMap[Tags::DSP_CORES_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(dspCoreCount, isDspCoreCountValid);
+        tlvMap[Tags::MEM_PAGE_BYTES_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(memPageSize, isMemPageSizeValid);
+        tlvMap[Tags::TOTAL_PHYS_MEM_PAGES_HW_CFG] = std::make_unique<TlvWrapper<uint32_t>>(
+            totalPhysicalMemoryPage, isTotalPhysicalMemoryPageValid);
+        tlvMap[Tags::I2S_CAPS_HW_CFG] =
+            std::make_unique<TlvWrapper<I2sCapabilities>>(i2sCaps, isI2sCapsValid);
+        tlvMap[Tags::GPDMA_CAPS_HW_CFG] =
+            std::make_unique<TlvWrapper<GpdmaCapabilities>>(gpdmaCaps, isGpdmaCapsValid);
+        tlvMap[Tags::GATEWAY_COUNT_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(gatewayCount, isGatewayCountValid);
+        tlvMap[Tags::LP_EBB_COUNT_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(lpEbbCount, isLpEbbCountValid);
+        tlvMap[Tags::HP_EBB_COUNT_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(hpEbbCount, isHpEbbCountValid);
+        tlvMap[Tags::EBB_SIZE_BYTES_HW_CFG] =
+            std::make_unique<TlvWrapper<uint32_t>>(ebbSizeBytes, isEbbSizeBytesValid);
+
+        return tlvMap;
+    }
+
+    Dictionary mHwConfigTlvDictionary;
 };
 }
 }
