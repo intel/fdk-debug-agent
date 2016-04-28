@@ -119,13 +119,13 @@ System::System(const DriverFactory &driverFactory)
       mPerfService(mDriver->getPerf(), mDriver->getModuleHandler())
 {
     try {
-        mDriver->getModuleHandler().getFwConfig(mFwConfig);
+        mFwConfig = mDriver->getModuleHandler().getFwConfig();
     } catch (ModuleHandler::Exception &e) {
         /** @todo use logging */
         std::cout << "Unable to get FW config: " + std::string(e.what()) << std::endl;
     }
     try {
-        mDriver->getModuleHandler().getHwConfig(mHwConfig);
+        mHwConfig = mDriver->getModuleHandler().getHwConfig();
     } catch (ModuleHandler::Exception &e) {
         /** @todo use logging */
         std::cout << "Unable to get HW config: " + std::string(e.what()) << std::endl;
@@ -133,7 +133,7 @@ System::System(const DriverFactory &driverFactory)
 
     if (mFwConfig.isModulesCountValid) {
         try {
-            mDriver->getModuleHandler().getModulesEntries(mFwConfig.modulesCount, mModuleEntries);
+            mModuleEntries = mDriver->getModuleHandler().getModulesEntries(mFwConfig.modulesCount);
         } catch (ModuleHandler::Exception &e) {
             /** @todo use logging */
             std::cout << "Unable to get module entries: " + std::string(e.what()) << std::endl;
@@ -266,8 +266,8 @@ void System::setModuleParameter(uint16_t moduleId, uint16_t instanceId,
 void System::getModuleParameter(uint16_t moduleId, uint16_t instanceId,
                                 dsp_fw::ParameterId parameterId, util::Buffer &parameterPayload)
 {
-    mDriver->getModuleHandler().getModuleParameter(moduleId, instanceId, parameterId,
-                                                   parameterPayload);
+    parameterPayload =
+        mDriver->getModuleHandler().getModuleParameter(moduleId, instanceId, parameterId);
 }
 
 void System::getTopology(Topology &topology)
@@ -283,7 +283,7 @@ void System::getTopology(Topology &topology)
     }
 
     try {
-        handler.getGatewaysInfo(mHwConfig.gatewayCount, topology.gateways);
+        topology.gateways = handler.getGatewaysInfo(mHwConfig.gatewayCount);
     } catch (ModuleHandler::Exception &e) {
         throw Exception("Can not retrieve gateways: " + std::string(e.what()));
     }
@@ -295,7 +295,7 @@ void System::getTopology(Topology &topology)
 
     std::vector<dsp_fw::PipeLineIdType> pipelineIds;
     try {
-        handler.getPipelineIdList(mFwConfig.maxPplCount, pipelineIds);
+        pipelineIds = handler.getPipelineIdList(mFwConfig.maxPplCount);
     } catch (ModuleHandler::Exception &e) {
         throw Exception("Can not retrieve pipeline ids: " + std::string(e.what()));
     }
@@ -303,8 +303,7 @@ void System::getTopology(Topology &topology)
     /* Retrieving pipeline props*/
     for (auto pplId : pipelineIds) {
         try {
-            dsp_fw::PplProps props;
-            handler.getPipelineProps(pplId, props);
+            dsp_fw::PplProps props = handler.getPipelineProps(pplId);
             topology.pipelines.push_back(props);
 
             /* Collecting module instance ids*/
@@ -330,8 +329,7 @@ void System::getTopology(Topology &topology)
 
     for (uint32_t coreId = 0; coreId < mHwConfig.dspCoreCount; coreId++) {
         try {
-            dsp_fw::SchedulersInfo info;
-            handler.getSchedulersInfo(dsp_fw::CoreId{coreId}, info);
+            dsp_fw::SchedulersInfo info = handler.getSchedulersInfo(dsp_fw::CoreId{coreId});
             topology.schedulers.push_back(info);
 
             /* Collecting module instance ids*/
@@ -351,9 +349,8 @@ void System::getTopology(Topology &topology)
     /* Retrieving module instances*/
     for (auto &compoundId : moduleInstanceIds) {
         try {
-            dsp_fw::ModuleInstanceProps props;
-            handler.getModuleInstanceProps(compoundId.moduleId, compoundId.instanceId, props);
-            topology.moduleInstances[props.id] = props;
+            topology.moduleInstances[compoundId] =
+                handler.getModuleInstanceProps(compoundId.moduleId, compoundId.instanceId);
         } catch (ModuleHandler::Exception &e) {
             throw Exception("Can not retrieve module instance with id: (" +
                             std::to_string(compoundId.moduleId) + "," +
@@ -458,9 +455,9 @@ const Prober::InjectionSampleByteSizes System::getInjectionSampleByteSizes() con
                 // Getting props of the probed module instance
                 dsp_fw::ModuleInstanceProps props;
                 try {
-                    mDriver->getModuleHandler().getModuleInstanceProps(
+                    props = mDriver->getModuleHandler().getModuleInstanceProps(
                         probeConfig.probePoint.fields.getModuleId(),
-                        probeConfig.probePoint.fields.getInstanceId(), props);
+                        probeConfig.probePoint.fields.getInstanceId());
                 } catch (ModuleHandler::Exception &e) {
                     throw Exception("Can not retreive injection format of probe id " +
                                     std::to_string(probeIndex) + ": " + std::string(e.what()));

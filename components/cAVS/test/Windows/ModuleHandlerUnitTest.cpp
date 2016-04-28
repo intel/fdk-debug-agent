@@ -77,8 +77,8 @@ void checkModuleEntryIoctl(windows::ModuleHandler &moduleHandler, std::size_t ex
 {
     /*Successful get module info command */
     std::vector<dsp_fw::ModuleEntry> entries;
-    CHECK_NOTHROW(
-        moduleHandler.getModulesEntries(static_cast<uint32_t>(expectedModuleCount), entries));
+    CHECK_NOTHROW(entries =
+                      moduleHandler.getModulesEntries(static_cast<uint32_t>(expectedModuleCount)));
 
     /* Checking result */
     dsp_fw::ModuleEntry expectedModuleEntry;
@@ -126,13 +126,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module entries")
 
     /* Simulating an os error during getting module entries */
     std::vector<dsp_fw::ModuleEntry> entries;
-    CHECK_THROWS_AS_MSG(moduleHandler.getModulesEntries(moduleCount, entries),
+    CHECK_THROWS_AS_MSG(entries = moduleHandler.getModulesEntries(moduleCount),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Device returns an exception: OS says that io control has failed.");
     CHECK(entries.empty());
 
     /* Simulating a driver error during getting module entries */
-    CHECK_THROWS_AS_MSG(moduleHandler.getModulesEntries(moduleCount, entries),
+    CHECK_THROWS_AS_MSG(entries = moduleHandler.getModulesEntries(moduleCount),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
@@ -140,7 +140,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module entries")
 
     /* Simulating a firmware error during getting module entries */
     CHECK_THROWS_AS_MSG(
-        moduleHandler.getModulesEntries(moduleCount, entries),
+        entries = moduleHandler.getModulesEntries(moduleCount),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
@@ -194,13 +194,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
 
     /* Simulating an os error during getting fw config */
     dsp_fw::FwConfig fwConfig;
-    CHECK_THROWS_AS_MSG(moduleHandler.getFwConfig(fwConfig),
+    CHECK_THROWS_AS_MSG(fwConfig = moduleHandler.getFwConfig(),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Device returns an exception: OS says that io control has failed.");
     CHECK(fwConfig.isFwVersionValid == false);
 
     /* Simulating a driver error during getting fw config */
-    CHECK_THROWS_AS_MSG(moduleHandler.getFwConfig(fwConfig),
+    CHECK_THROWS_AS_MSG(fwConfig = moduleHandler.getFwConfig(),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
@@ -208,13 +208,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
 
     /* Simulating a firmware error during getting fw config */
     CHECK_THROWS_AS_MSG(
-        moduleHandler.getFwConfig(fwConfig), debug_agent::cavs::ModuleHandler::Exception,
+        fwConfig = moduleHandler.getFwConfig(), debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(fwConfig.isFwVersionValid == false);
 
     /* Successful get fw config command */
-    CHECK_NOTHROW(moduleHandler.getFwConfig(fwConfig));
+    CHECK_NOTHROW(fwConfig = moduleHandler.getFwConfig());
     CHECK(fwConfig.isFwVersionValid == true);
     const dsp_fw::FwVersion *injectedVersion = reinterpret_cast<const dsp_fw::FwVersion *>(
         fwConfigTlvList.data() + fwVersionValueOffsetInTlv);
@@ -263,13 +263,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
     /* Simulating an os error during getting pipeline list */
     std::vector<dsp_fw::PipeLineIdType> pipelineIds;
     static const uint32_t maxPipeline = 10;
-    CHECK_THROWS_AS_MSG(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds),
+    CHECK_THROWS_AS_MSG(pipelineIds = moduleHandler.getPipelineIdList(maxPipeline),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Device returns an exception: OS says that io control has failed.");
     CHECK(pipelineIds.empty());
 
     /* Simulating a driver error during getting pipeline list */
-    CHECK_THROWS_AS_MSG(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds),
+    CHECK_THROWS_AS_MSG(pipelineIds = moduleHandler.getPipelineIdList(maxPipeline),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
@@ -277,14 +277,14 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
 
     /* Simulating a firmware error during getting pipeline list */
     CHECK_THROWS_AS_MSG(
-        moduleHandler.getPipelineIdList(maxPipeline, pipelineIds),
+        pipelineIds = moduleHandler.getPipelineIdList(maxPipeline),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(pipelineIds.empty());
 
     /*Successful get pipeline list command */
-    CHECK_NOTHROW(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds));
+    CHECK_NOTHROW(pipelineIds = moduleHandler.getPipelineIdList(maxPipeline));
     CHECK(fwPipelineIdList == pipelineIds);
 }
 
@@ -327,13 +327,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline props")
     static const dsp_fw::PplProps emptyProps = {PlID{0}, 0, 0, 0, 0, 0, {}, {}, {}};
     dsp_fw::PplProps props = emptyProps;
 
-    CHECK_THROWS_AS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
+    CHECK_THROWS_AS_MSG(props = moduleHandler.getPipelineProps(pipelineId),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Device returns an exception: OS says that io control has failed.");
     CHECK(emptyProps == props);
 
     /* Simulating a driver error */
-    CHECK_THROWS_AS_MSG(moduleHandler.getPipelineProps(pipelineId, props),
+    CHECK_THROWS_AS_MSG(props = moduleHandler.getPipelineProps(pipelineId),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
@@ -341,14 +341,14 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline props")
 
     /* Simulating a firmware error */
     CHECK_THROWS_AS_MSG(
-        moduleHandler.getPipelineProps(pipelineId, props),
+        props = moduleHandler.getPipelineProps(pipelineId),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(emptyProps == props);
 
     /*Successful command */
-    CHECK_NOTHROW(moduleHandler.getPipelineProps(pipelineId, props));
+    CHECK_NOTHROW(props = moduleHandler.getPipelineProps(pipelineId));
     CHECK(props == fwProps);
 }
 
@@ -397,13 +397,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
     static const dsp_fw::SchedulersInfo emptyInfo = {};
     dsp_fw::SchedulersInfo info = emptyInfo;
 
-    CHECK_THROWS_AS_MSG(moduleHandler.getSchedulersInfo(coreId, info),
+    CHECK_THROWS_AS_MSG(info = moduleHandler.getSchedulersInfo(coreId),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Device returns an exception: OS says that io control has failed.");
     CHECK(emptyInfo == info);
 
     /* Simulating a driver error */
-    CHECK_THROWS_AS_MSG(moduleHandler.getSchedulersInfo(coreId, info),
+    CHECK_THROWS_AS_MSG(info = moduleHandler.getSchedulersInfo(coreId),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
@@ -411,13 +411,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
 
     /* Simulating a firmware error */
     CHECK_THROWS_AS_MSG(
-        moduleHandler.getSchedulersInfo(coreId, info), debug_agent::cavs::ModuleHandler::Exception,
+        info = moduleHandler.getSchedulersInfo(coreId), debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(emptyInfo == info);
 
     /*Successful command */
-    CHECK_NOTHROW(moduleHandler.getSchedulersInfo(coreId, info));
+    CHECK_NOTHROW(info = moduleHandler.getSchedulersInfo(coreId));
     CHECK(fwSchedulersInfo == info);
 }
 
@@ -457,13 +457,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
 
     /* Simulating an os error during getting pipeline list */
     std::vector<dsp_fw::GatewayProps> gateways;
-    CHECK_THROWS_AS_MSG(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways),
+    CHECK_THROWS_AS_MSG(gateways = moduleHandler.getGatewaysInfo(fwGatewayCount),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Device returns an exception: OS says that io control has failed.");
     CHECK(gateways.empty());
 
     /* Simulating a driver error during getting pipeline list */
-    CHECK_THROWS_AS_MSG(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways),
+    CHECK_THROWS_AS_MSG(gateways = moduleHandler.getGatewaysInfo(fwGatewayCount),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
@@ -471,14 +471,14 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
 
     /* Simulating a firmware error during getting pipeline list */
     CHECK_THROWS_AS_MSG(
-        moduleHandler.getGatewaysInfo(fwGatewayCount, gateways),
+        gateways = moduleHandler.getGatewaysInfo(fwGatewayCount),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(gateways.empty());
 
     /*Successful get pipeline list command */
-    CHECK_NOTHROW(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways));
+    CHECK_NOTHROW(gateways = moduleHandler.getGatewaysInfo(fwGatewayCount));
     CHECK(fwGateways == gateways);
 }
 
@@ -569,13 +569,13 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
                                                            dsp_fw::ConnectorNodeId(0)};
     dsp_fw::ModuleInstanceProps props = emptyProps;
 
-    CHECK_THROWS_AS_MSG(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
+    CHECK_THROWS_AS_MSG(props = moduleHandler.getModuleInstanceProps(moduleId, instanceId),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Device returns an exception: OS says that io control has failed.");
     CHECK(emptyProps == props);
 
     /* Simulating a driver error */
-    CHECK_THROWS_AS_MSG(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
+    CHECK_THROWS_AS_MSG(props = moduleHandler.getModuleInstanceProps(moduleId, instanceId),
                         debug_agent::cavs::ModuleHandler::Exception,
                         "Driver returns invalid status: " +
                             std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
@@ -583,14 +583,14 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
 
     /* Simulating a firmware error */
     CHECK_THROWS_AS_MSG(
-        moduleHandler.getModuleInstanceProps(moduleId, instanceId, props),
+        props = moduleHandler.getModuleInstanceProps(moduleId, instanceId),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(emptyProps == props);
 
     /*Successful command */
-    CHECK_NOTHROW(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props));
+    CHECK_NOTHROW(props = moduleHandler.getModuleInstanceProps(moduleId, instanceId));
     CHECK(fwInstanceProps == props);
 }
 
@@ -634,31 +634,31 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module parameter")
     /* Simulating an os error */
     Buffer parameterPayload;
 
-    CHECK_THROWS_AS_MSG(
-        moduleHandler.getModuleParameter(moduleId, instanceId, parameterId, parameterPayload),
-        debug_agent::cavs::ModuleHandler::Exception,
-        "Device returns an exception: OS says that io control has failed.");
+    CHECK_THROWS_AS_MSG(parameterPayload =
+                            moduleHandler.getModuleParameter(moduleId, instanceId, parameterId),
+                        debug_agent::cavs::ModuleHandler::Exception,
+                        "Device returns an exception: OS says that io control has failed.");
     CHECK(parameterPayload.empty());
 
     /* Simulating a driver error */
-    CHECK_THROWS_AS_MSG(
-        moduleHandler.getModuleParameter(moduleId, instanceId, parameterId, parameterPayload),
-        debug_agent::cavs::ModuleHandler::Exception,
-        "Driver returns invalid status: " +
-            std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
+    CHECK_THROWS_AS_MSG(parameterPayload =
+                            moduleHandler.getModuleParameter(moduleId, instanceId, parameterId),
+                        debug_agent::cavs::ModuleHandler::Exception,
+                        "Driver returns invalid status: " +
+                            std::to_string(static_cast<uint32_t>(STATUS_FLOAT_DIVIDE_BY_ZERO)));
     CHECK(parameterPayload.empty());
 
     /* Simulating a firmware error */
     CHECK_THROWS_AS_MSG(
-        moduleHandler.getModuleParameter(moduleId, instanceId, parameterId, parameterPayload),
+        parameterPayload = moduleHandler.getModuleParameter(moduleId, instanceId, parameterId),
         debug_agent::cavs::ModuleHandler::Exception,
         "Firmware returns invalid status: " +
             std::to_string(static_cast<uint32_t>(dsp_fw::IxcStatus::ADSP_IPC_FAILURE)));
     CHECK(parameterPayload.empty());
 
     /*Successful command */
-    CHECK_NOTHROW(
-        moduleHandler.getModuleParameter(moduleId, instanceId, parameterId, parameterPayload));
+    CHECK_NOTHROW(parameterPayload =
+                      moduleHandler.getModuleParameter(moduleId, instanceId, parameterId));
     CHECK(fwParameterPayload == parameterPayload);
 }
 

@@ -76,7 +76,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
 
     /* Successful get fw config command */
 
-    CHECK_NOTHROW(moduleHandler.getFwConfig(fwConfig));
+    CHECK_NOTHROW(fwConfig = moduleHandler.getFwConfig());
 
     CHECK(fwConfig.isFwVersionValid == true);
     const dsp_fw::FwVersion *injectedVersion = reinterpret_cast<const dsp_fw::FwVersion *>(
@@ -113,9 +113,9 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module parameter")
     Buffer parameterPayload(fwParameterPayload.size());
 
     /*Successful command */
-    CHECK_NOTHROW(moduleHandler.getModuleParameter(moduleId, instanceId,
-                                                   dsp_fw::ParameterId(parameterId),
-                                                   parameterPayload, parameterPayload.size()));
+    CHECK_NOTHROW(
+        parameterPayload = moduleHandler.getModuleParameter(
+            moduleId, instanceId, dsp_fw::ParameterId(parameterId), parameterPayload.size()));
     CHECK(fwParameterPayload == parameterPayload);
 }
 
@@ -220,8 +220,8 @@ void checkModuleEntry(linux::ModuleHandler &moduleHandler, std::size_t expectedM
 {
     /*Successful get module info command */
     std::vector<dsp_fw::ModuleEntry> entries;
-    CHECK_NOTHROW(
-        moduleHandler.getModulesEntries(static_cast<uint32_t>(expectedModuleCount), entries));
+    CHECK_NOTHROW(entries =
+                      moduleHandler.getModulesEntries(static_cast<uint32_t>(expectedModuleCount)));
 
     /* Checking result */
 
@@ -297,7 +297,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
     static const uint32_t maxPipeline = 10;
 
     /*Successful get pipeline list command */
-    CHECK_NOTHROW(moduleHandler.getPipelineIdList(maxPipeline, pipelineIds));
+    CHECK_NOTHROW(pipelineIds = moduleHandler.getPipelineIdList(maxPipeline));
     CHECK(fwPipelineIdList == pipelineIds);
 }
 
@@ -322,13 +322,10 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline props")
     /* Creating the module handler, that will use the mocked device*/
     linux::ModuleHandler moduleHandler(*device);
 
-    /* Simulating an os error */
-
-    static const dsp_fw::PplProps emptyProps = {PlID{0}, 0, 0, 0, 0, 0, {}, {}, {}};
-    dsp_fw::PplProps props = emptyProps;
+    dsp_fw::PplProps props;
 
     /*Successful command */
-    CHECK_NOTHROW(moduleHandler.getPipelineProps(pipelineId, props));
+    CHECK_NOTHROW(props = moduleHandler.getPipelineProps(pipelineId));
     CHECK(props == fwProps);
 }
 
@@ -364,7 +361,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
     dsp_fw::SchedulersInfo info;
 
     /*Successful command */
-    CHECK_NOTHROW(moduleHandler.getSchedulersInfo(coreId, info));
+    CHECK_NOTHROW(info = moduleHandler.getSchedulersInfo(coreId));
     CHECK(fwSchedulersInfo == info);
 }
 
@@ -391,7 +388,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
     std::vector<dsp_fw::GatewayProps> gateways;
 
     /*Successful get pipeline list command */
-    CHECK_NOTHROW(moduleHandler.getGatewaysInfo(fwGatewayCount, gateways));
+    CHECK_NOTHROW(gateways = moduleHandler.getGatewaysInfo(fwGatewayCount));
     CHECK(fwGateways == gateways);
 }
 
@@ -468,7 +465,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
     dsp_fw::ModuleInstanceProps props = emptyProps;
 
     /*Successful command */
-    CHECK_NOTHROW(moduleHandler.getModuleInstanceProps(moduleId, instanceId, props));
+    CHECK_NOTHROW(props = moduleHandler.getModuleInstanceProps(moduleId, instanceId));
     CHECK(fwInstanceProps == props);
 }
 
@@ -501,6 +498,6 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting perf items")
     std::vector<dsp_fw::PerfDataItem> actualPerfItems;
 
     /*Successful getPerfItems command */
-    CHECK_NOTHROW(moduleHandler.getPerfItems(maxItemCount, actualPerfItems));
+    CHECK_NOTHROW(actualPerfItems = moduleHandler.getPerfItems(maxItemCount));
     CHECK(actualPerfItems == expectedPerfItems);
 }

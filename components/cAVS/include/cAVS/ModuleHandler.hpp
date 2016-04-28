@@ -64,41 +64,40 @@ public:
     virtual ~ModuleHandler() {}
 
     /** @return the firmware module entries */
-    void getModulesEntries(uint32_t moduleCount, std::vector<dsp_fw::ModuleEntry> &modulesEntries);
+    std::vector<dsp_fw::ModuleEntry> getModulesEntries(uint32_t moduleCount);
 
     /** @return the firmware configuration */
-    void getFwConfig(dsp_fw::FwConfig &fwConfig);
+    dsp_fw::FwConfig getFwConfig();
 
     /** @return the hardware configuration */
-    void getHwConfig(dsp_fw::HwConfig &hwConfig);
+    dsp_fw::HwConfig getHwConfig();
 
     /** @return the pipeline identifier list */
-    void getPipelineIdList(uint32_t maxPplCount, std::vector<dsp_fw::PipeLineIdType> &pipelinesIds);
+    std::vector<dsp_fw::PipeLineIdType> getPipelineIdList(uint32_t maxPplCount);
 
     /** @return the properties of one pipeline */
-    void getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props);
+    dsp_fw::PplProps getPipelineProps(dsp_fw::PipeLineIdType pipelineId);
 
     /** @return the schedulers of one core */
-    void getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers);
+    dsp_fw::SchedulersInfo getSchedulersInfo(dsp_fw::CoreId coreId);
 
     /** @return the gateways */
-    void getGatewaysInfo(uint32_t gatewayCount, std::vector<dsp_fw::GatewayProps> &gateways);
+    std::vector<dsp_fw::GatewayProps> getGatewaysInfo(uint32_t gatewayCount);
 
     /** @return the performance items */
-    void getPerfItems(uint32_t itemCount, std::vector<dsp_fw::PerfDataItem> &perfItems);
+    std::vector<dsp_fw::PerfDataItem> getPerfItems(uint32_t itemCount);
 
     /** @return the properties of one module instance */
-    void getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-                                dsp_fw::ModuleInstanceProps &props);
+    dsp_fw::ModuleInstanceProps getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId);
 
     /** set module parameter */
     void setModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
                             const util::Buffer &parameterPayload);
 
     /** @return module parameter */
-    void getModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                            util::Buffer &parameterPayload,
-                            size_t parameterSize = maxParameterPayloadSize);
+    util::Buffer getModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                    dsp_fw::ParameterId parameterId,
+                                    size_t parameterSize = maxParameterPayloadSize);
 
     /** The base firmware has several module like components in it.
      * To address them, the ParameterId is splited in a type and an instance part.
@@ -160,8 +159,7 @@ private:
 
     /** Get a tlv list from a module parameter value */
     template <typename TlvResponseHandlerInterface>
-    void readTlvParameters(TlvResponseHandlerInterface &responseHandler,
-                           dsp_fw::BaseFwParams parameterId);
+    TlvResponseHandlerInterface readTlvParameters(dsp_fw::BaseFwParams parameterId);
 
     /** @return extended parameter id that contains the targeted module part id */
     static dsp_fw::ParameterId getExtendedParameterId(dsp_fw::BaseFwParams parameterTypeId,

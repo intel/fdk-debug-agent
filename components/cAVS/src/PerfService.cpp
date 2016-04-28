@@ -85,8 +85,7 @@ PerfService::CompoundPerfData PerfService::getData()
     CompoundPerfData result;
 
     try {
-        std::vector<dsp_fw::PerfDataItem> raw;
-        mModuleHandler.getPerfItems(mMaxItemCount, raw);
+        auto raw = mModuleHandler.getPerfItems(mMaxItemCount);
 
         // Compute the budget for each module instance
         for (const auto &rawItem : raw) {
@@ -95,9 +94,8 @@ PerfService::CompoundPerfData PerfService::getData()
 
             // The budget for cores defaults to 0
             if (not isCore) {
-                dsp_fw::ModuleInstanceProps props;
-                mModuleHandler.getModuleInstanceProps(rawItem.resourceId.moduleId,
-                                                      rawItem.resourceId.instanceId, props);
+                dsp_fw::ModuleInstanceProps props = mModuleHandler.getModuleInstanceProps(
+                    rawItem.resourceId.moduleId, rawItem.resourceId.instanceId);
                 budget = computeBudget(props);
                 if (budget > std::numeric_limits<decltype(Perf::Item::budget)>::max()) {
                     throw Exception("Budget kCPS computation overflow.");

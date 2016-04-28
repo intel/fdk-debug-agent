@@ -58,9 +58,10 @@ void ModuleHandler::getFwParameterValue(uint16_t moduleId, uint16_t instanceId,
 }
 
 template <typename TlvResponseHandlerInterface>
-void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandler,
-                                      dsp_fw::BaseFwParams parameterId)
+TlvResponseHandlerInterface ModuleHandler::readTlvParameters(dsp_fw::BaseFwParams parameterId)
 {
+    TlvResponseHandlerInterface responseHandler;
+
     /** According to the SwAS, setting initial buffer size to cavsTlvBufferSize.
      * Using 0xFF for test purpose (mark unused memory) */
     util::Buffer buffer = configGet(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
@@ -80,10 +81,11 @@ void ModuleHandler::readTlvParameters(TlvResponseHandlerInterface &responseHandl
                       << static_cast<uint32_t>(parameterId) << ": " << e.what() << std::endl;
         }
     } while (!end);
+
+    return responseHandler;
 }
 
-void ModuleHandler::getModulesEntries(uint32_t moduleCount,
-                                      std::vector<dsp_fw::ModuleEntry> &modulesEntries)
+std::vector<dsp_fw::ModuleEntry> ModuleHandler::getModulesEntries(uint32_t moduleCount)
 {
     std::size_t moduleInfoSize = dsp_fw::ModulesInfo::getAllocationSize(moduleCount);
 
@@ -101,21 +103,20 @@ void ModuleHandler::getModulesEntries(uint32_t moduleCount,
                         std::to_string(moduleCount));
     }
 
-    modulesEntries = modulesInfo.module_info;
+    return modulesInfo.module_info;
 }
 
-void ModuleHandler::getFwConfig(dsp_fw::FwConfig &fwConfig)
+dsp_fw::FwConfig ModuleHandler::getFwConfig()
 {
-    readTlvParameters<dsp_fw::FwConfig>(fwConfig, dsp_fw::BaseFwParams::FW_CONFIG);
+    return readTlvParameters<dsp_fw::FwConfig>(dsp_fw::BaseFwParams::FW_CONFIG);
 }
 
-void ModuleHandler::getHwConfig(dsp_fw::HwConfig &hwConfig)
+dsp_fw::HwConfig ModuleHandler::getHwConfig()
 {
-    readTlvParameters<dsp_fw::HwConfig>(hwConfig, dsp_fw::BaseFwParams::HW_CONFIG_GET);
+    return readTlvParameters<dsp_fw::HwConfig>(dsp_fw::BaseFwParams::HW_CONFIG_GET);
 }
 
-void ModuleHandler::getPipelineIdList(uint32_t maxPplCount,
-                                      std::vector<dsp_fw::PipeLineIdType> &pipelinesIds)
+std::vector<dsp_fw::PipeLineIdType> ModuleHandler::getPipelineIdList(uint32_t maxPplCount)
 {
     /* Calculating the memory space required */
     std::size_t parameterSize = dsp_fw::PipelinesListInfo::getAllocationSize(maxPplCount);
@@ -133,31 +134,36 @@ void ModuleHandler::getPipelineIdList(uint32_t maxPplCount,
                         std::to_string(maxPplCount));
     }
 
-    pipelinesIds = pipelineListInfo.ppl_id;
+    return pipelineListInfo.ppl_id;
 }
 
-void ModuleHandler::getPipelineProps(dsp_fw::PipeLineIdType pipelineId, dsp_fw::PplProps &props)
+dsp_fw::PplProps ModuleHandler::getPipelineProps(dsp_fw::PipeLineIdType pipelineId)
 {
     /* Using extended parameter id to supply the pipeline id*/
     auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
 
+    dsp_fw::PplProps props;
     /* Query FW through driver */
     getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId, paramId,
                         maxParameterPayloadSize, props);
+
+    return props;
 }
 
-void ModuleHandler::getSchedulersInfo(dsp_fw::CoreId coreId, dsp_fw::SchedulersInfo &schedulers)
+dsp_fw::SchedulersInfo ModuleHandler::getSchedulersInfo(dsp_fw::CoreId coreId)
 {
     /* Using extended parameter id to supply the core id*/
     auto paramId = getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
 
+    dsp_fw::SchedulersInfo schedulers;
     /* Query FW through driver */
     getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId, paramId,
                         maxParameterPayloadSize, schedulers);
+
+    return schedulers;
 }
 
-void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
-                                    std::vector<dsp_fw::GatewayProps> &gateways)
+std::vector<dsp_fw::GatewayProps> ModuleHandler::getGatewaysInfo(uint32_t gatewayCount)
 {
     /* Calculating the memory space required */
     std::size_t parameterSize = dsp_fw::GatewaysInfo::getAllocationSize(gatewayCount);
@@ -175,10 +181,10 @@ void ModuleHandler::getGatewaysInfo(uint32_t gatewayCount,
                         std::to_string(gatewayCount));
     }
 
-    gateways = gatewaysInfo.gateways;
+    return gatewaysInfo.gateways;
 }
 
-void ModuleHandler::getPerfItems(uint32_t itemCount, std::vector<dsp_fw::PerfDataItem> &perfItems)
+std::vector<dsp_fw::PerfDataItem> ModuleHandler::getPerfItems(uint32_t itemCount)
 {
     /* Calculating the memory space required */
     std::size_t parameterSize = dsp_fw::GlobalPerfData::getAllocationSize(itemCount);
@@ -196,15 +202,18 @@ void ModuleHandler::getPerfItems(uint32_t itemCount, std::vector<dsp_fw::PerfDat
                         std::to_string(itemCount));
     }
 
-    perfItems = perfData.items;
+    return perfData.items;
 }
 
-void ModuleHandler::getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId,
-                                           dsp_fw::ModuleInstanceProps &props)
+dsp_fw::ModuleInstanceProps ModuleHandler::getModuleInstanceProps(uint16_t moduleId,
+                                                                  uint16_t instanceId)
 {
+    dsp_fw::ModuleInstanceProps props;
     getFwParameterValue(moduleId, instanceId,
                         dsp_fw::toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
                         maxParameterPayloadSize, props);
+
+    return props;
 }
 
 void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId,
@@ -220,12 +229,12 @@ void ModuleHandler::setModuleParameter(uint16_t moduleId, uint16_t instanceId,
     configSet(moduleId, instanceId, parameterId, parameterPayload);
 }
 
-void ModuleHandler::getModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                       dsp_fw::ParameterId parameterId,
-                                       util::Buffer &parameterPayload, size_t parameterSize)
+util::Buffer ModuleHandler::getModuleParameter(uint16_t moduleId, uint16_t instanceId,
+                                               dsp_fw::ParameterId parameterId,
+                                               size_t parameterSize)
 {
     /* Query FW through driver */
-    parameterPayload = configGet(moduleId, instanceId, parameterId, parameterSize);
+    return configGet(moduleId, instanceId, parameterId, parameterSize);
 }
 }
 }
