@@ -99,17 +99,15 @@ public:
     /**
      * Fallback for any compress device that does not provides any extra useful information
      * from procfs.
-     * @return always true
      */
-    static bool getCompressDeviceInfo(const std::string &, compress::DeviceInfo &) { return true; }
+    static void getCompressDeviceInfo(const std::string &, compress::DeviceInfo &) {}
 
-    /** Extract the logger compress device information from the info procfs entry of a
+    /** Extract the specific logger compress device information from the info procfs entry of a
      * device.
      * @param[in] infoId literal value of the info id field of the procfs entry
      * @param[out] info retrieved from the info if field for a logger device.
-     * @return true if the infoId is matching the compress info requested, false otherwise.
      */
-    static bool getCompressDeviceInfo(const std::string &infoId, compress::LoggerInfo &info)
+    static void getCompressDeviceInfo(const std::string &infoId, compress::LoggerInfo &info)
     {
         std::string::size_type rolePos{infoId.find(DeviceInfoTrait<compress::LoggerInfo>::mTag)};
         /* it is a logger device, which core for? */
@@ -124,7 +122,6 @@ public:
             throw Exception("Invalid core id found in info " + infoId);
         }
         info.setCoreId(coreId);
-        return coreId == 0; /** @todo: remove workaround: Only accept logging on Core 0. */
     }
 
     /** Find and extract the information of a given type of compress device available on the
@@ -150,7 +147,8 @@ public:
             /* lets retrieve information from procfs for this device. */
             std::string infoId{getDeviceIdInfo(deviceName)};
             auto &infoTag = DeviceInfoTrait<CompressInfo>::mTag;
-            if (infoId.find(infoTag) != std::string::npos && getCompressDeviceInfo(infoId, info)) {
+            if (infoId.find(infoTag) != std::string::npos) {
+                getCompressDeviceInfo(infoId, info);
                 compressInfoList.push_back(info);
             }
         }
