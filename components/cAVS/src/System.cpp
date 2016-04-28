@@ -116,16 +116,16 @@ System::System(const DriverFactory &driverFactory)
       mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
       mProbeInjectionMutexes(mDriver->getProber().getMaxProbeCount()),
       mProbeConfigs(mDriver->getProber().getMaxProbeCount()), mProber(mDriver->getProber()),
-      mPerfService(mDriver->getPerf(), mDriver->getModuleHandler())
+      mPerfService(mDriver->getPerf(), getModuleHandler())
 {
     try {
-        mFwConfig = mDriver->getModuleHandler().getFwConfig();
+        mFwConfig = getModuleHandler().getFwConfig();
     } catch (ModuleHandler::Exception &e) {
         /** @todo use logging */
         std::cout << "Unable to get FW config: " + std::string(e.what()) << std::endl;
     }
     try {
-        mHwConfig = mDriver->getModuleHandler().getHwConfig();
+        mHwConfig = getModuleHandler().getHwConfig();
     } catch (ModuleHandler::Exception &e) {
         /** @todo use logging */
         std::cout << "Unable to get HW config: " + std::string(e.what()) << std::endl;
@@ -133,7 +133,7 @@ System::System(const DriverFactory &driverFactory)
 
     if (mFwConfig.isModulesCountValid) {
         try {
-            mModuleEntries = mDriver->getModuleHandler().getModulesEntries(mFwConfig.modulesCount);
+            mModuleEntries = getModuleHandler().getModulesEntries(mFwConfig.modulesCount);
         } catch (ModuleHandler::Exception &e) {
             /** @todo use logging */
             std::cout << "Unable to get module entries: " + std::string(e.what()) << std::endl;
@@ -255,26 +255,11 @@ std::unique_ptr<System::InputStreamResource> System::tryToAcquireProbeInjectionS
         mProbeInjectionMutexes[probeIndex.getValue()], mDriver->getProber(), probeIndex));
 }
 
-void System::setModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                dsp_fw::ParameterId parameterId,
-                                const util::Buffer &parameterPayload)
-{
-    mDriver->getModuleHandler().setModuleParameter(moduleId, instanceId, parameterId,
-                                                   parameterPayload);
-}
-
-void System::getModuleParameter(uint16_t moduleId, uint16_t instanceId,
-                                dsp_fw::ParameterId parameterId, util::Buffer &parameterPayload)
-{
-    parameterPayload =
-        mDriver->getModuleHandler().getModuleParameter(moduleId, instanceId, parameterId);
-}
-
 void System::getTopology(Topology &topology)
 {
     topology.clear();
 
-    ModuleHandler &handler = mDriver->getModuleHandler();
+    ModuleHandler &handler = getModuleHandler();
     std::set<dsp_fw::CompoundModuleId> moduleInstanceIds;
 
     /* Retrieving gateways*/
@@ -360,6 +345,11 @@ void System::getTopology(Topology &topology)
 
     /* Compute links */
     topology.computeLinks();
+}
+
+ModuleHandler &System::getModuleHandler()
+{
+    return mDriver->getModuleHandler();
 }
 
 void System::setProberState(bool active)

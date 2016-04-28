@@ -165,16 +165,10 @@ public:
     std::unique_ptr<InputStreamResource> tryToAcquireProbeInjectionStreamResource(
         ProbeId probeIndex);
 
-    /** Set module parameter */
-    void setModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                            const util::Buffer &parameterPayload);
-
-    /** Get module parameter */
-    void getModuleParameter(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                            util::Buffer &parameterPayload);
-
     /** @return topology */
     void getTopology(Topology &topology);
+
+    ModuleHandler &getModuleHandler();
 
     /** Set the state of the probing service.
      * @throw System::Exception

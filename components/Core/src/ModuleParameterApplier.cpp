@@ -136,7 +136,8 @@ void ModuleParameterApplier::setParameterValue(const std::string &type, Paramete
 
             /* Sending binary data to the fw */
             try {
-                mSystem.setModuleParameter(moduleTypeId, instanceId, paramId, parameterPayload);
+                mSystem.getModuleHandler().setModuleParameter(moduleTypeId, instanceId, paramId,
+                                                              parameterPayload);
             } catch (ModuleHandler::Exception &e) {
                 throw Exception("Cannot set parameter: " + std::string(e.what()));
             }
@@ -168,7 +169,8 @@ std::string ModuleParameterApplier::getParameterValue(const std::string &type,
         /* Get parameter value from FW */
         util::Buffer parameterPayload;
         try {
-            mSystem.getModuleParameter(moduleTypeId, instanceId, paramId, parameterPayload);
+            parameterPayload =
+                mSystem.getModuleHandler().getModuleParameter(moduleTypeId, instanceId, paramId);
         } catch (ModuleHandler::Exception &e) {
             throw Exception("Cannot get parameter: " + std::string(e.what()));
         }
