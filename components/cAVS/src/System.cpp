@@ -113,9 +113,8 @@ void System::ProbeInjectionStreamResource::doReading(std::istream &is)
 // System class
 System::System(const DriverFactory &driverFactory)
     : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
-      mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
+      mProbeService(*mDriver), mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
       mProbeInjectionMutexes(mDriver->getProber().getMaxProbeCount()),
-      mProbeConfigs(mDriver->getProber().getMaxProbeCount()), mProber(mDriver->getProber()),
       mPerfService(mDriver->getPerf(), getModuleHandler())
 {
     try {
@@ -230,17 +229,10 @@ std::unique_ptr<System::OutputStreamResource> System::tryToAcquireLogStreamResou
         mLogStreamMutex, mDriver->getLogger(), mModuleEntries));
 }
 
-void System::checkProbeIndex(ProbeId probeIndex) const
-{
-    if (probeIndex.getValue() >= mDriver->getProber().getMaxProbeCount()) {
-        throw Exception("Wrong probe index: " + std::to_string(probeIndex.getValue()));
-    }
-}
-
 std::unique_ptr<System::OutputStreamResource> System::tryToAcquireProbeExtractionStreamResource(
     ProbeId probeIndex)
 {
-    checkProbeIndex(probeIndex);
+    mProbeService.checkProbeId(probeIndex);
 
     return tryToAcquireResource(std::make_unique<System::ProbeExtractionStreamResource>(
         mProbeExtractionMutexes[probeIndex.getValue()], mDriver->getProber(), probeIndex));
@@ -249,7 +241,7 @@ std::unique_ptr<System::OutputStreamResource> System::tryToAcquireProbeExtractio
 std::unique_ptr<System::InputStreamResource> System::tryToAcquireProbeInjectionStreamResource(
     ProbeId probeIndex)
 {
-    checkProbeIndex(probeIndex);
+    mProbeService.checkProbeId(probeIndex);
 
     return tryToAcquireResource(std::make_unique<System::ProbeInjectionStreamResource>(
         mProbeInjectionMutexes[probeIndex.getValue()], mDriver->getProber(), probeIndex));
@@ -352,56 +344,9 @@ ModuleHandler &System::getModuleHandler()
     return mDriver->getModuleHandler();
 }
 
-void System::setProberState(bool active)
+ProbeService &System::getProbeService()
 {
-    if (active) {
-        try {
-            std::lock_guard<std::mutex> guard(mProbeConfigMutex);
-            mProber.setProbesConfig(mProbeConfigs, getInjectionSampleByteSizes());
-        } catch (Prober::Exception &e) {
-            throw Exception("Cannot set probe sconfig: " + std::string(e.what()));
-        }
-    }
-    try {
-        mProber.setState(active);
-    } catch (Prober::Exception &e) {
-        throw Exception("Cannot set probe service state: " + std::string(e.what()));
-    }
-}
-
-/**
-* Get the state of the probing service
-*/
-bool System::isProberActive()
-{
-    try {
-        return mProber.isActive();
-    } catch (Prober::Exception &e) {
-        throw Exception("Cannot get probe service state: " + std::string(e.what()));
-    }
-}
-
-void System::checkProbeId(ProbeId probeId) const
-{
-    if (probeId.getValue() >= mProber.getMaxProbeCount()) {
-        throw Exception("Invalid probe index: " + std::to_string(probeId.getValue()));
-    }
-}
-
-void System::setProbeConfiguration(ProbeId id, const Prober::ProbeConfig &probe)
-{
-    checkProbeId(id);
-
-    std::lock_guard<std::mutex> guard(mProbeConfigMutex);
-    mProbeConfigs[id.getValue()] = probe;
-}
-
-Prober::ProbeConfig System::getProbeConfiguration(ProbeId id)
-{
-    checkProbeId(id);
-
-    std::lock_guard<std::mutex> guard(mProbeConfigMutex);
-    return mProbeConfigs[id.getValue()];
+    return mProbeService;
 }
 
 Perf::State System::getPerfState()
@@ -429,69 +374,6 @@ PerfService::CompoundPerfData System::getPerfData()
     } catch (Perf::Exception &e) {
         throw Exception("When fetching perf data: " + std::string(e.what()));
     }
-}
-
-const Prober::InjectionSampleByteSizes System::getInjectionSampleByteSizes() const
-{
-    Prober::InjectionSampleByteSizes sizeMap;
-    ProbeId::RawType probeIndex = 0;
-
-    // Iterating on enabled injection probes
-    for (auto &probeConfig : mProbeConfigs) {
-        if (probeConfig.enabled) {
-            if (probeConfig.purpose == Prober::ProbePurpose::Inject ||
-                probeConfig.purpose == Prober::ProbePurpose::InjectReextract) {
-
-                // Getting props of the probed module instance
-                dsp_fw::ModuleInstanceProps props;
-                try {
-                    props = mDriver->getModuleHandler().getModuleInstanceProps(
-                        probeConfig.probePoint.fields.getModuleId(),
-                        probeConfig.probePoint.fields.getInstanceId());
-                } catch (ModuleHandler::Exception &e) {
-                    throw Exception("Can not retreive injection format of probe id " +
-                                    std::to_string(probeIndex) + ": " + std::string(e.what()));
-                }
-
-                // Getting the pin list
-                dsp_fw::PinListInfo pinList;
-                switch (probeConfig.probePoint.fields.getType()) {
-                case dsp_fw::ProbeType::Input:
-                    pinList = props.input_pins;
-                    break;
-                case dsp_fw::ProbeType::Output:
-                    pinList = props.output_pins;
-                    break;
-                default:
-                    throw Exception("Unsupported pin type: " +
-                                    dsp_fw::probeTypeHelper().toString(
-                                        probeConfig.probePoint.fields.getType()));
-                }
-
-                // Checking pin index validy
-                if (probeConfig.probePoint.fields.getIndex() >= pinList.pin_info.size()) {
-                    throw Exception("Invalid pin index: " +
-                                    std::to_string(probeConfig.probePoint.fields.getIndex()) +
-                                    " max: " + std::to_string(pinList.pin_info.size()));
-                }
-
-                // Checking bit depth validity
-                dsp_fw::PinProps &prop = pinList.pin_info[probeConfig.probePoint.fields.getIndex()];
-                if (prop.format.valid_bit_depth % 8 != 0) {
-                    throw Exception("Unsupported format bit depth: " +
-                                    std::to_string(prop.format.bit_depth) +
-                                    " (should be a multiple of 8)");
-                }
-
-                // Calculating sample byte size and storing it in the map
-                std::size_t sampleByteSize =
-                    (prop.format.bit_depth / 8) * prop.format.number_of_channels;
-                sizeMap[ProbeId(probeIndex)] = sampleByteSize;
-            }
-        }
-        probeIndex++;
-    }
-    return sizeMap;
 }
 }
 }

@@ -131,8 +131,8 @@ void ProbeEndPointParameterApplier::setEndPointParameterValue(const std::size_t 
 
     /* Setting probe configuration to the driver */
     try {
-        mSystem.setProbeConfiguration(probeId, config);
-    } catch (System::Exception &e) {
+        mSystem.getProbeService().setConfiguration(probeId, config);
+    } catch (ProbeService::Exception &e) {
         throw Exception("Unable to set probe configuration: " + std::string(e.what()));
     }
 }
@@ -144,8 +144,8 @@ std::string ProbeEndPointParameterApplier::getEndPointParameterValue(
 
     Prober::ProbeConfig config;
     try {
-        config = mSystem.getProbeConfiguration(probeId);
-    } catch (System::Exception &e) {
+        config = mSystem.getProbeService().getConfiguration(probeId);
+    } catch (ProbeService::Exception &e) {
         throw Exception("Unable to get probe configuration: " + std::string(e.what()));
     }
 

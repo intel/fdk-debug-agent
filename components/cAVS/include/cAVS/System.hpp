@@ -24,6 +24,7 @@
 #include "cAVS/Driver.hpp"
 #include "cAVS/DriverFactory.hpp"
 #include "cAVS/Topology.hpp"
+#include "cAVS/ProbeService.hpp"
 #include "cAVS/Prober.hpp"
 #include "cAVS/PerfService.hpp"
 #include "Util/WrappedRaw.hpp"
@@ -169,26 +170,7 @@ public:
     void getTopology(Topology &topology);
 
     ModuleHandler &getModuleHandler();
-
-    /** Set the state of the probing service.
-     * @throw System::Exception
-     */
-    void setProberState(bool active);
-
-    /**
-     * Get the state of the probing service
-     */
-    bool isProberActive();
-
-    /** Set probe configuration. This configuration will be used at next probe service start.
-     * @throw System::Exception
-     */
-    void setProbeConfiguration(ProbeId probeId, const Prober::ProbeConfig &probeCfg);
-
-    /**
-    * @throw System::Exception
-    */
-    Prober::ProbeConfig getProbeConfiguration(ProbeId probeId);
+    ProbeService &getProbeService();
 
     Perf::State getPerfState();
 
@@ -248,9 +230,6 @@ private:
         ProbeId mProbeIndex;
     };
 
-    /** Check if probe id is in valid range */
-    void checkProbeId(ProbeId id) const;
-
     /* Make this class non copyable */
     System(const System &) = delete;
     System &operator=(const System &) = delete;
@@ -262,12 +241,6 @@ private:
     std::unique_ptr<T> tryToAcquireResource(std::unique_ptr<T> resource);
 
     static std::unique_ptr<Driver> createDriver(const DriverFactory &driverFactory);
-    void checkProbeIndex(ProbeId probeIndex) const;
-
-    /** @return the sample byte size of each injection probes used to inject silence if
-     * underrun happens.
-     */
-    const Prober::InjectionSampleByteSizes getInjectionSampleByteSizes() const;
 
     std::unique_ptr<Driver> mDriver;
 
@@ -289,14 +262,11 @@ private:
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;
 
+    ProbeService mProbeService;
     /** Mutexes that guarantee probe stream exclusive usage */
     std::vector<std::mutex> mProbeExtractionMutexes;
     std::vector<std::mutex> mProbeInjectionMutexes;
 
-    Prober::SessionProbes mProbeConfigs;
-    mutable std::mutex mProbeConfigMutex;
-
-    Prober &mProber;
     PerfService mPerfService;
 };
 }

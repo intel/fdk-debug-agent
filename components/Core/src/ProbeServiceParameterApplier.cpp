@@ -64,8 +64,8 @@ void ProbeServiceParameterApplier::setServiceParameterValue(const std::string &p
     }
 
     try {
-        mSystem.setProberState(active);
-    } catch (System::Exception &e) {
+        mSystem.getProbeService().setState(active);
+    } catch (ProbeService::Exception &e) {
         throw Exception("Unable to set probe service state: " + std::string(e.what()));
     }
 }
@@ -75,8 +75,8 @@ std::string ProbeServiceParameterApplier::getServiceParameterValue()
     bool active;
 
     try {
-        active = mSystem.isProberActive();
-    } catch (System::Exception &e) {
+        active = mSystem.getProbeService().isActive();
+    } catch (ProbeService::Exception &e) {
         throw Exception(std::string("Cannot get probe service state: ") + e.what());
     }
 
