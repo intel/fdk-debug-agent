@@ -54,10 +54,9 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
     addInstanceCollection(collectionMap, typeName_task, createTask());
 
     /* Module instances*/
-    for (auto it = mSystem.getModuleEntries().begin(); it != mSystem.getModuleEntries().end();
-         ++it) {
-        addInstanceCollection(collectionMap, findModuleEntryName(it->module_id),
-                              createModule(it->module_id));
+    for (const auto &module : mSystem.getModuleEntries()) {
+        addInstanceCollection(collectionMap, findModuleEntryName(module.module_id),
+                              createModule(module.module_id));
     }
 
     /* Gateways */
