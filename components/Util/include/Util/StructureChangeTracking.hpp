@@ -37,6 +37,6 @@ namespace util
     static_assert(offsetof(type, member) == requiredfOffset,                                       \
                   "Wrong offset of member " #type "::" #member);                                   \
     static_assert(std::is_same<decltype(type::member), requiredType>::value,                       \
-                  "Wrong type of member" #type "::" #member)
+                  "Wrong type of member " #type "::" #member)
 }
 }
