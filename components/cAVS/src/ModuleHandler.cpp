@@ -205,6 +205,12 @@ std::vector<dsp_fw::PerfDataItem> ModuleHandler::getPerfItems(uint32_t itemCount
     return perfData.items;
 }
 
+dsp_fw::GlobalMemoryState ModuleHandler::getGlobalMemoryState()
+{
+    return readTlvParameters<dsp_fw::GlobalMemoryState>(
+        dsp_fw::BaseFwParams::MEMORY_STATE_INFO_GET);
+}
+
 dsp_fw::ModuleInstanceProps ModuleHandler::getModuleInstanceProps(uint16_t moduleId,
                                                                   uint16_t instanceId)
 {

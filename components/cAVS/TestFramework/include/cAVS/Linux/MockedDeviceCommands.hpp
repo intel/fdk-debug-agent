@@ -241,6 +241,19 @@ public:
                                      uint32_t maxItemCount,
                                      const std::vector<dsp_fw::PerfDataItem> &perfItems);
 
+    /** Add a get global memory state command
+     *
+     * @param[in] returnedFirmwareStatus the returned firmware status
+     * @param[in] memoryTlvList the memory state returned by the ioctl, which is a TLV list.
+     *
+     * Note: the memoryTlvList parameter is unused if :
+     * - returnedFirmwareStatus != ADSP_IPC_SUCCESS
+     *
+     * @throw Device::Exception
+     */
+    void addGetGlobalMemoryStateCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
+                                        const util::Buffer &memoryTlvList);
+
     /** Add a set core power entries command.
      *
      * @param[in] controlSuccess true if the command shall be successful, false otherwise

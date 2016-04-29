@@ -29,6 +29,7 @@
 #include "cAVS/DspFw/Pipeline.hpp"
 #include "cAVS/DspFw/Gateway.hpp"
 #include "cAVS/DspFw/GlobalPerfData.hpp"
+#include "cAVS/DspFw/GlobalMemoryState.hpp"
 #include "cAVS/DspFw/Scheduler.hpp"
 #include "DspFw/Common.hpp"
 #include "cAVS/DspFw/Infrastructure.hpp"
@@ -86,6 +87,9 @@ public:
 
     /** @return the performance items */
     std::vector<dsp_fw::PerfDataItem> getPerfItems(uint32_t itemCount);
+
+    /** @return the global memory state */
+    dsp_fw::GlobalMemoryState getGlobalMemoryState();
 
     /** @return the properties of one module instance */
     dsp_fw::ModuleInstanceProps getModuleInstanceProps(uint16_t moduleId, uint16_t instanceId);

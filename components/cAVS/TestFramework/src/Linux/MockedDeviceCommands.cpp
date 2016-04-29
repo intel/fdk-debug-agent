@@ -198,6 +198,13 @@ void MockedDeviceCommands::addGetGlobalPerfDataCommand(
                                  parameterSize, returnedOutput);
 }
 
+void MockedDeviceCommands::addGetGlobalMemoryStateCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
+                                                          const Buffer &memoryTlvList)
+{
+    addTlvParameterCommand(returnedFirmwareStatus, memoryTlvList,
+                           dsp_fw::BaseFwParams::MEMORY_STATE_INFO_GET);
+}
+
 void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
                                                         uint16_t moduleId, uint16_t instanceId,
                                                         dsp_fw::ParameterId parameterId,
