@@ -111,7 +111,7 @@ public:
      */
     static bool getCompressDeviceInfo(const std::string &infoId, compress::LoggerInfo &info)
     {
-        std::string::size_type rolePos{infoId.find(infoId)};
+        std::string::size_type rolePos{infoId.find(DeviceInfoTrait<compress::LoggerInfo>::mTag)};
         /* it is a logger device, which core for? */
         std::string::size_type corePos = infoId.find(infoIdCore);
         if (corePos == std::string::npos) {
