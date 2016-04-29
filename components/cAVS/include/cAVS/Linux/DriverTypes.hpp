@@ -117,7 +117,8 @@ private:
 
 static bool requireTunneledAccess(uint32_t moduleId, uint32_t paramId)
 {
-    return paramId != dsp_fw::BaseModuleParams::MOD_INST_PROPS || moduleId >= LOADABLE_MODULE_ID;
+    return paramId != dsp_fw::BaseModuleParams::MOD_INST_PROPS ||
+           (moduleId >= LOADABLE_MODULE_ID && paramId != dsp_fw::BaseModuleParams::MOD_INST_PROPS);
 }
 
 struct TunneledHeader
