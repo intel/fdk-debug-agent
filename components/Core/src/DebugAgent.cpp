@@ -26,6 +26,7 @@
 #include "Core/TypeModelConverter.hpp"
 #include "Core/InstanceModelConverter.hpp"
 #include "Core/ModuleParameterApplier.hpp"
+#include "Core/SubsystemParameterApplier.hpp"
 #include "Core/LogServiceParameterApplier.hpp"
 #include "Core/PerfServiceParameterApplier.hpp"
 #include "Core/ProbeServiceParameterApplier.hpp"
@@ -126,6 +127,7 @@ std::vector<std::shared_ptr<ParameterApplier>> DebugAgent::createParamAppliers(
 {
     return {
         std::make_shared<ModuleParameterApplier>(system, paramSerializer),
+        std::make_shared<SubsystemParameterApplier>(system),
         std::make_shared<LogServiceParameterApplier>(system),
         std::make_shared<PerfServiceParameterApplier>(system),
         std::make_shared<ProbeServiceParameterApplier>(system),

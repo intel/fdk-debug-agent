@@ -31,6 +31,7 @@ set(SRCS
     src/LogServiceParameterApplier.cpp
     src/PerfServiceParameterApplier.cpp
     src/ModuleParameterApplier.cpp
+    src/SubsystemParameterApplier.cpp
     src/ProbeServiceParameterApplier.cpp
     src/ProbeEndPointParameterApplier.cpp)
 
@@ -50,6 +51,7 @@ set(INCS
     include/Core/LogServiceParameterApplier.hpp
     include/Core/PerfServiceParameterApplier.hpp
     include/Core/ModuleParameterApplier.hpp
+    include/Core/SubsystemParameterApplier.hpp
     include/Core/ProbeServiceParameterApplier.hpp
     include/Core/EndPointParameterApplier.hpp
     include/Core/ProbeEndPointParameterApplier.hpp
