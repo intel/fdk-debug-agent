@@ -165,7 +165,8 @@ void Logger::stop() noexcept
 /* The constructor starts the log producer thread */
 Logger::LogProducer::LogProducer(BlockingLogQueue &queue, unsigned int coreId, Device &device,
                                  std::unique_ptr<CompressDevice> logDevice)
-    : mQueue(queue), mCoreId(coreId), mLogDevice(std::move(logDevice)), mDevice(device)
+    : mQueue(queue), mCoreId(coreId), mLogDevice(std::move(logDevice)), mDevice(device),
+      mCorePower(device, coreId)
 {
     /* No parameter to start / stop logging on linux. So, just consider that if a log device
      * could be opened and started and consequently a log producer instantiated it is enough
@@ -188,19 +189,19 @@ void Logger::LogProducer::startLogDevice()
     assert(mLogDevice != nullptr);
 
     /* First wake up associated core, or at least prevent from sleeping. */
-    preventCoreFromSleeping();
+    mCorePower.preventCoreFromSleeping();
     compress::Config config(fragmentSize, nbFragments);
     try {
         mLogDevice->open(Mode::NonBlocking, compress::Role::Capture, config);
     } catch (const CompressDevice::Exception &e) {
-        allowCoreToSleep();
+        mCorePower.allowCoreToSleep();
         throw Exception("Error opening Log Device: " + std::string(e.what()));
     }
     try {
         mLogDevice->start();
     } catch (const CompressDevice::Exception &e) {
         mLogDevice->close();
-        allowCoreToSleep();
+        mCorePower.allowCoreToSleep();
         throw Exception("Error starting Log Device: " + std::string(e.what()));
     }
 }
@@ -225,27 +226,7 @@ void Logger::LogProducer::stopLogDevice()
     mLogDevice->close();
 
     /* Can decrease core wake up ref count. */
-    allowCoreToSleep();
-}
-
-void Logger::LogProducer::preventCoreFromSleeping()
-{
-    driver::CorePowerCommand corePowerCmd(false, mCoreId);
-    try {
-        mDevice.commandWrite(driver::corePowerCtrl, corePowerCmd.getBuffer());
-    } catch (const Device::Exception &e) {
-        throw Exception("Error: could not set core power: " + std::string(e.what()));
-    }
-}
-
-void Logger::LogProducer::allowCoreToSleep() noexcept
-{
-    driver::CorePowerCommand corePowerCmd(true, mCoreId);
-    try {
-        mDevice.commandWrite(driver::corePowerCtrl, corePowerCmd.getBuffer());
-    } catch (const Device::Exception &e) {
-        std::cout << "Error: could not restore core power:" << std::string(e.what()) << std::endl;
-    }
+    mCorePower.allowCoreToSleepNoExcept();
 }
 
 void Logger::LogProducer::produceEntries()

@@ -57,6 +57,7 @@ set(LINUX_LIB_INCS
     include/cAVS/Linux/Probe/InjectionOutputStream.hpp
     include/cAVS/Linux/DriverTypes.hpp
     include/cAVS/Linux/ModuleHandlerImpl.hpp
+    include/cAVS/Linux/CorePower.hpp
     include/cAVS/Linux/AudioProcfsHelper.hpp
     include/cAVS/Linux/CompressTypes.hpp
     include/cAVS/Linux/CompressDevice.hpp

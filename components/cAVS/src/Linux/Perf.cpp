@@ -20,7 +20,7 @@
 ********************************************************************************
 */
 #include "cAVS/Linux/Perf.hpp"
-#include "cAVS/Linux/DriverTypes.hpp" // for driver::CorePowerCommand
+#include "cAVS/Linux/CorePower.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/ByteStreamWriter.hpp"
 
@@ -41,13 +41,8 @@ void Perf::setState(State state)
 
     // Trig a PM action when enabling or disabling the perf service
     if (state == State::Started or state == State::Disabled) {
-        // only preventing core 0 from sleeping is enough.
-        driver::CorePowerCommand corePowerCmd(state == State::Disabled, 0);
-        try {
-            mDevice.commandWrite(driver::corePowerCtrl, corePowerCmd.getBuffer());
-        } catch (const Device::Exception &e) {
-            throw Exception("Error: could not set core power: " + std::string(e.what()));
-        }
+        CorePower<Exception> corePower(mDevice);
+        corePower.setCorePower(state == State::Disabled);
     }
 
     mModuleHandler.setPerfState(static_cast<uint32_t>(state));

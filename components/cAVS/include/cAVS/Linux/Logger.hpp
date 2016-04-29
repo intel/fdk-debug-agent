@@ -27,6 +27,7 @@
 #include "cAVS/Linux/ControlDeviceTypes.hpp"
 #include "cAVS/Linux/CompressTypes.hpp"
 #include "cAVS/Linux/CompressDeviceFactory.hpp"
+#include "cAVS/Linux/CorePower.hpp"
 #include <cAVS/Logger.hpp>
 #include "Util/BlockingQueue.hpp"
 #include <list>
@@ -92,10 +93,6 @@ private:
         static const size_t nbFragments = 16;
 
     private:
-        /** Allow the DSP core associated with the log producer to sleep. */
-        void allowCoreToSleep() noexcept;
-        void preventCoreFromSleeping();
-
         static const unsigned int maxCommandQueueSize = 10;
         static const unsigned int maxPollWaitMs = 500;
 
@@ -131,7 +128,7 @@ private:
         std::mutex mLogDeviceMutex;
         bool mProductionThreadBlocked = false;
         Device &mDevice;
-
+        CorePower<Exception> mCorePower;
         std::future<void> mLogResult;
     };
     /** A non empty producer list garantees that we could open and start the log device.
