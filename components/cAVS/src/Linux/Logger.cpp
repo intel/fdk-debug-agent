@@ -265,6 +265,9 @@ void Logger::LogProducer::produceEntries()
             if (not mLogDevice->wait(CompressDevice::mInfiniteTimeout)) {
                 break;
             }
+        } catch (const CompressDevice::IoException &) {
+            /** Log compress device has been stopped, exiting production. */
+            break;
         } catch (const CompressDevice::Exception &e) {
             std::cout << "Waiting on Log Device failed " + std::string(e.what()) << ", exiting"
                       << std::endl;

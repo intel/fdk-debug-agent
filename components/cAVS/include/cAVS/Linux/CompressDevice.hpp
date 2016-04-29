@@ -23,8 +23,8 @@
 #pragma once
 
 #include "Util/Buffer.hpp"
+#include "Util/Exception.hpp"
 #include "cAVS/Linux/CompressTypes.hpp"
-#include <exception>
 #include <string>
 #include <inttypes.h>
 #include <stdexcept>
@@ -47,9 +47,11 @@ enum class Mode
 class CompressDevice
 {
 public:
-    struct Exception : std::logic_error
+    using Exception = util::Exception<CompressDevice>;
+    struct IoException : public Exception
     {
-        using std::logic_error::logic_error;
+        /* No message required */
+        IoException() : Exception("") {}
     };
 
     /** @throw Device::Exception if the device initialization has failed */

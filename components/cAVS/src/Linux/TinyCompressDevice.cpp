@@ -85,11 +85,13 @@ bool TinyCompressDevice::wait(int timeoutMs)
         if (errno == ETIME) {
             std::cout << "Warning: compress wait poll timed out" << std::endl;
             return false;
-        } else if (errno != EIO) {
-            std::cout << "Error: compress wait error: " << compress_get_error(mDevice)
-                      << ", trying to recover" << std::endl;
-            recover();
         }
+        if (errno == EIO) {
+            throw IoException();
+        }
+        std::cout << "Error: compress wait error: " << compress_get_error(mDevice)
+                  << ", trying to recover" << std::endl;
+        recover();
     }
     throw Exception("Unrecoverable error on " + getName() + ", error:" + std::to_string(errno) +
                     ", compress error=" + std::string(compress_get_error(mDevice)));
