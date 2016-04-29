@@ -342,7 +342,7 @@ static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item
 
 Resource::ResponsePtr PerfDataResource::handleGet(const Request &)
 {
-    auto data = mSystem.getPerfData();
+    auto data = mSystem.getPerfService().getData();
 
     std::ostringstream result;
     result << "<ParameterBlock Name=\"PerformanceData\">\n"

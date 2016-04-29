@@ -65,8 +65,8 @@ void PerfServiceParameterApplier::setServiceParameterValue(const std::string &pa
     }
 
     try {
-        mSystem.setPerfState(state);
-    } catch (System::Exception &e) {
+        mSystem.getPerfService().setState(state);
+    } catch (PerfService::Exception &e) {
         throw Exception("Unable to set perf measurement parameters: " + std::string(e.what()));
     }
 }
@@ -76,8 +76,8 @@ std::string PerfServiceParameterApplier::getServiceParameterValue()
     Perf::State state;
 
     try {
-        state = mSystem.getPerfState();
-    } catch (System::Exception &e) {
+        state = mSystem.getPerfService().getState();
+    } catch (PerfService::Exception &e) {
         throw Exception(std::string("Cannot get perf measurement parameters : ") + e.what());
     }
 

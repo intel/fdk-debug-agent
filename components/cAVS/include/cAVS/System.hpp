@@ -171,12 +171,7 @@ public:
 
     ModuleHandler &getModuleHandler();
     ProbeService &getProbeService();
-
-    Perf::State getPerfState();
-
-    void setPerfState(Perf::State state);
-
-    PerfService::CompoundPerfData getPerfData();
+    PerfService &getPerfService();
 
     /** Stop internal threads and unblock consumer threads */
     void stop() noexcept { mDriver->stop(); }
