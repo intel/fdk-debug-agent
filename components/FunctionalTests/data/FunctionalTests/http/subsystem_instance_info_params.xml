@@ -1,0 +1,12 @@
+<info_parameters>
+<ParameterBlock Name="Memory State">
+    <ParameterBlock Name="LP">
+        <IntegerParameter Name="free_phys_mem_pages">42</IntegerParameter>
+        <IntegerParameter Name="ebb_state">1</IntegerParameter>
+    </ParameterBlock>
+    <ParameterBlock Name="HP">
+        <IntegerParameter Name="free_phys_mem_pages">1337</IntegerParameter>
+        <IntegerParameter Name="ebb_state">255 4294967295</IntegerParameter>
+    </ParameterBlock>
+</ParameterBlock>
+</info_parameters>

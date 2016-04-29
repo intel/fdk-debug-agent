@@ -22,16 +22,39 @@
 
 #include "Core/SubsystemParameterApplier.hpp"
 #include "Core/BaseModelConverter.hpp"
+#include "cAVS/ModuleHandler.hpp"
+#include <sstream>
+#include <numeric>
 
 namespace debug_agent
 {
 namespace core
 {
+
+using cavs::dsp_fw::GlobalMemoryState;
+
 std::set<std::string> SubsystemParameterApplier::getSupportedTypes() const
 {
     return {BaseModelConverter::subsystemName};
 }
 
+static void printMemoryState(std::ostringstream &out, const GlobalMemoryState::SramStateInfo &state)
+{
+    out << "        <IntegerParameter Name=\"free_phys_mem_pages\">" << state.freePhysMemPages
+        << "</IntegerParameter>\n"
+        << "        <IntegerParameter Name=\"ebb_state\">";
+
+    // join the EBB states like so: "1 2 3 4"...
+    std::string joinedEbbStates = std::accumulate(
+        begin(state.ebbStates), end(state.ebbStates), std::string(),
+        [](std::string acc, uint32_t ebbState) {
+            return acc.empty() ? std::to_string(ebbState) : (acc + " " + std::to_string(ebbState));
+        });
+
+    out << joinedEbbStates << "</IntegerParameter>\n";
+
+    // TODO: page_alloc (once available from the firmware)
+}
 std::string SubsystemParameterApplier::getParameterValue(const std::string & /*type*/,
                                                          ParameterKind kind,
                                                          const std::string &instanceId)
@@ -40,8 +63,22 @@ std::string SubsystemParameterApplier::getParameterValue(const std::string & /*t
         throw UnsupportedException();
     }
 
-    // TODO: actually return something useful.
-    return "<info_parameters>\n<info_parameters>";
+    auto memoryState = mSystem.getModuleHandler().getGlobalMemoryState();
+
+    std::ostringstream result;
+    // clang-format off
+    result << "<info_parameters>\n"
+           << "<ParameterBlock Name=\"Memory State\">\n"
+           << "    <ParameterBlock Name=\"LP\">\n";
+    printMemoryState(result, memoryState.lpsramState);
+    result << "    </ParameterBlock>\n"
+           << "    <ParameterBlock Name=\"HP\">\n";
+    printMemoryState(result, memoryState.hpsramState);
+    result << "    </ParameterBlock>\n"
+           << "</ParameterBlock>\n"
+           << "</info_parameters>\n";
+    // clang-format on
+    return result.str();
 }
 } // core
 } // debug_agent

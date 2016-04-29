@@ -350,6 +350,71 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: internal debug urls", "[debug]")
         "text/html", HttpClientSimulator::FileContent(htmlFileName("internal_topology"))));
 }
 
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsystem],[info]")
+{
+    /* Setting the test vector
+     * ----------------------- */
+    {
+        linux::MockedDeviceCommands commands(*device);
+        DBGACommandScope scope(commands);
+
+        /* Adding topology command */
+        addInstanceTopologyCommands(commands);
+
+        Buffer globalMemoryState = {/* Tag for LPSRAM_STATE: 0 */
+                                    0, 0, 0, 0,
+                                    /* Length: (1+1+1) * 4 */
+                                    12, 0, 0, 0,
+                                    /* Value */
+                                    /* Free physical memory pages (42) */
+                                    42, 0, 0, 0,
+                                    /* number of EBB state entries */
+                                    1, 0, 0, 0,
+                                    /* EBB state */
+                                    0x01, 0, 0, 0,
+                                    /* Tag for HPSRAM_STATE: 1 */
+                                    1, 0, 0, 0,
+                                    /* Length: (1+1+2) * 4 */
+                                    16, 0, 0, 0,
+                                    /* Value */
+                                    /* Free physical memory pages (1337 = 0x0539) */
+                                    0x39, 0x05, 0, 0,
+                                    /* number of EBB state entries */
+                                    2, 0, 0, 0,
+                                    /* EBB state, part 1 */
+                                    0xff, 0x00, 0x00, 0x00,
+                                    /* EBB state, part 2 */
+                                    0xff, 0xff, 0xff, 0xff};
+
+        /* Add command for get module parameter */
+        commands.addGetGlobalMemoryStateCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                                globalMemoryState);
+    }
+
+    /* Now using the mocked device
+     * --------------------------- */
+
+    /* Creating the factory that will inject the mocked device */
+    linux::DeviceInjectionDriverFactory driverFactory(
+        std::move(device), std::move(controlDevice),
+        std::make_unique<linux::StubbedCompressDeviceFactory>());
+
+    /* Creating and starting the debug agent */
+    DebugAgent debugAgent(driverFactory, HttpClientSimulator::DefaultPort, pfwConfigPath);
+
+    /* Creating the http client */
+    HttpClientSimulator client("localhost");
+
+    /* Request an instance topology refresh */
+    CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
+
+    /* 1: Getting system information*/
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs/0/info_parameters", HttpClientSimulator::Verb::Get, "",
+        HttpClientSimulator::Status::Ok, "text/xml",
+        HttpClientSimulator::FileContent(xmlFileName("subsystem_instance_info_params"))));
+}
+
 static const dsp_fw::ParameterId AecParameterId{0};
 
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control parameters "
