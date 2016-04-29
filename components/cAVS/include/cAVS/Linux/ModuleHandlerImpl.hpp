@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cAVS/ModuleHandlerImpl.hpp"
+#include "cAVS/Linux/CorePower.hpp"
 #include "cAVS/Linux/Device.hpp"
 
 namespace debug_agent
@@ -36,7 +37,7 @@ namespace linux
 class ModuleHandlerImpl : public cavs::ModuleHandlerImpl
 {
 public:
-    ModuleHandlerImpl(Device &device) : mDevice(device) {}
+    ModuleHandlerImpl(Device &device) : mDevice(device), mCorePower(mDevice) {}
 
 private:
     util::Buffer configGet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
@@ -46,6 +47,7 @@ private:
                    const util::Buffer &parameterPayload) override;
 
     Device &mDevice;
+    CorePower<Exception> mCorePower;
 };
 }
 }

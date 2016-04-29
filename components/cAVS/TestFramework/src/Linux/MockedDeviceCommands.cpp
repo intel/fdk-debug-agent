@@ -229,7 +229,9 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus, uint1
     messageWriter.write(largeConfigAccess);
     util::Buffer sentMessage = messageWriter.getBuffer();
 
+    addSetCorePowerCommand(true, 0, false);
     mDevice.addCommandWriteOK(driver::setGetCtrl, sentMessage, sentMessage.size());
+    addSetCorePowerCommand(true, 0, true);
 }
 
 void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus, uint16_t moduleId,
@@ -245,7 +247,9 @@ void MockedDeviceCommands::addSetModuleParameterCommand(dsp_fw::IxcStatus, uint1
     messageWriter.write(configAccess);
     util::Buffer sentMessage = messageWriter.getBuffer();
 
+    addSetCorePowerCommand(true, 0, false);
     mDevice.addCommandWriteOK(driver::setGetCtrl, sentMessage, sentMessage.size());
+    addSetCorePowerCommand(true, 0, true);
 }
 
 void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus, uint16_t moduleId,
@@ -276,8 +280,10 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus, uint1
     util::Buffer outputBuffer;
     outputBuffer.resize(maxParameterPayloadSize);
 
+    addSetCorePowerCommand(true, 0, false);
     mDevice.addCommandReadOK(driver::setGetCtrl, messageWriter.getBuffer(), outputBuffer,
                              returnedReadMsgWriter.getBuffer());
+    addSetCorePowerCommand(true, 0, true);
 }
 
 void MockedDeviceCommands::addSetCorePowerCommand(bool controlSuccess, unsigned int coreId,

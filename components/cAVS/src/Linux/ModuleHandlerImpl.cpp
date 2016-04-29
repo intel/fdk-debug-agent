@@ -21,6 +21,7 @@
  */
 #include "cAVS/Linux/ModuleHandlerImpl.hpp"
 #include "cAVS/Linux/DriverTypes.hpp"
+#include "cAVS/Linux/CorePower.hpp"
 #include "cAVS/DspFw/Common.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Util/Buffer.hpp"
@@ -37,6 +38,7 @@ namespace linux
 util::Buffer ModuleHandlerImpl::configGet(uint16_t moduleId, uint16_t instanceId,
                                           dsp_fw::ParameterId parameterId, size_t parameterSize)
 {
+    AutoPreventFromSleeping<Exception> autoPower(mCorePower);
     /* Creating the header and body payload using the LargeConfigAccess type */
     driver::LargeConfigAccess configAccess(driver::LargeConfigAccess::CmdType::Get, moduleId,
                                            instanceId, parameterId.getValue(), parameterSize);
@@ -59,7 +61,6 @@ util::Buffer ModuleHandlerImpl::configGet(uint16_t moduleId, uint16_t instanceId
     /* Reading the answer using the header of the corresponding replied debugfs command. */
     util::MemoryByteStreamReader messageReader(receivedMessage);
     messageReader.read(configAccess);
-
     const auto &payloadBegin = messageReader.getBuffer().begin() + messageReader.getPointerOffset();
     return {payloadBegin, payloadBegin + configAccess.getReplyPayloadSize()};
 }
@@ -68,6 +69,7 @@ void ModuleHandlerImpl::configSet(uint16_t moduleId, uint16_t instanceId,
                                   dsp_fw::ParameterId parameterId,
                                   const util::Buffer &parameterPayload)
 {
+    AutoPreventFromSleeping<Exception> autoPower(mCorePower);
     /* Creating the header and body payload using the Large or Module ConfigAccess type */
     util::MemoryByteStreamWriter messageWriter;
     if (parameterId.getValue() == dsp_fw::BaseModuleParams::MOD_INST_ENABLE) {
