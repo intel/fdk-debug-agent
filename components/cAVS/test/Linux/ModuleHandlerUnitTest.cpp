@@ -57,8 +57,6 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
                                  /* hot fix and build */
                                  0x05, 0x06, 0x07, 0x08};
 
-    const uint8_t *buf = fwConfigTlvList.data();
-
     /* Setting the test vector
     * ----------------------- */
     MockedDeviceCommands commands(*device);
