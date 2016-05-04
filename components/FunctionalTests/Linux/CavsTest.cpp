@@ -35,6 +35,7 @@
 #include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/MockedDeviceCommands.hpp"
 #include "cAVS/Linux/MockedControlDeviceCommands.hpp"
+#include "cAVS/Linux/ControlDeviceTypes.hpp"
 #include "cAVS/Linux/Prober.hpp"
 #include "cAVS/DspFw/Probe.hpp"
 #include "catch.hpp"
@@ -659,16 +660,39 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
         linux::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
         commands.addSetCorePowerCommand(true, 0, false);
-        commands.addSetCorePowerCommand(true, 1, false);
+        /* 0 is sent twice as far as we cannot wake another core than 0 separately. */
+        commands.addSetCorePowerCommand(true, 0, false);
 
-        /* @todo: 2: Set log parameter to
+        /* 2: Set log parameter to
         * - isStarted : true
         * - level: verbose
         * - output: sram
         */
+        linux::MockedControlDeviceCommands controlCommands(*controlDevice);
+        /* 1: Get log parameter, will return
+        * - isStarted : false  (Up to the logger that does not start yet the compress devices
+        * - level: critical (Up to the control device that get the level using ctl mixer)
+        * - output: Sram (not used)
+        */
+        controlCommands.addGetLogLevelCommand(true, linux::mixer_ctl::LogPriority::Critical);
+
+        /* 2: Set log parameter to
+        * - isStarted : true
+        * - level: verbose
+        * - output: sram
+        */
+        controlCommands.addSetLogLevelCommand(true, linux::mixer_ctl::LogPriority::Verbose);
+
+        /* 3: Get log parameter , will return
+        * - isStarted : true
+        * - level: verbose
+        * - output: sram
+        */
+        controlCommands.addGetLogLevelCommand(true, linux::mixer_ctl::LogPriority::Verbose);
 
         commands.addSetCorePowerCommand(true, 0, true);
-        commands.addSetCorePowerCommand(true, 1, true);
+        /* 0 is sent twice as far as we cannot wake another core than 0 separately. */
+        commands.addSetCorePowerCommand(true, 0 /*1*/, true);
     }
 
     /* Now using the mocked device
@@ -712,12 +736,17 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice", "[l
         linux::MockedDeviceCommands commands(*device);
         DBGACommandScope scope(commands);
         commands.addSetCorePowerCommand(true, 0, false);
-        commands.addSetCorePowerCommand(true, 1, false);
+        /* 0 is sent twice as far as we cannot wake another core than 0 separately. */
+        commands.addSetCorePowerCommand(true, 0 /*1*/, false);
 
-        /** @todo: mock set log level commands. */
+        /** mock set log level commands. */
+        linux::MockedControlDeviceCommands controlCommands(*controlDevice);
+        controlCommands.addGetLogLevelCommand(true, linux::mixer_ctl::LogPriority::Critical);
+        controlCommands.addSetLogLevelCommand(true, linux::mixer_ctl::LogPriority::Verbose);
 
         commands.addSetCorePowerCommand(true, 0, true);
-        commands.addSetCorePowerCommand(true, 1, true);
+        /* 0 is sent twice as far as we cannot wake another core than 0 separately. */
+        commands.addSetCorePowerCommand(true, 0 /*1*/, true);
     }
 
     /* Now using the mocked device
@@ -750,7 +779,22 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice", "[l
     CHECK_NOTHROW(client.request(
         "/instance/cavs.fwlogs/0/control_parameters", HttpClientSimulator::Verb::Put,
         file_helper::readAsString(xmlFileName("logservice_setparam_start")),
-        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
+        HttpClientSimulator::Status::InternalError, "text/plain",
+        HttpClientSimulator::StringContent(
+            "Internal error: ParameterDispatcher: cannot set control parameter value: "
+            "Unable to set log parameters: Unable to set log parameter: Can not change log "
+            "parameters while logging is activated. (type=cavs.fwlogs kind=Control instance=0\n"
+            "value:\n"
+            "<control_parameters>\n"
+            "    <BooleanParameter Name=\"Started\">1</BooleanParameter>\n"
+            "    <ParameterBlock Name=\"Buffering\">\n"
+            "        <IntegerParameter Name=\"Size\">100</IntegerParameter>\n"
+            "        <BooleanParameter Name=\"Circular\">0</BooleanParameter>\n"
+            "    </ParameterBlock>\n"
+            "    <BooleanParameter Name=\"PersistsState\">0</BooleanParameter>\n"
+            "    <EnumParameter Name=\"Verbosity\">Verbose</EnumParameter>\n"
+            "    <BooleanParameter Name=\"ViaPTI\">0</BooleanParameter>\n"
+            "</control_parameters>\n)")));
 }
 
 TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement service", "[perf]")

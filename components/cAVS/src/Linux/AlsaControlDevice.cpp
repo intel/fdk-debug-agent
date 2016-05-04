@@ -64,7 +64,7 @@ void AlsaControlDevice::getCtlHandle(const std::string &name, snd_ctl_t *&handle
     error = snd_ctl_elem_info(handle, &info);
     if (error < 0) {
         snd_ctl_close(handle);
-        throw Exception("Cannot find " + name + " + control mixer on " + mControl + ": " +
+        throw Exception("Cannot find " + name + " control mixer on " + mControl + ": " +
                         snd_strerror(error));
     }
     snd_ctl_elem_info_get_id(&info, &id);

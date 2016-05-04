@@ -39,7 +39,7 @@ void MockedControlDeviceCommands::addGetLogLevelCommand(bool controlSuccess,
                                                         mixer_ctl::LogPriority expectedLogPrio)
 {
     MemoryByteStreamWriter writer;
-    writer.write(static_cast<long>(expectedLogPrio));
+    writer.write(expectedLogPrio);
     if (controlSuccess) {
         mControlDevice.addSuccessfulControlReadEntry(mixer_ctl::logLevelMixer, {},
                                                      writer.getBuffer());
@@ -52,7 +52,7 @@ void MockedControlDeviceCommands::addSetLogLevelCommand(bool controlSuccess,
                                                         mixer_ctl::LogPriority logPrio)
 {
     MemoryByteStreamWriter writer;
-    writer.write(static_cast<long>(logPrio));
+    writer.write(logPrio);
     mControlDevice.addControlWriteEntry(controlSuccess, mixer_ctl::logLevelMixer,
                                         writer.getBuffer());
 }

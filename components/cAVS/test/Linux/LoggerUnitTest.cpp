@@ -36,98 +36,6 @@ using namespace debug_agent::cavs::linux;
 
 using Fixture = MockedDeviceFixture;
 
-TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stub")
-{
-    StubbedCompressDeviceFactory compressDeviceFactory;
-
-    /* Setting the test vector
-     * ----------------------- */
-    MockedDeviceCommands commands(*device);
-    commands.addSetCorePowerCommand(true, 0, false);
-    commands.addSetCorePowerCommand(true, 1, false);
-
-    /** @todo: Adding a successful set log parameters command */
-
-    commands.addSetCorePowerCommand(true, 0, true);
-    commands.addSetCorePowerCommand(true, 1, true);
-
-    /* Now using the stubbed compress device
-     * -------------------------------------- */
-
-    /* Creating the windows logger, that will use the mocked device*/
-    linux::Logger logger(*device, *controlDevice, compressDeviceFactory);
-
-    /* Defining parameters that will be used for set then get*/
-    linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
-                                              debug_agent::cavs::Logger::Output::Sram);
-
-    /* Checking successful set log parameters command */
-    CHECK_NOTHROW(logger.setParameters(inputParameters));
-
-    /* Checking that set log parameters command is supported if running*/
-    CHECK_NOTHROW(logger.setParameters(inputParameters));
-
-    /* Checking successful get log parameters command */
-    debug_agent::cavs::Logger::Parameters outputParameters;
-    CHECK_NOTHROW(outputParameters = logger.getParameters());
-
-    /* Checking that returned parameters are correct */
-    CHECK(outputParameters == inputParameters);
-}
-
-TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters using Stubbed Control Device")
-{
-    /* Setting the test vector
-     * ----------------------- */
-
-    StubbedCompressDeviceFactory compressDeviceFactory;
-
-    /* Setting the test vector
-     * ----------------------- */
-    MockedDeviceCommands commands(*device);
-
-    commands.addSetCorePowerCommand(true, 0, false);
-    commands.addSetCorePowerCommand(true, 1, false);
-
-    /** @todo: Adding a successful set log parameters command */
-
-    commands.addSetCorePowerCommand(true, 0, true);
-    commands.addSetCorePowerCommand(true, 1, true);
-
-    std::unique_ptr<ControlDevice> stubbedControlDevice =
-        std::make_unique<StubbedControlDevice>("myStubbedControlCard");
-    /* Now using the mocked device
-     * --------------------------- */
-
-    //* Creating the windows logger, that will use the mocked device*/
-    /* Creating the windows logger, that will use the mocked device*/
-    linux::Logger logger(*device, *stubbedControlDevice, compressDeviceFactory);
-
-    /* Defining parameters that will be used for set then get*/
-    linux::Logger::Parameters inputParameters(false, debug_agent::cavs::Logger::Level::Verbose,
-                                              debug_agent::cavs::Logger::Output::Sram);
-
-    debug_agent::cavs::Logger::Parameters initOutputParameters;
-    CHECK_NOTHROW(initOutputParameters = logger.getParameters());
-
-    /* Checking that returned parameters are correct */
-    CHECK(initOutputParameters == inputParameters);
-
-    /* Change the log lovel to verbose for activation. */
-    inputParameters.mIsStarted = true;
-    inputParameters.mLevel = debug_agent::cavs::Logger::Level::Verbose;
-
-    /* Checking successful set log parameters command */
-    CHECK_NOTHROW(logger.setParameters(inputParameters));
-
-    /* Checking successful get log parameters command */
-    debug_agent::cavs::Logger::Parameters outputParameters;
-    CHECK_NOTHROW(outputParameters = logger.getParameters());
-
-    /* Checking that returned parameters are correct */
-    CHECK(outputParameters == inputParameters);
-}
-
 TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
 {
     /* Setting the test vector
@@ -135,15 +43,28 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
     MockedDeviceCommands commands(*device);
 
     commands.addSetCorePowerCommand(true, 0, false);
-    /** @todo: Adding a failed set log parameters command due to control error. */
 
-    /** @todo: Adding a successful set log parameters command */
+    MockedControlDeviceCommands controlCommands(*controlDevice);
+
+    /** Adding a failed set log parameters command due to control error. */
+    controlCommands.addSetLogLevelCommand(false, mixer_ctl::LogPriority::Verbose);
+
+    /** Adding a successful set log parameters command */
+    controlCommands.addSetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
+
+    /** Adding a failed get log parameters command due to control error. */
+    controlCommands.addGetLogLevelCommand(false, mixer_ctl::LogPriority::Verbose);
+
+    /** Adding a successful get log parameters command */
+    controlCommands.addGetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
 
     commands.addSetCorePowerCommand(true, 0, true);
 
     MockedCompressDeviceFactory compressDeviceFactory;
     compressDevice->addSuccessfulCompressDeviceEntryOpen();
     compressDevice->addSuccessfulCompressDeviceEntryStart();
+
+    compressDevice->addSuccessfulCompressDeviceEntryWait(CompressDevice::mInfiniteTimeout, false);
 
     compressDevice->addSuccessfulCompressDeviceEntryStop();
     compressDeviceFactory.addMockedDevice(std::move(compressDevice));
@@ -157,10 +78,18 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
     linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
                                               debug_agent::cavs::Logger::Output::Sram);
 
-    /* @todo: Checking that set log parameters command produces OS error */
+    /* Checking that set log parameters command produces OS error */
+    CHECK_THROWS_AS_MSG(logger.setParameters(inputParameters), linux::Logger::Exception,
+                        "Failed to write the log level control: Control Device says that control "
+                        "Write has failed.");
 
     /* Checking successful set log parameters command */
     CHECK_NOTHROW(logger.setParameters(inputParameters));
+
+    /* Checking that get log parameters command produces OS error */
+    CHECK_THROWS_AS_MSG(
+        logger.getParameters(), linux::Logger::Exception,
+        "Failed to read the log level control: Control Device says that control Read has failed.");
 
     /* Checking successful get log parameters command */
     linux::Logger::Parameters outputParameters;
@@ -182,6 +111,9 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Open Fai
     MockedCompressDeviceFactory compressDeviceFactory;
     compressDevice->addFailedCompressDeviceEntryOpen();
     compressDeviceFactory.addMockedDevice(std::move(compressDevice));
+
+    MockedControlDeviceCommands controlCommands(*controlDevice);
+    controlCommands.addSetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
 
     /* Now using the mocked device
      * --------------------------- */
@@ -213,6 +145,9 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Start Fa
     compressDevice->addFailedCompressDeviceEntryStart();
     compressDeviceFactory.addMockedDevice(std::move(compressDevice));
 
+    MockedControlDeviceCommands controlCommands(*controlDevice);
+    controlCommands.addSetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
+
     /* Now using the mocked device
      * --------------------------- */
 
@@ -234,6 +169,9 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Empty Lo
      * ----------------------- */
 
     MockedCompressDeviceFactory compressDeviceFactory;
+
+    MockedControlDeviceCommands controlCommands(*controlDevice);
+    controlCommands.addSetLogLevelCommand(true, mixer_ctl::LogPriority::Verbose);
 
     /* Now using the mocked device
      * --------------------------- */

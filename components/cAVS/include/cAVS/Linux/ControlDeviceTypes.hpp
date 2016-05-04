@@ -35,14 +35,15 @@ namespace linux
 namespace mixer_ctl
 {
 
-static const std::string logLevelMixer{"FW LOGGING Log level"};
+static const std::string logLevelMixer{"DSP Log Level"};
 
 /**
  * Log Mixer Ctl levels, beware of the type, it shall match the mixer ctl value type
+ * Log Level is an enum control mixer, type is int
  */
-enum class LogPriority : long
+enum class LogPriority : uint32_t
 {
-    Quiet,
+    Quiet = 0,
     Critical,
     High,
     Medium,

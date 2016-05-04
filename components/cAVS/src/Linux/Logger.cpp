@@ -24,9 +24,11 @@
 #include "Util/PointerHelper.hpp"
 #include "Util/ByteStreamWriter.hpp"
 #include "Util/ByteStreamReader.hpp"
+#include <Util/AssertAlways.hpp>
 #include <string>
 #include <cstring>
 #include <algorithm>
+#include <map>
 
 namespace debug_agent
 {
@@ -34,6 +36,13 @@ namespace cavs
 {
 namespace linux
 {
+
+static const std::map<Logger::Level, mixer_ctl::LogPriority> levelConversion = {
+    {Logger::Level::Verbose, mixer_ctl::LogPriority::Verbose},
+    {Logger::Level::Low, mixer_ctl::LogPriority::Low},
+    {Logger::Level::Medium, mixer_ctl::LogPriority::Medium},
+    {Logger::Level::High, mixer_ctl::LogPriority::High},
+    {Logger::Level::Critical, mixer_ctl::LogPriority::Critical}};
 
 /* Explicit definition, so that it can be referenced.  See
  * https://gcc.gnu.org/wiki/VerboseDiagnostics#missing_static_const_definition */
@@ -51,16 +60,20 @@ void Logger::setParameters(const Parameters &parameters)
         } else {
             stopLogLocked(parameters);
         }
+    } else {
+        /* Start/Stop state has not changed */
+        if (isLogProductionRunning()) {
+            throw Exception("Can not change log parameters while logging is activated.");
+        }
+        updateLogLocked(parameters);
     }
-
-    mLogLevel = parameters.mLevel;
-    /** @todo: set the log level
-     */
 }
 
-void Logger::startLogLocked(const Parameters & /*parameters*/)
+void Logger::startLogLocked(const Parameters &parameters)
 {
-    assert(!isLogProductionRunning());
+    ASSERT_ALWAYS(not isLogProductionRunning());
+
+    setLogLevel(parameters.mLevel);
 
     /* Clearing the log queue at session start and open it during all logger session. */
     mLogEntryQueue.clear();
@@ -70,12 +83,23 @@ void Logger::startLogLocked(const Parameters & /*parameters*/)
     constructProducers();
 }
 
-void Logger::stopLogLocked(const Parameters & /*parameters*/)
+void Logger::stopLogLocked(const Parameters &parameters)
 {
     destroyProducers();
 
     /* Unblocking log consumer threads */
     mLogEntryQueue.close();
+
+    /* Update the low level anyway for consistency. */
+    setLogLevel(parameters.mLevel);
+}
+
+void Logger::updateLogLocked(const Parameters &parameters)
+{
+    /* Cannot change log parameters during running session */
+    ASSERT_ALWAYS(not isLogProductionRunning());
+
+    setLogLevel(parameters.mLevel);
 }
 
 Logger::Parameters Logger::getParameters()
@@ -84,7 +108,34 @@ Logger::Parameters Logger::getParameters()
      * Log production is started once tinycompress devices
      * are opened and started
      */
-    return {isLogProductionRunning(), mLogLevel, Output::Sram};
+    return {isLogProductionRunning(), getLogLevel(), Output::Sram};
+}
+
+void Logger::setLogLevel(const Level &level)
+{
+    util::MemoryByteStreamWriter writer;
+    writer.write(toLinux(level));
+    try {
+        mControlDevice.ctlWrite(mixer_ctl::logLevelMixer, writer.getBuffer());
+    } catch (const ControlDevice::Exception &e) {
+        throw Exception("Failed to write the log level control: " + std::string(e.what()));
+    }
+}
+
+Logger::Level Logger::getLogLevel() const
+{
+    mixer_ctl::LogPriority logPriority;
+
+    util::Buffer logLevelBuffer{};
+    try {
+        mControlDevice.ctlRead(mixer_ctl::logLevelMixer, logLevelBuffer);
+    } catch (const ControlDevice::Exception &e) {
+        throw Exception("Failed to read the log level control: " + std::string(e.what()));
+    }
+    util::MemoryByteStreamReader reader(logLevelBuffer);
+    reader.read(logPriority);
+
+    return fromLinux(logPriority);
 }
 
 std::unique_ptr<LogBlock> Logger::readLogBlock()
@@ -138,11 +189,33 @@ void Logger::stop() noexcept
     }
 }
 
-/* The constructor starts the log producer thread */
+mixer_ctl::LogPriority Logger::toLinux(const Logger::Level &level)
+{
+    try {
+        return levelConversion.at(level);
+    } catch (std::out_of_range &) {
+        throw Exception("Wrong level value (" + std::to_string(static_cast<uint32_t>(level)) +
+                        ").");
+    }
+}
+
+Logger::Level Logger::fromLinux(const mixer_ctl::LogPriority &level)
+{
+    for (auto &candidate : levelConversion) {
+        if (candidate.second == level) {
+            return candidate.first;
+        }
+    }
+    throw Exception("Wrong level value (" + std::to_string(static_cast<uint32_t>(level)) + ")");
+}
+
+/* The constructor starts the log producer thread.
+ * @todo: once driver supports waking up one core separately, send the request to the right core.
+ */
 Logger::LogProducer::LogProducer(BlockingLogQueue &queue, unsigned int coreId, Device &device,
                                  std::unique_ptr<CompressDevice> logDevice)
     : mQueue(queue), mCoreId(coreId), mLogDevice(std::move(logDevice)), mDevice(device),
-      mCorePower(device, coreId)
+      mCorePower(device)
 {
     /* No parameter to start / stop logging on linux. So, just consider that if a log device
      * could be opened and started and consequently a log producer instantiated it is enough
@@ -199,6 +272,7 @@ void Logger::LogProducer::stopLogDevice()
         mCondVar.wait(guard);
     }
     ASSERT_ALWAYS(not mProductionThreadBlocked);
+
     mLogDevice->close();
 
     /* Can decrease core wake up ref count. */

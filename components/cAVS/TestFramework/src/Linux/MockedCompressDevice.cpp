@@ -92,10 +92,6 @@ bool MockedCompressDevice::wait(int /*waitMs*/)
      */
     std::unique_lock<std::mutex> locker(mMutex);
 
-    /* Checking that the test vector is not already consumed */
-    if (consumed()) {
-        failure("MockedCompressDevice vector already consumed.");
-    }
     if (not mIsRunning) {
         /** The device has been stopped before the read/write thread could call wait.
          * It means wait shall fail to return. Find the wait mock within the entries list
@@ -103,6 +99,11 @@ bool MockedCompressDevice::wait(int /*waitMs*/)
          */
         throw IoException();
     }
+    /* Checking that the test vector is not already consumed */
+    if (consumed()) {
+        failure("MockedCompressDevice vector already consumed.");
+    }
+
     CompressOperationEntryPtr entryPtr = std::move(mEntries.front());
     CompressWaitEntry *entry = dynamic_cast<CompressWaitEntry *>(entryPtr.get());
     if (entry == nullptr) {

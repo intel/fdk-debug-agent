@@ -50,7 +50,7 @@ public:
     Logger(Device &device, ControlDevice &controlDevice,
            CompressDeviceFactory &compressDeviceFactory)
         : mDevice(device), mControlDevice(controlDevice),
-          mCompressDeviceFactory(compressDeviceFactory), mLogLevel(Level::Verbose),
+          mCompressDeviceFactory(compressDeviceFactory),
           mLogEntryQueue(queueMaxMemoryBytes, logBlockSize)
     {
     }
@@ -137,14 +137,20 @@ private:
 
     void startLogLocked(const Parameters &parameters);
     void stopLogLocked(const Parameters &parameters);
+    void updateLogLocked(const Parameters &parameters);
     void constructProducers();
     void destroyProducers();
+
+    void setLogLevel(const Level &level);
+    Level getLogLevel() const;
+
+    static mixer_ctl::LogPriority toLinux(const Level &level);
+    static Level fromLinux(const mixer_ctl::LogPriority &level);
 
     Device &mDevice;
     ControlDevice &mControlDevice;
 
     CompressDeviceFactory &mCompressDeviceFactory;
-    Level mLogLevel; /** cached log level.  */
     BlockingLogQueue mLogEntryQueue;
 
     std::list<std::unique_ptr<LogProducer>> mLogProducers;
