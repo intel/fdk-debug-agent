@@ -25,7 +25,8 @@ set(LINUX_LIB_SRCS
     src/Linux/MockedDebugFsEntryHandler.cpp
     src/Linux/MockedCompressDevice.cpp
     src/Linux/MockedControlDevice.cpp
-    src/Linux/MockedControlDeviceCommands.cpp)
+    src/Linux/MockedControlDeviceCommands.cpp
+    src/Linux/StubbedControlDeviceFactory.cpp)
 
 set(LIB_SRCS ${LIB_SRCS} ${LINUX_LIB_SRCS})
 
@@ -42,6 +43,7 @@ set(LINUX_LIB_INCS
     include/cAVS/Linux/MockedCompressDevice.hpp
     include/cAVS/Linux/MockedCompressDeviceFactory.hpp
     include/cAVS/Linux/MockedControlDevice.hpp
+    include/cAVS/Linux/StubbedControlDevice.hpp
     include/cAVS/Linux/MockedControlDeviceCommands.hpp
     include/cAVS/Linux/SyncWait.hpp)
 

@@ -21,7 +21,7 @@
 # cmake configuration file of the "cAVS" component
 
 # option to use Alsa-lib based Control device
-SET_PROPERTY(CACHE MIXER_CONTROL_LIB_TO_USE PROPERTY STRINGS Tinyalsa Alsa-lib Stub STRING
+SET_PROPERTY(CACHE MIXER_CONTROL_LIB_TO_USE PROPERTY STRINGS Tinyalsa Alsa-lib STRING
     "library selected to set/get control mixer on soundcard")
 
 # Common source files
@@ -152,6 +152,9 @@ if (CMAKE_SYSTEM_NAME MATCHES Linux)
         find_library(TINYALSA_LIBRARY NAMES tinyalsa REQUIRED)
         target_link_libraries(cAVS ${TINYALSA_LIBRARY})
     elseif (MIXER_CONTROL_LIB_TO_USE MATCHES "Alsa-lib")
+        find_path(ALSA_LIB_INCLUDE_DIR NAMES alsa/asoundlib.h REQUIRED)
+        target_include_directories(cAVS PUBLIC "${ALSA_LIB_INCLUDE_DIR}")
+
         find_library(LIBASOUND_LIBRARY NAMES asound REQUIRED)
         target_link_libraries(cAVS ${LIBASOUND_LIBRARY})
     endif ()
