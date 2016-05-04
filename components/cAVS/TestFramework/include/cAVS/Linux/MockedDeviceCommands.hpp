@@ -32,7 +32,6 @@
 #include "cAVS/DspFw/Infrastructure.hpp"
 #include "cAVS/DspFw/GlobalPerfData.hpp"
 #include "cAVS/Linux/MockedDevice.hpp"
-#include "cAVS/Linux/DriverTypes.hpp"
 #include "cAVS/Perf.hpp"
 #include "Util/Buffer.hpp"
 
@@ -263,18 +262,6 @@ public:
      * @throw Device::Exception
      */
     void addSetCorePowerCommand(bool controlSuccess, unsigned int coreId, bool allowedToSleep);
-
-    /** Add a set Log Info State command.
-     *
-     * @param[in] controlSuccess true if the command shall be successful, false otherwise
-     * @param[in] coreMask mask of the core to set the info
-     * @param[in] enabled true if log is enabled, false otherwise.
-     * @param[in] level of the log to set.
-     *
-     * @throw Device::Exception
-     */
-    void addSetLogInfoStateCommand(bool controlSuccess, driver::CoreMask coreMask, bool enabled,
-                                   Logger::Level level);
 
     void addGetPerfState(Perf::State state);
     void addSetPerfState(Perf::State state);

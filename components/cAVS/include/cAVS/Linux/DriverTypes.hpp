@@ -24,8 +24,6 @@
 
 #include "cAVS/DspFw/Common.hpp"
 #include "cAVS/ModuleHandler.hpp"
-#include "cAVS/Logger.hpp"
-#include <bitset>
 
 namespace debug_agent
 {
@@ -48,52 +46,6 @@ static const std::string corePowerCtrl{"/sys/kernel/debug/snd_soc_skl/core_power
 
 static const uint32_t LOADABLE_MODULE_ID = 0x1000;
 static const uint32_t VENDOR_CONFIG_PARAM = 0xFF;
-static const size_t maxCoreSupported = 2;
-
-using CoreMask = std::bitset<maxCoreSupported>;
-
-/** Write Only IPC. */
-class LogStateInfo
-{
-public:
-    LogStateInfo(const CoreMask &coreMask, bool isEnabled, Logger::Level priority)
-        : mCoreMask(coreMask.to_ulong()),
-          mLogStates(maxCoreSupported, LogState(isEnabled, priority))
-    {
-    }
-
-    /** Write only command, so only toStream to be provided. */
-    void toStream(util::ByteStreamWriter &writer) const
-    {
-        writer.write(mCoreMask);
-        for (const auto &logState : mLogStates) {
-            logState.toStream(writer);
-        }
-    }
-
-private:
-    class LogState
-    {
-    public:
-        LogState(bool isEnabled, Logger::Level priority)
-            : mIsEnabled(isEnabled), mPriority(priority)
-        {
-        }
-
-        void toStream(util::ByteStreamWriter &writer) const
-        {
-            writer.write(mIsEnabled);
-            writer.write(mPriority);
-        }
-
-    private:
-        uint32_t mIsEnabled;
-        debug_agent::cavs::Logger::Level mPriority;
-    };
-
-    uint32_t mCoreMask;
-    std::vector<LogState> mLogStates;
-};
 
 class CorePowerCommand
 {

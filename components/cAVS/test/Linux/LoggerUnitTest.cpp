@@ -46,10 +46,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters with Stub")
     commands.addSetCorePowerCommand(true, 0, false);
     commands.addSetCorePowerCommand(true, 1, false);
 
-    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
-                                       debug_agent::cavs::Logger::Level::Verbose);
-    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
-                                       debug_agent::cavs::Logger::Level::Verbose);
+    /** @todo: Adding a successful set log parameters command */
 
     commands.addSetCorePowerCommand(true, 0, true);
     commands.addSetCorePowerCommand(true, 1, true);
@@ -91,8 +88,9 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters using Stubbed
 
     commands.addSetCorePowerCommand(true, 0, false);
     commands.addSetCorePowerCommand(true, 1, false);
-    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0 | 1 << 1), true,
-                                       debug_agent::cavs::Logger::Level::Verbose);
+
+    /** @todo: Adding a successful set log parameters command */
+
     commands.addSetCorePowerCommand(true, 0, true);
     commands.addSetCorePowerCommand(true, 1, true);
 
@@ -137,19 +135,15 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
     MockedDeviceCommands commands(*device);
 
     commands.addSetCorePowerCommand(true, 0, false);
-    /** Adding a failed set log parameters command due to control error. */
-    commands.addSetLogInfoStateCommand(false, driver::CoreMask(1 << 0), true,
-                                       debug_agent::cavs::Logger::Level::Verbose);
+    /** @todo: Adding a failed set log parameters command due to control error. */
 
-    /** Adding a successful set log parameters command */
-    commands.addSetLogInfoStateCommand(true, driver::CoreMask(1 << 0), true,
-                                       debug_agent::cavs::Logger::Level::Verbose);
+    /** @todo: Adding a successful set log parameters command */
+
+    commands.addSetCorePowerCommand(true, 0, true);
 
     MockedCompressDeviceFactory compressDeviceFactory;
     compressDevice->addSuccessfulCompressDeviceEntryOpen();
     compressDevice->addSuccessfulCompressDeviceEntryStart();
-
-    compressDevice->addSuccessfulCompressDeviceEntryWait(CompressDevice::mInfiniteTimeout, false);
 
     compressDevice->addSuccessfulCompressDeviceEntryStop();
     compressDeviceFactory.addMockedDevice(std::move(compressDevice));
@@ -163,10 +157,7 @@ TEST_CASE_METHOD(Fixture, "Logging: setting and getting parameters")
     linux::Logger::Parameters inputParameters(true, debug_agent::cavs::Logger::Level::Verbose,
                                               debug_agent::cavs::Logger::Output::Sram);
 
-    /* Checking that set log parameters command produces OS error */
-    CHECK_THROWS_AS_MSG(logger.setParameters(inputParameters), linux::Logger::Exception,
-                        "Failed to write the log level: "
-                        "error during commandWrite: error#MockDevice");
+    /* @todo: Checking that set log parameters command produces OS error */
 
     /* Checking successful set log parameters command */
     CHECK_NOTHROW(logger.setParameters(inputParameters));

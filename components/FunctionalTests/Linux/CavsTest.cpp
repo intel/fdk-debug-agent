@@ -661,13 +661,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: log parameters (URL: /instance/cavs.
         commands.addSetCorePowerCommand(true, 0, false);
         commands.addSetCorePowerCommand(true, 1, false);
 
-        /* 2: Set log parameter to
+        /* @todo: 2: Set log parameter to
         * - isStarted : true
         * - level: verbose
         * - output: sram
         */
-        commands.addSetLogInfoStateCommand(true, linux::driver::CoreMask(1 << 0 | 1 << 1), true,
-                                           debug_agent::cavs::Logger::Level::Verbose);
 
         commands.addSetCorePowerCommand(true, 0, true);
         commands.addSetCorePowerCommand(true, 1, true);
@@ -715,10 +713,9 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice", "[l
         DBGACommandScope scope(commands);
         commands.addSetCorePowerCommand(true, 0, false);
         commands.addSetCorePowerCommand(true, 1, false);
-        commands.addSetLogInfoStateCommand(true, linux::driver::CoreMask(1 << 0 | 1 << 1), true,
-                                           debug_agent::cavs::Logger::Level::Verbose);
-        commands.addSetLogInfoStateCommand(true, linux::driver::CoreMask(1 << 0 | 1 << 1), true,
-                                           debug_agent::cavs::Logger::Level::Verbose);
+
+        /** @todo: mock set log level commands. */
+
         commands.addSetCorePowerCommand(true, 0, true);
         commands.addSetCorePowerCommand(true, 1, true);
     }

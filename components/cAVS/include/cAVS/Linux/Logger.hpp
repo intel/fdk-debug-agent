@@ -22,7 +22,6 @@
 #pragma once
 
 #include "cAVS/Linux/Device.hpp"
-#include "cAVS/Linux/DriverTypes.hpp"
 #include "cAVS/Linux/ControlDevice.hpp"
 #include "cAVS/Linux/ControlDeviceTypes.hpp"
 #include "cAVS/Linux/CompressTypes.hpp"
@@ -51,7 +50,7 @@ public:
     Logger(Device &device, ControlDevice &controlDevice,
            CompressDeviceFactory &compressDeviceFactory)
         : mDevice(device), mControlDevice(controlDevice),
-          mCompressDeviceFactory(compressDeviceFactory), mLogLevel(Level::Verbose), mCoreMask(0),
+          mCompressDeviceFactory(compressDeviceFactory), mLogLevel(Level::Verbose),
           mLogEntryQueue(queueMaxMemoryBytes, logBlockSize)
     {
     }
@@ -70,8 +69,6 @@ public:
     void stop() noexcept override;
 
 private:
-    void setLogStateInfo(const driver::LogStateInfo &logStateInfo);
-
     using BlockingLogQueue = util::BlockingQueue<LogBlock>;
     using LogBlockPtr = std::unique_ptr<LogBlock>;
 
@@ -147,8 +144,7 @@ private:
     ControlDevice &mControlDevice;
 
     CompressDeviceFactory &mCompressDeviceFactory;
-    Level mLogLevel;            /** Log State Info IPC is a write only, need to cache log level.  */
-    driver::CoreMask mCoreMask; /** Active Core for logging. */
+    Level mLogLevel; /** cached log level.  */
     BlockingLogQueue mLogEntryQueue;
 
     std::list<std::unique_ptr<LogProducer>> mLogProducers;
