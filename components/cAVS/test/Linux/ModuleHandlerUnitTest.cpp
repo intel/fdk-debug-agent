@@ -290,7 +290,6 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
     /* Creating the module handler, that will use the mocked device*/
     linux::ModuleHandler moduleHandler(*device);
 
-    /* Simulating an os error during getting pipeline list */
     std::vector<dsp_fw::PipeLineIdType> pipelineIds;
     static const uint32_t maxPipeline = 10;
 
