@@ -96,11 +96,17 @@ bool MockedCompressDevice::wait(int /*waitMs*/)
     if (consumed()) {
         failure("MockedCompressDevice vector already consumed.");
     }
+    if (not mIsRunning) {
+        /** The device has been stopped before the read/write thread could call wait.
+         * It means wait shall fail to return. Find the wait mock within the entries list
+         * as the order may not be correct.
+         */
+        throw IoException();
+    }
     CompressOperationEntryPtr entryPtr = std::move(mEntries.front());
     CompressWaitEntry *entry = dynamic_cast<CompressWaitEntry *>(entryPtr.get());
     if (entry == nullptr) {
-        failure("Wrong CompressDevice method, expecting wait, got " + entryPtr->getOpName() +
-                " command.");
+        failure("Wrong CompressDevice method, expecting wait.");
     }
     mEntries.pop();
     if (entry->getSyncWait() != nullptr) {
@@ -127,13 +133,36 @@ void MockedCompressDevice::start()
 
 void MockedCompressDevice::stop()
 {
-    {
-        std::unique_lock<std::mutex> locker(mMutex);
-        if (mIsRunning) {
-            mCondVar.notify_one();
+    std::unique_lock<std::mutex> locker(mMutex);
+    if (mIsRunning) {
+        mCondVar.notify_one();
+    }
+    mIsRunning = false;
+    if (consumed()) {
+        failure("MockedCompressDevice vector already consumed.");
+    }
+    /** As stop may be called from a different context than the read/write thread, the order of
+     * stop and wait mock is not garanted.
+     */
+    while (__func__ != mEntries.front().get()->getOpName()) {
+        // Removing the entry
+        mEntries.pop();
+        /* Checking that the test vector is not already consumed */
+        if (consumed()) {
+            failure("MockedCompressDevice vector already consumed.");
         }
     }
-    basicMockedOperation(__func__);
+    assert(__func__ == mEntries.front().get()->getOpName());
+
+    CompressOperationEntryPtr entryPtr(std::move(mEntries.front()));
+    if (entryPtr == nullptr) {
+        failure("Wrong CompressDevice method, invalid command.");
+    }
+    mEntries.pop();
+
+    if (entryPtr->isFailing()) {
+        throw Exception("error during compress stop error#MockDevice");
+    }
 }
 
 bool MockedCompressDevice::isRunning() const noexcept
@@ -166,8 +195,7 @@ size_t MockedCompressDevice::write(const util::Buffer &inputBuffer)
     CompressOperationEntryPtr entryPtr(std::move(mEntries.front()));
     const CompressWriteEntry *entry = dynamic_cast<CompressWriteEntry *>(entryPtr.get());
     if (entry == nullptr) {
-        failure("Wrong CompressDevice method, expecting write, got " + entryPtr->getOpName() +
-                " command.");
+        failure("Wrong CompressDevice method, expecting write.");
     }
     mEntries.pop();
 
@@ -197,8 +225,7 @@ size_t MockedCompressDevice::read(util::Buffer &outputBuffer)
     CompressOperationEntryPtr entryPtr(std::move(mEntries.front()));
     const CompressReadEntry *entry = dynamic_cast<CompressReadEntry *>(entryPtr.get());
     if (entry == nullptr) {
-        failure("Wrong CompressDevice method, expecting read, got " + entryPtr->getOpName() +
-                " command.");
+        failure("Wrong CompressDevice method, expecting read.");
     }
     mEntries.pop();
 
