@@ -151,7 +151,7 @@ struct MessageHeader
 
         extended.largeParamId = parameterId;
         // The size of the parameter I am expecting to read / write
-        extended.dataDize = std::min(parameterSize, ModuleHandler::maxParameterPayloadSize);
+        extended.dataDize = std::min(parameterSize, maxParameterPayloadSize);
         extended.reserved = 0;
     }
 
@@ -196,8 +196,8 @@ struct TunneledMessageHeader : public MessageHeader
                         parameterSize + sizeof(mTunneledHeader))
     {
         mTunneledHeader.mParamId = parameterId;
-        mTunneledHeader.mParamSize = std::min(parameterSize + sizeof(mTunneledHeader),
-                                              ModuleHandler::maxParameterPayloadSize);
+        mTunneledHeader.mParamSize =
+            std::min(parameterSize + sizeof(mTunneledHeader), maxParameterPayloadSize);
     }
     void fromStream(util::ByteStreamReader &reader) override
     {
@@ -236,8 +236,7 @@ public:
             mHeader = std::make_unique<MessageHeader>((uint32_t)cmd, moduleId, instanceId,
                                                       parameterId, parameterSize);
         }
-        mSize = std::min(sizeof(*mHeader) + mParameterPayload.size(),
-                         ModuleHandler::maxParameterPayloadSize);
+        mSize = std::min(sizeof(*mHeader) + mParameterPayload.size(), maxParameterPayloadSize);
     }
 
     void fromStream(util::ByteStreamReader &reader) { mHeader->fromStream(reader); }

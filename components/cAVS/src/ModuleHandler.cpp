@@ -27,10 +27,6 @@ namespace debug_agent
 {
 namespace cavs
 {
-/** In order to invoque this constant in std::min that requires reference, need
- * WA to force the compiler giving an address.
- */
-const size_t ModuleHandler::maxParameterPayloadSize;
 
 template <typename FirmwareParameterType>
 void ModuleHandler::getFwParameterValue(uint16_t moduleId, uint16_t instanceId,
@@ -62,10 +58,10 @@ TlvResponseHandlerInterface ModuleHandler::readTlvParameters(dsp_fw::BaseFwParam
 {
     TlvResponseHandlerInterface responseHandler;
 
-    /** According to the SwAS, setting initial buffer size to cavsTlvBufferSize.
+    /** According to the SwAS, setting initial buffer size to tlvBufferSize.
      * Using 0xFF for test purpose (mark unused memory) */
     util::Buffer buffer = configGet(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
-                                    dsp_fw::toParameterId(parameterId), cavsTlvBufferSize);
+                                    dsp_fw::toParameterId(parameterId), tlvBufferSize);
 
     /* Now parse the TLV answer */
     tlv::TlvUnpack unpack(responseHandler, buffer);

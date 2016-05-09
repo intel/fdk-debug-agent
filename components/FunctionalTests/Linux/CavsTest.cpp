@@ -435,11 +435,10 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: GET module instance control paramete
         uint16_t InstanceId = 1;
         commands.addGetModuleParameterCommand(
             /*true, STATUS_SUCCESS, */ dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, InstanceId,
-            AecParameterId, ModuleHandler::maxParameterPayloadSize, aecControlParameterPayload);
+            AecParameterId, maxParameterPayloadSize, aecControlParameterPayload);
         commands.addGetModuleParameterCommand(
             /*true, STATUS_SUCCESS, */ dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, InstanceId,
-            dsp_fw::ParameterId{25}, ModuleHandler::maxParameterPayloadSize,
-            nsControlParameterPayload);
+            dsp_fw::ParameterId{25}, maxParameterPayloadSize, nsControlParameterPayload);
     }
 
     /* Now using the mocked device

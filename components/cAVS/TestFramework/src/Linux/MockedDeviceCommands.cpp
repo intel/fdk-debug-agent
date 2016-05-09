@@ -42,7 +42,7 @@ void MockedDeviceCommands::addTlvParameterCommand(dsp_fw::IxcStatus returnedFirm
 {
     addGetModuleParameterCommand(returnedFirmwareStatus, dsp_fw::baseFirmwareModuleId,
                                  dsp_fw::baseFirmwareInstanceId, dsp_fw::toParameterId(parameterId),
-                                 ModuleHandler::cavsTlvBufferSize, tlvList);
+                                 tlvBufferSize, tlvList);
 }
 
 void MockedDeviceCommands::addGetHwConfigCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
@@ -91,12 +91,12 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(dsp_fw::IxcStatus returned
     util::MemoryByteStreamWriter writer;
     writer.write(props);
 
-    util::Buffer returnedOutput(ModuleHandler::maxParameterPayloadSize, 0xFF);
+    util::Buffer returnedOutput(maxParameterPayloadSize, 0xFF);
     returnedOutput = writer.getBuffer();
 
     addGetModuleParameterCommand(returnedFirmwareStatus, dsp_fw::baseFirmwareModuleId,
-                                 dsp_fw::baseFirmwareInstanceId, paramId,
-                                 ModuleHandler::maxParameterPayloadSize, returnedOutput);
+                                 dsp_fw::baseFirmwareInstanceId, paramId, maxParameterPayloadSize,
+                                 returnedOutput);
 }
 
 void MockedDeviceCommands::addGetSchedulersInfoCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
@@ -110,12 +110,12 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(dsp_fw::IxcStatus returne
     util::MemoryByteStreamWriter writer;
     writer.write(info);
 
-    util::Buffer returnedOutput(ModuleHandler::maxParameterPayloadSize, 0xFF);
+    util::Buffer returnedOutput(maxParameterPayloadSize, 0xFF);
     returnedOutput = writer.getBuffer();
 
     addGetModuleParameterCommand(returnedFirmwareStatus, dsp_fw::baseFirmwareModuleId,
-                                 dsp_fw::baseFirmwareInstanceId, paramId,
-                                 ModuleHandler::maxParameterPayloadSize, returnedOutput);
+                                 dsp_fw::baseFirmwareInstanceId, paramId, maxParameterPayloadSize,
+                                 returnedOutput);
 }
 
 void MockedDeviceCommands::addGetGatewaysCommand(dsp_fw::IxcStatus returnedFirmwareStatus,
@@ -147,12 +147,12 @@ void MockedDeviceCommands::addGetModuleInstancePropsCommand(
     util::MemoryByteStreamWriter writer;
     writer.write(props);
 
-    util::Buffer returnedOutput(ModuleHandler::maxParameterPayloadSize, 0xFF);
+    util::Buffer returnedOutput(maxParameterPayloadSize, 0xFF);
     returnedOutput = writer.getBuffer();
 
     addGetModuleParameterCommand(returnedFirmwareStatus, moduleId, instanceId,
                                  dsp_fw::toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
-                                 ModuleHandler::maxParameterPayloadSize, returnedOutput);
+                                 maxParameterPayloadSize, returnedOutput);
 }
 
 void MockedDeviceCommands::addGetModuleEntriesCommand(
@@ -274,7 +274,7 @@ void MockedDeviceCommands::addGetModuleParameterCommand(dsp_fw::IxcStatus, uint1
 
     /** The read command output buffer is expected to be sized at param payload max size. */
     util::Buffer outputBuffer;
-    outputBuffer.resize(ModuleHandler::maxParameterPayloadSize);
+    outputBuffer.resize(maxParameterPayloadSize);
 
     mDevice.addCommandReadOK(driver::setGetCtrl, messageWriter.getBuffer(), outputBuffer,
                              returnedReadMsgWriter.getBuffer());

@@ -222,7 +222,7 @@ void MockedDeviceCommands::addTlvParameterCommand(bool ioctlSuccess, NTSTATUS re
                                                   const Buffer &tlvList,
                                                   dsp_fw::BaseFwParams parameterId)
 {
-    util::Buffer expectedOutput(ModuleHandler::cavsTlvBufferSize, 0xFF);
+    util::Buffer expectedOutput(tlvBufferSize, 0xFF);
     util::Buffer returnedOutput;
     returnedOutput = tlvList;
 
@@ -402,8 +402,8 @@ void MockedDeviceCommands::addGetPipelinePropsCommand(bool ioctlSuccess,
         ModuleHandler::getExtendedParameterId(dsp_fw::BaseFwParams::PIPELINE_PROPS_GET, pipelineId);
 
     addGetModuleParameterCommand(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
-                                 paramId, ModuleHandler::maxParameterPayloadSize, props,
-                                 ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+                                 paramId, maxParameterPayloadSize, props, ioctlSuccess,
+                                 returnedDriverStatus, returnedFirmwareStatus);
 }
 
 void MockedDeviceCommands::addGetSchedulersInfoCommand(bool ioctlSuccess,
@@ -417,8 +417,8 @@ void MockedDeviceCommands::addGetSchedulersInfoCommand(bool ioctlSuccess,
         ModuleHandler::getExtendedParameterId(dsp_fw::BaseFwParams::SCHEDULERS_INFO_GET, coreId);
 
     addGetModuleParameterCommand(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
-                                 paramId, ModuleHandler::maxParameterPayloadSize, info,
-                                 ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
+                                 paramId, maxParameterPayloadSize, info, ioctlSuccess,
+                                 returnedDriverStatus, returnedFirmwareStatus);
 }
 
 void MockedDeviceCommands::addGetGatewaysCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
@@ -442,10 +442,9 @@ void MockedDeviceCommands::addGetModuleInstancePropsCommand(
     bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
     uint16_t moduleId, uint16_t instanceId, const dsp_fw::ModuleInstanceProps &props)
 {
-    addGetModuleParameterCommand(moduleId, instanceId,
-                                 dsp_fw::toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
-                                 ModuleHandler::maxParameterPayloadSize, props, ioctlSuccess,
-                                 returnedDriverStatus, returnedFirmwareStatus);
+    addGetModuleParameterCommand(
+        moduleId, instanceId, dsp_fw::toParameterId(dsp_fw::BaseModuleParams::MOD_INST_PROPS),
+        maxParameterPayloadSize, props, ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 
 void MockedDeviceCommands::addSetModuleParameterCommand(bool ioctlSuccess,
@@ -468,9 +467,8 @@ void MockedDeviceCommands::addGetModuleParameterCommand(bool ioctlSuccess,
                                                         const util::Buffer &parameterPayload)
 {
     addModuleParameterCommand(Command::Get, moduleId, instanceId, parameterId,
-                              util::Buffer(ModuleHandler::maxParameterPayloadSize, 0xFF),
-                              parameterPayload, ioctlSuccess, returnedDriverStatus,
-                              returnedFirmwareStatus);
+                              util::Buffer(maxParameterPayloadSize, 0xFF), parameterPayload,
+                              ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus);
 }
 }
 }

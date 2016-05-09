@@ -41,21 +41,21 @@ namespace debug_agent
 namespace cavs
 {
 
+/**
+ * The size in bytes of the response buffer needed by the FW in order to reply a TLV.
+ * The SwAS specifies the output buffer size for TLV shall be 2KB.
+ */
+static constexpr size_t tlvBufferSize = 2048;
+
+/**
+ * Max parameter payload size set to one memory page (4096 bytes)
+ */
+static constexpr size_t maxParameterPayloadSize = 4 * 1024;
+
 /** This abstract class exposes the FW module API */
 class ModuleHandler
 {
 public:
-    /**
-     * The size in bytes of the response buffer needed by the FW in order to reply a TLV.
-     * The SwAS specifies the output buffer size for TLV shall be 2KB.
-     */
-    static const size_t cavsTlvBufferSize = 2048;
-
-    /**
-     * Max parameter payload size set to one memory page (4096 bytes)
-     */
-    static const size_t maxParameterPayloadSize = 4 * 1024;
-
     struct Exception : std::logic_error
     {
         using std::logic_error::logic_error;
