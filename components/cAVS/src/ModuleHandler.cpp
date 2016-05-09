@@ -28,6 +28,30 @@ namespace debug_agent
 namespace cavs
 {
 
+ModuleHandler::ModuleHandler(std::unique_ptr<ModuleHandlerImpl> impl) : mImpl(std::move(impl))
+{
+}
+
+util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
+                                      dsp_fw::ParameterId parameterId, size_t parameterSize)
+{
+    try {
+        return mImpl->configGet(moduleId, instanceId, parameterId, parameterSize);
+    } catch (ModuleHandlerImpl::Exception &e) {
+        throw Exception(e.what());
+    }
+}
+
+void ModuleHandler::configSet(uint16_t moduleId, uint16_t instanceId,
+                              dsp_fw::ParameterId parameterId, const util::Buffer &parameterPayload)
+{
+    try {
+        mImpl->configSet(moduleId, instanceId, parameterId, parameterPayload);
+    } catch (ModuleHandlerImpl::Exception &e) {
+        throw Exception(e.what());
+    }
+}
+
 template <typename FirmwareParameterType>
 void ModuleHandler::getFwParameterValue(uint16_t moduleId, uint16_t instanceId,
                                         dsp_fw::ParameterId moduleParamId,

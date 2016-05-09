@@ -21,7 +21,7 @@
  */
 
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
-#include "cAVS/Windows/ModuleHandler.hpp"
+#include "cAVS/ModuleHandler.hpp"
 #include "Util/Buffer.hpp"
 
 using namespace debug_agent::util;

@@ -1,7 +1,7 @@
 /*
  ********************************************************************************
  *                              INTEL CONFIDENTIAL
- *   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+ *   Copyright(C) 2016 Intel Corporation. All Rights Reserved.
  *   The source code contained  or  described herein and all documents related to
  *   the source code ("Material") are owned by Intel Corporation or its suppliers
  *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -22,23 +22,21 @@
 
 #pragma once
 
-#include "cAVS/ModuleHandler.hpp"
-#include "cAVS/Windows/Device.hpp"
-#include "cAVS/Windows/DriverTypes.hpp"
-#include "tlv/TlvResponseHandlerInterface.hpp"
+#include "cAVS/ModuleHandlerImpl.hpp"
+#include "cAVS/Linux/Device.hpp"
 
 namespace debug_agent
 {
 namespace cavs
 {
-namespace windows
+namespace linux
 {
 
-/** Windows module handler implementation */
-class ModuleHandler : public cavs::ModuleHandler
+/** Linux module handler implementation */
+class ModuleHandlerImpl : public cavs::ModuleHandlerImpl
 {
 public:
-    ModuleHandler(Device &device) : mDevice(device) {}
+    ModuleHandlerImpl(Device &device) : mDevice(device) {}
 
     util::Buffer configGet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
                            size_t parameterSize) override;
@@ -48,25 +46,6 @@ public:
 
 private:
     Device &mDevice;
-
-    /** Performs an ioctl "big get/set" to the base firmware using the feature
-     * "module access parameter" to retrieve firmware information: adsp properties, module entries,
-     * pipelines...
-     *
-     * The ioctl "big get/set" allows to retrieve information from the driver. This ioctl supports
-     * several kind of information (Wake On voice...), here the "module access parameter" is used
-     * to retrieve firmware structures.
-     *
-     * @param[in] isGet true for BigGet ioctl, false for BigSet ioctl.
-     * @param[in] moduleId the target module type id
-     * @param[in] instanceId the target module instance id
-     * @param[in] moduleParamId the module parameter id
-     * @param[in] suppliedOutputBuffer the input parameter payload
-     * @param[in] returnedOutputBuffer the output parameter payload
-     */
-    util::Buffer bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId, uint16_t instanceId,
-                                         dsp_fw::ParameterId moduleParamId,
-                                         const util::Buffer &suppliedOutputBuffer);
 };
 }
 }

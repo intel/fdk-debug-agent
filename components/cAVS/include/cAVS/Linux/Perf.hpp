@@ -23,7 +23,7 @@
 
 #include "cAVS/Perf.hpp"
 #include "cAVS/Linux/Device.hpp"
-#include "cAVS/Linux/ModuleHandler.hpp"
+#include "cAVS/ModuleHandler.hpp"
 
 namespace debug_agent
 {

@@ -29,7 +29,7 @@ set(WINDOWS_LIB_SRCS
     src/Windows/SystemDevice.cpp
     src/Windows/LastError.cpp
     src/Windows/DeviceIdFinder.cpp
-    src/Windows/ModuleHandler.cpp
+    src/Windows/ModuleHandlerImpl.cpp
     src/Windows/WppConsumer.cpp
     src/Windows/WppController.cpp
     src/Windows/FileWppClient.cpp
@@ -50,7 +50,7 @@ set(WINDOWS_LIB_INCS
     include/cAVS/Windows/IoctlHelpers.hpp
     include/cAVS/Windows/LastError.hpp
     include/cAVS/Windows/Logger.hpp
-    include/cAVS/Windows/ModuleHandler.hpp
+    include/cAVS/Windows/ModuleHandlerImpl.hpp
     include/cAVS/Windows/Prober.hpp
     include/cAVS/Windows/ProberBackend.hpp
     include/cAVS/Windows/ProberStateMachine.hpp

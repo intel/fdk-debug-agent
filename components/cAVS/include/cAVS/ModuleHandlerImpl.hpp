@@ -22,31 +22,54 @@
 
 #pragma once
 
-#include "cAVS/ModuleHandler.hpp"
-#include "cAVS/Linux/Device.hpp"
+#include "cAVS/DspFw/Common.hpp"
+#include "Util/Buffer.hpp"
+#include "Util/Exception.hpp"
+
+#include <cstdint>
+#include <cstddef>
 
 namespace debug_agent
 {
 namespace cavs
 {
-namespace linux
-{
 
-/** Linux module handler implementation */
-class ModuleHandler : public cavs::ModuleHandler
+/** module handler implementation */
+class ModuleHandlerImpl
 {
 public:
-    ModuleHandler(Device &device) : mDevice(device) {}
+    using Exception = util::Exception<ModuleHandlerImpl>;
 
-    util::Buffer configGet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                           size_t parameterSize) override;
+    virtual ~ModuleHandlerImpl() = default;
 
-    void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                   const util::Buffer &parameterPayload) override;
+    /** Perform a "config get" command
+     *
+     * This method should be implemented using driver specificities
+     *
+     * @param[in] moduleId the module type id
+     * @param[in] instanceId the module instance id
+     * @param[in] parameterId the parameter id
+     * @param[in] parameterSize the parameter's size
+     *
+     * @returns the parameter payload.
+     * @throw ModuleHandler::Exception
+     */
+    virtual util::Buffer configGet(uint16_t moduleId, uint16_t instanceId,
+                                   dsp_fw::ParameterId parameterId, size_t parameterSize) = 0;
 
-private:
-    Device &mDevice;
+    /** Perform a "config set" command
+     *
+     * This method should be implemented using driver specificities
+     *
+     * @param[in] moduleId the module type id
+     * @param[in] instanceId the module instance id
+     * @param[in] parameterId the parameter id
+     * @param[in] parameterPayload the parameter payload to set as value
+     *
+     * @throw ModuleHandler::Exception
+     */
+    virtual void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                           const util::Buffer &parameterPayload) = 0;
 };
-}
 }
 }

@@ -19,7 +19,7 @@
  *
  *******************************************************************************
  */
-#include "cAVS/Linux/ModuleHandler.hpp"
+#include "cAVS/Linux/ModuleHandlerImpl.hpp"
 #include "cAVS/Linux/DriverTypes.hpp"
 #include "cAVS/DspFw/Common.hpp"
 #include "Util/ByteStreamReader.hpp"
@@ -34,8 +34,8 @@ namespace cavs
 {
 namespace linux
 {
-util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
-                                      dsp_fw::ParameterId parameterId, size_t parameterSize)
+util::Buffer ModuleHandlerImpl::configGet(uint16_t moduleId, uint16_t instanceId,
+                                          dsp_fw::ParameterId parameterId, size_t parameterSize)
 {
     /* Creating the header and body payload using the LargeConfigAccess type */
     driver::LargeConfigAccess configAccess(driver::LargeConfigAccess::CmdType::Get, moduleId,
@@ -64,8 +64,9 @@ util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
     return {payloadBegin, payloadBegin + configAccess.getReplyPayloadSize()};
 }
 
-void ModuleHandler::configSet(uint16_t moduleId, uint16_t instanceId,
-                              dsp_fw::ParameterId parameterId, const util::Buffer &parameterPayload)
+void ModuleHandlerImpl::configSet(uint16_t moduleId, uint16_t instanceId,
+                                  dsp_fw::ParameterId parameterId,
+                                  const util::Buffer &parameterPayload)
 {
     /* Creating the header and body payload using the Large or Module ConfigAccess type */
     util::MemoryByteStreamWriter messageWriter;

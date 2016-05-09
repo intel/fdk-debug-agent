@@ -21,7 +21,6 @@
  */
 
 #include "cAVS/Linux/MockedControlDeviceCommands.hpp"
-#include "cAVS/Linux/ModuleHandler.hpp"
 #include "cAVS/Linux/DriverTypes.hpp"
 #include "Util/Buffer.hpp"
 #include "Util/ByteStreamWriter.hpp"

@@ -19,9 +19,10 @@
  *
  ********************************************************************************
  */
-#include "cAVS/Windows/ModuleHandler.hpp"
+#include "cAVS/Windows/ModuleHandlerImpl.hpp"
 #include "cAVS/Windows/WindowsTypes.hpp"
 #include "cAVS/Windows/IoctlHelpers.hpp"
+#include "cAVS/DspFw/Infrastructure.hpp"
 #include "Util/ByteStreamReader.hpp"
 #include "Tlv/TlvUnpack.hpp"
 #include <vector>
@@ -35,10 +36,10 @@ namespace cavs
 namespace windows
 {
 
-util::Buffer ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId,
-                                                    uint16_t instanceId,
-                                                    dsp_fw::ParameterId moduleParamId,
-                                                    const util::Buffer &suppliedOutputBuffer)
+util::Buffer ModuleHandlerImpl::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleId,
+                                                        uint16_t instanceId,
+                                                        dsp_fw::ParameterId moduleParamId,
+                                                        const util::Buffer &suppliedOutputBuffer)
 {
     /* Creating the body payload using the IoctlFwModuleParam type */
     driver::IoctlFwModuleParam moduleParam(moduleId, instanceId, moduleParamId,
@@ -95,8 +96,8 @@ util::Buffer ModuleHandler::bigCmdModuleAccessIoctl(bool isGet, uint16_t moduleI
 }
 
 /** set module parameter */
-util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
-                                      dsp_fw::ParameterId parameterId, size_t parameterSize)
+util::Buffer ModuleHandlerImpl::configGet(uint16_t moduleId, uint16_t instanceId,
+                                          dsp_fw::ParameterId parameterId, size_t parameterSize)
 {
     const util::Buffer suppliedParameterPayload(parameterSize, 0xff);
     return bigCmdModuleAccessIoctl(true, moduleId, instanceId, parameterId,
@@ -104,9 +105,9 @@ util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
 }
 
 /** @return module parameter */
-void ModuleHandler::configSet(uint16_t moduleId, uint16_t instanceId,
-                              dsp_fw::ParameterId parameterId,
-                              const util::Buffer &suppliedParameterPayload)
+void ModuleHandlerImpl::configSet(uint16_t moduleId, uint16_t instanceId,
+                                  dsp_fw::ParameterId parameterId,
+                                  const util::Buffer &suppliedParameterPayload)
 {
     bigCmdModuleAccessIoctl(false, moduleId, instanceId, parameterId, suppliedParameterPayload);
 }

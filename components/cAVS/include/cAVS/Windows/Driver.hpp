@@ -24,13 +24,14 @@
 #include "cAVS/Driver.hpp"
 #include "cAVS/Windows/EventHandle.hpp"
 #include "cAVS/Windows/Logger.hpp"
-#include "cAVS/Windows/ModuleHandler.hpp"
+#include "cAVS/Windows/ModuleHandlerImpl.hpp"
 #include "cAVS/Windows/Prober.hpp"
 #include "cAVS/Windows/Perf.hpp"
 #include "cAVS/Windows/Device.hpp"
 #include "cAVS/Windows/WppClientFactory.hpp"
 #include "Util/AssertAlways.hpp"
 #include <memory>
+#include <utility>
 
 namespace debug_agent
 {
@@ -49,7 +50,8 @@ public:
            ProberBackend::EventHandles &eventHandles)
         : mDevice(std::move(device)), mWppClientFactory(std::move(wppClientFactory)),
           mEventHandles(std::move(eventHandles)), mLogger(*mDevice, *mWppClientFactory),
-          mModuleHandler(*mDevice), mProber(*mDevice, mEventHandles), mPerf(*mDevice)
+          mModuleHandler(std::make_unique<ModuleHandlerImpl>(*mDevice)),
+          mProber(*mDevice, mEventHandles), mPerf(*mDevice)
     {
         ASSERT_ALWAYS(mEventHandles.isValid());
     }

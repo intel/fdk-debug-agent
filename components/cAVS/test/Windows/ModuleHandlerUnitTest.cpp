@@ -24,11 +24,13 @@
 #include "cAVS/Windows/MockedDevice.hpp"
 #include "cAVS/Windows/MockedDeviceCatchHelper.hpp"
 #include "cAVS/Windows/MockedDeviceCommands.hpp"
-#include "cAVS/Windows/ModuleHandler.hpp"
+#include "cAVS/ModuleHandler.hpp"
+#include "cAVS/Windows/ModuleHandlerImpl.hpp"
 #include "Util/Buffer.hpp"
 #include <catch.hpp>
 #include <memory>
 #include <iostream>
+#include <utility>
 
 /**
  * NOTE: test vector buffers are filled with firmware and driver types, maybe a better way
@@ -73,7 +75,7 @@ std::vector<dsp_fw::ModuleEntry> produceModuleEntries(std::size_t expectedModule
 }
 
 /** Perform a module entry ioctl and check the result using the supplied expected module count */
-void checkModuleEntryIoctl(windows::ModuleHandler &moduleHandler, std::size_t expectedModuleCount)
+void checkModuleEntryIoctl(ModuleHandler &moduleHandler, std::size_t expectedModuleCount)
 {
     /*Successful get module info command */
     std::vector<dsp_fw::ModuleEntry> entries;
@@ -122,7 +124,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module entries")
      * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error during getting module entries */
     std::vector<dsp_fw::ModuleEntry> entries;
@@ -190,7 +192,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error during getting fw config */
     dsp_fw::FwConfig fwConfig;
@@ -258,7 +260,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error during getting pipeline list */
     std::vector<dsp_fw::PipeLineIdType> pipelineIds;
@@ -320,7 +322,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline props")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error */
 
@@ -390,7 +392,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error */
 
@@ -453,7 +455,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error during getting pipeline list */
     std::vector<dsp_fw::GatewayProps> gateways;
@@ -548,7 +550,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error */
 
@@ -629,7 +631,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module parameter")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error */
     Buffer parameterPayload;
@@ -696,7 +698,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: setting module parameter")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    windows::ModuleHandler moduleHandler(device);
+    ModuleHandler moduleHandler(std::make_unique<windows::ModuleHandlerImpl>(device));
 
     /* Simulating an os error */
     CHECK_THROWS_AS_MSG(

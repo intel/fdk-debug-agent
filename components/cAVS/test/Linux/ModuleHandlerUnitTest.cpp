@@ -24,7 +24,8 @@
 #include "cAVS/Linux/MockedDevice.hpp"
 #include "cAVS/Linux/MockedDeviceCommands.hpp"
 #include "cAVS/Linux/MockedDeviceCatchHelper.hpp"
-#include "cAVS/Linux/ModuleHandler.hpp"
+#include "cAVS/Linux/ModuleHandlerImpl.hpp"
+#include "cAVS/ModuleHandler.hpp"
 #include "Util/Buffer.hpp"
 #include <catch.hpp>
 #include <memory>
@@ -68,7 +69,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting FW configs")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     dsp_fw::FwConfig fwConfig;
 
@@ -99,7 +100,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module parameter")
     MockedDeviceCommands commands(*device);
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     /* Successful command */
     commands.addGetModuleParameterCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS, moduleId, instanceId,
@@ -135,7 +136,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: set module enable")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     /*Successful command */
     CHECK_NOTHROW(moduleHandler.setModuleParameter(moduleId, instanceId, parameterId, {}));
@@ -161,7 +162,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: setting module parameter")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     /*Successful command */
     CHECK_NOTHROW(
@@ -188,7 +189,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: setting loadable module parameter")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     /*Successful command */
     CHECK_NOTHROW(
@@ -213,7 +214,7 @@ void setArbitraryContent(T &value)
 }
 
 /** Perform a module entry ioctl and check the result using the supplied expected module count */
-void checkModuleEntry(linux::ModuleHandler &moduleHandler, std::size_t expectedModuleCount,
+void checkModuleEntry(ModuleHandler &moduleHandler, std::size_t expectedModuleCount,
                       const std::vector<dsp_fw::ModuleEntry> &expectedModuleEntry)
 {
     /*Successful get module info command */
@@ -263,7 +264,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module entries")
      * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     /*Successful get module info command with 2 modules*/
     checkModuleEntry(moduleHandler, moduleCount, expectedModuleEntry);
@@ -288,7 +289,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline list")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     std::vector<dsp_fw::PipeLineIdType> pipelineIds;
     static const uint32_t maxPipeline = 10;
@@ -317,7 +318,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting pipeline props")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     dsp_fw::PplProps props;
 
@@ -351,7 +352,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting schedulers info")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     /* Simulating an os error */
 
@@ -379,7 +380,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting gateways")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     /* Simulating an os error during getting pipeline list */
     std::vector<dsp_fw::GatewayProps> gateways;
@@ -440,7 +441,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting module instance properties")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     /* Simulating an os error */
 
@@ -490,7 +491,7 @@ TEST_CASE_METHOD(Fixture, "Module handling: getting perf items")
     * --------------------------- */
 
     /* Creating the module handler, that will use the mocked device*/
-    linux::ModuleHandler moduleHandler(*device);
+    ModuleHandler moduleHandler(std::make_unique<linux::ModuleHandlerImpl>(*device));
 
     std::vector<dsp_fw::PerfDataItem> actualPerfItems;
 

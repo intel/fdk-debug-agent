@@ -26,11 +26,12 @@
 #include "cAVS/Linux/ControlDevice.hpp"
 #include "cAVS/DspFw/FwConfig.hpp"
 #include "cAVS/DspFw/HwConfig.hpp"
-#include "cAVS/Linux/ModuleHandler.hpp"
+#include "cAVS/Linux/ModuleHandlerImpl.hpp"
 #include "cAVS/Linux/Logger.hpp"
 #include "cAVS/Linux/Perf.hpp"
 #include "cAVS/Linux/Prober.hpp"
 #include "Util/AssertAlways.hpp"
+#include <utility>
 
 namespace debug_agent
 {
@@ -50,7 +51,8 @@ public:
         : mDevice(std::move(device)), mControlDevice(std::move(controlDevice)),
           mCompressDeviceFactory(std::move(compressDeviceFactory)),
           mLogger(*mDevice, *mControlDevice, *mCompressDeviceFactory),
-          mProber(*mControlDevice, *mCompressDeviceFactory), mModuleHandler(*mDevice),
+          mProber(*mControlDevice, *mCompressDeviceFactory),
+          mModuleHandler(std::make_unique<ModuleHandlerImpl>(*mDevice)),
           mPerf(*mDevice, mModuleHandler)
     {
         ASSERT_ALWAYS(mCompressDeviceFactory != nullptr);

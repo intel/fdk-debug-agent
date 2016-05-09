@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "cAVS/ModuleHandlerImpl.hpp"
 #include "cAVS/DspFw/ModuleType.hpp"
 #include "cAVS/DspFw/ModuleInstance.hpp"
 #include "cAVS/DspFw/FwConfig.hpp"
@@ -61,8 +62,33 @@ public:
         using std::logic_error::logic_error;
     };
 
-    ModuleHandler() = default;
+    ModuleHandler(std::unique_ptr<ModuleHandlerImpl> impl);
     virtual ~ModuleHandler() {}
+
+    /** Perform a "config get" command
+     *
+     * @param[in] moduleId the module type id
+     * @param[in] instanceId the module instance id
+     * @param[in] parameterId the parameter id
+     * @param[in] parameterSize the parameter's size
+     *
+     * @returns the parameter payload.
+     * @throw ModuleHandler::Exception
+     */
+    util::Buffer configGet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                           size_t parameterSize);
+
+    /** Perform a "config set" command
+     *
+     * @param[in] moduleId the module type id
+     * @param[in] instanceId the module instance id
+     * @param[in] parameterId the parameter id
+     * @param[in] parameterPayload the parameter payload to set as value
+     *
+     * @throw ModuleHandler::Exception
+     */
+    void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                   const util::Buffer &parameterPayload);
 
     /** @return the firmware module entries */
     std::vector<dsp_fw::ModuleEntry> getModulesEntries(uint32_t moduleCount);
@@ -124,35 +150,6 @@ public:
     /** @} */
 
 private:
-    /** Perform a "config get" command
-     *
-     * This method should be implemented using driver specificities
-     *
-     * @param[in] moduleId the module type id
-     * @param[in] instanceId the module instance id
-     * @param[in] parameterId the parameter id
-     * @param[in] parameterSize the parameter's size
-     *
-     * @returns the parameter payload.
-     * @throw ModuleHandler::Exception
-     */
-    virtual util::Buffer configGet(uint16_t moduleId, uint16_t instanceId,
-                                   dsp_fw::ParameterId parameterId, size_t parameterSize) = 0;
-
-    /** Perform a "config set" command
-     *
-     * This method should be implemented using driver specificities
-     *
-     * @param[in] moduleId the module type id
-     * @param[in] instanceId the module instance id
-     * @param[in] parameterId the parameter id
-     * @param[in] parameterPayload the parameter payload to set as value
-     *
-     * @throw ModuleHandler::Exception
-     */
-    virtual void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                           const util::Buffer &parameterPayload) = 0;
-
     /** Get module parameter value as a template type
      * @tparam FirmwareParameterType The type of the retrieved parameter value
      */
@@ -178,6 +175,8 @@ private:
 
     ModuleHandler(const ModuleHandler &) = delete;
     ModuleHandler &operator=(const ModuleHandler &) = delete;
+
+    std::unique_ptr<ModuleHandlerImpl> mImpl;
 };
 }
 }

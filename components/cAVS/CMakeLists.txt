@@ -43,6 +43,7 @@ set(LIB_INCS
     include/cAVS/SystemDriverFactory.hpp
     include/cAVS/System.hpp
     include/cAVS/ModuleHandler.hpp
+    include/cAVS/ModuleHandlerImpl.hpp
     include/cAVS/Topology.hpp
     include/cAVS/ProbeService.hpp
     include/cAVS/Prober.hpp
