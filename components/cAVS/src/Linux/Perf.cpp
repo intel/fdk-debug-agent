@@ -50,22 +50,12 @@ void Perf::setState(State state)
         }
     }
 
-    util::MemoryByteStreamWriter writer;
-    writer.write(static_cast<uint32_t>(state));
-    mModuleHandler.configSet(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
-                             dsp_fw::ParameterId{dsp_fw::BaseFwParams::PERF_MEASUREMENTS_STATE},
-                             writer.getBuffer());
+    mModuleHandler.setPerfState(static_cast<uint32_t>(state));
 }
 
 Perf::State Perf::getState()
 {
-    auto fromDriver = mModuleHandler.configGet(
-        dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
-        dsp_fw::ParameterId{dsp_fw::BaseFwParams::PERF_MEASUREMENTS_STATE}, sizeof(State));
-    util::MemoryByteStreamReader reader(fromDriver);
-    uint32_t state;
-    reader.read(state);
-    return static_cast<State>(state);
+    return static_cast<State>(mModuleHandler.getPerfState());
 }
 }
 }

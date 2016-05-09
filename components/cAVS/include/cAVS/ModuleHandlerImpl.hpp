@@ -42,6 +42,9 @@ public:
 
     virtual ~ModuleHandlerImpl() = default;
 
+private:
+    friend class ModuleHandler;
+
     /** Perform a "config get" command
      *
      * This method should be implemented using driver specificities

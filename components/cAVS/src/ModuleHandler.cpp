@@ -21,6 +21,7 @@
  */
 #include "cAVS/ModuleHandler.hpp"
 #include "Util/ByteStreamReader.hpp"
+#include "Util/ByteStreamWriter.hpp"
 #include "Tlv/TlvUnpack.hpp"
 
 namespace debug_agent
@@ -256,6 +257,26 @@ std::vector<dsp_fw::GatewayProps> ModuleHandler::getGatewaysInfo()
     }
 
     return gatewaysInfo.gateways;
+}
+
+// TODO: use the dsp_fw-provided enum once available
+void ModuleHandler::setPerfState(uint32_t state)
+{
+    util::MemoryByteStreamWriter writer;
+    writer.write(state);
+    configSet(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
+              dsp_fw::ParameterId{dsp_fw::BaseFwParams::PERF_MEASUREMENTS_STATE},
+              writer.getBuffer());
+}
+
+// TODO: use the dsp_fw-provided enum once available
+uint32_t ModuleHandler::getPerfState()
+{
+    uint32_t fromDriver;
+    getFwParameterValue(dsp_fw::baseFirmwareModuleId, dsp_fw::baseFirmwareInstanceId,
+                        dsp_fw::toParameterId(dsp_fw::BaseFwParams::PERF_MEASUREMENTS_STATE),
+                        sizeof(fromDriver), fromDriver);
+    return fromDriver;
 }
 
 std::vector<dsp_fw::PerfDataItem> ModuleHandler::getPerfItems()

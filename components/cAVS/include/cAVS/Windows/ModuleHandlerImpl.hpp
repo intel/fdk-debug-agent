@@ -38,13 +38,13 @@ class ModuleHandlerImpl : public cavs::ModuleHandlerImpl
 public:
     ModuleHandlerImpl(Device &device) : mDevice(device) {}
 
+private:
     util::Buffer configGet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
                            size_t parameterSize) override;
 
     void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
                    const util::Buffer &parameterPayload) override;
 
-private:
     Device &mDevice;
 
     /** Performs an ioctl "big get/set" to the base firmware using the feature

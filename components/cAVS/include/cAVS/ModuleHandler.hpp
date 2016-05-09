@@ -78,31 +78,6 @@ public:
     ModuleHandler(std::unique_ptr<ModuleHandlerImpl> impl);
     virtual ~ModuleHandler() {}
 
-    /** Perform a "config get" command
-     *
-     * @param[in] moduleId the module type id
-     * @param[in] instanceId the module instance id
-     * @param[in] parameterId the parameter id
-     * @param[in] parameterSize the parameter's size
-     *
-     * @returns the parameter payload.
-     * @throw ModuleHandler::Exception
-     */
-    util::Buffer configGet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                           size_t parameterSize);
-
-    /** Perform a "config set" command
-     *
-     * @param[in] moduleId the module type id
-     * @param[in] instanceId the module instance id
-     * @param[in] parameterId the parameter id
-     * @param[in] parameterPayload the parameter payload to set as value
-     *
-     * @throw ModuleHandler::Exception
-     */
-    void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
-                   const util::Buffer &parameterPayload);
-
     /** @return the firmware module entries */
     const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const noexcept;
 
@@ -127,6 +102,10 @@ public:
     /** @return the gateways */
     std::vector<dsp_fw::GatewayProps> getGatewaysInfo();
 
+    /** @return the state of the perf measurement service */
+    uint32_t getPerfState();
+    /** Sets the state of the perf measurement service */
+    void setPerfState(uint32_t state);
     /** @return the performance items */
     std::vector<dsp_fw::PerfDataItem> getPerfItems();
 
@@ -166,6 +145,31 @@ public:
     /** @} */
 
 private:
+    /** Perform a "config get" command
+     *
+     * @param[in] moduleId the module type id
+     * @param[in] instanceId the module instance id
+     * @param[in] parameterId the parameter id
+     * @param[in] parameterSize the parameter's size
+     *
+     * @returns the parameter payload.
+     * @throw ModuleHandler::Exception
+     */
+    util::Buffer configGet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                           size_t parameterSize);
+
+    /** Perform a "config set" command
+     *
+     * @param[in] moduleId the module type id
+     * @param[in] instanceId the module instance id
+     * @param[in] parameterId the parameter id
+     * @param[in] parameterPayload the parameter payload to set as value
+     *
+     * @throw ModuleHandler::Exception
+     */
+    void configSet(uint16_t moduleId, uint16_t instanceId, dsp_fw::ParameterId parameterId,
+                   const util::Buffer &parameterPayload);
+
     /** Get module parameter value as a template type
      * @tparam FirmwareParameterType The type of the retrieved parameter value
      */
