@@ -23,6 +23,7 @@
 
 #include "Util/EnumHelper.hpp"
 #include "Util/Exception.hpp"
+#include <string>
 
 namespace debug_agent
 {
@@ -63,7 +64,8 @@ public:
 
     struct Item
     {
-        uint32_t resourceId;
+        std::string uuid;
+        uint16_t instanceId;
         PowerMode powerMode;
         bool isRemoved;
         uint32_t budget;

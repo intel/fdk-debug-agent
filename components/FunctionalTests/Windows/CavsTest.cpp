@@ -1179,8 +1179,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
             dsp_fw::PerfDataItem(0, 0, false, false, 1337, 42),   // Core 0
             dsp_fw::PerfDataItem(1, 0, true, false, 123456, 789), // Module 1, instance 0
             dsp_fw::PerfDataItem(0, 1, true, true, 987654, 321),  // Core 1
-            dsp_fw::PerfDataItem(12, 0, false, false, 1111, 222), // Module 12, instance 0
-            dsp_fw::PerfDataItem(12, 1, true, false, 3333, 444)   // Module 12, instance 1
+            dsp_fw::PerfDataItem(9, 0, false, false, 1111, 222),  // Module 9, instance 0
+            dsp_fw::PerfDataItem(9, 1, true, false, 3333, 444)    // Module 9, instance 1
         };
         commands.addGetPerfItems(
             true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
@@ -1208,7 +1208,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
         // 2nd module instance props ioctl
         {
             dsp_fw::ModuleInstanceProps moduleInstanceProps{};
-            moduleInstanceProps.id = {12, 0};
+            moduleInstanceProps.id = {9, 0};
             moduleInstanceProps.ibs_bytes = 9;
             moduleInstanceProps.cpc = 10000;
 
@@ -1227,7 +1227,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
         // 3rd module instance props ioctl
         {
             dsp_fw::ModuleInstanceProps moduleInstanceProps{};
-            moduleInstanceProps.id = {12, 1};
+            moduleInstanceProps.id = {9, 1};
             moduleInstanceProps.ibs_bytes = 17;
             moduleInstanceProps.cpc = 18000;
 

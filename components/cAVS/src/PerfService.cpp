@@ -21,6 +21,7 @@
 */
 
 #include "cAVS/PerfService.hpp"
+#include "Util/Uuid.hpp"
 
 namespace debug_agent
 {
@@ -83,6 +84,7 @@ PerfService::CompoundPerfData PerfService::getData()
         for (const auto &rawItem : raw) {
             bool isCore = rawItem.resourceId.moduleId == 0;
             float budget = 0;
+            std::string uuidRepr = "n/a"; // irrelevant for cores
 
             // The budget for cores defaults to 0
             if (not isCore) {
@@ -92,10 +94,22 @@ PerfService::CompoundPerfData PerfService::getData()
                 if (budget > std::numeric_limits<decltype(Perf::Item::budget)>::max()) {
                     throw Exception("Budget kCPS computation overflow.");
                 }
+
+                util::Uuid uuid;
+                try {
+                    auto moduleEntry = mModuleHandler.findModuleEntry(rawItem.resourceId.moduleId);
+                    uuid.fromOtherUuidType(moduleEntry.uuid);
+                } catch (ModuleHandler::Exception &e) {
+                    throw Exception("When trying to find module entry " +
+                                    std::to_string(rawItem.resourceId.moduleId) + ": " +
+                                    std::string(e.what()));
+                }
+                uuidRepr = uuid.toString();
             }
 
             Perf::Item item{
-                rawItem.resourceId.toInt(),
+                uuidRepr,
+                rawItem.resourceId.instanceId,
                 (rawItem.details.bits.powerMode == 0 ? Perf::PowerMode::D0 : Perf::PowerMode::D0i3),
                 bool(rawItem.details.bits.isRemoved),
                 decltype(Perf::Item::budget)(budget),

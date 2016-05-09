@@ -1,7 +1,8 @@
 <ParameterBlock Name="PerformanceData">
     <ParameterBlock Name="Cores">
         <ParameterBlock Name="0">
-            <IntegerParameter Name="resource_id">0</IntegerParameter>
+            <StringParameter Name="uuid">n/a</StringParameter>
+            <IntegerParameter Name="instance_id">0</IntegerParameter>
             <StringParameter Name="power_mode">D0</StringParameter>
             <BooleanParameter Name="is_removed">0</BooleanParameter>
             <IntegerParameter Name="budget">0</IntegerParameter>
@@ -9,7 +10,8 @@
             <IntegerParameter Name="average">42</IntegerParameter>
         </ParameterBlock>
         <ParameterBlock Name="1">
-            <IntegerParameter Name="resource_id">1</IntegerParameter>
+            <StringParameter Name="uuid">n/a</StringParameter>
+            <IntegerParameter Name="instance_id">1</IntegerParameter>
             <StringParameter Name="power_mode">D0i3</StringParameter>
             <BooleanParameter Name="is_removed">1</BooleanParameter>
             <IntegerParameter Name="budget">0</IntegerParameter>
@@ -19,7 +21,8 @@
     </ParameterBlock>
     <ParameterBlock Name="Modules">
         <ParameterBlock Name="0">
-            <IntegerParameter Name="resource_id">65536</IntegerParameter>
+            <StringParameter Name="uuid">00000001-0001-0000-0100-000001000000</StringParameter>
+            <IntegerParameter Name="instance_id">0</IntegerParameter>
             <StringParameter Name="power_mode">D0i3</StringParameter>
             <BooleanParameter Name="is_removed">0</BooleanParameter>
             <IntegerParameter Name="budget">64000</IntegerParameter>
@@ -27,7 +30,8 @@
             <IntegerParameter Name="average">789</IntegerParameter>
         </ParameterBlock>
         <ParameterBlock Name="1">
-            <IntegerParameter Name="resource_id">786432</IntegerParameter>
+            <StringParameter Name="uuid">00000009-0009-0000-0900-000009000000</StringParameter>
+            <IntegerParameter Name="instance_id">0</IntegerParameter>
             <StringParameter Name="power_mode">D0</StringParameter>
             <BooleanParameter Name="is_removed">0</BooleanParameter>
             <IntegerParameter Name="budget">294000</IntegerParameter>
@@ -35,7 +39,8 @@
             <IntegerParameter Name="average">222</IntegerParameter>
         </ParameterBlock>
         <ParameterBlock Name="2">
-            <IntegerParameter Name="resource_id">786433</IntegerParameter>
+            <StringParameter Name="uuid">00000009-0009-0000-0900-000009000000</StringParameter>
+            <IntegerParameter Name="instance_id">1</IntegerParameter>
             <StringParameter Name="power_mode">D0i3</StringParameter>
             <BooleanParameter Name="is_removed">0</BooleanParameter>
             <IntegerParameter Name="budget">762352</IntegerParameter>

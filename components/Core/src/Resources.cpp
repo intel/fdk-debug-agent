@@ -325,7 +325,8 @@ static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item
     int index = 0;
     for (const auto &item : items) {
         out << "        <ParameterBlock Name=\"" << index << "\">\n"
-            << "            <IntegerParameter Name=\"resource_id\">" << item.resourceId
+            << "            <StringParameter Name=\"uuid\">" << item.uuid << "</StringParameter>\n"
+            << "            <IntegerParameter Name=\"instance_id\">" << item.instanceId
             << "</IntegerParameter>\n"
             << "            <StringParameter Name=\"power_mode\">"
             << Perf::powerModeHelper().toString(item.powerMode) << "</StringParameter>\n"
