@@ -68,7 +68,7 @@ std::string SubsystemParameterApplier::getParameterValue(const std::string & /*t
     std::ostringstream result;
     // clang-format off
     result << "<info_parameters>\n"
-           << "<ParameterBlock Name=\"Memory State\">\n"
+           << "<ParameterBlock Name=\"MemoryState\">\n"
            << "    <ParameterBlock Name=\"LP\">\n";
     printMemoryState(result, memoryState.lpsramState);
     result << "    </ParameterBlock>\n"
