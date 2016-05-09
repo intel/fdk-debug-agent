@@ -66,7 +66,8 @@ struct WorldValueType
     bool operator==(const WorldValueType &other) const
     {
         return plankRandomGeneratorSeed == other.plankRandomGeneratorSeed &&
-               universeId == other.universeId && galaxyId == other.galaxyId && planetId == planetId;
+               universeId == other.universeId && galaxyId == other.galaxyId &&
+               planetId == other.planetId;
     }
 
     void fromStream(ByteStreamReader &reader)
