@@ -112,41 +112,11 @@ void System::ProbeInjectionStreamResource::doReading(std::istream &is)
 
 // System class
 System::System(const DriverFactory &driverFactory)
-    : mDriver(std::move(createDriver(driverFactory))), mModuleEntries(), mFwConfig(), mHwConfig(),
-      mProbeService(*mDriver), mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
+    : mDriver(std::move(createDriver(driverFactory))), mProbeService(*mDriver),
+      mProbeExtractionMutexes(mDriver->getProber().getMaxProbeCount()),
       mProbeInjectionMutexes(mDriver->getProber().getMaxProbeCount()),
       mPerfService(mDriver->getPerf(), getModuleHandler())
 {
-    try {
-        mFwConfig = getModuleHandler().getFwConfig();
-    } catch (ModuleHandler::Exception &e) {
-        /** @todo use logging */
-        std::cout << "Unable to get FW config: " + std::string(e.what()) << std::endl;
-    }
-    try {
-        mHwConfig = getModuleHandler().getHwConfig();
-    } catch (ModuleHandler::Exception &e) {
-        /** @todo use logging */
-        std::cout << "Unable to get HW config: " + std::string(e.what()) << std::endl;
-    }
-
-    if (mFwConfig.isModulesCountValid) {
-        try {
-            mModuleEntries = getModuleHandler().getModulesEntries(mFwConfig.modulesCount);
-        } catch (ModuleHandler::Exception &e) {
-            /** @todo use logging */
-            std::cout << "Unable to get module entries: " + std::string(e.what()) << std::endl;
-        }
-    } else {
-        /** @todo use logging */
-        std::cout << "Cannot get module entries: module count is invalid." << std::endl;
-    }
-    if (mFwConfig.isMaxModInstCountValid and mHwConfig.isDspCoreCountValid) {
-        mPerfService.setMaxItemCount(mFwConfig.maxModInstCount + mHwConfig.dspCoreCount);
-    } else {
-        std::cout << "Perf Service won't work: can't retrieve the maximum amount of perf items."
-                  << std::endl;
-    }
 }
 
 std::unique_ptr<Driver> System::createDriver(const DriverFactory &driverFactory)
@@ -178,39 +148,6 @@ Logger::Parameters System::getLogParameters()
     } catch (Logger::Exception &e) {
         throw Exception("Unable to get log parameter: " + std::string(e.what()));
     }
-}
-
-const std::vector<dsp_fw::ModuleEntry> &System::getModuleEntries() const noexcept
-{
-    return mModuleEntries;
-}
-
-const dsp_fw::ModuleEntry &System::findModuleEntry(uint16_t moduleId) const
-{
-    for (auto &module : mModuleEntries) {
-        if (module.module_id == moduleId)
-            return module;
-    }
-    throw Exception("module with id '" + std::to_string(moduleId) + "' not found");
-}
-
-const dsp_fw::ModuleEntry &System::findModuleEntry(const std::string &name) const
-{
-    for (auto &module : mModuleEntries) {
-        if (module.getName() == name)
-            return module;
-    }
-    throw Exception("module with name  '" + name + "' not found");
-}
-
-const dsp_fw::FwConfig &System::getFwConfig() const noexcept
-{
-    return mFwConfig;
-}
-
-const dsp_fw::HwConfig &System::getHwConfig() const noexcept
-{
-    return mHwConfig;
 }
 
 template <typename T>
@@ -254,25 +191,17 @@ void System::getTopology(Topology &topology)
     ModuleHandler &handler = getModuleHandler();
     std::set<dsp_fw::CompoundModuleId> moduleInstanceIds;
 
-    /* Retrieving gateways*/
-    if (!mHwConfig.isGatewayCountValid) {
-        throw Exception("Gate count is invalid.");
-    }
+    auto &hwConfig = handler.getHwConfig();
 
     try {
-        topology.gateways = handler.getGatewaysInfo(mHwConfig.gatewayCount);
+        topology.gateways = handler.getGatewaysInfo();
     } catch (ModuleHandler::Exception &e) {
         throw Exception("Can not retrieve gateways: " + std::string(e.what()));
     }
 
-    /* Retrieving pipelines ids*/
-    if (!mFwConfig.isMaxPplCountValid) {
-        throw Exception("Max pipeline count is invalid.");
-    }
-
     std::vector<dsp_fw::PipeLineIdType> pipelineIds;
     try {
-        pipelineIds = handler.getPipelineIdList(mFwConfig.maxPplCount);
+        pipelineIds = handler.getPipelineIdList();
     } catch (ModuleHandler::Exception &e) {
         throw Exception("Can not retrieve pipeline ids: " + std::string(e.what()));
     }
@@ -299,12 +228,7 @@ void System::getTopology(Topology &topology)
                   return pipeA.priority < pipeB.priority;
               });
 
-    /* Retrieving scheduler props*/
-    if (!mHwConfig.isDspCoreCountValid) {
-        throw Exception("Core count is invalid.");
-    }
-
-    for (uint32_t coreId = 0; coreId < mHwConfig.dspCoreCount; coreId++) {
+    for (uint32_t coreId = 0; coreId < hwConfig.dspCoreCount; coreId++) {
         try {
             dsp_fw::SchedulersInfo info = handler.getSchedulersInfo(dsp_fw::CoreId{coreId});
             topology.schedulers.push_back(info);

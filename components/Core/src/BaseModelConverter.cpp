@@ -77,7 +77,7 @@ const std::vector<std::string> BaseModelConverter::staticServiceTypes = {logServ
 const dsp_fw::ModuleEntry &BaseModelConverter::findModuleEntry(uint16_t moduleId)
 {
     try {
-        return mSystem.findModuleEntry(moduleId);
+        return mSystem.getModuleHandler().findModuleEntry(moduleId);
     } catch (System::Exception &e) {
         throw Exception("BaseModelConverter: can not find module: " + std::string(e.what()));
     }

@@ -47,7 +47,7 @@ ModuleParameterApplier::ModuleParameterApplier(
     : mSystem(system), mParameterSerializer(parameterSerializer)
 {
     /* Building (fdk module name, cavs module name) map */
-    for (auto &module : mSystem.getModuleEntries()) {
+    for (auto &module : mSystem.getModuleHandler().getModuleEntries()) {
 
         std::string cavsModuleName = module.getName();
 
@@ -315,7 +315,8 @@ std::pair<uint16_t, std::string> ModuleParameterApplier::getModuleInfo(
     const std::string &fdkModuleTypeName) const
 {
     try {
-        auto &entry = mSystem.findModuleEntry(fdkModuleTypeToCavs(fdkModuleTypeName));
+        auto &entry =
+            mSystem.getModuleHandler().findModuleEntry(fdkModuleTypeToCavs(fdkModuleTypeName));
         util::Uuid uuid;
         uuid.fromOtherUuidType(entry.uuid);
         return std::pair<uint16_t, std::string>(entry.module_id, uuid.toString());

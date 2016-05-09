@@ -107,7 +107,7 @@ void ProbeEndPointParameterApplier::setEndPointParameterValue(const std::size_t 
             std::string cavsModuleTypeName = getCavsModuleNameFromFdk(fdkModuleTypeName);
             try {
                 config.probePoint.fields.setModuleId(
-                    mSystem.findModuleEntry(cavsModuleTypeName).module_id);
+                    mSystem.getModuleHandler().findModuleEntry(cavsModuleTypeName).module_id);
             } catch (System::Exception &e) {
                 throw Exception("Cannot get cavs module id: " + std::string(e.what()));
             }
@@ -154,7 +154,9 @@ std::string ProbeEndPointParameterApplier::getEndPointParameterValue(
     if (config.enabled) {
         try {
             std::string cavsModuleTypeName =
-                mSystem.findModuleEntry(config.probePoint.fields.getModuleId()).getName();
+                mSystem.getModuleHandler()
+                    .findModuleEntry(config.probePoint.fields.getModuleId())
+                    .getName();
             fdkModuleTypeName = getFdkModuleNameFromCavs(cavsModuleTypeName);
         } catch (System::Exception &e) {
             throw Exception("Cannot get cavs module name: " + std::string(e.what()));

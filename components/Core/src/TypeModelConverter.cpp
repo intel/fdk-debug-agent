@@ -51,7 +51,7 @@ std::shared_ptr<TypeModel> TypeModelConverter::createModel()
     addSubsystemSubType(typeMap, createCore());
 
     /* modules */
-    for (auto &module : mSystem.getModuleEntries()) {
+    for (auto &module : mSystem.getModuleHandler().getModuleEntries()) {
         addSubsystemSubType(typeMap, createModule(module.module_id));
     }
 
@@ -137,7 +137,7 @@ std::shared_ptr<Type> TypeModelConverter::createSubsystem()
     /* Modules*/
     auto compColl = std::make_shared<ComponentRefCollection>(collectionName_module);
 
-    for (auto &module : mSystem.getModuleEntries()) {
+    for (auto &module : mSystem.getModuleHandler().getModuleEntries()) {
         std::string moduleName = findModuleEntryName(module.module_id);
 
         compColl->add(ComponentRef(moduleName));
@@ -159,7 +159,7 @@ std::shared_ptr<Type> TypeModelConverter::createPipe()
     /* Modules*/
     auto compColl = std::make_shared<ComponentRefCollection>(collectionName_module);
 
-    for (auto &module : mSystem.getModuleEntries()) {
+    for (auto &module : mSystem.getModuleHandler().getModuleEntries()) {
         std::string moduleName = findModuleEntryName(module.module_id);
 
         compColl->add(ComponentRef(moduleName));
@@ -184,7 +184,7 @@ std::shared_ptr<Type> TypeModelConverter::createTask()
     /* Modules*/
     auto compColl = std::make_shared<ComponentRefCollection>(collectionName_module);
 
-    for (auto &module : mSystem.getModuleEntries()) {
+    for (auto &module : mSystem.getModuleHandler().getModuleEntries()) {
         std::string moduleName = findModuleEntryName(module.module_id);
 
         compColl->add(ComponentRef(moduleName));
@@ -283,7 +283,7 @@ void TypeModelConverter::addSubsystemServiceTypes(TypeModel::TypeMap &map,
 void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
 {
     // Add FW config
-    const dsp_fw::FwConfig &fwConfig = mSystem.getFwConfig();
+    const dsp_fw::FwConfig &fwConfig = mSystem.getModuleHandler().getFwConfig();
     if (fwConfig.isFwVersionValid) {
         ch.add(
             Characteristic("Firmware version", std::to_string(fwConfig.fwVersion.major) + "." +
@@ -361,7 +361,7 @@ void TypeModelConverter::getSystemCharacteristics(Characteristics &ch)
     }
 
     // Add HW config
-    const dsp_fw::HwConfig &hwConfig = mSystem.getHwConfig();
+    const dsp_fw::HwConfig &hwConfig = mSystem.getModuleHandler().getHwConfig();
     if (hwConfig.isCavsVersionValid) {
         ch.add(Characteristic("cAVS Version", std::to_string(hwConfig.cavsVersion)));
     }

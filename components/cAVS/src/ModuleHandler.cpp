@@ -28,8 +28,35 @@ namespace debug_agent
 namespace cavs
 {
 
-ModuleHandler::ModuleHandler(std::unique_ptr<ModuleHandlerImpl> impl) : mImpl(std::move(impl))
+ModuleHandler::ModuleHandler(std::unique_ptr<ModuleHandlerImpl> impl)
+    : mImpl(std::move(impl)),
+      mFwConfig(readTlvParameters<dsp_fw::FwConfig>(dsp_fw::BaseFwParams::FW_CONFIG)),
+      mHwConfig(readTlvParameters<dsp_fw::HwConfig>(dsp_fw::BaseFwParams::HW_CONFIG_GET))
 {
+    std::string error;
+    if (not mFwConfig.isFwVersionValid) {
+        error += "FW version\n";
+    }
+    if (not mFwConfig.isModulesCountValid) {
+        error += "Module count\n";
+    }
+    if (not mFwConfig.isMaxPplCountValid) {
+        error += "Max pipeline count\n";
+    }
+    if (not mFwConfig.isMaxModInstCountValid) {
+        error += "Max module instance count\n";
+    }
+    if (not mHwConfig.isGatewayCountValid) {
+        error += "Gateway count\n";
+    }
+    if (not mHwConfig.isDspCoreCountValid) {
+        error += "DSP core count\n";
+    }
+    if (not error.empty()) {
+        throw Exception("The following config items could not be retrieved from hardware:\n" +
+                        error);
+    }
+    cacheModuleEntries();
 }
 
 util::Buffer ModuleHandler::configGet(uint16_t moduleId, uint16_t instanceId,
@@ -105,8 +132,33 @@ TlvResponseHandlerInterface ModuleHandler::readTlvParameters(dsp_fw::BaseFwParam
     return responseHandler;
 }
 
-std::vector<dsp_fw::ModuleEntry> ModuleHandler::getModulesEntries(uint32_t moduleCount)
+const std::vector<dsp_fw::ModuleEntry> &ModuleHandler::getModuleEntries() const noexcept
 {
+    return mModuleEntries;
+}
+
+const dsp_fw::ModuleEntry &ModuleHandler::findModuleEntry(uint16_t moduleId) const
+{
+    // TODO: have a map instead of a list if there's any performance issue?
+    for (auto &module : mModuleEntries) {
+        if (module.module_id == moduleId)
+            return module;
+    }
+    throw Exception("module with id '" + std::to_string(moduleId) + "' not found");
+}
+
+const dsp_fw::ModuleEntry &ModuleHandler::findModuleEntry(const std::string &name) const
+{
+    for (auto &module : mModuleEntries) {
+        if (module.getName() == name)
+            return module;
+    }
+    throw Exception("module with name  '" + name + "' not found");
+}
+
+void ModuleHandler::cacheModuleEntries()
+{
+    auto moduleCount = mFwConfig.modulesCount;
     std::size_t moduleInfoSize = dsp_fw::ModulesInfo::getAllocationSize(moduleCount);
 
     dsp_fw::ModulesInfo modulesInfo;
@@ -123,21 +175,22 @@ std::vector<dsp_fw::ModuleEntry> ModuleHandler::getModulesEntries(uint32_t modul
                         std::to_string(moduleCount));
     }
 
-    return modulesInfo.module_info;
+    mModuleEntries = modulesInfo.module_info;
 }
 
-dsp_fw::FwConfig ModuleHandler::getFwConfig()
+const dsp_fw::FwConfig &ModuleHandler::getFwConfig() const noexcept
 {
-    return readTlvParameters<dsp_fw::FwConfig>(dsp_fw::BaseFwParams::FW_CONFIG);
+    return mFwConfig;
 }
 
-dsp_fw::HwConfig ModuleHandler::getHwConfig()
+const dsp_fw::HwConfig &ModuleHandler::getHwConfig() const noexcept
 {
-    return readTlvParameters<dsp_fw::HwConfig>(dsp_fw::BaseFwParams::HW_CONFIG_GET);
+    return mHwConfig;
 }
 
-std::vector<dsp_fw::PipeLineIdType> ModuleHandler::getPipelineIdList(uint32_t maxPplCount)
+std::vector<dsp_fw::PipeLineIdType> ModuleHandler::getPipelineIdList()
 {
+    auto maxPplCount = mFwConfig.maxPplCount;
     /* Calculating the memory space required */
     std::size_t parameterSize = dsp_fw::PipelinesListInfo::getAllocationSize(maxPplCount);
 
@@ -183,8 +236,9 @@ dsp_fw::SchedulersInfo ModuleHandler::getSchedulersInfo(dsp_fw::CoreId coreId)
     return schedulers;
 }
 
-std::vector<dsp_fw::GatewayProps> ModuleHandler::getGatewaysInfo(uint32_t gatewayCount)
+std::vector<dsp_fw::GatewayProps> ModuleHandler::getGatewaysInfo()
 {
+    auto gatewayCount = mHwConfig.gatewayCount;
     /* Calculating the memory space required */
     std::size_t parameterSize = dsp_fw::GatewaysInfo::getAllocationSize(gatewayCount);
 
@@ -204,8 +258,9 @@ std::vector<dsp_fw::GatewayProps> ModuleHandler::getGatewaysInfo(uint32_t gatewa
     return gatewaysInfo.gateways;
 }
 
-std::vector<dsp_fw::PerfDataItem> ModuleHandler::getPerfItems(uint32_t itemCount)
+std::vector<dsp_fw::PerfDataItem> ModuleHandler::getPerfItems()
 {
+    auto itemCount = mFwConfig.maxModInstCount + mHwConfig.dspCoreCount;
     /* Calculating the memory space required */
     std::size_t parameterSize = dsp_fw::GlobalPerfData::getAllocationSize(itemCount);
 

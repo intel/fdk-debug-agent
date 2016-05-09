@@ -102,7 +102,7 @@ Resource::ResponsePtr ModuleListDebugResource::handleGet(const Request &)
     static const std::size_t segmentCount = 3;
 
     /* Retrieving module entries, doesn't throw exception */
-    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleEntries();
+    const std::vector<dsp_fw::ModuleEntry> &entries = mSystem.getModuleHandler().getModuleEntries();
 
     HtmlHelper html;
     html.title("Module type list");
@@ -355,7 +355,8 @@ void TopologyDebugResource::dumpModuleInstances(
 
         const dsp_fw::ModuleInstanceProps &module = entry.second;
 
-        const dsp_fw::ModuleEntry &moduleEntry = mSystem.findModuleEntry(module.id.moduleId);
+        const dsp_fw::ModuleEntry &moduleEntry =
+            mSystem.getModuleHandler().findModuleEntry(module.id.moduleId);
 
         html.cell(module.id.toString());
         html.cell(module.id.moduleId);

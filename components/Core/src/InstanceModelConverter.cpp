@@ -54,7 +54,7 @@ std::shared_ptr<InstanceModel> InstanceModelConverter::createModel()
     addInstanceCollection(collectionMap, typeName_task, createTask());
 
     /* Module instances*/
-    for (const auto &module : mSystem.getModuleEntries()) {
+    for (const auto &module : mSystem.getModuleHandler().getModuleEntries()) {
         addInstanceCollection(collectionMap, findModuleEntryName(module.module_id),
                               createModule(module.module_id));
     }
@@ -112,10 +112,8 @@ std::shared_ptr<BaseCollection> InstanceModelConverter::createSubsystem()
     std::shared_ptr<InstanceRefCollection> coreCollection =
         std::make_shared<InstanceRefCollection>(collectionName_core);
 
-    if (!mSystem.getHwConfig().isDspCoreCountValid) {
-        throw Exception("Core count is invalid.");
-    }
-    for (uint32_t coreId = 0; coreId < mSystem.getHwConfig().dspCoreCount; coreId++) {
+    for (uint32_t coreId = 0; coreId < mSystem.getModuleHandler().getHwConfig().dspCoreCount;
+         coreId++) {
         coreCollection->add(InstanceRef(typeName_core, std::to_string(coreId)));
     }
     children.add(coreCollection);

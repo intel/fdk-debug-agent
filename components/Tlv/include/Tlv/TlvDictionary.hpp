@@ -45,6 +45,9 @@ public:
      */
     TlvDictionary(TlvMap tlvMap) : mTlvMap(std::move(tlvMap)) {}
 
+    TlvDictionary<TagsEnumClass> &operator=(TlvDictionary<TagsEnumClass> &&) = default;
+    TlvDictionary<TagsEnumClass>(TlvDictionary<TagsEnumClass> &&) = default;
+
     TlvWrapperInterface *getTlvWrapperForTag(unsigned int tag) const noexcept override
     {
         return getTlvWrapperForTag(static_cast<TagsEnumClass>(tag));

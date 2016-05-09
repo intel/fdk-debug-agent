@@ -36,6 +36,7 @@
 #include "cAVS/DspFw/Infrastructure.hpp"
 #include <stdexcept>
 #include <vector>
+#include <string>
 
 namespace debug_agent
 {
@@ -62,6 +63,18 @@ public:
         using std::logic_error::logic_error;
     };
 
+    /** Constructor
+     *
+     * Upon construction, the following FW/HW config items are guaranteed to be valid:
+     * - FwConfig::fwVersion
+     * - FwConfig::modulesCount
+     * - FwConfig::maxPplCount
+     * - FwConfig::maxModInstCount
+     * - HwConfig::gatewayCount
+     * - HwConfig::dspCoreCount
+     *
+     * @param impl The OS-specific object that communicates with the hardware
+     */
     ModuleHandler(std::unique_ptr<ModuleHandlerImpl> impl);
     virtual ~ModuleHandler() {}
 
@@ -91,16 +104,19 @@ public:
                    const util::Buffer &parameterPayload);
 
     /** @return the firmware module entries */
-    std::vector<dsp_fw::ModuleEntry> getModulesEntries(uint32_t moduleCount);
+    const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const noexcept;
+
+    const dsp_fw::ModuleEntry &findModuleEntry(uint16_t moduleId) const;
+    const dsp_fw::ModuleEntry &findModuleEntry(const std::string &name) const;
 
     /** @return the firmware configuration */
-    dsp_fw::FwConfig getFwConfig();
+    const dsp_fw::FwConfig &getFwConfig() const noexcept;
 
     /** @return the hardware configuration */
-    dsp_fw::HwConfig getHwConfig();
+    const dsp_fw::HwConfig &getHwConfig() const noexcept;
 
     /** @return the pipeline identifier list */
-    std::vector<dsp_fw::PipeLineIdType> getPipelineIdList(uint32_t maxPplCount);
+    std::vector<dsp_fw::PipeLineIdType> getPipelineIdList();
 
     /** @return the properties of one pipeline */
     dsp_fw::PplProps getPipelineProps(dsp_fw::PipeLineIdType pipelineId);
@@ -109,10 +125,10 @@ public:
     dsp_fw::SchedulersInfo getSchedulersInfo(dsp_fw::CoreId coreId);
 
     /** @return the gateways */
-    std::vector<dsp_fw::GatewayProps> getGatewaysInfo(uint32_t gatewayCount);
+    std::vector<dsp_fw::GatewayProps> getGatewaysInfo();
 
     /** @return the performance items */
-    std::vector<dsp_fw::PerfDataItem> getPerfItems(uint32_t itemCount);
+    std::vector<dsp_fw::PerfDataItem> getPerfItems();
 
     /** @return the global memory state */
     dsp_fw::GlobalMemoryState getGlobalMemoryState();
@@ -177,6 +193,12 @@ private:
     ModuleHandler &operator=(const ModuleHandler &) = delete;
 
     std::unique_ptr<ModuleHandlerImpl> mImpl;
+
+    // caches (they don't change during runtime and as such can be retrieved at startup time)
+    dsp_fw::FwConfig mFwConfig;
+    dsp_fw::HwConfig mHwConfig;
+    void cacheModuleEntries();
+    std::vector<dsp_fw::ModuleEntry> mModuleEntries;
 };
 }
 }

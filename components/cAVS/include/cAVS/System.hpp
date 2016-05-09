@@ -113,31 +113,6 @@ public:
     Logger::Parameters getLogParameters();
 
     /**
-     * Get module entries
-     */
-    const std::vector<dsp_fw::ModuleEntry> &getModuleEntries() const noexcept;
-
-    /**
-    * Find module entry by its id
-    */
-    const dsp_fw::ModuleEntry &findModuleEntry(uint16_t moduleId) const;
-
-    /**
-    * Find module entry by its name
-    */
-    const dsp_fw::ModuleEntry &findModuleEntry(const std::string &name) const;
-
-    /**
-     * Get firmware configuration
-     */
-    const dsp_fw::FwConfig &getFwConfig() const noexcept;
-
-    /**
-     * Get hardware configuration
-     */
-    const dsp_fw::HwConfig &getHwConfig() const noexcept;
-
-    /**
      * Try to acquire the log stream resource
      *
      * The resource will be locked until the returned OutputStreamResource instance is released.
@@ -243,16 +218,6 @@ private:
      * The module entries table retrieved from FW once, at initialization
      */
     std::vector<dsp_fw::ModuleEntry> mModuleEntries;
-
-    /**
-     * The FW config structure retrieved from FW once, at initialization
-     */
-    dsp_fw::FwConfig mFwConfig;
-
-    /**
-     * The HW config structure retrieved from FW once, at initialization
-     */
-    dsp_fw::HwConfig mHwConfig;
 
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;

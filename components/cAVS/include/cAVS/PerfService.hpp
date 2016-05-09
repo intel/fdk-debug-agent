@@ -42,8 +42,6 @@ public:
     PerfService(Perf &perf, ModuleHandler &moduleHandler);
     ~PerfService();
 
-    void setMaxItemCount(uint32_t maxItemCount);
-
     /** @throws Perf::Exception */
     /** @{ */
     Perf::State getState();
@@ -56,8 +54,6 @@ public:
 private:
     Perf &mPerf;
     ModuleHandler &mModuleHandler;
-
-    uint32_t mMaxItemCount{0};
 };
 }
 }
