@@ -23,6 +23,7 @@
 #include "Core/SubsystemParameterApplier.hpp"
 #include "Core/BaseModelConverter.hpp"
 #include "cAVS/ModuleHandler.hpp"
+#include "cAVS/Perf.hpp"
 #include <sstream>
 #include <numeric>
 
@@ -32,6 +33,7 @@ namespace core
 {
 
 using cavs::dsp_fw::GlobalMemoryState;
+using cavs::Perf;
 
 std::set<std::string> SubsystemParameterApplier::getSupportedTypes() const
 {
@@ -55,6 +57,30 @@ static void printMemoryState(std::ostringstream &out, const GlobalMemoryState::S
 
     // TODO: page_alloc (once available from the firmware)
 }
+
+static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item> &items)
+{
+    int index = 0;
+    for (const auto &item : items) {
+        out << "        <ParameterBlock Name=\"" << index << "\">\n"
+            << "            <StringParameter Name=\"uuid\">" << item.uuid << "</StringParameter>\n"
+            << "            <IntegerParameter Name=\"instance_id\">" << item.instanceId
+            << "</IntegerParameter>\n"
+            << "            <StringParameter Name=\"power_mode\">"
+            << Perf::powerModeHelper().toString(item.powerMode) << "</StringParameter>\n"
+            << "            <BooleanParameter Name=\"is_removed\">" << item.isRemoved
+            << "</BooleanParameter>\n"
+            << "            <IntegerParameter Name=\"budget\">" << item.budget
+            << "</IntegerParameter>\n"
+            << "            <IntegerParameter Name=\"peak\">" << item.peak
+            << "</IntegerParameter>\n"
+            << "            <IntegerParameter Name=\"average\">" << item.average
+            << "</IntegerParameter>\n"
+            << "        </ParameterBlock>\n";
+        ++index;
+    }
+}
+
 std::string SubsystemParameterApplier::getParameterValue(const std::string & /*type*/,
                                                          ParameterKind kind,
                                                          const std::string &instanceId)
@@ -63,21 +89,35 @@ std::string SubsystemParameterApplier::getParameterValue(const std::string & /*t
         throw UnsupportedException();
     }
 
-    auto memoryState = mSystem.getModuleHandler().getGlobalMemoryState();
-
     std::ostringstream result;
-    // clang-format off
-    result << "<info_parameters>\n"
-           << "<ParameterBlock Name=\"MemoryState\">\n"
-           << "    <ParameterBlock Name=\"LP\">\n";
-    printMemoryState(result, memoryState.lpsramState);
-    result << "    </ParameterBlock>\n"
-           << "    <ParameterBlock Name=\"HP\">\n";
-    printMemoryState(result, memoryState.hpsramState);
-    result << "    </ParameterBlock>\n"
-           << "</ParameterBlock>\n"
-           << "</info_parameters>\n";
-    // clang-format on
+    result << "<info_parameters>\n";
+
+    {
+        auto perfData = mSystem.getPerfService().getData();
+        result << "<ParameterBlock Name=\"PerformanceData\">\n"
+               << "    <ParameterBlock Name=\"Cores\">\n";
+        printPerfItems(result, perfData.cores);
+        result << "    </ParameterBlock>\n"
+               << "    <ParameterBlock Name=\"Modules\">\n";
+        printPerfItems(result, perfData.modules);
+        result << "    </ParameterBlock>\n"
+               << "</ParameterBlock>\n";
+    }
+
+    {
+        auto memoryState = mSystem.getModuleHandler().getGlobalMemoryState();
+        result << "<ParameterBlock Name=\"MemoryState\">\n"
+               << "    <ParameterBlock Name=\"LP\">\n";
+        printMemoryState(result, memoryState.lpsramState);
+        result << "    </ParameterBlock>\n"
+               << "    <ParameterBlock Name=\"HP\">\n";
+        printMemoryState(result, memoryState.hpsramState);
+        result << "    </ParameterBlock>\n"
+               << "</ParameterBlock>\n";
+    }
+
+    result << "</info_parameters>\n";
+
     return result.str();
 }
 } // core

@@ -319,45 +319,5 @@ Resource::ResponsePtr ProbeStreamResource::handlePut(const Request &request)
 
     return std::make_unique<Response>();
 }
-
-static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item> &items)
-{
-    int index = 0;
-    for (const auto &item : items) {
-        out << "        <ParameterBlock Name=\"" << index << "\">\n"
-            << "            <StringParameter Name=\"uuid\">" << item.uuid << "</StringParameter>\n"
-            << "            <IntegerParameter Name=\"instance_id\">" << item.instanceId
-            << "</IntegerParameter>\n"
-            << "            <StringParameter Name=\"power_mode\">"
-            << Perf::powerModeHelper().toString(item.powerMode) << "</StringParameter>\n"
-            << "            <BooleanParameter Name=\"is_removed\">" << item.isRemoved
-            << "</BooleanParameter>\n"
-            << "            <IntegerParameter Name=\"budget\">" << item.budget
-            << "</IntegerParameter>\n"
-            << "            <IntegerParameter Name=\"peak\">" << item.peak
-            << "</IntegerParameter>\n"
-            << "            <IntegerParameter Name=\"average\">" << item.average
-            << "</IntegerParameter>\n"
-            << "        </ParameterBlock>\n";
-        ++index;
-    }
-}
-
-Resource::ResponsePtr PerfDataResource::handleGet(const Request &)
-{
-    auto data = mSystem.getPerfService().getData();
-
-    std::ostringstream result;
-    result << "<ParameterBlock Name=\"PerformanceData\">\n"
-           << "    <ParameterBlock Name=\"Cores\">\n";
-    printPerfItems(result, data.cores);
-    result << "    </ParameterBlock>\n"
-           << "    <ParameterBlock Name=\"Modules\">\n";
-    printPerfItems(result, data.modules);
-    result << "    </ParameterBlock>\n"
-           << "</ParameterBlock>";
-
-    return std::make_unique<Response>(ContentTypeXml, result.str());
-}
 }
 }

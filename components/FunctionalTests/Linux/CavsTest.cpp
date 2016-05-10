@@ -361,6 +361,56 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
         /* Adding topology command */
         addInstanceTopologyCommands(commands);
 
+        commands.addGetPerfState(Perf::State::Disabled);
+        commands.addSetCorePowerCommand(true, 0, false);
+        commands.addSetPerfState(Perf::State::Started);
+
+        static const std::vector<dsp_fw::PerfDataItem> expectedPerfItems = {
+            dsp_fw::PerfDataItem(0, 0, false, false, 1337, 42),   // Core 0
+            dsp_fw::PerfDataItem(1, 0, true, false, 123456, 789), // Module 1, instance 0
+            dsp_fw::PerfDataItem(0, 1, true, true, 987654, 321),  // Core 1
+            dsp_fw::PerfDataItem(9, 0, false, false, 1111, 222),  // Module 9, instance 0
+            dsp_fw::PerfDataItem(9, 1, true, false, 3333, 444)    // Module 9, instance 1
+        };
+        commands.addGetGlobalPerfDataCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                             CavsTopologySample::maxModInstCount +
+                                                 CavsTopologySample::dspCoreCount,
+                                             expectedPerfItems);
+        dsp_fw::ModuleInstanceProps props;
+
+        props.id.moduleId = 1;
+        props.id.instanceId = 0;
+        props.ibs_bytes = 1;
+        props.cpc = 2000;
+        props.input_pins.pin_info.emplace_back();
+        auto &format = props.input_pins.pin_info[0].format;
+        format.sampling_frequency = dsp_fw::SamplingFrequency::FS_8000HZ;
+        format.number_of_channels = 4;
+        format.valid_bit_depth = 8;
+        commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
+                                                  dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                                  props.id.moduleId, props.id.instanceId, props);
+        props.id.moduleId = 9;
+        props.id.instanceId = 0;
+        props.ibs_bytes = 9;
+        props.cpc = 10000;
+        format.sampling_frequency = dsp_fw::SamplingFrequency::FS_11025HZ;
+        format.number_of_channels = 12;
+        format.valid_bit_depth = 16;
+        commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
+                                                  dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                                  props.id.moduleId, props.id.instanceId, props);
+        props.id.moduleId = 9;
+        props.id.instanceId = 1;
+        props.ibs_bytes = 17;
+        props.cpc = 18000;
+        format.sampling_frequency = dsp_fw::SamplingFrequency::FS_12000HZ;
+        format.number_of_channels = 20;
+        format.valid_bit_depth = 24;
+        commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
+                                                  dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
+                                                  props.id.moduleId, props.id.instanceId, props);
+
         Buffer globalMemoryState = {/* Tag for LPSRAM_STATE: 0 */
                                     0, 0, 0, 0,
                                     /* Length: (1+1+1) * 4 */
@@ -407,6 +457,12 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
 
     /* Request an instance topology refresh */
     CHECK_NOTHROW(requestInstanceTopologyRefresh(client));
+
+    /* start the perf service */
+    CHECK_NOTHROW(client.request(
+        "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Put,
+        file_helper::readAsString(xmlFileName("perfservice_started")),
+        HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 
     /* 1: Getting system information*/
     CHECK_NOTHROW(client.request(
@@ -700,8 +756,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: starting same log stream twice", "[l
         HttpClientSimulator::Status::Ok, "", HttpClientSimulator::StringContent("")));
 }
 
-TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
+TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement service", "[perf]")
 {
+    // This test case only covers the perf service's lifecycle. For data retrieval, see the
+    // Subsystem info parameters test case.
+
     /* Setting the test vector
      * ----------------------- */
     {
@@ -718,52 +777,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
         commands.addGetPerfState(Perf::State::Paused);
         commands.addSetPerfState(Perf::State::Stopped);
         commands.addGetPerfState(Perf::State::Stopped);
-
-        static const std::vector<dsp_fw::PerfDataItem> expectedPerfItems = {
-            dsp_fw::PerfDataItem(0, 0, false, false, 1337, 42),   // Core 0
-            dsp_fw::PerfDataItem(1, 0, true, false, 123456, 789), // Module 1, instance 0
-            dsp_fw::PerfDataItem(0, 1, true, true, 987654, 321),  // Core 1
-            dsp_fw::PerfDataItem(9, 0, false, false, 1111, 222),  // Module 9, instance 0
-            dsp_fw::PerfDataItem(9, 1, true, false, 3333, 444)    // Module 9, instance 1
-        };
-        commands.addGetGlobalPerfDataCommand(dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                             CavsTopologySample::maxModInstCount +
-                                                 CavsTopologySample::dspCoreCount,
-                                             expectedPerfItems);
-        dsp_fw::ModuleInstanceProps props;
-
-        props.id.moduleId = 1;
-        props.id.instanceId = 0;
-        props.ibs_bytes = 1;
-        props.cpc = 2000;
-        props.input_pins.pin_info.emplace_back();
-        auto &format = props.input_pins.pin_info[0].format;
-        format.sampling_frequency = dsp_fw::SamplingFrequency::FS_8000HZ;
-        format.number_of_channels = 4;
-        format.valid_bit_depth = 8;
-        commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
-                                                  dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                                  props.id.moduleId, props.id.instanceId, props);
-        props.id.moduleId = 9;
-        props.id.instanceId = 0;
-        props.ibs_bytes = 9;
-        props.cpc = 10000;
-        format.sampling_frequency = dsp_fw::SamplingFrequency::FS_11025HZ;
-        format.number_of_channels = 12;
-        format.valid_bit_depth = 16;
-        commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
-                                                  dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                                  props.id.moduleId, props.id.instanceId, props);
-        props.id.moduleId = 9;
-        props.id.instanceId = 1;
-        props.ibs_bytes = 17;
-        props.cpc = 18000;
-        format.sampling_frequency = dsp_fw::SamplingFrequency::FS_12000HZ;
-        format.number_of_channels = 20;
-        format.valid_bit_depth = 24;
-        commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
-                                                  dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
-                                                  props.id.moduleId, props.id.instanceId, props);
     }
 
     /* Now using the mocked device
@@ -797,11 +810,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: performance measurement", "[perf]")
         "/instance/cavs.perf_measurement/0/control_parameters", HttpClientSimulator::Verb::Get, "",
         HttpClientSimulator::Status::Ok, "text/xml",
         HttpClientSimulator::FileContent(xmlFileName("perfservice_stopped"))));
-
-    CHECK_NOTHROW(
-        client.request("/instance/cavs.perf_measurement/0/perf", HttpClientSimulator::Verb::Get, "",
-                       HttpClientSimulator::Status::Ok, "text/xml",
-                       HttpClientSimulator::FileContent(xmlFileName("perfservice_data"))));
 }
 
 // Probing constants

@@ -78,9 +78,6 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     dispatcher->addResource("/instance/cavs.probe.endpoint/${instance_id}/streaming",
                             std::make_shared<ProbeStreamResource>(mSystem));
 
-    dispatcher->addResource("/instance/cavs.perf_measurement/0/perf",
-                            std::make_shared<PerfDataResource>(mSystem));
-
     /* System */
     dispatcher->addResource("/type", std::make_shared<SystemTypeResource>(*mTypeModel));
     dispatcher->addResource("/instance",
