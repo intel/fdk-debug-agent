@@ -376,6 +376,15 @@ void MockedDeviceCommands::addSetPerfState(bool ioctlSuccess, NTSTATUS returnedS
         expectedState, ioctlSuccess, returnedStatus);
 }
 
+void MockedDeviceCommands::addGetGlobalMemoryStateCommand(bool ioctlSuccess,
+                                                          NTSTATUS returnedDriverStatus,
+                                                          dsp_fw::IxcStatus returnedFirmwareStatus,
+                                                          const Buffer &memoryState)
+{
+    addTlvParameterCommand(ioctlSuccess, returnedDriverStatus, returnedFirmwareStatus, memoryState,
+                           dsp_fw::BaseFwParams::MEMORY_STATE_INFO_GET);
+}
+
 void MockedDeviceCommands::addGetPipelineListCommand(
     bool ioctlSuccess, NTSTATUS returnedDriverStatus, dsp_fw::IxcStatus returnedFirmwareStatus,
     uint32_t maxPplCount, const std::vector<dsp_fw::PipeLineIdType> &pipelineIds)

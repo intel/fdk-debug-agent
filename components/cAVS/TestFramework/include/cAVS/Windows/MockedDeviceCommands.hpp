@@ -281,6 +281,22 @@ public:
     */
     void addSetPerfState(bool ioctlSuccess, NTSTATUS returnedStatus, Perf::State expectedState);
 
+    /** Add a get global memory state command
+
+    * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
+    * @param[in] returnedDriverStatus the returned driver status
+    * @param[in] returnedFirmwareStatus the returned firmware status
+    * @param[in] memoryState the hw config returned by the ioctl, which is a TLV list.
+    *
+    * Note: the memoryState parameter is unused if :
+    *  NT_SUCCESS(returnedDriverStatus) returns false or if ioctlSuccess is false
+    *
+    * @throw Device::Exception
+    */
+    void addGetGlobalMemoryStateCommand(bool ioctlSuccess, NTSTATUS returnedDriverStatus,
+                                        dsp_fw::IxcStatus returnedFirmwareStatus,
+                                        const util::Buffer &memoryState);
+
     /** Add a get pipeline list command.
      *
      * @param[in] ioctlSuccess the returned OS status (when calling DeviceIoControl)
