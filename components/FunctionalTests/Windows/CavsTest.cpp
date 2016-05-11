@@ -1297,8 +1297,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
 
         Buffer globalMemoryState = {/* Tag for LPSRAM_STATE: 0 */
                                     0, 0, 0, 0,
-                                    /* Length: (1+1+1) * 4 */
-                                    12, 0, 0, 0,
+                                    /* Length: (1+(1+1)+(1+0.5)) = 4.5 */
+                                    18, 0, 0, 0,
                                     /* Value */
                                     /* Free physical memory pages (42) */
                                     42, 0, 0, 0,
@@ -1306,10 +1306,14 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
                                     1, 0, 0, 0,
                                     /* EBB state */
                                     0x01, 0, 0, 0,
+                                    /* number of page alloc entries */
+                                    1, 0, 0, 0,
+                                    /* page alloc */
+                                    42, 0x00,
                                     /* Tag for HPSRAM_STATE: 1 */
                                     1, 0, 0, 0,
-                                    /* Length: (1+1+2) * 4 */
-                                    16, 0, 0, 0,
+                                    /* Length: (1+(1+2) + (1+1.5)) * 6.5 */
+                                    26, 0, 0, 0,
                                     /* Value */
                                     /* Free physical memory pages (1337 = 0x0539) */
                                     0x39, 0x05, 0, 0,
@@ -1318,7 +1322,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
                                     /* EBB state, part 1 */
                                     0xff, 0x00, 0x00, 0x00,
                                     /* EBB state, part 2 */
-                                    0xff, 0xff, 0xff, 0xff};
+                                    0xff, 0xff, 0xff, 0xff,
+                                    /* number of page alloc entries */
+                                    3, 0, 0, 0,
+                                    /* page alloc, parts 1, 2 & 3 */
+                                    42, 0x00, 0x00, 0x00, 0x00, 0xff};
 
         /* Add command for get module parameter */
         commands.addGetGlobalMemoryStateCommand(

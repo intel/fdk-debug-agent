@@ -40,22 +40,25 @@ std::set<std::string> SubsystemParameterApplier::getSupportedTypes() const
     return {BaseModelConverter::subsystemName};
 }
 
+template <class Iterable>
+static std::string join(Iterable items)
+{
+    // join the items like so: "1 2 3 4"...
+    return std::accumulate(begin(items), end(items), std::string(),
+                           [](std::string acc, typename Iterable::value_type item) {
+                               return acc.empty() ? std::to_string(item)
+                                                  : (acc + " " + std::to_string(item));
+                           });
+}
+
 static void printMemoryState(std::ostringstream &out, const GlobalMemoryState::SramStateInfo &state)
 {
     out << "        <IntegerParameter Name=\"free_phys_mem_pages\">" << state.freePhysMemPages
         << "</IntegerParameter>\n"
-        << "        <IntegerParameter Name=\"ebb_state\">";
-
-    // join the EBB states like so: "1 2 3 4"...
-    std::string joinedEbbStates = std::accumulate(
-        begin(state.ebbStates), end(state.ebbStates), std::string(),
-        [](std::string acc, uint32_t ebbState) {
-            return acc.empty() ? std::to_string(ebbState) : (acc + " " + std::to_string(ebbState));
-        });
-
-    out << joinedEbbStates << "</IntegerParameter>\n";
-
-    // TODO: page_alloc (once available from the firmware)
+        << "        <IntegerParameter Name=\"ebb_state\">" << join(state.ebbStates)
+        << "</IntegerParameter>\n"
+        << "        <IntegerParameter Name=\"page_alloc\">" << join(state.pageAlloc)
+        << "</IntegerParameter>\n";
 }
 
 static void printPerfItems(std::ostringstream &out, const std::vector<Perf::Item> &items)
