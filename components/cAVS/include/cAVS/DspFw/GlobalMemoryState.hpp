@@ -38,10 +38,13 @@ namespace cavs
 {
 namespace dsp_fw
 {
-CHECK_SIZE(private_fw::SramStateInfo, 12);
+// The sum of the size of its members is 18 but since it isn't packed, it is padded to 20
+CHECK_SIZE(private_fw::SramStateInfo, 20);
 CHECK_MEMBER(private_fw::SramStateInfo, free_phys_mem_pages, 0, uint32_t);
 CHECK_MEMBER(private_fw::SramStateInfo, ebb_state_dword_count, 4, uint32_t);
 CHECK_MEMBER(private_fw::SramStateInfo, ebb_state, 8, uint32_t[1]);
+CHECK_MEMBER(private_fw::SramStateInfo, page_alloc_count, 12, uint32_t);
+CHECK_MEMBER(private_fw::SramStateInfo, page_alloc, 16, uint16_t[1]);
 class GlobalMemoryState : public tlv::TlvResponseHandlerInterface
 {
 public:
@@ -51,22 +54,28 @@ public:
         // Caveat: each entry of this vector is actually a bitset and the actual state is the
         // concatenation of all these bitsets.
         std::vector<uint32_t> ebbStates;
+        // Caveat: each entry of this vector is actually a bitset and the actual state is the
+        // concatenation of all these bitsets.
+        std::vector<uint16_t> pageAlloc;
 
         bool operator==(const SramStateInfo &other) const
         {
-            return freePhysMemPages == other.freePhysMemPages && ebbStates == other.ebbStates;
+            return freePhysMemPages == other.freePhysMemPages && ebbStates == other.ebbStates &&
+                   pageAlloc == other.pageAlloc;
         }
 
         void fromStream(util::ByteStreamReader &reader)
         {
             reader.read(freePhysMemPages);
             reader.readVector<ArraySizeType>(ebbStates);
+            reader.readVector<ArraySizeType>(pageAlloc);
         }
 
         void toStream(util::ByteStreamWriter &writer)
         {
             writer.write(freePhysMemPages);
             writer.writeVector<ArraySizeType>(ebbStates);
+            writer.writeVector<ArraySizeType>(pageAlloc);
         }
     };
 
