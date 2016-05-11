@@ -259,7 +259,6 @@ std::vector<dsp_fw::GatewayProps> ModuleHandler::getGatewaysInfo()
     return gatewaysInfo.gateways;
 }
 
-// TODO: use the dsp_fw-provided enum once available
 void ModuleHandler::setPerfState(uint32_t state)
 {
     util::MemoryByteStreamWriter writer;
@@ -269,7 +268,6 @@ void ModuleHandler::setPerfState(uint32_t state)
               writer.getBuffer());
 }
 
-// TODO: use the dsp_fw-provided enum once available
 uint32_t ModuleHandler::getPerfState()
 {
     uint32_t fromDriver;

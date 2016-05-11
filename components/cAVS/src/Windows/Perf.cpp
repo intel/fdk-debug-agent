@@ -31,11 +31,12 @@ namespace windows
 {
 using ioctl_helpers::ioctl;
 using driver::IoCtlType;
-using driver::IOCTL_FEATURE;
-using GetState = IoCtlDescription<IoCtlType::TinyGet, driver::FEATURE_GLOBAL_PERF_DATA,
-                                  driver::GlobalPerfDataFeatureParameter::FEATURE_STATE, uint32_t>;
-using SetState = IoCtlDescription<IoCtlType::TinySet, driver::FEATURE_GLOBAL_PERF_DATA,
-                                  driver::GlobalPerfDataFeatureParameter::FEATURE_STATE, uint32_t>;
+using GetState =
+    IoCtlDescription<IoCtlType::TinyGet, driver::IOCTL_FEATURE::FEATURE_PERFORMANCE_MEASUREMENT,
+                     driver::PERFORMANCE_MEASUREMENT::PERFORMANCE_MEASURE_PARAM, uint32_t>;
+using SetState =
+    IoCtlDescription<IoCtlType::TinySet, driver::IOCTL_FEATURE::FEATURE_PERFORMANCE_MEASUREMENT,
+                     driver::PERFORMANCE_MEASUREMENT::PERFORMANCE_MEASURE_PARAM, uint32_t>;
 
 void Perf::setState(Perf::State state)
 {

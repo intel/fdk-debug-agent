@@ -363,16 +363,16 @@ void MockedDeviceCommands::addGetPerfItems(bool ioctlSuccess, NTSTATUS returnedD
 void MockedDeviceCommands::addGetPerfState(bool ioctlSuccess, NTSTATUS returnedStatus,
                                            Perf::State returnedState)
 {
-    addTinyGetCommand<driver::FEATURE_GLOBAL_PERF_DATA,
-                      driver::GlobalPerfDataFeatureParameter::FEATURE_STATE, Perf::State>(
+    addTinyGetCommand<driver::IOCTL_FEATURE::FEATURE_PERFORMANCE_MEASUREMENT,
+                      driver::PERFORMANCE_MEASUREMENT::PERFORMANCE_MEASURE_PARAM, Perf::State>(
         returnedState, ioctlSuccess, returnedStatus);
 }
 
 void MockedDeviceCommands::addSetPerfState(bool ioctlSuccess, NTSTATUS returnedStatus,
                                            Perf::State expectedState)
 {
-    addTinySetCommand<driver::FEATURE_GLOBAL_PERF_DATA,
-                      driver::GlobalPerfDataFeatureParameter::FEATURE_STATE, Perf::State>(
+    addTinySetCommand<driver::IOCTL_FEATURE::FEATURE_PERFORMANCE_MEASUREMENT,
+                      driver::PERFORMANCE_MEASUREMENT::PERFORMANCE_MEASURE_PARAM, Perf::State>(
         expectedState, ioctlSuccess, returnedStatus);
 }
 

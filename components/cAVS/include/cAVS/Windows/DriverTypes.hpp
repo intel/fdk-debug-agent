@@ -77,6 +77,10 @@ static const uint32_t logParametersCommandparameterId = 0;
 /* Importing IOCTL_FEATURE enum */
 using IOCTL_FEATURE = private_driver::IOCTL_FEATURE;
 
+/* Importing the performance measurement state enum */
+using PERFORMANCE_MEASUREMENT =
+    private_driver::IntcIoctlFeatures::PerformanceMeasurementFeature::Params;
+
 /* Importing IOCTL_LOG_STATE enum */
 using IOCTL_LOG_STATE =
     private_driver::IntcIoctlFeatures::FwLogsFeature::LogStatusParam::StartedValueType;
@@ -404,18 +408,6 @@ struct RingBuffersDescription
         writer.write(extractionRBDescription);
         writer.write(injectionRBDescriptions);
     }
-};
-
-/** Adding missing "global perf data" value in IOCTL_FEATURE enum
-* @todo: remove it when availabe */
-static constexpr IOCTL_FEATURE FEATURE_GLOBAL_PERF_DATA = static_cast<IOCTL_FEATURE>(0x270000);
-
-/** Missing perf global data enum that holds parameters
- * @todo Import it when available
- */
-enum GlobalPerfDataFeatureParameter : ULONG
-{
-    FEATURE_STATE = 0
 };
 }
 }
