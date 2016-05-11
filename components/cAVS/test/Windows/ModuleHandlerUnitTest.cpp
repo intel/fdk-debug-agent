@@ -304,7 +304,6 @@ TEST_CASE_METHOD(Fixture, "Module handler", "[module_handler]")
     }
 
     SECTION ("Getting pipeline list") {
-        static const uint32_t fwMaxPplCount = 9;
         using ID = dsp_fw::PipeLineIdType;
         static const std::vector<ID> fwPipelineIdList = {ID{1}, ID{2}, ID{3}};
 
