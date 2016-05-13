@@ -88,20 +88,22 @@ PerfService::CompoundPerfData PerfService::getData()
 
             // The budget for cores defaults to 0
             if (not isCore) {
-                try {
-                    dsp_fw::ModuleInstanceProps props = mModuleHandler.getModuleInstanceProps(
-                        rawItem.resourceId.moduleId, rawItem.resourceId.instanceId);
-                    budget = computeBudget(props);
-                } catch (ModuleHandler::Exception &e) {
-                    // continue on error (leave the budget uncomputed)
-                    std::cout << "Couldn't retrieve module instance ("
-                              << rawItem.resourceId.moduleId << ", "
-                              << rawItem.resourceId.instanceId
-                              << ") when trying to compute its KCPS budget: " << e.what();
-                }
+                if (not rawItem.details.bits.isRemoved) {
+                    try {
+                        dsp_fw::ModuleInstanceProps props = mModuleHandler.getModuleInstanceProps(
+                            rawItem.resourceId.moduleId, rawItem.resourceId.instanceId);
+                        budget = computeBudget(props);
+                    } catch (ModuleHandler::Exception &e) {
+                        // continue on error (leave the budget uncomputed)
+                        std::cout << "Couldn't retrieve module instance ("
+                                  << rawItem.resourceId.moduleId << ", "
+                                  << rawItem.resourceId.instanceId
+                                  << ") when trying to compute its KCPS budget: " << e.what();
+                    }
 
-                if (budget > std::numeric_limits<decltype(Perf::Item::budget)>::max()) {
-                    throw Exception("Budget kCPS computation overflow.");
+                    if (budget > std::numeric_limits<decltype(Perf::Item::budget)>::max()) {
+                        throw Exception("Budget kCPS computation overflow.");
+                    }
                 }
 
                 util::Uuid uuid;

@@ -39,6 +39,15 @@
             <IntegerParameter Name="peak">3333</IntegerParameter>
             <IntegerParameter Name="average">444</IntegerParameter>
         </ParameterBlock>
+        <ParameterBlock Name="3">
+            <StringParameter Name="uuid">00000009-0009-0000-0900-000009000000</StringParameter>
+            <IntegerParameter Name="instance_id">2</IntegerParameter>
+            <StringParameter Name="power_mode">D0i3</StringParameter>
+            <BooleanParameter Name="is_removed">1</BooleanParameter>
+            <IntegerParameter Name="budget">0</IntegerParameter>
+            <IntegerParameter Name="peak">5555</IntegerParameter>
+            <IntegerParameter Name="average">666</IntegerParameter>
+        </ParameterBlock>
     </ParameterBlock>
 </ParameterBlock>
 <ParameterBlock Name="MemoryState">

@@ -1231,7 +1231,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
             dsp_fw::PerfDataItem(0, 0, false, false, 1337, 42),   // Core 0
             dsp_fw::PerfDataItem(1, 0, true, false, 123456, 789), // Module 1, instance 0
             dsp_fw::PerfDataItem(9, 0, false, false, 1111, 222),  // Module 9, instance 0
-            dsp_fw::PerfDataItem(9, 1, true, false, 3333, 444)    // Module 9, instance 1
+            dsp_fw::PerfDataItem(9, 1, true, false, 3333, 444),   // Module 9, instance 1
+            dsp_fw::PerfDataItem(9, 2, true, true, 5555, 666)     // Module 9, instance 2, removed
         };
         commands.addGetPerfItems(
             true, STATUS_SUCCESS, dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
