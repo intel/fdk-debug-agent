@@ -97,12 +97,28 @@ void AlsaControlDevice::ctlRead(const std::string &name, util::Buffer &bufferOut
     getCtlHandle(ctlName, handle, *id, *info, *control);
     assert(handle != NULL && info != NULL && id != NULL && control != NULL);
 
-    snd_ctl_close(handle);
-
     unsigned int count = snd_ctl_elem_info_get_count(info);
     snd_ctl_elem_type_t type = snd_ctl_elem_info_get_type(info);
 
     MemoryByteStreamWriter writer;
+
+    // Special hook for TLV Bytes Control
+    if ((type == SND_CTL_ELEM_TYPE_BYTES) && snd_ctl_elem_info_is_tlv_readable(info)) {
+
+        util::Buffer rawTlv(sizeof(TlvHeader) + count);
+        int ret = snd_ctl_elem_tlv_read(handle, id, reinterpret_cast<unsigned int *>(rawTlv.data()),
+                                        rawTlv.size());
+        snd_ctl_close(handle);
+        if (ret < 0) {
+            throw Exception("Control " + getCardName() + " Unable to read element: " +
+                            snd_strerror(ret));
+        }
+        const auto &dataBegin = begin(rawTlv) + sizeof(TlvHeader);
+        bufferOutput = {dataBegin, dataBegin + count};
+        return;
+    }
+    snd_ctl_close(handle);
+
     for (unsigned int idx = 0; idx < count; idx++) {
         switch (type) {
         case SND_CTL_ELEM_TYPE_BOOLEAN:
@@ -149,12 +165,30 @@ void AlsaControlDevice::ctlWrite(const std::string &name, const util::Buffer &bu
     snd_ctl_t *handle;
     snd_ctl_elem_value_t *control;
     snd_ctl_elem_value_alloca(&control);
+    int error;
 
     getCtlHandle(ctlName, handle, *id, *info, *control);
     assert(handle != NULL && info != NULL && id != NULL && control != NULL);
 
     unsigned int count = snd_ctl_elem_info_get_count(info);
     snd_ctl_elem_type_t type = snd_ctl_elem_info_get_type(info);
+
+    // Special hook for TLV Bytes Control
+    if ((type == SND_CTL_ELEM_TYPE_BYTES) && snd_ctl_elem_info_is_tlv_writable(info)) {
+        TlvHeader tlv(0, count);
+        util::MemoryByteStreamWriter messageWriter;
+        messageWriter.write(tlv);
+        messageWriter.writeVector<uint8_t>(bufferInput);
+        util::Buffer rawTlv = messageWriter.getBuffer();
+
+        error = snd_ctl_elem_tlv_write(handle, id, reinterpret_cast<unsigned int *>(rawTlv.data()));
+        snd_ctl_close(handle);
+        if (error < 0) {
+            throw Exception("Control " + mControl + " element write error:" +
+                            std::string{snd_strerror(error)});
+        }
+        return;
+    }
 
     MemoryByteStreamReader reader(bufferInput);
     for (unsigned int idx = 0; idx < count; idx++) {
@@ -194,7 +228,7 @@ void AlsaControlDevice::ctlWrite(const std::string &name, const util::Buffer &bu
             throw Exception("Control " + getCardName() + " element has unknown type");
         }
     }
-    int error = snd_ctl_elem_write(handle, control);
+    error = snd_ctl_elem_write(handle, control);
     if (error < 0) {
         snd_ctl_close(handle);
         throw Exception("Control " + mControl + " element write error:" +

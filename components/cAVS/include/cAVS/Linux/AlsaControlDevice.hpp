@@ -23,6 +23,8 @@
 #pragma once
 
 #include "cAVS/Linux/ControlDevice.hpp"
+#include "Util/ByteStreamReader.hpp"
+#include "Util/ByteStreamWriter.hpp"
 
 namespace private_driver
 {
@@ -40,6 +42,29 @@ namespace linux
  */
 class AlsaControlDevice final : public ControlDevice
 {
+private:
+    /**
+     * ALSA tlv Header
+     */
+    struct TlvHeader
+    {
+        TlvHeader(unsigned int tag, unsigned int length) : mTag(tag), mLength(length) {}
+        unsigned int mTag;    /* control element numeric identification */
+        unsigned int mLength; /* in bytes aligned to 4 */
+
+        void fromStream(util::ByteStreamReader &reader)
+        {
+            reader.read(mTag);
+            reader.read(mLength);
+        }
+
+        void toStream(util::ByteStreamWriter &writer) const
+        {
+            writer.write(mTag);
+            writer.write(mLength);
+        }
+    };
+
 public:
     /** @throw Device::Exception if the device initialization has failed */
     AlsaControlDevice(const std::string &name);
