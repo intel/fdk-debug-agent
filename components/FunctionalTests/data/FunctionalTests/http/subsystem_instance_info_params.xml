@@ -10,15 +10,6 @@
             <IntegerParameter Name="peak">1337</IntegerParameter>
             <IntegerParameter Name="average">42</IntegerParameter>
         </ParameterBlock>
-        <ParameterBlock Name="1">
-            <StringParameter Name="uuid">n/a</StringParameter>
-            <IntegerParameter Name="instance_id">1</IntegerParameter>
-            <StringParameter Name="power_mode">D0i3</StringParameter>
-            <BooleanParameter Name="is_removed">1</BooleanParameter>
-            <IntegerParameter Name="budget">0</IntegerParameter>
-            <IntegerParameter Name="peak">987654</IntegerParameter>
-            <IntegerParameter Name="average">321</IntegerParameter>
-        </ParameterBlock>
     </ParameterBlock>
     <ParameterBlock Name="Modules">
         <ParameterBlock Name="0">

@@ -369,7 +369,6 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
         static const std::vector<dsp_fw::PerfDataItem> expectedPerfItems = {
             dsp_fw::PerfDataItem(0, 0, false, false, 1337, 42),   // Core 0
             dsp_fw::PerfDataItem(1, 0, true, false, 123456, 789), // Module 1, instance 0
-            dsp_fw::PerfDataItem(0, 1, true, true, 987654, 321),  // Core 1
             dsp_fw::PerfDataItem(9, 0, false, false, 1111, 222),  // Module 9, instance 0
             dsp_fw::PerfDataItem(9, 1, true, false, 3333, 444)    // Module 9, instance 1
         };
