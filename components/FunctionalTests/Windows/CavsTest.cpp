@@ -1248,6 +1248,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
             dsp_fw::PinProps pinProps{};
             pinProps.format.sampling_frequency = dsp_fw::SamplingFrequency::FS_8000HZ;
             pinProps.format.number_of_channels = 4;
+            pinProps.format.bit_depth = dsp_fw::BitDepth::DEPTH_8BIT;
             pinProps.format.valid_bit_depth = 8;
 
             moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
@@ -1267,6 +1268,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
             dsp_fw::PinProps pinProps{};
             pinProps.format.sampling_frequency = dsp_fw::SamplingFrequency::FS_11025HZ;
             pinProps.format.number_of_channels = 12;
+            pinProps.format.bit_depth = dsp_fw::BitDepth::DEPTH_16BIT;
             pinProps.format.valid_bit_depth = 16;
 
             moduleInstanceProps.input_pins.pin_info.push_back(pinProps);
@@ -1286,6 +1288,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
             dsp_fw::PinProps pinProps{};
             pinProps.format.sampling_frequency = dsp_fw::SamplingFrequency::FS_12000HZ;
             pinProps.format.number_of_channels = 20;
+            pinProps.format.bit_depth = dsp_fw::BitDepth::DEPTH_32BIT;
             pinProps.format.valid_bit_depth = 24;
 
             moduleInstanceProps.input_pins.pin_info.push_back(pinProps);

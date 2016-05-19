@@ -60,16 +60,16 @@ static float computeBudget(const dsp_fw::ModuleInstanceProps &props)
     static_assert(double(std::numeric_limits<decltype(props.cpc)>::max()) *
                           std::numeric_limits<decltype(format.sampling_frequency)>::max() *
                           std::numeric_limits<decltype(format.number_of_channels)>::max() *
-                          std::numeric_limits<decltype(format.valid_bit_depth)>::max() <=
+                          std::numeric_limits<decltype(format.bit_depth)>::max() <=
                       std::numeric_limits<float>::max(),
                   "Potential floating-point overflow at runtime.");
-    if (format.valid_bit_depth % 8 != 0) {
-        throw std::range_error("The valid bit depth for module instance (" +
+    if (format.bit_depth % 8 != 0) {
+        throw std::range_error("The bit depth for module instance (" +
                                std::to_string(props.id.moduleId) + ", " +
                                std::to_string(props.id.instanceId) + ") is not a multiple of 8.");
     }
     return (float(props.cpc) * format.sampling_frequency * format.number_of_channels *
-            (format.valid_bit_depth / 8) / props.ibs_bytes) /
+            (format.bit_depth / 8) / props.ibs_bytes) /
            1000;
 }
 

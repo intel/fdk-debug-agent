@@ -387,6 +387,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
         auto &format = props.input_pins.pin_info[0].format;
         format.sampling_frequency = dsp_fw::SamplingFrequency::FS_8000HZ;
         format.number_of_channels = 4;
+        format.bit_depth = dsp_fw::BitDepth::DEPTH_8BIT;
         format.valid_bit_depth = 8;
         commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
                                                   dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
@@ -397,6 +398,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
         props.cpc = 10000;
         format.sampling_frequency = dsp_fw::SamplingFrequency::FS_11025HZ;
         format.number_of_channels = 12;
+        format.bit_depth = dsp_fw::BitDepth::DEPTH_16BIT;
         format.valid_bit_depth = 16;
         commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
                                                   dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,
@@ -407,6 +409,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: subsystem info parameters", "[subsys
         props.cpc = 18000;
         format.sampling_frequency = dsp_fw::SamplingFrequency::FS_12000HZ;
         format.number_of_channels = 20;
+        format.bit_depth = dsp_fw::BitDepth::DEPTH_32BIT;
         format.valid_bit_depth = 24;
         commands.addGetModuleInstancePropsCommand(/*true, STATUS_SUCCESS,*/
                                                   dsp_fw::IxcStatus::ADSP_IPC_SUCCESS,

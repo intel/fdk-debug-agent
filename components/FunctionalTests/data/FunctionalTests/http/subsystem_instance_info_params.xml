@@ -35,7 +35,7 @@
             <IntegerParameter Name="instance_id">1</IntegerParameter>
             <StringParameter Name="power_mode">D0i3</StringParameter>
             <BooleanParameter Name="is_removed">0</BooleanParameter>
-            <IntegerParameter Name="budget">762352</IntegerParameter>
+            <IntegerParameter Name="budget">1016470</IntegerParameter>
             <IntegerParameter Name="peak">3333</IntegerParameter>
             <IntegerParameter Name="average">444</IntegerParameter>
         </ParameterBlock>
