@@ -146,8 +146,7 @@ std::size_t TinyCompressDevice::getAvailable()
 {
     assert(mDevice != nullptr);
     unsigned int available;
-    struct timespec tstamp;
-    int ret = compress_get_hpointer(mDevice, &available, &tstamp);
+    int ret = compress_get_avail(mDevice, &available);
     if (ret < 0) {
         throw CompressDevice::Exception("Error getting available samples from device: " +
                                         getName() + ", error:" +
