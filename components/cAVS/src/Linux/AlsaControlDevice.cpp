@@ -37,6 +37,42 @@ namespace cavs
 namespace linux
 {
 
+size_t AlsaControlDevice::getControlCountByTag(const std::string &tag) const
+{
+    size_t count = 0;
+    snd_hctl_t *handle;
+    snd_ctl_elem_id_t *id;
+    snd_ctl_elem_info_t *info;
+    snd_ctl_elem_id_alloca(&id);
+    snd_ctl_elem_info_alloca(&info);
+
+    int err = snd_hctl_open(&handle, mControl.c_str(), 0);
+    if (err < 0) {
+        throw Exception("Failed to open control " + mControl + ": " + snd_strerror(err));
+    }
+    err = snd_hctl_load(handle);
+    if (err < 0) {
+        snd_hctl_close(handle);
+        throw Exception("Failed to load control " + mControl + ": " + snd_strerror(err));
+    }
+    snd_hctl_elem_t *elem = snd_hctl_first_elem(handle);
+    while (elem != nullptr) {
+        err = snd_hctl_elem_info(elem, info);
+        if (err < 0) {
+            snd_hctl_close(handle);
+            throw Exception("Failed to get ctl elem info: " + mControl + ": " + snd_strerror(err));
+        }
+        snd_hctl_elem_get_id(elem, id);
+        std::string name(snd_ctl_ascii_elem_id_get(id));
+        if (name.find(tag) != std::string::npos) {
+            count += 1;
+        }
+        elem = snd_hctl_elem_next(elem);
+    }
+    snd_hctl_close(handle);
+    return count;
+}
+
 AlsaControlDevice::AlsaControlDevice(const std::string &name) : ControlDevice(name)
 {
     int cardIndex = snd_card_get_index(getCardName().c_str());

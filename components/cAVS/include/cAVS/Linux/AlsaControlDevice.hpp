@@ -72,6 +72,8 @@ public:
     void ctlRead(const std::string &name, util::Buffer &bufferOutput) override;
     void ctlWrite(const std::string &name, const util::Buffer &bufferInput) override;
 
+    size_t getControlCountByTag(const std::string &name) const override;
+
 private:
     void getCtlHandle(const std::string &name, private_driver::snd_ctl_t *&handle,
                       private_driver::snd_ctl_elem_id_t &id,

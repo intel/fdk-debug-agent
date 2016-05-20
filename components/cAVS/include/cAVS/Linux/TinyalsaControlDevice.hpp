@@ -42,6 +42,8 @@ public:
     void ctlRead(const std::string &name, util::Buffer &bufferOutput) override;
     void ctlWrite(const std::string &name, const util::Buffer &bufferInput) override;
 
+    size_t getControlCountByTag(const std::string &name) const override;
+
 private:
     unsigned int mControlId;
 };

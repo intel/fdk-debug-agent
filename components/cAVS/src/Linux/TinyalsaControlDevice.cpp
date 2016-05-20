@@ -141,6 +141,30 @@ void TinyalsaControlDevice::ctlWrite(const std::string &name, const util::Buffer
     }
     mixer_close(mixer);
 }
+
+size_t TinyalsaControlDevice::getControlCountByTag(const std::string &tag) const
+{
+    size_t count = 0;
+    struct mixer *mixer;
+    mixer = mixer_open(mControlId);
+    if (!mixer) {
+        throw Exception("Failed to open control " + getCardName());
+    }
+    unsigned int nbControls = mixer_get_num_ctls(mixer);
+    for (unsigned int i = 0; i < nbControls; i++) {
+        struct mixer_ctl *control = mixer_get_ctl(mixer, i);
+        if (!control) {
+            mixer_close(mixer);
+            throw Exception("Cannot find control#" + std::to_string(i) + " on " + getCardName());
+        }
+        std::string name(mixer_ctl_get_name(control));
+        if (name.find(tag) != std::string::npos) {
+            count += 1;
+        }
+    }
+    mixer_close(mixer);
+    return count;
+}
 }
 }
 }

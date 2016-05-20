@@ -53,6 +53,17 @@ public:
 
     const std::string getCardName() const { return mName; }
 
+    /**
+     * Retrieve the number of control containing a given tag in their name.
+     * It is used for introspection in order for example to get the number of mixer associated
+     * with probe injection, extraction, etc...
+     *
+     * @param name tag to find in the control count
+     *
+     * @return number of control containing the given tag in their name.
+     */
+    virtual size_t getControlCountByTag(const std::string &name) const = 0;
+
 private:
     ControlDevice(const ControlDevice &) = delete;
     ControlDevice &operator=(const ControlDevice &) = delete;

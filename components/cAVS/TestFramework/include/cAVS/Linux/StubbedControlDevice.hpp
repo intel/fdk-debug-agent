@@ -60,6 +60,13 @@ public:
         mBackupedControl[name] = bufferInput;
     }
 
+    size_t getControlCountByTag(const std::string & /*tag*/) const override
+    {
+        /** used to get max probe count in extraction and in injection.
+         * So answer 4 (4 for extract, 4 for injection to get 8 probe point...). */
+        return 4;
+    }
+
 private:
     std::map<std::string, util::Buffer> mBackupedControl;
 };

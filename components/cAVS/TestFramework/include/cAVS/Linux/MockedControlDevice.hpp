@@ -69,6 +69,13 @@ public:
     void ctlRead(const std::string &name, util::Buffer &bufferOutput) override;
     void ctlWrite(const std::string &name, const util::Buffer &bufferInput) override;
 
+    size_t getControlCountByTag(const std::string & /*tag*/) const override
+    {
+        /** used to get max probe count in extraction and in injection.
+         * So answer 4 (4 for extract, 4 for injection to get 8 probe point...). */
+        return 4;
+    }
+
     /** @returns whether all test inputs have been consumed */
     bool consumed() const;
 
