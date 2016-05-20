@@ -53,14 +53,14 @@ enum class LogPriority : uint32_t
 
 enum class ProbeState : uint8_t
 {
-    Connect = 3,
-    Disconnect = 4
+    Connect = private_fw::dsp_fw::PROBE_POINTS,
+    Disconnect = private_fw::dsp_fw::DISCONNECT_PROBE_POINTS
 };
 enum class ProbePurpose : uint32_t
 {
-    Inject,
-    Extract,
-    InjectReextract
+    Extract = private_fw::dsp_fw::EXTRACT,
+    Inject = private_fw::dsp_fw::INJECT,
+    InjectReextract = private_fw::dsp_fw::INJECT_REEXTRACT
 };
 
 static inline const std::string getProbeExtractControlMixer(size_t index)
@@ -80,29 +80,29 @@ class ProbeControl
 public:
     ProbeControl() = default;
     ProbeControl(ProbeState state, ProbePurpose purpose, dsp_fw::ProbePointId point)
-        : mState(state), mPurpose(purpose), mPointId(point)
+        : mState(static_cast<uint8_t>(state)), mPurpose(purpose), mPointId(point)
     {
     }
 
-    virtual void fromStream(util::ByteStreamReader &reader)
+    void fromStream(util::ByteStreamReader &reader)
     {
         reader.read(mState);
         reader.read(mPurpose);
-        mPointId.fromStream(reader);
+        reader.read(mPointId);
     }
 
-    virtual void toStream(util::ByteStreamWriter &writer) const
+    void toStream(util::ByteStreamWriter &writer) const
     {
         writer.write(mState);
         writer.write(mPurpose);
-        mPointId.toStream(writer);
+        writer.write(mPointId);
     }
-    ProbeState getState() const { return mState; }
+    ProbeState getState() const { return static_cast<ProbeState>(mState); }
     ProbePurpose getPurpose() const { return mPurpose; }
     dsp_fw::ProbePointId getPointId() const { return mPointId; }
 
 private:
-    ProbeState mState;
+    uint8_t mState; /**< Probe state is encoded on one byte for mixer control. */
     ProbePurpose mPurpose;
     dsp_fw::ProbePointId mPointId; /**< ProbeID is directly mapped on FW IPC structure. */
 };

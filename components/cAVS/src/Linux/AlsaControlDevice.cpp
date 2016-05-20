@@ -178,7 +178,7 @@ void AlsaControlDevice::ctlWrite(const std::string &name, const util::Buffer &bu
         TlvHeader tlv(0, count);
         util::MemoryByteStreamWriter messageWriter;
         messageWriter.write(tlv);
-        messageWriter.writeVector<uint8_t>(bufferInput);
+        messageWriter.writeRawBuffer(bufferInput);
         util::Buffer rawTlv = messageWriter.getBuffer();
 
         error = snd_ctl_elem_tlv_write(handle, id, reinterpret_cast<unsigned int *>(rawTlv.data()));
