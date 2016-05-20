@@ -104,26 +104,19 @@ public:
             }
             mStreamBlocked = true;
         }
+        bool success = false;
         try {
-            if (not mProbeDevice->wait(CompressDevice::mInfiniteTimeout)) {
-                /* wait without timer, do not lock, stop will unblock us */
-                unblock();
-                return false;
-            }
+            /* wait without timer, do not lock, stop will unblock us */
+            success = mProbeDevice->wait(CompressDevice::mInfiniteTimeout);
+        } catch (const CompressDevice::IoException &) {
+            /** Log compress device has been stopped, exiting production. */
         } catch (const CompressDevice::Exception &e) {
             std::cout << "Waiting on Injection Device failed " + std::string(e.what()) << std::endl;
-            unblock();
-            return false;
         }
-        unblock();
-        return true;
-    }
-
-    void unblock()
-    {
         std::lock_guard<std::mutex> locker(mProbeDeviceMutex);
         mStreamBlocked = false;
         mCondVar.notify_one();
+        return success;
     }
 
     std::size_t getSize() const override

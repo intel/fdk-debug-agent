@@ -128,20 +128,21 @@ private:
             }
             mStreamBlocked = true;
         }
+        bool success = false;
         try {
-            if (not mProbeDevice->wait(CompressDevice::mInfiniteTimeout)) {
-                unblock();
-                return false;
-            }
+            success = mProbeDevice->wait(CompressDevice::mInfiniteTimeout);
+        } catch (const CompressDevice::IoException &) {
+            /** Log compress device has been stopped, exiting production. */
         } catch (const CompressDevice::Exception &e) {
             std::cout << "Waiting on extraction Probe Device failed " + std::string(e.what())
                       << ". Input stream closed." << std::endl;
-            unblock();
-            return false;
         }
         std::lock_guard<std::mutex> locker(mProbeDeviceMutex);
         mStreamBlocked = false;
         mCondVar.notify_one();
+        if (not success) {
+            return false;
+        }
         mCurrentBlock.clear();
         mCurrentBlock.resize(mFragmentSize);
         /* Wait guarantees that there is something to read. */
@@ -151,14 +152,7 @@ private:
             std::cout << "Error reading from probe Device: " + std::string(e.what()) << std::endl;
         }
         mCurentBlockStream.reset();
-        return true;
-    }
-
-    void unblock()
-    {
-        std::lock_guard<std::mutex> locker(mProbeDeviceMutex);
-        mStreamBlocked = false;
-        mCondVar.notify_one();
+        return success;
     }
 
     /** Fragment size is aligned with FW buffer size. */

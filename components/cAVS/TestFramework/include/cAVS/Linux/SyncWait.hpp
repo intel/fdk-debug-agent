@@ -40,7 +40,7 @@ public:
     void waitUntilUnblock()
     {
         std::unique_lock<std::mutex> locker(mWaitVarMutex);
-        if (!mWaiting) {
+        if (not mWaiting && not mUnblocked) {
             mWaiting = true;
             mWaitVar.wait(locker);
         }
@@ -50,14 +50,18 @@ public:
     void unblockWait()
     {
         std::unique_lock<std::mutex> locker(mWaitVarMutex);
-        mWaiting = false;
-        mWaitVar.notify_one();
+        if (mWaiting) {
+            mWaiting = false;
+            mUnblocked = true;
+            mWaitVar.notify_one();
+        }
     }
 
 private:
     std::condition_variable mWaitVar;
     std::mutex mWaitVarMutex;
     bool mWaiting = false;
+    bool mUnblocked = false;
 };
 }
 }

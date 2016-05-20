@@ -1014,7 +1014,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     }
     // At the end, the stream will be stopped, the compress wait shall return an error, so
     // and exception is raised. It will be translated into an error.
-    compressDevice->addFailedCompressDeviceEntryWait(linux::CompressDevice::mInfiniteTimeout, true);
+    compressDevice->addSuccessfulCompressDeviceEntryWait(linux::CompressDevice::mInfiniteTimeout,
+                                                         false);
     compressDevice->addSuccessfulCompressDeviceEntryStop();
     // Use the mocked compress device of the fixture as the prober extraction device.
     compressDeviceFactory->setMockedProbeExtractDevice(std::move(compressDevice));
@@ -1046,8 +1047,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     }
     // At the end, the stream will be stopped, the compress wait shall return an error, so
     // and exception is raised. It will be translated into an error.
-    compressProbeInjectDevice->addFailedCompressDeviceEntryWait(
-        linux::CompressDevice::mInfiniteTimeout, true);
+    compressProbeInjectDevice->addSuccessfulCompressDeviceEntryWait(
+        linux::CompressDevice::mInfiniteTimeout, false);
     compressProbeInjectDevice->addSuccessfulCompressDeviceEntryStop();
     // Use the mocked compress device of the fixture as the prober extraction device.
     compressDeviceFactory->addMockedProbeInjectDevice(std::move(compressProbeInjectDevice));
