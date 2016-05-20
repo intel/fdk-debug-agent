@@ -163,7 +163,7 @@ std::unique_ptr<T> System::tryToAcquireResource(std::unique_ptr<T> resource)
 std::unique_ptr<System::OutputStreamResource> System::tryToAcquireLogStreamResource()
 {
     return tryToAcquireResource(std::make_unique<System::LogStreamResource>(
-        mLogStreamMutex, mDriver->getLogger(), mModuleEntries));
+        mLogStreamMutex, mDriver->getLogger(), getModuleHandler().getModuleEntries()));
 }
 
 std::unique_ptr<System::OutputStreamResource> System::tryToAcquireProbeExtractionStreamResource(

@@ -214,11 +214,6 @@ private:
 
     std::unique_ptr<Driver> mDriver;
 
-    /**
-     * The module entries table retrieved from FW once, at initialization
-     */
-    std::vector<dsp_fw::ModuleEntry> mModuleEntries;
-
     /** Mutex that guarantees log stream exclusive usage */
     std::mutex mLogStreamMutex;
 
