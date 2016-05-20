@@ -45,8 +45,11 @@ public:
     void addGetProbeControlCommand(bool controlSuccess, unsigned int probeIndex,
                                    mixer_ctl::ProbeControl expectedProbeControl);
 
-    void addSetProbeControlCommand(bool controlSuccess, unsigned int probeIndex,
-                                   mixer_ctl::ProbeControl probeControl);
+    void addSetProbeInjectControlCommand(bool controlSuccess, unsigned int probeIndex,
+                                         mixer_ctl::ProbeControl probeControl);
+
+    void addSetProbeExtractControlCommand(bool controlSuccess, unsigned int probeIndex,
+                                          mixer_ctl::ProbeControl probeControl);
 
 private:
     MockedControlDeviceCommands(const MockedControlDeviceCommands &) = delete;

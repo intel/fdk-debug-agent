@@ -1077,11 +1077,18 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
         //     extraction
         std::size_t probeIndex = 0;
-        for (auto &probe : probes) {
+
+        cavs::Prober::SessionProbes extractProbes{
+            4, {false, {0, 0, Type::Output, 0}, Purpose::Extract}};
+        extractProbes[0] = probes[1];
+
+        for (auto &probe : extractProbes) {
             linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
-            controlCommands.addSetProbeControlCommand(true, probeIndex, probeControl);
+            controlCommands.addSetProbeExtractControlCommand(true, probeIndex, probeControl);
             ++probeIndex;
         }
+        linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probes[0]));
+        controlCommands.addSetProbeInjectControlCommand(true, 0, probeControl);
 
         // For step 4 : Getting probe endpoint parameters, checking that they are deactivated except
         // the one that has been enabled
@@ -1246,9 +1253,13 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
 
         // For step 3 : Configuring probe #1 to be enabled
         std::size_t probeIndex = 0;
-        for (auto &probe : probes) {
+        cavs::Prober::SessionProbes extractProbes{
+            4, {false, {0, 0, Type::Output, 0}, Purpose::Extract}};
+        extractProbes[0] = probes[1];
+
+        for (auto &probe : extractProbes) {
             linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
-            controlCommands.addSetProbeControlCommand(true, probeIndex, probeControl);
+            controlCommands.addSetProbeExtractControlCommand(true, probeIndex, probeControl);
             ++probeIndex;
         }
 

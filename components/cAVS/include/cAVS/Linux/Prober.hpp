@@ -44,10 +44,24 @@ namespace linux
 class Prober final : public cavs::Prober
 {
 public:
+    /** Need to map id of the DBGA on id used for injection / extraction for compress device Id
+     * and control mixer associated. We do use the same ProbeId strong type.
+     */
+    using ProbeControlMap = std::map<ProbeId /*Prober*/, ProbeId /*Probe Control Id*/>;
+
     Prober(ControlDevice &controlDevice, CompressDeviceFactory &compressDeviceFactory);
     ~Prober() override;
 
-    std::size_t getMaxProbeCount() const override { return mixer_ctl::maxProbes; }
+    /**
+     * Max probe point supported is the sum of injection and extraction end points.
+     * If a probe point is used in injection / extraction, it shall be considered as 2 active
+     * probe points from FW point of view.
+     * @return max probe allowed.
+     */
+    std::size_t getMaxProbeCount() const override
+    {
+        return mMaxInjectionProbes + mMaxExtractionProbes;
+    }
 
     void setState(bool active) override;
 
@@ -71,10 +85,11 @@ public:
     static mixer_ctl::ProbeControl toLinux(const ProbeConfig &from);
 
 private:
+    ProbeId getInjectProbeControlId(const ProbeId &probeIndex) const;
+    ProbeId getExtractProbeControlId(const ProbeId &probeIndex) const;
+
     void startStreaming();
     void stopStreaming();
-
-    void checkProbeId(ProbeId id) const;
 
     void stopNoThrow() noexcept;
 
@@ -98,12 +113,18 @@ private:
     CompressDeviceFactory &mCompressDeviceFactory;
 
     /** Collection of probe configurations with their state, ID, purpose*/
-    SessionProbes mCachedProbeConfiguration;
+    SessionProbes mCachedProbeConfig;
+
+    ProbeControlMap mExtractionProbeMap;
+    ProbeControlMap mInjectionProbeMap;
     InjectionSampleByteSizes mCachedInjectionSampleByteSizes;
 
     /** Extraction of multiplexed probe points is performed by a compress device. */
     std::unique_ptr<ProbeExtractor> mProbeExtractor;
     std::vector<ProbeInjector> mProbeInjectors;
+
+    size_t mMaxInjectionProbes;
+    size_t mMaxExtractionProbes;
 
     BlockingExtractionQueues mExtractionQueues;
     std::vector<util::RingBuffer> mInjectionQueues;

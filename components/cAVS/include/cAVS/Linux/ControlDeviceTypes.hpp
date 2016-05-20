@@ -56,6 +56,7 @@ enum class ProbeState : uint8_t
     Connect = private_fw::dsp_fw::PROBE_POINTS,
     Disconnect = private_fw::dsp_fw::DISCONNECT_PROBE_POINTS
 };
+
 enum class ProbePurpose : uint32_t
 {
     Extract = private_fw::dsp_fw::EXTRACT,
@@ -63,17 +64,18 @@ enum class ProbePurpose : uint32_t
     InjectReextract = private_fw::dsp_fw::INJECT_REEXTRACT
 };
 
-static inline const std::string getProbeExtractControlMixer(size_t index)
+const std::string mExtractorControlTag{"Probe probe 0 Extractor"};
+const std::string mInjectorControlTag{"Probe probe 0 Injector"};
+
+static inline const std::string getProbeExtractControl(size_t index)
 {
-    return {"Probe probe 0 Extractor" + std::to_string(index) + " params"};
+    return {mExtractorControlTag + std::to_string(index) + " params"};
 }
 
-static inline const std::string getProbeInjectControlMixer(size_t index)
+static inline const std::string getProbeInjectControl(size_t index)
 {
-    return {"Probe probe 0 Injector" + std::to_string(index) + " params"};
+    return {mInjectorControlTag + std::to_string(index) + " params"};
 }
-
-static constexpr uint32_t maxProbes = 8;
 
 class ProbeControl
 {

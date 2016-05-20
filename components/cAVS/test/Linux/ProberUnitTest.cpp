@@ -57,6 +57,28 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
 
     LinuxProber prober(*controlDevice, compressDeviceFactory);
 
+    LinuxProber::SessionProbes extractionProbeConfiguration = {
+        {true, {4, 3, dsp_fw::ProbeType::Internal, 1}, LinuxProber::ProbePurpose::Extract},
+        {true,
+         {0xffff, 0xff, dsp_fw::ProbeType::Internal, 0x3f},
+         LinuxProber::ProbePurpose::InjectReextract},
+        {true, {0, 0, dsp_fw::ProbeType::Output, 0}, LinuxProber::ProbePurpose::Extract},
+        /* For inactive probe, the value applied to the mixer control is as followed
+         * even if the cached probe configuration reflects the real probe config.
+         */
+        {false, {0, 0, dsp_fw::ProbeType::Output, 0}, LinuxProber::ProbePurpose::Extract}};
+
+    /** For inactive injection probe, no control mixer will be set as the compress device associated
+     * will not be opened, so no IPC command to the FW to be sent
+     */
+    LinuxProber::SessionProbes injectionProbeConfiguration = {
+        {true, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Inject},
+        {true,
+         {0xffff, 0xff, dsp_fw::ProbeType::Internal, 0x3f},
+         LinuxProber::ProbePurpose::InjectReextract},
+        {true, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Inject},
+        {true, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Inject}};
+
     LinuxProber::SessionProbes sampleCavsConfig = {
         {true, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Inject},
         {true, {4, 3, dsp_fw::ProbeType::Internal, 1}, LinuxProber::ProbePurpose::Extract},
@@ -66,22 +88,24 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
         {false, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Inject},
         {true, {0, 0, dsp_fw::ProbeType::Output, 0}, LinuxProber::ProbePurpose::Extract},
         {false, {16, 8, dsp_fw::ProbeType::Internal, 4}, LinuxProber::ProbePurpose::Extract},
-        {true, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Extract},
-        {true, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Extract}};
+        {true, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Inject},
+        {true, {0, 0, dsp_fw::ProbeType::Input, 0}, LinuxProber::ProbePurpose::Inject}};
 
     /* Currently not used */
     LinuxProber::InjectionSampleByteSizes injectionSampleByteSizes;
 
     // Check nominal cases
     std::size_t probeIndex = 0;
-    for (auto sessionProbe : sampleCavsConfig) {
+    for (auto sessionProbe : extractionProbeConfiguration) {
         mixer_ctl::ProbeControl probeControl(LinuxProber::toLinux(sessionProbe));
-        commands.addSetProbeControlCommand(true, probeIndex, probeControl);
+        commands.addSetProbeExtractControlCommand(true, probeIndex, probeControl);
         ++probeIndex;
     }
+
     probeIndex = 0;
-    for (auto sessionProbe : sampleCavsConfig) {
+    for (auto sessionProbe : injectionProbeConfiguration) {
         mixer_ctl::ProbeControl probeControl(LinuxProber::toLinux(sessionProbe));
+        commands.addSetProbeInjectControlCommand(true, probeIndex, probeControl);
         ++probeIndex;
     }
 
@@ -98,10 +122,11 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
                         LinuxProber::Exception, "Wrong purpose value (3).");
 
     // Have the control device failing to set the params
-    mixer_ctl::ProbeControl probeControl(LinuxProber::toLinux(sampleCavsConfig[0]));
-    commands.addSetProbeControlCommand(false, 0, probeControl);
+    mixer_ctl::ProbeControl probeControl(LinuxProber::toLinux(extractionProbeConfiguration[0]));
+    commands.addSetProbeExtractControlCommand(false, 0, probeControl);
 
     CHECK_THROWS_AS_MSG(prober.setProbesConfig(sampleCavsConfig, injectionSampleByteSizes),
                         LinuxProber::Exception,
-                        "Control Mixer failed: Control Device says that control Write has failed.");
+                        "Failed to write extration probe control settings: "
+                        "Control Device says that control Write has failed.");
 }
