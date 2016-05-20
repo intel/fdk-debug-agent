@@ -82,7 +82,6 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
     probeIndex = 0;
     for (auto sessionProbe : sampleCavsConfig) {
         mixer_ctl::ProbeControl probeControl(LinuxProber::toLinux(sessionProbe));
-        commands.addGetProbeControlCommand(true, probeIndex, probeControl);
         ++probeIndex;
     }
 

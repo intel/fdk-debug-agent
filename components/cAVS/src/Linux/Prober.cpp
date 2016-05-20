@@ -146,30 +146,9 @@ Prober::SessionProbes Prober::getProbesConfig() const
 {
     std::lock_guard<std::mutex> guard(mProbeConfigMutex);
 
-    SessionProbes result;
-    ProbeId::RawType probeId = 0;
-    for (auto &probe : mCachedProbeConfiguration) {
-
-        mixer_ctl::ProbeControl probeControl;
-        util::Buffer controlRead;
-        try {
-            if (probe.purpose == ProbePurpose::Inject ||
-                probe.purpose == ProbePurpose::InjectReextract) {
-                mControlDevice.ctlRead(mixer_ctl::getProbeInjectControlMixer(probeId), controlRead);
-            } else {
-                mControlDevice.ctlRead(mixer_ctl::getProbeExtractControlMixer(probeId),
-                                       controlRead);
-            }
-        } catch (const ControlDevice::Exception &e) {
-            throw Exception("Control Mixer failed: " + std::string(e.what()));
-        }
-        util::MemoryByteStreamReader controlReader(controlRead);
-        controlReader.read(probeControl);
-
-        result.emplace_back(fromLinux(probeControl));
-        probeId++;
-    }
-    return result;
+    // Control mixer for probe configuration is write only for injection, returns null values
+    // for extraction.
+    return mCachedProbeConfiguration;
 }
 
 std::unique_ptr<util::Buffer> Prober::dequeueExtractionBlock(ProbeId probeIndex)

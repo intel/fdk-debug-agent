@@ -70,17 +70,6 @@ void AlsaControlDevice::getCtlHandle(const std::string &name, snd_ctl_t *&handle
     snd_ctl_elem_info_get_id(&info, &id);
 
     snd_ctl_elem_value_set_id(&control, &id);
-
-    if (!snd_ctl_elem_info_is_readable(&info)) {
-        snd_ctl_close(handle);
-        throw Exception("Control " + getCardName() + " element is unreadable ");
-    }
-    error = snd_ctl_elem_read(handle, &control);
-    if (error < 0) {
-        snd_ctl_close(handle);
-        throw Exception("Cannot read the given element from control " + mControl + ":" +
-                        std::string{snd_strerror(error)});
-    }
 }
 
 void AlsaControlDevice::ctlRead(const std::string &name, util::Buffer &bufferOutput)
@@ -116,6 +105,17 @@ void AlsaControlDevice::ctlRead(const std::string &name, util::Buffer &bufferOut
         const auto &dataBegin = begin(rawTlv) + sizeof(TlvHeader);
         bufferOutput = {dataBegin, dataBegin + count};
         return;
+    }
+
+    if (!snd_ctl_elem_info_is_readable(info)) {
+        snd_ctl_close(handle);
+        throw Exception("Control " + getCardName() + " element is unreadable ");
+    }
+    int error = snd_ctl_elem_read(handle, control);
+    if (error < 0) {
+        snd_ctl_close(handle);
+        throw Exception("Cannot read the given element from control " + mControl + ":" +
+                        std::string{snd_strerror(error)});
     }
     snd_ctl_close(handle);
 
@@ -188,6 +188,11 @@ void AlsaControlDevice::ctlWrite(const std::string &name, const util::Buffer &bu
                             std::string{snd_strerror(error)});
         }
         return;
+    }
+
+    if (!snd_ctl_elem_info_is_writable(info)) {
+        snd_ctl_close(handle);
+        throw Exception("Control " + getCardName() + " element is unwritable ");
     }
 
     MemoryByteStreamReader reader(bufferInput);
