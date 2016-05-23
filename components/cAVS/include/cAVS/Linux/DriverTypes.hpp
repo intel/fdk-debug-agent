@@ -148,8 +148,7 @@ struct TunneledMessageHeader : public MessageHeader
                         parameterSize + sizeof(mTunneledHeader))
     {
         mTunneledHeader.mParamId = parameterId;
-        mTunneledHeader.mParamSize =
-            std::min(parameterSize + sizeof(mTunneledHeader), maxParameterPayloadSize);
+        mTunneledHeader.mParamSize = std::min(parameterSize, maxParameterPayloadSize);
     }
     void fromStream(util::ByteStreamReader &reader) override
     {
