@@ -330,10 +330,6 @@ void Prober::startStreaming()
 
 void Prober::stopStreaming()
 {
-    if (mProbeExtractor == nullptr) {
-        // Nothing to do
-        return;
-    }
     // Deleting extractor (the packet producer)
     mProbeExtractor.reset();
 
@@ -343,6 +339,9 @@ void Prober::stopStreaming()
     // then closing the queues to make wakup listening threads
     for (auto probe : mExtractionProbeMap) {
         mExtractionQueues[probe.second.getValue()].close();
+    }
+    for (auto probe : mInjectionProbeMap) {
+        mInjectionQueues[probe.second.getValue()].close();
     }
 }
 
