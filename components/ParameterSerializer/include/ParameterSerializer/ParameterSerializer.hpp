@@ -23,6 +23,7 @@
 
 #include "Util/EnumHelper.hpp"
 #include "Util/Buffer.hpp"
+#include "Util/Exception.hpp"
 #include <string>
 #include <stdexcept>
 #include <vector>
@@ -43,10 +44,8 @@ namespace parameter_serializer
 class ParameterSerializer
 {
 public:
-    struct Exception final : std::logic_error
-    {
-        using std::logic_error::logic_error;
-    };
+    using Exception = util::Exception<ParameterSerializer, std::logic_error>;
+    using ElementNotFound = util::Exception<ParameterSerializer>;
 
     /**
      * Constructor
@@ -86,7 +85,7 @@ public:
      * @param[in] elementName is the name of the element
      * @param[in] parameterKind is the kind of subnode (eg. control or info)
      * @return a map containing the childId and its corresponding name of children of the element
-     * @throw ParameterSerializer::Exception
+     * @throw ParameterSerializer::Exception or ParameterSerializer::ElementNotFound
      */
     std::map<uint32_t, std::string> getChildren(const std::string &subsystemName,
                                                 const std::string &elementName,

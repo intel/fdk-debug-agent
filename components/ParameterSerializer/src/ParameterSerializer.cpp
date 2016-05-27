@@ -93,8 +93,7 @@ std::unique_ptr<ElementHandle> ParameterSerializer::getElement(const std::string
         mParameterMgrPlatformConnector->createElementHandle(moduleControlPath, error));
 
     if (moduleElementHandle == nullptr) {
-        throw Exception("Invalid parameters format: node for path \"" + moduleControlPath +
-                        "\" not found");
+        throw ElementNotFound(moduleControlPath);
     }
 
     return moduleElementHandle;

@@ -150,20 +150,16 @@ TEST_CASE("Test parameter serializer getChildren()")
     ParameterSerializer parameterSerializer(pfwConfFilePath);
 
     // Check bad subsystem name behavior
-    CHECK_THROWS_AS_MSG(
-        children = parameterSerializer.getChildren("badSubsystem", aecUuid,
-                                                   ParameterSerializer::ParameterKind::Control),
-        ParameterSerializer::Exception,
-        "Invalid parameters format: node for path \"/BXTN/badSubsystem/categories/" + aecUuid +
-            "/control/\" not found");
+    CHECK_THROWS_AS_MSG(children = parameterSerializer.getChildren(
+                            "badSubsystem", aecUuid, ParameterSerializer::ParameterKind::Control),
+                        ParameterSerializer::ElementNotFound,
+                        "/BXTN/badSubsystem/categories/" + aecUuid + "/control/");
 
     // Check bad module name behavior
-    CHECK_THROWS_AS_MSG(
-        children = parameterSerializer.getChildren("cavs", "badModule",
-                                                   ParameterSerializer::ParameterKind::Control),
-        ParameterSerializer::Exception,
-        "Invalid parameters format: node for path \"/BXTN/cavs/categories/badModule/control/\" "
-        "not found");
+    CHECK_THROWS_AS_MSG(children = parameterSerializer.getChildren(
+                            "cavs", "badModule", ParameterSerializer::ParameterKind::Control),
+                        ParameterSerializer::ElementNotFound,
+                        "/BXTN/cavs/categories/badModule/control/");
 
     CHECK_NOTHROW(children = parameterSerializer.getChildren(
                       "cavs", aecUuid, ParameterSerializer::ParameterKind::Control));

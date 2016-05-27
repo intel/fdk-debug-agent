@@ -88,6 +88,10 @@ std::string SubsystemParameterApplier::getParameterValue(const std::string & /*t
                                                          ParameterKind kind,
                                                          const std::string &instanceId)
 {
+    if (kind == ParameterKind::Control) {
+        return "<control_parameters/>";
+    }
+
     if (kind != ParameterKind::Info or instanceId != "0") {
         throw UnsupportedException();
     }

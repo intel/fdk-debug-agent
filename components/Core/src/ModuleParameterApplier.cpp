@@ -254,6 +254,8 @@ std::vector<std::string> ModuleParameterApplier::getModuleParameterNames(
     try {
         children = mParameterSerializer->getChildren(BaseModelConverter::subsystemName,
                                                      moduleTypeName, translate(parameterKind));
+    } catch (ParameterSerializer::ElementNotFound &) {
+        return {};
     } catch (ParameterSerializer::Exception &e) {
         throw Exception("Cannot get parameter map : " + std::string(e.what()));
     }
