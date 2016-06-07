@@ -149,11 +149,11 @@ private:
         }
     }
 
-    /** Fragment size is aligned with FW buffer size. */
-    static const size_t mFragmentSize = 2048;
+    /** Fragment size is aligned with page size. */
+    static const size_t mFragmentSize = 4096;
     /** Even if we could work with 2 fragments at driver side (tensed with FW ping pong buffer),
      * keep some margin to avoid xrun events. */
-    static const size_t mNbFragments = 2;
+    static const size_t mNbFragments = 32;
 
     /** Current block stores each fragment read from probe compress device. */
     util::Buffer mCurrentBlock;
