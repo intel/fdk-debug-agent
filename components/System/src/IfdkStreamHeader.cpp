@@ -22,6 +22,7 @@
 
 #include <System/IfdkStreamHeader.hpp>
 #include <cstdint>
+#include <vector>
 
 namespace debug_agent
 {
@@ -77,6 +78,29 @@ void IfdkStreamHeader::addProperty(const std::string &key, const std::string &va
 
         throw Exception("Property already exists for key '" + key + "'");
     }
+}
+
+std::istream &operator>>(std::istream &is, const IfdkStreamHeader &)
+{
+    std::vector<char> buffer(IfdkStreamHeader::formatTypeMaxLength + 1);
+    is.read(buffer.data(), buffer.size());
+
+    uint32_t nbProperties = 0;
+    is.read(reinterpret_cast<char *>(&nbProperties), sizeof(nbProperties));
+
+    auto propertyKeyMaxLength = IfdkStreamHeader::formatTypeMaxLength;
+    auto propertyValueMaxLength = IfdkStreamHeader::formatTypeMaxLength;
+
+    // toss the properties out of the stream
+    for (uint32_t i = 0; i < nbProperties; ++i) {
+        buffer.resize(propertyKeyMaxLength);
+        is.read(buffer.data(), propertyKeyMaxLength + 1);
+
+        buffer.resize(propertyValueMaxLength);
+        is.read(buffer.data(), propertyValueMaxLength + 1);
+    }
+
+    return is;
 }
 
 std::ostream &operator<<(std::ostream &os, const IfdkStreamHeader &header)

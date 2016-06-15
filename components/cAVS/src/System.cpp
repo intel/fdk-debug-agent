@@ -77,6 +77,11 @@ void System::ProbeInjectionStreamResource::doReading(std::istream &is)
 
     util::Buffer buffer;
 
+    {
+        system::IfdkStreamHeader header;
+        is >> header;
+    }
+
     try {
         while (true) {
             std::streamsize read = 0;

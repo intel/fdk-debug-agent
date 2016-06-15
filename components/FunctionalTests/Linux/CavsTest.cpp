@@ -38,6 +38,7 @@
 #include "cAVS/Linux/ControlDeviceTypes.hpp"
 #include "cAVS/Linux/Prober.hpp"
 #include "cAVS/DspFw/Probe.hpp"
+#include "System/IfdkStreamHeader.hpp"
 #include "catch.hpp"
 #include <chrono>
 #include <thread>
@@ -1194,6 +1195,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
     });
 
     // Sending inject data to the DBGA
+    // Prefix the inject data with the probe header
+    std::ostringstream oss;
+    oss << system::IfdkStreamHeader("generic", "probe", 1, 0);
+    std::string injectionHeader(oss.str());
+    injectData.insert(begin(injectData), begin(injectionHeader), end(injectionHeader));
     CHECK_NOTHROW(client.request(
         "/instance/cavs.probe.endpoint/" + std::to_string(injectionProbeIndex) + "/streaming",
         HttpClientSimulator::Verb::Put, injectData, HttpClientSimulator::Status::Ok, "",

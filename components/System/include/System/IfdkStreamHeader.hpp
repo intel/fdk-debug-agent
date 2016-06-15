@@ -42,6 +42,10 @@ public:
         using std::logic_error::logic_error;
     };
 
+    /** When deserializing, IfdkStreamHeader is two-step initialized.
+     */
+    IfdkStreamHeader() = default;
+
     /**
      * @param[in] systemType the name of the system type that provides this stream
      * @param[in] fileType the name of the file type of this stream
@@ -70,6 +74,13 @@ public:
      * @return ostream containing original ostream plus serialized IfdkStreamHeader
      */
     friend std::ostream &operator<<(std::ostream &os, const IfdkStreamHeader &header);
+    /**
+     * Deserialize an istream into an ifdk header
+     * @param[in] is the istream
+     * @param[in] header the IfdkStreamHeader to be deserialized
+     * @return istream containing original ostream minus deserialized IfdkStreamHeader
+     */
+    friend std::istream &operator>>(std::istream &is, const IfdkStreamHeader &header);
 
 private:
     std::string mFormatType;
