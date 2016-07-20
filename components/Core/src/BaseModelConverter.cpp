@@ -30,8 +30,22 @@ namespace core
 {
 
 /* definitions */
+
+/** @todo: remove these hardcoded system names
+ *
+ * System name is the platform name, but currently there is no way to retrieve it, so deducing
+ * it from the current OS.
+ */
+#if defined(_WIN32)
+const std::string BaseModelConverter::systemName = "spt";
+const std::string BaseModelConverter::systemDescription = "Sunrisepoint platform";
+#elif defined(__linux__)
 const std::string BaseModelConverter::systemName = "bxtn";
 const std::string BaseModelConverter::systemDescription = "Broxton platform";
+#else
+#error("Unsupported OS")
+#endif
+
 const std::string BaseModelConverter::systemId = "0";
 
 const std::string BaseModelConverter::subsystemName = "cavs";

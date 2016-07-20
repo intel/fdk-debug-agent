@@ -261,7 +261,7 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology", "[topology]")
 
     /* System type and instance are available before refresh */
     std::map<std::string, std::string> systemUrlMap = {
-        {"/type", "system_type"}, {"/instance", "system_instance"},
+        {"/type", "linux/system_type"}, {"/instance", "linux/system_instance"},
     };
     checkUrlMap(client, systemUrlMap);
 
@@ -270,12 +270,9 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: topology", "[topology]")
 
     /* Testing urls that depend of topology retrieval */
     std::map<std::string, std::string> urlMap = {
-        {"/type", "system_type"},
-        {"/instance", "system_instance"},
-
         {"/type/cavs", "subsystem_type"},
-        {"/instance/cavs", "subsystem_instance_collection"},
-        {"/instance/cavs/0", "subsystem_instance"},
+        {"/instance/cavs", "linux/subsystem_instance_collection"},
+        {"/instance/cavs/0", "linux/subsystem_instance"},
 
         {"/type/cavs.pipe", "pipe_type"},
         {"/instance/cavs.pipe", "pipe_instance_collection"},

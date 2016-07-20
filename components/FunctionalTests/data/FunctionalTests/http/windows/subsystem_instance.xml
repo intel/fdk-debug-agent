@@ -1,0 +1,121 @@
+<subsystem Id="0" Type="cavs">
+    <info_parameters/>
+    <control_parameters/>
+    <parents>
+        <system Id="0" Type="spt"/>
+    </parents>
+    <children>
+        <collection Name="pipes">
+            <instance Id="1" Type="pipe"/>
+            <instance Id="2" Type="pipe"/>
+            <instance Id="3" Type="pipe"/>
+            <instance Id="4" Type="pipe"/>
+        </collection>
+        <collection Name="cores">
+            <instance Id="0" Type="core"/>
+        </collection>
+        <collection Name="tasks">
+            <instance Id="1" Type="task"/>
+            <instance Id="2" Type="task"/>
+            <instance Id="3" Type="task"/>
+            <instance Id="9" Type="task"/>
+            <instance Id="4" Type="task"/>
+            <instance Id="5" Type="task"/>
+            <instance Id="6" Type="task"/>
+        </collection>
+        <component_collection Name="gateways">
+            <component Id="1" Type="hda-host-in-gateway"/>
+            <component Id="2" Type="hda-host-in-gateway"/>
+            <component Id="1" Type="hda-link-out-gateway"/>
+            <component Id="1" Type="dmic-link-in-gateway"/>
+            <component Id="1" Type="hda-host-out-gateway"/>
+        </component_collection>
+        <component_collection Name="modules">
+            <component Id="1" Type="module-copier"/>
+            <component Id="2" Type="module-aec"/>
+            <component Id="5" Type="module-aec"/>
+            <component Id="1" Type="module-gain"/>
+            <component Id="4" Type="module-gain"/>
+            <component Id="5" Type="module-gain"/>
+            <component Id="9" Type="module-gain"/>
+            <component Id="2" Type="module-ns"/>
+            <component Id="6" Type="module-ns"/>
+            <component Id="1" Type="module-mixin"/>
+            <component Id="0" Type="module-src"/>
+            <component Id="3" Type="module-mixout"/>
+        </component_collection>
+        <service_collection Name="services">
+            <service Id="0" Type="fwlogs"/>
+            <service Id="0" Type="probe"/>
+            <service Id="0" Type="perf_measurement"/>
+        </service_collection>
+    </children>
+    <inputs/>
+    <outputs/>
+    <links>
+        <link>
+            <from Id="1" OutputId="0" Type="hda-host-in-gateway"/>
+            <to Id="1" InputId="0" Type="module-copier"/>
+        </link>
+        <link>
+            <from Id="1" OutputId="0" Type="dmic-link-in-gateway"/>
+            <to Id="1" InputId="0" Type="module-gain"/>
+        </link>
+        <link>
+            <from Id="2" OutputId="0" Type="hda-host-in-gateway"/>
+            <to Id="4" InputId="0" Type="module-gain"/>
+        </link>
+        <link>
+            <from Id="9" OutputId="0" Type="module-gain"/>
+            <to Id="1" InputId="0" Type="hda-link-out-gateway"/>
+        </link>
+        <link>
+            <from Id="3" OutputId="0" Type="module-mixout"/>
+            <to Id="1" InputId="0" Type="hda-host-out-gateway"/>
+        </link>
+        <link>
+            <from Id="1" OutputId="0" Type="module-copier"/>
+            <to Id="2" InputId="0" Type="module-aec"/>
+        </link>
+        <link>
+            <from Id="2" OutputId="0" Type="module-aec"/>
+            <to Id="5" InputId="0" Type="module-gain"/>
+        </link>
+        <link>
+            <from Id="4" OutputId="0" Type="module-gain"/>
+            <to Id="5" InputId="0" Type="module-aec"/>
+        </link>
+        <link>
+            <from Id="5" OutputId="0" Type="module-aec"/>
+            <to Id="6" InputId="0" Type="module-ns"/>
+        </link>
+        <link>
+            <from Id="1" OutputId="0" Type="module-mixin"/>
+            <to Id="0" InputId="0" Type="module-src"/>
+        </link>
+        <link>
+            <from Id="0" OutputId="0" Type="module-src"/>
+            <to Id="9" InputId="0" Type="module-gain"/>
+        </link>
+        <link>
+            <from Id="1" OutputId="1" Type="module-gain"/>
+            <to Id="2" InputId="0" Type="module-ns"/>
+        </link>
+        <link>
+            <from Id="2" OutputId="0" Type="module-ns"/>
+            <to Id="3" InputId="0" Type="module-mixout"/>
+        </link>
+        <link>
+            <from Id="5" OutputId="0" Type="module-gain"/>
+            <to Id="1" InputId="0" Type="module-mixin"/>
+        </link>
+        <link>
+            <from Id="6" OutputId="0" Type="module-ns"/>
+            <to Id="1" InputId="1" Type="module-mixin"/>
+        </link>
+        <link>
+            <from Id="1" OutputId="0" Type="module-gain"/>
+            <to Id="9" InputId="1" Type="module-gain"/>
+        </link>
+    </links>
+</subsystem>
