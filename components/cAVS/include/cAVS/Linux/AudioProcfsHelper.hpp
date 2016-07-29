@@ -88,9 +88,9 @@ public:
     {
         std::string deviceTypeLine{getLineWithTagFromFile(devicesProcfsEntry, type)};
         if (!deviceTypeLine.empty()) {
-            Poco::StringTokenizer tokenize(deviceTypeLine, ":", Poco::StringTokenizer::TOK_TRIM);
-            if (tokenize.count()) {
-                return tokenize[0];
+            Poco::StringTokenizer tokenize(deviceTypeLine, "[]", Poco::StringTokenizer::TOK_TRIM);
+            if (tokenize.count() > 1) {
+                return tokenize[1];
             }
         }
         return {};
