@@ -62,11 +62,7 @@ TEST_CASE_METHOD(Fixture, "Probing: set/getSessionProbes", "[prober]")
          {true,
           {0xffff, 0xff, dsp_fw::ProbeType::Internal, 0x3f},
           LinuxProber::ProbePurpose::InjectReextract},
-         {true, {0, 0, dsp_fw::ProbeType::Output, 0}, LinuxProber::ProbePurpose::Extract},
-         /* For inactive probe, the value applied to the mixer control is as followed
-          * even if the cached probe configuration reflects the real probe config.
-          */
-         {false, {0, 0, dsp_fw::ProbeType::Output, 0}, LinuxProber::ProbePurpose::Extract}});
+         {true, {0, 0, dsp_fw::ProbeType::Output, 0}, LinuxProber::ProbePurpose::Extract}});
 
     /** For inactive injection probe, no control mixer will be set as the compress device associated
      * will not be opened, so no IPC command to the FW to be sent

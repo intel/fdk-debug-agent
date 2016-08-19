@@ -129,13 +129,6 @@ void Prober::setProbesConfig(const SessionProbes &probes,
     mExtractionProbeMap.clear();
     mInjectionProbeMap.clear();
 
-    /* NOTE: there is only one compress device for extraction but as many control as extraction
-     * end points. So, we must refresh ALL the mixer control before starting an extraction probe
-     * session, disabled extraction point will be set with default config.
-     */
-    SessionProbes extractionProbeConfiguration{
-        mMaxExtractionProbes, {false, {0, 0, dsp_fw::ProbeType::Output, 0}, ProbePurpose::Extract}};
-
     auto result = getActiveSession(mCachedProbeConfig);
     auto &extractionProbes = result.first;
     auto &injectionProbes = result.second;
@@ -150,23 +143,20 @@ void Prober::setProbesConfig(const SessionProbes &probes,
     /** Setting extraction probe mixers. */
     if (not extractionProbes.empty()) {
         ProbeId::RawType probeControlId{0};
-        for (auto probeId : extractionProbes) {
-            extractionProbeConfiguration[probeControlId] = mCachedProbeConfig[probeId.getValue()];
-            mExtractionProbeMap[probeId] = ProbeId{probeControlId};
-            probeControlId++;
-        }
-    }
-    ProbeId::RawType probeControlId{0};
-    for (const auto &extractionProbe : extractionProbeConfiguration) {
-        mixer_ctl::ProbeControl probeControl(toLinux(extractionProbe));
-        util::MemoryByteStreamWriter controlWriter;
-        controlWriter.write(probeControl);
-        try {
-            mControlDevice.ctlWrite(mixer_ctl::getProbeExtractControl(probeControlId),
-                                    controlWriter.getBuffer());
-        } catch (const ControlDevice::Exception &e) {
-            throw Exception("Failed to write extration probe control settings: " +
-                            std::string(e.what()));
+        for (const auto probeId : extractionProbes) {
+            const auto &extractionProbe = mCachedProbeConfig[probeId.getValue()];
+            mixer_ctl::ProbeControl probeControl(toLinux(extractionProbe));
+            util::MemoryByteStreamWriter controlWriter;
+            controlWriter.write(probeControl);
+            try {
+                mControlDevice.ctlWrite(mixer_ctl::getProbeExtractControl(probeControlId),
+                                        controlWriter.getBuffer());
+                mExtractionProbeMap[probeId] = ProbeId{probeControlId};
+                probeControlId++;
+            } catch (const ControlDevice::Exception &e) {
+                throw Exception("Failed to write extration probe control settings: " +
+                                std::string(e.what()));
+            }
         }
         probeControlId++;
     }

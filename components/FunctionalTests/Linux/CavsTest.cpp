@@ -1074,19 +1074,11 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control nominal cases"
         // For step 3 : Configuring probe #1 to be enabled in extraction
         // 3 : Configuring probe #0 to be enabled for injection and probe #1 to be enabled for
         //     extraction
-        std::size_t probeIndex = 0;
+        linux::mixer_ctl::ProbeControl probeExtractionControl(linux::Prober::toLinux(probes[1]));
+        controlCommands.addSetProbeExtractControlCommand(true, 0, probeExtractionControl);
 
-        cavs::Prober::SessionProbes extractProbes{
-            4, {false, {0, 0, Type::Output, 0}, Purpose::Extract}};
-        extractProbes[0] = probes[1];
-
-        for (auto &probe : extractProbes) {
-            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
-            controlCommands.addSetProbeExtractControlCommand(true, probeIndex, probeControl);
-            ++probeIndex;
-        }
-        linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probes[0]));
-        controlCommands.addSetProbeInjectControlCommand(true, 0, probeControl);
+        linux::mixer_ctl::ProbeControl probeInjectionControl(linux::Prober::toLinux(probes[0]));
+        controlCommands.addSetProbeInjectControlCommand(true, 0, probeInjectionControl);
 
         // For step 4 : Getting probe endpoint parameters, checking that they are deactivated except
         // the one that has been enabled
@@ -1255,16 +1247,8 @@ TEST_CASE_METHOD(Fixture, "DebugAgent/cAVS: probe service control failure cases"
         // For step 1 : Getting probe service parameters, checking that it is stopped
 
         // For step 3 : Configuring probe #1 to be enabled
-        std::size_t probeIndex = 0;
-        cavs::Prober::SessionProbes extractProbes{
-            4, {false, {0, 0, Type::Output, 0}, Purpose::Extract}};
-        extractProbes[0] = probes[1];
-
-        for (auto &probe : extractProbes) {
-            linux::mixer_ctl::ProbeControl probeControl(linux::Prober::toLinux(probe));
-            controlCommands.addSetProbeExtractControlCommand(true, probeIndex, probeControl);
-            ++probeIndex;
-        }
+        linux::mixer_ctl::ProbeControl probeExtractionControl(linux::Prober::toLinux(probes[1]));
+        controlCommands.addSetProbeExtractControlCommand(true, 0, probeExtractionControl);
 
         // For step 4 : Getting probe endpoint parameters, checking that they are deactivated
         //     except the one that has been enabled
