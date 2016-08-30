@@ -225,19 +225,12 @@ struct Packet
         uint64_t headerChecksumValue;
         reader.read(headerChecksumValue);
 
-// Disabling checksum because currently the FW produces invalid ones
-// @todo : Re-enable checksum when the firmware is fixed
-//
-// Note: the error could be logged without failing, but it's not a good idea because printing
-// logs is very expensive and leads to overruns
-#if 0
         if (headerChecksumValue != sum()) {
             throw util::ByteStreamReader::Exception("Header checksum mismatch. Expected " +
                                                     std::to_string(sum()) + ", found " +
                                                     std::to_string(headerChecksumValue) +
                                                     ". While checking integrity of " + toString());
         }
-#endif
     }
 
     // Allowing an optional custom checksum type for fdk tool compatibility (requires uint32_t)
