@@ -24,6 +24,7 @@ set(SRCS
     src/Uuid.cpp)
 
 set(INCS
+    include/Util/About.hpp
     include/Util/AssertAlways.hpp
     include/Util/BlockingQueue.hpp
     include/Util/Buffer.hpp

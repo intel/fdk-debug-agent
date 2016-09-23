@@ -83,5 +83,12 @@ private:
     const ifdk_objects::instance::System &mSystemInstance;
     ExclusiveInstanceModel &mInstanceModel;
 };
+
+/** This resource returns general information about a Debug Agent's instance */
+class AboutResource : public rest::Resource
+{
+private:
+    ResponsePtr handleGet(const rest::Request &request) override;
+};
 }
 }

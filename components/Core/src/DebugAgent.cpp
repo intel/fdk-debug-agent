@@ -116,6 +116,9 @@ std::unique_ptr<rest::Dispatcher> DebugAgent::createDispatcher()
     dispatcher->addResource("/internal/model", std::make_shared<ModelDumpDebugResource>(
                                                    *mTypeModel, *mSystemInstance, mInstanceModel));
 
+    /* Version resource */
+    dispatcher->addResource("/about", std::make_shared<AboutResource>());
+
     return dispatcher;
 }
 

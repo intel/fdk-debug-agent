@@ -27,6 +27,7 @@
 #include "cAVS/Topology.hpp"
 #include "Util/StringHelper.hpp"
 #include "Util/Uuid.hpp"
+#include "Util/About.hpp"
 #include <Poco/Zip/Compress.h>
 #include <Poco/Zip/ZipException.h>
 #include <sstream>
@@ -435,6 +436,15 @@ Resource::ResponsePtr ModelDumpDebugResource::handleGet(const Request &)
     }
 
     return std::make_unique<StreamResponse>(ContentTypeZip, std::move(ss));
+}
+
+Resource::ResponsePtr AboutResource::handleGet(const Request &)
+{
+    HtmlHelper html;
+    html.title("About");
+    html.paragraph("Version: " + util::about::version());
+    html.paragraph("Build configuration: " + util::about::configuration());
+    return std::make_unique<Response>(ContentTypeHtml, html.getHtmlContent());
 }
 }
 }

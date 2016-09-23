@@ -1,6 +1,6 @@
 ################################################################################
 #                              INTEL CONFIDENTIAL
-#   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+#   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 #   The source code contained  or  described herein and all documents related to
 #   the source code ("Material") are owned by Intel Corporation or its suppliers
 #   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -55,7 +55,7 @@ set_target_properties(Main PROPERTIES OUTPUT_NAME "DebugAgent")
 link_poco(Main)
 
 # Needed components
-target_link_libraries(Main Core)
+target_link_libraries(Main Core Util)
 
 # Installation step
 install(TARGETS Main RUNTIME DESTINATION bin)

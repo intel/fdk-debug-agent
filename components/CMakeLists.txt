@@ -25,6 +25,15 @@ if (UNIX)
         COMPILE_OPTIONS "-Wall;$<$<CONFIG:Release>:-Wno-unused-parameter>;-Wextra")
 endif()
 
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS
+    DBGA_BUILD_CONFIGURATION=\"$<CONFIG>\")
+
+# Add DBGA_VERSION_* compilation definitions
+foreach(version_item DBGA_VERSION_MAJOR DBGA_VERSION_MINOR DBGA_VERSION_PATCH DBGA_VERSION_TWEAK)
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS
+        ${version_item}=\"${${version_item}}\")
+endforeach()
+
 # Adding components in the right order (less dependent first)
 foreach(dir Util IfdkObjects TestCommon Tlv Rest System cAVS ParameterSerializer Core Main)
     add_subdirectory("${dir}")

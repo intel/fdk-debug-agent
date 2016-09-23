@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
 *                              INTEL CONFIDENTIAL
-*   Copyright(C) 2015 Intel Corporation. All Rights Reserved.
+*   Copyright(C) 2015-2016 Intel Corporation. All Rights Reserved.
 *   The source code contained  or  described herein and all documents related to
 *   the source code ("Material") are owned by Intel Corporation or its suppliers
 *   or licensors.  Title to the  Material remains with  Intel Corporation or its
@@ -21,6 +21,7 @@
 */
 
 #include "Main/Application.hpp"
+#include "Util/About.hpp"
 #include "cAVS/SystemDriverFactory.hpp"
 #include "Core/DebugAgent.hpp"
 #include <Poco/Util/HelpFormatter.h>
@@ -86,6 +87,12 @@ void Application::handleValidation(const std::string &, const std::string &)
     mConfig.validationRequested = true;
 }
 
+void Application::handleVersion(const std::string &, const std::string &)
+{
+    std::cout << util::about::version() << std::endl;
+    std::exit(0);
+}
+
 void Application::defineOptions(OptionSet &options)
 {
     options.addOption(Option("help", "h", "Display DebugAgent help.")
@@ -129,6 +136,11 @@ void Application::defineOptions(OptionSet &options)
             .required(false)
             .repeatable(false)
             .callback(OptionCallback<Application>(this, &Application::handleValidation)));
+
+    options.addOption(
+        Option("version", "", "Print the DebugAgent's version and exit")
+            .required(false)
+            .callback(OptionCallback<Application>(this, &Application::handleVersion)));
 }
 
 int Application::main(const std::vector<std::string> &)
