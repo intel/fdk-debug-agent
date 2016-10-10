@@ -31,7 +31,7 @@ set(CPACK_PACKAGE_VERSION
 
 set(CPACK_PACKAGE_NAME ${DBGA_NAME})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${DBGA_DESCRIPTION})
-set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/resources/docs/DebugAgentLicence.rtf")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/resources/docs/DebugAgentLicence.txt")
 set(CPACK_PACKAGE_VENDOR "Intel")
 
 # Arbitrary GUID needed by the installer on windows to abort
